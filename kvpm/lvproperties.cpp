@@ -1,0 +1,69 @@
+/*
+ *
+ * 
+ * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ *
+ * This file is part of the Klvm project.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License,  version 3, as 
+ * published by the Free Software Foundation.
+ * 
+ * See the file "COPYING" for the exact licensing terms.
+ */
+
+
+#include <QtGui>
+#include "logvol.h"
+#include "lvproperties.h"
+
+LVProperties::LVProperties(LogVol *LogicalVolume, int Segment, QWidget *parent):QWidget(parent)
+{
+    long long extents;
+    
+    QStringList pv_list;
+
+    QVBoxLayout *layout = new QVBoxLayout();
+
+    layout->addWidget(new QLabel( "<b>" + LogicalVolume->getName() + "</b>" ), 0, Qt::AlignHCenter);
+     
+    if(Segment > -1){
+	extents = LogicalVolume->getSegmentExtents(Segment);
+	layout->addWidget(new QLabel(QString("Segment: %1").arg(Segment)));
+    }
+    else{
+	extents = LogicalVolume->getExtents();
+	layout->addWidget(new QLabel(QString("Segment: all")));
+    }
+    
+    layout->addWidget(new QLabel("Allocation: " + LogicalVolume->getPolicy()));
+    layout->addWidget(new QLabel( QString("Extents: %1").arg( extents ) ));
+
+    if(LogicalVolume->isMounted()){
+	QStringList mount_points = LogicalVolume->getMountPoints();
+	for(int x = 0; x < mount_points.size(); x++)
+	    layout->addWidget( new QLabel( "Mount point: " + mount_points[x] ) );
+    }
+    else
+	layout->addWidget(new QLabel("Mount point: Not mounted"));
+
+    if(LogicalVolume->isSnap())
+	layout->addWidget(new QLabel("Snapshot origin: "  + LogicalVolume->getOrigin()));
+
+    layout->addStretch();
+
+    layout->addWidget(new QLabel("Physical Volumes"), 0, Qt::AlignHCenter);
+
+    if(Segment > -1){
+	pv_list = LogicalVolume->getDevicePath(Segment);
+	for(int pv = 0; pv < pv_list.size(); pv++)
+	    layout->addWidget(new QLabel(pv_list[pv]));
+    }
+    else{
+	pv_list = LogicalVolume->getDevicePathAll();
+	for(int pv = 0; pv < pv_list.size(); pv++)
+	    layout->addWidget(new QLabel(pv_list[pv]));
+    }
+    
+    setLayout(layout);
+}

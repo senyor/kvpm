@@ -1,0 +1,47 @@
+/*
+ *
+ * 
+ * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ *
+ * This file is part of the Klvm project.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License,  version 3, as 
+ * published by the Free Software Foundation.
+ * 
+ * See the file "COPYING" for the exact licensing terms.
+ */
+
+
+#include <KApplication>
+#include <KAboutData>
+#include <KCmdLineArgs>
+#include <QtGui>
+#include "topwindow.h"
+
+class VolGroup;
+class PhysVol;
+class LogVol;
+class MasterList;
+
+
+TopWindow *MainWindow;
+MasterList *master_list;
+
+int main(int argc, char **argv)
+{
+
+    KAboutData aboutData( "kvpm", 0,
+			  ki18n("kvpm"), "0.3",
+			  ki18n("Linux volume and partition manager for KDE"),
+			  KAboutData::License_GPL,
+			  ki18n("Copyright (c) 2008 Benjamin Scott") );
+
+    KCmdLineArgs::init( argc, argv, &aboutData);
+    KApplication kvpm;
+    MainWindow = new TopWindow(NULL);
+    MainWindow->setGeometry(0,0,1000,750);
+    MainWindow->show();
+    return kvpm.exec();
+}
+
