@@ -16,7 +16,10 @@
 #include <KApplication>
 #include <KAboutData>
 #include <KCmdLineArgs>
+#include <KMessageBox>
+
 #include <QtGui>
+
 #include "topwindow.h"
 
 class VolGroup;
@@ -39,6 +42,16 @@ int main(int argc, char **argv)
 
     KCmdLineArgs::init( argc, argv, &aboutData);
     KApplication kvpm;
+
+    if( geteuid() ){
+	if( seteuid(0) ){
+	    KMessageBox::error( 0, 
+				"This program must be run as root (uid = 0)",
+				"Insufficient Privilege");
+	    return 0;
+	}
+    }
+    
     MainWindow = new TopWindow(NULL);
     MainWindow->setGeometry(0,0,1000,750);
     MainWindow->show();
