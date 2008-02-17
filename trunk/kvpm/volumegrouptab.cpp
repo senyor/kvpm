@@ -47,7 +47,7 @@ VolumeGroupTab::VolumeGroupTab(VolGroup *VolumeGroup, QWidget *parent) :
     
     pv_tree_widget->setLayout(pv_tree_layout);
     QLabel *pv_label = new QLabel("<b>Physical Volumes</b>");
-    pv_tree = new PVTree(vg->getPhysicalVolumes());
+    pv_tree = new PVTree(vg);
 
     QSplitter *splitter = new QSplitter();
     

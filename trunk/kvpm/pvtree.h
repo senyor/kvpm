@@ -20,6 +20,10 @@
 #include <QTreeWidget>
 #include "physvol.h"
 
+class VolGroup;
+class LogVol;
+
+
 class PVTree : public QTreeWidget
 {
 Q_OBJECT
@@ -31,7 +35,7 @@ Q_OBJECT
     PhysVol *pv;
     
 public:
-    PVTree(QList<PhysVol *> physical_volumes, QWidget *parent = 0);
+    PVTree(VolGroup *VolumeGroup, QWidget *parent = 0);
 
 private slots:    
     void popupContextMenu(QPoint point);
