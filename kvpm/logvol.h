@@ -79,8 +79,8 @@ class LogVol
     long long getSegmentSize(int segment);
     long long getSegmentExtents(int segment);
     QList<long long> getSegmentStartingExtent(int segment);
-    QStringList getDevicePath(int segment);
-    QStringList getDevicePathAll();
+    QStringList getDevicePath(int segment);     
+    QStringList getDevicePathAll();         // full path of physical volumes for all segments
     QStringList getMountPoints();
     long long getSpaceOnPhysicalVolume(QString PhysicalVolume);
     long long getExtents();

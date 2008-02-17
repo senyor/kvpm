@@ -14,6 +14,8 @@
 
 
 #include <QtGui>
+
+#include "logvol.h"
 #include "masterlist.h"
 #include "processprogress.h"
 #include "pvtree.h"
@@ -28,25 +30,33 @@
 
 extern MasterList *master_list;
 
+/* This is the physical volume tree list on the volume group tab */
 
-PVTree::PVTree(QList<PhysVol *> physical_volumes, QWidget *parent) : QTreeWidget(parent)
+PVTree::PVTree(VolGroup *VolumeGroup, QWidget *parent) : QTreeWidget(parent)
 {
-    QList<PhysVol *>  pvs;
+
+    QList<LogVol *>   lvs = VolumeGroup->getLogicalVolumes();
+    QList<PhysVol *>  pvs = VolumeGroup->getPhysicalVolumes();
+
+    QStringList lv_names;
+    QStringList pv_names;
+    QString device_name;
+    
     PhysVol *pv;
     QStringList header_labels, pv_data;
     QTreeWidgetItem *item;
-
-    pvs = physical_volumes;
+    
     setupContextMenu();
     setColumnCount(6);
     header_labels << "Name" << "Size" << "Free" << "Used"
-		  << "Allocatable" << "Exported";
+		  << "Allocatable" << "Exported" << "Logical Volumes";
     setHeaderLabels(header_labels);
-    for(int x = 0; x < pvs.size(); x++){
-	pv = pvs[x];
+    for(int n = 0; n < pvs.size(); n++){
+	pv = pvs[n];
 	pv_data.clear();
-	    
-	pv_data << pv->getDeviceName() 
+	device_name = pv->getDeviceName();
+	
+	pv_data << device_name
 		<< sizeToString(pv->getSize())
 		<< sizeToString(pv->getUnused())
 		<< sizeToString(pv->getUsed());
@@ -59,6 +69,28 @@ PVTree::PVTree(QList<PhysVol *> physical_volumes, QWidget *parent) : QTreeWidget
 	    pv_data << "Yes";
 	else
 	    pv_data << "No";
+
+/* here we get the names of logical volumes associated
+   with the physical volume */
+
+	lv_names.clear();
+	for(int x = 0; x < lvs.size() ; x++){
+	    pv_names = lvs[x]->getDevicePathAll();
+	    for(int y = 0; y < pv_names.size() ; y++)
+		if( device_name == pv_names[y] ) 
+		    lv_names.append( lvs[x]->getName() );
+	}
+
+/* next we remove duplicate entries */
+
+	lv_names.sort();
+	if( lv_names.size() > 1 )        
+	    for(int x = lv_names.size() - 2; x >= 0; x--)
+		if( lv_names[x] == lv_names[x + 1] )
+		    lv_names.removeAt(x + 1);
+	
+	pv_data << lv_names.join(", ");
+
 	item = new QTreeWidgetItem((QTreeWidgetItem *)0, pv_data);
 	item->setData(1, Qt::UserRole, pv->getSize());
 	item->setData(2, Qt::UserRole, pv->getUnused());
