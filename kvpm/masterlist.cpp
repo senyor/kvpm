@@ -59,12 +59,12 @@ MasterList::~MasterList()
    then rescans the information for the volume group it represents.
    The resulting VolGroup object is placed in the VolGroups
    list at the location of the original, which is then deleted. 
-   This function is only useful when the operation, such a creating
-   a new logical volume, is one that won't effect other groups or
-   change information on the first tab of the main display page. */
+   This function is only useful when the operation, such a changing
+   logical volume attributes, is one that won't effect other groups 
+   or change information on the first tab of the main display page. */
 
 
-void MasterList::rebuildVolumeGroup(VolGroup *VolumeGroup)
+VolGroup* MasterList::rebuildVolumeGroup(VolGroup *VolumeGroup)
 {
     VolGroup *new_group, *old_group;
 
@@ -75,9 +75,11 @@ void MasterList::rebuildVolumeGroup(VolGroup *VolumeGroup)
 	if(VolGroups[x] == old_group)
 	    VolGroups[x] = new_group;
     delete old_group;
-    scanLogVols(new_group);
 
+    scanLogVols(new_group);
     scanPhysVols(new_group);
+
+    return new_group;
 }
 
 void MasterList::scanVolGroups()

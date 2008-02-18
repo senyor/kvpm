@@ -52,10 +52,9 @@ Q_OBJECT
     
  public slots:
     void reRun();
-    void rebuildVolumeGroupTab(VolGroup *VolumeGroup);
+    void rebuildVolumeGroupTab();
  
  private slots:
-    void rebuildVolumeGroupTab();
     void setupMenus(int index);
     void updateTabGeometry(int index);
     void launchVGChangeAllocDialog();

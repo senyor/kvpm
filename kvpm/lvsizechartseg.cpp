@@ -118,7 +118,7 @@ void LVChartSeg::removeMirror()
 void LVChartSeg::mkfsLogicalVolume()
 {
     if( make_fs(lv) )
-	MainWindow->rebuildVolumeGroupTab(vg);
+	MainWindow->rebuildVolumeGroupTab();
 }
 
 void LVChartSeg::removeLogicalVolume()
@@ -136,19 +136,19 @@ void LVChartSeg::createSnapshot()
 void LVChartSeg::changeLogicalVolume()
 {
     if( change_lv(lv) )
-	MainWindow->rebuildVolumeGroupTab(vg);
+	MainWindow->rebuildVolumeGroupTab();
 }
 
 void LVChartSeg::mountFilesystem()
 {
     if( mount_filesystem(lv) )
-	MainWindow->rebuildVolumeGroupTab(vg);
+	MainWindow->rebuildVolumeGroupTab();
 }
 
 void LVChartSeg::unmountFilesystem()
 {
     if( unmount_filesystem(lv) )
-	MainWindow->rebuildVolumeGroupTab(vg);
+	MainWindow->rebuildVolumeGroupTab();
 }
 
 void LVChartSeg::movePhysicalExtents()
