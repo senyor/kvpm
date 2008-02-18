@@ -41,14 +41,7 @@ bool change_vg_pv(VolGroup *VolumeGroup)
 VGChangePVDialog::VGChangePVDialog(VolGroup *VolumeGroup, QWidget *parent) : KDialog(parent)
 {
     vg = VolumeGroup;
-
-    qDebug() << " Got here 1 ...";
-    
-
     vg_name = vg->getName();
-
-    qDebug() << " Got here 2 ..." << vg_name;
-
 
 // We don't want the limit set to less than the number already in existence!
 
