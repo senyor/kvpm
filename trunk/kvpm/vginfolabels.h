@@ -14,10 +14,10 @@
 #ifndef VGINFOLABELS_H
 #define VGINFOLABELS_H
 
-#include <QFrame>
+#include <QWidget>
 #include "volgroup.h"
 
-class VGInfoLabels : public QFrame
+class VGInfoLabels : public QWidget
 {
  public:
      VGInfoLabels(VolGroup *VolumeGroup, QWidget *parent = 0);
