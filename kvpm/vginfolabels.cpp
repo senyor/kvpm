@@ -18,77 +18,122 @@
 #include "sizetostring.h"
 #include "vginfolabels.h"
 
-
-VGInfoLabels::VGInfoLabels(VolGroup *VolumeGroup, QWidget *parent) : QFrame(parent)
+VGInfoLabels::VGInfoLabels(VolGroup *VolumeGroup, QWidget *parent) : QWidget(parent) 
 {
-    VolGroup *vg = VolumeGroup;
-    QGridLayout *layout = new QGridLayout();
+    QLabel *extent_size_label, *size_label, *used_label, 
+	   *free_label, *lvm_fmt_label, *resizable_label, 
+	   *clustered_label, *allocateable_label,
+	   *max_lv_label, *max_pv_label, *policy_label,
+	   *partial_label, *vg_write_mode;
+
     QString clustered, resizable, write_mode;
-
-    setFrameShape(QFrame::StyledPanel);
-    setFrameShadow(QFrame::Sunken);
+    QVBoxLayout *upper_layout = new QVBoxLayout();
     
-    QLabel *vg_extent_size_label, *vg_size_label;
-    QLabel *vg_used_space_label, *vg_free_space_label, *lvm_fmt_label;
-    QLabel *vg_resizable_label, *vg_clustered_label, *vg_allocateable_space_label;
-    QLabel *lv_max_label, *pv_max_label, *policy_label;
-    QLabel *vg_partial, *vg_write_mode;
+    QHBoxLayout *hlayout1 = new QHBoxLayout();
+    QHBoxLayout *hlayout2 = new QHBoxLayout();
+    upper_layout->addLayout(hlayout1);
+    upper_layout->addLayout(hlayout2);
+    
+    QVBoxLayout *vlayout1 = new QVBoxLayout();
+    QVBoxLayout *vlayout2 = new QVBoxLayout();
+    QVBoxLayout *vlayout3 = new QVBoxLayout();
+    QVBoxLayout *vlayout4 = new QVBoxLayout();
+    QVBoxLayout *vlayout5 = new QVBoxLayout();
+    QVBoxLayout *vlayout6 = new QVBoxLayout();
 
-    if(vg->isResizable())
+    QFrame *label_frame1 = new QFrame();
+    QFrame *label_frame2 = new QFrame();
+    QFrame *label_frame3 = new QFrame();
+    QFrame *label_frame4 = new QFrame();
+    QFrame *label_frame5 = new QFrame();
+    QFrame *label_frame6 = new QFrame();
+
+    label_frame1->setFrameShape(QFrame::StyledPanel);
+    label_frame2->setFrameShape(QFrame::StyledPanel);
+    label_frame3->setFrameShape(QFrame::StyledPanel);
+    label_frame4->setFrameShape(QFrame::StyledPanel);
+    label_frame5->setFrameShape(QFrame::StyledPanel);
+    label_frame6->setFrameShape(QFrame::StyledPanel);
+
+    label_frame1->setFrameShadow(QFrame::Sunken);
+    label_frame2->setFrameShadow(QFrame::Sunken);
+    label_frame3->setFrameShadow(QFrame::Sunken);
+    label_frame4->setFrameShadow(QFrame::Sunken);
+    label_frame5->setFrameShadow(QFrame::Sunken);
+    label_frame6->setFrameShadow(QFrame::Sunken);
+
+    label_frame1->setLayout(vlayout1);
+    label_frame2->setLayout(vlayout2);
+    label_frame3->setLayout(vlayout3);
+    label_frame4->setLayout(vlayout4);
+    label_frame5->setLayout(vlayout5);
+    label_frame6->setLayout(vlayout6);
+    
+    if(VolumeGroup->isResizable())
 	resizable = "Yes";
     else
 	resizable = "No";
 
-    if(vg->isClustered())
+    if(VolumeGroup->isClustered())
 	clustered = "Yes";
     else    
 	clustered = "No";
 
-    if(vg->isWritable())
-	write_mode = "read / write";
+    if(VolumeGroup->isWritable())
+	write_mode = "r/w";
     else
-	write_mode = "read only";
+	write_mode = "r/o";
     
-    if(vg->isPartial())
+    if(VolumeGroup->isPartial())
     {
-	vg_partial = new QLabel("<b>*** Warning: Partial Volume Group ***</b>");
-	layout->addWidget(vg_partial, 3, 1);
+	partial_label = new QLabel("<b>*** Warning: Partial Volume Group ***</b>");
+	hlayout2->addWidget(partial_label);
     }
 
-    vg_used_space_label   = new QLabel("Used: " + sizeToString(vg->getUsedSpace()));
-    vg_free_space_label   = new QLabel("Free: " +sizeToString(vg->getFreeSpace()));
-    vg_allocateable_space_label   = new QLabel("Allocateable: " +sizeToString(vg->getAllocateableSpace()));
-    vg_size_label         = new QLabel("Total: " + sizeToString(vg->getSize()));
-    vg_extent_size_label  = new QLabel("Extent size: " + sizeToString(vg->getExtentSize()));
-    lvm_fmt_label = new QLabel("Format: " + vg->getFormat());
-    policy_label = new QLabel("Policy: " + vg->getPolicy());
-    vg_resizable_label = new QLabel("Resizable: " + resizable);
-    vg_clustered_label = new QLabel("Clustered: " + clustered);
-    if(vg->getPhysVolMax())
-	pv_max_label = new QLabel("Max physical volumes: " + QString("%1").arg(vg->getPhysVolMax()));
-    else
-	pv_max_label = new QLabel("Max physical volumes: Unlimited");
-    if(vg->getLogVolMax())
-	lv_max_label = new QLabel("Max logical volumes: " + QString("%1").arg(vg->getLogVolMax()));
-    else
-	lv_max_label = new QLabel("Max logical volumes: Unlimited");
+    used_label   = new QLabel("Used: " + sizeToString( VolumeGroup->getUsedSpace() ));
+    free_label   = new QLabel("Free: " +sizeToString( VolumeGroup->getFreeSpace() ));
+    allocateable_label   = new QLabel("Allocateable: " + 
+				      sizeToString( VolumeGroup->getAllocateableSpace() ));
+    size_label         = new QLabel("Total: " + sizeToString(VolumeGroup->getSize()));
+    extent_size_label  = new QLabel("Extent size: " + 
+				    sizeToString( VolumeGroup->getExtentSize() ));
+    lvm_fmt_label = new QLabel("Format: " + VolumeGroup->getFormat());
+    policy_label = new QLabel("Policy: " + VolumeGroup->getPolicy());
+    resizable_label = new QLabel("Resizable: " + resizable);
+    clustered_label = new QLabel("Clustered: " + clustered);
     vg_write_mode = new QLabel("Access: " + write_mode);
+
+    vlayout1->addWidget(size_label);
+    vlayout1->addWidget(allocateable_label);
+    vlayout2->addWidget(used_label);    
+    vlayout2->addWidget(free_label);  
+    vlayout3->addWidget(clustered_label);
+    vlayout3->addWidget(lvm_fmt_label);
+    vlayout4->addWidget(extent_size_label);
+    vlayout4->addWidget(policy_label);
+    vlayout5->addWidget(resizable_label);
+    vlayout5->addWidget(vg_write_mode);
     
-    layout->addWidget(vg_size_label,        0, 0);
-    layout->addWidget(vg_used_space_label,  0, 1);
-    layout->addWidget(vg_clustered_label,   0, 2);
-    layout->addWidget(vg_extent_size_label, 0, 3);
-    layout->addWidget(vg_resizable_label,   0, 4);
-    layout->addWidget(pv_max_label,         0, 5);
+    hlayout1->addWidget(label_frame1);
+    hlayout1->addWidget(label_frame2);
+    hlayout1->addWidget(label_frame3);
+    hlayout1->addWidget(label_frame4);
+    hlayout1->addWidget(label_frame5);
+    if( VolumeGroup->getLogVolMax() || VolumeGroup->getPhysVolMax() ){
+	if(VolumeGroup->getPhysVolMax())
+	    max_pv_label = new QLabel("Max pvs: " + QString("%1").arg(VolumeGroup->getPhysVolMax()));
+	else
+	    max_pv_label = new QLabel("Max pvs: Unlimited");
+	if(VolumeGroup->getLogVolMax())
+	    max_lv_label = new QLabel("Max lvs: " + QString("%1").arg(VolumeGroup->getLogVolMax()));
+	else
+	    max_lv_label = new QLabel("Max lvs: Unlimited");
 
-    layout->addWidget(vg_allocateable_space_label, 1, 0);
-    layout->addWidget(vg_free_space_label,         1, 1);
-    layout->addWidget(lvm_fmt_label,               1, 2);
-    layout->addWidget(policy_label,                1, 3);
-    layout->addWidget(vg_write_mode,               1, 4);
-    layout->addWidget(lv_max_label,                1, 5);
-
-
-    setLayout(layout);
+	vlayout6->addWidget(max_pv_label);
+	vlayout6->addWidget(max_lv_label);
+	hlayout1->addWidget(label_frame6);
+    }
+    
+    setLayout(upper_layout);
 }
 
