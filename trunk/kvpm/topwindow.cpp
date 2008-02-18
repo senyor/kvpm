@@ -37,7 +37,6 @@ extern MasterList *master_list;
 
 TopWindow::TopWindow(QWidget *parent):KMainWindow(parent)
 {
-
     file_menu     = new KMenu("File");
     tool_menu     = new KMenu("Tools");
     groups_menu   = new KMenu("Volume Groups");
@@ -134,41 +133,32 @@ void TopWindow::reRun()
     connect(tab_widget, SIGNAL(currentChanged(int)), this, SLOT(setupMenus(int)));
 }
 
+/* This function destroys the displayed tab for the volume group at 
+   the tab widget's current index and replaces it with a new one. It
+   is called when something is changed in a volume group that doesn't
+   effect the information on any other tab */
+
+
 void TopWindow::rebuildVolumeGroupTab()
 {
-    VolGroup *vg;
+    int index = tab_widget->currentIndex();
+    VolGroup *old_vg = vg_tabs[index - 1]->getVolumeGroup(); 
+    QString group_name = old_vg->getName();
 
-    vg = vg_tabs[(tab_widget->currentIndex()) - 1]->getVolumeGroup();
+    vg = master_list->rebuildVolumeGroup(old_vg);
+    VolumeGroupTab *tab = new VolumeGroupTab(vg);
 
-    MainWindow->rebuildVolumeGroupTab(vg);
-}
+    tab_widget->removeTab(index);
+    tab_widget->insertTab(index, tab, group_name);
 
+    delete vg_tabs[index - 1];
 
-void TopWindow::rebuildVolumeGroupTab(VolGroup *VolumeGroup)
-{
-    VolGroup *old_vg, *new_vg;
-    QString group_name;
-    VolumeGroupTab *tab;
-    int index = 0;
+    vg_tabs.replace(index - 1, tab);
 
-    old_vg = VolumeGroup;
-    group_name = old_vg->getName();
-
-    while( (index < vg_tabs.size()) && (vg_tabs[index]->getVolumeGroupName() != group_name) )
-	index++;
-    
-    master_list->rebuildVolumeGroup(old_vg);
-    new_vg = master_list->getVolGroupByName(group_name);
-
-    tab = new VolumeGroupTab(new_vg);
-    tab_widget->removeTab(index + 1);
-    tab_widget->insertTab(index + 1, tab, new_vg->getName());
-    tab_widget->setCurrentIndex(index + 1);
-    delete vg_tabs[index];
-    
-    vg_tabs.replace(index, tab);
-    vg_tabs[index]->hide();
-    vg_tabs[index]->show();
+// These three lines must be last
+    tab_widget->setCurrentIndex(index);
+    vg_tabs[index - 1]->hide();
+    vg_tabs[index - 1]->show();
 }
 
 
@@ -223,32 +213,32 @@ void TopWindow::launchVGChangeAllocDialog()
     dialog.exec();
     if(dialog.result() == QDialog::Accepted){
         ProcessProgress change_vg(dialog.arguments(), "", FALSE);
-	MainWindow->rebuildVolumeGroupTab(vg);
+	MainWindow->rebuildVolumeGroupTab();
     }
 }
 
 void TopWindow::launchVGChangeExtentDialog()
 {
     if( change_vg_extent(vg) )
-	MainWindow->rebuildVolumeGroupTab(vg);
+	MainWindow->rebuildVolumeGroupTab();
 }
 
 void TopWindow::launchVGChangeLVDialog()
 {
     if( change_vg_lv(vg) )
-	MainWindow->rebuildVolumeGroupTab(vg);
+	MainWindow->rebuildVolumeGroupTab();
 }
 
 void TopWindow::launchVGChangePVDialog()
 {
     if( change_vg_pv(vg) )
-	MainWindow->rebuildVolumeGroupTab(vg);
+	MainWindow->rebuildVolumeGroupTab();
 }
 
 void TopWindow::launchVGChangeResizeDialog()
 {
     if( change_vg_resize(vg) )
-	MainWindow->rebuildVolumeGroupTab(vg);
+	MainWindow->rebuildVolumeGroupTab();
 }
 
 void TopWindow::launchVGRemoveDialog()

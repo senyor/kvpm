@@ -149,7 +149,7 @@ void VGTree::popupContextMenu(QPoint point)
 void VGTree::mkfsLogicalVolume()
 {
     if( make_fs(lv) )
-	MainWindow->rebuildVolumeGroupTab(vg);
+	MainWindow->rebuildVolumeGroupTab();
 }
 
 void VGTree::removeLogicalVolume()
@@ -200,7 +200,7 @@ void VGTree::changeLogicalVolume()
     LogVol *lv = vg->getLogVolByName(lv_name);
 
     if( change_lv(lv) )
-	MainWindow->rebuildVolumeGroupTab(vg);
+	MainWindow->rebuildVolumeGroupTab();
 }
 
 void VGTree::addMirror()
@@ -224,7 +224,7 @@ void VGTree::mountFilesystem()
     LogVol *lv = vg->getLogVolByName(lv_name);
 
     if( mount_filesystem(lv) )
-	MainWindow->rebuildVolumeGroupTab(vg);
+	MainWindow->rebuildVolumeGroupTab();
 }
 
 void VGTree::unmountFilesystem()
@@ -232,5 +232,5 @@ void VGTree::unmountFilesystem()
     LogVol *lv = vg->getLogVolByName(lv_name);
 
     if( unmount_filesystem(lv) ) 
-	MainWindow->rebuildVolumeGroupTab(vg);
+	MainWindow->rebuildVolumeGroupTab();
 }

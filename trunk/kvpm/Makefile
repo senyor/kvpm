@@ -34,10 +34,10 @@ RM = /usr/bin/cmake -E remove -f
 CMAKE_EDIT_COMMAND = /usr/bin/ccmake
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/benscott/klvm/trunk/klvm
+CMAKE_SOURCE_DIR = /home/benscott/kvpm/trunk/kvpm
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/benscott/klvm/trunk/klvm
+CMAKE_BINARY_DIR = /home/benscott/kvpm/trunk/kvpm
 
 # Include the progress variables for this target.
 include CMakeFiles/progress.make
@@ -63,9 +63,9 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/benscott/klvm/trunk/klvm/CMakeFiles $(CMAKE_ALL_PROGRESS)
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/benscott/kvpm/trunk/kvpm/CMakeFiles $(CMAKE_ALL_PROGRESS)
 	$(MAKE) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/benscott/klvm/trunk/klvm/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/benscott/kvpm/trunk/kvpm/CMakeFiles 0
 
 # The main clean target
 clean:
@@ -87,15 +87,15 @@ depend:
 	$(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 
 #=============================================================================
-# Target rules for targets named klvm
+# Target rules for targets named kvpm
 
 # Build rule for target.
-klvm: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 klvm
+kvpm: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 kvpm
 
 # fast build rule for target.
-klvm/fast:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/build
+kvpm/fast:
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/build
 
 #=============================================================================
 # Target rules for targets named uninstall
@@ -110,687 +110,687 @@ uninstall/fast:
 
 # target to build an object file
 addmirror.o:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/addmirror.o
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/addmirror.o
 
 # target to preprocess a source file
 addmirror.i:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/addmirror.i
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/addmirror.i
 
 # target to generate assembly for a file
 addmirror.s:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/addmirror.s
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/addmirror.s
 
 # target to build an object file
 devicemodel.o:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/devicemodel.o
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/devicemodel.o
 
 # target to preprocess a source file
 devicemodel.i:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/devicemodel.i
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/devicemodel.i
 
 # target to generate assembly for a file
 devicemodel.s:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/devicemodel.s
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/devicemodel.s
 
 # target to build an object file
 deviceproperties.o:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/deviceproperties.o
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/deviceproperties.o
 
 # target to preprocess a source file
 deviceproperties.i:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/deviceproperties.i
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/deviceproperties.i
 
 # target to generate assembly for a file
 deviceproperties.s:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/deviceproperties.s
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/deviceproperties.s
 
 # target to build an object file
 devicepropertiesstack.o:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/devicepropertiesstack.o
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/devicepropertiesstack.o
 
 # target to preprocess a source file
 devicepropertiesstack.i:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/devicepropertiesstack.i
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/devicepropertiesstack.i
 
 # target to generate assembly for a file
 devicepropertiesstack.s:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/devicepropertiesstack.s
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/devicepropertiesstack.s
 
 # target to build an object file
 devicesizechart.o:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/devicesizechart.o
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/devicesizechart.o
 
 # target to preprocess a source file
 devicesizechart.i:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/devicesizechart.i
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/devicesizechart.i
 
 # target to generate assembly for a file
 devicesizechart.s:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/devicesizechart.s
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/devicesizechart.s
 
 # target to build an object file
 devicesizechartseg.o:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/devicesizechartseg.o
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/devicesizechartseg.o
 
 # target to preprocess a source file
 devicesizechartseg.i:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/devicesizechartseg.i
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/devicesizechartseg.i
 
 # target to generate assembly for a file
 devicesizechartseg.s:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/devicesizechartseg.s
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/devicesizechartseg.s
 
 # target to build an object file
 devicetab.o:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/devicetab.o
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/devicetab.o
 
 # target to preprocess a source file
 devicetab.i:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/devicetab.i
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/devicetab.i
 
 # target to generate assembly for a file
 devicetab.s:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/devicetab.s
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/devicetab.s
 
 # target to build an object file
 devicetreeview.o:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/devicetreeview.o
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/devicetreeview.o
 
 # target to preprocess a source file
 devicetreeview.i:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/devicetreeview.i
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/devicetreeview.i
 
 # target to generate assembly for a file
 devicetreeview.s:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/devicetreeview.s
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/devicetreeview.s
 
 # target to build an object file
 fsprobe.o:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/fsprobe.o
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/fsprobe.o
 
 # target to preprocess a source file
 fsprobe.i:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/fsprobe.i
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/fsprobe.i
 
 # target to generate assembly for a file
 fsprobe.s:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/fsprobe.s
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/fsprobe.s
 
 # target to build an object file
-klvm_automoc.o:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/klvm_automoc.o
+kvpm_automoc.o:
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/kvpm_automoc.o
 
 # target to preprocess a source file
-klvm_automoc.i:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/klvm_automoc.i
+kvpm_automoc.i:
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/kvpm_automoc.i
 
 # target to generate assembly for a file
-klvm_automoc.s:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/klvm_automoc.s
+kvpm_automoc.s:
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/kvpm_automoc.s
 
 # target to build an object file
 logvol.o:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/logvol.o
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/logvol.o
 
 # target to preprocess a source file
 logvol.i:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/logvol.i
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/logvol.i
 
 # target to generate assembly for a file
 logvol.s:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/logvol.s
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/logvol.s
 
 # target to build an object file
 lvactionsmenu.o:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/lvactionsmenu.o
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/lvactionsmenu.o
 
 # target to preprocess a source file
 lvactionsmenu.i:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/lvactionsmenu.i
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/lvactionsmenu.i
 
 # target to generate assembly for a file
 lvactionsmenu.s:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/lvactionsmenu.s
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/lvactionsmenu.s
 
 # target to build an object file
 lvchange.o:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/lvchange.o
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/lvchange.o
 
 # target to preprocess a source file
 lvchange.i:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/lvchange.i
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/lvchange.i
 
 # target to generate assembly for a file
 lvchange.s:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/lvchange.s
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/lvchange.s
 
 # target to build an object file
 lvcreate.o:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/lvcreate.o
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/lvcreate.o
 
 # target to preprocess a source file
 lvcreate.i:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/lvcreate.i
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/lvcreate.i
 
 # target to generate assembly for a file
 lvcreate.s:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/lvcreate.s
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/lvcreate.s
 
 # target to build an object file
 lvproperties.o:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/lvproperties.o
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/lvproperties.o
 
 # target to preprocess a source file
 lvproperties.i:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/lvproperties.i
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/lvproperties.i
 
 # target to generate assembly for a file
 lvproperties.s:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/lvproperties.s
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/lvproperties.s
 
 # target to build an object file
 lvpropertiesstack.o:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/lvpropertiesstack.o
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/lvpropertiesstack.o
 
 # target to preprocess a source file
 lvpropertiesstack.i:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/lvpropertiesstack.i
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/lvpropertiesstack.i
 
 # target to generate assembly for a file
 lvpropertiesstack.s:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/lvpropertiesstack.s
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/lvpropertiesstack.s
 
 # target to build an object file
 lvreduce.o:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/lvreduce.o
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/lvreduce.o
 
 # target to preprocess a source file
 lvreduce.i:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/lvreduce.i
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/lvreduce.i
 
 # target to generate assembly for a file
 lvreduce.s:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/lvreduce.s
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/lvreduce.s
 
 # target to build an object file
 lvremove.o:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/lvremove.o
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/lvremove.o
 
 # target to preprocess a source file
 lvremove.i:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/lvremove.i
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/lvremove.i
 
 # target to generate assembly for a file
 lvremove.s:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/lvremove.s
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/lvremove.s
 
 # target to build an object file
 lvsizechart.o:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/lvsizechart.o
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/lvsizechart.o
 
 # target to preprocess a source file
 lvsizechart.i:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/lvsizechart.i
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/lvsizechart.i
 
 # target to generate assembly for a file
 lvsizechart.s:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/lvsizechart.s
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/lvsizechart.s
 
 # target to build an object file
 lvsizechartseg.o:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/lvsizechartseg.o
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/lvsizechartseg.o
 
 # target to preprocess a source file
 lvsizechartseg.i:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/lvsizechartseg.i
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/lvsizechartseg.i
 
 # target to generate assembly for a file
 lvsizechartseg.s:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/lvsizechartseg.s
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/lvsizechartseg.s
 
 # target to build an object file
 main.o:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/main.o
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/main.o
 
 # target to preprocess a source file
 main.i:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/main.i
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/main.i
 
 # target to generate assembly for a file
 main.s:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/main.s
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/main.s
 
 # target to build an object file
 masterlist.o:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/masterlist.o
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/masterlist.o
 
 # target to preprocess a source file
 masterlist.i:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/masterlist.i
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/masterlist.i
 
 # target to generate assembly for a file
 masterlist.s:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/masterlist.s
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/masterlist.s
 
 # target to build an object file
 mkfs.o:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/mkfs.o
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/mkfs.o
 
 # target to preprocess a source file
 mkfs.i:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/mkfs.i
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/mkfs.i
 
 # target to generate assembly for a file
 mkfs.s:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/mkfs.s
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/mkfs.s
 
 # target to build an object file
 mount.o:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/mount.o
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/mount.o
 
 # target to preprocess a source file
 mount.i:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/mount.i
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/mount.i
 
 # target to generate assembly for a file
 mount.s:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/mount.s
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/mount.s
 
 # target to build an object file
 mountentry.o:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/mountentry.o
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/mountentry.o
 
 # target to preprocess a source file
 mountentry.i:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/mountentry.i
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/mountentry.i
 
 # target to generate assembly for a file
 mountentry.s:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/mountentry.s
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/mountentry.s
 
 # target to build an object file
 mountinfo.o:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/mountinfo.o
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/mountinfo.o
 
 # target to preprocess a source file
 mountinfo.i:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/mountinfo.i
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/mountinfo.i
 
 # target to generate assembly for a file
 mountinfo.s:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/mountinfo.s
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/mountinfo.s
 
 # target to build an object file
 nomungecheck.o:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/nomungecheck.o
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/nomungecheck.o
 
 # target to preprocess a source file
 nomungecheck.i:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/nomungecheck.i
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/nomungecheck.i
 
 # target to generate assembly for a file
 nomungecheck.s:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/nomungecheck.s
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/nomungecheck.s
 
 # target to build an object file
 partitionproperties.o:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/partitionproperties.o
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/partitionproperties.o
 
 # target to preprocess a source file
 partitionproperties.i:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/partitionproperties.i
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/partitionproperties.i
 
 # target to generate assembly for a file
 partitionproperties.s:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/partitionproperties.s
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/partitionproperties.s
 
 # target to build an object file
 partitionpropertiesstack.o:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/partitionpropertiesstack.o
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/partitionpropertiesstack.o
 
 # target to preprocess a source file
 partitionpropertiesstack.i:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/partitionpropertiesstack.i
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/partitionpropertiesstack.i
 
 # target to generate assembly for a file
 partitionpropertiesstack.s:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/partitionpropertiesstack.s
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/partitionpropertiesstack.s
 
 # target to build an object file
 physvol.o:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/physvol.o
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/physvol.o
 
 # target to preprocess a source file
 physvol.i:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/physvol.i
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/physvol.i
 
 # target to generate assembly for a file
 physvol.s:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/physvol.s
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/physvol.s
 
 # target to build an object file
 processprogress.o:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/processprogress.o
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/processprogress.o
 
 # target to preprocess a source file
 processprogress.i:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/processprogress.i
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/processprogress.i
 
 # target to generate assembly for a file
 processprogress.s:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/processprogress.s
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/processprogress.s
 
 # target to build an object file
 pvchange.o:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/pvchange.o
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/pvchange.o
 
 # target to preprocess a source file
 pvchange.i:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/pvchange.i
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/pvchange.i
 
 # target to generate assembly for a file
 pvchange.s:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/pvchange.s
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/pvchange.s
 
 # target to build an object file
 pvcreate.o:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/pvcreate.o
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/pvcreate.o
 
 # target to preprocess a source file
 pvcreate.i:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/pvcreate.i
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/pvcreate.i
 
 # target to generate assembly for a file
 pvcreate.s:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/pvcreate.s
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/pvcreate.s
 
 # target to build an object file
 pvmove.o:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/pvmove.o
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/pvmove.o
 
 # target to preprocess a source file
 pvmove.i:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/pvmove.i
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/pvmove.i
 
 # target to generate assembly for a file
 pvmove.s:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/pvmove.s
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/pvmove.s
 
 # target to build an object file
 pvremove.o:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/pvremove.o
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/pvremove.o
 
 # target to preprocess a source file
 pvremove.i:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/pvremove.i
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/pvremove.i
 
 # target to generate assembly for a file
 pvremove.s:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/pvremove.s
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/pvremove.s
 
 # target to build an object file
 pvtree.o:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/pvtree.o
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/pvtree.o
 
 # target to preprocess a source file
 pvtree.i:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/pvtree.i
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/pvtree.i
 
 # target to generate assembly for a file
 pvtree.s:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/pvtree.s
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/pvtree.s
 
 # target to build an object file
 removemirror.o:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/removemirror.o
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/removemirror.o
 
 # target to preprocess a source file
 removemirror.i:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/removemirror.i
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/removemirror.i
 
 # target to generate assembly for a file
 removemirror.s:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/removemirror.s
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/removemirror.s
 
 # target to build an object file
 removemissing.o:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/removemissing.o
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/removemissing.o
 
 # target to preprocess a source file
 removemissing.i:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/removemissing.i
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/removemissing.i
 
 # target to generate assembly for a file
 removemissing.s:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/removemissing.s
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/removemissing.s
 
 # target to build an object file
 sizetostring.o:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/sizetostring.o
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/sizetostring.o
 
 # target to preprocess a source file
 sizetostring.i:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/sizetostring.i
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/sizetostring.i
 
 # target to generate assembly for a file
 sizetostring.s:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/sizetostring.s
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/sizetostring.s
 
 # target to build an object file
 storagedevice.o:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/storagedevice.o
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/storagedevice.o
 
 # target to preprocess a source file
 storagedevice.i:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/storagedevice.i
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/storagedevice.i
 
 # target to generate assembly for a file
 storagedevice.s:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/storagedevice.s
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/storagedevice.s
 
 # target to build an object file
 storagepartition.o:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/storagepartition.o
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/storagepartition.o
 
 # target to preprocess a source file
 storagepartition.i:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/storagepartition.i
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/storagepartition.i
 
 # target to generate assembly for a file
 storagepartition.s:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/storagepartition.s
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/storagepartition.s
 
 # target to build an object file
 topwindow.o:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/topwindow.o
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/topwindow.o
 
 # target to preprocess a source file
 topwindow.i:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/topwindow.i
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/topwindow.i
 
 # target to generate assembly for a file
 topwindow.s:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/topwindow.s
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/topwindow.s
 
 # target to build an object file
 unmount.o:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/unmount.o
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/unmount.o
 
 # target to preprocess a source file
 unmount.i:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/unmount.i
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/unmount.i
 
 # target to generate assembly for a file
 unmount.s:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/unmount.s
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/unmount.s
 
 # target to build an object file
 vgchangealloc.o:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/vgchangealloc.o
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/vgchangealloc.o
 
 # target to preprocess a source file
 vgchangealloc.i:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/vgchangealloc.i
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/vgchangealloc.i
 
 # target to generate assembly for a file
 vgchangealloc.s:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/vgchangealloc.s
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/vgchangealloc.s
 
 # target to build an object file
 vgchangeextent.o:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/vgchangeextent.o
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/vgchangeextent.o
 
 # target to preprocess a source file
 vgchangeextent.i:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/vgchangeextent.i
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/vgchangeextent.i
 
 # target to generate assembly for a file
 vgchangeextent.s:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/vgchangeextent.s
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/vgchangeextent.s
 
 # target to build an object file
 vgchangelv.o:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/vgchangelv.o
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/vgchangelv.o
 
 # target to preprocess a source file
 vgchangelv.i:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/vgchangelv.i
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/vgchangelv.i
 
 # target to generate assembly for a file
 vgchangelv.s:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/vgchangelv.s
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/vgchangelv.s
 
 # target to build an object file
 vgchangepv.o:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/vgchangepv.o
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/vgchangepv.o
 
 # target to preprocess a source file
 vgchangepv.i:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/vgchangepv.i
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/vgchangepv.i
 
 # target to generate assembly for a file
 vgchangepv.s:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/vgchangepv.s
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/vgchangepv.s
 
 # target to build an object file
 vgchangeresize.o:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/vgchangeresize.o
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/vgchangeresize.o
 
 # target to preprocess a source file
 vgchangeresize.i:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/vgchangeresize.i
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/vgchangeresize.i
 
 # target to generate assembly for a file
 vgchangeresize.s:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/vgchangeresize.s
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/vgchangeresize.s
 
 # target to build an object file
 vgcreate.o:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/vgcreate.o
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/vgcreate.o
 
 # target to preprocess a source file
 vgcreate.i:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/vgcreate.i
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/vgcreate.i
 
 # target to generate assembly for a file
 vgcreate.s:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/vgcreate.s
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/vgcreate.s
 
 # target to build an object file
 vgextend.o:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/vgextend.o
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/vgextend.o
 
 # target to preprocess a source file
 vgextend.i:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/vgextend.i
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/vgextend.i
 
 # target to generate assembly for a file
 vgextend.s:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/vgextend.s
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/vgextend.s
 
 # target to build an object file
 vginfolabels.o:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/vginfolabels.o
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/vginfolabels.o
 
 # target to preprocess a source file
 vginfolabels.i:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/vginfolabels.i
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/vginfolabels.i
 
 # target to generate assembly for a file
 vginfolabels.s:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/vginfolabels.s
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/vginfolabels.s
 
 # target to build an object file
 vgreduce.o:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/vgreduce.o
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/vgreduce.o
 
 # target to preprocess a source file
 vgreduce.i:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/vgreduce.i
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/vgreduce.i
 
 # target to generate assembly for a file
 vgreduce.s:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/vgreduce.s
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/vgreduce.s
 
 # target to build an object file
 vgreduceone.o:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/vgreduceone.o
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/vgreduceone.o
 
 # target to preprocess a source file
 vgreduceone.i:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/vgreduceone.i
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/vgreduceone.i
 
 # target to generate assembly for a file
 vgreduceone.s:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/vgreduceone.s
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/vgreduceone.s
 
 # target to build an object file
 vgremove.o:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/vgremove.o
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/vgremove.o
 
 # target to preprocess a source file
 vgremove.i:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/vgremove.i
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/vgremove.i
 
 # target to generate assembly for a file
 vgremove.s:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/vgremove.s
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/vgremove.s
 
 # target to build an object file
 vgtree.o:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/vgtree.o
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/vgtree.o
 
 # target to preprocess a source file
 vgtree.i:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/vgtree.i
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/vgtree.i
 
 # target to generate assembly for a file
 vgtree.s:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/vgtree.s
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/vgtree.s
 
 # target to build an object file
 volgroup.o:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/volgroup.o
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/volgroup.o
 
 # target to preprocess a source file
 volgroup.i:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/volgroup.i
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/volgroup.i
 
 # target to generate assembly for a file
 volgroup.s:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/volgroup.s
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/volgroup.s
 
 # target to build an object file
 volumegrouptab.o:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/volumegrouptab.o
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/volumegrouptab.o
 
 # target to preprocess a source file
 volumegrouptab.i:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/volumegrouptab.i
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/volumegrouptab.i
 
 # target to generate assembly for a file
 volumegrouptab.s:
-	$(MAKE) -f CMakeFiles/klvm.dir/build.make CMakeFiles/klvm.dir/volumegrouptab.s
+	$(MAKE) -f CMakeFiles/kvpm.dir/build.make CMakeFiles/kvpm.dir/volumegrouptab.s
 
 # Help Target
 help::
@@ -799,7 +799,7 @@ help::
 	@echo "... clean"
 	@echo "... depend"
 	@echo "... edit_cache"
-	@echo "... klvm"
+	@echo "... kvpm"
 	@echo "... rebuild_cache"
 	@echo "... uninstall"
 	@echo "... addmirror.o"
@@ -829,9 +829,9 @@ help::
 	@echo "... fsprobe.o"
 	@echo "... fsprobe.i"
 	@echo "... fsprobe.s"
-	@echo "... klvm_automoc.o"
-	@echo "... klvm_automoc.i"
-	@echo "... klvm_automoc.s"
+	@echo "... kvpm_automoc.o"
+	@echo "... kvpm_automoc.i"
+	@echo "... kvpm_automoc.s"
 	@echo "... logvol.o"
 	@echo "... logvol.i"
 	@echo "... logvol.s"

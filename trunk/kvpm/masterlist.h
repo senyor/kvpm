@@ -45,7 +45,7 @@ class MasterList : public QObject
 public:
     MasterList();
     ~MasterList();
-    void rebuildVolumeGroup(VolGroup *VolumeGroup);
+    VolGroup* rebuildVolumeGroup(VolGroup *VolumeGroup);
     const QList<VolGroup *> getVolGroups();
     const QList<PhysVol *> getPhysVols();
     const QList<StorageDevice *> getStorageDevices();
