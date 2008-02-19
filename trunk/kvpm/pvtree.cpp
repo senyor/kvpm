@@ -157,7 +157,6 @@ void PVTree::popupContextMenu(QPoint point)
 void PVTree::movePhysicalExtents()
 {
     PhysVol *pv = master_list->getPhysVolByName(pv_name);
-    VolGroup *vg = master_list->getVolGroupByName(vg_name);
 
     if( move_pv(pv) )
 	MainWindow->rebuildVolumeGroupTab();
@@ -171,8 +170,6 @@ void PVTree::reduceVolumeGroup()
 
 void PVTree::changePhysicalVolume()
 {
-    VolGroup *vg = master_list->getVolGroupByName(vg_name);
-
     PVChangeDialog dialog(pv_name);
     dialog.exec();
     if(dialog.result() == QDialog::Accepted){

@@ -22,37 +22,37 @@ class LogVol;
 
 class VolGroup
 {
-    long extent_size;
-    int pv_count;
-    int pv_max;
-    long long size;      // total size of volume group in bytes
-    long long free;      // free space in bytes
-    long long extents;
-    long long free_extents;         // free extents are not always useable
-    long long allocateable_extents; // extents on some physical volumes
-                                    // may not be allocateable
-    int lv_count;        // number of logical volumes in this volume group
-    int lv_max;          // maximum number
-    int snap_count;      // snapshots count
-    QString vg_name;     // this volume group name
-    QString allocation_policy;
-    QString lvm_fmt;     // lvm1 or lvm2
-    QList<LogVol *>  member_lvs;
-    QList<PhysVol *> member_pvs;
-    bool resizable;
-    bool clustered;
-    bool writable;
-    bool exported;
-    bool partial;
+    long m_extent_size;
+    int m_lv_count;        // number of logical volumes in this volume group
+    int m_lv_max;          // maximum number of logical volumes
+    int m_pv_count;
+    int m_pv_max;
+    long long m_size;      // total size of volume group in bytes
+    long long m_free;      // free space in bytes
+    long long m_extents;
+    long long m_free_extents;         // free extents are not always useable
+    long long m_allocateable_extents; // extents on some physical volumes
+                                      // may not be allocateable
+    int m_snap_count;                 // snapshots count
+    QString m_vg_name;                // this volume group name
+    QString m_allocation_policy;
+    QString m_lvm_fmt;                // lvm1 or lvm2
+    QList<LogVol *>  m_member_lvs;    // lvs that belong to this group
+    QList<PhysVol *> m_member_pvs;    // pvs that belong to this group
+    bool m_resizable;
+    bool m_clustered;
+    bool m_writable;
+    bool m_exported;
+    bool m_partial;        // some physical volumes may be missing
     
 public:
-    VolGroup(QString vgdata);
-    void addLogicalVolume(LogVol *lv);
-    void addPhysicalVolume(PhysVol *pv);
+    VolGroup(QString volumeGroupData);
+    void addLogicalVolume(LogVol *logicalVolume);
+    void addPhysicalVolume(PhysVol *physicalVolume);
     void clearPhysicalVolumes();
     const QList<LogVol *>  getLogicalVolumes();
     const QList<PhysVol *> getPhysicalVolumes();
-    LogVol* getLogVolByName(QString ShortName);  // lv name with the vg name and "/"
+    LogVol* getLogVolByName(QString shortName);  // lv name without the vg name and "/"
     long long getExtents();
     long long getFreeExtents();
     long long getAllocateableExtents();

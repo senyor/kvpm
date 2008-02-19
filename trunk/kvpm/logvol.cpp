@@ -21,272 +21,297 @@
 #include "mountinfo.h"
 #include "processprogress.h"
 #include "storagedevice.h"
+#include "volgroup.h"
 
+
+/* Some information about a logical volume pertains to the entire volume
+   while other information only applies to a segement in the volume. The
+   volume keeps a list of Segment structures for segment information */
+
+struct Segment
+{
+    int m_stripes;               // number of stripes in segment
+    int m_stripe_size;    
+    long long m_size;            // segment size (bytes)
+    QStringList m_device_path;   // full path of physical volume
+    QList<long long> m_starting_extent;   // first extent on physical volume 
+                                          // for this segment
+};
 
 /* the logical volume data is in a list because lvs outputs one
    line for each segment  */
 
-LogVol::LogVol(QStringList lvdata_list, MountInformationList *mount_list)
+LogVol::LogVol(QStringList lvDataList, MountInformationList *mountInformationList)
 {
-    QString lvdata = lvdata_list[0];
-    lvdata = lvdata.trimmed();
+    QString lvdata = lvDataList[0].trimmed();
     QByteArray flags;
-    seg_total = lvdata_list.size();
-    lv_name = lvdata.section('|',0,0);
-    lv_name = lv_name.trimmed();
-    vg_name = lvdata.section('|',1,1);
-    full_name = vg_name + "/" + lv_name;
+
+    m_seg_total = lvDataList.size();
+    m_lv_name   = lvdata.section('|',0,0);
+    m_lv_name   = m_lv_name.trimmed();
+    m_vg_name   = lvdata.section('|',1,1);
+    m_lv_full_name = m_vg_name + "/" + m_lv_name;
+
     QString attr = lvdata.section('|',2,2);
     flags.append(attr);
+
     switch( flags[0] ){
     case 'M':
-	type = "mirror";
+	m_type = "mirror";
 	break;
     case 'm':
-	type = "mirror";
+	m_type = "mirror";
 	break;
     case 'o':
-	type = "origin";
+	m_type = "origin";
 	break;
     case 'p':
-	type = "pvmove";
+	m_type = "pvmove";
 	break;
     case 's':
-	type = "valid snap";
+	m_type = "valid snap";
 	break;
     case 'S':
-	type = "invalid snap";
+	m_type = "invalid snap";
 	break;
     case 'v':
-	type = "virtual";
+	m_type = "virtual";
 	break;
     default:
-	type = "standard";
+	m_type = "standard";
     break;
     }
 
-    snap    = type.contains("snap", Qt::CaseInsensitive);
-    pvmove = type.contains("pvmove", Qt::CaseInsensitive);
+    m_snap   = m_type.contains("snap", Qt::CaseInsensitive);
+    m_pvmove = m_type.contains("pvmove", Qt::CaseInsensitive);
     
     switch(flags[1]){
     case 'w':
-	writable = TRUE;
+	m_writable = true;
 	break;
     default:
-	writable = FALSE;
+	m_writable = false;
     }
-    alloc_locked = FALSE;
+
+    m_alloc_locked = false;
+
     switch( flags[2] ){
     case 'C':
-	alloc_locked = TRUE;
+	m_alloc_locked = true;
     case 'c':
-	policy = "Contiguous";
+	m_policy = "Contiguous";
 	break;
     case 'L':
-	alloc_locked = TRUE;
+	m_alloc_locked = true;
     case 'l':
-	policy = "Cling";
+	m_policy = "Cling";
 	break;
     case 'N':
-	alloc_locked = TRUE;
+	m_alloc_locked = true;
     case 'n':
-	policy = "Normal";
+	m_policy = "Normal";
 	break;
     case 'A':
-	alloc_locked = TRUE;
+	m_alloc_locked = true;
     case 'a':
-	policy = "Anywhere";
+	m_policy = "Anywhere";
 	break;
     case 'I':
-	alloc_locked = TRUE;
+	m_alloc_locked = true;
     case 'i':
-	policy = "Inherited";
+	m_policy = "Inherited";
 	break;
     default:
-	policy = "Other";
+	m_policy = "Other";
 	break;
     }
-    if(alloc_locked)
-	policy.append(" (locked)");
+
+    if(m_alloc_locked)
+	m_policy.append(" (locked)");
+
     switch(flags[3]){
     case 'm':
-	fixed = TRUE;
+	m_fixed = true;
 	break;
     default:
-	fixed = FALSE;
+	m_fixed = false;
     }
+
     switch(flags[4]){
     case '-':
-	state = "Unavailable";
+	m_state = "Unavailable";
 	break;
     case 'a':
-	state = "Active";
+	m_state = "Active";
 	break;
     case 's':
-	state = "Suspended";
+	m_state = "Suspended";
 	break;
     case 'I':
-	state = "Invalid";
+	m_state = "Invalid";
 	break;
     case 'S':
-	state = "Suspended";
+	m_state = "Suspended";
 	break;
     case 'd':
-	state = "No table";
+	m_state = "No table";
 	break;
     case 'i':
-	state = "Inactive table";
+	m_state = "Inactive table";
 	break;
     default:
-	state = "Other";
+	m_state = "Other";
     }
+
     switch(flags[5]){
     case 'o':
-	open = TRUE;
+	m_open = true;
 	break;
     default:
-	open = FALSE;
+	m_open = false;
     }
-    size = (lvdata.section('|',3,3)).toLongLong();
-    snap_origin = lvdata.section('|',4,4);
-    snap_percent = (lvdata.section('|',5,5)).toDouble();
-    copy_percent = (lvdata.section('|',8,8)).toDouble();
-    major_device = (lvdata.section('|',15,15)).toInt();
-    minor_device = (lvdata.section('|',16,16)).toInt();
+
+    m_size =         (lvdata.section('|',3,3)).toLongLong();
+    m_snap_origin =   lvdata.section('|',4,4);
+    m_snap_percent = (lvdata.section('|',5,5)).toDouble();
+    m_copy_percent = (lvdata.section('|',8,8)).toDouble();
+    m_major_device = (lvdata.section('|',15,15)).toInt();
+    m_minor_device = (lvdata.section('|',16,16)).toInt();
+
     if( (lvdata.section('|',17,17)).toInt() != -1)
-	persistant = TRUE;
+	m_persistant = true;
     else
-	persistant = FALSE;
-    lv_fs = fsprobe_getfstype2( "/dev/mapper/" + vg_name + "-" + lv_name );
+	m_persistant = false;
+
+    m_lv_fs = fsprobe_getfstype2( "/dev/mapper/" + m_vg_name + "-" + m_lv_name );
 
     
-    mount_info_list = mount_list->getMountInformation( "/dev/mapper/" + vg_name + "-" + lv_name );
+    m_mount_info_list = mountInformationList->getMountInformation( "/dev/mapper/" + 
+							 m_vg_name + "-" + m_lv_name );
 
 /* To Do: get all the rest of the mount info, not just mount points */
 
-    for(int x = 0; x < mount_info_list.size(); x++){
-	mount_points <<  mount_info_list[x]->getMountPoint();
-	delete mount_info_list[x];
+    for(int x = 0; x < m_mount_info_list.size(); x++){
+	m_mount_points <<  m_mount_info_list[x]->getMountPoint();
+	delete m_mount_info_list[x];
     }
-    mount_info_list.clear();
-    
-    
-    if( mount_points.size() )
-	mounted = TRUE;
-    else
-	mounted = FALSE;
-    
-    for(int x = 0; x < seg_total ; x++)
-	segments.append(processSegments(lvdata_list[x]));
+    m_mount_info_list.clear();
+
+    m_mounted = !m_mount_points.isEmpty();
+
+    for(int x = 0; x < m_seg_total ; x++)
+	m_segments.append(processSegments(lvDataList[x]));
 }
 
-Segment* LogVol::processSegments(QString segment_data)
+Segment* LogVol::processSegments(QString segmentData)
 {
     Segment *segment = new Segment();
     
     QStringList devices_and_starts, temp;
     QString raw_paths;
     
-    segment->stripes = (segment_data.section('|',11,11)).toInt();
-    segment->stripe_size = (segment_data.section('|',12,12)).toInt();
-    segment->size = (segment_data.section('|',13,13)).toLongLong();
+    segment->m_stripes     = (segmentData.section('|',11,11)).toInt();
+    segment->m_stripe_size = (segmentData.section('|',12,12)).toInt();
+    segment->m_size        = (segmentData.section('|',13,13)).toLongLong();
 
-    raw_paths = (segment_data.section('|',14,14)).trimmed();
+    raw_paths = (segmentData.section('|',14,14)).trimmed();
     devices_and_starts = raw_paths.split(",");
+
     for(int x = 0; x < devices_and_starts.size(); x++){
 	temp = devices_and_starts[x].split("(");
-	segment->device_path.append(temp[0]);
-	segment->starting_extent.append((temp[1].remove(")")).toLongLong());
+	segment->m_device_path.append(temp[0]);
+	segment->m_starting_extent.append((temp[1].remove(")")).toLongLong());
     }
+
     return segment;
 }
 
 int LogVol::getSegmentCount()
 {
-    return seg_total;
+    return m_seg_total;
 }
 
 int LogVol::getSegmentStripes(int segment)
 {
-    return segments[segment]->stripes;
+    return m_segments[segment]->m_stripes;
 }
 
 int LogVol::getSegmentStripeSize(int segment)
 {
-    return segments[segment]->stripe_size;
+    return m_segments[segment]->m_stripe_size;
 }
 
 long long LogVol::getSegmentSize(int segment)
 {
-    return segments[segment]->size;
+    return m_segments[segment]->m_size;
 }
 
 long long LogVol::getSegmentExtents(int segment)
 {
-    return (segments[segment]->size / group->getExtentSize());
+    return (m_segments[segment]->m_size / m_group->getExtentSize());
 }
 
 QList<long long> LogVol::getSegmentStartingExtent(int segment)
 {
-    return segments[segment]->starting_extent;
+    return m_segments[segment]->m_starting_extent;
 }
 
 QStringList LogVol::getDevicePath(int segment)
 {
-    return segments[segment]->device_path;
+    return m_segments[segment]->m_device_path;
 }
 
 QStringList LogVol::getDevicePathAll()
 {
     QStringList devices;
     
-    for (int seg = 0; seg < seg_total; seg++)
-	devices << segments[seg]->device_path;
+    for (int seg = 0; seg < m_seg_total; seg++)
+	devices << m_segments[seg]->m_device_path;
     return devices;
 }
 
-void LogVol::setVolumeGroup(VolGroup *VolumeGroup)
+void LogVol::setVolumeGroup(VolGroup *volumeGroup)
 {
-    group = VolumeGroup;
-    extents = size / group->getExtentSize();
+    m_group = volumeGroup;
+    m_extents = m_size / m_group->getExtentSize();
 }
 
 VolGroup* LogVol::getVolumeGroup()
 {
-    return group;
+    return m_group;
 }
 
 QString LogVol::getVolumeGroupName()
 {
-    return vg_name;
+    return m_vg_name;
 }
 
 QString LogVol::getName()
 {
-    return lv_name;
+    return m_lv_name;
 }
 
 QString LogVol::getFullName()
 {
-    return full_name;
+    return m_lv_full_name;
 }
 
-const QString LogVol::getMapperPath()
+QString LogVol::getMapperPath()
 {
     QString path;
 
-    path = "/dev/mapper/" + vg_name + "-" + lv_name;
+    path = "/dev/mapper/" + m_vg_name + "-" + m_lv_name;
     
     return path;
 }
 
-long long LogVol::getSpaceOnPhysicalVolume(QString PhysicalVolume)
+long long LogVol::getSpaceOnPhysicalVolume(QString physicalVolume)
 {
     long long space_used = 0;
     for(int x = 0; x < getSegmentCount(); x++){
-	for(int y = 0; y < segments[x]->device_path.size(); y++){
-	    if(PhysicalVolume == (segments[x])->device_path[y]){
-		space_used += (segments[x]->size) / (segments[x]->stripes) ;
+	for(int y = 0; y < m_segments[x]->m_device_path.size(); y++){
+	    if(physicalVolume == (m_segments[x])->m_device_path[y]){
+		space_used += (m_segments[x]->m_size) / (m_segments[x]->m_stripes) ;
 	    }
 	}
     }
@@ -296,106 +321,106 @@ long long LogVol::getSpaceOnPhysicalVolume(QString PhysicalVolume)
 
 long long LogVol::getExtents()
 {
-  return extents;
+  return m_extents;
 }
 
 long long LogVol::getSize()
 {
-  return size;
+  return m_size;
 }
 
-QString LogVol::getFS()
+QString LogVol::getFilesystem()
 {
-  return lv_fs;
+  return m_lv_fs;
 }
 
 int LogVol::getMinorDevice()
 {
-    return minor_device;
+    return m_minor_device;
 }
 
 int LogVol::getMajorDevice()
 {
-    return major_device;
+    return m_major_device;
 }
 
 bool LogVol::isMounted()
 {
-    return mounted;
+    return m_mounted;
 }
 
 bool LogVol::isPersistant()
 {
-    return persistant;
+    return m_persistant;
 }
 
 bool LogVol::isOpen()
 {
-    return open;
+    return m_open;
 }
 
 bool LogVol::isLocked()
 {
-    return alloc_locked;
+    return m_alloc_locked;
 }
 
 bool LogVol::isWritable()
 {
-    return writable;
+    return m_writable;
 }
 
 bool LogVol::isSnap()
 {
-    return snap;
+    return m_snap;
 }
 
 bool LogVol::isPvmove()
 {
-    return pvmove;
+    return m_pvmove;
 }
 
 bool LogVol::isOrigin()
 {
-    return type.contains("origin", Qt::CaseInsensitive);
+    return m_type.contains("origin", Qt::CaseInsensitive);
 }
 
 bool LogVol::isFixed()
 {
-    return fixed;
+    return m_fixed;
 }
 
 QString LogVol::getPolicy()
 {
-    return policy;
+    return m_policy;
 }
 
 QString LogVol::getState()
 {
-    return state;
+    return m_state;
 }
 
 QString LogVol::getType()
 {
-    return type;
+    return m_type;
 }
 
 QString LogVol::getOrigin()
 {
-    return  snap_origin;
+    return  m_snap_origin;
 }
 
 QStringList LogVol::getMountPoints()
 {
-    return mount_points;
+    return m_mount_points;
 }
 
 double LogVol::getSnapPercent()
 {
-    return snap_percent;
+    return m_snap_percent;
 }
 
 double LogVol::getCopyPercent()
 {
-    return copy_percent;
+    return m_copy_percent;
 }
 

@@ -25,7 +25,7 @@ bool LVReduce(LogVol *LogicalVolume)
     QString fs, state, type;
     QStringList fs_args, lv_args;
     
-    fs = LogicalVolume->getFS();
+    fs = LogicalVolume->getFilesystem();
     QString warning_message = "Currently only the ext2 and ext3  file systems are supported";
     warning_message.append("for file system reduction. If this logical volume is reduced");
     warning_message.append(" any data it contains will be lost!");
@@ -179,7 +179,7 @@ QStringList LVReduceDialog::argumentsFS()
         new_extents = 1;
     new_size = (vg->getExtentSize()) * new_extents;
 
-    if( (lv->getFS() == "ext2") || (lv->getFS() == "ext3") ){
+    if( (lv->getFilesystem() == "ext2") || (lv->getFilesystem() == "ext3") ){
 	fs_arguments << "/sbin/resize2fs" << "-f"
 		     << "/dev/mapper/" + vg->getName() + "-" + lv->getName() 
 		     << QString("%1k").arg(new_size / 1024);

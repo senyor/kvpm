@@ -21,6 +21,7 @@
 #include "physvol.h"
 #include "pvmove.h"
 #include "sizetostring.h"
+#include "volgroup.h"
 
 extern MasterList *master_list;
 

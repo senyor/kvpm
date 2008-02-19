@@ -58,7 +58,7 @@ bool LVExtend(LogVol *LogicalVolume)
     int error;
     QString mount_point;
     
-    QString fs = LogicalVolume->getFS();
+    QString fs = LogicalVolume->getFilesystem();
     QString warning_message = "Currently only the ext2, ext3 and reiserfs file systems are";
     warning_message.append(" supported for file system extention. If this logical volume has ");
     warning_message.append(" a filesystem or data, it will need to be extended separately!");
@@ -759,7 +759,7 @@ QStringList LVCreateDialog::argumentsFS()
 {
     QStringList temp;
     QStringList args;
-    QString fs = lv->getFS();
+    QString fs = lv->getFilesystem();
     QString mount_point;
     
     if( lv->getMountPoints().size() )
@@ -770,11 +770,11 @@ QStringList LVCreateDialog::argumentsFS()
     if( fs == "xfs" ){
 	args << "xfs_growfs" << mount_point;
     }
-    else if( (lv->getFS() == "ext2") || (lv->getFS() == "ext3") ){
+    else if( (fs == "ext2") || (fs == "ext3") ){
         args << "/sbin/resize2fs" << "-f"
 	     << "/dev/" + vg->getName() + "/" + lv->getName();
     }
-    else if(lv->getFS() == "reiserfs"){
+    else if(fs == "reiserfs"){
         args << "/sbin/resize_reiserfs"
 	     << "/dev/" + vg->getName() + "/" + lv->getName();
     }

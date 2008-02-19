@@ -56,7 +56,7 @@ void LVSizeChart::populateChart()
     
     for(int x = 0; x < lv_count; x++){
 	lv = logical_volumes[x];
-	usage = lv->getFS();
+	usage = lv->getFilesystem();
 
 	seg_ratio = lv->getExtents() / (double) total_extents;
 	if( lv->getType() == "mirror" )
