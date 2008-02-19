@@ -30,16 +30,21 @@ class VolGroup;
 class VGTree : public QTreeWidget
 {
 Q_OBJECT
-    VolGroup *vg;
-    LogVol *lv;
+
+    VolGroup *m_vg;
+    LogVol   *m_lv;
+
+    KMenu *filesystem_menu;
 
     KAction *lv_remove_action, *lv_create_action, *pv_move_action,
-	    *lv_reduce_action, *lv_extend_action, *lv_change_action, *add_mirror_action, 
-	    *remove_mirror_action, *snap_create_action,
-            *mount_filesystem_action, *unmount_filesystem_action, *lv_mkfs_action;
+	    *lv_reduce_action, *lv_extend_action, *lv_change_action,
+	    *add_mirror_action, *remove_mirror_action, 
+	    *snap_create_action, *mount_filesystem_action, 
+	    *unmount_filesystem_action, *lv_mkfs_action;
     
-    KMenu *filesystem_menu;
-    QString vg_name, lv_name, pv_name;
+    QString m_vg_name;
+    QString m_lv_name;
+    QString m_pv_name;
 
     void setupContextMenu();
     
