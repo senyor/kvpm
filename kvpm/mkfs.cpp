@@ -23,7 +23,7 @@
 #include "mkfs.h"
 #include "processprogress.h"
 #include "storagedevice.h"
-//#include "storagepartition.h"
+#include "storagepartition.h"
 #include "volgroup.h"
 
 bool call_dialog(QString DevicePath);

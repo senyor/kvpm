@@ -15,38 +15,39 @@
 #include <QtGui>
 
 #include "storagedevice.h"
+#include "storagepartition.h"
+
 #include "physvol.h"
 #include "mountentry.h"
 
-StorageDevice::StorageDevice( PedDevice *dev,
-			      QList<PhysVol *> pv_list, 
-			      MountInformationList *mount_info_list) : QObject()
+StorageDevice::StorageDevice( PedDevice *pedDevice,
+			      QList<PhysVol *> pvList, 
+			      MountInformationList *mountInformationList) : QObject()
 {
-    QString partition_path;
-    QString partition_type;
+    QString   partition_path;
+    QString   partition_type;
     long long partition_size;
     
     PedPartition *part = NULL;
-    PedDisk  *disk = NULL;
+    PedDisk      *disk = NULL;
     PedPartitionType  part_type;
     
-    device_size = (dev->length) * 512;
-    device_path = QString("%1").arg(dev->path);
+    m_device_size = (pedDevice->length) * 512;
+    m_device_path = QString("%1").arg(pedDevice->path);
 
-    physical_volume = FALSE;
-    pv = NULL;
+    m_physical_volume = false;
+    m_pv = NULL;
 
-    for(int x = 0; x < pv_list.size(); x++){
-	if(device_path == pv_list[x]->getDeviceName()){
-	    pv = pv_list[x];
-	    volume_group = pv->getVolumeGroupName();
-	    physical_volume = TRUE;
+    for(int x = 0; x < pvList.size(); x++){
+	if(m_device_path == pvList[x]->getDeviceName()){
+	    m_pv = pvList[x];
+	    m_physical_volume = true;
 	}
     }
 
-    disk = ped_disk_new(dev);
-    if( disk && !physical_volume ){
-	disk_label = QString( (disk->type)->name );
+    disk = ped_disk_new(pedDevice);
+    if( disk && !m_physical_volume ){
+	m_disk_label = QString( (disk->type)->name );
 	while( (part = ped_disk_next_partition (disk, part)) ){
 	    part_type = part->type;
 	    
@@ -74,57 +75,52 @@ StorageDevice::StorageDevice( PedDevice *dev,
 		    partition_type = "normal";
 		    partition_path = "freespace"; 
 		}
-		storage_partitions.append(new StoragePartition( partition_path,
+		m_storage_partitions.append(new StoragePartition( partition_path,
 								partition_type,
 								partition_size,
-								pv_list, 
-								mount_info_list ));
+								pvList, 
+								mountInformationList ));
 	    }
 	}
     }
-    else if (physical_volume)
-	disk_label = "physical volume";
+    else if (m_physical_volume)
+	m_disk_label = "physical volume";
     else
-	disk_label = "unknown";
+	m_disk_label = "unknown";
 }
 
 QString StorageDevice::getDevicePath()
 {
-    return device_path;
+    return m_device_path;
 }
 
 QString StorageDevice::getDiskLabel()
 {
-    return disk_label;
+    return m_disk_label;
 }
 
 QList<StoragePartition *> StorageDevice::getStoragePartitions()
 {
-    return storage_partitions;
+    return m_storage_partitions;
 }
 
 int StorageDevice::getPartitionCount()
 {
-    return storage_partitions.size();
+    return m_storage_partitions.size();
 }
 
 long long StorageDevice::getSize()
 {
-    return device_size;
+    return m_device_size;
 }
 
 bool StorageDevice::isPhysicalVolume()
 {
-    return physical_volume;
+    return m_physical_volume;
 }
 
 PhysVol* StorageDevice::getPhysicalVolume()
 {
-    return pv;
-}
-
-QString StorageDevice::getVolumeGroup()
-{
-    return volume_group;
+    return m_pv;
 }
 

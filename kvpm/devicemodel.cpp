@@ -17,6 +17,7 @@
 #include "devicemodel.h"
 #include "physvol.h"
 #include "storagedevice.h"
+#include "storagepartition.h"
 
 
 extern QString sizeToString(long long bytes);

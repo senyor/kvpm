@@ -11,36 +11,38 @@
  * 
  * See the file "COPYING" for the exact licensing terms.
  */
+
 #ifndef PHYSVOL_H
 #define PHYSVOL_H
+
 #include <QString>
 #include <QWidget>
 
 class PhysVol
 {
-    QString device;      // eg: /dev/hde4
-    QString vg_name;     // May be empty, if it isn't assigned to a group yet
-    QString format;      // e.g. lvm1 or lvm2
-    QString uuid;
+    QString m_device;      // eg: /dev/hde4
+    QString m_vg_name;     // May be empty, if it isn't assigned to a group yet
+    QString m_format;      // e.g. lvm1 or lvm2
+    QString m_uuid;
     
-    bool allocatable;
-    bool exported;
-    long long size;      // size in bytes
-    long long unused;      // free space in bytes
-    long long used;
+    bool m_allocatable;
+    bool m_exported;
+    long long m_size;      // size in bytes
+    long long m_unused;    // free space in bytes
+    long long m_used;
 
  public:
-    PhysVol(QString lvdata);
-    QString getDeviceName();
+    PhysVol(QString pvData);
+    QString getDeviceName();       // eg: /dev/hde4
     QString getVolumeGroupName();
-    QString getFormat();
+    QString getFormat();           // e.g. lvm1 or lvm2
     QString getUuid();
     bool isAllocateable();
     bool isExported();
-    long long getSize();
-    long long getUnused();
-    long long getUsed();
-    int getPercentUsed();
+    long long getSize();       // size in bytes    
+    long long getUnused();     // free space in bytes
+    long long getUsed();       // space left in bytes
+    int getPercentUsed();      // 0 - 100
     
 };
 

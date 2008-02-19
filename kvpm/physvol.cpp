@@ -16,85 +16,89 @@
 #include <QtGui>
 #include "physvol.h"
 
-PhysVol::PhysVol(QString pvdata)
+PhysVol::PhysVol(QString pvData)
 {
-    QString attr;
-    allocatable = FALSE;
-    exported = FALSE;
-    
-    pvdata  = pvdata.trimmed();
-    device  = pvdata.section('|',0,0);
-    vg_name = pvdata.section('|',1,1);
-    format  = pvdata.section('|',2,2);
-    attr    = pvdata.section('|',3,3);
-    if (attr.at(0) == 'a')
-	allocatable = TRUE;
-    if (attr.at(1) == 'x')
-	exported = TRUE;
-    size    = (pvdata.section('|',4,4)).toLongLong();
-    unused  = (pvdata.section('|',5,5)).toLongLong();
-    used  = (pvdata.section('|',6,6)).toLongLong();
-    uuid = pvdata.section('|',7,7);
+    QString attributes;
+
+    pvData     = pvData.trimmed();
+    m_device   = pvData.section('|',0,0);
+    m_vg_name  = pvData.section('|',1,1);
+    m_format   = pvData.section('|',2,2);
+    attributes = pvData.section('|',3,3);
+
+    if (attributes.at(0) == 'a')
+	m_allocatable = true;
+    else
+	m_allocatable = false;
+
+    if (attributes.at(1) == 'x')
+	m_exported = true;
+    else
+	m_exported = false;
+
+    m_size   = (pvData.section('|',4,4)).toLongLong();
+    m_unused = (pvData.section('|',5,5)).toLongLong();
+    m_used   = (pvData.section('|',6,6)).toLongLong();
+    m_uuid   =  pvData.section('|',7,7);
 }
 
 QString PhysVol::getVolumeGroupName()
 {
-    return vg_name;
+    return m_vg_name;
 }
 
 QString PhysVol::getDeviceName()
 {
-    return device;
+    return m_device;
 }
 
 QString PhysVol::getFormat()
 {
-    return format;
+    return m_format;
 }
 
 QString PhysVol::getUuid()
 {
-    return uuid;
+    return m_uuid;
 }
 
 bool PhysVol::isAllocateable()
 {
-    return allocatable;
+    return m_allocatable;
 }
 
 bool PhysVol::isExported()
 {
-    return exported;
+    return m_exported;
 }
 
 long long PhysVol::getSize()
 {
-    return size;
+    return m_size;
 }
 
 long long PhysVol::getUnused()
 {
-    return unused;
+    return m_unused;
 }
 
 long long PhysVol::getUsed()
 {
-    return used;
+    return m_used;
 }
 
 int PhysVol::getPercentUsed()
 {
     int percent;
 
-    if( used == size )
+    if( m_used == m_size )
 	return 100;
-    else if( used == 0 )
+    else if( m_used == 0 )
 	return 0;
-    else if( size == 0 )      // This shouldn't happen
+    else if( m_size == 0 )      // This shouldn't happen
 	return 100;
     else
-	percent = qRound(  ( used * 100.0 ) / size );
-    
+	percent = qRound(  ( m_used * 100.0 ) / m_size );
     
     return percent;
 }
