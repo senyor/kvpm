@@ -18,60 +18,66 @@
 #include "volgroup.h"
 
 
-VolGroup::VolGroup(QString vgdata)
+VolGroup::VolGroup(QString volumeGroupData)
 {
     QString attributes;
-    allocateable_extents = 0;
+    m_allocateable_extents = 0;
     
-    vgdata = vgdata.trimmed();
-    vg_name = vgdata.section('|',0,0);
-    pv_count = (vgdata.section('|',1,1)).toInt();
+    volumeGroupData = volumeGroupData.trimmed();
+    m_vg_name = volumeGroupData.section('|',0,0);
+    m_pv_count = (volumeGroupData.section('|',1,1)).toInt();
 
-/*  a bug in lvm2 2.02 causes the reported logical volume count
+/*  a bug(?) in lvm2 2.02 causes the reported logical volume count
     to be inconsistent with the number of logical volumes reported 
     by /sbin/lvs when a physical volume move is in progress
 
-    lv_count = (vgdata.section('|',2,2)).toInt();  
+    lv_count = (volumeGroupData.section('|',2,2)).toInt();  
 */
-    lv_count = 0;
-    snap_count = (vgdata.section('|',3,3)).toInt();
-    attributes = vgdata.section('|',4,4);
-    size = (vgdata.section('|',5,5)).toLongLong();
-    free = (vgdata.section('|',6,6)).toLongLong();
-    extent_size = (vgdata.section('|',7,7)).toLong();
-    extents = (vgdata.section('|',8,8)).toLongLong();
-    free_extents = (vgdata.section('|',9,9)).toLongLong();
-    lvm_fmt = vgdata.section('|',10,10);
-    pv_max = (vgdata.section('|',11,11)).toInt();
-    lv_max = (vgdata.section('|',12,12)).toInt();
+    m_lv_count = 0;
+    m_snap_count = (volumeGroupData.section('|',3,3)).toInt();
+    attributes   =  volumeGroupData.section('|',4,4);
+    m_size       = (volumeGroupData.section('|',5,5)).toLongLong();
+    m_free       = (volumeGroupData.section('|',6,6)).toLongLong();
+    m_extent_size  = (volumeGroupData.section('|',7,7)).toLong();
+    m_extents      = (volumeGroupData.section('|',8,8)).toLongLong();
+    m_free_extents = (volumeGroupData.section('|',9,9)).toLongLong();
+    m_lvm_fmt =  volumeGroupData.section('|',10,10);
+    m_pv_max  = (volumeGroupData.section('|',11,11)).toInt();
+    m_lv_max  = (volumeGroupData.section('|',12,12)).toInt();
+
     if(attributes.at(0) == 'w')
-	writable = TRUE;
+	m_writable = true;
     else 
-	writable = FALSE;
+	m_writable = false;
+
     if(attributes.at(1) == 'z')
-	resizable = TRUE;
+	m_resizable = true;
     else
-	resizable = FALSE;
+	m_resizable = false;
+
     if(attributes.at(2) == 'x')
-	exported = TRUE;
+	m_exported = true;
     else
-	exported = FALSE;
+	m_exported = false;
+
     if(attributes.at(3) == 'p')
-	partial = TRUE;
+	m_partial = true;
     else
-	partial = FALSE;
+	m_partial = false;
+
     if(attributes.at(4) == 'c')
-	allocation_policy = "contiguous";
+	m_allocation_policy = "contiguous";
     else if(attributes.at(4) == 'l')
-	allocation_policy = "cling";
+	m_allocation_policy = "cling";
     else if(attributes.at(4) == 'n')
-	allocation_policy = "normal";
+	m_allocation_policy = "normal";
     else if(attributes.at(4) == 'a')
-	allocation_policy = "anywhere";
+	m_allocation_policy = "anywhere";
+
     if(attributes.at(5) == 'c')
-	clustered = TRUE;
+	m_clustered = true;
     else
-	clustered = FALSE;
+	m_clustered = false;
 }
 
 /* The following function sorts some of the member volumes
@@ -91,18 +97,17 @@ VolGroup::VolGroup(QString vgdata)
 
 const QList<LogVol *>  VolGroup::getLogicalVolumes()
 {
-    QList<LogVol *> sorted_list, unsorted_list;
+    QList<LogVol *> sorted_list;
+    QList<LogVol *> unsorted_list = m_member_lvs;
     LogVol *lv;
-
-    unsorted_list = member_lvs;
     
-    while(unsorted_list.size()){
+    while( unsorted_list.size() ){
 	lv = unsorted_list.takeFirst();
 	if( lv->isOrigin() ){
 	    sorted_list.append(lv);
 	    for(int x = (unsorted_list.size() - 1); x >= 0; x--){
 		if( unsorted_list[x]->isSnap() )
-		    if(unsorted_list[x]->getOrigin() == lv->getName())
+		    if( unsorted_list[x]->getOrigin() == lv->getName() )
 			sorted_list.append( unsorted_list.takeAt(x) );
 	    }
 	}
@@ -116,125 +121,124 @@ const QList<LogVol *>  VolGroup::getLogicalVolumes()
 
 const QList<PhysVol *> VolGroup::getPhysicalVolumes()
 {
-    return member_pvs;
+    return m_member_pvs;
 }
 
-LogVol* VolGroup::getLogVolByName(QString ShortName)
+LogVol* VolGroup::getLogVolByName(QString shortName)
 {
     QString name;
     
-    name = ShortName.trimmed();
-    for(int x = 0; x < lv_count; x++){
-	if(name == member_lvs[x]->getName())
-	    return member_lvs[x];
+    name = shortName.trimmed();
+    for(int x = 0; x < m_lv_count; x++){
+	if(name == m_member_lvs[x]->getName())
+	    return m_member_lvs[x];
     }
     return NULL;
 }
 
-
-void VolGroup::addLogicalVolume(LogVol *lv)
+void VolGroup::addLogicalVolume(LogVol *logicalVolume)
 {
-    member_lvs.append(lv);
-    lv_count = member_lvs.size();
+    m_member_lvs.append(logicalVolume);
+    m_lv_count = m_member_lvs.size();
 }
 
-void VolGroup::addPhysicalVolume(PhysVol *pv)
+void VolGroup::addPhysicalVolume(PhysVol *physicalVolume)
 {
-    member_pvs.append(pv);
-    if( pv->isAllocateable() )
-	allocateable_extents += pv->getUnused() / (long long) extent_size;
+    m_member_pvs.append(physicalVolume);
+    if( physicalVolume->isAllocateable() )
+	m_allocateable_extents += physicalVolume->getUnused() / (long long) m_extent_size;
 }
 
 void VolGroup::clearPhysicalVolumes()
 {
-    member_pvs.clear();
+    m_member_pvs.clear();
 }
 
 long VolGroup::getExtentSize()
 {
-  return extent_size;
+  return m_extent_size;
 }
 
 long long VolGroup::getExtents()
 {
-  return extents;
+  return m_extents;
 }
 
 long long VolGroup::getFreeExtents()
 {
-  return free_extents;
+  return m_free_extents;
 }
 
 long long VolGroup::getAllocateableExtents()
 {
-  return allocateable_extents;
+  return m_allocateable_extents;
 }
 
 long long VolGroup::getAllocateableSpace()
 {
-  return allocateable_extents * (long long)extent_size;
+  return m_allocateable_extents * (long long)m_extent_size;
 }
 
 long long VolGroup::getSize()
 {
-    return extents * extent_size;
+    return m_extents * m_extent_size;
 }
 
 long long VolGroup::getFreeSpace()
 {
-  return free_extents * extent_size;
+  return m_free_extents * m_extent_size;
 }
 
 long long VolGroup::getUsedSpace()
 {
-  return (extents - free_extents) * extent_size;
+  return (m_extents - m_free_extents) * m_extent_size;
 }
 
 int VolGroup::getLogVolCount()
 {
-  return lv_count;
+  return m_lv_count;
 }
 
 int VolGroup::getLogVolMax()
 {
-  return lv_max;
+  return m_lv_max;
 }
 
 int VolGroup::getPhysVolCount()
 {
-  return pv_count;
+  return m_pv_count;
 }
 
 int VolGroup::getPhysVolMax()
 {
-  return pv_max;
+  return m_pv_max;
 }
 
 int VolGroup::getSnapCount()
 {
-    return snap_count;
+    return m_snap_count;
 }
 
 QString VolGroup::getName()
 {
-  return vg_name;
+  return m_vg_name;
 }
 
 QString VolGroup::getPolicy()
 {
-    return allocation_policy;
+    return m_allocation_policy;
 }
 
 QString VolGroup::getFormat()
 {
-  return lvm_fmt;
+  return m_lvm_fmt;
 }
 
 QStringList VolGroup::getLogVolNames()
 {
   QStringList names;
-  for(int x = 0; x < lv_count; x++){
-    names << (member_lvs[x])->getName();
+  for(int x = 0; x < m_lv_count; x++){
+    names << (m_member_lvs[x])->getName();
   }
 
   return names;
@@ -242,21 +246,21 @@ QStringList VolGroup::getLogVolNames()
 
 bool VolGroup::isWritable()
 {
-    return writable;
+    return m_writable;
 }
 
 bool VolGroup::isResizable()
 {
-    return resizable;
+    return m_resizable;
 }
 
 bool VolGroup::isClustered()
 {
-    return clustered;
+    return m_clustered;
 }
 
 bool VolGroup::isPartial()
 {
-    return partial;
+    return m_partial;
 }
 

@@ -59,7 +59,7 @@ VGTree::VGTree(VolGroup *VolumeGroup) : QTreeWidget(), vg(VolumeGroup)
 	lv = logical_volumes[x];
 	lv_data.clear();
 	if(lv->getSegmentCount() == 1){
-	    lv_data << lv->getName() << sizeToString(lv->getSize()) << lv->getFS()
+	    lv_data << lv->getName() << sizeToString(lv->getSize()) << lv->getFilesystem()
 		    << lv->getType() << QString("%1").arg(lv->getSegmentStripes(0)) 
 		    << sizeToString(lv->getSegmentStripeSize(0));
 
@@ -81,7 +81,7 @@ VGTree::VGTree(VolGroup *VolumeGroup) : QTreeWidget(), vg(VolumeGroup)
 	    lv_item->setData(1, Qt::UserRole, 0);            // 0 means segment 0 data present
 	}
 	else {
-	    lv_data << lv->getName() << sizeToString(lv->getSize()) << lv->getFS()
+	    lv_data << lv->getName() << sizeToString(lv->getSize()) << lv->getFilesystem()
 		    << lv->getType() << "" << "";
 
 	    if( lv->isSnap() )

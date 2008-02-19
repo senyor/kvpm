@@ -456,7 +456,7 @@ bool mount_filesystem(LogVol *VolumeToMount)
     const QString lv_name = VolumeToMount->getName();
     const QString vg_name = VolumeToMount->getVolumeGroupName();
 
-    MountDialog dialog(prefix + vg_name + "-" + lv_name, VolumeToMount->getFS());
+    MountDialog dialog(prefix + vg_name + "-" + lv_name, VolumeToMount->getFilesystem());
     dialog.exec();
     if (dialog.result() == QDialog::Accepted)
 	return TRUE;
