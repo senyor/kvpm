@@ -21,25 +21,26 @@
 #include <QWidget>
 #include <QString>
 
-#include "storagepartition.h"
 #include "mountinfo.h"
 
 class PhysVol;
+class StoragePartition;
+
 
 class StorageDevice : public QObject
 {
-    long long device_size;
-    QString device_path;
-    QString volume_group;
-    QString disk_label;
-    
-    bool physical_volume;
-    PhysVol *pv;
-    QList<StoragePartition *> storage_partitions;
+    long long m_device_size;
+    QString   m_device_path;
+    QString   m_disk_label;
+    bool      m_physical_volume;
+    PhysVol  *m_pv;
+
+    QList<StoragePartition *> m_storage_partitions;
 
  public:
-    StorageDevice(PedDevice *dev, QList<PhysVol *> pv_list, 
-		  MountInformationList *mount_info_list);
+    StorageDevice(PedDevice *pedDevice,
+		  QList<PhysVol *> pvList, 
+		  MountInformationList *mountInformationList);
 
     QString getDevicePath();
     QString getDiskLabel();
@@ -48,7 +49,6 @@ class StorageDevice : public QObject
     long long getSize();
     bool isPhysicalVolume();
     PhysVol *getPhysicalVolume();
-    QString getVolumeGroup();
     
 };
 

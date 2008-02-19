@@ -19,6 +19,8 @@
 #include "partitionpropertiesstack.h"
 #include "partitionproperties.h"
 #include "storagedevice.h"
+#include "storagepartition.h"
+
 
 /* This stack widget simply displays some information about the
    drive partition selected in the tree view. If nothing is selected
