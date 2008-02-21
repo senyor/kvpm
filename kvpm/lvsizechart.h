@@ -11,6 +11,7 @@
  * 
  * See the file "COPYING" for the exact licensing terms.
  */
+
 #ifndef LVSIZECHART_H
 #define LVSIZECHART_H
 
