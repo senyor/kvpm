@@ -63,57 +63,64 @@ VGTree::VGTree(VolGroup *VolumeGroup) : QTreeWidget(),
 	m_lv = logical_volumes[x];
 	lv_data.clear();
 
-	if( (m_lv->getSegmentCount() == 1) && !m_lv->isMirrorLeg() ) {
-	    lv_data << m_lv->getName() << sizeToString(m_lv->getSize()) << m_lv->getFilesystem()
-		    << m_lv->getType() << QString("%1").arg(m_lv->getSegmentStripes(0)) 
-		    << sizeToString(m_lv->getSegmentStripeSize(0));
+	if( !m_lv->isMirrorLeg() ) {
+	    if( m_lv->getSegmentCount() == 1 ) {
+		lv_data << m_lv->getName() 
+			<< sizeToString(m_lv->getSize()) 
+			<< m_lv->getFilesystem()
+			<< m_lv->getType() 
+			<< QString("%1").arg(m_lv->getSegmentStripes(0)) 
+			<< sizeToString(m_lv->getSegmentStripeSize(0));
+		
+		if( m_lv->isSnap() )
+		    lv_data    << QString("%%1").arg(m_lv->getSnapPercent());
+		else if( m_lv->isPvmove() )
+		    lv_data    << QString("%%1").arg(m_lv->getCopyPercent());
+		else
+		    lv_data << " ";
+		
+		lv_data << m_lv->getState();
 
-	    if( m_lv->isSnap() )
-		lv_data    << QString("%%1").arg(m_lv->getSnapPercent());
-	    else if( m_lv->isPvmove() )
-		lv_data    << QString("%%1").arg(m_lv->getCopyPercent());
-	    else
-		lv_data << " ";
-	    
-	    lv_data << m_lv->getState();
-	    if(m_lv->isWritable())
-		lv_data << "r/w";
-	    else
-		lv_data << "r/o";
-	    lv_item = new QTreeWidgetItem((QTreeWidgetItem *)0, lv_data);
-	    lv_tree_items.append(lv_item);
-	    lv_item->setData(0, Qt::UserRole, m_lv->getName());
-	    lv_item->setData(1, Qt::UserRole, 0);            // 0 means segment 0 data present
-	    if( m_lv->isMirror() )
-		insertMirrorLegItems(m_lv, lv_item);
-	}
-	else if( !m_lv->isMirrorLeg() ) {
-	    lv_data << m_lv->getName() 
-		    << sizeToString(m_lv->getSize()) 
-		    << m_lv->getFilesystem()
-		    << m_lv->getType() 
-		    << "" << "";
+		if(m_lv->isWritable())
+		    lv_data << "r/w";
+		else
+		    lv_data << "r/o";
 
-	    if( m_lv->isSnap() )
-		lv_data    << QString("%%1").arg(m_lv->getSnapPercent());
-	    else if( m_lv->isPvmove() )
-		lv_data    << QString("%%1").arg(m_lv->getCopyPercent());
-	    else
-		lv_data << " ";
-	    
-	    lv_data << m_lv->getState();
-
-	    if(m_lv->isWritable())
-		lv_data << "r/w";
-	    else
-		lv_data << "r/o";
-
-	    lv_item = new QTreeWidgetItem((QTreeWidgetItem *)0, lv_data);
-	    lv_item->setData(0, Qt::UserRole, m_lv->getName());
-	    lv_item->setData(1, Qt::UserRole, -1);            // -1 means not segment data
-	    lv_tree_items.append(lv_item);
-
-	    insertSegmentItems(m_lv, lv_item);
+		lv_item = new QTreeWidgetItem((QTreeWidgetItem *)0, lv_data);
+		lv_tree_items.append(lv_item);
+		lv_item->setData(0, Qt::UserRole, m_lv->getName());
+		lv_item->setData(1, Qt::UserRole, 0);            // 0 means segment 0 data present
+		if( m_lv->isMirror() )
+		    insertMirrorLegItems(m_lv, lv_item);
+	    }
+	    else {
+		lv_data << m_lv->getName() 
+			<< sizeToString(m_lv->getSize()) 
+			<< m_lv->getFilesystem()
+			<< m_lv->getType() 
+			<< "" << "";
+		
+		if( m_lv->isSnap() )
+		    lv_data    << QString("%%1").arg(m_lv->getSnapPercent());
+		else if( m_lv->isPvmove() )
+		    lv_data    << QString("%%1").arg(m_lv->getCopyPercent());
+		else
+		    lv_data << " ";
+		
+		lv_data << m_lv->getState();
+		
+		if(m_lv->isWritable())
+		    lv_data << "r/w";
+		else
+		    lv_data << "r/o";
+		
+		lv_item = new QTreeWidgetItem((QTreeWidgetItem *)0, lv_data);
+		lv_item->setData(0, Qt::UserRole, m_lv->getName());
+		lv_item->setData(1, Qt::UserRole, -1);            // -1 means not segment data
+		lv_tree_items.append(lv_item);
+		
+		insertSegmentItems(m_lv, lv_item);
+	    }
 	}
     }
     insertTopLevelItems(0, lv_tree_items);
@@ -136,17 +143,16 @@ void VGTree::insertSegmentItems(LogVol *logicalVolume, QTreeWidgetItem *item)
     for(int x = 0; x < logicalVolume->getSegmentCount(); x++){
 	segment_data.clear();
 	
-	segment_data << QString("Seg# %1").arg(x + 1) 
-		     << sizeToString(m_lv->getSegmentSize(x)) 
+	segment_data << QString("Seg# %1").arg(x) 
+		     << sizeToString(logicalVolume->getSegmentSize(x)) 
 		     << "" << "" 
-		     << QString("%1").arg(m_lv->getSegmentStripes(x))
-		     << sizeToString(m_lv->getSegmentStripeSize(x)) 
+		     << QString("%1").arg(logicalVolume->getSegmentStripes(x))
+		     << sizeToString(logicalVolume->getSegmentStripeSize(x)) 
 		     << "" << "" << "" << "" ;
-	
 	
 	lv_seg_item = new QTreeWidgetItem( item, segment_data );
 	lv_seg_item->setData(0, Qt::UserRole, logicalVolume->getName());
-	lv_seg_item->setData(1, Qt::UserRole, x);            // x == seg number
+	lv_seg_item->setData(1, Qt::UserRole, x);
     }
 }
 
@@ -158,53 +164,70 @@ void VGTree::insertMirrorLegItems(LogVol *logicalVolume, QTreeWidgetItem *item)
     QList<LogVol *>  logical_volume_list;
     LogVol *leg_volume;
     
-    qDebug() << "Got Here..........";
-    
     volume_group = logicalVolume->getVolumeGroup();    
     logical_volume_list = volume_group->getLogicalVolumes();
-    
-    for(int x = 0; x < volume_group->getLogVolCount(); x++){
-	    
-	leg_volume = logical_volume_list[x];
 
-	qDebug() << "Leg Origin " << leg_volume->getOrigin();
-	qDebug() << "Mirror     " << logicalVolume->getName();
-	qDebug();
+    if( logicalVolume->getSegmentCount() == 1 ) {
+    
+	for(int x = 0; x < volume_group->getLogVolCount(); x++){
+	    
+	    leg_volume = logical_volume_list[x];
 	
-	if( ( leg_volume->getOrigin() == logicalVolume->getName() ) && 
-	      leg_volume->isMirrorLeg() ){
+	    if( ( leg_volume->getOrigin() == logicalVolume->getName() ) && 
+		leg_volume->isMirrorLeg() ){
     
-	    qDebug() << "Got Here 2..........";
-    
-	    leg_data.clear();
+		leg_data.clear();
 
-	    leg_data << leg_volume->getName() 
-		     << sizeToString(leg_volume->getSize()) 
-		     << leg_volume->getFilesystem()
-		     << leg_volume->getType() 
-		     << QString("%1").arg( leg_volume->getSegmentStripes(0) ) 
-		     << sizeToString( leg_volume->getSegmentStripeSize(0) );
+		leg_data << leg_volume->getName() 
+			 << sizeToString(leg_volume->getSize()) 
+			 << leg_volume->getFilesystem()
+			 << leg_volume->getType() 
+			 << QString("%1").arg( leg_volume->getSegmentStripes(0) ) 
+			 << sizeToString( leg_volume->getSegmentStripeSize(0) );
 	    
-	    if( leg_volume->isPvmove() )
-		leg_data    << QString("%%1").arg(leg_volume->getCopyPercent());
-	    else
-		leg_data << " ";
-	    
-	    leg_data << leg_volume->getState();
-
-	    if(leg_volume->isWritable())
-		leg_data << "r/w";
-	    else
-		leg_data << "r/o";
-//	    lv_item = new QTreeWidgetItem((QTreeWidgetItem *)0, lv_data);
-//	    lv_tree_items.append(lv_item);
-//	    lv_item->setData(0, Qt::UserRole, m_lv->getName());
-//	    lv_item->setData(1, Qt::UserRole, 0);            // 0 means segment 0 data present
-
-	    leg_item = new QTreeWidgetItem( item, leg_data );
+		if( leg_volume->isPvmove() )
+		    leg_data    << QString("%%1").arg(leg_volume->getCopyPercent());
+		else
+		    leg_data << " ";
+		
+		leg_data << leg_volume->getState();
+		
+		if(leg_volume->isWritable())
+		    leg_data << "r/w";
+		else
+		    leg_data << "r/o";
+		
+		leg_item = new QTreeWidgetItem( item, leg_data );
+		leg_item->setData(0, Qt::UserRole, logicalVolume->getName());
+		leg_item->setData(1, Qt::UserRole, 0);          // 0 means segment 0 data present
+	    }
 	}
     }
-    
+    else{
+	leg_data << logicalVolume->getName() 
+		<< sizeToString(logicalVolume->getSize()) 
+		<< logicalVolume->getFilesystem()
+		<< logicalVolume->getType() 
+		<< "" << "";
+
+	if( logicalVolume->isPvmove() )
+	    leg_data    << QString("%%1").arg(m_lv->getCopyPercent());
+	else
+	    leg_data << " ";
+	
+	leg_data << logicalVolume->getState();
+	
+	if(logicalVolume->isWritable())
+	    leg_data << "r/w";
+	else
+	    leg_data << "r/o";
+	
+	leg_item = new QTreeWidgetItem( (QTreeWidgetItem *)0, leg_data );
+	leg_item->setData(0, Qt::UserRole, logicalVolume->getName());
+	leg_item->setData(1, Qt::UserRole, -1);         // -1 means this item has no segment data
+	
+	insertSegmentItems(logicalVolume, leg_item);
+    }
 }
 
 void VGTree::popupContextMenu(QPoint point)
