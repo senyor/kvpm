@@ -19,31 +19,31 @@
 #include "logvol.h"
 #include "processprogress.h"
 
-bool remove_lv(LogVol *LogicalVolume)
+bool remove_lv(LogVol *logicalVolume)
 {
-    return (remove_lv( LogicalVolume->getFullName() ));
+    return (remove_lv( logicalVolume->getFullName() ));
 }
 
-bool remove_lv(QString FullName)
+bool remove_lv(QString fullName)
 {
-    LVRemoveDialog dialog(FullName);
+    LVRemoveDialog dialog(fullName);
     if(dialog.result() == QDialog::Accepted){
-	ProcessProgress remove_lv(dialog.arguments(), "Removing volume...", FALSE);
-	return TRUE;
+	ProcessProgress remove_lv(dialog.arguments(), "Removing volume...", false);
+	return true;
     }
     else
-	return FALSE;
+	return false;
 }
 
-LVRemoveDialog::LVRemoveDialog(QString FullName, QWidget *parent):QObject(parent)
+LVRemoveDialog::LVRemoveDialog(QString fullName, QWidget *parent):QObject(parent)
 {
-    lv_full_name = FullName;
+    m_lv_full_name = fullName;
     
     QString message = "Are you certain you want to delete the logical volume named: ";
-    message.append("<b>" + lv_full_name + "</b>");
+    message.append("<b>" + m_lv_full_name + "</b>");
     message.append(" Any data on it will be lost.");
     
-    return_code =  KMessageBox::warningYesNo( 0, message);
+    m_return_code =  KMessageBox::warningYesNo( 0, message);
 }
 
 QStringList LVRemoveDialog::arguments()
@@ -52,15 +52,15 @@ QStringList LVRemoveDialog::arguments()
     
     args << "/sbin/lvremove" 
 	 << "--force" 
-	 << lv_full_name;
+	 << m_lv_full_name;
 
     return args;
 }
 
 int LVRemoveDialog::result()
 {
-    if(return_code == 3)  // 3 = yes button
-        return 1;         // QDialog::Accepted
+    if(m_return_code == 3)  // 3 = yes button
+        return 1;           // QDialog::Accepted
     else
-        return 0;         // QDialog::Rejected
+        return 0;           // QDialog::Rejected
 }

@@ -49,18 +49,28 @@ LogVol::LogVol(QStringList lvDataList, MountInformationList *mountInformationLis
     m_seg_total = lvDataList.size();
     m_lv_name   = lvdata.section('|',0,0);
     m_lv_name   = m_lv_name.trimmed();
+
+    if( m_lv_name.startsWith("[") )
+       m_mirror_leg = true;
+    else
+       m_mirror_leg = false;
+
     m_vg_name   = lvdata.section('|',1,1);
     m_lv_full_name = m_vg_name + "/" + m_lv_name;
 
     QString attr = lvdata.section('|',2,2);
     flags.append(attr);
-
+	
+    m_mirror = false;
+    
     switch( flags[0] ){
     case 'M':
 	m_type = "mirror";
+	m_mirror = true;
 	break;
     case 'm':
 	m_type = "mirror";
+	m_mirror = true;
 	break;
     case 'o':
 	m_type = "origin";
@@ -171,9 +181,22 @@ LogVol::LogVol(QStringList lvDataList, MountInformationList *mountInformationLis
 	m_open = false;
     }
 
-    m_size =         (lvdata.section('|',3,3)).toLongLong();
-    m_snap_origin =   lvdata.section('|',4,4);
-    m_snap_percent = (lvdata.section('|',5,5)).toDouble();
+    m_size         = (lvdata.section('|',3,3)).toLongLong();
+
+    if(m_snap){
+	m_origin       =  lvdata.section('|',4,4);
+	m_snap_percent = (lvdata.section('|',5,5)).toDouble();
+    }
+    else if(m_mirror_leg){
+	m_origin = m_lv_name;
+	m_origin.remove(0,1);
+	m_origin.truncate( m_origin.indexOf("_mimage_") );
+	m_snap_percent = 0.0;
+    }
+
+    qDebug() << "ORIGIN" << m_origin;
+    
+    
     m_copy_percent = (lvdata.section('|',8,8)).toDouble();
     m_major_device = (lvdata.section('|',15,15)).toInt();
     m_minor_device = (lvdata.section('|',16,16)).toInt();
@@ -185,7 +208,6 @@ LogVol::LogVol(QStringList lvDataList, MountInformationList *mountInformationLis
 
     m_lv_fs = fsprobe_getfstype2( "/dev/mapper/" + m_vg_name + "-" + m_lv_name );
 
-    
     m_mount_info_list = mountInformationList->getMountInformation( "/dev/mapper/" + 
 							 m_vg_name + "-" + m_lv_name );
 
@@ -349,6 +371,16 @@ bool LogVol::isMounted()
     return m_mounted;
 }
 
+bool LogVol::isMirror()
+{
+    return m_mirror;
+}
+
+bool LogVol::isMirrorLeg()
+{
+    return m_mirror_leg;
+}
+
 bool LogVol::isPersistant()
 {
     return m_persistant;
@@ -406,7 +438,7 @@ QString LogVol::getType()
 
 QString LogVol::getOrigin()
 {
-    return  m_snap_origin;
+    return  m_origin;
 }
 
 QStringList LogVol::getMountPoints()

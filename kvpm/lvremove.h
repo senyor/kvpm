@@ -18,17 +18,18 @@
 
 class LogVol;
 
-bool remove_lv(LogVol *LogicalVolume);
-bool remove_lv(QString FullName);
+bool remove_lv(LogVol *logicalVolume);
+bool remove_lv(QString fullName);
 
 class LVRemoveDialog : public QObject
 {
-    QString lv_full_name;   //full name = vg name + lv name
-    void buildDialog();
-    int return_code;
+    QString m_lv_full_name;   //full name = vg name + lv name
+    int m_return_code;
     
+    void buildDialog();
+
  public:
-    LVRemoveDialog(QString FullName, QWidget *parent = 0);
+    LVRemoveDialog(QString fullName, QWidget *parent = 0);
     QStringList arguments();
     int result();
     
