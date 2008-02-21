@@ -20,7 +20,9 @@
 
 #include <QPoint>
 #include <QMenu>
+#include <QStringList>
 #include <QTreeWidget>
+
 #include "masterlist.h"
 
 class LogVol;
@@ -47,7 +49,10 @@ Q_OBJECT
     QString m_pv_name;
 
     void setupContextMenu();
+    void insertSegmentItems(LogVol *logicalVolume, QTreeWidgetItem *item);
+    void insertMirrorLegItems(LogVol *logicalVolume, QTreeWidgetItem *item);
     
+
 public:
     VGTree(VolGroup *VolumeGroup);
 

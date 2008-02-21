@@ -28,10 +28,13 @@ class LogVol
     QList<Segment *> m_segments;
     QList<MountInformation *> m_mount_info_list;
     
-    QString m_lv_full_name;     // volume_group/logical_volume
+    QString m_lv_full_name;  // volume_group/logical_volume
     QString m_lv_name;       // name of this logical volume
     QString m_lv_fs;         // Filesystem on volume or "unknown"
-    QString m_snap_origin;   // the origin if this is a snapshot 
+
+    QString m_origin;        // the origin if this is a snapshot or 
+                             // the parent mirror volume to a mirror leg
+
     QString m_type;          // the type of volume
     QString m_policy;        // the allocation policy
     QString m_state;         // the lv state
@@ -43,14 +46,15 @@ class LogVol
     long long m_size;            // size in bytes
     long long m_extents;         // size in extents
     int m_seg_total;             // total number of segments in logical volume
-
     int m_major_device;          // Unix device major number, if set
     int m_minor_device;          // Unix device minor number, if set
-
+    bool m_mirror;               // Is a mirrored volume
+    bool m_mirror_leg;           // Is one of the underlying legs of a mirrored volume
     bool m_fixed, m_persistant;  // fix the device minor and major number 
 
     bool m_alloc_locked;         // allocation type is fixed when pvmove is underway 
                                  // (and maybe other times)
+
     bool m_mounted;              // has a mounted filesystem
     bool m_open;                 // device is open
     bool m_pvmove;               // is a pvmove temporary volume
@@ -69,7 +73,7 @@ class LogVol
     QString getPolicy();
     QString getState();
     QString getType();
-    QString getOrigin();
+    QString getOrigin();        // The name of the parent volume to a snapshot or mirror leg
     int getSegmentCount();
     int getSegmentStripes(int segment);
     int getSegmentStripeSize(int segment);
@@ -90,6 +94,8 @@ class LogVol
     int getMajorDevice();
     bool isFixed();
     bool isLocked();
+    bool isMirror();
+    bool isMirrorLeg();
     bool isMounted();
     bool isOpen();
     bool isOrigin();
