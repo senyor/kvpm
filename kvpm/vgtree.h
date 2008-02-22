@@ -38,9 +38,9 @@ Q_OBJECT
 
     KMenu *filesystem_menu;
 
-    KAction *lv_remove_action, *lv_create_action, *pv_move_action,
-	    *lv_reduce_action, *lv_extend_action, *lv_change_action,
-	    *add_mirror_action, *remove_mirror_action, 
+    KAction *lv_remove_action,   *lv_create_action, *pv_move_action,
+	    *lv_reduce_action,   *lv_extend_action, *lv_change_action,
+	    *add_mirror_action,  *remove_mirror_action, 
 	    *snap_create_action, *mount_filesystem_action, 
 	    *unmount_filesystem_action, *lv_mkfs_action;
     
@@ -50,7 +50,7 @@ Q_OBJECT
 
     void setupContextMenu();
     void insertSegmentItems(LogVol *logicalVolume, QTreeWidgetItem *item);
-    void insertMirrorLegItems(LogVol *logicalVolume, QTreeWidgetItem *item);
+    void insertMirrorLegItems(LogVol *mirrorVolume, QTreeWidgetItem *item);
     
 
 public:
