@@ -36,7 +36,6 @@
 extern MasterList *master_list;
 
 
-
 VGTree::VGTree(VolGroup *VolumeGroup) : QTreeWidget(),
 					m_vg(VolumeGroup)
 {
@@ -156,7 +155,11 @@ void VGTree::insertSegmentItems(LogVol *logicalVolume, QTreeWidgetItem *item)
     }
 }
 
-void VGTree::insertMirrorLegItems(LogVol *logicalVolume, QTreeWidgetItem *item)
+/* Here we start with the mirror logical volume and locate its mirror
+   legs. Then the legs are checked for segment data just like any other
+   logical volume and it is all inserted into the tree */
+
+void VGTree::insertMirrorLegItems(LogVol *mirrorVolume, QTreeWidgetItem *item)
 {
     QStringList leg_data;
     QTreeWidgetItem *leg_item;
@@ -164,19 +167,19 @@ void VGTree::insertMirrorLegItems(LogVol *logicalVolume, QTreeWidgetItem *item)
     QList<LogVol *>  logical_volume_list;
     LogVol *leg_volume;
     
-    volume_group = logicalVolume->getVolumeGroup();    
+    volume_group = mirrorVolume->getVolumeGroup();    
     logical_volume_list = volume_group->getLogicalVolumes();
 
-    if( logicalVolume->getSegmentCount() == 1 ) {
-    
-	for(int x = 0; x < volume_group->getLogVolCount(); x++){
-	    
-	    leg_volume = logical_volume_list[x];
+    for(int x = 0; x < volume_group->getLogVolCount(); x++){
 	
-	    if( ( leg_volume->getOrigin() == logicalVolume->getName() ) && 
-		leg_volume->isMirrorLeg() ){
-    
-		leg_data.clear();
+	leg_volume = logical_volume_list[x];
+	
+	if( ( leg_volume->getOrigin() == mirrorVolume->getName() ) && 
+	    leg_volume->isMirrorLeg() ){
+	    
+	    leg_data.clear();
+
+	    if( leg_volume->getSegmentCount() == 1 ) {	    
 
 		leg_data << leg_volume->getName() 
 			 << sizeToString(leg_volume->getSize()) 
@@ -196,37 +199,44 @@ void VGTree::insertMirrorLegItems(LogVol *logicalVolume, QTreeWidgetItem *item)
 		    leg_data << "r/w";
 		else
 		    leg_data << "r/o";
-		
+	    
 		leg_item = new QTreeWidgetItem( item, leg_data );
-		leg_item->setData(0, Qt::UserRole, logicalVolume->getName());
-		leg_item->setData(1, Qt::UserRole, 0);          // 0 means segment 0 data present
+		leg_item->setData(0, Qt::UserRole, leg_volume->getName());
+
+// In the following "setData()" 0 means segment 0 (the only segment) 
+// data is present on the same line as the rest of the lv data.
+
+		leg_item->setData(1, Qt::UserRole, 0);      
+	    }
+	    else {
+		leg_data << leg_volume->getName() 
+			 << sizeToString(leg_volume->getSize()) 
+			 << leg_volume->getFilesystem()
+			 << leg_volume->getType() 
+			 << "" << "";
+		
+		if( leg_volume->isPvmove() )
+		    leg_data    << QString("%%1").arg(leg_volume->getCopyPercent());
+		else
+		    leg_data << " ";
+		
+		leg_data << leg_volume->getState();
+		
+		if(leg_volume->isWritable())
+		    leg_data << "r/w";
+		else
+		    leg_data << "r/o";
+		
+		leg_item = new QTreeWidgetItem( (QTreeWidgetItem *)0, leg_data );
+		leg_item->setData(0, Qt::UserRole, leg_volume->getName());
+
+// -1 means this item has no segment data. The segment data will be on 
+// the following lines, one line per segement
+
+		leg_item->setData(1, Qt::UserRole, -1);        
+		insertSegmentItems(leg_volume, leg_item);
 	    }
 	}
-    }
-    else{
-	leg_data << logicalVolume->getName() 
-		<< sizeToString(logicalVolume->getSize()) 
-		<< logicalVolume->getFilesystem()
-		<< logicalVolume->getType() 
-		<< "" << "";
-
-	if( logicalVolume->isPvmove() )
-	    leg_data    << QString("%%1").arg(m_lv->getCopyPercent());
-	else
-	    leg_data << " ";
-	
-	leg_data << logicalVolume->getState();
-	
-	if(logicalVolume->isWritable())
-	    leg_data << "r/w";
-	else
-	    leg_data << "r/o";
-	
-	leg_item = new QTreeWidgetItem( (QTreeWidgetItem *)0, leg_data );
-	leg_item->setData(0, Qt::UserRole, logicalVolume->getName());
-	leg_item->setData(1, Qt::UserRole, -1);         // -1 means this item has no segment data
-	
-	insertSegmentItems(logicalVolume, leg_item);
     }
 }
 
