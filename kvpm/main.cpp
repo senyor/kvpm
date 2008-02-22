@@ -3,7 +3,7 @@
  * 
  * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
  *
- * This file is part of the Klvm project.
+ * This file is part of the Kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License,  version 3, as 
@@ -35,7 +35,7 @@ int main(int argc, char **argv)
 {
 
     KAboutData aboutData( "kvpm", 0,
-			  ki18n("kvpm"), "0.3",
+			  ki18n("kvpm"), "0.3.1",
 			  ki18n("Linux volume and partition manager for KDE"),
 			  KAboutData::License_GPL,
 			  ki18n("Copyright (c) 2008 Benjamin Scott") );

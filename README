@@ -3,6 +3,15 @@ libparted. It uses the standard lvm tools and programs to work with
 logical volumes. It also can format volumes and mount them. I hope to
 add in the ability to repartition drives with libparted at some point.
 
+This program is currently being developed on lvm version:
+
+#lvs --version
+  LVM version:     2.02.33 (2008-01-31)
+  Library version: 1.02.24 (2007-12-20)
+  Driver version:  4.12.0
+
+Because kvpm relies on the exact format of the lvm program
+output it probably won't work correctly with earlier versions.
 
 The following development headers need to be 
 installed for compilation: 
@@ -15,8 +24,7 @@ kdelibs version 4
 
 To compile the source just "cd" into the source directory then run
 "cmake -i" and answer the questions. Next run "make" and if all goes
-well you will have a working executable.  Kvpm is being developed with
-recent versions of the lvm programs and may not work with older ones.
+well you will have a working executable.
 
 ***
 Known major bug: Currently kvpm doesn't search for the LVM programs

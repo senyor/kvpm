@@ -3,7 +3,7 @@
  * 
  * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
  *
- * This file is part of the Klvm project.
+ * This file is part of the Kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License,  version 3, as 
@@ -17,26 +17,27 @@
 #include <QtGui>
 
 #include "masterlist.h"
+#include "nomungecheck.h"
 #include "processprogress.h"
 #include "vgreduce.h"
 #include "volgroup.h"
 
 extern MasterList *master_list;
 
-bool reduce_vg(VolGroup *VolumeGroup)
+bool reduce_vg(VolGroup *volumeGroup)
 {
-    VGReduceDialog dialog(VolumeGroup);
+    VGReduceDialog dialog(volumeGroup);
     dialog.exec();
 
     if(dialog.result() == QDialog::Accepted){
         ProcessProgress reduce( dialog.arguments() );
-        return TRUE;
+        return true;
     }
 
-    return FALSE;
+    return false;
 }
 
-VGReduceDialog::VGReduceDialog(VolGroup *VolumeGroup, QWidget *parent) : KDialog(parent)
+VGReduceDialog::VGReduceDialog(VolGroup *volumeGroup, QWidget *parent) : KDialog(parent)
 {
     setWindowTitle(tr("Reduce Volume Group"));
     QWidget *dialog_body = new QWidget(this);
@@ -45,7 +46,7 @@ VGReduceDialog::VGReduceDialog(VolGroup *VolumeGroup, QWidget *parent) : KDialog
     dialog_body->setLayout(layout);
 
     unremovable_pvs_present = FALSE;
-    vg_name = VolumeGroup->getName();
+    vg_name = volumeGroup->getName();
 
     QLabel *label = new QLabel( QString( "Select any of the following physical volumes" ) +
 				" to remove them from volume group <b>" +
@@ -63,8 +64,8 @@ VGReduceDialog::VGReduceDialog(VolGroup *VolumeGroup, QWidget *parent) : KDialog
     QVBoxLayout *pv_used_layout = new QVBoxLayout;
     pv_used_box->setLayout(pv_used_layout);
 
-    QList<PhysVol *> member_pvs = VolumeGroup->getPhysicalVolumes();
-    int pv_count = VolumeGroup->getPhysVolCount(); 
+    QList<PhysVol *> member_pvs = volumeGroup->getPhysicalVolumes();
+    int pv_count = volumeGroup->getPhysVolCount(); 
     NoMungeCheck *pv_check = NULL;
     
     for(int x = 0; x < pv_count; x++){
