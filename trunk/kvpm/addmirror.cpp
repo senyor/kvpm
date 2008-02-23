@@ -3,7 +3,7 @@
  * 
  * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
  *
- * This file is part of the Klvm project.
+ * This file is part of the Kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License,  version 3, as 
@@ -25,7 +25,7 @@ bool add_mirror(LogVol *LogicalVolume)
    AddMirrorDialog dialog(LogicalVolume);
     dialog.exec();
     if(dialog.result() == QDialog::Accepted){
-        ProcessProgress add_mirror(dialog.arguments(), "Adding Mirror...", TRUE);
+        ProcessProgress add_mirror(dialog.arguments(), "Adding Mirror...", false);
         return TRUE;
     }
     else
@@ -100,6 +100,7 @@ QStringList AddMirrorDialog::arguments()
 
     args << "--mirrors" 
 	 << QString("%1").arg(count_spin->value()) 
+	 << "--background"
 	 << logical_volume_name;
 
     return args;
