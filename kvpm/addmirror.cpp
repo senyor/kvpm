@@ -14,6 +14,7 @@
 
 
 #include <QtGui>
+
 #include "addmirror.h"
 #include "logvol.h"
 #include "processprogress.h"
