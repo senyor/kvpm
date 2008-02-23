@@ -3,7 +3,7 @@
  * 
  * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
  *
- * This file is part of the Klvm project.
+ * This file is part of the Kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License,  version 3, as 
@@ -64,6 +64,15 @@ LogVol::LogVol(QStringList lvDataList, MountInformationList *mountInformationLis
     m_mirror = false;
     
     switch( flags[0] ){
+    case 'c':
+	m_type = "under conversion";
+	break;
+    case 'I':
+	m_type = "un-synced mirror leg";
+	break;
+    case 'i':
+	m_type = "synced mirror leg";
+	break;
     case 'M':
 	m_type = "mirror";
 	m_mirror = true;
