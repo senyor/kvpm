@@ -3,7 +3,7 @@
  * 
  * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
  *
- * This file is part of the Klvm project.
+ * This file is part of the Kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License,  version 3, as 
@@ -32,14 +32,14 @@ extern MasterList *master_list;
 
 /* This is the physical volume tree list on the volume group tab */
 
-PVTree::PVTree(VolGroup *VolumeGroup, QWidget *parent) : QTreeWidget(parent)
+PVTree::PVTree(VolGroup *volumeGroup, QWidget *parent) : QTreeWidget(parent)
 {
 
-    QList<LogVol *>   lvs = VolumeGroup->getLogicalVolumes();
-    QList<PhysVol *>  pvs = VolumeGroup->getPhysicalVolumes();
+    QList<LogVol *>  lvs = volumeGroup->getLogicalVolumes();
+    QList<PhysVol *> pvs = volumeGroup->getPhysicalVolumes();
 
-    QStringList lv_names;
-    QStringList pv_names;
+    QStringList lv_name_list;
+    QStringList pv_name_list;
     QString device_name;
     
     PhysVol *pv;
@@ -60,6 +60,7 @@ PVTree::PVTree(VolGroup *VolumeGroup, QWidget *parent) : QTreeWidget(parent)
 		<< sizeToString(pv->getSize())
 		<< sizeToString(pv->getUnused())
 		<< sizeToString(pv->getUsed());
+
 	if(pv->isAllocateable())
 	    pv_data << "Yes";
 	else
@@ -73,23 +74,23 @@ PVTree::PVTree(VolGroup *VolumeGroup, QWidget *parent) : QTreeWidget(parent)
 /* here we get the names of logical volumes associated
    with the physical volume */
 
-	lv_names.clear();
+	lv_name_list.clear();
 	for(int x = 0; x < lvs.size() ; x++){
-	    pv_names = lvs[x]->getDevicePathAll();
-	    for(int y = 0; y < pv_names.size() ; y++)
-		if( device_name == pv_names[y] ) 
-		    lv_names.append( lvs[x]->getName() );
+	    pv_name_list = lvs[x]->getDevicePathAll();
+	    for(int y = 0; y < pv_name_list.size() ; y++)
+		if( device_name == pv_name_list[y] ) 
+		    lv_name_list.append( lvs[x]->getName() );
 	}
 
 /* next we remove duplicate entries */
 
-	lv_names.sort();
-	if( lv_names.size() > 1 )        
-	    for(int x = lv_names.size() - 2; x >= 0; x--)
-		if( lv_names[x] == lv_names[x + 1] )
-		    lv_names.removeAt(x + 1);
+	lv_name_list.sort();
+	if( lv_name_list.size() > 1 )        
+	    for(int x = lv_name_list.size() - 2; x >= 0; x--)
+		if( lv_name_list[x] == lv_name_list[x + 1] )
+		    lv_name_list.removeAt(x + 1);
 	
-	pv_data << lv_names.join(", ");
+	pv_data << lv_name_list.join(", ");
 
 	item = new QTreeWidgetItem((QTreeWidgetItem *)0, pv_data);
 	item->setData(1, Qt::UserRole, pv->getSize());
@@ -103,60 +104,74 @@ PVTree::PVTree(VolGroup *VolumeGroup, QWidget *parent) : QTreeWidget(parent)
 void PVTree::setupContextMenu()
 {
     setContextMenuPolicy(Qt::CustomContextMenu);   
-    pv_move_action = new QAction("Move Physical Extents", this);
+
+    pv_move_action   = new QAction("Move physical extents", this);
     vg_reduce_action = new QAction("Remove from volume group", this);
     pv_change_action = new QAction("Change physical volume attributes", this);
+
     context_menu = new QMenu(this);
     context_menu->addAction(pv_move_action);
     context_menu->addAction(vg_reduce_action);
     context_menu->addAction(pv_change_action);
-    connect(this, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(popupContextMenu(QPoint)) );
-    connect(pv_move_action, SIGNAL(triggered()), this, SLOT(movePhysicalExtents()));
-    connect(vg_reduce_action, SIGNAL(triggered()), this, SLOT(reduceVolumeGroup()));
-    connect(pv_change_action, SIGNAL(triggered()), this, SLOT(changePhysicalVolume()));
+
+    connect(this, SIGNAL(customContextMenuRequested(QPoint)), 
+	    this, SLOT(popupContextMenu(QPoint)) );
+
+    connect(pv_move_action, SIGNAL(triggered()), 
+	    this, SLOT(movePhysicalExtents()));
+
+    connect(vg_reduce_action, SIGNAL(triggered()), 
+	    this, SLOT(reduceVolumeGroup()));
+
+    connect(pv_change_action, SIGNAL(triggered()), 
+	    this, SLOT(changePhysicalVolume()));
 }
 
 void PVTree::popupContextMenu(QPoint point)
 {
     VolGroup *vg;
+    PhysVol *pv;
     QTreeWidgetItem *item;
 
     item = itemAt(point);
     if(item){
 	if( (QVariant(item->data(3, 0)).toString()) == "0" ){  // 0 =  Zero used extents on pv
-	    pv_name = QVariant(item->data(0, 0)).toString();
-	    pv = ( master_list->getPhysVolByName(pv_name) );
-	    vg_name = pv->getVolumeGroupName();
-	    vg = ( master_list->getVolGroupByName(vg_name));
+	    m_pv_name = QVariant(item->data(0, 0)).toString();
+	    pv = ( master_list->getPhysVolByName(m_pv_name) );
+	    m_vg_name = pv->getVolumeGroupName();
+	    vg = ( master_list->getVolGroupByName(m_vg_name));
 	    
-	    pv_move_action->setEnabled(FALSE);
+	    pv_move_action->setEnabled(false);
+
 	    if(vg->getPhysVolCount() > 1)
-		vg_reduce_action->setEnabled(TRUE);
+		vg_reduce_action->setEnabled(true);
 	    else
-		vg_reduce_action->setEnabled(FALSE);  // can't remove last pv from group
+		vg_reduce_action->setEnabled(false);  // can't remove last pv from group
 	}
 	else{
-	    pv_name = QVariant(item->data(0, 0)).toString();
-	    pv = ( master_list->getPhysVolByName(pv_name) );
-	    vg_name = pv->getVolumeGroupName();
-	    vg = ( master_list->getVolGroupByName(vg_name));
+	    m_pv_name = QVariant(item->data(0, 0)).toString();
+	    pv = ( master_list->getPhysVolByName(m_pv_name) );
+	    m_vg_name = pv->getVolumeGroupName();
+	    vg = ( master_list->getVolGroupByName(m_vg_name));
 	    
-	    vg_reduce_action->setEnabled(FALSE);
-	    if(vg->getPhysVolCount() > 1)              // can't move extents if there isn't another
-		pv_move_action->setEnabled(TRUE);      // volume to put them on
+	    vg_reduce_action->setEnabled(false);
+
+	    if(vg->getPhysVolCount() > 1)              // can't move extents if there isn't
+		pv_move_action->setEnabled(true);      // another volume to put them on
 	    else
-		pv_move_action->setEnabled(FALSE);
+		pv_move_action->setEnabled(false);
 	}
-	context_menu->setEnabled(TRUE);
+
+	context_menu->setEnabled(true);
 	context_menu->exec(QCursor::pos());
     }
     else
-	context_menu->setEnabled(FALSE);  //item = 0 if there is no item a that point
+	context_menu->setEnabled(false);  //item = 0 if there is no item a that point
 }
 
 void PVTree::movePhysicalExtents()
 {
-    PhysVol *pv = master_list->getPhysVolByName(pv_name);
+    PhysVol *pv = master_list->getPhysVolByName(m_pv_name);
 
     if( move_pv(pv) )
 	MainWindow->rebuildVolumeGroupTab();
@@ -164,14 +179,15 @@ void PVTree::movePhysicalExtents()
 
 void PVTree::reduceVolumeGroup()
 {
-    if( reduce_vg_one(vg_name, pv_name) )
+    if( reduce_vg_one(m_vg_name, m_pv_name) )
         MainWindow->reRun();
 }
 
 void PVTree::changePhysicalVolume()
 {
-    PVChangeDialog dialog(pv_name);
+    PVChangeDialog dialog(m_pv_name);
     dialog.exec();
+
     if(dialog.result() == QDialog::Accepted){
         ProcessProgress change_pv(dialog.arguments(), "Changing physical volume...");
 	MainWindow->rebuildVolumeGroupTab();

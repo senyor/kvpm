@@ -37,8 +37,8 @@ Q_OBJECT
     void setup(LogVol *lv);
     
  public:
-    LVActionsMenu(LogVol *LogicalVolume, VGTree *VolumeGroupTree, QWidget *parent);
-    LVActionsMenu(LogVol *LogicalVolume, LVChartSeg *ChartSeg, QWidget *parent);
+    LVActionsMenu(LogVol *logicalVolume, VGTree *volumeGroupTree, QWidget *parent);
+    LVActionsMenu(LogVol *logicalVolume, LVChartSeg *chartSeg, QWidget *parent);
 
 };
 

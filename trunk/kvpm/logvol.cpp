@@ -50,18 +50,17 @@ LogVol::LogVol(QStringList lvDataList, MountInformationList *mountInformationLis
     m_lv_name   = lvdata.section('|',0,0);
     m_lv_name   = m_lv_name.trimmed();
 
-    if( m_lv_name.startsWith("[") )
-       m_mirror_leg = true;
-    else
-       m_mirror_leg = false;
-
     m_vg_name   = lvdata.section('|',1,1);
     m_lv_full_name = m_vg_name + "/" + m_lv_name;
 
     QString attr = lvdata.section('|',2,2);
     flags.append(attr);
 	
-    m_mirror = false;
+    m_mirror     = false;
+    m_mirror_leg = false;
+    m_mirror_log = false;
+    m_snap       = false;
+    m_pvmove     = false;
     
     switch( flags[0] ){
     case 'c':
@@ -69,9 +68,16 @@ LogVol::LogVol(QStringList lvDataList, MountInformationList *mountInformationLis
 	break;
     case 'I':
 	m_type = "un-synced mirror leg";
+	m_mirror_leg = true;
 	break;
     case 'i':
 	m_type = "synced mirror leg";
+	m_mirror_leg = true;
+	break;
+    case 'L':
+    case 'l':
+	m_type = "mirror log";
+	m_mirror_log = true;
 	break;
     case 'M':
 	m_type = "mirror";
@@ -86,12 +92,15 @@ LogVol::LogVol(QStringList lvDataList, MountInformationList *mountInformationLis
 	break;
     case 'p':
 	m_type = "pvmove";
+	m_pvmove = true;
 	break;
     case 's':
 	m_type = "valid snap";
+	m_snap = true;
 	break;
     case 'S':
 	m_type = "invalid snap";
+	m_snap = true;
 	break;
     case 'v':
 	m_type = "virtual";
@@ -101,9 +110,6 @@ LogVol::LogVol(QStringList lvDataList, MountInformationList *mountInformationLis
     break;
     }
 
-    m_snap   = m_type.contains("snap", Qt::CaseInsensitive);
-    m_pvmove = m_type.contains("pvmove", Qt::CaseInsensitive);
-    
     switch(flags[1]){
     case 'w':
 	m_writable = true;
@@ -202,9 +208,12 @@ LogVol::LogVol(QStringList lvDataList, MountInformationList *mountInformationLis
 	m_origin.truncate( m_origin.indexOf("_mimage_") );
 	m_snap_percent = 0.0;
     }
-
-    qDebug() << "ORIGIN" << m_origin;
-    
+    else if(m_mirror_log){
+	m_origin = m_lv_name;
+	m_origin.remove(0,1);
+	m_origin.truncate( m_origin.indexOf("_mlog]") );
+	m_snap_percent = 0.0;
+    }
     
     m_copy_percent = (lvdata.section('|',8,8)).toDouble();
     m_major_device = (lvdata.section('|',15,15)).toInt();
@@ -388,6 +397,11 @@ bool LogVol::isMirror()
 bool LogVol::isMirrorLeg()
 {
     return m_mirror_leg;
+}
+
+bool LogVol::isMirrorLog()
+{
+    return m_mirror_log;
 }
 
 bool LogVol::isPersistant()

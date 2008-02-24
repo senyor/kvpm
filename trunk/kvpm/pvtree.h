@@ -11,6 +11,7 @@
  * 
  * See the file "COPYING" for the exact licensing terms.
  */
+
 #ifndef PVTREE_H
 #define PVTREE_H
 
@@ -18,24 +19,32 @@
 #include <QPoint>
 #include <QMenu>
 #include <QTreeWidget>
-#include "physvol.h"
+
 
 class VolGroup;
 class LogVol;
+class PhysVol;
 
 
 class PVTree : public QTreeWidget
 {
 Q_OBJECT
+
     QList<QTreeWidgetItem *> pv_tree_items;
-    QAction *pv_move_action, *vg_reduce_action, *pv_change_action;
+
     QMenu *context_menu;
-    QString pv_name, vg_name;
+
+    QAction *pv_move_action, 
+            *vg_reduce_action, 
+	    *pv_change_action;
+
+    QString m_pv_name, 
+            m_vg_name;
+
     void setupContextMenu();
-    PhysVol *pv;
     
 public:
-    PVTree(VolGroup *VolumeGroup, QWidget *parent = 0);
+    PVTree(VolGroup *volumeGroup, QWidget *parent = 0);
 
 private slots:    
     void popupContextMenu(QPoint point);

@@ -3,7 +3,7 @@
  * 
  * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
  *
- * This file is part of the Klvm project.
+ * This file is part of the Kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License,  version 3, as 
@@ -20,66 +20,88 @@
 #include "vgtree.h"
 #include "lvsizechartseg.h"
 
-LVActionsMenu::LVActionsMenu(LogVol *LogicalVolume, 
-			     VGTree *VolumeGroupTree, 
+LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, 
+			     VGTree *volumeGroupTree, 
 			     QWidget *parent) : KMenu(parent)
 {
-    setup(LogicalVolume);
+    setup(logicalVolume);
     
     connect(lv_mkfs_action, SIGNAL(triggered()), 
-	    VolumeGroupTree, SLOT(mkfsLogicalVolume()));
+	    volumeGroupTree, SLOT(mkfsLogicalVolume()));
+
     connect(lv_reduce_action, SIGNAL(triggered()), 
-	    VolumeGroupTree, SLOT(reduceLogicalVolume()));
+	    volumeGroupTree, SLOT(reduceLogicalVolume()));
+
     connect(lv_remove_action, SIGNAL(triggered()), 
-	    VolumeGroupTree, SLOT(removeLogicalVolume()));
+	    volumeGroupTree, SLOT(removeLogicalVolume()));
+
     connect(lv_create_action, SIGNAL(triggered()), 
-	    VolumeGroupTree, SLOT(createLogicalVolume()));
+	    volumeGroupTree, SLOT(createLogicalVolume()));
+
     connect(snap_create_action, SIGNAL(triggered()), 
-	    VolumeGroupTree, SLOT(createSnapshot()));
+	    volumeGroupTree, SLOT(createSnapshot()));
+
     connect(lv_extend_action, SIGNAL(triggered()), 
-	    VolumeGroupTree, SLOT(extendLogicalVolume()));
+	    volumeGroupTree, SLOT(extendLogicalVolume()));
+
     connect(pv_move_action, SIGNAL(triggered()), 
-	    VolumeGroupTree, SLOT(movePhysicalExtents()));
+	    volumeGroupTree, SLOT(movePhysicalExtents()));
+
     connect(lv_change_action, SIGNAL(triggered()), 
-	    VolumeGroupTree, SLOT(changeLogicalVolume()));
+	    volumeGroupTree, SLOT(changeLogicalVolume()));
+
     connect(add_mirror_action, SIGNAL(triggered()), 
-	    VolumeGroupTree, SLOT(addMirror()));
+	    volumeGroupTree, SLOT(addMirror()));
+
     connect(mount_filesystem_action, SIGNAL(triggered()), 
-	    VolumeGroupTree, SLOT(mountFilesystem()));
+	    volumeGroupTree, SLOT(mountFilesystem()));
+
     connect(unmount_filesystem_action, SIGNAL(triggered()), 
-	    VolumeGroupTree, SLOT(unmountFilesystem()));
+	    volumeGroupTree, SLOT(unmountFilesystem()));
+
     connect(remove_mirror_action, SIGNAL(triggered()), 
-	    VolumeGroupTree, SLOT(removeMirror()));
+	    volumeGroupTree, SLOT(removeMirror()));
 }
 
-LVActionsMenu::LVActionsMenu(LogVol *LogicalVolume, 
+LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, 
 			     LVChartSeg *ChartSeg,
 			     QWidget *parent) : KMenu(parent)
 {
-    setup(LogicalVolume);
+    setup(logicalVolume);
     
     connect(lv_mkfs_action, SIGNAL(triggered()), 
 	    ChartSeg, SLOT(mkfsLogicalVolume()));
+
     connect(lv_reduce_action, SIGNAL(triggered()), 
 	    ChartSeg, SLOT(reduceLogicalVolume()));
+
     connect(lv_remove_action, SIGNAL(triggered()), 
 	    ChartSeg, SLOT(removeLogicalVolume()));
+
     connect(lv_create_action, SIGNAL(triggered()), 
 	    ChartSeg, SLOT(createLogicalVolume()));
+
     connect(snap_create_action, SIGNAL(triggered()), 
 	    ChartSeg, SLOT(createSnapshot()));
+
     connect(lv_extend_action, SIGNAL(triggered()), 
 	    ChartSeg, SLOT(extendLogicalVolume()));
+
     connect(pv_move_action, SIGNAL(triggered()), 
 	    ChartSeg, SLOT(movePhysicalExtents()));
+
     connect(lv_change_action, SIGNAL(triggered()), 
 	    ChartSeg, SLOT(changeLogicalVolume()));
+
     connect(add_mirror_action, SIGNAL(triggered()), 
 	    ChartSeg, SLOT(addMirror()));
+
     connect(mount_filesystem_action, SIGNAL(triggered()), 
 	    ChartSeg, SLOT(mountFilesystem()));
+
     connect(unmount_filesystem_action, SIGNAL(triggered()), 
 	    ChartSeg, SLOT(unmountFilesystem()));
+
     connect(remove_mirror_action, SIGNAL(triggered()), 
 	    ChartSeg, SLOT(removeMirror()));
 }
@@ -116,117 +138,133 @@ void LVActionsMenu::setup(LogVol *lv)
     filesystem_menu->addAction(lv_mkfs_action);
 
     if( lv ){
-	if( lv->isWritable() && !(lv->isLocked()) ){
+	if(  lv->isWritable()  && !lv->isLocked() && 
+	    !lv->isMirrorLeg() && !lv->isMirrorLog() ){
+
 	    if( lv->isMounted() ){
-		lv_mkfs_action->setEnabled(FALSE);
-		lv_reduce_action->setEnabled(FALSE);
-		lv_remove_action->setEnabled(FALSE);
-		unmount_filesystem_action->setEnabled(TRUE);
-		mount_filesystem_action->setEnabled(FALSE);
+		lv_mkfs_action->setEnabled(false);
+		lv_reduce_action->setEnabled(false);
+		lv_remove_action->setEnabled(false);
+		unmount_filesystem_action->setEnabled(true);
+		mount_filesystem_action->setEnabled(false);
 	    }
 	    else{
-		lv_mkfs_action->setEnabled(TRUE);
-		lv_reduce_action->setEnabled(TRUE);
-		lv_remove_action->setEnabled(TRUE);
-		unmount_filesystem_action->setEnabled(FALSE);
-		mount_filesystem_action->setEnabled(TRUE);
+		lv_mkfs_action->setEnabled(true);
+		lv_reduce_action->setEnabled(true);
+		lv_remove_action->setEnabled(true);
+		unmount_filesystem_action->setEnabled(false);
+		mount_filesystem_action->setEnabled(true);
 	    }
-	    add_mirror_action->setEnabled(TRUE);
-	    lv_change_action->setEnabled(TRUE);
-	    lv_extend_action->setEnabled(TRUE);
-	    pv_move_action->setEnabled(TRUE);
-	    remove_mirror_action->setEnabled(TRUE);
-	    snap_create_action->setEnabled(TRUE);
-	    filesystem_menu->setEnabled(TRUE);
+	    add_mirror_action->setEnabled(true);
+	    lv_change_action->setEnabled(true);
+	    lv_extend_action->setEnabled(true);
+	    pv_move_action->setEnabled(true);
+	    remove_mirror_action->setEnabled(true);
+	    snap_create_action->setEnabled(true);
+	    filesystem_menu->setEnabled(true);
 	}
 	else if( lv->isPvmove() ){
-	    lv_mkfs_action->setEnabled(FALSE);
-	    lv_remove_action->setEnabled(FALSE);
-	    unmount_filesystem_action->setEnabled(FALSE);
-	    mount_filesystem_action->setEnabled(FALSE);
-	    add_mirror_action->setEnabled(FALSE);
-	    lv_change_action->setEnabled(FALSE);
-	    lv_extend_action->setEnabled(FALSE);
-	    lv_reduce_action->setEnabled(FALSE);
-	    pv_move_action->setEnabled(FALSE);
-	    remove_mirror_action->setEnabled(FALSE);
-	    snap_create_action->setEnabled(FALSE);
-	    filesystem_menu->setEnabled(FALSE);
+	    lv_mkfs_action->setEnabled(false);
+	    lv_remove_action->setEnabled(false);
+	    unmount_filesystem_action->setEnabled(false);
+	    mount_filesystem_action->setEnabled(false);
+	    add_mirror_action->setEnabled(false);
+	    lv_change_action->setEnabled(false);
+	    lv_extend_action->setEnabled(false);
+	    lv_reduce_action->setEnabled(false);
+	    pv_move_action->setEnabled(false);
+	    remove_mirror_action->setEnabled(false);
+	    snap_create_action->setEnabled(false);
+	    filesystem_menu->setEnabled(false);
+	}
+	else if( lv->isMirrorLeg() || lv->isMirrorLog() ){
+	    lv_mkfs_action->setEnabled(false);
+	    lv_remove_action->setEnabled(false);
+	    unmount_filesystem_action->setEnabled(false);
+	    mount_filesystem_action->setEnabled(false);
+	    add_mirror_action->setEnabled(false);
+	    lv_change_action->setEnabled(false);
+	    lv_extend_action->setEnabled(false);
+	    lv_reduce_action->setEnabled(false);
+	    pv_move_action->setEnabled(false);
+	    remove_mirror_action->setEnabled(false);
+	    snap_create_action->setEnabled(false);
+	    filesystem_menu->setEnabled(false);
 	}
 	else if( !(lv->isWritable()) && lv->isLocked() ){
 	    if( lv->isMounted() ){
-		unmount_filesystem_action->setEnabled(TRUE);
-		mount_filesystem_action->setEnabled(FALSE);
+		unmount_filesystem_action->setEnabled(true);
+		mount_filesystem_action->setEnabled(false);
 	    }
 	    else{
-		unmount_filesystem_action->setEnabled(FALSE);
-		mount_filesystem_action->setEnabled(TRUE);
+		unmount_filesystem_action->setEnabled(false);
+		mount_filesystem_action->setEnabled(true);
 	    }
-	    lv_mkfs_action->setEnabled(FALSE);
-	    lv_remove_action->setEnabled(FALSE);
-	    add_mirror_action->setEnabled(FALSE);
-	    lv_change_action->setEnabled(TRUE);
-	    lv_extend_action->setEnabled(FALSE);
-	    lv_reduce_action->setEnabled(FALSE);
-	    pv_move_action->setEnabled(FALSE);
-	    remove_mirror_action->setEnabled(FALSE);
-	    snap_create_action->setEnabled(FALSE);
-	    filesystem_menu->setEnabled(TRUE);
+	    lv_mkfs_action->setEnabled(false);
+	    lv_remove_action->setEnabled(false);
+	    add_mirror_action->setEnabled(false);
+	    lv_change_action->setEnabled(true);
+	    lv_extend_action->setEnabled(false);
+	    lv_reduce_action->setEnabled(false);
+	    pv_move_action->setEnabled(false);
+	    remove_mirror_action->setEnabled(false);
+	    snap_create_action->setEnabled(false);
+	    filesystem_menu->setEnabled(true);
 	}
 	else if( lv->isWritable() && lv->isLocked() ){
 	    if( lv->isMounted() ){
-		unmount_filesystem_action->setEnabled(TRUE);
-		mount_filesystem_action->setEnabled(FALSE);
+		unmount_filesystem_action->setEnabled(true);
+		mount_filesystem_action->setEnabled(false);
 	    }
 	    else{
-		unmount_filesystem_action->setEnabled(FALSE);
-		mount_filesystem_action->setEnabled(TRUE);
+		unmount_filesystem_action->setEnabled(false);
+		mount_filesystem_action->setEnabled(true);
 	    }
-	    lv_mkfs_action->setEnabled(TRUE);
-	    lv_remove_action->setEnabled(FALSE);
-	    add_mirror_action->setEnabled(FALSE);
-	    lv_change_action->setEnabled(TRUE);
-	    lv_extend_action->setEnabled(FALSE);
-	    lv_reduce_action->setEnabled(FALSE);
-	    pv_move_action->setEnabled(FALSE);
-	    remove_mirror_action->setEnabled(FALSE);
-	    snap_create_action->setEnabled(FALSE);
-	    filesystem_menu->setEnabled(TRUE);
+	    lv_mkfs_action->setEnabled(true);
+	    lv_remove_action->setEnabled(false);
+	    add_mirror_action->setEnabled(false);
+	    lv_change_action->setEnabled(true);
+	    lv_extend_action->setEnabled(false);
+	    lv_reduce_action->setEnabled(false);
+	    pv_move_action->setEnabled(false);
+	    remove_mirror_action->setEnabled(false);
+	    snap_create_action->setEnabled(false);
+	    filesystem_menu->setEnabled(true);
 	}
 	else{
 	    if( lv->isMounted() ){
-		lv_remove_action->setEnabled(FALSE);
-		unmount_filesystem_action->setEnabled(TRUE);
-		mount_filesystem_action->setEnabled(FALSE);
+		lv_remove_action->setEnabled(false);
+		unmount_filesystem_action->setEnabled(true);
+		mount_filesystem_action->setEnabled(false);
 	    }
 	    else{
-		lv_remove_action->setEnabled(TRUE);
-		unmount_filesystem_action->setEnabled(FALSE);
-		mount_filesystem_action->setEnabled(TRUE);
+		lv_remove_action->setEnabled(true);
+		unmount_filesystem_action->setEnabled(false);
+		mount_filesystem_action->setEnabled(true);
 	    }
-	    lv_mkfs_action->setEnabled(FALSE);
-	    lv_reduce_action->setEnabled(FALSE);
-	    add_mirror_action->setEnabled(TRUE);
-	    lv_change_action->setEnabled(TRUE);
-	    lv_extend_action->setEnabled(FALSE);
-	    pv_move_action->setEnabled(TRUE);
-	    remove_mirror_action->setEnabled(TRUE);
-	    snap_create_action->setEnabled(TRUE);
-	    filesystem_menu->setEnabled(TRUE);
+	    lv_mkfs_action->setEnabled(false);
+	    lv_reduce_action->setEnabled(false);
+	    add_mirror_action->setEnabled(true);
+	    lv_change_action->setEnabled(true);
+	    lv_extend_action->setEnabled(false);
+	    pv_move_action->setEnabled(true);
+	    remove_mirror_action->setEnabled(true);
+	    snap_create_action->setEnabled(true);
+	    filesystem_menu->setEnabled(true);
 	}
     }
     else{
-	lv_mkfs_action->setEnabled(FALSE);
-	lv_remove_action->setEnabled(FALSE);
-	unmount_filesystem_action->setEnabled(FALSE);
-	mount_filesystem_action->setEnabled(FALSE);
-	add_mirror_action->setEnabled(FALSE);
-	lv_change_action->setEnabled(FALSE);
-	lv_extend_action->setEnabled(FALSE);
-	lv_reduce_action->setEnabled(FALSE);
-	pv_move_action->setEnabled(FALSE);
-	remove_mirror_action->setEnabled(FALSE);
-	snap_create_action->setEnabled(FALSE);
-	filesystem_menu->setEnabled(FALSE);
+	lv_mkfs_action->setEnabled(false);
+	lv_remove_action->setEnabled(false);
+	unmount_filesystem_action->setEnabled(false);
+	mount_filesystem_action->setEnabled(false);
+	add_mirror_action->setEnabled(false);
+	lv_change_action->setEnabled(false);
+	lv_extend_action->setEnabled(false);
+	lv_reduce_action->setEnabled(false);
+	pv_move_action->setEnabled(false);
+	remove_mirror_action->setEnabled(false);
+	snap_create_action->setEnabled(false);
+	filesystem_menu->setEnabled(false);
     }
 }

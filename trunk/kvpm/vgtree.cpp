@@ -3,7 +3,7 @@
  * 
  * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
  *
- * This file is part of the Klvm project.
+ * This file is part of the Kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License,  version 3, as 
@@ -51,7 +51,7 @@ VGTree::VGTree(VolGroup *VolumeGroup) : QTreeWidget(),
     setupContextMenu();
     
     setColumnCount(9);
-    header_labels << "Name" << "Size" << "Filesystem" << "type"
+    header_labels << "Volume" << "Size" << "Filesystem" << "type"
 		  << "Stripes" << "Stripe size" 
 		  << "Snap/Move" << "State" << "Access" ;
     setHeaderLabels(header_labels);
@@ -62,7 +62,11 @@ VGTree::VGTree(VolGroup *VolumeGroup) : QTreeWidget(),
 	m_lv = logical_volumes[x];
 	lv_data.clear();
 
-	if( !m_lv->isMirrorLeg() ) {
+	if( ( !m_lv->isMirrorLeg() ) && ( !m_lv->isMirrorLog() ) ) { 
+
+
+	    qDebug() << "Name: " << m_lv->getName();
+	    
 	    if( m_lv->getSegmentCount() == 1 ) {
 		lv_data << m_lv->getName() 
 			<< sizeToString(m_lv->getSize()) 
@@ -157,7 +161,8 @@ void VGTree::insertSegmentItems(LogVol *logicalVolume, QTreeWidgetItem *item)
 
 /* Here we start with the mirror logical volume and locate its mirror
    legs. Then the legs are checked for segment data just like any other
-   logical volume and it is all inserted into the tree */
+   logical volume and it is all inserted into the tree. The mirror log
+   is also inserted here */
 
 void VGTree::insertMirrorLegItems(LogVol *mirrorVolume, QTreeWidgetItem *item)
 {
@@ -175,7 +180,7 @@ void VGTree::insertMirrorLegItems(LogVol *mirrorVolume, QTreeWidgetItem *item)
 	leg_volume = logical_volume_list[x];
 	
 	if( ( leg_volume->getOrigin() == mirrorVolume->getName() ) && 
-	    leg_volume->isMirrorLeg() ){
+	    ( leg_volume->isMirrorLog() || leg_volume->isMirrorLeg() ) ){
 	    
 	    leg_data.clear();
 
