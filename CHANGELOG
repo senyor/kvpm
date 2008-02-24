@@ -1,0 +1,8 @@
+version .3.1
+
+Changes to the handling of mirrors, still not done.
+Copyright notice debugged.
+Many coding style improvements and bugs fixed.
+Volume group information display changed but still
+needs improvement.
+  

@@ -11,11 +11,12 @@
  * 
  * See the file "COPYING" for the exact licensing terms.
  */
+
 #ifndef FSPROBE_H
 #define FSPROBE_H
 
 #include <QString>
 
-QString fsprobe_getfstype2(QString DevicePath);
+QString fsprobe_getfstype2(QString devicePath);
 
 #endif
