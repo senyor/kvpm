@@ -14,6 +14,8 @@
 #ifndef ADDMIRROR_H
 #define ADDMIRROR_H
 
+#include <KTabWidget>
+
 #include <KDialog>
 #include <QStringList>
 #include <QLabel>
@@ -21,31 +23,54 @@
 #include <QRadioButton>
 #include <QGroupBox>
 
+class KIntSpinBox;
 
 class LogVol;
+class NoMungeCheck;
 class VolGroup;
 
-bool add_mirror(LogVol *LogicalVolume);
+bool add_mirror(LogVol *logicalVolume);
 
 
 class AddMirrorDialog : public KDialog
 {
+Q_OBJECT
 
-     LogVol *lv;
-     VolGroup *vg;
-     QString logical_volume_name;
-     int mirrors;
-     QRadioButton *contiguous_button, *normal_button,   //Radio button to chose 
-	          *anywhere_button, *inherited_button,  // the allocation policy
-	          *cling_button;
-     QRadioButton *core_log, *disk_log;
-     QSpinBox *count_spin;
+    KTabWidget *m_tab_widget;
+    KIntSpinBox *m_add_mirrors_spin;
 
- public:
-     AddMirrorDialog(LogVol *LogicalVolume, QWidget *parent = 0);
-     QStringList arguments();
+    QVBoxLayout *m_general_layout;
+    QVBoxLayout *m_physical_layout;
 
- };
+    QGroupBox *m_mirror_group;
+    QGroupBox *m_mirror_log_group;
+    QString m_logical_volume_name;
+    LogVol *m_lv;                      // The volume we are adding a mirror to. 
+    
+    int m_current_leg_count;           // How many mirror legs do we already have?
+                                       // An unmirrored volume counts as one.
+    
+    QRadioButton *contiguous_button, *normal_button,   //Radio button to chose 
+	         *anywhere_button, *inherited_button,  // the allocation policy
+	         *cling_button;
+
+    QRadioButton *core_log, *disk_log;
+
+    QList<NoMungeCheck *> m_pv_checks;
+
+    void setupGeneralTab();
+    void setupPhysicalTab();
+    QStringList getPvsInUse();
+    
+public:
+    AddMirrorDialog(LogVol *logicalVolume, QWidget *parent = 0);
+    QStringList arguments();
+
+private slots:
+    void showMirrorLogBox(bool show);
+    void enableMirrorLogBox(bool enable);
+
+};
 
 #endif
 
