@@ -60,7 +60,8 @@ Q_OBJECT
     bool m_has_log_only_suitable_pvs;  // Are there any pvs that can fit a log but 
                                        // not a complete leg? 
     
-    QList<NoMungeCheck *> m_pv_checks;
+    QList<NoMungeCheck *> m_pv_leg_checks;
+    QList<NoMungeCheck *> m_pv_log_checks;
 
     void setupGeneralTab();
     void setupPhysicalTab();
@@ -73,7 +74,11 @@ public:
 private slots:
     void showMirrorLogBox(bool show);
     void enableMirrorLogBox(bool enable);
-
+    void comparePvsNeededPvsAvailable(int);
+    void comparePvsNeededPvsAvailable(bool);
+    void comparePvsNeededPvsAvailable();
+    void clearCheckedPvs(bool checked);
+    
 };
 
 #endif

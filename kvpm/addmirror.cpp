@@ -59,7 +59,22 @@ AddMirrorDialog::AddMirrorDialog(LogVol *logicalVolume, QWidget *parent):
     
     setupGeneralTab();
     setupPhysicalTab();
-    
+    comparePvsNeededPvsAvailable(true);
+
+    connect(disk_log,     SIGNAL(toggled(bool)), 
+	    this, SLOT(showMirrorLogBox(bool)));
+
+    connect(m_mirror_group, SIGNAL(toggled(bool)), 
+	    this, SLOT(enableMirrorLogBox(bool)));
+
+    connect(m_mirror_group, SIGNAL(toggled(bool)), 
+	    this, SLOT(clearCheckedPvs(bool)));
+
+    connect(m_mirror_group, SIGNAL(toggled(bool)), 
+	    this, SLOT(comparePvsNeededPvsAvailable(bool)));
+
+    connect(m_add_mirrors_spin, SIGNAL(valueChanged(int)),
+	    this, SLOT(comparePvsNeededPvsAvailable(int)));
 }
 
 void AddMirrorDialog::setupGeneralTab()
@@ -76,7 +91,7 @@ void AddMirrorDialog::setupGeneralTab()
     }
     else{
 	current_mirrors_label->setText("Existing mirror legs: none");
-	m_current_leg_count = 0;
+	m_current_leg_count = 1;   // Even without a mirror it is using a pv.
     }
     
     m_general_layout->addStretch();
@@ -180,8 +195,11 @@ void AddMirrorDialog::setupPhysicalTab()
 	    temp_check = new NoMungeCheck( leg_physical_volumes[x]->getDeviceName() );
 	    temp_check->setEnabled(true);
 	    temp_check->setChecked(false);
-	    m_pv_checks.append(temp_check);
+	    m_pv_leg_checks.append(temp_check);
 	    mirror_leg_layout->addWidget(temp_check);
+
+	    connect(temp_check, SIGNAL(toggled(bool)), 
+		    this, SLOT(comparePvsNeededPvsAvailable(bool)));
 	}
     }
 
@@ -199,8 +217,11 @@ void AddMirrorDialog::setupPhysicalTab()
 	    temp_check = new NoMungeCheck( log_physical_volumes[x]->getDeviceName() );
 	    temp_check->setEnabled(true);
 	    temp_check->setChecked(false);
-	    m_pv_checks.append(temp_check);
+	    m_pv_log_checks.append(temp_check);
 	    mirror_log_layout->addWidget(temp_check);
+
+	    connect(temp_check, SIGNAL(toggled(bool)), 
+		    this, SLOT(comparePvsNeededPvsAvailable(bool)));
 	}
     }
 
@@ -209,11 +230,6 @@ void AddMirrorDialog::setupPhysicalTab()
 	m_mirror_log_group->setEnabled(false);
     }
 
-    connect(disk_log,     SIGNAL(toggled(bool)), 
-	    this, SLOT(showMirrorLogBox(bool)));
-
-    connect(m_mirror_group, SIGNAL(toggled(bool)), 
-	    this, SLOT(enableMirrorLogBox(bool)));
 }
 
 /* The next function returns a list of physical volumes in 
@@ -297,9 +313,15 @@ QStringList AddMirrorDialog::arguments()
     QStringList args;
     QStringList physical_volumes; // the physical volumes to use for the new mirrors and log
 
-    for(int x = 0; x < m_pv_checks.size(); x++){
-	if( m_pv_checks[x]->isChecked() && m_pv_checks[x]->isEnabled() ){
-	    physical_volumes << m_pv_checks[x]->getUnmungedText();
+    for(int x = 0; x < m_pv_leg_checks.size(); x++){
+	if( m_pv_leg_checks[x]->isChecked() && m_pv_leg_checks[x]->isEnabled() ){
+	    physical_volumes << m_pv_leg_checks[x]->getUnmungedText();
+	}
+    }
+
+    for(int x = 0; x < m_pv_log_checks.size(); x++){
+	if( m_pv_log_checks[x]->isChecked() && m_pv_log_checks[x]->isEnabled() ){
+	    physical_volumes << m_pv_log_checks[x]->getUnmungedText();
 	}
     }
 
@@ -314,7 +336,86 @@ QStringList AddMirrorDialog::arguments()
 	 << m_logical_volume_name
 	 << physical_volumes;
 
-    qDebug() << "args: " << args;
+    qDebug() << "ARGS: " << args;
     
+
     return args;
+}
+
+
+/* Enable or disable the OK button based on having
+   enough physical volumes either checked, if we are
+   selecting them manually, or available if doing it
+   automatically.  */
+
+
+void AddMirrorDialog::comparePvsNeededPvsAvailable(bool)
+{
+    comparePvsNeededPvsAvailable();
+}
+
+void AddMirrorDialog::comparePvsNeededPvsAvailable(int)
+{
+    comparePvsNeededPvsAvailable();
+}
+
+void AddMirrorDialog::comparePvsNeededPvsAvailable()
+{
+    bool log_pv_checked = false;
+    int leg_pvs_checked = 0 ;
+
+    if( m_mirror_group->isChecked() ){
+	for(int x = 0; x < m_pv_leg_checks.size(); x++){
+	    if(m_pv_leg_checks[x]->isChecked() )
+		leg_pvs_checked++;
+	}
+	
+	for(int x = 0; x < m_pv_log_checks.size(); x++){
+	    if(m_pv_log_checks[x]->isChecked() )
+		log_pv_checked = true;
+	}
+    }
+    else{                               // If we a doing it automatically
+	if( m_pv_log_checks.size() )    // we pretend everything is checked.
+	    log_pv_checked = true;
+
+	leg_pvs_checked = m_pv_leg_checks.size();
+    }
+
+    if(m_mirror_has_log){
+	
+	if( m_add_mirrors_spin->value() <= leg_pvs_checked )
+	    enableButtonOk(true);
+	else
+	    enableButtonOk(false);
+    }
+    else if( core_log->isChecked() ){
+
+	if( m_add_mirrors_spin->value() <= leg_pvs_checked )
+	    enableButtonOk(true);
+	else
+	    enableButtonOk(false);
+    }
+    else if(m_add_mirrors_spin->value() < leg_pvs_checked){
+	enableButtonOk(true);
+    }
+    else if((m_add_mirrors_spin->value() == leg_pvs_checked) && log_pv_checked ){
+	enableButtonOk(true);
+    }
+    else
+	enableButtonOk(false);
+}
+
+/* clear the selected physical volumes when the
+   mirror group box is unchecked */
+
+void AddMirrorDialog::clearCheckedPvs(bool checked)
+{
+    if( !checked ){
+	for(int x = 0; x < m_pv_leg_checks.size(); x++)
+	    m_pv_leg_checks[x]->setChecked(false);
+
+	for(int x = 0; x < m_pv_log_checks.size(); x++)
+	    m_pv_log_checks[x]->setChecked(false);
+    }
 }
