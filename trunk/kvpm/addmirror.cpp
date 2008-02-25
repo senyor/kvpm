@@ -84,7 +84,7 @@ void AddMirrorDialog::setupGeneralTab()
     QHBoxLayout *spin_box_layout = new QHBoxLayout();
 
     QLabel *add_mirrors_label = new QLabel("Add mirror legs: ");
-    m_add_mirrors_spin = new KIntSpinBox(1, 10, 1, 1, this);
+    m_add_mirrors_spin = new KIntSpinBox(0, 10, 1, 1, this);
     spin_box_layout->addWidget(add_mirrors_label);
     spin_box_layout->addWidget(m_add_mirrors_spin);
     m_general_layout->addLayout(spin_box_layout);
@@ -185,6 +185,8 @@ void AddMirrorDialog::setupPhysicalTab()
 	}
     }
 
+    m_has_log_only_suitable_pvs =false;
+    
     for(int x = 0; x < log_physical_volumes.size(); x++){
 	if( (log_physical_volumes[x]->getUnused() >= m_lv->getSize()) ||
 	    (log_physical_volumes[x]->getUnused() == 0) )
@@ -193,12 +195,18 @@ void AddMirrorDialog::setupPhysicalTab()
 	    x--;
 	}
 	else{
+	    m_has_log_only_suitable_pvs =true;
 	    temp_check = new NoMungeCheck( log_physical_volumes[x]->getDeviceName() );
 	    temp_check->setEnabled(true);
 	    temp_check->setChecked(false);
 	    m_pv_checks.append(temp_check);
 	    mirror_log_layout->addWidget(temp_check);
 	}
+    }
+
+    if( m_mirror_has_log || !m_has_log_only_suitable_pvs ){           
+	m_mirror_log_group->hide();   
+	m_mirror_log_group->setEnabled(false);
     }
 
     connect(disk_log,     SIGNAL(toggled(bool)), 
@@ -208,13 +216,25 @@ void AddMirrorDialog::setupPhysicalTab()
 	    this, SLOT(enableMirrorLogBox(bool)));
 }
 
+/* The next function returns a list of physical volumes in 
+   use by the mirror as legs or log. It also sets or clears the 
+   m_mirror_has_log boolean */
+
 QStringList AddMirrorDialog::getPvsInUse()
 {
     QList<LogVol *>  mirror_legs = (m_lv->getVolumeGroup())->getLogicalVolumes();
     QStringList pvs_in_use;
     
     if( m_lv->isMirror() ){
+	m_mirror_has_log = false;
 	for(int x = mirror_legs.size() - 1; x >= 0; x--){
+
+	    if(  mirror_legs[x]->getOrigin() == m_lv->getName() &&
+		 mirror_legs[x]->isMirrorLog() )
+	    {
+		m_mirror_has_log = true;
+	    }
+
 	    if(  mirror_legs[x]->getOrigin() != m_lv->getName() ||
 		 (!mirror_legs[x]->isMirrorLeg() &&
 		  !mirror_legs[x]->isMirrorLog()) )
@@ -228,6 +248,7 @@ QStringList AddMirrorDialog::getPvsInUse()
     else{
 	pvs_in_use << m_lv->getDevicePathAll();
 	mirror_legs.clear();
+	m_mirror_has_log = false;
     }
 
     return pvs_in_use;
@@ -235,7 +256,11 @@ QStringList AddMirrorDialog::getPvsInUse()
 
 void AddMirrorDialog::showMirrorLogBox(bool show)
 {
-    if( show ){
+    if( m_mirror_has_log || !m_has_log_only_suitable_pvs ){           
+	m_mirror_log_group->hide();   
+	m_mirror_log_group->setEnabled(false);
+    }
+    else if( show ){
 	m_mirror_log_group->show();
 
 	if ( m_mirror_group->isChecked() )
@@ -251,7 +276,11 @@ void AddMirrorDialog::showMirrorLogBox(bool show)
 
 void AddMirrorDialog::enableMirrorLogBox(bool enable)
 {
-    if( enable )
+    if( m_mirror_has_log || !m_has_log_only_suitable_pvs ){           
+	m_mirror_log_group->hide();   
+	m_mirror_log_group->setEnabled(false);
+    }
+    else if( enable )
 	m_mirror_log_group->setEnabled(true);
     else
 	m_mirror_log_group->setEnabled(false);
@@ -280,7 +309,7 @@ QStringList AddMirrorDialog::arguments()
 	args << "--corelog";
 
     args << "--mirrors" 
-	 << QString("%1").arg( m_add_mirrors_spin->value() )
+	 << QString("%1").arg(m_current_leg_count - 1 + m_add_mirrors_spin->value() )
 	 << "--background"
 	 << m_logical_volume_name
 	 << physical_volumes;

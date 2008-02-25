@@ -55,7 +55,11 @@ Q_OBJECT
 	         *cling_button;
 
     QRadioButton *core_log, *disk_log;
-
+    bool m_mirror_has_log;             // True if the volume is a mirror with an
+                                       // existing mirror log.
+    bool m_has_log_only_suitable_pvs;  // Are there any pvs that can fit a log but 
+                                       // not a complete leg? 
+    
     QList<NoMungeCheck *> m_pv_checks;
 
     void setupGeneralTab();
