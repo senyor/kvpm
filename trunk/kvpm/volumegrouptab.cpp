@@ -3,7 +3,7 @@
  * 
  * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
  *
- * This file is part of the Klvm project.
+ * This file is part of the Kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License,  version 3, as 
@@ -17,73 +17,67 @@
 
 #include "lvpropertiesstack.h"
 #include "lvsizechart.h"
+#include "pvtree.h"
 #include "vginfolabels.h"
 #include "vgremove.h"
+#include "vgtree.h"
 #include "volumegrouptab.h"
 
 
-VolumeGroupTab::VolumeGroupTab(VolGroup *VolumeGroup, QWidget *parent) : 
-    QWidget(parent), vg(VolumeGroup)
+VolumeGroupTab::VolumeGroupTab(VolGroup *volumeGroup, QWidget *parent) : 
+    QWidget(parent), m_vg(volumeGroup)
 {
 
-    group_name = vg->getName();
+    m_group_name = m_vg->getName();
     
     QVBoxLayout *layout = new QVBoxLayout;
     setLayout(layout);
 
-    VGInfoLabels *vg_info_labels = new VGInfoLabels(vg);
+    VGInfoLabels *vg_info_labels = new VGInfoLabels(m_vg);
+    LVSizeChart  *lv_size_chart  = new LVSizeChart(m_vg);
+    QSplitter *tree_splitter = new QSplitter(Qt::Vertical);
+    QSplitter *lv_splitter = new QSplitter();
+    QSplitter *pv_splitter = new QSplitter();
+
     layout->addWidget(vg_info_labels);
-
-    LVSizeChart *lv_size_chart = new LVSizeChart(vg);
     layout->addWidget(lv_size_chart);
+    layout->addWidget(tree_splitter);
+    tree_splitter->addWidget(lv_splitter);
+    tree_splitter->addWidget(pv_splitter);
 
-    vg_tree = new VGTree(vg);
-    layout->addWidget(vg_tree);
+    m_vg_tree = new VGTree(m_vg);
+    m_pv_tree = new PVTree(m_vg);
 
-    QWidget *pv_tree_widget = new QWidget();
+    lv_splitter->addWidget(m_vg_tree);
+    pv_splitter->addWidget(m_pv_tree);
+    lv_splitter->setStretchFactor(0, 1);
+    pv_splitter->setStretchFactor(0, 1);
+
+    QWidget *test_widget = new QWidget;
+    QLabel *test_label = new QLabel("volumes");
+    QHBoxLayout *test_layout = new QHBoxLayout();
+    test_widget->setLayout(test_layout);
+    test_layout->addWidget(test_label);
     
-    QVBoxLayout *pv_tree_layout = new QVBoxLayout;
-    pv_tree_layout->setMargin(0);
-    
-    pv_tree_widget->setLayout(pv_tree_layout);
-    QLabel *pv_label = new QLabel("<b>Physical Volumes</b>");
-    pv_tree = new PVTree(vg);
-
-    QSplitter *splitter = new QSplitter();
-    
-    layout->addWidget(splitter);
-    pv_tree_layout->addWidget(pv_label, 0, Qt::AlignHCenter);
-    pv_tree_layout->addWidget(pv_tree);
-    splitter->addWidget(pv_tree_widget);
-    splitter->setStretchFactor(0, 1);
-
-    QWidget *lv_properties_widget = new QWidget();
-    QVBoxLayout *lv_properties_layout = new QVBoxLayout;
-    lv_properties_layout->setMargin(0);
-    
-    lv_properties_widget->setLayout(lv_properties_layout);
-
-    QLabel *lv_properties_label = new QLabel("<b>Logical Volume Properties</b>");
-    lv_properties_layout->addWidget(lv_properties_label, 0 , Qt::AlignHCenter);
+    pv_splitter->addWidget(test_widget);
 
     QScrollArea *lv_properties_scroll = new QScrollArea();
-    lv_properties_layout->addWidget(lv_properties_scroll);
-    lv_properties_stack = new LVPropertiesStack(vg);
-    lv_properties_scroll->setWidget( lv_properties_stack );
+    m_lv_properties_stack = new LVPropertiesStack(m_vg);
+    lv_properties_scroll->setWidget( m_lv_properties_stack );
 
-    splitter->addWidget(lv_properties_widget);
+    lv_splitter->addWidget(lv_properties_scroll);
 
-    connect(vg_tree, SIGNAL(itemClicked(QTreeWidgetItem*, int)), 
-	    lv_properties_stack, SLOT(changeLVStackIndex(QTreeWidgetItem*, int)));
+    connect(m_vg_tree, SIGNAL(itemClicked(QTreeWidgetItem*, int)), 
+	    m_lv_properties_stack, SLOT(changeLVStackIndex(QTreeWidgetItem*, int)));
 }
 
 VolGroup* VolumeGroupTab::getVolumeGroup()
 {
-    return vg;   
+    return m_vg;   
 }
 
 QString VolumeGroupTab::getVolumeGroupName()
 {
-    return group_name;   // will return empty string if not a volume group
+    return m_group_name;   // will return empty string if not a volume group
 }
 

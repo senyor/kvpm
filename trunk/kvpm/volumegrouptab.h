@@ -11,35 +11,31 @@
  * 
  * See the file "COPYING" for the exact licensing terms.
  */
-#ifndef TOPWINDOWTAB_H
-#define TOPWINDOWTAB_H
+
+#ifndef VOLUMEGROUPTAB_H
+#define VOLUMEGROUPTAB_H
 
 #include <QString>
-#include <QVBoxLayout>
-#include <QMainWindow>
-#include <QScrollArea>
-#include <QTabWidget>
-#include <QStackedWidget>
-#include <QTreeWidgetItem>
-#include "lvpropertiesstack.h"
-#include "pvtree.h"
-#include "vgtree.h"
- 
-class MasterList;
+
+
 class VolGroup;
+class LVPropertiesStack;
+class PVTree;
+class VGTree;
+
 
 class VolumeGroupTab : public QWidget
 {
 Q_OBJECT
-    bool is_vg;
-    VolGroup *vg;
-    QString group_name;
-    LVPropertiesStack *lv_properties_stack;
-    PVTree *pv_tree;
-    VGTree *vg_tree;
+
+    VolGroup *m_vg;
+    QString m_group_name;
+    LVPropertiesStack *m_lv_properties_stack;
+    PVTree *m_pv_tree;
+    VGTree *m_vg_tree;
     
  public:
-    VolumeGroupTab(VolGroup *VolumeGroup, QWidget *parent = 0);
+    VolumeGroupTab(VolGroup *volumeGroup, QWidget *parent = 0);
     VolGroup* getVolumeGroup();
     QString getVolumeGroupName();
 
