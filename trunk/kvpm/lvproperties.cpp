@@ -49,15 +49,15 @@ LVProperties::LVProperties(LogVol *logicalVolume, int segment, QWidget *parent):
     else
 	layout->addWidget(new QLabel("Mount point: Not mounted"));
 
-    if(LogicalVolume->isSnap())
-	layout->addWidget(new QLabel("Snapshot origin: "  + LogicalVolume->getOrigin()));
+    if(logicalVolume->isSnap())
+	layout->addWidget(new QLabel("Snapshot origin: "  + logicalVolume->getOrigin()));
 
     layout->addStretch();
 
     layout->addWidget(new QLabel("Physical Volumes"), 0, Qt::AlignHCenter);
 
     if(segment > -1){
-	pv_list = logicalVolume->getDevicePath(Segment);
+	pv_list = logicalVolume->getDevicePath(segment);
 	for(int pv = 0; pv < pv_list.size(); pv++)
 	    layout->addWidget(new QLabel(pv_list[pv]));
     }
