@@ -56,15 +56,17 @@ VolumeGroupTab::VolumeGroupTab(VolGroup *volumeGroup, QWidget *parent) :
     QWidget *test_widget = new QWidget;
     QLabel *test_label = new QLabel("volumes");
     QHBoxLayout *test_layout = new QHBoxLayout();
+    test_widget->setBackgroundRole(QPalette::Base);
+    test_widget->setAutoFillBackground(true);
     test_widget->setLayout(test_layout);
     test_layout->addWidget(test_label);
-    
     pv_splitter->addWidget(test_widget);
 
     QScrollArea *lv_properties_scroll = new QScrollArea();
+    lv_properties_scroll->setBackgroundRole(QPalette::Base);
+    lv_properties_scroll->setAutoFillBackground(true);
     m_lv_properties_stack = new LVPropertiesStack(m_vg);
     lv_properties_scroll->setWidget( m_lv_properties_stack );
-
     lv_splitter->addWidget(lv_properties_scroll);
 
     connect(m_vg_tree, SIGNAL(itemClicked(QTreeWidgetItem*, int)), 

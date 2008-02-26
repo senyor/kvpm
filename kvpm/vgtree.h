@@ -52,12 +52,12 @@ Q_OBJECT
     void insertSegmentItems(LogVol *logicalVolume, QTreeWidgetItem *item);
     void insertMirrorLegItems(LogVol *mirrorVolume, QTreeWidgetItem *item);
     
-
 public:
     VGTree(VolGroup *VolumeGroup);
 
 private slots:    
     void popupContextMenu(QPoint point);
+    void adjustColumnWidth(QTreeWidgetItem *);
     void mkfsLogicalVolume();
     void removeLogicalVolume();
     void reduceLogicalVolume();
@@ -70,7 +70,7 @@ private slots:
     void removeMirror();
     void mountFilesystem();
     void unmountFilesystem();
-    
+
 };
 
 #endif
