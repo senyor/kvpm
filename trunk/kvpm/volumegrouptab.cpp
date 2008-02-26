@@ -70,8 +70,8 @@ VolumeGroupTab::VolumeGroupTab(VolGroup *volumeGroup, QWidget *parent) :
     lv_properties_scroll->setWidget( m_lv_properties_stack );
     lv_splitter->addWidget(lv_properties_scroll);
 
-    lv_splitter->setStretchFactor(0, 4);
-    pv_splitter->setStretchFactor(0, 4);
+    lv_splitter->setStretchFactor(0, 3);
+    pv_splitter->setStretchFactor(0, 3);
     lv_splitter->setStretchFactor(1, 1);
     pv_splitter->setStretchFactor(1, 1);
 
