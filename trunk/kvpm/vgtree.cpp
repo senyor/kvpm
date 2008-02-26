@@ -64,9 +64,6 @@ VGTree::VGTree(VolGroup *VolumeGroup) : QTreeWidget(),
 
 	if( ( !m_lv->isMirrorLeg() ) && ( !m_lv->isMirrorLog() ) ) { 
 
-
-	    qDebug() << "Name: " << m_lv->getName();
-	    
 	    if( m_lv->getSegmentCount() == 1 ) {
 		lv_data << m_lv->getName() 
 			<< sizeToString(m_lv->getSize()) 

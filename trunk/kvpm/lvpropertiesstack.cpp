@@ -45,10 +45,10 @@ LVPropertiesStack::LVPropertiesStack(VolGroup *Group, QWidget *parent) : QStacke
     }
     if( members.size() )
 	setCurrentIndex(0);
-
+/*
     setBackgroundRole(QPalette::Base);
     setAutoFillBackground(true);
-
+*/
 
 
 }
