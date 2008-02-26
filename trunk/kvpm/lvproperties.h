@@ -21,7 +21,7 @@ class LogVol;
 class LVProperties : public QWidget
 {
  public:
-    LVProperties(LogVol *LogicalVolume, int Segment, QWidget *parent = 0);
+    LVProperties(LogVol *logicalVolume, int segment, QWidget *parent = 0);
 
 };
 

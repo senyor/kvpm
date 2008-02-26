@@ -17,7 +17,7 @@
 #include "logvol.h"
 #include "lvproperties.h"
 
-LVProperties::LVProperties(LogVol *LogicalVolume, int Segment, QWidget *parent):QWidget(parent)
+LVProperties::LVProperties(LogVol *logicalVolume, int segment, QWidget *parent):QWidget(parent)
 {
     long long extents;
     
@@ -25,22 +25,24 @@ LVProperties::LVProperties(LogVol *LogicalVolume, int Segment, QWidget *parent):
 
     QVBoxLayout *layout = new QVBoxLayout();
 
-    layout->addWidget(new QLabel( "<b>" + LogicalVolume->getName() + "</b>" ), 0, Qt::AlignHCenter);
+    layout->addWidget(new QLabel( "<b>" + logicalVolume->getName() + "</b>" ), 
+		      0, 
+		      Qt::AlignHCenter);
      
-    if(Segment > -1){
-	extents = LogicalVolume->getSegmentExtents(Segment);
-	layout->addWidget(new QLabel(QString("Segment: %1").arg(Segment)));
+    if(segment > -1){
+	extents = logicalVolume->getSegmentExtents(segment);
+	layout->addWidget(new QLabel(QString("Segment: %1").arg(segment)));
     }
     else{
-	extents = LogicalVolume->getExtents();
+	extents = logicalVolume->getExtents();
 	layout->addWidget(new QLabel(QString("Segment: all")));
     }
     
-    layout->addWidget(new QLabel("Allocation: " + LogicalVolume->getPolicy()));
+    layout->addWidget(new QLabel("Allocation: " + logicalVolume->getPolicy()));
     layout->addWidget(new QLabel( QString("Extents: %1").arg( extents ) ));
 
-    if(LogicalVolume->isMounted()){
-	QStringList mount_points = LogicalVolume->getMountPoints();
+    if(logicalVolume->isMounted()){
+	QStringList mount_points = logicalVolume->getMountPoints();
 	for(int x = 0; x < mount_points.size(); x++)
 	    layout->addWidget( new QLabel( "Mount point: " + mount_points[x] ) );
     }
@@ -54,13 +56,13 @@ LVProperties::LVProperties(LogVol *LogicalVolume, int Segment, QWidget *parent):
 
     layout->addWidget(new QLabel("Physical Volumes"), 0, Qt::AlignHCenter);
 
-    if(Segment > -1){
-	pv_list = LogicalVolume->getDevicePath(Segment);
+    if(segment > -1){
+	pv_list = logicalVolume->getDevicePath(Segment);
 	for(int pv = 0; pv < pv_list.size(); pv++)
 	    layout->addWidget(new QLabel(pv_list[pv]));
     }
     else{
-	pv_list = LogicalVolume->getDevicePathAll();
+	pv_list = logicalVolume->getDevicePathAll();
 	for(int pv = 0; pv < pv_list.size(); pv++)
 	    layout->addWidget(new QLabel(pv_list[pv]));
     }
