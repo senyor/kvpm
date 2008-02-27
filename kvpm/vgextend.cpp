@@ -3,7 +3,7 @@
  * 
  * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
  *
- * This file is part of the Klvm project.
+ * This file is part of the Kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License,  version 3, as 
@@ -14,7 +14,9 @@
 
 
 #include <KMessageBox>
+
 #include <QtGui>
+
 #include "processprogress.h"
 #include "vgextend.h"
 
@@ -34,7 +36,7 @@ bool extend_vg(QString VolumeGroupName, QString PhysicalVolumePath)
 	     << VolumeGroupName
 	     << PhysicalVolumePath;
 
-	ProcessProgress extend(args);
+	ProcessProgress extend(args, "Extending vg...", true);
 	return TRUE;
     }
     else

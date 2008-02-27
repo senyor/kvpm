@@ -31,3 +31,6 @@ Known major bug: Currently kvpm doesn't search for the LVM programs
 such a "vgs." It simply expects to find them in /sbin and will fail if
 they aren't there.
 ***
+
+The progress bar doesn't really work either, but that appears to
+be a bug in KDE 4.0, from the report I found.

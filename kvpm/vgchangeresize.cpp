@@ -3,7 +3,7 @@
  * 
  * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
  *
- * This file is part of the Klvm project.
+ * This file is part of the Kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License,  version 3, as 
@@ -14,7 +14,9 @@
 
 
 #include <KMessageBox>
+
 #include <QtGui>
+
 #include "processprogress.h"
 #include "vgchangeresize.h"
 #include "volgroup.h"
@@ -49,7 +51,7 @@ bool change_vg_resize(VolGroup *VolumeGroup)
 	    args << "--resizeable" << "y";
 	
 	args << vg_name;
-        ProcessProgress resize(args);
+        ProcessProgress resize(args, "Changing vg resize...");
         return TRUE;
     }
     else

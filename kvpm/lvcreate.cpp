@@ -3,7 +3,7 @@
  * 
  * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
  *
- * This file is part of the Klvm project.
+ * This file is part of the Kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License,  version 3, as 
@@ -34,7 +34,7 @@ bool LVCreate(VolGroup *VolumeGroup)
     LVCreateDialog dialog(VolumeGroup);
     dialog.exec();
     if(dialog.result() == QDialog::Accepted){
-	ProcessProgress create_lv(dialog.argumentsLV(), "", FALSE);
+	ProcessProgress create_lv(dialog.argumentsLV(), "Creating volume...", false);
 	return TRUE;
     }
     else
@@ -46,7 +46,7 @@ bool SnapshotCreate(LogVol *LogicalVolume)
     LVCreateDialog dialog(LogicalVolume, TRUE);
     dialog.exec();
     if(dialog.result() == QDialog::Accepted){
-	ProcessProgress create_lv(dialog.argumentsLV(), "", FALSE);
+	ProcessProgress create_lv(dialog.argumentsLV(), "Creating snapshot...", false);
 	return TRUE;
     }
     else
@@ -74,7 +74,9 @@ bool LVExtend(LogVol *LogicalVolume)
 	    dialog.exec();
 
 	    if(dialog.result() == QDialog::Accepted){
-		ProcessProgress extend_lv(dialog.argumentsLV(), "Extending volume...", TRUE);
+		ProcessProgress extend_lv(dialog.argumentsLV(), 
+					  QString("Extending volume..."), 
+					  true);
 		if( !extend_lv.exitCode() ){
 		    
 		    error = mount( LogicalVolume->getMapperPath().toAscii().data(),

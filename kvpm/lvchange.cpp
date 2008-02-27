@@ -3,7 +3,7 @@
  * 
  * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
  *
- * This file is part of the Klvm project.
+ * This file is part of the Kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License,  version 3, as 
@@ -24,7 +24,7 @@ bool change_lv(LogVol *LogicalVolume)
     LVChangeDialog dialog(LogicalVolume);
     dialog.exec();
     if(dialog.result() == QDialog::Accepted){
-        ProcessProgress change_lv(dialog.arguments());
+        ProcessProgress change_lv(dialog.arguments(),"Changing lv attributes");
 	return TRUE;
     }
     else

@@ -3,7 +3,7 @@
  * 
  * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
  *
- * This file is part of the Klvm project.
+ * This file is part of the Kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License,  version 3, as 
@@ -34,8 +34,8 @@ bool reduce_vg_one(QString VolumeGroupName, QString PhysicalVolumePath)
 	args << "/sbin/vgreduce"
 	     << VolumeGroupName
 	     << PhysicalVolumePath;
-       ProcessProgress remove( args );
-       return TRUE;
+	ProcessProgress remove( args, "Reducing vg...", true );
+	return TRUE;
     }
     else
 	return FALSE;

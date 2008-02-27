@@ -14,6 +14,7 @@
 
 
 #include <QtGui>
+
 #include "addmirror.h"
 #include "lvactionsmenu.h"
 #include "lvchange.h"
@@ -24,7 +25,6 @@
 #include "masterlist.h"
 #include "mkfs.h"
 #include "mount.h"
-#include "processprogress.h"
 #include "pvmove.h"
 #include "removemirror.h"
 #include "sizetostring.h"
