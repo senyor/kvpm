@@ -47,8 +47,8 @@ VolumeGroupTab::VolumeGroupTab(VolGroup *volumeGroup, QWidget *parent) :
 
     m_vg_tree = new VGTree(m_vg);
     m_pv_tree = new PVTree(m_vg);
-    m_vg_tree->setAlternatingColumnColors(true);
-    m_pv_tree->setAlternatingColumnColors(true);
+    m_vg_tree->setAlternatingRowColors(true);
+    m_pv_tree->setAlternatingRowColors(true);
     
     lv_splitter->addWidget(m_vg_tree);
     pv_splitter->addWidget(m_pv_tree);
