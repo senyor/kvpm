@@ -21,6 +21,7 @@
 #include "vginfolabels.h"
 #include "vgremove.h"
 #include "vgtree.h"
+#include "volgroup.h"
 #include "volumegrouptab.h"
 
 

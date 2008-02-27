@@ -11,16 +11,19 @@
  * 
  * See the file "COPYING" for the exact licensing terms.
  */
+
 #ifndef VGINFOLABELS_H
 #define VGINFOLABELS_H
 
-#include <QWidget>
-#include "volgroup.h"
+#include <QFrame>
 
-class VGInfoLabels : public QWidget
+class VolGroup;
+
+
+class VGInfoLabels : public QFrame
 {
  public:
-     VGInfoLabels(VolGroup *VolumeGroup, QWidget *parent = 0);
+     VGInfoLabels(VolGroup *volumeGroup, QWidget *parent = 0);
     
 };
 
