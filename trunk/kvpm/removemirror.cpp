@@ -3,7 +3,7 @@
  * 
  * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
  *
- * This file is part of the Klvm project.
+ * This file is part of the Kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License,  version 3, as 
@@ -25,7 +25,7 @@ bool remove_mirror(LogVol *LogicalVolume)
     RemoveMirrorDialog dialog(LogicalVolume);
     dialog.exec();
     if(dialog.result() == QDialog::Accepted){
-        ProcessProgress remove_mirror(dialog.arguments());
+        ProcessProgress remove_mirror(dialog.arguments(), "Removing mirror...");
         return TRUE;
     }
     else

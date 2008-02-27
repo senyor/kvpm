@@ -19,7 +19,7 @@
 #include "logvol.h"
 #include "mountentry.h"
 #include "mountinfo.h"
-#include "processprogress.h"
+//#include "processprogress.h"
 #include "storagedevice.h"
 #include "volgroup.h"
 

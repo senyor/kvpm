@@ -3,7 +3,7 @@
  * 
  * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
  *
- * This file is part of the Klvm project.
+ * This file is part of the Kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License,  version 3, as 
@@ -12,132 +12,95 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
+#include <KProcess>
 
 #include <QtGui>
+
 #include "processprogress.h"
 
 
-ProcessProgress::ProcessProgress(QStringList Arguments, QString Operation, bool ShowProgress, QWidget *parent):QWidget(parent)
+ProcessProgress::ProcessProgress(QStringList arguments, 
+				 QString operation, 
+				 bool showProgress, 
+				 QWidget *parent) : 
+    QWidget(parent), 
+    m_show_progress(showProgress)
 {
-    QString program;
     QProgressBar *progress_bar;
  
-    if(Arguments.size() == 0){
+    if(arguments.size() == 0){
 	qDebug() << "ProcessProgress given an empty arguments list";
 	close();
     }
     else{
-	program = Arguments.takeFirst();
-	show_progress = ShowProgress;
-	process = new QProcess(this);
+	m_process = new KProcess(this);
 	QStringList environment = QProcess::systemEnvironment();
 	environment << "LVM_SUPPRESS_FD_WARNINGS=1";
-	process->setEnvironment(environment);
-	loop = new QEventLoop(this);
+	m_process->setEnvironment(environment);
+	m_loop = new QEventLoop(this);
 	
-	if(show_progress){
-	    progress_dialog = new KProgressDialog(this, "progress", Operation);
-	    progress_dialog->setAllowCancel(FALSE);
-	    progress_bar = progress_dialog->progressBar();
+	if(m_show_progress){
+	    m_progress_dialog = new KProgressDialog(this, "progress", operation);
+	    m_progress_dialog->setAllowCancel(false);
+	    progress_bar = m_progress_dialog->progressBar();
 	    progress_bar->setRange(0,0);
-	    
 	}
 	
-	connect(process, SIGNAL(finished(int, QProcess::ExitStatus)), 
+	connect(m_process,  SIGNAL(finished(int, QProcess::ExitStatus)), 
 		this, SLOT(stopProgressLoop(int, QProcess::ExitStatus)));
-	connect(process, SIGNAL(readyReadStandardOutput()),
+
+	connect(m_process, SIGNAL(readyReadStandardOutput()),
 		this, SLOT(readStandardOut()));
-	connect(process, SIGNAL(readyReadStandardError()),
+
+	connect(m_process, SIGNAL(readyReadStandardError()),
 		this, SLOT(readStandardError()));
 	
+	m_process->setOutputChannelMode(KProcess::SeparateChannels);
+	m_process->setReadChannel(QProcess::StandardOutput);
+	m_process->setProgram(arguments);
 	
-	process->setReadChannel(QProcess::StandardOutput);
+	m_process->start();
+	m_process->closeWriteChannel();
+	m_loop->exec(QEventLoop::ExcludeUserInputEvents);
+
+	m_process->waitForFinished();
 	
-	process->start(program, Arguments);
-	process->closeWriteChannel();
-	
-	loop->exec(QEventLoop::ExcludeUserInputEvents);
-	process->waitForFinished();
-	
-	if (process->exitCode())
-	    QMessageBox::critical(this, "Execution of " + program + " produced errors", output_all.join(""));
+	if (m_process->exitCode()){
+	    QMessageBox::critical(this, 
+				  "Execution of " + arguments.takeFirst() + " produced errors", 
+				  m_output_all.join(""));
+	}
     }
-}
-
-ProcessProgress::ProcessProgress(QStringList Arguments, QWidget *parent):QWidget(parent)
-{
-    QProgressBar *progress_bar;
- 
-    if(Arguments.size() == 0)
-	qDebug() << "ProcessProgress given an empty arguments list";
-
-    show_progress = FALSE;
-    QString Operation = "";
-    QString program = Arguments.takeFirst();
-
-    process = new QProcess(this);
-    QStringList environment = QProcess::systemEnvironment();
-    environment << "LVM_SUPPRESS_FD_WARNINGS=1";
-    process->setEnvironment(environment);
-    loop = new QEventLoop(this);
-
-    if(show_progress){
-	progress_dialog = new KProgressDialog(this, "progress", Operation);
-	progress_dialog->setAllowCancel(FALSE);
-	progress_bar = progress_dialog->progressBar();
-	progress_bar->setRange(0,0);
-    
-    }
-
-    connect(process, SIGNAL(finished(int, QProcess::ExitStatus)), 
-	    this, SLOT(stopProgressLoop(int, QProcess::ExitStatus)));
-    connect(process, SIGNAL(readyReadStandardOutput()),
-	    this, SLOT(readStandardOut()));
-    connect(process, SIGNAL(readyReadStandardError()),
-	    this, SLOT(readStandardError()));
-    
-
-    process->setReadChannel(QProcess::StandardOutput);
-
-    process->start(program, Arguments);
-    process->closeWriteChannel();
-
-    loop->exec(QEventLoop::ExcludeUserInputEvents);
-    process->waitForFinished();
-
-    if (process->exitCode())
-        QMessageBox::critical(this, "Execution of " + program + " produced errors", output_all.join(""));
 }
 
 void ProcessProgress::stopProgressLoop(int, QProcess::ExitStatus)
 {
-    loop->exit();
-    if(show_progress)
-	progress_dialog->close();
-    
+    m_loop->exit();
+    if(m_show_progress)
+	m_progress_dialog->close();
 }
 
 QStringList ProcessProgress::programOutput()
 {
-    return output_no_error;
+    return m_output_no_error;
 }
 
 int ProcessProgress::exitCode()
 {
-    return process->exitCode();
+    return m_process->exitCode();
 }
 
 void ProcessProgress::readStandardOut()
 {
     QString output_line;
     
-    process->setReadChannel(QProcess::StandardOutput);
-    while(process->canReadLine()){
-	output_line = process->readLine();
+    m_process->setReadChannel(QProcess::StandardOutput);
+    while(m_process->canReadLine()){
+	output_line = m_process->readLine();
 	if(!output_line.contains("partial mode.", Qt::CaseInsensitive)){
-	    output_no_error << output_line;
+	    m_output_no_error << output_line;
 	}
-	output_all << output_line;
+	m_output_all << output_line;
     }
     
 }
@@ -146,11 +109,11 @@ void ProcessProgress::readStandardError()
 {
     QString output_line;
     
-    process->setReadChannel(QProcess::StandardError);
+    m_process->setReadChannel(QProcess::StandardError);
 
-    while(process->canReadLine()){
-	output_line = process->readLine();
-	output_all << output_line;
+    while(m_process->canReadLine()){
+	output_line = m_process->readLine();
+	m_output_all << output_line;
     }
     
 }

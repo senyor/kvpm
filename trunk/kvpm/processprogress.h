@@ -19,24 +19,30 @@
 #include <QEventLoop>
 #include <KProgressDialog>
 
+class KProcess;
+
+
 class ProcessProgress : public QWidget
 {
 Q_OBJECT
 
-    bool show_progress;
-    QEventLoop *loop;
-    QStringList output_all, output_no_error;
-    KProgressDialog *progress_dialog;
-    QProcess *process;
+    bool m_show_progress;
+    QEventLoop *m_loop;
+    QStringList m_output_all, m_output_no_error;
+    KProgressDialog *m_progress_dialog;
+    KProcess *m_process;
 
  public:
-    ProcessProgress(QStringList Arguments, QString Operation, bool ShowProgress = FALSE, QWidget *parent = 0);
-   ProcessProgress(QStringList Arguments, QWidget *parent = 0);
+    ProcessProgress(QStringList arguments,
+		    QString operation, 
+		    bool showProgress = false, 
+		    QWidget *parent = 0);
+
     QStringList programOutput();
     int exitCode();
     
  public slots:   
-     void stopProgressLoop(int ExitCode, QProcess::ExitStatus ExitStatus);
+     void stopProgressLoop(int exitCode, QProcess::ExitStatus);
      void readStandardOut();
      void readStandardError();
  

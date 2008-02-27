@@ -3,7 +3,7 @@
  * 
  * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
  *
- * This file is part of the Klvm project.
+ * This file is part of the Kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License,  version 3, as 
@@ -33,7 +33,7 @@ bool create_pv(QString PhysicalVolumePath)
 	     << "--force"
 	     << PhysicalVolumePath;
 
-	ProcessProgress create(args);
+	ProcessProgress create(args, "Creating pv...", false);
 	return TRUE;
     }
     else

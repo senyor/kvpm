@@ -14,6 +14,7 @@
 
 
 #include <KMessageBox>
+
 #include <QtGui>
 
 #include "masterlist.h"
@@ -30,7 +31,7 @@ bool reduce_vg(VolGroup *volumeGroup)
     dialog.exec();
 
     if(dialog.result() == QDialog::Accepted){
-        ProcessProgress reduce( dialog.arguments() );
+        ProcessProgress reduce( dialog.arguments(), "Reducing vg...", true );
         return true;
     }
 

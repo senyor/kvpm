@@ -3,7 +3,7 @@
  * 
  * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
  *
- * This file is part of the Klvm project.
+ * This file is part of the Kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License,  version 3, as 
@@ -29,7 +29,7 @@ bool change_vg_lv(VolGroup *VolumeGroup)
     VGChangeLVDialog dialog(VolumeGroup);
     dialog.exec();
     if(dialog.result() == QDialog::Accepted){
-        ProcessProgress change( dialog.arguments() );
+        ProcessProgress change( dialog.arguments(), "Changing limit..." );
 	return TRUE;
     }
     else
