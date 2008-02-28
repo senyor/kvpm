@@ -3,7 +3,7 @@
  * 
  * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
  *
- * This file is part of the Klvm project.
+ * This file is part of the Kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License,  version 3, as 
@@ -14,14 +14,15 @@
 
 
 #include <QtGui>
+
 #include "vgchangealloc.h"
 
 /* This dialog changes the default allocation policy for
    the volume group */
 
-VGChangeAllocDialog::VGChangeAllocDialog(QString VolGroupName, QWidget *parent):
+VGChangeAllocDialog::VGChangeAllocDialog(QString volumeGroupName, QWidget *parent):
     KDialog(parent),
-    vg_name(VolGroupName)
+    m_vg_name(volumeGroupName)
 {
 
     setWindowTitle("Extent allocation policy");
@@ -31,7 +32,7 @@ VGChangeAllocDialog::VGChangeAllocDialog(QString VolGroupName, QWidget *parent):
     QVBoxLayout *layout = new QVBoxLayout();
     dialog_body->setLayout(layout);
 
-    QLabel *name_label = new QLabel( "Volume group: <b>" + vg_name + "</b>" );
+    QLabel *name_label = new QLabel( "Volume group: <b>" + m_vg_name + "</b>" );
     name_label->setAlignment(Qt::AlignCenter);
     layout->addWidget(name_label);
 
@@ -41,15 +42,15 @@ VGChangeAllocDialog::VGChangeAllocDialog(QString VolGroupName, QWidget *parent):
     alloc_box->setLayout(group_layout);
     layout->addWidget(alloc_box);
     
-    normal = new QRadioButton("Normal");
-    normal->setChecked(TRUE);
-    contiguous = new QRadioButton("Contiguous");
-    anywhere = new QRadioButton("Anwhere");
-    cling = new QRadioButton("Cling");    
-    group_layout->addWidget(normal);
-    group_layout->addWidget(contiguous);
-    group_layout->addWidget(anywhere);
-    group_layout->addWidget(cling);  
+    m_normal     = new QRadioButton("Normal");
+    m_contiguous = new QRadioButton("Contiguous");
+    m_anywhere   = new QRadioButton("Anwhere");
+    m_cling      = new QRadioButton("Cling");    
+    m_normal->setChecked(true);
+    group_layout->addWidget(m_normal);
+    group_layout->addWidget(m_contiguous);
+    group_layout->addWidget(m_anywhere);
+    group_layout->addWidget(m_cling);  
 }
 
 QStringList VGChangeAllocDialog::arguments()
@@ -57,19 +58,19 @@ QStringList VGChangeAllocDialog::arguments()
     QString allocation_policy;
     QStringList args;
 
-    if(normal->isChecked())
-	allocation_policy = "normal";
-    if(contiguous->isChecked())
+    if(m_contiguous->isChecked())
 	allocation_policy = "contiguous";
-    if(anywhere->isChecked())
+    else if(m_anywhere->isChecked())
 	allocation_policy = "anywhere";
-    if(cling->isChecked())
+    else if(m_cling->isChecked())
 	allocation_policy = "cling";
+    else
+	allocation_policy = "normal";
 
     args << "/sbin/vgchange" 
 	 << "--alloc"
 	 << allocation_policy
-	 << vg_name;
+	 << m_vg_name;
 
     return args;
 }

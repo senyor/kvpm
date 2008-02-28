@@ -24,29 +24,30 @@
    group may also be unlimited with lvm2 format */
 
 
-bool change_vg_lv(VolGroup *VolumeGroup)
+bool change_vg_lv(VolGroup *volumeGroup)
 {
-    VGChangeLVDialog dialog(VolumeGroup);
+    VGChangeLVDialog dialog(volumeGroup);
     dialog.exec();
     if(dialog.result() == QDialog::Accepted){
         ProcessProgress change( dialog.arguments(), "Changing limit..." );
-	return TRUE;
+	return true;
     }
     else
-	return FALSE;
+	return false;
 }
 
 
-VGChangeLVDialog::VGChangeLVDialog(VolGroup *VolumeGroup, QWidget *parent) :
+VGChangeLVDialog::VGChangeLVDialog(VolGroup *volumeGroup, QWidget *parent) :
     KDialog(parent),
-    vg(VolumeGroup)
+    m_vg(volumeGroup)
 {
+
     setWindowTitle("Logical volume limit");
-    vg_name = vg->getName();
+    m_vg_name = m_vg->getName();
 
 // We don't want the limit set to less than the number already in existence!
 
-    int lv_count = vg->getLogVolCount();
+    int lv_count = m_vg->getLogVolCount();
     if(lv_count <= 0)
 	lv_count = 1;
 
@@ -55,49 +56,50 @@ VGChangeLVDialog::VGChangeLVDialog(VolGroup *VolumeGroup, QWidget *parent) :
     QVBoxLayout *layout = new QVBoxLayout();
     dialog_body->setLayout(layout);
 
-    QLabel *name_label = new QLabel("Volume group: <b>" + vg_name);
+    QLabel *name_label = new QLabel("Volume group: <b>" + m_vg_name);
     name_label->setAlignment(Qt::AlignCenter);
     layout->addWidget(name_label);
     
-    limit_lvs = new QGroupBox("Maximum logical volumes");
+    m_limit_lvs = new QGroupBox("Maximum logical volumes");
     QVBoxLayout *groupbox_layout = new QVBoxLayout();
-    limit_lvs->setLayout(groupbox_layout);
+    m_limit_lvs->setLayout(groupbox_layout);
 
     QLabel *message_label  = new QLabel();
-    message_label->setWordWrap(TRUE);
+    message_label->setWordWrap(true);
     layout->addWidget(message_label);
     QLabel *current_limit_label = new QLabel;
     layout->addWidget(current_limit_label);
-    if( vg->getLogVolMax() )
-	current_limit_label->setText( QString( "Current limit: %1" ).arg( vg->getLogVolMax() ) );
+
+    if( m_vg->getLogVolMax() )
+	current_limit_label->setText( QString( "Current limit: %1" ).arg( m_vg->getLogVolMax() ) );
     else
 	current_limit_label->setText( QString("Current limit: unlimited") );
     
-    max_lvs = new QSpinBox();
-    groupbox_layout->addWidget(max_lvs);
+    m_max_lvs = new QSpinBox();
+    groupbox_layout->addWidget(m_max_lvs);
 
-    if(vg->getFormat() == "lvm1"){
+    if(m_vg->getFormat() == "lvm1"){
 	message_label->setText( (QString) "This volume group is in lvm1 format. Unless you" +
 	                       " have a reason to set the limit lower it is normally best" +
 	                       " to leave the limit at the maximum allowed: 255." );
 	
-	max_lvs->setEnabled(TRUE);
-	max_lvs->setRange(lv_count, 255);
-	max_lvs->setValue(255);
+	m_max_lvs->setEnabled(true);
+	m_max_lvs->setRange(lv_count, 255);
+	m_max_lvs->setValue(255);
     }
     else{
 	message_label->setText( (QString) "This volume group is in lvm2 format. Unless you" +
 	                       " have a reason to limit the maximum logical volumes it is" +
 	                       " normally best to leave them unlimited" );
 	
-	limit_lvs->setCheckable(TRUE);
-	limit_lvs->setChecked(FALSE);
-	limit_lvs->setEnabled(TRUE);
-	max_lvs->setMinimum(lv_count);
-	max_lvs->setRange(lv_count, 32767); // does anyone need more than 32 thousand?
+	m_limit_lvs->setCheckable(true);
+	m_limit_lvs->setChecked(false);
+	m_limit_lvs->setEnabled(true);
+	m_max_lvs->setMinimum(lv_count);
+	m_max_lvs->setRange(lv_count, 32767); // does anyone need more than 32 thousand?
     }
 
-    layout->addWidget(limit_lvs);
+    layout->addWidget(m_limit_lvs);
 }
 
 QStringList VGChangeLVDialog::arguments()
@@ -107,12 +109,12 @@ QStringList VGChangeLVDialog::arguments()
     args << "/sbin/vgchange"
 	 << "--logicalvolume";
 
-    if(max_lvs->isEnabled())
-	args << QString( "%1" ).arg( max_lvs->value() );
+    if(m_max_lvs->isEnabled())
+	args << QString( "%1" ).arg( m_max_lvs->value() );
     else
 	args << QString( "%1" ).arg( 0 );           // unlimited
 
-    args << vg_name;
+    args << m_vg_name;
 
     return args;
 }

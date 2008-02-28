@@ -11,6 +11,7 @@
  * 
  * See the file "COPYING" for the exact licensing terms.
  */
+
 #ifndef VGCHANGEALLOC_H
 #define VGCHANGEALLOC_H
 
@@ -21,11 +22,12 @@
 class VGChangeAllocDialog : public KDialog
 {
 Q_OBJECT
-    QString vg_name;
-    QRadioButton *normal, *contiguous, *anywhere, *cling;;
+
+    QString m_vg_name;
+    QRadioButton *m_normal, *m_contiguous, *m_anywhere, *m_cling;;
 
 public:
-    VGChangeAllocDialog(QString VolGroupName, QWidget *parent = 0);
+    VGChangeAllocDialog(QString volumeGroupName, QWidget *parent = 0);
     QStringList arguments();
     
 };
