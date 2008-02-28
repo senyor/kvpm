@@ -35,7 +35,7 @@ int main(int argc, char **argv)
 {
 
     KAboutData aboutData( "kvpm", 0,
-			  ki18n("kvpm"), "0.3.2",
+			  ki18n("kvpm"), "0.3.3",
 			  ki18n("Linux volume and partition manager for KDE"),
 			  KAboutData::License_GPL,
 			  ki18n("Copyright (c) 2008 Benjamin Scott") );
