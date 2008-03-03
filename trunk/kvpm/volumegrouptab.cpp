@@ -17,6 +17,8 @@
 
 #include "lvpropertiesstack.h"
 #include "lvsizechart.h"
+#include "physvol.h"
+#include "pvpropertiesstack.h"
 #include "pvtree.h"
 #include "vginfolabels.h"
 #include "vgremove.h"
@@ -54,14 +56,9 @@ VolumeGroupTab::VolumeGroupTab(VolGroup *volumeGroup, QWidget *parent) :
     lv_splitter->addWidget(m_vg_tree);
     pv_splitter->addWidget(m_pv_tree);
 
-    QWidget *test_widget = new QWidget;
-    QLabel *test_label = new QLabel("volumes");
-    QHBoxLayout *test_layout = new QHBoxLayout();
-    test_widget->setBackgroundRole(QPalette::Base);
-    test_widget->setAutoFillBackground(true);
-    test_widget->setLayout(test_layout);
-    test_layout->addWidget(test_label);
-    pv_splitter->addWidget(test_widget);
+    m_pv_properties_stack = new PVPropertiesStack(m_vg);
+    
+    pv_splitter->addWidget(m_pv_properties_stack);
 
     QScrollArea *lv_properties_scroll = new QScrollArea();
     lv_properties_scroll->setWidgetResizable(true);
@@ -80,6 +77,9 @@ VolumeGroupTab::VolumeGroupTab(VolGroup *volumeGroup, QWidget *parent) :
 
     connect(m_vg_tree, SIGNAL(itemClicked(QTreeWidgetItem*, int)), 
 	    m_lv_properties_stack, SLOT(changeLVStackIndex(QTreeWidgetItem*, int)));
+
+    connect(m_pv_tree, SIGNAL(itemClicked(QTreeWidgetItem*, int)), 
+	    m_pv_properties_stack, SLOT(changePVStackIndex(QTreeWidgetItem*, int)));
 }
 
 VolGroup* VolumeGroupTab::getVolumeGroup()

@@ -20,6 +20,7 @@
 
 class VolGroup;
 class LVPropertiesStack;
+class PVPropertiesStack;
 class PVTree;
 class VGTree;
 
@@ -31,6 +32,7 @@ Q_OBJECT
     VolGroup *m_vg;
     QString m_group_name;
     LVPropertiesStack *m_lv_properties_stack;
+    PVPropertiesStack *m_pv_properties_stack;
     PVTree *m_pv_tree;
     VGTree *m_vg_tree;
     

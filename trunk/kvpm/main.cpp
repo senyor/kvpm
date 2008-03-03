@@ -20,6 +20,7 @@
 
 #include <QtGui>
 
+#include "executablefinder.h"
 #include "topwindow.h"
 
 class VolGroup;
@@ -51,6 +52,9 @@ int main(int argc, char **argv)
 	    return 0;
 	}
     }
+
+    ExecutableFinder *executable_finder = new ExecutableFinder();
+    
     
     MainWindow = new TopWindow(NULL);
     MainWindow->setGeometry(0,0,1000,750);
