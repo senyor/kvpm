@@ -31,6 +31,8 @@ class MasterList;
 
 TopWindow *MainWindow;
 MasterList *master_list;
+ExecutableFinder *g_executable_finder;
+
 
 int main(int argc, char **argv)
 {
@@ -53,7 +55,7 @@ int main(int argc, char **argv)
 	}
     }
 
-    ExecutableFinder *executable_finder = new ExecutableFinder();
+    g_executable_finder = new ExecutableFinder();
     
     
     MainWindow = new TopWindow(NULL);

@@ -16,7 +16,10 @@
 
 #include <QtGui>
 
+#include "executablefinder.h"
 #include "processprogress.h"
+
+extern ExecutableFinder *g_executable_finder;
 
 
 ProcessProgress::ProcessProgress(QStringList arguments, 
@@ -27,6 +30,8 @@ ProcessProgress::ProcessProgress(QStringList arguments,
     m_show_progress(showProgress)
 {
     QProgressBar *progress_bar;
+    
+//    qDebug() << g_executable_finder->getExecutablePath("vgs");
  
     if(arguments.size() == 0){
 	qDebug() << "ProcessProgress given an empty arguments list";
@@ -117,4 +122,3 @@ void ProcessProgress::readStandardError()
     }
     
 }
-
