@@ -30,14 +30,19 @@ ProcessProgress::ProcessProgress(QStringList arguments,
     m_show_progress(showProgress)
 {
     QProgressBar *progress_bar;
-    
-//    qDebug() << g_executable_finder->getExecutablePath("vgs");
+    QString executable_path;
  
     if(arguments.size() == 0){
 	qDebug() << "ProcessProgress given an empty arguments list";
 	close();
     }
     else{
+	executable_path = arguments.takeFirst();
+	executable_path = g_executable_finder->getExecutablePath(executable_path);
+
+	qDebug() << executable_path;
+	
+
 	m_process = new KProcess(this);
 	QStringList environment = QProcess::systemEnvironment();
 	environment << "LVM_SUPPRESS_FD_WARNINGS=1";
@@ -62,7 +67,7 @@ ProcessProgress::ProcessProgress(QStringList arguments,
 	
 	m_process->setOutputChannelMode(KProcess::SeparateChannels);
 	m_process->setReadChannel(QProcess::StandardOutput);
-	m_process->setProgram(arguments);
+	m_process->setProgram(executable_path, arguments);
 	
 	m_process->start();
 	m_process->closeWriteChannel();
@@ -72,7 +77,7 @@ ProcessProgress::ProcessProgress(QStringList arguments,
 	
 	if (m_process->exitCode()){
 	    QMessageBox::critical(this, 
-				  "Execution of " + arguments.takeFirst() + " produced errors", 
+				  "Execution of " + executable_path + " produced errors", 
 				  m_output_all.join(""));
 	}
     }
