@@ -65,7 +65,7 @@ QStringList RemoveMirrorDialog::arguments()
     QStringList tempstrings;
     QStringList args;
 
-    args << "/sbin/lvconvert"
+    args << "lvconvert"
 	 << "--mirrors" 
 	 << QString("%1").arg(count_spin->value()) 
 	 << logical_volume_name;

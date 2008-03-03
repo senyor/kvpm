@@ -3,7 +3,7 @@
  * 
  * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
  *
- * This file is part of the Klvm project.
+ * This file is part of the Kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License,  version 3, as 
@@ -29,7 +29,7 @@ VolGroup::VolGroup(QString volumeGroupData)
 
 /*  a bug(?) in lvm2 2.02 causes the reported logical volume count
     to be inconsistent with the number of logical volumes reported 
-    by /sbin/lvs when a physical volume move is in progress
+    by "lvs" when a physical volume move is in progress
 
     lv_count = (volumeGroupData.section('|',2,2)).toInt();  
 */

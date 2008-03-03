@@ -30,7 +30,7 @@ bool remove_missing_pv(VolGroup *VolumeGroup)
 
     if(KMessageBox::warningYesNo( 0, message) == 3){      // 3 = "yes" button
 
-    args << "/sbin/vgreduce"
+    args << "vgreduce"
 	 << "--removemissing"
 	 << vg_name;
 

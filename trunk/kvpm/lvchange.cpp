@@ -50,7 +50,7 @@ QStringList LVChangeDialog::arguments()
 {
     QStringList args, temp;
 
-    args << "/sbin/lvchange";
+    args << "lvchange";
     
     if(general_tab->available_check->isChecked())
 	args << "--available" << "y";

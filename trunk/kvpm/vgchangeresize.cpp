@@ -43,7 +43,7 @@ bool change_vg_resize(VolGroup *VolumeGroup)
 
     if(KMessageBox::questionYesNo( 0, message) == 3){      // 3 = "yes" button
 
-	args << "/sbin/vgchange";
+	args << "vgchange";
 
 	if( VolumeGroup->isResizable() )
 	    args << "--resizeable" << "n";

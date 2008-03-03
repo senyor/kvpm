@@ -31,7 +31,7 @@ bool reduce_vg_one(QString VolumeGroupName, QString PhysicalVolumePath)
     int return_code =  KMessageBox::questionYesNo( 0, message);
 
     if(return_code == 3){  // 3 = yes button
-	args << "/sbin/vgreduce"
+	args << "vgreduce"
 	     << VolumeGroupName
 	     << PhysicalVolumePath;
 	ProcessProgress remove( args, "Reducing vg...", true );

@@ -31,7 +31,7 @@ bool remove_vg(VolGroup *VolumeGroup)
 
     if(KMessageBox::questionYesNo( 0, message) == 3){      // 3 = "yes" button
     
-	args << "/sbin/vgremove"
+	args << "vgremove"
 	     << VolumeGroup->getName();
 
 	ProcessProgress remove(args, "Removing vg...");

@@ -325,7 +325,7 @@ QStringList AddMirrorDialog::arguments()
 	}
     }
 
-    args << "/sbin/lvconvert";
+    args << "lvconvert";
     
     if(core_log->isChecked())
 	args << "--corelog";

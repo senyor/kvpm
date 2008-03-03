@@ -106,7 +106,7 @@ QStringList VGChangeLVDialog::arguments()
 {
     QStringList args;
     
-    args << "/sbin/vgchange"
+    args << "vgchange"
 	 << "--logicalvolume";
 
     if(m_max_lvs->isEnabled())

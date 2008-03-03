@@ -37,11 +37,7 @@ ProcessProgress::ProcessProgress(QStringList arguments,
 	close();
     }
     else{
-	executable_path = arguments.takeFirst();
-	executable_path = g_executable_finder->getExecutablePath(executable_path);
-
-	qDebug() << executable_path;
-	
+	executable_path = g_executable_finder->getExecutablePath( arguments.takeFirst() );
 
 	m_process = new KProcess(this);
 	QStringList environment = QProcess::systemEnvironment();

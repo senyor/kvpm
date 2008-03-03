@@ -67,7 +67,7 @@ QStringList VGChangeAllocDialog::arguments()
     else
 	allocation_policy = "normal";
 
-    args << "/sbin/vgchange" 
+    args << "vgchange" 
 	 << "--alloc"
 	 << allocation_policy
 	 << m_vg_name;

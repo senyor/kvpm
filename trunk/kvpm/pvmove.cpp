@@ -271,7 +271,7 @@ QStringList PVMoveDialog::arguments()
     QStringList args;
     QString source;
     
-    args << "/sbin/pvmove" << "--background";
+    args << "pvmove" << "--background";
 
     if(move_lv){
 	args << "--name";

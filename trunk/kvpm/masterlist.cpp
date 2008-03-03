@@ -3,7 +3,7 @@
  * 
  * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
  *
- * This file is part of the Klvm project.
+ * This file is part of the Kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License,  version 3, as 
@@ -88,10 +88,10 @@ void MasterList::scanVolGroups()
     QStringList arguments;
     int vg_count;
     
-    /* First we run /sbin/vgs to find out what volume groups
+    /* First we run "vgs" to find out what volume groups
        we have and get some information on them  */
     
-    arguments << "/sbin/vgs" << "-o" 
+    arguments << "vgs" << "-o" 
 	      <<  "+vg_extent_size,vg_extent_count,vg_free_count,vg_fmt,max_pv,max_lv"  
 	      << "--noheadings" << "--separator" << "|" << "--nosuffix" 
 	      << "--units" << "b" << "--partial"; 
@@ -109,10 +109,10 @@ VolGroup* MasterList::scanVolGroups(QString VolumeGroupName)
     QStringList vg_output;
     QStringList arguments;
     
-    /* Running /sbin/vgs gets us the information we
+    /* Running vgs gets us the information we
        need to have on the volume group named  */
     
-    arguments << "/sbin/vgs" << "-o" 
+    arguments << "vgs" << "-o" 
 	      <<  "+vg_extent_size,vg_extent_count,vg_free_count,vg_fmt,max_pv,max_lv"  
 	      << "--noheadings" << "--separator" << "|" << "--nosuffix" 
 	      << "--units" << "b" << "--partial" << VolumeGroupName; 
@@ -134,7 +134,7 @@ void MasterList::scanLogVols()
 
     mount_info_list = new MountInformationList();
     
-    arguments << "/sbin/lvs" << "--all" << "-o" 
+    arguments << "lvs" << "--all" << "-o" 
 	      << "lv_name,vg_name,lv_attr,lv_size,origin,snap_percent,move_pv,mirror_log,copy_percent,chunksize,seg_count,stripes,stripesize,seg_size,devices,lv_kernel_major,lv_kernel_minor,lv_minor"  
 	      << "--noheadings" << "--separator" << "|" << "--nosuffix" 
 	      << "--units" << "b" << "--partial"; 
@@ -180,7 +180,7 @@ void MasterList::scanLogVols(VolGroup *VolumeGroup)
 
     mount_info_list = new MountInformationList();
 
-    arguments << "/sbin/lvs" << "--all" << "-o" 
+    arguments << "lvs" << "--all" << "-o" 
 	      << "lv_name,vg_name,lv_attr,lv_size,origin,snap_percent,move_pv,mirror_log,copy_percent,chunksize,seg_count,stripes,stripesize,seg_size,devices,lv_kernel_major,lv_kernel_minor,lv_minor"  
 	      << "--noheadings" << "--separator" << "|" << "--nosuffix" 
 	      << "--units" << "b" << "--partial" << group_name; 
@@ -213,7 +213,7 @@ void MasterList::scanPhysVols()
     int pv_count;
     int vg_count = getVolGroupCount();
     
-    arguments << "/sbin/pvs" << "--noheadings" << "--separator" << "|" << "--nosuffix" 
+    arguments << "pvs" << "--noheadings" << "--separator" << "|" << "--nosuffix" 
 	      << "--units" << "b" << "--partial" << "-o" << "+pv_used,pv_uuid";
     
     ProcessProgress pvscan(arguments, "Scanning physical volumes...");
@@ -248,7 +248,7 @@ void MasterList::scanPhysVols(VolGroup *VolumeGroup)
 
     group_name = VolumeGroup->getName();
     
-    arguments << "/sbin/pvs" << "--noheadings" << "--separator" << "|" << "--nosuffix" 
+    arguments << "pvs" << "--noheadings" << "--separator" << "|" << "--nosuffix" 
 	      << "--units" << "b" << "--partial" << "-o" << "+pv_used,pv_uuid";
     
     ProcessProgress pvscan(arguments, "Scanning physical volumes...");
