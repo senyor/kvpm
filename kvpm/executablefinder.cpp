@@ -74,5 +74,10 @@ ExecutableFinder::ExecutableFinder(QObject *parent) : QObject(parent)
 
 QString ExecutableFinder::getExecutablePath(QString name)
 {
-    return m_path_map.value(name);
+    QString path = m_path_map.value(name);
+
+    if(path == "")
+	qDebug() << "Excutable Finder: error " << name << " does not map to any path";
+    
+    return path;
 }

@@ -80,7 +80,7 @@ QStringList VGChangeExtentDialog::arguments()
 {  
     QStringList args;
     
-    args << "/sbin/vgchange"
+    args << "vgchange"
 	 << "--physicalextentsize"
 	 << extent_size->currentText() + extent_suffix->currentText().at(0)
 	 << vg_name;

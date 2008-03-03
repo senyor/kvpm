@@ -728,7 +728,7 @@ QStringList LVCreateDialog::argumentsLV()
     args << "--extents" << QString("+%1").arg(volume_size);
     
     if( !extend && !snapshot ){                           // create a standard volume
-	program_to_run = "/sbin/lvcreate";
+	program_to_run = "lvcreate";
 	
 	if( name_edit->text() != "" )
 	    args << "--name" << (QString)name_edit->text();
@@ -736,7 +736,7 @@ QStringList LVCreateDialog::argumentsLV()
 	args << vg->getName();
     }
     else if( snapshot ){                                  // create a snapshot
-	program_to_run = "/sbin/lvcreate";
+	program_to_run = "lvcreate";
 	
 	args << "--snapshot";
 	    
@@ -745,7 +745,7 @@ QStringList LVCreateDialog::argumentsLV()
 	args << lv->getFullName();
     }
     else{                                               // extend the current volume
-	program_to_run = "/sbin/lvextend";
+	program_to_run = "lvextend";
 	args <<	lv->getFullName();
     }
 
@@ -773,11 +773,11 @@ QStringList LVCreateDialog::argumentsFS()
 	args << "xfs_growfs" << mount_point;
     }
     else if( (fs == "ext2") || (fs == "ext3") ){
-        args << "/sbin/resize2fs" << "-f"
+        args << "resize2fs" << "-f"
 	     << "/dev/" + vg->getName() + "/" + lv->getName();
     }
     else if(fs == "reiserfs"){
-        args << "/sbin/resize_reiserfs"
+        args << "resize_reiserfs"
 	     << "/dev/" + vg->getName() + "/" + lv->getName();
     }
     return args;

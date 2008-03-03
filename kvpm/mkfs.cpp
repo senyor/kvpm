@@ -3,7 +3,7 @@
  * 
  * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
  *
- * This file is part of the Klvm project.
+ * This file is part of the Kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License,  version 3, as 
@@ -164,14 +164,14 @@ QStringList MkfsDialog::arguments()
 	type = "vfat";
      
     if(type != "swap"){
-	arguments << "/sbin/mkfs";
+	arguments << "mkfs";
 	if(mkfs_options.size())    
 	    arguments << "-t" << type << mkfs_options << path;
 	else
 	    arguments << "-t" << type << path;
     }
     else
-	arguments << "/sbin/mkswap" << path;
+	arguments << "mkswap" << path;
     return arguments;
 }
 

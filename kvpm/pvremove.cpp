@@ -27,7 +27,7 @@ bool remove_pv(QString PhysicalVolumePath)
     message.append("<b>" + PhysicalVolumePath + "</b>?");
 
     if(KMessageBox::questionYesNo( 0, message) == 3){  // 3 = "yes" button
-	args << "/sbin/pvremove" 
+	args << "pvremove" 
 	     << "--force"
 	     << PhysicalVolumePath;
 	ProcessProgress remove(args, "Removing pv...", false);

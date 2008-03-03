@@ -98,7 +98,7 @@ QStringList VGReduceDialog::arguments()
     QStringList args;
     int check_box_count = pv_check_boxes.size();
 
-    args << "/sbin/vgreduce"
+    args << "vgreduce"
 	 << vg_name;
 
     for(int x = 0; x < check_box_count; x++){

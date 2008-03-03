@@ -142,7 +142,7 @@ QStringList VGCreateDialog::arguments()
 {
     QStringList args;
     
-    args << "/sbin/vgcreate"
+    args << "vgcreate"
 	 << "--physicalextentsize"
 	 << m_extent_size->currentText() + m_extent_suffix->currentText().at(0);
     

@@ -3,7 +3,7 @@
  * 
  * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
  *
- * This file is part of the Klvm project.
+ * This file is part of the Kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License,  version 3, as 
@@ -41,7 +41,7 @@ PVChangeDialog::PVChangeDialog(QString PhysicalVolumePath, QWidget *parent):KDia
 QStringList PVChangeDialog::arguments()
 {
     QStringList args;
-    args << "/sbin/pvchange"
+    args << "pvchange"
 	 << "--allocatable";
 
     if(allocation_box->isChecked())

@@ -103,7 +103,7 @@ QStringList VGChangePVDialog::arguments()
 {
     QStringList args;
     
-    args << "/sbin/vgchange"
+    args << "vgchange"
 	 << "--maxphysicalvolumes";
 
     if(max_pvs->isEnabled())

@@ -32,7 +32,7 @@ bool extend_vg(QString VolumeGroupName, QString PhysicalVolumePath)
 
     if( KMessageBox::questionYesNo(0, message) == 3 ){     // 3 is the "yes" button
 
-	args << "/sbin/vgextend"
+	args << "vgextend"
 	     << VolumeGroupName
 	     << PhysicalVolumePath;
 

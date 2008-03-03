@@ -182,7 +182,7 @@ QStringList LVReduceDialog::argumentsFS()
     new_size = (vg->getExtentSize()) * new_extents;
 
     if( (lv->getFilesystem() == "ext2") || (lv->getFilesystem() == "ext3") ){
-	fs_arguments << "/sbin/resize2fs" << "-f"
+	fs_arguments << "resize2fs" << "-f"
 		     << "/dev/mapper/" + vg->getName() + "-" + lv->getName() 
 		     << QString("%1k").arg(new_size / 1024);
     }
@@ -211,7 +211,7 @@ QStringList LVReduceDialog::argumentsLV()
         new_extents = 1;
     new_size = (vg->getExtentSize()) * new_extents;
 
-    lv_arguments << "/sbin/lvreduce" << "--force" 
+    lv_arguments << "lvreduce" << "--force" 
 		 << "--extents" << QString("%1").arg(new_extents)
 		 << vg->getName() + "/" + lv->getName();
     

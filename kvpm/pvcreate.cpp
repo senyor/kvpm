@@ -29,7 +29,7 @@ bool create_pv(QString PhysicalVolumePath)
 
     if(KMessageBox::warningContinueCancel( 0, message) == 5){  // 5 = continue button
 
-	args << "/sbin/pvcreate" 
+	args << "pvcreate" 
 	     << "--force"
 	     << PhysicalVolumePath;
 
