@@ -50,8 +50,6 @@ PVProperties::PVProperties(PhysVol *physicalVolume, QWidget *parent):QWidget(par
 	    if( device_name == pv_name_list[y] )
 		lv_name_list.append( lvs[x]->getName() );
     }
-
-    qDebug() << lv_name_list;
     
 /* next we remove duplicate entries */
 
@@ -60,9 +58,13 @@ PVProperties::PVProperties(PhysVol *physicalVolume, QWidget *parent):QWidget(par
 	for(int x = lv_name_list.size() - 2; x >= 0; x--)
 	    if( lv_name_list[x] == lv_name_list[x + 1] )
 		lv_name_list.removeAt(x + 1);
+
+
+    layout->addWidget( new QLabel( "<b>" + device_name + "</b>" ) );
     
-    QString lv_names = lv_name_list.join(", ");
-    QLabel  *temp = new QLabel(lv_names);
-    layout->addWidget(temp);
+    for(int x = 0; x < lv_name_list.size(); x++)
+	layout->addWidget( new QLabel( lv_name_list[x] ) );
+
+    layout->addStretch();
     
 }
