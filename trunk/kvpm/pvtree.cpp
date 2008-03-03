@@ -48,9 +48,11 @@ PVTree::PVTree(VolGroup *volumeGroup, QWidget *parent) : QTreeWidget(parent)
     
     setupContextMenu();
     setColumnCount(6);
+
     header_labels << "Name" << "Size" << "Free" << "Used"
 		  << "Allocatable" << "Exported" << "Logical Volumes";
     setHeaderLabels(header_labels);
+
     for(int n = 0; n < pvs.size(); n++){
 	pv = pvs[n];
 	pv_data.clear();
@@ -99,6 +101,8 @@ PVTree::PVTree(VolGroup *volumeGroup, QWidget *parent) : QTreeWidget(parent)
 	pv_tree_items.append(item);
     }
     insertTopLevelItems(0, pv_tree_items);
+
+    setColumnHidden(6, true);
 }
 
 void PVTree::setupContextMenu()
