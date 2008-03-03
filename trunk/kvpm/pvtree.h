@@ -30,8 +30,6 @@ class PVTree : public QTreeWidget
 {
 Q_OBJECT
 
-    QList<QTreeWidgetItem *> pv_tree_items;
-
     QMenu *context_menu;
 
     QAction *pv_move_action, 

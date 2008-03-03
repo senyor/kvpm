@@ -125,9 +125,13 @@ VGTree::VGTree(VolGroup *VolumeGroup) : QTreeWidget(),
     }
     insertTopLevelItems(0, lv_tree_items);
 
+    if( lv_tree_items.size() )
+	setCurrentItem( lv_tree_items[0] );
+    
     resizeColumnToContents ( 0 );
 
-// At some point the columns shown and hidden by a configuration menu
+// At some point the columns shown and hidden will
+// be set by a configuration menu
 
     hideColumn(4);
     hideColumn(5);

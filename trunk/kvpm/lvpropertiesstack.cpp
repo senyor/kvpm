@@ -53,7 +53,7 @@ LVPropertiesStack::LVPropertiesStack(VolGroup *Group, QWidget *parent) : QStacke
 
 }
 
-void LVPropertiesStack::changeLVStackIndex(QTreeWidgetItem *item, int)
+void LVPropertiesStack::changeLVStackIndex(QTreeWidgetItem *item, QTreeWidgetItem*)
 {
 /* If *item points to a volume we set the widget stack to the
    widget with that volume's information.
