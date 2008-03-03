@@ -32,7 +32,8 @@ Q_OBJECT
     PVPropertiesStack(VolGroup *volumeGroup, QWidget *parent = 0);
  
  public slots:
-     void changePVStackIndex(QTreeWidgetItem *item, int column);
+    void changePVStackIndex(QTreeWidgetItem *item, QTreeWidgetItem*);
+    
 };
 
 #endif

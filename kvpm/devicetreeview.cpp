@@ -3,7 +3,7 @@
  * 
  * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
  *
- * This file is part of the Klvm project.
+ * This file is part of the Kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License,  version 3, as 
@@ -51,6 +51,7 @@ DeviceTreeView::DeviceTreeView(QWidget *parent) : QTreeView(parent)
     menu->addMenu(vgextend_menu);
     menu->addAction(mount_action);
     menu->addAction(unmount_action);
+
     group_names = master_list->getVolumeGroupNames();
     for(int x = 0; x < group_names.size(); x++){
         vgextend_actions.append(new QAction(group_names[x], this));
@@ -66,7 +67,8 @@ DeviceTreeView::DeviceTreeView(QWidget *parent) : QTreeView(parent)
     connect(mount_action,   SIGNAL(triggered()), this, SLOT(mountPartition()));
     connect(unmount_action, SIGNAL(triggered()), this, SLOT(unmountPartition()));
 
-    connect(this, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(popupContextMenu(QPoint)) );
+    connect(this, SIGNAL(customContextMenuRequested(QPoint)), 
+	    this, SLOT(popupContextMenu(QPoint)) );
 
 }
 
@@ -79,77 +81,77 @@ void DeviceTreeView::popupContextMenu(QPoint point)
 	if( (item->dataAlternate(0)).canConvert<void *>() )
 	    part = (StoragePartition *) (( item->dataAlternate(0)).value<void *>() );
 
-	menu->setEnabled(TRUE);
+	menu->setEnabled(true);
 
 
 	if(item->data(6) == "yes"){
-	    mount_action->setEnabled(FALSE);
-	    unmount_action->setEnabled(TRUE);
+	    mount_action->setEnabled(false);
+	    unmount_action->setEnabled(true);
 	}
 	else if(item->data(6) == "no"){
-	    mount_action->setEnabled(TRUE);
-	    unmount_action->setEnabled(FALSE);
+	    mount_action->setEnabled(true);
+	    unmount_action->setEnabled(false);
 	}
 	else{
-	    mount_action->setEnabled(FALSE);
-	    unmount_action->setEnabled(FALSE);
+	    mount_action->setEnabled(false);
+	    unmount_action->setEnabled(false);
 	}
 
 	if(item->data(0) == "freespace" || item->data(1) == "extended" ){
-	    pvcreate_action->setEnabled(FALSE);
-	    mkfs_action->setEnabled(FALSE);
-	    pvremove_action->setEnabled(FALSE);
-	    vgcreate_action->setEnabled(FALSE);
-	    vgextend_menu->setEnabled(FALSE);
-	    vgreduce_action->setEnabled(FALSE);
+	    pvcreate_action->setEnabled(false);
+	    mkfs_action->setEnabled(false);
+	    pvremove_action->setEnabled(false);
+	    vgcreate_action->setEnabled(false);
+	    vgextend_menu->setEnabled(false);
+	    vgreduce_action->setEnabled(false);
 	}
 	else if(item->data(6) == "yes"){
-	    pvcreate_action->setEnabled(FALSE);
-	    mkfs_action->setEnabled(FALSE);
-	    pvremove_action->setEnabled(FALSE);
-	    vgcreate_action->setEnabled(FALSE);
-	    vgextend_menu->setEnabled(FALSE);
-	    vgreduce_action->setEnabled(FALSE);
+	    pvcreate_action->setEnabled(false);
+	    mkfs_action->setEnabled(false);
+	    pvremove_action->setEnabled(false);
+	    vgcreate_action->setEnabled(false);
+	    vgextend_menu->setEnabled(false);
+	    vgreduce_action->setEnabled(false);
 	}
 	else if( (item->data(4) == "physical volume") && (item->data(5) == "" ) ){
-	    pvcreate_action->setEnabled(FALSE);
-	    mkfs_action->setEnabled(FALSE);
-	    pvremove_action->setEnabled(TRUE);
-	    vgcreate_action->setEnabled(TRUE);
-	    vgextend_menu->setEnabled(TRUE);
-	    vgreduce_action->setEnabled(FALSE);
+	    pvcreate_action->setEnabled(false);
+	    mkfs_action->setEnabled(false);
+	    pvremove_action->setEnabled(true);
+	    vgcreate_action->setEnabled(true);
+	    vgextend_menu->setEnabled(true);
+	    vgreduce_action->setEnabled(false);
 	}
 	else if( (item->data(4) == "physical volume") && (item->data(5) != "" ) ){
-	    pvcreate_action->setEnabled(FALSE);
-	    mkfs_action->setEnabled(FALSE);
-	    pvremove_action->setEnabled(FALSE);
-	    vgcreate_action->setEnabled(FALSE);
-	    vgextend_menu->setEnabled(FALSE);
+	    pvcreate_action->setEnabled(false);
+	    mkfs_action->setEnabled(false);
+	    pvremove_action->setEnabled(false);
+	    vgcreate_action->setEnabled(false);
+	    vgextend_menu->setEnabled(false);
 	    if( item->dataAlternate(3) == 0 )
-		vgreduce_action->setEnabled(TRUE);
+		vgreduce_action->setEnabled(true);
 	    else
-		vgreduce_action->setEnabled(FALSE);
+		vgreduce_action->setEnabled(false);
 	}
 	else if(item->data(1) == "logical" || item->data(1) == "normal"){
-	    pvcreate_action->setEnabled(TRUE);
-	    pvremove_action->setEnabled(FALSE);
-	    mkfs_action->setEnabled(TRUE);
-	    vgcreate_action->setEnabled(FALSE);
-	    vgextend_menu->setEnabled(FALSE);
-	    vgreduce_action->setEnabled(FALSE);
+	    pvcreate_action->setEnabled(true);
+	    pvremove_action->setEnabled(false);
+	    mkfs_action->setEnabled(true);
+	    vgcreate_action->setEnabled(false);
+	    vgextend_menu->setEnabled(false);
+	    vgreduce_action->setEnabled(false);
 	}
 	else{
-	    pvcreate_action->setEnabled(FALSE);
-	    pvremove_action->setEnabled(FALSE);
-	    mkfs_action->setEnabled(FALSE);
-	    vgcreate_action->setEnabled(FALSE);
-	    vgextend_menu->setEnabled(FALSE);
-	    vgreduce_action->setEnabled(FALSE);
+	    pvcreate_action->setEnabled(false);
+	    pvremove_action->setEnabled(false);
+	    mkfs_action->setEnabled(false);
+	    vgcreate_action->setEnabled(false);
+	    vgextend_menu->setEnabled(false);
+	    vgreduce_action->setEnabled(false);
 	}
 	menu->exec(QCursor::pos());
     }
     else
-	menu->setEnabled(FALSE);  // if item points to NULL, do nothing
+	menu->setEnabled(false);  // if item points to NULL, do nothing
 }
 
 void DeviceTreeView::mkfsPartition()

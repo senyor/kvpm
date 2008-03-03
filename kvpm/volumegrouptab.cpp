@@ -79,11 +79,11 @@ VolumeGroupTab::VolumeGroupTab(VolGroup *volumeGroup, QWidget *parent) :
     lv_splitter->setStretchFactor(1, 1);
     pv_splitter->setStretchFactor(1, 1);
 
-    connect(m_vg_tree, SIGNAL(itemClicked(QTreeWidgetItem*, int)), 
-	    m_lv_properties_stack, SLOT(changeLVStackIndex(QTreeWidgetItem*, int)));
+    connect(m_vg_tree, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)), 
+	    m_lv_properties_stack, SLOT(changeLVStackIndex(QTreeWidgetItem*, QTreeWidgetItem*)));
 
-    connect(m_pv_tree, SIGNAL(itemClicked(QTreeWidgetItem*, int)), 
-	    m_pv_properties_stack, SLOT(changePVStackIndex(QTreeWidgetItem*, int)));
+    connect(m_pv_tree, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)), 
+	    m_pv_properties_stack, SLOT(changePVStackIndex(QTreeWidgetItem*, QTreeWidgetItem*)));
 }
 
 VolGroup* VolumeGroupTab::getVolumeGroup()

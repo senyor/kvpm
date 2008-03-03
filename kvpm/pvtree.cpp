@@ -35,6 +35,7 @@ extern MasterList *master_list;
 PVTree::PVTree(VolGroup *volumeGroup, QWidget *parent) : QTreeWidget(parent)
 {
 
+    QList<QTreeWidgetItem *> pv_tree_items;
     QList<LogVol *>  lvs = volumeGroup->getLogicalVolumes();
     QList<PhysVol *> pvs = volumeGroup->getPhysicalVolumes();
 
@@ -101,6 +102,9 @@ PVTree::PVTree(VolGroup *volumeGroup, QWidget *parent) : QTreeWidget(parent)
 	pv_tree_items.append(item);
     }
     insertTopLevelItems(0, pv_tree_items);
+
+    if( pv_tree_items.size() )
+	setCurrentItem( pv_tree_items[0] );
 
     setColumnHidden(6, true);
 }

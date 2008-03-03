@@ -53,7 +53,7 @@ PVPropertiesStack::PVPropertiesStack(VolGroup *volumeGroup, QWidget *parent)
    Else we set the stack widget index to -1, nothing */ 
 
 
-void PVPropertiesStack::changePVStackIndex(QTreeWidgetItem *item, int)
+void PVPropertiesStack::changePVStackIndex(QTreeWidgetItem *item, QTreeWidgetItem*)
 {
 
     QString pv_name;

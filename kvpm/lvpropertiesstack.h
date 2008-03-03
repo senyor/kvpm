@@ -11,6 +11,7 @@
  * 
  * See the file "COPYING" for the exact licensing terms.
  */
+
 #ifndef LVPROPERTIESSTACK_H
 #define LVPROPERTIESSTACK_H
 
@@ -23,6 +24,7 @@ class VolGroup;
 class LVPropertiesStack : public QStackedWidget
 {
 Q_OBJECT
+
     bool is_vg;
     VolGroup *vg;
     QList<QStackedWidget *> lv_stack_list;
@@ -31,7 +33,8 @@ Q_OBJECT
     LVPropertiesStack(VolGroup *Group, QWidget *parent = 0);
  
  public slots:
-     void changeLVStackIndex(QTreeWidgetItem *item, int column);
+    void changeLVStackIndex(QTreeWidgetItem *item, QTreeWidgetItem*);
+    
 };
 
 #endif
