@@ -26,11 +26,30 @@ To compile the source just "cd" into the source directory then run
 "cmake -i" and answer the questions. Next run "make" and if all goes
 well you will have a working executable.
 
-***
-Known major bug: Currently kvpm doesn't search for the LVM programs
-such a "vgs." It simply expects to find them in /sbin and will fail if
-they aren't there.
-***
 
-The progress bar doesn't really work either, but that appears to
+The progress bar doesn't really work, but that appears to
 be a bug in KDE 4.0, from the report I found.
+
+The program looks for the executables such as vgs and mkfs
+in /sbin, /usr/sbin, /bin, /usr/bin and /usr/local/bin. If 
+the binaries are elsewhere, edit the file "executablefinder.cpp."
+The path is searched in the order given.
+
+
+For example:
+
+    search_path << "/sbin/"
+                << "/usr/sbin/"
+                << "/bin/"
+                << "/usr/bin/"
+                << "/usr/local/bin/";
+
+Could become:
+
+    search_path << "/mybins/"
+                << "/usr/sbin/"
+                << "/bin/"
+                << "/usr/bin/"
+                << "/usr/local/bin/";
+
+Note: Don't forget the trailing slash!
