@@ -31,6 +31,4 @@ class ExecutableFinder : public QObject
     
 };
 
-
-
 #endif
