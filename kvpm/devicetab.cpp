@@ -3,7 +3,7 @@
  * 
  * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
  *
- * This file is part of the Klvm project.
+ * This file is part of the Kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License,  version 3, as 
@@ -73,10 +73,14 @@ QSplitter *DeviceTab::setupPropertyWidgets()
     device_box_layout->addWidget(device_label);
     partition_box_layout->addWidget(partition_label);
 
-    QScrollArea *device_scroll = new QScrollArea();
+    QScrollArea *device_scroll    = new QScrollArea();
     QScrollArea *partition_scroll = new QScrollArea();
-    DevicePropertiesStack *device_stack = new DevicePropertiesStack(devs);
+    DevicePropertiesStack *device_stack       = new DevicePropertiesStack(devs);
     PartitionPropertiesStack *partition_stack = new PartitionPropertiesStack(devs);
+    device_scroll->setBackgroundRole(QPalette::Base);
+    partition_scroll->setBackgroundRole(QPalette::Base);
+    device_scroll->setAutoFillBackground(true);
+    partition_scroll->setAutoFillBackground(true);
     device_scroll->setWidget(device_stack);
     partition_scroll->setWidget(partition_stack);
 
