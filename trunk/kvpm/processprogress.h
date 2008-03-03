@@ -11,6 +11,7 @@
  * 
  * See the file "COPYING" for the exact licensing terms.
  */
+
 #ifndef PROCESSPROGRESS_H
 #define PROCESSPROGRESS_H
 
