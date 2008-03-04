@@ -68,6 +68,7 @@ private slots:
     void changeLogicalVolume();
     void addMirror();
     void removeMirror();
+    void removeMirrorLeg();
     void mountFilesystem();
     void unmountFilesystem();
 

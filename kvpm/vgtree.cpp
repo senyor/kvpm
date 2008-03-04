@@ -27,6 +27,7 @@
 #include "mount.h"
 #include "pvmove.h"
 #include "removemirror.h"
+#include "removemirrorleg.h"
 #include "sizetostring.h"
 #include "topwindow.h"
 #include "unmount.h"
@@ -338,6 +339,12 @@ void VGTree::addMirror()
 void VGTree::removeMirror()
 {
     if( remove_mirror(m_lv) )
+	MainWindow->reRun();
+}
+
+void VGTree::removeMirrorLeg()
+{
+    if( remove_mirror_leg(m_lv) )
 	MainWindow->reRun();
 }
 

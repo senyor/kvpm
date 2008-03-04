@@ -61,6 +61,10 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume,
 
     connect(remove_mirror_action, SIGNAL(triggered()), 
 	    volumeGroupTree, SLOT(removeMirror()));
+
+    connect(remove_mirror_leg_action, SIGNAL(triggered()), 
+	    volumeGroupTree, SLOT(removeMirrorLeg()));
+
 }
 
 LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, 
@@ -120,6 +124,7 @@ void LVActionsMenu::setup(LogVol *lv)
     mount_filesystem_action = new KAction("Mount filesystem", this);
     unmount_filesystem_action = new KAction("Unmount filesystem", this);
     remove_mirror_action = new KAction("Remove logical volume mirror", this);
+    remove_mirror_leg_action = new KAction("Remove mirror leg", this);
 
     addAction(lv_create_action);
     addAction(lv_remove_action);
@@ -130,6 +135,7 @@ void LVActionsMenu::setup(LogVol *lv)
     addAction(lv_change_action);
     addAction(add_mirror_action);
     addAction(remove_mirror_action);
+    addAction(remove_mirror_leg_action);
 
     filesystem_menu = new KMenu("Filesystem Operations", this);
     addMenu(filesystem_menu);
