@@ -3,7 +3,7 @@
  * 
  * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
  *
- * This file is part of the Klvm project.
+ * This file is part of the Kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License,  version 3, as 
@@ -39,41 +39,43 @@
 /* This should be passed *lv = 0 if it is really free space on a volume
    group that is being displayed */
 
-LVChartSeg::LVChartSeg(VolGroup *VolumeGroup, LogVol *LogicalVolume, 
+LVChartSeg::LVChartSeg(VolGroup *volumeGroup, LogVol *logicalVolume, 
 		       QString use, QWidget *parent) : 
     QWidget(parent), 
-    vg(VolumeGroup),
-    lv(LogicalVolume)
+    m_vg(volumeGroup),
+    m_lv(logicalVolume)
 {
     
     QPalette *colorset = new QPalette();
+
     if(use == "ext2")
 	colorset->setColor(QPalette::Window, Qt::blue);
-    if(use == "ext3")
+    else if(use == "ext3")
 	colorset->setColor(QPalette::Window, Qt::darkBlue);
-    if(use == "reiserfs")
+    else if(use == "reiserfs")
 	colorset->setColor(QPalette::Window, Qt::red);
-    if(use == "reiser4")
+    else if(use == "reiser4")
 	colorset->setColor(QPalette::Window, Qt::darkGray);
-    if(use == "hfs")
+    else if(use == "hfs")
 	colorset->setColor(QPalette::Window, Qt::darkRed);
-    if(use == "vfat")
+    else if(use == "vfat")
 	colorset->setColor(QPalette::Window, Qt::yellow);
-    if(use == "jfs")
+    else if(use == "jfs")
 	colorset->setColor(QPalette::Window, Qt::magenta);
-    if(use == "xfs")
+    else if(use == "xfs")
 	colorset->setColor(QPalette::Window, Qt::cyan);
-    if(use == "linux-swap")
+    else if(use == "linux-swap")
 	colorset->setColor(QPalette::Window, Qt::lightGray);
-    if(use == "")
-	colorset->setColor(QPalette::Window, Qt::black);
-    if(use == "freespace")
+    else if(use == "freespace")
 	colorset->setColor(QPalette::Window, Qt::green);
+    else
+	colorset->setColor(QPalette::Window, Qt::black);
+
     setPalette(*colorset);
-    setAutoFillBackground(TRUE);
+    setAutoFillBackground(true);
 
     setContextMenuPolicy(Qt::CustomContextMenu);
-    context_menu = new LVActionsMenu(lv, this, this);
+    m_context_menu = new LVActionsMenu(m_lv, this, this);
 
     connect(this, SIGNAL(customContextMenuRequested(QPoint)), 
 	    this, SLOT(popupContextMenu(QPoint)) );
@@ -81,78 +83,78 @@ LVChartSeg::LVChartSeg(VolGroup *VolumeGroup, LogVol *LogicalVolume,
 
 void LVChartSeg::popupContextMenu(QPoint)
 {
-    context_menu->exec(QCursor::pos());
+    m_context_menu->exec(QCursor::pos());
 }
 
 
 void LVChartSeg::extendLogicalVolume()
 {
-    if(LVExtend(lv))
+    if(LVExtend(m_lv))
 	MainWindow->reRun();
 }
 
 void LVChartSeg::createLogicalVolume()
 {
-    if(LVCreate(vg))
+    if(LVCreate(m_vg))
 	MainWindow->reRun();
 }
 
 void LVChartSeg::reduceLogicalVolume()
 {
-    if(LVReduce(lv))
+    if(LVReduce(m_lv))
 	MainWindow->reRun();
 }
 
 void LVChartSeg::addMirror()
 {
-    if( add_mirror(lv) )
+    if( add_mirror(m_lv) )
 	MainWindow->reRun();
 }
 
 void LVChartSeg::removeMirror()
 {
-    if( remove_mirror(lv) )
+    if( remove_mirror(m_lv) )
 	MainWindow->reRun();
 }
 
 void LVChartSeg::mkfsLogicalVolume()
 {
-    if( make_fs(lv) )
+    if( make_fs(m_lv) )
 	MainWindow->rebuildVolumeGroupTab();
 }
 
 void LVChartSeg::removeLogicalVolume()
 {
-    if( remove_lv(lv) )
+    if( remove_lv(m_lv) )
 	MainWindow->reRun();
 }
 
 void LVChartSeg::createSnapshot()
 {
-    if(SnapshotCreate(lv))
+    if(SnapshotCreate(m_lv))
 	MainWindow->reRun();
 }
 
 void LVChartSeg::changeLogicalVolume()
 {
-    if( change_lv(lv) )
+    if( change_lv(m_lv) )
 	MainWindow->rebuildVolumeGroupTab();
 }
 
 void LVChartSeg::mountFilesystem()
 {
-    if( mount_filesystem(lv) )
+    if( mount_filesystem(m_lv) )
 	MainWindow->rebuildVolumeGroupTab();
 }
 
 void LVChartSeg::unmountFilesystem()
 {
-    if( unmount_filesystem(lv) )
+    if( unmount_filesystem(m_lv) )
 	MainWindow->rebuildVolumeGroupTab();
 }
 
 void LVChartSeg::movePhysicalExtents()
 {
-    if( move_pv(lv) )
+    if( move_pv(m_lv) )
         MainWindow->reRun();
 }
