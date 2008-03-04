@@ -11,6 +11,7 @@
  * 
  * See the file "COPYING" for the exact licensing terms.
  */
+
 #ifndef LVSIZECHARTSEG_H
 #define LVSIZECHARTSEG_H
 
@@ -27,12 +28,12 @@ class LVChartSeg : public QWidget
 {
 Q_OBJECT
 
-     VolGroup *vg;
-     LogVol *lv;
-     KMenu *context_menu;
+     VolGroup *m_vg;
+     LogVol *m_lv;
+     KMenu *m_context_menu;
      
  public:
-     LVChartSeg(VolGroup *VolumeGroup, LogVol *LogicalVolume, QString use, QWidget *parent);
+     LVChartSeg(VolGroup *volumeGroup, LogVol *logicalVolume, QString use, QWidget *parent);
 
  private slots:
      void popupContextMenu(QPoint);
