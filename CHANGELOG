@@ -1,9 +1,13 @@
+version 0.4.0
+More additions for handling mirrors. The "properties"
+widgets improved again and background colors made to
+match. Many bug fixes.
+
 version .3.3
 Lots of bug fixes. Volume group information display
 changed again, much nicer now.
 
 version .3.1
-
 Changes to the handling of mirrors, still not done.
 Copyright notice debugged.
 Many coding style improvements and bugs fixed.
