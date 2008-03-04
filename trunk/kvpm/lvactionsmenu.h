@@ -11,6 +11,7 @@
  * 
  * See the file "COPYING" for the exact licensing terms.
  */
+
 #ifndef LVACTIONSMENU_H
 #define LVACTIONSMENU_H
 

@@ -24,6 +24,7 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume,
 			     VGTree *volumeGroupTree, 
 			     QWidget *parent) : KMenu(parent)
 {
+
     setup(logicalVolume);
     
     connect(lv_mkfs_action, SIGNAL(triggered()), 
@@ -112,19 +113,19 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume,
 
 void LVActionsMenu::setup(LogVol *lv)
 {
-    lv_mkfs_action = new KAction("Make filesystem", this);
-    lv_reduce_action = new KAction("Reduce logical volume", this);
-    lv_remove_action = new KAction("Remove logical volume", this);
-    lv_create_action = new KAction("Create logical volume", this);
-    snap_create_action = new KAction("Create snapshot", this);
-    lv_extend_action = new KAction("Extend logical volume", this);
-    pv_move_action = new KAction("Move physical extents", this);
-    lv_change_action = new KAction("Change logical volume attributes", this);
-    add_mirror_action = new KAction("Add logical volume mirror", this);
-    mount_filesystem_action = new KAction("Mount filesystem", this);
-    unmount_filesystem_action = new KAction("Unmount filesystem", this);
-    remove_mirror_action = new KAction("Remove logical volume mirror", this);
-    remove_mirror_leg_action = new KAction("Remove mirror leg", this);
+    lv_mkfs_action   = new KAction("Make filesystem...", this);
+    lv_reduce_action = new KAction("Reduce logical volume...", this);
+    lv_remove_action = new KAction("Remove logical volume...", this);
+    lv_create_action = new KAction("Create logical volume...", this);
+    snap_create_action = new KAction("Create snapshot...", this);
+    lv_extend_action   = new KAction("Extend logical volume...", this);
+    pv_move_action     = new KAction("Move physical extents...", this);
+    lv_change_action   = new KAction("Change logical volume attributes...", this);
+    add_mirror_action  = new KAction("Add logical volume mirror...", this);
+    mount_filesystem_action   = new KAction("Mount filesystem...", this);
+    unmount_filesystem_action = new KAction("Unmount filesystem...", this);
+    remove_mirror_action      = new KAction("Remove mirror leg...", this);
+    remove_mirror_leg_action  = new KAction("Remove this mirror leg...", this);
 
     addAction(lv_create_action);
     addAction(lv_remove_action);
@@ -165,7 +166,13 @@ void LVActionsMenu::setup(LogVol *lv)
 	    lv_change_action->setEnabled(true);
 	    lv_extend_action->setEnabled(true);
 	    pv_move_action->setEnabled(true);
-	    remove_mirror_action->setEnabled(true);
+
+	    if( lv->isMirror() )
+		remove_mirror_action->setEnabled(true);
+	    else
+		remove_mirror_action->setEnabled(false);
+
+	    remove_mirror_leg_action->setEnabled(false);
 	    snap_create_action->setEnabled(true);
 	    filesystem_menu->setEnabled(true);
 	}
@@ -180,6 +187,7 @@ void LVActionsMenu::setup(LogVol *lv)
 	    lv_reduce_action->setEnabled(false);
 	    pv_move_action->setEnabled(false);
 	    remove_mirror_action->setEnabled(false);
+	    remove_mirror_leg_action->setEnabled(false);
 	    snap_create_action->setEnabled(false);
 	    filesystem_menu->setEnabled(false);
 	}
@@ -194,6 +202,12 @@ void LVActionsMenu::setup(LogVol *lv)
 	    lv_reduce_action->setEnabled(false);
 	    pv_move_action->setEnabled(false);
 	    remove_mirror_action->setEnabled(false);
+
+	    if( lv->isMirrorLeg() )
+		remove_mirror_leg_action->setEnabled(true);
+	    else
+		remove_mirror_leg_action->setEnabled(false);
+
 	    snap_create_action->setEnabled(false);
 	    filesystem_menu->setEnabled(false);
 	}
@@ -214,6 +228,7 @@ void LVActionsMenu::setup(LogVol *lv)
 	    lv_reduce_action->setEnabled(false);
 	    pv_move_action->setEnabled(false);
 	    remove_mirror_action->setEnabled(false);
+	    remove_mirror_leg_action->setEnabled(false);
 	    snap_create_action->setEnabled(false);
 	    filesystem_menu->setEnabled(true);
 	}
@@ -234,6 +249,7 @@ void LVActionsMenu::setup(LogVol *lv)
 	    lv_reduce_action->setEnabled(false);
 	    pv_move_action->setEnabled(false);
 	    remove_mirror_action->setEnabled(false);
+	    remove_mirror_leg_action->setEnabled(false);
 	    snap_create_action->setEnabled(false);
 	    filesystem_menu->setEnabled(true);
 	}
@@ -255,6 +271,7 @@ void LVActionsMenu::setup(LogVol *lv)
 	    lv_extend_action->setEnabled(false);
 	    pv_move_action->setEnabled(true);
 	    remove_mirror_action->setEnabled(true);
+	    remove_mirror_leg_action->setEnabled(false);
 	    snap_create_action->setEnabled(true);
 	    filesystem_menu->setEnabled(true);
 	}
@@ -270,6 +287,7 @@ void LVActionsMenu::setup(LogVol *lv)
 	lv_reduce_action->setEnabled(false);
 	pv_move_action->setEnabled(false);
 	remove_mirror_action->setEnabled(false);
+	remove_mirror_leg_action->setEnabled(false);
 	snap_create_action->setEnabled(false);
 	filesystem_menu->setEnabled(false);
     }
