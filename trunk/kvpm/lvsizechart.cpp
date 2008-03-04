@@ -3,7 +3,7 @@
  * 
  * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
  *
- * This file is part of the Klvm project.
+ * This file is part of the Kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License,  version 3, as 
@@ -23,19 +23,19 @@
 
 LVSizeChart::LVSizeChart(VolGroup *VolumeGroup, QWidget *parent) : 
     QFrame(parent),
-    vg(VolumeGroup)
+    m_vg(VolumeGroup)
 {
 
     setFrameStyle(QFrame::Sunken | QFrame::Box);
     setLineWidth(2);
 
-    layout = new QHBoxLayout(this);
-    layout->setSpacing(0);
-    layout->setMargin(0);
-    layout->setSizeConstraint(QLayout::SetNoConstraint);
+    m_layout = new QHBoxLayout(this);
+    m_layout->setSpacing(0);
+    m_layout->setMargin(0);
+    m_layout->setSizeConstraint(QLayout::SetNoConstraint);
     
     populateChart();
-    setLayout(layout);
+    setLayout(m_layout);
     setMinimumHeight(45);
     setMaximumHeight(75);
 }
@@ -45,41 +45,37 @@ void LVSizeChart::populateChart()
     double seg_ratio;
     QWidget *widget;
 
-    long long free_extents  = vg->getFreeExtents();
-    long long total_extents = vg->getExtents();
+    long long free_extents  = m_vg->getFreeExtents();
+    long long total_extents = m_vg->getExtents();
     
-    QList<LogVol *> logical_volumes = vg->getLogicalVolumes();
-    int lv_count = vg->getLogVolCount();
+    QList<LogVol *> logical_volumes = m_vg->getLogicalVolumes();
+    int lv_count = m_vg->getLogVolCount();
     
     QString usage;                   // Filesystem: blank, ext2 etc. or freespace in vg
     int max_segment_width;
     
     for(int x = 0; x < lv_count; x++){
+	m_lv = logical_volumes[x];
 
-	lv = logical_volumes[x];
-
-	if( !lv->isMirrorLeg() ){
-	    
-	    if( x != 0 ){
+	if( !m_lv->isMirrorLeg() && !m_lv->isMirrorLog() ){
+	    if( m_widgets.size() ){
 		KSeparator *separator = new KSeparator(Qt::Vertical);
 		separator->setFrameStyle(QFrame::Sunken | QFrame::Box);
 		separator->setLineWidth(2);
 		separator->setMaximumWidth(2);
-		layout->addWidget(separator);
+		m_layout->addWidget(separator);
 	    }
 
-	    usage = lv->getFilesystem();
+	    usage = m_lv->getFilesystem();
+	    seg_ratio = m_lv->getExtents() / (double) total_extents;
 
-	    seg_ratio = lv->getExtents() / (double) total_extents;
-
-	    if( lv->isMirror() )
-		seg_ratio *= lv->getSegmentStripes(0);
+	    if( m_lv->isMirror() )
+		seg_ratio *= m_lv->getSegmentStripes(0);
 	
-	    ratios.append(seg_ratio);
-	    widget = new LVChartSeg(vg, lv, usage, this);
-	    layout->addWidget(widget);
-	    widgets.append(widget);
-
+	    m_ratios.append(seg_ratio);
+	    widget = new LVChartSeg(m_vg, m_lv, usage, this);
+	    m_layout->addWidget(widget);
+	    m_widgets.append(widget);
 	}
     }
 
@@ -87,56 +83,56 @@ void LVSizeChart::populateChart()
 
     if( free_extents ){
 
-	KSeparator *separator = new KSeparator(Qt::Vertical);
-	separator->setFrameStyle(QFrame::Sunken | QFrame::Box);
-	separator->setLineWidth(2);
-	separator->setMaximumWidth(2);
-	layout->addWidget(separator);
-
+	if( m_widgets.size() ){
+	    KSeparator *separator = new KSeparator(Qt::Vertical);
+	    separator->setFrameStyle(QFrame::Sunken | QFrame::Box);
+	    separator->setLineWidth(2);
+	    separator->setMaximumWidth(2);
+	    m_layout->addWidget(separator);
+	}
+	
 	seg_ratio = free_extents / (double) total_extents;
 	usage = "freespace" ;
-	widget = new LVChartSeg(vg, 0, usage, this);
-	widgets.append(widget);
+	widget = new LVChartSeg(m_vg, 0, usage, this);
+	m_widgets.append(widget);
 	
-	layout->addWidget(widget);
-	ratios.append(seg_ratio);
+	m_layout->addWidget(widget);
+	m_ratios.append(seg_ratio);
     }
 
-    max_segment_width = (int) ( width() * ratios[0] ); 
+    max_segment_width = (int) ( width() * m_ratios[0] ); 
 
     if( max_segment_width < 1 )
 	max_segment_width = 1;
 
-    widgets[0]->setMaximumWidth(max_segment_width); 
+    m_widgets[0]->setMaximumWidth(max_segment_width); 
 
-    for(int x =  widgets.size() - 1; x >= 1 ; x--){
-
-	max_segment_width = (int) ( (width() * ratios[x]) - 2 );
+    for(int x =  m_widgets.size() - 1; x >= 1 ; x--){
+	max_segment_width = (int) ( (width() * m_ratios[x]) - 2 );
 	
 	if( max_segment_width < 1 )
 	    max_segment_width = 1;
 	
-	widgets[x]->setMaximumWidth( max_segment_width ); 
+	m_widgets[x]->setMaximumWidth( max_segment_width ); 
     }
 }
 
 void LVSizeChart::resizeEvent(QResizeEvent *event)
 {
     int new_width = (event->size()).width();
-    int max_segment_width = (int) (new_width * ratios[0]);  
+    int max_segment_width = (int) (new_width * m_ratios[0]);  
 
     if( max_segment_width < 1 )
 	max_segment_width = 1;
 
-    widgets[0]->setMaximumWidth(max_segment_width); 
+    m_widgets[0]->setMaximumWidth(max_segment_width); 
     
-    for(int x =  widgets.size() - 1; x >= 1 ; x--){
-	
-	max_segment_width = (int) ( (width() * ratios[x]) - 2 );
+    for(int x =  m_widgets.size() - 1; x >= 1 ; x--){
+	max_segment_width = (int) ( (width() * m_ratios[x]) - 2 );
 
 	if( max_segment_width < 1 )
 	    max_segment_width = 1;
 
-	widgets[x]->setMaximumWidth( max_segment_width ); 
+	m_widgets[x]->setMaximumWidth( max_segment_width ); 
     }
 }

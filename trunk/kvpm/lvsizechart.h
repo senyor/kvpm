@@ -15,9 +15,10 @@
 #ifndef LVSIZECHART_H
 #define LVSIZECHART_H
 
-#include <KMenu>
+//#include <KMenu>
 #include <QHBoxLayout>
 #include <QFrame>
+#include <QResizeEvent>
 
 class VolGroup;
 class LogVol;
@@ -26,12 +27,13 @@ class LogVol;
 class LVSizeChart : public QFrame
 {
 Q_OBJECT
-    VolGroup *vg;
-    LogVol *lv;
-    QHBoxLayout *layout;
-    QList<QWidget *> widgets;    // These are segments of the bar chart
-    QList<double> ratios;        // These are the relative size of each segment
-                                 // to the whole chart. The total should be about 1.
+
+    VolGroup *m_vg;
+    LogVol *m_lv;
+    QHBoxLayout *m_layout;
+    QList<QWidget *> m_widgets;    // These are segments of the bar chart
+    QList<double> m_ratios;        // These are the relative size of each segment
+                                   // to the whole chart. The total should be about 1.
 
  public:
     LVSizeChart(VolGroup *VolumeGroup, QWidget *parent = 0);
