@@ -29,36 +29,36 @@
 #include "volgroup.h"
 
 
-bool LVCreate(VolGroup *VolumeGroup)
+bool LVCreate(VolGroup *volumeGroup)
 {
-    LVCreateDialog dialog(VolumeGroup);
+    LVCreateDialog dialog(volumeGroup);
     dialog.exec();
     if(dialog.result() == QDialog::Accepted){
 	ProcessProgress create_lv(dialog.argumentsLV(), "Creating volume...", false);
-	return TRUE;
+	return true;
     }
     else
-	return FALSE;
+	return false;
 }
 
-bool SnapshotCreate(LogVol *LogicalVolume)
+bool SnapshotCreate(LogVol *logicalVolume)
 {
-    LVCreateDialog dialog(LogicalVolume, TRUE);
+    LVCreateDialog dialog(logicalVolume, true);
     dialog.exec();
     if(dialog.result() == QDialog::Accepted){
 	ProcessProgress create_lv(dialog.argumentsLV(), "Creating snapshot...", false);
-	return TRUE;
+	return true;
     }
     else
-	return FALSE;
+	return false;
 }
 
-bool LVExtend(LogVol *LogicalVolume)
+bool LVExtend(LogVol *logicalVolume)
 {
     int error;
     QString mount_point;
     
-    QString fs = LogicalVolume->getFilesystem();
+    QString fs = logicalVolume->getFilesystem();
     QString warning_message = "Currently only the ext2, ext3 and reiserfs file systems are";
     warning_message.append(" supported for file system extention. If this logical volume has ");
     warning_message.append(" a filesystem or data, it will need to be extended separately!");
@@ -68,9 +68,9 @@ bool LVExtend(LogVol *LogicalVolume)
     error_message.append("the additional space can be used.");
 
     if( fs == "jfs" ){
-	if( LogicalVolume->isMounted() ){
-	    mount_point = LogicalVolume->getMountPoints().takeFirst();
-	    LVCreateDialog dialog(LogicalVolume, FALSE);
+	if( logicalVolume->isMounted() ){
+	    mount_point = logicalVolume->getMountPoints().takeFirst();
+	    LVCreateDialog dialog(logicalVolume, false);
 	    dialog.exec();
 
 	    if(dialog.result() == QDialog::Accepted){
@@ -79,7 +79,7 @@ bool LVExtend(LogVol *LogicalVolume)
 					  true);
 		if( !extend_lv.exitCode() ){
 		    
-		    error = mount( LogicalVolume->getMapperPath().toAscii().data(),
+		    error = mount( logicalVolume->getMapperPath().toAscii().data(),
 				   mount_point.toAscii().data(),
 				   "",
 				   MS_REMOUNT,
@@ -91,127 +91,130 @@ bool LVExtend(LogVol *LogicalVolume)
 			KMessageBox::error(0, QString("Error number: %1  %2").arg(errno).arg(strerror(errno)));
 		    
 		}
-		return TRUE;
+		return true;
 	    }
 	    else
-		return FALSE;
+		return false;
 	}
 	else{
 	    KMessageBox::error(0, "Jfs filesystems must be mounted to extend them");
-	    return FALSE;
+	    return false;
 	}
     }
     else if( fs == "xfs" ){
-	if( LogicalVolume->isMounted() ){
+	if( logicalVolume->isMounted() ){
 
-	    LVCreateDialog dialog(LogicalVolume, FALSE);
+	    LVCreateDialog dialog(logicalVolume, false);
 	    dialog.exec();
 
 	    if(dialog.result() == QDialog::Accepted){
-		ProcessProgress extend_lv(dialog.argumentsLV(), "Extending volume...", TRUE);
+		ProcessProgress extend_lv(dialog.argumentsLV(), "Extending volume...", true);
 		if( !extend_lv.exitCode() ){
-		    ProcessProgress extend_fs(dialog.argumentsFS(),"Extending filesystem...", TRUE);
+		    ProcessProgress extend_fs(dialog.argumentsFS(),"Extending filesystem...", true);
 		    if( extend_fs.exitCode() )
 			KMessageBox::error(0, error_message);
 		    
 		}
-		return TRUE;
+		return true;
 	    }
 	    else
-		return FALSE;
+		return false;
 	}
 	else{
 	    KMessageBox::error(0, "Xfs filesystems must be mounted to extend them");
-	    return FALSE;
+	    return false;
 	}
     }
     else if( (fs != "ext2") && (fs != "ext3") && (fs != "reiserfs") ){
         if(KMessageBox::warningContinueCancel(0, warning_message) != KMessageBox::Continue)
-            return FALSE;
+            return false;
         else{
-            LVCreateDialog dialog(LogicalVolume, FALSE);
+            LVCreateDialog dialog(logicalVolume, false);
             dialog.exec();
             if(dialog.result() == QDialog::Accepted){
-                ProcessProgress extend_lv(dialog.argumentsLV(), "Extending volume...", TRUE);
-                return TRUE;
+                ProcessProgress extend_lv(dialog.argumentsLV(), "Extending volume...", true);
+                return true;
             }
             else
-                return FALSE;
+                return false;
         }
     }
     else{
-        LVCreateDialog dialog(LogicalVolume, FALSE);
+        LVCreateDialog dialog(logicalVolume, false);
         dialog.exec();
         if(dialog.result() == QDialog::Accepted){
-	    ProcessProgress extend_lv(dialog.argumentsLV(), "Extending volume...", TRUE);
+	    ProcessProgress extend_lv(dialog.argumentsLV(), "Extending volume...", true);
 	    if( !extend_lv.exitCode() ){
-		ProcessProgress extend_fs(dialog.argumentsFS(),"Extending filesystem...", TRUE);
+		ProcessProgress extend_fs(dialog.argumentsFS(),"Extending filesystem...", true);
 		if( extend_fs.exitCode() )
 		    KMessageBox::error(0, error_message);
 	    }
-            return TRUE;
+            return true;
 	}
 	else
-            return FALSE;
+            return false;
     }
 }
 
 /* This class handles the creation and extension of logical
    volumes and snapshots since they are so similiar. */
 
-LVCreateDialog::LVCreateDialog(VolGroup *Group, QWidget *parent):KDialog(parent)
+LVCreateDialog::LVCreateDialog(VolGroup *volumeGroup, QWidget *parent):
+    KDialog(parent),
+    m_vg(volumeGroup)
 {
-    vg = Group;
-    lv = NULL;
-    extend = FALSE;
-    snapshot = FALSE;
+
+    m_lv = NULL;
+    m_extend = false;
+    m_snapshot = false;
     
     setCaption(tr("Create Logical Volume"));
 
-    tab_widget = new KTabWidget(this);
-    physical_tab = createPhysicalTab();
-    advanced_tab = createAdvancedTab();
-    general_tab  = createGeneralTab();
-    tab_widget->addTab(general_tab, "General");
-    tab_widget->addTab(physical_tab, "Physical layout");
-    tab_widget->addTab(advanced_tab, "Advanced");
+    m_tab_widget = new KTabWidget(this);
+    m_physical_tab = createPhysicalTab();
+    m_advanced_tab = createAdvancedTab();
+    m_general_tab  = createGeneralTab();
+    m_tab_widget->addTab(m_general_tab, "General");
+    m_tab_widget->addTab(m_physical_tab, "Physical layout");
+    m_tab_widget->addTab(m_advanced_tab, "Advanced");
 
-    setMainWidget(tab_widget);
+    setMainWidget(m_tab_widget);
 }
 
-LVCreateDialog::LVCreateDialog(LogVol *LogicalVolume, bool Snapshot, QWidget *parent):KDialog(parent)
+LVCreateDialog::LVCreateDialog(LogVol *logicalVolume, bool snapshot, QWidget *parent):
+    KDialog(parent),
+    m_snapshot(snapshot),
+    m_lv(logicalVolume)
 {
-    snapshot = Snapshot;
-    extend = !snapshot;
-    
-    lv = LogicalVolume;
-    vg = lv->getVolumeGroup();
-    if(snapshot)
+
+    m_extend = !m_snapshot;
+    m_vg = m_lv->getVolumeGroup();
+
+    if(m_snapshot)
 	setCaption(tr("Create snapshot Volume"));
     else
 	setCaption(tr("Extend Logical Volume"));
     
-    tab_widget = new KTabWidget(this);
-    physical_tab = createPhysicalTab();
-    advanced_tab = createAdvancedTab();
-    general_tab  = createGeneralTab();
-    tab_widget->addTab(general_tab, "General");
-    tab_widget->addTab(physical_tab, "Physical layout");
-    tab_widget->addTab(advanced_tab, "Advanced");
+    m_tab_widget = new KTabWidget(this);
+    m_physical_tab = createPhysicalTab();
+    m_advanced_tab = createAdvancedTab();
+    m_general_tab  = createGeneralTab();
+    m_tab_widget->addTab(m_general_tab, "General");
+    m_tab_widget->addTab(m_physical_tab, "Physical layout");
+    m_tab_widget->addTab(m_advanced_tab, "Advanced");
 
-    setMainWidget(tab_widget);
+    setMainWidget(m_tab_widget);
 
 }
 
 QWidget* LVCreateDialog::createGeneralTab()
 {
-     const int stripes = getStripes();
      QLabel *label;
      QString temp;
 
-     general_tab = new QWidget(this);
+     m_general_tab = new QWidget(this);
      QVBoxLayout *layout = new QVBoxLayout;
-     general_tab->setLayout(layout);
+     m_general_tab->setLayout(layout);
      
      QVBoxLayout *upper_layout = new QVBoxLayout();
      QHBoxLayout *lower_layout = new QHBoxLayout();
@@ -220,7 +223,7 @@ QWidget* LVCreateDialog::createGeneralTab()
      layout->addStretch();
      layout->addLayout(lower_layout);
 
-     if( !extend ){
+     if( !m_extend ){
 	 QHBoxLayout *name_layout = new QHBoxLayout();
 	 label = new QLabel("Volume name: ");
 	 name_edit = new KLineEdit();
@@ -229,7 +232,7 @@ QWidget* LVCreateDialog::createGeneralTab()
 	 upper_layout->insertLayout(0, name_layout);
      }
      else {
-	 label = new QLabel("Extending volume: " + lv->getName());
+	 label = new QLabel("Extending volume: " + m_lv->getName());
 	 upper_layout->addWidget(label);
      }
      
@@ -241,8 +244,8 @@ QWidget* LVCreateDialog::createGeneralTab()
      size_edit->setValidator(size_validator);
      size_validator->setBottom(0);
      
-     volume_size = getLargestVolume(stripes) / vg->getExtentSize();
-     size_edit->setText(QString("%1").arg(volume_size));
+     m_volume_size = getLargestVolume( getStripeCount() ) / m_vg->getExtentSize();
+     size_edit->setText(QString("%1").arg(m_volume_size));
      size_combo = new KComboBox();
      size_combo->insertItem(0,"Extents");
      size_combo->insertItem(1,"MB");
@@ -253,11 +256,11 @@ QWidget* LVCreateDialog::createGeneralTab()
      size_layout->addWidget(size_combo);
 
      upper_layout->addLayout(size_layout);
-     size_spin = new QSpinBox();
-     size_spin->setRange(0, 100);
-     size_spin->setSuffix("%");
-     size_spin->setValue(100);
-     upper_layout->addWidget(size_spin);
+     m_size_spin = new QSpinBox();
+     m_size_spin->setRange(0, 100);
+     m_size_spin->setSuffix("%");
+     m_size_spin->setValue(100);
+     upper_layout->addWidget(m_size_spin);
      QGroupBox *volume_limit_box = new QGroupBox("Volume size limit");
      QVBoxLayout *volume_limit_layout = new QVBoxLayout();
      volume_limit_box->setLayout(volume_limit_layout);
@@ -277,7 +280,7 @@ QWidget* LVCreateDialog::createGeneralTab()
      anywhere_button   = new QRadioButton("Anywhere");
      inherited_button  = new QRadioButton("Inherited");
      cling_button      = new QRadioButton("Cling");
-     normal_button->setChecked(TRUE);
+     normal_button->setChecked(true);
      alloc_box_layout->addWidget(normal_button);
      alloc_box_layout->addWidget(contiguous_button);
      alloc_box_layout->addWidget(anywhere_button);
@@ -286,12 +289,17 @@ QWidget* LVCreateDialog::createGeneralTab()
      alloc_box->setLayout(alloc_box_layout);
      lower_layout->addWidget(alloc_box);
 
-     connect(size_combo, SIGNAL(currentIndexChanged(int)), this , SLOT(adjustSizeCombo(int)));
-     connect(size_edit, SIGNAL(textChanged(QString)), this, SLOT(validateSizeEdit(QString)));
-     connect(size_spin, SIGNAL(valueChanged(int)), this, SLOT(adjustSizeEdit(int)));
+     connect(size_combo, SIGNAL(currentIndexChanged(int)), 
+	     this , SLOT(adjustSizeCombo(int)));
 
-     setMaxSize(TRUE);
-     return general_tab;
+     connect(size_edit, SIGNAL(textChanged(QString)), 
+	     this, SLOT(validateSizeEdit(QString)));
+
+     connect(m_size_spin, SIGNAL(valueChanged(int)), 
+	     this, SLOT(adjustSizeEdit(int)));
+
+     setMaxSize(true);
+     return m_general_tab;
 }
 
 QWidget* LVCreateDialog::createPhysicalTab()
@@ -302,81 +310,84 @@ QWidget* LVCreateDialog::createPhysicalTab()
     int stripe_index;
 
     QVBoxLayout *layout = new QVBoxLayout;
-    physical_tab = new QWidget(this);
-    physical_tab->setLayout(layout);
+    m_physical_tab = new QWidget(this);
+    m_physical_tab->setLayout(layout);
     
-    physical_volumes = vg->getPhysicalVolumes();
+    m_physical_volumes = m_vg->getPhysicalVolumes();
     
     QGroupBox *physical_group = new QGroupBox("Available physical volumes");
     QVBoxLayout *physical_layout = new QVBoxLayout();
     physical_group->setLayout(physical_layout);
     layout->addWidget(physical_group);
     
-    for(int x = 0; x < physical_volumes.size(); x++){
-	pv = physical_volumes[x];
+    for(int x = 0; x < m_physical_volumes.size(); x++){
+	pv = m_physical_volumes[x];
 	temp_check = new QCheckBox();
 
 	if(pv->isAllocateable()){
-	    temp_check->setEnabled(TRUE);
-	    temp_check->setChecked(TRUE);
+	    temp_check->setEnabled(true);
+	    temp_check->setChecked(true);
 	    temp_check->setText(pv->getDeviceName() + " " + sizeToString(pv->getUnused()));
 	}
 	else{
-	    temp_check->setEnabled(FALSE);
-	    temp_check->setChecked(FALSE);
+	    temp_check->setEnabled(false);
+	    temp_check->setChecked(false);
 	    temp_check->setText(pv->getDeviceName() + " Not allocateable");
 	}
 	
-	pv_checks.append(temp_check);
+	m_pv_checks.append(temp_check);
 	physical_layout->addWidget(temp_check);
 
-	connect(temp_check, SIGNAL(toggled(bool)), this, SLOT(calculateSpace(bool)));
-	connect(temp_check, SIGNAL(toggled(bool)), this, SLOT(setMaxSize(bool)));
+	connect(temp_check, SIGNAL(toggled(bool)), 
+		this, SLOT(calculateSpace(bool)));
+
+	connect(temp_check, SIGNAL(toggled(bool)), 
+		this, SLOT(setMaxSize(bool)));
     }
 
     allocateable_space_label = new QLabel();
     allocateable_extents_label = new QLabel();
-    calculateSpace(TRUE);
+    calculateSpace(true);
     physical_layout->addWidget(allocateable_space_label);
     physical_layout->addWidget(allocateable_extents_label);
     QVBoxLayout *striped_layout = new QVBoxLayout;
     QHBoxLayout *stripe_size_layout = new QHBoxLayout;
     QHBoxLayout *stripes_number_layout = new QHBoxLayout;
     
-    stripe_box = new QGroupBox("Disk Striping");
-    stripe_box->setCheckable(TRUE);
-    stripe_box->setChecked(FALSE);
-    stripe_box->setLayout(striped_layout);
+    m_stripe_box = new QGroupBox("Disk striping");
+    m_stripe_box->setCheckable(true);
+    m_stripe_box->setChecked(false);
+    m_stripe_box->setLayout(striped_layout);
 
     stripe_size_combo = new KComboBox();    
-    for(int n = 2; (pow(2, n) * 1024) <= vg->getExtentSize() ; n++){
+    for(int n = 2; (pow(2, n) * 1024) <= m_vg->getExtentSize() ; n++){
 	stripe_size_combo->addItem(QString("%1").arg(pow(2, n)) + " KB");
 	stripe_size_combo->setItemData(n - 2, QVariant( (int) pow(2, n) ), Qt::UserRole );
     }
     
     QLabel *stripe_size = new QLabel("Stripe Size: ");
-    stripes_number_spin = new QSpinBox();
-    stripes_number_spin->setMinimum(2);
-    stripes_number_spin->setMaximum(vg->getPhysVolCount());
+    m_stripes_number_spin = new QSpinBox();
+    m_stripes_number_spin->setMinimum(2);
+    m_stripes_number_spin->setMaximum(m_vg->getPhysVolCount());
     stripe_size_layout->addWidget(stripe_size);
     stripe_size_layout->addWidget(stripe_size_combo);
     QLabel *stripes_number = new QLabel("Number of stripes: ");
     stripes_number_layout->addWidget(stripes_number); 
-    stripes_number_layout->addWidget(stripes_number_spin);
+    stripes_number_layout->addWidget(m_stripes_number_spin);
     striped_layout->addLayout(stripe_size_layout);  
-    striped_layout->addLayout(stripes_number_layout);  
+    striped_layout->addLayout(stripes_number_layout);
 
 /* If we are extending a volume we try to match the striping
    of the last segment of that volume, if it was striped */
 
-    if(extend){
-	const int seg_count = lv->getSegmentCount();
-	const int seg_stripe_count = lv->getSegmentStripes(seg_count - 1);
-	const int seg_stripe_size = lv->getSegmentStripeSize(seg_count - 1);
+    if(m_extend){
+	const int seg_count = m_lv->getSegmentCount();
+	const int seg_stripe_count = m_lv->getSegmentStripes(seg_count - 1);
+	const int seg_stripe_size = m_lv->getSegmentStripeSize(seg_count - 1);
 	
 	if(seg_stripe_count > 1){
-	    stripes_number_spin->setValue(seg_stripe_count);
-	    stripe_box->setChecked(TRUE);
+	    m_stripes_number_spin->setValue(seg_stripe_count);
+	    m_stripe_box->setChecked(true);
 	    stripe_index = stripe_size_combo->findData( QVariant(seg_stripe_size / 1024) );
 	    if(stripe_index == -1)
 		stripe_index = 0;
@@ -384,37 +395,78 @@ QWidget* LVCreateDialog::createPhysicalTab()
 	}
     }
 
+    QVBoxLayout *mirror_layout = new QVBoxLayout;
+    m_mirror_box = new QGroupBox("Disk mirrors");
+    m_mirror_box->setCheckable(true);
+    m_mirror_box->setChecked(false);
+    m_mirror_box->setLayout(mirror_layout);
 
-    layout->addWidget(stripe_box);
+    m_disk_log = new QRadioButton("Disk based log");
+    m_core_log = new QRadioButton("Memory based log");
+    m_disk_log->setChecked(true);
+    mirror_layout->addWidget(m_disk_log);
+    mirror_layout->addWidget(m_core_log);
 
-    connect(stripes_number_spin, SIGNAL(valueChanged(int)), this, SLOT(setMaxSize(int)));
-    connect(stripe_box, SIGNAL(toggled(bool)), this, SLOT(setMaxSize(bool)));
+    QHBoxLayout *mirrors_spin_layout = new QHBoxLayout();
+    
+    m_mirrors_number_spin = new QSpinBox();
+    m_mirrors_number_spin->setMinimum(2);
+    m_mirrors_number_spin->setMaximum(m_vg->getPhysVolCount());
+    QLabel *mirrors_number_label  = new QLabel("Number of mirror legs: ");
+    mirrors_spin_layout->addWidget(mirrors_number_label);
+    mirrors_spin_layout->addWidget(m_mirrors_number_spin);
+    mirror_layout->addLayout(mirrors_spin_layout);
+    
+    layout->addWidget(m_stripe_box);
 
-    return physical_tab;
+    if( (!m_extend) && (!m_snapshot) )
+	layout->addWidget(m_mirror_box);
+    else
+	m_mirror_box->setEnabled(false);
+
+    connect(m_stripes_number_spin, SIGNAL(valueChanged(int)), 
+	    this, SLOT(setMaxSize(int)));
+
+    connect(m_mirrors_number_spin, SIGNAL(valueChanged(int)), 
+	    this, SLOT(setMaxSize(int)));
+
+    connect(m_stripe_box, SIGNAL(toggled(bool)), 
+	    this, SLOT(setMaxSize(bool)));
+
+    connect(m_mirror_box, SIGNAL(toggled(bool)), 
+	    this, SLOT(setMaxSize(bool)));
+
+    connect(m_stripe_box, SIGNAL(toggled(bool)), 
+	    this, SLOT(enableMirrorBox(bool)));
+
+    connect(m_mirror_box, SIGNAL(toggled(bool)), 
+	    this, SLOT(enableStripeBox(bool)));
+
+    return m_physical_tab;
 }
 
 QWidget* LVCreateDialog::createAdvancedTab()
 {
 
     QVBoxLayout *layout = new QVBoxLayout;
-    advanced_tab = new QWidget(this);
-    advanced_tab->setLayout(layout);
+    m_advanced_tab = new QWidget(this);
+    m_advanced_tab->setLayout(layout);
     
-    persistent_box = new QGroupBox("Device numbering");
-    persistent_box->setCheckable(TRUE);
-    persistent_box->setChecked(FALSE);
+    m_persistent_box = new QGroupBox("Device numbering");
+    m_persistent_box->setCheckable(true);
+    m_persistent_box->setChecked(false);
     
     readonly_check = new QCheckBox();
     readonly_check->setText("Set Read Only");
     readonly_check->setCheckState(Qt::Unchecked);
     layout->addWidget(readonly_check);
 
-    if( !snapshot ){
+    if( !m_snapshot ){
 	zero_check = new QCheckBox();
 	zero_check->setText("Write zeros at volume start");
 	layout->addWidget(zero_check);
 	zero_check->setCheckState(Qt::Checked);
-	readonly_check->setEnabled(FALSE);
+	readonly_check->setEnabled(false);
     
 	connect(zero_check, SIGNAL(stateChanged(int)), 
 		this ,SLOT(zeroReadonlyCheck(int)));
@@ -423,7 +475,7 @@ QWidget* LVCreateDialog::createAdvancedTab()
     }
     else{
 	zero_check = NULL;
-	readonly_check->setEnabled(TRUE);
+	readonly_check->setEnabled(true);
     }
     
     QVBoxLayout *persistent_layout = new QVBoxLayout;
@@ -445,39 +497,89 @@ QWidget* LVCreateDialog::createAdvancedTab()
     major_validator->setBottom(0);
     minor_number_edit->setValidator(minor_validator);
     major_number_edit->setValidator(major_validator);
-    persistent_box->setLayout(persistent_layout);
-    layout->addWidget(persistent_box);
+    m_persistent_box->setLayout(persistent_layout);
+    layout->addWidget(m_persistent_box);
     
     layout->addStretch();
 
-    return advanced_tab;
+    return m_advanced_tab;
 }
 
 void LVCreateDialog::setMaxSize(int)
 {
-    setMaxSize(TRUE);
+    setMaxSize(true);
 }
 
 void LVCreateDialog::setMaxSize(bool)
 {
-    const int stripes = getStripes();
-    long long free_extents, free_space;
+    int stripe_count = getStripeCount();
+    int mirror_count = getMirrorCount();
+
+    long long free_extents, 
+	      free_space;
 
     int old_combo_index = size_combo->currentIndex();
-    
-    free_space   = getLargestVolume(stripes);
-    free_extents = free_space / vg->getExtentSize();
 
-    max_size_label->setText("Maximum size: " + sizeToString(free_space));
-    max_extents_label->setText("Maximum extents: " + QString("%1").arg(free_extents));
-    if( getStripes() == 1)
-	stripes_count_label->setText( QString("(linear volume)") );
-    else
-	stripes_count_label->setText( QString("(with %1 stripes)").arg( getStripes() ) );
+    if( m_stripe_box->isChecked() ){
+	free_space   = getLargestVolume(stripe_count);
+	free_extents = free_space / m_vg->getExtentSize();
+
+	max_size_label->setText("Maximum size: " + sizeToString(free_space));
+	max_extents_label->setText("Maximum extents: " + QString("%1").arg(free_extents));
+
+	stripes_count_label->setText( QString("(with %1 stripes)").arg(stripe_count) );
     
-    size_combo->setCurrentIndex(0);
-    size_combo->setCurrentIndex(old_combo_index);
-    validateSizeEdit( size_edit->text() );
+	size_combo->setCurrentIndex(0);
+	size_combo->setCurrentIndex(old_combo_index);
+	validateSizeEdit( size_edit->text() );
+    }
+    else if( m_mirror_box->isChecked() ){
+	free_space   = getLargestMirror( mirror_count );
+	free_extents = free_space / m_vg->getExtentSize();
+
+	max_size_label->setText("Maximum size: " + sizeToString(free_space));
+	max_extents_label->setText("Maximum extents: " + QString("%1").arg(free_extents));
+
+	stripes_count_label->setText( QString("(with %1 mirror legs)").arg(mirror_count) );
+    
+	size_combo->setCurrentIndex(0);
+	size_combo->setCurrentIndex(old_combo_index);
+	validateSizeEdit( size_edit->text() );
+    }
+    else{
+	free_space   = getLargestVolume(1);
+	free_extents = free_space / m_vg->getExtentSize();
+
+	max_size_label->setText("Maximum size: " + sizeToString(free_space));
+	max_extents_label->setText("Maximum extents: " + QString("%1").arg(free_extents));
+
+	stripes_count_label->setText( QString("(linear volume)") );
+    
+	size_combo->setCurrentIndex(0);
+	size_combo->setCurrentIndex(old_combo_index);
+	validateSizeEdit( size_edit->text() );
+    }
+}
+
+void LVCreateDialog::enableStripeBox(bool toggle_state)
+{
+    if(toggle_state){
+	m_stripe_box->setChecked(false);
+	m_stripe_box->setEnabled(false);
+    }
+    else
+	m_stripe_box->setEnabled(true);
+}
+
+
+void LVCreateDialog::enableMirrorBox(bool toggle_state)
+{
+    if(toggle_state){
+	m_mirror_box->setChecked(false);
+	m_mirror_box->setEnabled(false);
+    }
+    else
+	m_mirror_box->setEnabled(true);
 }
 
 
@@ -485,15 +587,24 @@ void LVCreateDialog::setMaxSize(bool)
 
 void LVCreateDialog::adjustSizeEdit(int percentage)
 {
-    const int stripes = getStripes();
-    long long size, free_extents;
+    
+    long long size, 
+	      free_extents;
+
     int old_index;
 
-    free_extents = getLargestVolume(stripes) / vg->getExtentSize();
+    if( m_stripe_box->isChecked() )
+	free_extents = getLargestVolume( getStripeCount() ) / m_vg->getExtentSize();
+    else if( m_mirror_box->isChecked() )
+	free_extents = getLargestMirror( getMirrorCount() ) / m_vg->getExtentSize();
+    else
+	free_extents = getLargestVolume(1) / m_vg->getExtentSize();
+
     if(percentage == 100)
 	size = free_extents;
-    else if(percentage == 0)
+    else if(percentage == 0){
 	size = 0;
+    }
     else
 	size = (long long)(( (double) percentage / 100) * free_extents);
     
@@ -506,42 +617,61 @@ void LVCreateDialog::adjustSizeEdit(int percentage)
 void LVCreateDialog::validateSizeEdit(QString size)
 {
     int x = 0;
-    long long new_lv_size, max_extents;
-    const int stripes = getStripes();
-    const int size_combo_index = size_combo->currentIndex();
-    
-    max_extents = getLargestVolume(stripes) / vg->getExtentSize();
 
+    long long new_lv_size, 
+	      max_extents;
+
+    const int size_combo_index = size_combo->currentIndex();
+
+    if( m_stripe_box->isChecked() ){    
+	max_extents = getLargestVolume( getStripeCount() ) / m_vg->getExtentSize();
+    }
+    else if( m_mirror_box->isChecked() ){
+	max_extents = getLargestMirror( m_mirrors_number_spin->value() ) / m_vg->getExtentSize();
+    }
+    else{
+	max_extents = getLargestVolume(1) / m_vg->getExtentSize();
+    }
+    
     if(size_validator->validate(size, x) == QValidator::Acceptable){
 	if(!size_combo_index){
 	    new_lv_size = size.toLongLong();
 	    if( new_lv_size <= max_extents ){
-		volume_size = new_lv_size;
-		enableButtonOk(TRUE);
+		m_volume_size = new_lv_size;
+
+		if( new_lv_size > 0 )
+		    enableButtonOk(true);
+		else
+		    enableButtonOk(false);
 	    }
 	    else
-		enableButtonOk(FALSE);
+		enableButtonOk(false);
 	}
 	else{
 	    new_lv_size = convertSizeToExtents(size_combo_index, size.toDouble());
 	    if( new_lv_size <= max_extents ){
-		volume_size = new_lv_size;
-		enableButtonOk(TRUE);
+		m_volume_size = new_lv_size;
+		
+		if( new_lv_size > 0 )
+		    enableButtonOk(true);
+		else
+		    enableButtonOk(false);
 	    }
 	    else
-		enableButtonOk(FALSE);
+		enableButtonOk(false);
 	}
     }
     else
-	enableButtonOk(FALSE);
+	enableButtonOk(false);
 }
 
 void LVCreateDialog::adjustSizeCombo(int index)
 {
     long double sized;
-
+    qDebug("size: %lld", m_volume_size);
+    
     if(index){
-	sized = (long double)volume_size * vg->getExtentSize();
+	sized = (long double)m_volume_size * m_vg->getExtentSize();
 	if(index == 1)
 	    sized /= (long double)0x100000;
 	if(index == 2)
@@ -553,7 +683,7 @@ void LVCreateDialog::adjustSizeCombo(int index)
 	size_edit->setText(QString("%1").arg((double)sized));
     }
     else
-	size_edit->setText(QString("%1").arg(volume_size));
+	size_edit->setText(QString("%1").arg(m_volume_size));
 }
 
 long long LVCreateDialog::convertSizeToExtents(int index, double size)
@@ -561,7 +691,7 @@ long long LVCreateDialog::convertSizeToExtents(int index, double size)
     long long extent_size;
     long double lv_size = size;
     
-    extent_size = vg->getExtentSize();
+    extent_size = m_vg->getExtentSize();
 
     if(index == 1)
 	lv_size *= (long double)0x100000;
@@ -571,47 +701,50 @@ long long LVCreateDialog::convertSizeToExtents(int index, double size)
 	lv_size *= (long double)(0x100000);
 	lv_size *= (long double)(0x100000);
     }
+
     lv_size /= extent_size;
+
     if (lv_size < 0)
 	lv_size = 0;
+
     return qRound64(lv_size);
 }
 
 void LVCreateDialog::calculateSpace(bool)
 {
-    allocateable_space = 0;
-    allocateable_extents = 0;
+    m_allocateable_space = 0;
+    m_allocateable_extents = 0;
     PhysVol *pv;
     int checked_count = 0;  // number of selected physical volumes
     
-    for(int x = 0; x < pv_checks.size(); x++){
-	if (pv_checks[x]->isChecked()){
+    for(int x = 0; x < m_pv_checks.size(); x++){
+	if (m_pv_checks[x]->isChecked()){
 	    checked_count++;
-	    pv = physical_volumes[x];
-	    allocateable_space += pv->getUnused();
-	    allocateable_extents += (pv->getUnused()) / vg->getExtentSize();
+	    pv = m_physical_volumes[x];
+	    m_allocateable_space += pv->getUnused();
+	    m_allocateable_extents += (pv->getUnused()) / m_vg->getExtentSize();
 	}
     }
 
 /* at least one pv must always be selected */
 
     if (checked_count == 1){   
-	for(int x = 0; x < pv_checks.size(); x++){
-	    if (pv_checks[x]->isChecked())
-		pv_checks[x]->setEnabled(FALSE);
+	for(int x = 0; x < m_pv_checks.size(); x++){
+	    if (m_pv_checks[x]->isChecked())
+		m_pv_checks[x]->setEnabled(false);
 	}
     }
     else{
-	for(int x = 0; x < pv_checks.size(); x++){
-	    if(physical_volumes[x]->isAllocateable())
-		pv_checks[x]->setEnabled(TRUE);
+	for(int x = 0; x < m_pv_checks.size(); x++){
+	    if(m_physical_volumes[x]->isAllocateable())
+		m_pv_checks[x]->setEnabled(true);
 	    else
-		pv_checks[x]->setEnabled(FALSE);
+		m_pv_checks[x]->setEnabled(false);
 	}
     }
     
-    allocateable_space_label->setText("Allocateable space: " + sizeToString(allocateable_space));
-    allocateable_extents_label->setText("Allocateable extents: " + QString("%1").arg(allocateable_extents));
+    allocateable_space_label->setText("Allocateable space: " + sizeToString(m_allocateable_space));
+    allocateable_extents_label->setText("Allocateable extents: " + QString("%1").arg(m_allocateable_extents));
 }
 
 long long LVCreateDialog::getLargestVolume(int stripes)
@@ -624,9 +757,9 @@ long long LVCreateDialog::getLargestVolume(int stripes)
     if( stripes < 1 )
 	return 0;
     
-    for(int x = physical_volumes.size() - 1 ; x >= 0 ; x--){
-	if( ( physical_volumes[x]->getUnused() > 0 ) && ( pv_checks[x]->isChecked() ) )    
-	    free_list.append( physical_volumes[x]->getUnused() );
+    for(int x = m_physical_volumes.size() - 1 ; x >= 0 ; x--){
+	if( ( m_physical_volumes[x]->getUnused() > 0 ) && ( m_pv_checks[x]->isChecked() ) )    
+	    free_list.append( m_physical_volumes[x]->getUnused() );
     }
 
     if( stripes == 1 ){
@@ -651,36 +784,66 @@ long long LVCreateDialog::getLargestVolume(int stripes)
 	    if( free_list[x] <= 0)
 		free_list.removeAt(x);
     }
+
     return max_size;
 }
 
-int LVCreateDialog::getStripes()
+long long LVCreateDialog::getLargestMirror(int mirrors)
 {
-    if(stripe_box->isChecked())
-	return stripes_number_spin->value();
+    QList<long long> free_list;
+    long long max_size = 0;
+
+    for(int x = m_physical_volumes.size() - 1 ; x >= 0 ; x--){
+	if( ( m_physical_volumes[x]->getUnused() > 0 ) && ( m_pv_checks[x]->isChecked() ) )    
+	    free_list.append( m_physical_volumes[x]->getUnused() );
+    }
+
+    qSort(free_list.begin(), free_list.end());
+
+    if( mirrors > free_list.size() )
+	max_size = 0;
+    else
+	max_size = free_list[ free_list.size() - mirrors ];
+    
+    return max_size;
+}
+
+
+int LVCreateDialog::getStripeCount()
+{
+    if(m_stripe_box->isChecked())
+	return m_stripes_number_spin->value();
+    else
+	return 1;
+}
+
+int LVCreateDialog::getMirrorCount()
+{
+    if(m_mirror_box->isChecked())
+	return m_mirrors_number_spin->value();
     else
 	return 1;
 }
 
 void LVCreateDialog::zeroReadonlyCheck(int)
 {
-    if( !snapshot ){             // zero_check = NULL if this is a snapshot
+    if( !m_snapshot ){             // zero_check = NULL if this is a snapshot
 	if (zero_check->isChecked()){
-	    readonly_check->setChecked(FALSE);
-	    readonly_check->setEnabled(FALSE);
+	    readonly_check->setChecked(false);
+	    readonly_check->setEnabled(false);
 	}
 	else
-	    readonly_check->setEnabled(TRUE);
+	    readonly_check->setEnabled(true);
 	
 	if (readonly_check->isChecked()){
-	    zero_check->setChecked(FALSE);
-	    zero_check->setEnabled(FALSE);
+	    zero_check->setChecked(false);
+	    zero_check->setEnabled(false);
 	}
 	else
-	    zero_check->setEnabled(TRUE);
+	    zero_check->setEnabled(true);
     }
     else
-	readonly_check->setEnabled(TRUE);
+	readonly_check->setEnabled(true);
 }
 
 /* Here we create a stringlist of arguments based on all
@@ -691,24 +854,25 @@ QStringList LVCreateDialog::argumentsLV()
     QString program_to_run;
     QStringList args;
 
-    if(persistent_box->isChecked()){
+    if(m_persistent_box->isChecked()){
 	args << "--persistent" << "y";
 	args << "--major" << major_number_edit->text();
 	args << "--minor" << minor_number_edit->text();
     }
 
-    args << "--stripes" << QString("%1").arg( getStripes() );
+    if( m_stripe_box->isChecked() )
+	args << "--stripes" << QString("%1").arg( getStripeCount() );
     
-    if( !extend ){
+    if( !m_extend ){
 	if ( readonly_check->isChecked() )
 	    args << "--permission" << "r" ;
 	else 
 	    args << "--permission" << "rw" ;
 
 	if ( !inherited_button->isChecked() ){        // "inherited" is what we get if
-	    args << "--alloc";                      // we don't pass "--alloc" at all
+	    args << "--alloc";                        // we don't pass "--alloc" at all
 	    if ( contiguous_button->isChecked() )     // passing "--alloc" "inherited"
-		args << "contiguous" ;              // doesn't work
+		args << "contiguous" ;                // doesn't work
 	    else if ( anywhere_button->isChecked() )
 		args << "anywhere" ;
 	    else if ( cling_button->isChecked() )
@@ -718,40 +882,44 @@ QStringList LVCreateDialog::argumentsLV()
 	}
     }
 	
-    if( !snapshot && !extend ){
-	if(zero_check->isChecked())
+    if( !m_snapshot && !m_extend ){
+
+	if( zero_check->isChecked() )
 	    args << "--zero" << "y";
 	else
 	    args << "--zero" << "n";
+
+	if( m_mirror_box->isChecked() )
+	    args << "--mirrors" << QString("%1").arg( getMirrorCount() - 1 );
     }
     
-    args << "--extents" << QString("+%1").arg(volume_size);
+    args << "--extents" << QString("+%1").arg(m_volume_size);
     
-    if( !extend && !snapshot ){                           // create a standard volume
+    if( !m_extend && !m_snapshot ){                           // create a standard volume
 	program_to_run = "lvcreate";
 	
 	if( name_edit->text() != "" )
 	    args << "--name" << (QString)name_edit->text();
 	
-	args << vg->getName();
+	args << m_vg->getName();
     }
-    else if( snapshot ){                                  // create a snapshot
+    else if( m_snapshot ){                                  // create a snapshot
 	program_to_run = "lvcreate";
 	
 	args << "--snapshot";
 	    
 	if( name_edit->text() != "" )
 	    args << "--name" << (QString)name_edit->text() ;
-	args << lv->getFullName();
+	args << m_lv->getFullName();
     }
     else{                                               // extend the current volume
 	program_to_run = "lvextend";
-	args <<	lv->getFullName();
+	args <<	m_lv->getFullName();
     }
 
-    for(int x = 0; x < pv_checks.size(); x++)
-	if ( pv_checks[x]->isChecked() )
-	    args << physical_volumes[x]->getDeviceName();
+    for(int x = 0; x < m_pv_checks.size(); x++)
+	if ( m_pv_checks[x]->isChecked() )
+	    args << m_physical_volumes[x]->getDeviceName();
 
     args.prepend(program_to_run);
     return args;
@@ -761,11 +929,11 @@ QStringList LVCreateDialog::argumentsFS()
 {
     QStringList temp;
     QStringList args;
-    QString fs = lv->getFilesystem();
+    QString fs = m_lv->getFilesystem();
     QString mount_point;
     
-    if( lv->getMountPoints().size() )
-	mount_point = lv->getMountPoints().takeFirst();
+    if( m_lv->getMountPoints().size() )
+	mount_point = m_lv->getMountPoints().takeFirst();
     else
 	qDebug() << "xfs was not mounted!";
     
@@ -774,11 +942,12 @@ QStringList LVCreateDialog::argumentsFS()
     }
     else if( (fs == "ext2") || (fs == "ext3") ){
         args << "resize2fs" << "-f"
-	     << "/dev/" + vg->getName() + "/" + lv->getName();
+	     << "/dev/" + m_vg->getName() + "/" + m_lv->getName();
     }
     else if(fs == "reiserfs"){
         args << "resize_reiserfs"
-	     << "/dev/" + vg->getName() + "/" + lv->getName();
+	     << "/dev/" + m_vg->getName() + "/" + m_lv->getName();
     }
+
     return args;
 }
