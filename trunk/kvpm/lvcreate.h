@@ -11,6 +11,7 @@
  * 
  * See the file "COPYING" for the exact licensing terms.
  */
+
 #ifndef LVCREATE_H
 #define LVCREATE_H
 
@@ -31,60 +32,81 @@ class LogVol;
 class VolGroup;
 class PhysVol;
 
-bool LVCreate(VolGroup *VolumeGroup);
-bool LVExtend(LogVol *LogicalVolume);
-bool SnapshotCreate(LogVol *LogicalVolume);
+bool LVCreate(VolGroup *volumeGroup);
+bool LVExtend(LogVol *logicalVolume);
+bool SnapshotCreate(LogVol *logicalVolume);
 
 class LVCreateDialog : public KDialog
 {
 Q_OBJECT
-     bool snapshot;   // TRUE if a snapshot
-     bool extend;     // TRUE if extending a volume
+     bool m_snapshot;   // TRUE if a snapshot
+     bool m_extend;     // TRUE if extending a volume
      
-     VolGroup *vg;
-     LogVol *lv;      // origin for snap or lv to extend
-                      // set to NULL if creating a new logical volume
+     VolGroup *m_vg;
+     LogVol *m_lv;      // origin for snap or lv to extend
+                        // set to NULL if creating a new logical volume
 
-     QWidget *general_tab, *physical_tab, *advanced_tab;
+     QWidget *m_general_tab,   // The tab labeled "general" in the dialog 
+	     *m_physical_tab,  // The physical tab 
+	     *m_advanced_tab;  // Adevanced options tab
      
      KLineEdit *minor_number_edit, *major_number_edit,
 	       *name_edit, *size_edit;
 
      QCheckBox *zero_check, *readonly_check;
-     QGroupBox *persistent_box, *stripe_box;
+
+     QGroupBox *m_persistent_box,
+	       *m_mirror_box,
+	       *m_stripe_box;
  
-     KTabWidget *tab_widget;
+     KTabWidget *m_tab_widget;
 
-     QList<QCheckBox *> pv_checks;        // these 2 lists are the same size and order
-     QList<PhysVol *> physical_volumes;   // with each pv associated with a check box
+     QList<QCheckBox *> m_pv_checks;        // these 2 lists are the same size and order
+     QList<PhysVol *> m_physical_volumes;   // with each pv associated with a check box
 
-     long long volume_size;     // proposed logical volume size in extents
-     long long allocateable_space, allocateable_extents;
+     long long m_volume_size,               // proposed logical volume size in extents
+	       m_allocateable_space, 
+	       m_allocateable_extents;
+
      KComboBox *size_combo, *stripe_size_combo; 
-     QSpinBox *size_spin, *stripes_number_spin;
+
+     QSpinBox *m_size_spin,
+	      *m_mirrors_number_spin,  // how many mirrors we want
+	      *m_stripes_number_spin;  // how many stripes we want
+
      QDoubleValidator *size_validator;
-     QLabel *stripes_label, *stripes_count_label, *max_size_label, *max_extents_label,
-            *allocateable_space_label, *allocateable_extents_label;
+
+     QLabel *stripes_label, *stripes_count_label,
+	    *max_size_label, *max_extents_label,
+            *allocateable_space_label, 
+	    *allocateable_extents_label;
      
      QRadioButton *contiguous_button, *normal_button,   //Radio button to chose 
 	          *anywhere_button, *inherited_button,  // the allocation policy
 	          *cling_button;
 
+     QRadioButton *m_disk_log,      // if this is a mirror, which kind of log
+	          *m_core_log;      // do we want
+     
      QWidget* createGeneralTab();
      QWidget* createAdvancedTab();
      QWidget* createPhysicalTab();
      long long getLargestVolume(int stripes); // largest lv possible with n stripes
-     int getStripes();
+     long long getLargestMirror(int mirrors); // largest lv possible with n mirror legs
+     int getStripeCount();
+     int getMirrorCount();
 
  public:
-     LVCreateDialog(VolGroup *Group, QWidget *parent = 0);
-     LVCreateDialog(LogVol *LogicalVolume, bool Snapshot, QWidget *parent = 0);
+     LVCreateDialog(VolGroup *volumeGroup, QWidget *parent = 0);
+     LVCreateDialog(LogVol *logicalVolume, bool snapshot, QWidget *parent = 0);
      
      QStringList argumentsFS();
      QStringList argumentsLV();
 
  private slots:
      void adjustSizeCombo(int index);
+     void enableStripeBox(bool toggle_state);
+     void enableMirrorBox(bool toggle_state);
      void setMaxSize(bool toggle_state);
      void setMaxSize(int stripes);
      void adjustSizeEdit(int percentage);
