@@ -91,8 +91,8 @@ Q_OBJECT
      QWidget* createGeneralTab();
      QWidget* createAdvancedTab();
      QWidget* createPhysicalTab();
-     long long getLargestVolume(int stripes); // largest lv possible with n stripes
-     long long getLargestMirror(int mirrors); // largest lv possible with n mirror legs
+     long long getLargestVolume(int stripes); 
+     long long getLargestMirror(int mirrors, bool disk_log);
      int getStripeCount();
      int getMirrorCount();
 

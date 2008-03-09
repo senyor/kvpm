@@ -534,7 +534,7 @@ void LVCreateDialog::setMaxSize(bool)
 	validateSizeEdit( size_edit->text() );
     }
     else if( m_mirror_box->isChecked() ){
-	free_space   = getLargestMirror( mirror_count );
+	free_space   = getLargestMirror( mirror_count, m_disk_log->isChecked() );
 	free_extents = free_space / m_vg->getExtentSize();
 
 	max_size_label->setText("Maximum size: " + sizeToString(free_space));
@@ -587,24 +587,24 @@ void LVCreateDialog::enableMirrorBox(bool toggle_state)
 
 void LVCreateDialog::adjustSizeEdit(int percentage)
 {
-    
     long long size, 
 	      free_extents;
 
     int old_index;
 
     if( m_stripe_box->isChecked() )
-	free_extents = getLargestVolume( getStripeCount() ) / m_vg->getExtentSize();
+	free_extents = getLargestVolume( getStripeCount() );
     else if( m_mirror_box->isChecked() )
-	free_extents = getLargestMirror( getMirrorCount() ) / m_vg->getExtentSize();
+	free_extents = getLargestMirror( getMirrorCount(), m_disk_log->isChecked() );
     else
-	free_extents = getLargestVolume(1) / m_vg->getExtentSize();
+	free_extents = getLargestVolume(1);
+    
+	free_extents /= m_vg->getExtentSize();
 
     if(percentage == 100)
 	size = free_extents;
-    else if(percentage == 0){
+    else if(percentage == 0)
 	size = 0;
-    }
     else
 	size = (long long)(( (double) percentage / 100) * free_extents);
     
@@ -627,7 +627,7 @@ void LVCreateDialog::validateSizeEdit(QString size)
 	max_extents = getLargestVolume( getStripeCount() ) / m_vg->getExtentSize();
     }
     else if( m_mirror_box->isChecked() ){
-	max_extents = getLargestMirror( m_mirrors_number_spin->value() ) / m_vg->getExtentSize();
+	max_extents = getLargestMirror( m_mirrors_number_spin->value(), m_disk_log->isChecked() ) / m_vg->getExtentSize();
     }
     else{
 	max_extents = getLargestVolume(1) / m_vg->getExtentSize();
@@ -668,7 +668,6 @@ void LVCreateDialog::validateSizeEdit(QString size)
 void LVCreateDialog::adjustSizeCombo(int index)
 {
     long double sized;
-    qDebug("size: %lld", m_volume_size);
     
     if(index){
 	sized = (long double)m_volume_size * m_vg->getExtentSize();
@@ -698,8 +697,8 @@ long long LVCreateDialog::convertSizeToExtents(int index, double size)
     if(index == 2)
 	lv_size *= (long double)0x40000000;
     if(index == 3){
-	lv_size *= (long double)(0x100000);
-	lv_size *= (long double)(0x100000);
+	lv_size *= (long double)0x100000;
+	lv_size *= (long double)0x100000;
     }
 
     lv_size /= extent_size;
@@ -747,6 +746,8 @@ void LVCreateDialog::calculateSpace(bool)
     allocateable_extents_label->setText("Allocateable extents: " + QString("%1").arg(m_allocateable_extents));
 }
 
+/* Determine just how big a stripe set or linear volume we can create */
+
 long long LVCreateDialog::getLargestVolume(int stripes)
 {
     QList<long long> free_list;
@@ -788,7 +789,10 @@ long long LVCreateDialog::getLargestVolume(int stripes)
     return max_size;
 }
 
-long long LVCreateDialog::getLargestMirror(int mirrors)
+/* Determine just how big a mirror set we can create 
+   with a given number of legs and a log, or no log */
+
+long long LVCreateDialog::getLargestMirror(int mirrors, bool disk_log)
 {
     QList<long long> free_list;
     long long max_size = 0;
@@ -800,10 +804,18 @@ long long LVCreateDialog::getLargestMirror(int mirrors)
 
     qSort(free_list.begin(), free_list.end());
 
-    if( mirrors > free_list.size() )
-	max_size = 0;
-    else
-	max_size = free_list[ free_list.size() - mirrors ];
+    if( !disk_log){
+	if( mirrors > free_list.size() )
+	    max_size = 0;
+	else
+	    max_size = free_list[ free_list.size() - mirrors ];
+    }
+    else{
+	if( (mirrors + 1) > free_list.size() )
+	    max_size = 0;
+	else
+	    max_size = free_list[ free_list.size() - mirrors ];
+    }
     
     return max_size;
 }
