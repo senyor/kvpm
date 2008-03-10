@@ -24,14 +24,13 @@ class PVChangeDialog : public KDialog
 {
 Q_OBJECT
 
+     QCheckBox *allocation_box;
+     QString m_pv_path;
+
 public:
-     PVChangeDialog(QString PhysicalVolumePath, QWidget *parent = 0);
+     PVChangeDialog(QString physicalVolumePath, QWidget *parent = 0);
      QStringList arguments();
  
-private:
-     QCheckBox *allocation_box;
-     QString path;
-     
 };
 
 #endif

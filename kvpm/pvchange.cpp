@@ -17,17 +17,20 @@
 #include "pvchange.h"
 
 
-PVChangeDialog::PVChangeDialog(QString PhysicalVolumePath, QWidget *parent):KDialog(parent)
+PVChangeDialog::PVChangeDialog(QString physicalVolumePath, QWidget *parent):
+    KDialog(parent),
+    m_pv_path(physicalVolumePath)
+
 {
-    path = PhysicalVolumePath;
 
     setWindowTitle(tr("Change physical volume attributes"));
+
     QWidget *dialog_body = new QWidget(this);
     setMainWidget(dialog_body);
     QVBoxLayout *layout = new QVBoxLayout;
     dialog_body->setLayout(layout);
 
-    QLabel *label = new QLabel("Physical volume: " + path);
+    QLabel *label = new QLabel("Physical volume: " + m_pv_path);
     layout->addWidget(label);
     QGroupBox *attrib_box = new QGroupBox("Attributes");
     QVBoxLayout *attrib_box_layout = new QVBoxLayout;
@@ -41,6 +44,7 @@ PVChangeDialog::PVChangeDialog(QString PhysicalVolumePath, QWidget *parent):KDia
 QStringList PVChangeDialog::arguments()
 {
     QStringList args;
+
     args << "pvchange"
 	 << "--allocatable";
 
@@ -49,7 +53,7 @@ QStringList PVChangeDialog::arguments()
     else
 	args << "n";
 
-    args << path;
+    args << m_pv_path;
   
     return args;
 }
