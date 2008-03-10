@@ -209,12 +209,10 @@ LVCreateDialog::LVCreateDialog(LogVol *logicalVolume, bool snapshot, QWidget *pa
 
 QWidget* LVCreateDialog::createGeneralTab()
 {
-     QLabel *label;
-     QString temp;
 
-     m_general_tab = new QWidget(this);
+     QWidget *general_tab = new QWidget(this);
      QVBoxLayout *layout = new QVBoxLayout;
-     m_general_tab->setLayout(layout);
+     general_tab->setLayout(layout);
      
      QVBoxLayout *upper_layout = new QVBoxLayout();
      QHBoxLayout *lower_layout = new QHBoxLayout();
@@ -225,27 +223,25 @@ QWidget* LVCreateDialog::createGeneralTab()
 
      if( !m_extend ){
 	 QHBoxLayout *name_layout = new QHBoxLayout();
-	 label = new QLabel("Volume name: ");
-	 name_edit = new KLineEdit();
-	 name_layout->addWidget(label);
-	 name_layout->addWidget(name_edit);
+	 m_name_edit = new KLineEdit();
+	 name_layout->addWidget( new QLabel("Volume name: ") );
+	 name_layout->addWidget(m_name_edit);
 	 upper_layout->insertLayout(0, name_layout);
      }
      else {
-	 label = new QLabel("Extending volume: " + m_lv->getName());
-	 upper_layout->addWidget(label);
+	 upper_layout->addWidget( new QLabel("Extending volume: " + m_lv->getName()) );
      }
      
      QHBoxLayout *size_layout = new QHBoxLayout();
      size_layout->addWidget(new QLabel("Volume size: "));
      m_size_edit = new KLineEdit();
      size_layout->addWidget(m_size_edit);
-     size_validator = new QDoubleValidator(m_size_edit); 
-     m_size_edit->setValidator(size_validator);
-     size_validator->setBottom(0);
+     m_size_validator = new QDoubleValidator(m_size_edit); 
+     m_size_edit->setValidator(m_size_validator);
+     m_size_validator->setBottom(0);
      
-     m_volume_size = getLargestVolume( getStripeCount() ) / m_vg->getExtentSize();
-     m_size_edit->setText(QString("%1").arg(m_volume_size));
+     m_volume_extents = getLargestVolume( getStripeCount() ) / m_vg->getExtentSize();
+     m_size_edit->setText(QString("%1").arg(m_volume_extents));
      size_combo = new KComboBox();
      size_combo->insertItem(0,"Extents");
      size_combo->insertItem(1,"MB");
@@ -264,12 +260,12 @@ QWidget* LVCreateDialog::createGeneralTab()
      QGroupBox *volume_limit_box = new QGroupBox("Volume size limit");
      QVBoxLayout *volume_limit_layout = new QVBoxLayout();
      volume_limit_box->setLayout(volume_limit_layout);
-     max_size_label = new QLabel();
-     volume_limit_layout->addWidget(max_size_label);
-     max_extents_label = new QLabel();
-     volume_limit_layout->addWidget(max_extents_label);
-     stripes_count_label = new QLabel();
-     volume_limit_layout->addWidget(stripes_count_label);
+     m_max_size_label = new QLabel();
+     volume_limit_layout->addWidget(m_max_size_label);
+     m_max_extents_label = new QLabel();
+     volume_limit_layout->addWidget(m_max_extents_label);
+     m_stripes_count_label = new QLabel();
+     volume_limit_layout->addWidget(m_stripes_count_label);
      volume_limit_layout->addStretch();
      lower_layout->addWidget(volume_limit_box);
 
@@ -299,7 +295,8 @@ QWidget* LVCreateDialog::createGeneralTab()
 	     this, SLOT(adjustSizeEdit(int)));
 
      setMaxSize(true);
-     return m_general_tab;
+
+     return general_tab;
 }
 
 QWidget* LVCreateDialog::createPhysicalTab()
@@ -345,11 +342,11 @@ QWidget* LVCreateDialog::createPhysicalTab()
 		this, SLOT(setMaxSize(bool)));
     }
 
-    allocateable_space_label = new QLabel();
-    allocateable_extents_label = new QLabel();
+    m_allocateable_space_label = new QLabel();
+    m_allocateable_extents_label = new QLabel();
     calculateSpace(true);
-    physical_layout->addWidget(allocateable_space_label);
-    physical_layout->addWidget(allocateable_extents_label);
+    physical_layout->addWidget(m_allocateable_space_label);
+    physical_layout->addWidget(m_allocateable_extents_label);
     QVBoxLayout *striped_layout = new QVBoxLayout;
     QHBoxLayout *stripe_size_layout = new QHBoxLayout;
     QHBoxLayout *stripes_number_layout = new QHBoxLayout;
@@ -456,47 +453,47 @@ QWidget* LVCreateDialog::createAdvancedTab()
     m_persistent_box->setCheckable(true);
     m_persistent_box->setChecked(false);
     
-    readonly_check = new QCheckBox();
-    readonly_check->setText("Set Read Only");
-    readonly_check->setCheckState(Qt::Unchecked);
-    layout->addWidget(readonly_check);
+    m_readonly_check = new QCheckBox();
+    m_readonly_check->setText("Set Read Only");
+    m_readonly_check->setCheckState(Qt::Unchecked);
+    layout->addWidget(m_readonly_check);
 
     if( !m_snapshot ){
-	zero_check = new QCheckBox();
-	zero_check->setText("Write zeros at volume start");
-	layout->addWidget(zero_check);
-	zero_check->setCheckState(Qt::Checked);
-	readonly_check->setEnabled(false);
+	m_zero_check = new QCheckBox();
+	m_zero_check->setText("Write zeros at volume start");
+	layout->addWidget(m_zero_check);
+	m_zero_check->setCheckState(Qt::Checked);
+	m_readonly_check->setEnabled(false);
     
-	connect(zero_check, SIGNAL(stateChanged(int)), 
+	connect(m_zero_check, SIGNAL(stateChanged(int)), 
 		this ,SLOT(zeroReadonlyCheck(int)));
-	connect(readonly_check, SIGNAL(stateChanged(int)), 
+	connect(m_readonly_check, SIGNAL(stateChanged(int)), 
 		this ,SLOT(zeroReadonlyCheck(int)));
     }
     else{
-	zero_check = NULL;
-	readonly_check->setEnabled(true);
+	m_zero_check = NULL;
+	m_readonly_check->setEnabled(true);
     }
     
     QVBoxLayout *persistent_layout = new QVBoxLayout;
     QHBoxLayout *minor_number_layout = new QHBoxLayout;
     QHBoxLayout *major_number_layout = new QHBoxLayout;
-    minor_number_edit = new KLineEdit();
-    major_number_edit = new KLineEdit();
+    m_minor_number_edit = new KLineEdit();
+    m_major_number_edit = new KLineEdit();
     QLabel *minor_number = new QLabel("Device minor number: ");
     QLabel *major_number = new QLabel("Device major number: ");
     major_number_layout->addWidget(major_number);
-    major_number_layout->addWidget(major_number_edit);
+    major_number_layout->addWidget(m_major_number_edit);
     minor_number_layout->addWidget(minor_number);
-    minor_number_layout->addWidget(minor_number_edit);
+    minor_number_layout->addWidget(m_minor_number_edit);
     persistent_layout->addLayout(major_number_layout);
     persistent_layout->addLayout(minor_number_layout);
-    QIntValidator *minor_validator = new QIntValidator(minor_number_edit); 
-    QIntValidator *major_validator = new QIntValidator(major_number_edit); 
+    QIntValidator *minor_validator = new QIntValidator(m_minor_number_edit); 
+    QIntValidator *major_validator = new QIntValidator(m_major_number_edit); 
     minor_validator->setBottom(0);
     major_validator->setBottom(0);
-    minor_number_edit->setValidator(minor_validator);
-    major_number_edit->setValidator(major_validator);
+    m_minor_number_edit->setValidator(minor_validator);
+    m_major_number_edit->setValidator(major_validator);
     m_persistent_box->setLayout(persistent_layout);
     layout->addWidget(m_persistent_box);
     
@@ -524,10 +521,10 @@ void LVCreateDialog::setMaxSize(bool)
 	free_space   = getLargestVolume(stripe_count);
 	free_extents = free_space / m_vg->getExtentSize();
 
-	max_size_label->setText("Maximum size: " + sizeToString(free_space));
-	max_extents_label->setText("Maximum extents: " + QString("%1").arg(free_extents));
+	m_max_size_label->setText("Maximum size: " + sizeToString(free_space));
+	m_max_extents_label->setText("Maximum extents: " + QString("%1").arg(free_extents));
 
-	stripes_count_label->setText( QString("(with %1 stripes)").arg(stripe_count) );
+	m_stripes_count_label->setText( QString("(with %1 stripes)").arg(stripe_count) );
     
 	size_combo->setCurrentIndex(0);
 	size_combo->setCurrentIndex(old_combo_index);
@@ -536,10 +533,10 @@ void LVCreateDialog::setMaxSize(bool)
 	free_space   = getLargestMirror( mirror_count, m_disk_log->isChecked() );
 	free_extents = free_space / m_vg->getExtentSize();
 
-	max_size_label->setText("Maximum size: " + sizeToString(free_space));
-	max_extents_label->setText("Maximum extents: " + QString("%1").arg(free_extents));
+	m_max_size_label->setText("Maximum size: " + sizeToString(free_space));
+	m_max_extents_label->setText("Maximum extents: " + QString("%1").arg(free_extents));
 
-	stripes_count_label->setText( QString("(with %1 mirror legs)").arg(mirror_count) );
+	m_stripes_count_label->setText( QString("(with %1 mirror legs)").arg(mirror_count) );
     
 	size_combo->setCurrentIndex(0);
 	size_combo->setCurrentIndex(old_combo_index);
@@ -548,16 +545,16 @@ void LVCreateDialog::setMaxSize(bool)
 	free_space   = getLargestVolume(1);
 	free_extents = free_space / m_vg->getExtentSize();
 
-	max_size_label->setText("Maximum size: " + sizeToString(free_space));
-	max_extents_label->setText("Maximum extents: " + QString("%1").arg(free_extents));
+	m_max_size_label->setText("Maximum size: " + sizeToString(free_space));
+	m_max_extents_label->setText("Maximum extents: " + QString("%1").arg(free_extents));
 
-	stripes_count_label->setText( QString("(linear volume)") );
+	m_stripes_count_label->setText( QString("(linear volume)") );
     
 	size_combo->setCurrentIndex(0);
 	size_combo->setCurrentIndex(old_combo_index);
     }
 
-    validateVolumeSize();
+    resetOkButton();
 }
 
 void LVCreateDialog::enableStripeBox(bool toggle_state)
@@ -598,15 +595,15 @@ void LVCreateDialog::adjustSizeEdit(int percentage)
     free_extents /= m_vg->getExtentSize();
 
     if(percentage == 100)
-	m_volume_size = free_extents;
+	m_volume_extents = free_extents;
     else if(percentage == 0)
-	m_volume_size = 0;
+	m_volume_extents = 0;
     else
-	m_volume_size = (long long)(( (double) percentage / 100) * free_extents);
+	m_volume_extents = (long long)(( (double) percentage / 100) * free_extents);
     
     adjustSizeCombo( size_combo->currentIndex() );
 
-    validateVolumeSize();
+    resetOkButton();
 }
 
 void LVCreateDialog::validateVolumeSize(QString size)
@@ -615,23 +612,22 @@ void LVCreateDialog::validateVolumeSize(QString size)
 
     const int size_combo_index = size_combo->currentIndex();
 
-    if(size_validator->validate(size, x) == QValidator::Acceptable){
+    if(m_size_validator->validate(size, x) == QValidator::Acceptable){
 
 	if(!size_combo_index)
-	    m_volume_size = size.toLongLong();
+	    m_volume_extents = size.toLongLong();
 	else
-	    m_volume_size = convertSizeToExtents( size_combo_index, size.toDouble() ); 
+	    m_volume_extents = convertSizeToExtents( size_combo_index, size.toDouble() ); 
 						 
     }
     else{
-	m_volume_size = 0;
-	enableButtonOk(false);
+	m_volume_extents = 0;
     }
 
-    validateVolumeSize();
+    resetOkButton();
 }
 
-void LVCreateDialog::validateVolumeSize()
+void LVCreateDialog::resetOkButton()
 {
     long long max_extents;
 	      
@@ -646,20 +642,19 @@ void LVCreateDialog::validateVolumeSize()
 	max_extents = getLargestVolume(1) / m_vg->getExtentSize();
     }
     
-    if( (m_volume_size <= max_extents) && (m_volume_size > 0) )
+    if( (m_volume_extents <= max_extents) && (m_volume_extents > 0) )
 	enableButtonOk(true);
     else
 	enableButtonOk(false);
 
 }
 
-
 void LVCreateDialog::adjustSizeCombo(int index)
 {
     long double sized;
     
     if(index){
-	sized = (long double)m_volume_size * m_vg->getExtentSize();
+	sized = (long double)m_volume_extents * m_vg->getExtentSize();
 	if(index == 1)
 	    sized /= (long double)0x100000;
 	if(index == 2)
@@ -671,7 +666,7 @@ void LVCreateDialog::adjustSizeCombo(int index)
 	m_size_edit->setText(QString("%1").arg((double)sized));
     }
     else
-	m_size_edit->setText(QString("%1").arg(m_volume_size));
+	m_size_edit->setText(QString("%1").arg(m_volume_extents));
 }
 
 long long LVCreateDialog::convertSizeToExtents(int index, double size)
@@ -731,8 +726,11 @@ void LVCreateDialog::calculateSpace(bool)
 	}
     }
     
-    allocateable_space_label->setText("Allocateable space: " + sizeToString(m_allocateable_space));
-    allocateable_extents_label->setText("Allocateable extents: " + QString("%1").arg(m_allocateable_extents));
+    m_allocateable_space_label->setText("Allocateable space: " + 
+					sizeToString(m_allocateable_space));
+
+    m_allocateable_extents_label->setText("Allocateable extents: " + 
+					  QString("%1").arg(m_allocateable_extents));
 }
 
 /* Determine just how big a stripe set or linear volume we can create */
@@ -744,37 +742,42 @@ long long LVCreateDialog::getLargestVolume(int stripes)
     long long free_space;
     int list_end;
     
-    if( stripes < 1 )
-	return 0;
-    
     for(int x = m_physical_volumes.size() - 1 ; x >= 0 ; x--){
-	if( ( m_physical_volumes[x]->getUnused() > 0 ) && ( m_pv_checks[x]->isChecked() ) )    
+
+	if( ( m_physical_volumes[x]->getUnused() > 0 ) && 
+	    ( m_pv_checks[x]->isChecked() ) )
+	{
 	    free_list.append( m_physical_volumes[x]->getUnused() );
-    }
-
-    if( stripes == 1 ){
-	for(int x = free_list.size() - 1 ; x >= 0 ; x--)
-	    max_size += free_list[x];
-	return max_size;
-    }
-    
-    while( stripes <= free_list.size() ){
-
-	qSort(free_list.begin(), free_list.end());
-
-	list_end = free_list.size() - 1;
-
-	for(int x = list_end; x > list_end - stripes; x--){
-	    free_space = free_list[ (list_end - stripes) + 1];
-	    max_size += free_space;
-	    free_list[x] -= free_space;
 	}
 
-	for(int x = free_list.size() - 1 ; x >= 0 ; x--)
-	    if( free_list[x] <= 0)
-		free_list.removeAt(x);
     }
 
+    if( stripes < 1 ){
+	max_size = 0;
+    }
+    else if( stripes == 1 ){
+	for(int x = free_list.size() - 1 ; x >= 0 ; x--)
+	    max_size += free_list[x];
+    }
+    else{
+	while( stripes <= free_list.size() ){
+
+	    qSort(free_list.begin(), free_list.end());
+
+	    list_end = free_list.size() - 1;
+
+	    for(int x = list_end; x > list_end - stripes; x--){
+		free_space = free_list[ (list_end - stripes) + 1];
+		max_size += free_space;
+		free_list[x] -= free_space;
+	    }
+
+	    for(int x = free_list.size() - 1 ; x >= 0 ; x--)
+		if( free_list[x] <= 0)
+		    free_list.removeAt(x);
+	}
+    }
+    
     return max_size;
 }
 
@@ -828,23 +831,23 @@ int LVCreateDialog::getMirrorCount()
 
 void LVCreateDialog::zeroReadonlyCheck(int)
 {
-    if( !m_snapshot ){             // zero_check = NULL if this is a snapshot
-	if (zero_check->isChecked()){
-	    readonly_check->setChecked(false);
-	    readonly_check->setEnabled(false);
+    if( !m_snapshot ){             // m_zero_check = NULL if this is a snapshot
+	if (m_zero_check->isChecked()){
+	    m_readonly_check->setChecked(false);
+	    m_readonly_check->setEnabled(false);
 	}
 	else
-	    readonly_check->setEnabled(true);
+	    m_readonly_check->setEnabled(true);
 	
-	if (readonly_check->isChecked()){
-	    zero_check->setChecked(false);
-	    zero_check->setEnabled(false);
+	if (m_readonly_check->isChecked()){
+	    m_zero_check->setChecked(false);
+	    m_zero_check->setEnabled(false);
 	}
 	else
-	    zero_check->setEnabled(true);
+	    m_zero_check->setEnabled(true);
     }
     else
-	readonly_check->setEnabled(true);
+	m_readonly_check->setEnabled(true);
 }
 
 /* Here we create a stringlist of arguments based on all
@@ -857,15 +860,15 @@ QStringList LVCreateDialog::argumentsLV()
 
     if(m_persistent_box->isChecked()){
 	args << "--persistent" << "y";
-	args << "--major" << major_number_edit->text();
-	args << "--minor" << minor_number_edit->text();
+	args << "--major" << m_major_number_edit->text();
+	args << "--minor" << m_minor_number_edit->text();
     }
 
     if( m_stripe_box->isChecked() )
 	args << "--stripes" << QString("%1").arg( getStripeCount() );
     
     if( !m_extend ){
-	if ( readonly_check->isChecked() )
+	if ( m_readonly_check->isChecked() )
 	    args << "--permission" << "r" ;
 	else 
 	    args << "--permission" << "rw" ;
@@ -881,26 +884,24 @@ QStringList LVCreateDialog::argumentsLV()
 	    else
 		args << "normal" ;
 	}
-    }
-	
-    if( !m_snapshot && !m_extend ){
+	if( !m_snapshot ){
+	    if( m_zero_check->isChecked() )
+		args << "--zero" << "y";
+	    else
+		args << "--zero" << "n";
 
-	if( zero_check->isChecked() )
-	    args << "--zero" << "y";
-	else
-	    args << "--zero" << "n";
-
-	if( m_mirror_box->isChecked() )
-	    args << "--mirrors" << QString("%1").arg( getMirrorCount() - 1 );
+	    if( m_mirror_box->isChecked() )
+		args << "--mirrors" << QString("%1").arg( getMirrorCount() - 1 );
+	}
     }
     
-    args << "--extents" << QString("+%1").arg(m_volume_size);
+    args << "--extents" << QString("+%1").arg(m_volume_extents);
     
     if( !m_extend && !m_snapshot ){                           // create a standard volume
 	program_to_run = "lvcreate";
 	
-	if( name_edit->text() != "" )
-	    args << "--name" << (QString)name_edit->text();
+	if( m_name_edit->text() != "" )
+	    args << "--name" << m_name_edit->text();
 	
 	args << m_vg->getName();
     }
@@ -909,8 +910,8 @@ QStringList LVCreateDialog::argumentsLV()
 	
 	args << "--snapshot";
 	    
-	if( name_edit->text() != "" )
-	    args << "--name" << (QString)name_edit->text() ;
+	if( m_name_edit->text() != "" )
+	    args << "--name" << m_name_edit->text() ;
 	args << m_lv->getFullName();
     }
     else{                                               // extend the current volume
