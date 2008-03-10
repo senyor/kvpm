@@ -50,10 +50,13 @@ Q_OBJECT
 	     *m_physical_tab,  // The physical tab 
 	     *m_advanced_tab;  // Adevanced options tab
      
-     KLineEdit *minor_number_edit, *major_number_edit,
-	       *name_edit, *m_size_edit;
+     KLineEdit *m_minor_number_edit, 
+	       *m_major_number_edit,
+	       *m_name_edit, 
+	       *m_size_edit;
 
-     QCheckBox *zero_check, *readonly_check;
+     QCheckBox *m_zero_check, 
+               *m_readonly_check;
 
      QGroupBox *m_persistent_box,
 	       *m_mirror_box,
@@ -64,7 +67,7 @@ Q_OBJECT
      QList<QCheckBox *> m_pv_checks;        // these 2 lists are the same size and order
      QList<PhysVol *> m_physical_volumes;   // with each pv associated with a check box
 
-     long long m_volume_size,               // proposed logical volume size in extents
+     long long m_volume_extents,               // proposed logical volume size in extents
 	       m_allocateable_space, 
 	       m_allocateable_extents;
 
@@ -74,12 +77,13 @@ Q_OBJECT
 	      *m_mirrors_number_spin,  // how many mirrors we want
 	      *m_stripes_number_spin;  // how many stripes we want
 
-     QDoubleValidator *size_validator;
+     QDoubleValidator *m_size_validator;
 
-     QLabel *stripes_label, *stripes_count_label,
-	    *max_size_label, *max_extents_label,
-            *allocateable_space_label, 
-	    *allocateable_extents_label;
+     QLabel *m_stripes_count_label,
+	    *m_max_size_label, 
+            *m_max_extents_label,
+            *m_allocateable_space_label, 
+	    *m_allocateable_extents_label;
      
      QRadioButton *contiguous_button, *normal_button,   //Radio button to chose 
 	          *anywhere_button, *inherited_button,  // the allocation policy
@@ -95,6 +99,7 @@ Q_OBJECT
      long long getLargestMirror(int mirrors, bool disk_log);
      int getStripeCount();
      int getMirrorCount();
+     void resetOkButton();
 
  public:
      LVCreateDialog(VolGroup *volumeGroup, QWidget *parent = 0);
@@ -111,7 +116,6 @@ Q_OBJECT
      void setMaxSize(int stripes);
      void adjustSizeEdit(int percentage);
      void validateVolumeSize(QString size);
-     void validateVolumeSize();
      long long convertSizeToExtents(int index, double size);
      void calculateSpace(bool checked);
      void zeroReadonlyCheck(int state);
