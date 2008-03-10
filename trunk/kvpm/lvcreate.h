@@ -51,7 +51,7 @@ Q_OBJECT
 	     *m_advanced_tab;  // Adevanced options tab
      
      KLineEdit *minor_number_edit, *major_number_edit,
-	       *name_edit, *size_edit;
+	       *name_edit, *m_size_edit;
 
      QCheckBox *zero_check, *readonly_check;
 
@@ -110,7 +110,8 @@ Q_OBJECT
      void setMaxSize(bool toggle_state);
      void setMaxSize(int stripes);
      void adjustSizeEdit(int percentage);
-     void validateSizeEdit(QString size);
+     void validateVolumeSize(QString size);
+     void validateVolumeSize();
      long long convertSizeToExtents(int index, double size);
      void calculateSpace(bool checked);
      void zeroReadonlyCheck(int state);

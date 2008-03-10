@@ -238,14 +238,14 @@ QWidget* LVCreateDialog::createGeneralTab()
      
      QHBoxLayout *size_layout = new QHBoxLayout();
      size_layout->addWidget(new QLabel("Volume size: "));
-     size_edit = new KLineEdit();
-     size_layout->addWidget(size_edit);
-     size_validator = new QDoubleValidator(size_edit); 
-     size_edit->setValidator(size_validator);
+     m_size_edit = new KLineEdit();
+     size_layout->addWidget(m_size_edit);
+     size_validator = new QDoubleValidator(m_size_edit); 
+     m_size_edit->setValidator(size_validator);
      size_validator->setBottom(0);
      
      m_volume_size = getLargestVolume( getStripeCount() ) / m_vg->getExtentSize();
-     size_edit->setText(QString("%1").arg(m_volume_size));
+     m_size_edit->setText(QString("%1").arg(m_volume_size));
      size_combo = new KComboBox();
      size_combo->insertItem(0,"Extents");
      size_combo->insertItem(1,"MB");
@@ -292,8 +292,8 @@ QWidget* LVCreateDialog::createGeneralTab()
      connect(size_combo, SIGNAL(currentIndexChanged(int)), 
 	     this , SLOT(adjustSizeCombo(int)));
 
-     connect(size_edit, SIGNAL(textChanged(QString)), 
-	     this, SLOT(validateSizeEdit(QString)));
+     connect(m_size_edit, SIGNAL(textEdited(QString)), 
+	     this, SLOT(validateVolumeSize(QString)));
 
      connect(m_size_spin, SIGNAL(valueChanged(int)), 
 	     this, SLOT(adjustSizeEdit(int)));
@@ -531,7 +531,6 @@ void LVCreateDialog::setMaxSize(bool)
     
 	size_combo->setCurrentIndex(0);
 	size_combo->setCurrentIndex(old_combo_index);
-	validateSizeEdit( size_edit->text() );
     }
     else if( m_mirror_box->isChecked() ){
 	free_space   = getLargestMirror( mirror_count, m_disk_log->isChecked() );
@@ -544,7 +543,6 @@ void LVCreateDialog::setMaxSize(bool)
     
 	size_combo->setCurrentIndex(0);
 	size_combo->setCurrentIndex(old_combo_index);
-	validateSizeEdit( size_edit->text() );
     }
     else{
 	free_space   = getLargestVolume(1);
@@ -557,8 +555,9 @@ void LVCreateDialog::setMaxSize(bool)
     
 	size_combo->setCurrentIndex(0);
 	size_combo->setCurrentIndex(old_combo_index);
-	validateSizeEdit( size_edit->text() );
     }
+
+    validateVolumeSize();
 }
 
 void LVCreateDialog::enableStripeBox(bool toggle_state)
@@ -587,11 +586,8 @@ void LVCreateDialog::enableMirrorBox(bool toggle_state)
 
 void LVCreateDialog::adjustSizeEdit(int percentage)
 {
-    long long size, 
-	      free_extents;
-
-    int old_index;
-
+    long long free_extents;
+	      
     if( m_stripe_box->isChecked() )
 	free_extents = getLargestVolume( getStripeCount() );
     else if( m_mirror_box->isChecked() )
@@ -599,71 +595,64 @@ void LVCreateDialog::adjustSizeEdit(int percentage)
     else
 	free_extents = getLargestVolume(1);
     
-	free_extents /= m_vg->getExtentSize();
+    free_extents /= m_vg->getExtentSize();
 
     if(percentage == 100)
-	size = free_extents;
+	m_volume_size = free_extents;
     else if(percentage == 0)
-	size = 0;
+	m_volume_size = 0;
     else
-	size = (long long)(( (double) percentage / 100) * free_extents);
+	m_volume_size = (long long)(( (double) percentage / 100) * free_extents);
     
-    old_index = size_combo->currentIndex();
-    size_combo->setCurrentIndex(0);
-    size_edit->setText(QString("%1").arg(size));
-    size_combo->setCurrentIndex(old_index);
+    adjustSizeCombo( size_combo->currentIndex() );
+
+    validateVolumeSize();
 }
 
-void LVCreateDialog::validateSizeEdit(QString size)
+void LVCreateDialog::validateVolumeSize(QString size)
 {
     int x = 0;
 
-    long long new_lv_size, 
-	      max_extents;
-
     const int size_combo_index = size_combo->currentIndex();
 
+    if(size_validator->validate(size, x) == QValidator::Acceptable){
+
+	if(!size_combo_index)
+	    m_volume_size = size.toLongLong();
+	else
+	    m_volume_size = convertSizeToExtents( size_combo_index, size.toDouble() ); 
+						 
+    }
+    else{
+	m_volume_size = 0;
+	enableButtonOk(false);
+    }
+
+    validateVolumeSize();
+}
+
+void LVCreateDialog::validateVolumeSize()
+{
+    long long max_extents;
+	      
     if( m_stripe_box->isChecked() ){    
 	max_extents = getLargestVolume( getStripeCount() ) / m_vg->getExtentSize();
     }
     else if( m_mirror_box->isChecked() ){
-	max_extents = getLargestMirror( m_mirrors_number_spin->value(), m_disk_log->isChecked() ) / m_vg->getExtentSize();
+	max_extents = getLargestMirror( m_mirrors_number_spin->value(), 
+					m_disk_log->isChecked() ) / m_vg->getExtentSize();
     }
     else{
 	max_extents = getLargestVolume(1) / m_vg->getExtentSize();
     }
     
-    if(size_validator->validate(size, x) == QValidator::Acceptable){
-	if(!size_combo_index){
-	    new_lv_size = size.toLongLong();
-	    if( new_lv_size <= max_extents ){
-		m_volume_size = new_lv_size;
-
-		if( new_lv_size > 0 )
-		    enableButtonOk(true);
-		else
-		    enableButtonOk(false);
-	    }
-	    else
-		enableButtonOk(false);
-	}
-	else{
-	    new_lv_size = convertSizeToExtents(size_combo_index, size.toDouble());
-	    if( new_lv_size <= max_extents ){
-		m_volume_size = new_lv_size;
-		
-		if( new_lv_size > 0 )
-		    enableButtonOk(true);
-		else
-		    enableButtonOk(false);
-	    }
-	    else
-		enableButtonOk(false);
-	}
-    }
+    if( (m_volume_size <= max_extents) && (m_volume_size > 0) )
+	enableButtonOk(true);
     else
 	enableButtonOk(false);
+
 }
+
 
 void LVCreateDialog::adjustSizeCombo(int index)
 {
@@ -679,10 +668,10 @@ void LVCreateDialog::adjustSizeCombo(int index)
 	    sized /= (long double)(0x100000);
 	    sized /= (long double)(0x100000);
 	}
-	size_edit->setText(QString("%1").arg((double)sized));
+	m_size_edit->setText(QString("%1").arg((double)sized));
     }
     else
-	size_edit->setText(QString("%1").arg(m_volume_size));
+	m_size_edit->setText(QString("%1").arg(m_volume_size));
 }
 
 long long LVCreateDialog::convertSizeToExtents(int index, double size)
