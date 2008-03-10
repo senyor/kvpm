@@ -52,7 +52,9 @@ ExecutableFinder::ExecutableFinder(QObject *parent) : QObject(parent)
 	 << "vgextend"
 	 << "vgreduce"
 	 << "vgremove"
-	 << "vgs" ;
+	 << "vgs" 
+	 << "xfs_growfs";
+    
     
     search_path << "/sbin/" 
 		<< "/usr/sbin/" 
