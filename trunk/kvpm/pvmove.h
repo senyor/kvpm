@@ -28,22 +28,21 @@ class LogVol;
 class VolGroup;
 
 
-bool move_pv(PhysVol *PhysicalVolume);
-bool move_pv(LogVol *LogicalVolume);
+bool move_pv(PhysVol *physicalVolume);
+bool move_pv(LogVol *logicalVolume);
+bool restart_pvmove();
+bool stop_pvmove();
 
 class PVMoveDialog : public KDialog
 {
 Q_OBJECT
 
     QLabel *free_space_total_label;
-    QLabel *needed_space_total_label;
     
-    long long needed_space_total, free_space_total;
-    QList<long long> free_space;
-    LogVol *lv;
-    VolGroup *vg;
-    QStringList source_pvs;                // full path to source physical volumes
-    QStringList destination_pvs;           // same for destination physical volumes
+    LogVol   *m_lv;
+
+    QList<PhysVol *> m_source_pvs;         // source physical volumes
+    QList<PhysVol *> m_destination_pvs;    // destination physical volumes
     QList<NoMungeCheck *> check_boxes;     // user can select multiple destination pv's
     QList<QRadioButton *> radio_buttons;   // user can select one source pv
     QCheckBox *check_box_any;              // use any destination pv
@@ -52,8 +51,8 @@ Q_OBJECT
     void buildDialog();
     
 public:
-    PVMoveDialog(PhysVol *PhysicalVolume, QWidget *parent = 0);
-    PVMoveDialog(LogVol *LogicalVolume, QWidget *parent = 0);
+    PVMoveDialog(PhysVol *physicalVolume, QWidget *parent = 0);
+    PVMoveDialog(LogVol *logicalVolume, QWidget *parent = 0);
     QStringList arguments();
     
 private slots:
