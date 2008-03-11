@@ -3,7 +3,7 @@
  * 
  * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
  *
- * This file is part of the Klvm project.
+ * This file is part of the Kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License,  version 3, as 
@@ -20,6 +20,7 @@
 #include "masterlist.h"
 #include "physvol.h"
 #include "processprogress.h"
+#include "pvmove.h"
 #include "removemissing.h"
 #include "topwindow.h"
 #include "vgchangealloc.h"
@@ -56,6 +57,8 @@ TopWindow::TopWindow(QWidget *parent):KMainWindow(parent)
     reduce_vg_action   = new KAction("Reduce Volume Group...", this);
     rescan_action      = new KAction( KIcon("rebuild"), "Rescan System", this);
     rescan_vg_action   = new KAction( KIcon("rebuild"), "Rescan This Group", this);
+    m_restart_pvmove_action = new KAction("Restart interrupted pvmove", this);
+    m_stop_pvmove_action    = new KAction("Abort pvmove", this);
 
     remove_missing_action =  new KAction("Remove Missing Volumes...", this);
     vgchange_menu   = new KMenu("Change Volume Group Attributes", this);
@@ -75,6 +78,8 @@ TopWindow::TopWindow(QWidget *parent):KMainWindow(parent)
     tool_menu->addAction(rescan_action);
     tool_menu->addAction(rescan_vg_action);
     tool_menu->addAction(remove_missing_action);
+    tool_menu->addAction(m_restart_pvmove_action);
+    tool_menu->addAction(m_stop_pvmove_action);
     groups_menu->addMenu(vgchange_menu);
     groups_menu->addAction(remove_vg_action);
     groups_menu->addAction(reduce_vg_action);
@@ -94,6 +99,8 @@ TopWindow::TopWindow(QWidget *parent):KMainWindow(parent)
     connect(reduce_vg_action,       SIGNAL(triggered()), this, SLOT(launchVGReduceDialog()));
     connect(rescan_vg_action,       SIGNAL(triggered()), this, SLOT(rebuildVolumeGroupTab()));
     connect(rescan_action,          SIGNAL(triggered()), this, SLOT(reRun()));
+    connect(m_restart_pvmove_action, SIGNAL(triggered()), this, SLOT(launchPVMoveRestart()));
+    connect(m_stop_pvmove_action,    SIGNAL(triggered()), this, SLOT(launchPVMoveStop()));
 
     reRun();    // reRun also does the initial run
 }
@@ -256,6 +263,18 @@ void TopWindow::launchVGReduceDialog()
 void TopWindow::launchRemoveMissingDialog()
 {
     if( remove_missing_pv(vg) )
+        MainWindow->reRun();
+}
+
+void TopWindow::launchPVMoveRestart()
+{
+    if( restart_pvmove() )
+        MainWindow->reRun();
+}
+
+void TopWindow::launchPVMoveStop()
+{
+    if( stop_pvmove() )
         MainWindow->reRun();
 }
 

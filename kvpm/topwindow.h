@@ -38,6 +38,10 @@ Q_OBJECT
 	    *vgchange_lv_action, *vgchange_resize_action,
 	    *vgchange_extent_action, *remove_missing_action, *config_kvpm_action;
 
+    KAction *m_restart_pvmove_action,
+	    *m_stop_pvmove_action;
+    
+
     KMenu *vgchange_menu, *file_menu, *tool_menu, 
 	  *groups_menu, *settings_menu,
 	  *help_menu;
@@ -65,6 +69,9 @@ Q_OBJECT
     void launchVGRemoveDialog();
     void launchRemoveMissingDialog();
     void launchVGReduceDialog();
+    void launchPVMoveRestart();
+    void launchPVMoveStop();
+    
 };
 
 extern TopWindow *MainWindow;

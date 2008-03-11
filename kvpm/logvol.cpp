@@ -307,6 +307,16 @@ QStringList LogVol::getDevicePathAll()
     
     for (int seg = 0; seg < m_seg_total; seg++)
 	devices << m_segments[seg]->m_device_path;
+
+// remove repeated physical volumes
+
+    devices.sort();
+
+    for(int x = devices.size() - 1; x > 0; x--){
+	if(devices[x] == devices[x - 1])
+	    devices.removeAt(x);
+    }
+    
     return devices;
 }
 
