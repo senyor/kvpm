@@ -11,29 +11,41 @@
  * 
  * See the file "COPYING" for the exact licensing terms.
  */
+
 #ifndef STORAGEDEVICESIZECHARTSEG_H
 #define STORAGEDEVICESIZECHARTSEG_H
+
+class StoragePartition;
+class StorageDeviceItem;
+
 
 #include <QMenu>
 #include <QFrame>
 
-#include "devicemodel.h"
-#include "storagepartition.h"
 
 class DeviceChartSeg : public QWidget
 {
 Q_OBJECT
-    QMenu *menu, *vgextend_menu;
-    StorageDeviceItem *item;
-    QAction *mkfs_action, *pvcreate_action, *pvremove_action,
-	    *vgcreate_action, *vgreduce_action, 
-	    *mount_action, *unmount_action;
-    QList<QAction *> vgextend_actions;
-    QString path, use;
-    StoragePartition *part;
+
+    QMenu *m_context_menu, 
+          *m_vgextend_menu;
+
+    StorageDeviceItem *m_item;
+
+    QAction *m_mkfs_action, 
+	    *m_pvcreate_action, 
+            *m_pvremove_action,
+            *m_vgcreate_action, 
+            *m_vgreduce_action, 
+            *m_mount_action, 
+            *m_unmount_action;
+
+    QString m_pv_name;
+    
+    StoragePartition *m_partition;
 
 public:
-    DeviceChartSeg(StorageDeviceItem *device_item, QWidget *parent = 0);
+    DeviceChartSeg(StorageDeviceItem *storageDeviceItem, QWidget *parent = 0);
 
 public slots:
     void popupContextMenu(QPoint point);
