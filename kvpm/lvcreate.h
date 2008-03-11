@@ -32,9 +32,9 @@ class LogVol;
 class VolGroup;
 class PhysVol;
 
-bool LVCreate(VolGroup *volumeGroup);
-bool LVExtend(LogVol *logicalVolume);
-bool SnapshotCreate(LogVol *logicalVolume);
+bool lv_create(VolGroup *volumeGroup);
+bool lv_extend(LogVol *logicalVolume);
+bool snapshot_create(LogVol *logicalVolume);
 
 class LVCreateDialog : public KDialog
 {

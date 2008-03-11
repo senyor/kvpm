@@ -29,7 +29,7 @@
 #include "volgroup.h"
 
 
-bool LVCreate(VolGroup *volumeGroup)
+bool lv_create(VolGroup *volumeGroup)
 {
     LVCreateDialog dialog(volumeGroup);
     dialog.exec();
@@ -41,7 +41,7 @@ bool LVCreate(VolGroup *volumeGroup)
 	return false;
 }
 
-bool SnapshotCreate(LogVol *logicalVolume)
+bool snapshot_create(LogVol *logicalVolume)
 {
     LVCreateDialog dialog(logicalVolume, true);
     dialog.exec();
@@ -53,7 +53,7 @@ bool SnapshotCreate(LogVol *logicalVolume)
 	return false;
 }
 
-bool LVExtend(LogVol *logicalVolume)
+bool lv_extend(LogVol *logicalVolume)
 {
     int error;
     QString mount_point;
@@ -156,8 +156,8 @@ bool LVExtend(LogVol *logicalVolume)
     }
 }
 
-/* This class handles the creation and extension of logical
-   volumes and snapshots since they are so similiar. */
+/* This class handles both the creation and extension of logical
+   volumes and snapshots since both processes are so similiar. */
 
 LVCreateDialog::LVCreateDialog(VolGroup *volumeGroup, QWidget *parent):
     KDialog(parent),
@@ -377,7 +377,7 @@ QWidget* LVCreateDialog::createPhysicalTab()
 /* If we are extending a volume we try to match the striping
    of the last segment of that volume, if it was striped */
 
-    if(m_extend){
+    if(m_extend && !(m_lv->isMirror() ) ){
 	const int seg_count = m_lv->getSegmentCount();
 	const int seg_stripe_count = m_lv->getSegmentStripes(seg_count - 1);
 	const int seg_stripe_size = m_lv->getSegmentStripeSize(seg_count - 1);
@@ -857,6 +857,7 @@ QStringList LVCreateDialog::argumentsLV()
 {
     QString program_to_run;
     QStringList args;
+    QVariant stripe_size;
 
     if(m_persistent_box->isChecked()){
 	args << "--persistent" << "y";
@@ -864,8 +865,12 @@ QStringList LVCreateDialog::argumentsLV()
 	args << "--minor" << m_minor_number_edit->text();
     }
 
-    if( m_stripe_box->isChecked() )
+    stripe_size = stripe_size_combo->itemData(stripe_size_combo->currentIndex(), Qt::UserRole);
+
+    if( m_stripe_box->isChecked() || m_extend){
 	args << "--stripes" << QString("%1").arg( getStripeCount() );
+	args << "--stripesize" << QString("%1").arg( stripe_size.toLongLong() );
+    }
     
     if( !m_extend ){
 	if ( m_readonly_check->isChecked() )
@@ -919,10 +924,11 @@ QStringList LVCreateDialog::argumentsLV()
 	args <<	m_lv->getFullName();
     }
 
-    for(int x = 0; x < m_pv_checks.size(); x++)
+    for(int x = 0; x < m_pv_checks.size(); x++){
 	if ( m_pv_checks[x]->isChecked() )
 	    args << m_physical_volumes[x]->getDeviceName();
-
+    }
+    
     args.prepend(program_to_run);
     return args;
 }
