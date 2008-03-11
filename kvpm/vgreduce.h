@@ -29,10 +29,10 @@ bool reduce_vg(VolGroup *volumeGroup);
 class VGReduceDialog : public KDialog
 {
 Q_OBJECT
-    QString pv_path;
-    QString vg_name;
-    QList<NoMungeCheck *> pv_check_boxes;
-    bool unremovable_pvs_present;
+
+    QString m_vg_name;
+    QList<NoMungeCheck *> m_pv_check_boxes;
+    bool m_unremovable_pvs_present;
     
  public:
     VGReduceDialog(VolGroup *volumeGroup, QWidget *parent = 0);
