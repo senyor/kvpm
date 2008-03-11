@@ -89,13 +89,13 @@ void LVChartSeg::popupContextMenu(QPoint)
 
 void LVChartSeg::extendLogicalVolume()
 {
-    if(LVExtend(m_lv))
+    if(lv_extend(m_lv))
 	MainWindow->reRun();
 }
 
 void LVChartSeg::createLogicalVolume()
 {
-    if(LVCreate(m_vg))
+    if(lv_create(m_vg))
 	MainWindow->reRun();
 }
 
@@ -131,7 +131,7 @@ void LVChartSeg::removeLogicalVolume()
 
 void LVChartSeg::createSnapshot()
 {
-    if(SnapshotCreate(m_lv))
+    if(snapshot_create(m_lv))
 	MainWindow->reRun();
 }
 
