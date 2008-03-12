@@ -11,6 +11,7 @@
  * 
  * See the file "COPYING" for the exact licensing terms.
  */
+
 #ifndef LVREMOVE_H
 #define LVREMOVE_H
 
@@ -20,19 +21,5 @@ class LogVol;
 
 bool remove_lv(LogVol *logicalVolume);
 bool remove_lv(QString fullName);
-
-class LVRemoveDialog : public QObject
-{
-    QString m_lv_full_name;   //full name = vg name + lv name
-    int m_return_code;
-    
-    void buildDialog();
-
- public:
-    LVRemoveDialog(QString fullName, QWidget *parent = 0);
-    QStringList arguments();
-    int result();
-    
-};
 
 #endif
