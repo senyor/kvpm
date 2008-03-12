@@ -11,34 +11,40 @@
  * 
  * See the file "COPYING" for the exact licensing terms.
  */
-#ifndef LVRESIZEDIALOG_H
-#define LVRESIZEDIALOG_H
+
+#ifndef LVREDUCEDIALOG_H
+#define LVREDUCEDIALOG_H
 
 #include <KDialog>
-#include <QLineEdit>
-#include <QComboBox>
-#include "logvol.h"
-#include "volgroup.h"
+#include <KLineEdit>
+#include <KComboBox>
+#include <KDoubleValidator>
 
-bool LVReduce(LogVol *LogicalVolume);
+class LogVol;
+class VolGroup;
+
+bool lv_reduce(LogVol *logicalVolume);
+
 
 class LVReduceDialog : public KDialog
 {
 Q_OBJECT
 
-    LogVol *lv;
-    VolGroup *vg;
-    QDoubleValidator *size_validator;
-    QComboBox *size_combo;
-    QLineEdit *size_edit;
-    int size_combo_last_index;
-    long long new_size, current_size, new_extents;
+    LogVol   *m_lv;
+    VolGroup *m_vg;
+
+    KDoubleValidator *m_size_validator;
+    KComboBox *m_size_combo;
+    KLineEdit *m_size_edit;
+ 
+    int m_size_combo_last_index;
+    long long m_current_lv_size;
 
  public:
-    LVReduceDialog(LogVol *LogicalVolume, QWidget *parent = 0);
+    LVReduceDialog(LogVol *logicalVolume, QWidget *parent = 0);
+    long long getSizeEditExtents(int index);
     QStringList argumentsFS();
     QStringList argumentsLV();
-    
      
  private slots:
     void sizeComboAdjust(int index);

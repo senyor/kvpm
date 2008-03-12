@@ -101,7 +101,7 @@ void LVChartSeg::createLogicalVolume()
 
 void LVChartSeg::reduceLogicalVolume()
 {
-    if(LVReduce(m_lv))
+    if(lv_reduce(m_lv))
 	MainWindow->reRun();
 }
 

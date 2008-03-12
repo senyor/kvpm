@@ -15,101 +15,101 @@
 
 #include <KMessageBox>
 #include <QtGui>
+
+#include "logvol.h"
 #include "lvreduce.h"
 #include "processprogress.h"
 #include "sizetostring.h"
+#include "volgroup.h"
 
 
-bool LVReduce(LogVol *LogicalVolume)
+bool lv_reduce(LogVol *logicalVolume)
 {
-    QString fs, state, type;
+    QString fs, state;
     QStringList fs_args, lv_args;
     
-    fs = LogicalVolume->getFilesystem();
+    fs    = logicalVolume->getFilesystem();
+    state = logicalVolume->getState();
+
     QString warning_message = "Currently only the ext2 and ext3  file systems are supported";
     warning_message.append("for file system reduction. If this logical volume is reduced");
     warning_message.append(" any data it contains will be lost!");
-	
-    state = LogicalVolume->getState();
+
     QString warning_message2 = "If this <b>Inactive</b> logical volume is reduced";
     warning_message2.append(" any data it contains will be lost!");
 
-    type = LogicalVolume->getType();
-
-    if( type == "Mirror"){
-	KMessageBox::error(0, "Resizing mirrors is not supported yet");
-	return FALSE;
+    if( state != "Active" ){
+	if(KMessageBox::warningContinueCancel(0, warning_message2) != KMessageBox::Continue)
+	    return false;
+	else{
+	    LVReduceDialog dialog(logicalVolume);
+	    dialog.exec();
+	    if(dialog.result() == QDialog::Accepted){
+		ProcessProgress reduce_lv(dialog.argumentsLV(), "Reducing volume...", true);
+		return true;
+	    }
+	    else
+		return false;
+	}
     }
-    else if( type == "Valid Snap"){
-	LVReduceDialog dialog(LogicalVolume);
+    else if( logicalVolume->isMirror() ){
+	KMessageBox::error(0, "Resizing mirrors is not supported yet");
+	return false;
+    }
+    else if( logicalVolume->isSnap() ){
+	LVReduceDialog dialog(logicalVolume);
 	dialog.exec();
 	if(dialog.result() == QDialog::Accepted){
 	    ProcessProgress reduce_lv(dialog.argumentsLV(), 
 				      QString("Reducing volume..."), 
 				      true);
-	    return TRUE;
+	    return true;
 	}
-	return TRUE;
+	return true;
     }
-    else if( type == "Mirror"){
-	KMessageBox::error(0, "Resizing mirrors is not supported yet");
-	return FALSE;
-    }
-    else if( type == "Origin"){
+    else if( logicalVolume->isOrigin() ){
 	KMessageBox::error(0, "Resizing snapshot origin is not supported yet");
-	return FALSE;
+	return false;
     }
-    else if( LogicalVolume->isMounted() ){
+    else if( logicalVolume->isMounted() ){
 	KMessageBox::error(0, "The filesystem must be unmounted first");
-	return FALSE;
-    }
-    else if( state != "Active" ){
-	if(KMessageBox::warningContinueCancel(0, warning_message2) != KMessageBox::Continue)
-	    return FALSE;
-	else{
-	    LVReduceDialog dialog(LogicalVolume);
-	    dialog.exec();
-	    if(dialog.result() == QDialog::Accepted){
-		ProcessProgress reduce_lv(dialog.argumentsLV(), "Reducing volume...", TRUE);
-		return TRUE;
-	    }
-	    else
-		return FALSE;
-	}
+	return false;
     }
     else if( (fs != "ext2") && (fs != "ext3") ){
 	if(KMessageBox::warningContinueCancel(0, warning_message) != KMessageBox::Continue)
-	    return FALSE;
+	    return false;
 	else{
-	    LVReduceDialog dialog(LogicalVolume);
+	    LVReduceDialog dialog(logicalVolume);
 	    dialog.exec();
 	    if(dialog.result() == QDialog::Accepted){
-		ProcessProgress reduce_lv(dialog.argumentsLV(), "Reducing volume...", TRUE);
-		return TRUE;
+		ProcessProgress reduce_lv(dialog.argumentsLV(), "Reducing volume...", true);
+		return true;
 	    }
 	    else
-		return FALSE;
+		return false;
 	}
     }
     else{
-	LVReduceDialog dialog(LogicalVolume);
+	LVReduceDialog dialog(logicalVolume);
 	dialog.exec();
 	if(dialog.result() == QDialog::Accepted){
-	    ProcessProgress reduce_fs(dialog.argumentsFS(), "Reducing filesystem...", TRUE);
+	    ProcessProgress reduce_fs(dialog.argumentsFS(), "Reducing filesystem...", true);
 	    if( !reduce_fs.exitCode() )
-		ProcessProgress reduce_lv(dialog.argumentsLV(), "Reducing volume...", TRUE);
-	    return TRUE;
+		ProcessProgress reduce_lv(dialog.argumentsLV(), "Reducing volume...", true);
+	    return true;
 	}
 	else
-	    return FALSE;
+	    return false;
     }
 }
 
 
-LVReduceDialog::LVReduceDialog(LogVol *LogicalVolume, QWidget *parent) : KDialog(parent)
+LVReduceDialog::LVReduceDialog(LogVol *logicalVolume, QWidget *parent) : 
+    KDialog(parent),
+    m_lv(logicalVolume)
 {
-    lv = LogicalVolume;
-    vg = lv->getVolumeGroup();
+
+    m_vg = m_lv->getVolumeGroup();
     setWindowTitle(tr("Reduce Logical Volume"));
 
     QWidget *dialog_body = new QWidget(this);
@@ -117,103 +117,83 @@ LVReduceDialog::LVReduceDialog(LogVol *LogicalVolume, QWidget *parent) : KDialog
     QVBoxLayout *layout = new QVBoxLayout();
     dialog_body->setLayout(layout);
 
-    QLabel *ext_size_label, *current_size_label;
-    
-    current_size = lv->getSize();
-    ext_size_label = new QLabel("Extent size: " + sizeToString(vg->getExtentSize()));
-    current_size_label = new QLabel("Current size: " + sizeToString(current_size));
+    m_current_lv_size = m_lv->getSize();
+
+    QLabel *ext_size_label = new QLabel("Extent size: " + 
+					sizeToString(m_vg->getExtentSize()));
+
+    QLabel *current_lv_size_label = new QLabel("Current size: " + 
+					       sizeToString(m_current_lv_size));
 
     layout->addWidget(ext_size_label);
-    layout->addWidget(current_size_label);
+    layout->addWidget(current_lv_size_label);
     QHBoxLayout *size_layout = new QHBoxLayout();
     size_layout->addWidget(new QLabel("New size: "));
     
-    size_edit = new QLineEdit();
-    size_validator = new QDoubleValidator(size_edit);
-    size_validator->setBottom(0.0);
-    size_edit->setValidator(size_validator);
-    connect(size_edit, SIGNAL(textEdited(QString)),
+    m_size_edit = new KLineEdit();
+    m_size_validator = new KDoubleValidator(m_size_edit);
+    m_size_validator->setBottom(0.0);
+    m_size_edit->setValidator(m_size_validator);
+
+    connect(m_size_edit, SIGNAL(textEdited(QString)),
 	    this, SLOT(validateInput(QString)));
     
-    size_combo = new QComboBox();
-    connect(size_combo, SIGNAL(currentIndexChanged(int)), 
-	    this, SLOT(sizeComboAdjust(int)));
-    size_combo->insertItem(0,"Extents");
-    size_combo->insertItem(1,"MB");
-    size_combo->insertItem(2,"GB");
-    size_combo->insertItem(3,"TB");
-    size_combo->setInsertPolicy(QComboBox::NoInsert);
-    size_combo->setCurrentIndex(0);
+    m_size_combo = new KComboBox();
 
-    size_edit->setText( QString("%1").arg( current_size / vg->getExtentSize() ));
-    if(current_size / (1024 * 1024) > (1024 * 1024))
-	size_combo->setCurrentIndex(3);
-    else if(current_size / (1024 * 1024) > 1024 )
-	size_combo->setCurrentIndex(2);
+    connect(m_size_combo, SIGNAL(currentIndexChanged(int)), 
+	    this, SLOT(sizeComboAdjust(int)));
+
+    m_size_combo->insertItem(0,"Extents");
+    m_size_combo->insertItem(1,"MB");
+    m_size_combo->insertItem(2,"GB");
+    m_size_combo->insertItem(3,"TB");
+    m_size_combo->setInsertPolicy(QComboBox::NoInsert);
+    m_size_combo->setCurrentIndex(0);
+
+    m_size_edit->setText( QString("%1").arg( m_current_lv_size / m_vg->getExtentSize() ));
+
+    if(m_current_lv_size / (1024 * 1024) > (1024 * 1024))
+	m_size_combo->setCurrentIndex(3);
+    else if(m_current_lv_size / (1024 * 1024) > 1024 )
+	m_size_combo->setCurrentIndex(2);
     else
-	size_combo->setCurrentIndex(1);
+	m_size_combo->setCurrentIndex(1);
     
-    size_combo_last_index = size_combo->currentIndex();
-    size_layout->addWidget(size_edit);
-    size_layout->addWidget(size_combo);
+    m_size_combo_last_index = m_size_combo->currentIndex();
+    size_layout->addWidget(m_size_edit);
+    size_layout->addWidget(m_size_combo);
     layout->addLayout(size_layout);
 }
 
 QStringList LVReduceDialog::argumentsFS()
 {
-    long long suffix;
-    double temp;
     QStringList fs_arguments;
 
-    if(size_combo->currentIndex()){
-	if (size_combo->currentIndex() == 3)       // Combobox = Terabytes
-	    suffix = (long long)(1024 * 1024) * (1024 * 1024);
-	if (size_combo->currentIndex() == 2)       // Combobox = Gigabytes
-	    suffix = 1024 * 1024 * 1024;
-	if (size_combo->currentIndex() == 1)       // Combobox = Megabytes
-	    suffix = 1024 * 1024;
-	temp = (size_edit->text()).toDouble();      
-	new_extents = qRound64(( temp * (suffix /(double) (vg->getExtentSize())) ));
-    }
-    else
-	new_extents = qRound64((size_edit->text()).toDouble());
-    if (new_extents <= 0)
-        new_extents = 1;
-    new_size = (vg->getExtentSize()) * new_extents;
+    long long new_size = getSizeEditExtents( m_size_combo->currentIndex() );
+    new_size *= m_vg->getExtentSize();
 
-    if( (lv->getFilesystem() == "ext2") || (lv->getFilesystem() == "ext3") ){
-	fs_arguments << "resize2fs" << "-f"
-		     << "/dev/mapper/" + vg->getName() + "-" + lv->getName() 
+    if( (m_lv->getFilesystem() == "ext2") || (m_lv->getFilesystem() == "ext3") ){
+	fs_arguments << "resize2fs" 
+		     << "-f"
+		     << "/dev/mapper/" + m_vg->getName() + "-" + m_lv->getName() 
 		     << QString("%1k").arg(new_size / 1024);
     }
+
     return fs_arguments;
 }
 
 QStringList LVReduceDialog::argumentsLV()
 {
-    long long suffix;
-    double temp;
     QStringList lv_arguments;
+    long long new_extents;
+    
+    new_extents = getSizeEditExtents( m_size_combo->currentIndex() );
 
-    if(size_combo->currentIndex()){
-	if (size_combo->currentIndex() == 3)       // Combobox = Terabytes
-	    suffix = (long long)(1024 * 1024) * (1024 * 1024);
-	if (size_combo->currentIndex() == 2)       // Combobox = Gigabytes
-	    suffix = 1024 * 1024 * 1024;
-	if (size_combo->currentIndex() == 1)       // Combobox = Megabytes
-	    suffix = 1024 * 1024;
-	temp = (size_edit->text()).toDouble();      
-	new_extents = qRound64(( temp * (suffix /(double) (vg->getExtentSize())) ));
-    }
-    else
-	new_extents = qRound64((size_edit->text()).toDouble());
-    if (new_extents <= 0)
-        new_extents = 1;
-    new_size = (vg->getExtentSize()) * new_extents;
-
-    lv_arguments << "lvreduce" << "--force" 
-		 << "--extents" << QString("%1").arg(new_extents)
-		 << vg->getName() + "/" + lv->getName();
+    lv_arguments << "lvreduce" 
+		 << "--force" 
+		 << "--extents" 
+		 << QString("%1").arg(new_extents)
+		 << m_vg->getName() + "/" + m_lv->getName();
     
     return lv_arguments;
 }
@@ -221,56 +201,76 @@ QStringList LVReduceDialog::argumentsLV()
 void LVReduceDialog::validateInput(QString text)
 {
     int pos = 0;
-    if(size_validator->validate(text , pos) == QValidator::Acceptable)
-	enableButtonOk(TRUE);
+
+    if(m_size_validator->validate(text , pos) == QValidator::Acceptable)
+	enableButtonOk(true);
     else
-	enableButtonOk(FALSE);
+	enableButtonOk(false);
 }
 
 void LVReduceDialog::sizeComboAdjust(int index)
 {
-    long long es;
-    unsigned long long exts;
+    long long extent_size;
+    unsigned long long extents;
     long double sized;
 
-    es = vg->getExtentSize();
-    if(size_combo_last_index){
-	sized = (size_edit->displayText()).toDouble();
-	if(size_combo_last_index == 1)
-	    sized *= (long double)0x100000;
-	if(size_combo_last_index == 2)
-	    sized *= (long double)0x40000000;
-	if(size_combo_last_index == 3){
-	    sized *= (long double)(0x100000);
-	    sized *= (long double)(0x100000);
-	}
-	sized /= es;
-	if (sized < 0)
-	    sized = 0;
-	exts = qRound64(sized);
-    }
-    else
-	exts =  (size_edit->displayText()).toULongLong();
+    extent_size = m_vg->getExtentSize();
+    extents     = getSizeEditExtents(m_size_combo_last_index);
+
     if(index){
-	sized = (long double)exts * es;
+	sized = (long double)extents * extent_size;
 	if(index == 1){
-	    size_validator->setTop(current_size / (long double)0x100000);
+	    m_size_validator->setTop(m_current_lv_size / (long double)0x100000);
 	    sized /= (long double)0x100000;
 	}
 	if(index == 2){
-	    size_validator->setTop(current_size / (long double)0x40000000);
+	    m_size_validator->setTop(m_current_lv_size / (long double)0x40000000);
 	    sized /= (long double)0x40000000; 
 	}
 	if(index == 3){
-	    size_validator->setTop(current_size / ((long double)0x100000 * 0x100000));
+	    m_size_validator->setTop(m_current_lv_size / ((long double)0x100000 * 0x100000));
 	    sized /= (long double)(0x100000);
 	    sized /= (long double)(0x100000);
 	}
-	size_edit->setText(QString("%1").arg((double)sized));
+	m_size_edit->setText(QString("%1").arg((double)sized));
     }
     else{
-	size_validator->setTop(current_size / es);
-	size_edit->setText(QString("%1").arg(exts));
+	m_size_validator->setTop(m_current_lv_size / extent_size);
+	m_size_edit->setText(QString("%1").arg(extents));
     }
-    size_combo_last_index = index;
+
+    m_size_combo_last_index = index;
+}
+
+long long LVReduceDialog::getSizeEditExtents(int index)
+{
+    long long extent_size = m_vg->getExtentSize();
+    long long extents;
+    long double sized;
+
+    if(index){  
+	sized = (m_size_edit->displayText()).toDouble();
+
+	if(m_size_combo_last_index == 1){      // combo index = Megabytes
+	    sized *= (long double)0x100000;
+	}
+	else if(m_size_combo_last_index == 2){ // combo index = Gigabytes
+	    sized *= (long double)0x40000000;
+	}
+	else{                                  // combo index = Terabytes
+	    sized *= (long double)(0x100000);
+	    sized *= (long double)(0x100000);
+	}
+
+	sized /= extent_size;
+
+	if (sized < 0)
+	    sized = 0;
+
+	extents = qRound64(sized);
+    }
+    else                                       // combo index = Extents
+	extents =  ( m_size_edit->displayText() ).toLongLong();
+
+    return extents;
 }
