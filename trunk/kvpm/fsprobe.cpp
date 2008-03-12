@@ -14,7 +14,9 @@
 
 
 #include <blkid/blkid.h>
+
 #include <QtGui>
+
 #include "fsprobe.h"
 
 #define BLKID_EMPTY_CACHE       "/dev/null"
