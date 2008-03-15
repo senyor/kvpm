@@ -17,6 +17,7 @@
 
 #include <KLineEdit>
 #include <KDialog>
+
 #include <QString>
 #include <QRadioButton>
 #include <QCheckBox>
@@ -26,13 +27,16 @@
 class LogVol;
 class StoragePartition;
 
+bool mount_filesystem(StoragePartition *partition);
+bool mount_filesystem(LogVol *volumeToMount);
+
 class MountDialog : public KDialog
 {
 Q_OBJECT
 
-    QString mount_point,                // The desired mount point 
-            device_to_mount,            // The complete device path
-            filesystem_type;            // ext3, reiserfs, vfat etc.
+    QString m_mount_point,                // The desired mount point 
+            m_device_to_mount,            // The complete device path
+            m_filesystem_type;            // ext3, reiserfs, vfat etc.
  
     QRadioButton *ext2_button, *ext3_button, *reiserfs3_button, *reiserfs4_button,
 	         *xfs_button, *jfs_button, *vfat_button, *specify_button,
@@ -44,19 +48,18 @@ Q_OBJECT
 	      *dev_check, *exec_check, *mand_check, *acl_check, 
               *user_xattr_check;
 
-    KLineEdit *mount_point_edit, 
-	      *filesystem_edit,            // User chosen filesystem type
-	      *fs_specific_edit;           // Additional options such as acl and data=ordered
+    KLineEdit *m_mount_point_edit, 
+	      *m_filesystem_edit,    // User chosen filesystem type
+	      *m_fs_specific_edit;   // Additional options such as acl and data=ordered
 
-    QVBoxLayout *main_layout, *options_layout;
-    QGroupBox *filesystem_journal_box;
+    QGroupBox *m_filesystem_journal_box;
     
-    void setupFilesystemBox();
-    void setupOptionsTab();
-    void setupMountPointBox();
+    QWidget* filesystemBox();
+    QWidget* optionsTab();
+    QWidget* mountPointBox();
     
  public:
-    MountDialog(QString DeviceToMount, QString Filesystem, QWidget *parent = 0);
+    MountDialog(QString deviceToMount, QString filesystemType, QWidget *parent = 0);
     
  private slots:
      void selectMountPoint(bool);
@@ -67,7 +70,5 @@ Q_OBJECT
      
 };
 
-bool mount_filesystem(StoragePartition *Partition);
-bool mount_filesystem(LogVol *VolumeToMount);
 
 #endif
