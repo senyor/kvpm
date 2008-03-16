@@ -11,6 +11,7 @@
  * 
  * See the file "COPYING" for the exact licensing terms.
  */
+
 #ifndef MOUNTINFO_H
 #define MOUNTINFO_H
 
@@ -23,27 +24,27 @@ class MountInformation;
 
 class MountInformationList
 {
-    QList<MountInformation *> list;
+    QList<MountInformation *> m_list;
     
  public:
     MountInformationList();
     ~MountInformationList();
-    QList<MountInformation *> getMountInformation(QString DeviceName);
+    QList<MountInformation *> getMountInformation(QString deviceName);
 };
 
     
 class MountInformation : public QObject
 {
-    QString device_name,        // for example: "/dev/sda1"
-	    mount_point, 
-	    filesystem_type,    // ext3, reiserfs, swap etcetera 
-	    mount_options;      // options, such as "noatime," set when mounting a filesystem 
+    QString m_device_name,        // for example: "/dev/sda1"
+	    m_mount_point, 
+	    m_filesystem_type,    // ext3, reiserfs, swap etcetera 
+	    m_mount_options;      // options, such as "noatime," set when mounting a filesystem 
 
-    int dump_frequency; 
-    int dump_passno;
+    int m_dump_frequency; 
+    int m_dump_passno;
 
  public:
-    MountInformation(mntent *MountTableEntry, QObject *parent = 0);
+    MountInformation(mntent *mountTableEntry, QObject *parent = 0);
     QString getDeviceName();
     QString getMountPoint();
     QString getFilesystemType();

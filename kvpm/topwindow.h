@@ -48,6 +48,8 @@ Q_OBJECT
     
     QVBoxLayout *layout;
     QList<VolumeGroupTab *> vg_tabs;
+    QList<VolumeGroupTab *> m_old_vg_tabs;
+
     DeviceTab *device_tab;
     VolGroup *vg;
 

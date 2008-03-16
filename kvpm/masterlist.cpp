@@ -64,16 +64,18 @@ MasterList::~MasterList()
    or change information on the first tab of the main display page. */
 
 
-VolGroup* MasterList::rebuildVolumeGroup(VolGroup *VolumeGroup)
+VolGroup* MasterList::rebuildVolumeGroup(VolGroup *volumeGroup)
 {
     VolGroup *new_group, *old_group;
 
-    old_group = VolumeGroup;
-    new_group = scanVolGroups(VolumeGroup->getName());
+    old_group = volumeGroup;
+    new_group = scanVolGroups( volumeGroup->getName() );
 
-    for(int x = 0; x <  VolGroups.size(); x++)
+    for(int x = 0; x <  VolGroups.size(); x++){
 	if(VolGroups[x] == old_group)
 	    VolGroups[x] = new_group;
+    }
+
     delete old_group;
 
     scanLogVols(new_group);
@@ -132,7 +134,8 @@ void MasterList::scanLogVols()
     int vg_count;
     int lv_segments;   //number of segments in the logical volume
 
-    mount_info_list = new MountInformationList();
+    MountInformationList mount_info_list;
+    
     
     arguments << "lvs" << "--all" << "-o" 
 	      << "lv_name,vg_name,lv_attr,lv_size,origin,snap_percent,move_pv,mirror_log,copy_percent,chunksize,seg_count,stripes,stripesize,seg_size,devices,lv_kernel_major,lv_kernel_minor,lv_minor"  
@@ -149,7 +152,8 @@ void MasterList::scanLogVols()
 	for(int x = 0 ; x < lv_segments ; x++){
 	    seg_data << lv_output[i++];
 	}
-	LogVols.append(new LogVol(seg_data, mount_info_list));
+
+	LogVols.append(new LogVol(seg_data, &mount_info_list));
     } 
     
     /* put pointers to the lvs in their associated vgs */
@@ -178,7 +182,7 @@ void MasterList::scanLogVols(VolGroup *VolumeGroup)
     
     group_name = VolumeGroup->getName();
 
-    mount_info_list = new MountInformationList();
+    MountInformationList mount_info_list;
 
     arguments << "lvs" << "--all" << "-o" 
 	      << "lv_name,vg_name,lv_attr,lv_size,origin,snap_percent,move_pv,mirror_log,copy_percent,chunksize,seg_count,stripes,stripesize,seg_size,devices,lv_kernel_major,lv_kernel_minor,lv_minor"  
@@ -195,7 +199,8 @@ void MasterList::scanLogVols(VolGroup *VolumeGroup)
 	for(int x = 0 ; x < lv_segments ; x++){
 	    seg_data << lv_output[i++];
 	}
-	logical_volume = new LogVol(seg_data, mount_info_list);
+
+	logical_volume = new LogVol(seg_data, &mount_info_list);
 	VolumeGroup->addLogicalVolume(logical_volume);
 	logical_volume->setVolumeGroup(VolumeGroup);
     } 
@@ -283,11 +288,11 @@ void MasterList::scanStorageDevices()
 
     ped_device_probe_all();
 
+    MountInformationList *mount_info_list = new MountInformationList();
+
     while( ( dev = ped_device_get_next(dev) ) ){
 	StorageDevices.append( new StorageDevice(dev, PhysVols, mount_info_list ) );
     }
-    
-    delete (mount_info_list);
 }
 
 int MasterList::getVolGroupCount()

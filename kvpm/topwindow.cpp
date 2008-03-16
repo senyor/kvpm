@@ -14,7 +14,9 @@
 
 
 #include <KStandardAction>
+
 #include <QtGui>
+
 #include "devicetab.h"
 #include "logvol.h"
 #include "masterlist.h"
@@ -43,7 +45,7 @@ TopWindow::TopWindow(QWidget *parent):KMainWindow(parent)
     groups_menu   = new KMenu("Volume Groups");
     settings_menu = new KMenu("Settings");
     
-    help_menu   = helpMenu( "Linux volume and partition manager for KDE" );
+    help_menu = helpMenu( "Linux volume and partition manager for KDE" );
 
     menuBar()->addMenu(file_menu);
     menuBar()->addMenu(tool_menu);
@@ -88,7 +90,7 @@ TopWindow::TopWindow(QWidget *parent):KMainWindow(parent)
     master_list = 0;
     tab_widget = 0;
     old_tab_widget =0;
-
+    
     connect(vgchange_alloc_action,  SIGNAL(triggered()), this, SLOT(launchVGChangeAllocDialog()));
     connect(vgchange_extent_action, SIGNAL(triggered()), this, SLOT(launchVGChangeExtentDialog()));
     connect(vgchange_lv_action,     SIGNAL(triggered()), this, SLOT(launchVGChangeLVDialog()));
@@ -114,7 +116,14 @@ void TopWindow::reRun()
     QList<VolGroup *> groups;
     int vg_count;
     vg_tabs.clear();
+
+    for(int x = 0; x < m_old_vg_tabs.size(); x++)
+	delete(m_old_vg_tabs[x]);
+    m_old_vg_tabs.clear();
+
+
     old_tab_widget = tab_widget;           // with this function we delay actually deleting
+
     if(old_tab_widget)                     // the widgets for one cycle.
 	old_tab_widget->setParent(0);
 
@@ -127,6 +136,7 @@ void TopWindow::reRun()
 
     vg_count = master_list->getVolGroupCount();
     groups = master_list->getVolGroups();
+
     for(int x = 0; x < vg_count; x++){
 	tab = new VolumeGroupTab(groups[x]);
 	tab_widget->addTab(tab, groups[x]->getName());
@@ -136,8 +146,11 @@ void TopWindow::reRun()
     tab_widget->setCurrentIndex(0);
     setupMenus(0);
 
-    connect(tab_widget, SIGNAL(currentChanged(int)), this, SLOT(updateTabGeometry(int)));
-    connect(tab_widget, SIGNAL(currentChanged(int)), this, SLOT(setupMenus(int)));
+    connect(tab_widget, SIGNAL(currentChanged(int)), 
+	    this, SLOT(updateTabGeometry(int)));
+
+    connect(tab_widget, SIGNAL(currentChanged(int)), 
+	    this, SLOT(setupMenus(int)));
 }
 
 /* This function destroys the displayed tab for the volume group at 
@@ -158,8 +171,8 @@ void TopWindow::rebuildVolumeGroupTab()
     tab_widget->removeTab(index);
     tab_widget->insertTab(index, tab, group_name);
 
-    delete vg_tabs[index - 1];
-
+    m_old_vg_tabs.append( vg_tabs[index - 1] );
+    
     vg_tabs.replace(index - 1, tab);
 
 // These three lines must be last
@@ -218,6 +231,7 @@ void TopWindow::launchVGChangeAllocDialog()
 {
     VGChangeAllocDialog dialog( vg->getName() );
     dialog.exec();
+
     if(dialog.result() == QDialog::Accepted){
         ProcessProgress change_vg(dialog.arguments(), "", FALSE);
 	MainWindow->rebuildVolumeGroupTab();
@@ -277,4 +291,3 @@ void TopWindow::launchPVMoveStop()
     if( stop_pvmove() )
         MainWindow->reRun();
 }
-
