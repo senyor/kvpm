@@ -3,7 +3,7 @@
  * 
  * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
  *
- * This file is part of the Klvm project.
+ * This file is part of the Kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License,  version 3, as 
@@ -16,8 +16,11 @@
 #include <sys/mount.h>
 #include <errno.h>
 #include <string.h>
+
 #include <KMessageBox>
+
 #include <QtGui>
+
 #include "logvol.h"
 #include "mountentry.h"
 #include "nomungecheck.h"
@@ -30,9 +33,11 @@
    KMessageBox type dialogs are used otherwise */
 
 
-UnmountDialog::UnmountDialog(QString Device, QStringList MountPoints, QWidget *parent) : KDialog(parent)
+UnmountDialog::UnmountDialog(QString device, QStringList mountPoints, QWidget *parent) : 
+    KDialog(parent),
+    m_mount_points(mountPoints)
 {
-    mount_points = MountPoints;
+
     NoMungeCheck *temp_check;
     QString unmount_message;
     
@@ -42,11 +47,11 @@ UnmountDialog::UnmountDialog(QString Device, QStringList MountPoints, QWidget *p
     QVBoxLayout *layout    = new QVBoxLayout();
     dialog_body->setLayout(layout);
 
-    unmount_message.append( "<b>" + Device + "</b> is mounted at multiple locatations.");
+    unmount_message.append( "<b>" + device + "</b> is mounted at multiple locatations.");
     unmount_message.append( " Check the boxes for any you wish to unmount." );
     QLabel *unmount_message_label = new QLabel();
     unmount_message_label->setText(unmount_message);
-    unmount_message_label->setWordWrap(TRUE);
+    unmount_message_label->setWordWrap(true);
     layout->addWidget(unmount_message_label);
 
     QGroupBox *mount_group = new QGroupBox("Mount points");
@@ -54,23 +59,25 @@ UnmountDialog::UnmountDialog(QString Device, QStringList MountPoints, QWidget *p
     mount_group->setLayout(mount_group_layout);
     layout->addWidget(mount_group);
     
-    for(int x = 0; x < mount_points.size(); x++){
-	temp_check = new NoMungeCheck( mount_points[x] );
+    for(int x = 0; x < m_mount_points.size(); x++){
+	temp_check = new NoMungeCheck( m_mount_points[x] );
 	mount_group_layout->addWidget(temp_check);
-	check_list.append(temp_check);
+	m_check_list.append(temp_check);
     }
 
-    connect(this, SIGNAL( accepted() ), this, SLOT( unmountFilesystems() ));
+    connect(this, SIGNAL( accepted() ), 
+	    this, SLOT( unmountFilesystems() ));
+
 }
 
 void UnmountDialog::unmountFilesystems()
 {
     QString mount_point, error_string, error_message;
     
-    for(int x = 0; x < check_list.size(); x++){
-	if( check_list[x]->isChecked() ) {
+    for(int x = 0; x < m_check_list.size(); x++){
+	if( m_check_list[x]->isChecked() ) {
 	    
-	    mount_point = check_list[x]->getUnmungedText();
+	    mount_point = m_check_list[x]->getUnmungedText();
 	    if( umount2( mount_point.toAscii().data() , 0) ){
 		error_string =  strerror( errno );
 		error_message = "Unmounting " + mount_point + " failed with ";
@@ -85,15 +92,15 @@ void UnmountDialog::unmountFilesystems()
     }
 }
 
-bool unmount_filesystem(LogVol *LogicalVolume)
+bool unmount_filesystem(LogVol *logicalVolume)
 {
-    QStringList mount_points = LogicalVolume->getMountPoints();
-    QString name = LogicalVolume->getName();
-    QString vg_name = LogicalVolume->getVolumeGroupName();
+    QStringList mount_points = logicalVolume->getMountPoints();
+    QString name = logicalVolume->getName();
+    QString vg_name = logicalVolume->getVolumeGroupName();
     QString unused_message;
     QString unmount_point;                 // mount point to unmount
 
-    if( LogicalVolume->isMounted() ){
+    if( logicalVolume->isMounted() ){
 
         unused_message.append("The volume <b>" + name + "</b> is mounted at ");
         unused_message.append("<b>" + mount_points[0] + "</b>" );
@@ -105,27 +112,28 @@ bool unmount_filesystem(LogVol *LogicalVolume)
                 return( unmount_filesystem( unmount_point ) );
             }
             else
-                return FALSE;
+                return false;
         }
         else{
             UnmountDialog dialog("/dev/mapper/" + vg_name + "-" + name  ,mount_points);
             dialog.exec();
-            return TRUE;
+            return true;
         }
     }
+
     KMessageBox::error(0, "The volume: <b>" + name + "</b> does not seem to be mounted");
-    return FALSE;
+    return false;
 }
 
-bool unmount_filesystem(StoragePartition *Partition)
+bool unmount_filesystem(StoragePartition *partition)
 {
-    QStringList mount_points = Partition->getMountPoints();
-    QString path = Partition->getPartitionPath();
+    QStringList mount_points = partition->getMountPoints();
+    QString path = partition->getPartitionPath();
 
     QString unused_message;
     QString unmount_point;                 // mount point to unmount
 
-    if( Partition->isMounted() ){
+    if( partition->isMounted() ){
     
 	unused_message.append("The partition <b>" + path + "</b> is mounted at ");
 	unused_message.append("<b>" + mount_points[0] + "</b>" );
@@ -137,40 +145,40 @@ bool unmount_filesystem(StoragePartition *Partition)
 		return( unmount_filesystem( unmount_point ) );
 	    }
 	    else
-		return FALSE;
+		return false;
 	}
 	else{
 	    UnmountDialog dialog(path, mount_points);
 	    dialog.exec();
-	    return TRUE;
+	    return true;
 	}
     }
     KMessageBox::error(0, "The partition: <b>" + path + "</b> does not seem to be mounted"); 
-    return FALSE;
+    return false;
 }
 
 
 /* This function calls umount2 for the actual unmounting if the dialog
    asks for it. It also removes the entry from "mtab" on success */
 
-bool unmount_filesystem(const QString MountPoint)
+bool unmount_filesystem(const QString mountPoint)
 {
     QString error_string, error_message;
 
-    const char *mount_point = MountPoint.toAscii().data();
-    
+    const char *mount_point = mountPoint.toAscii().data();
+
     if( umount2(mount_point, 0) ){
 	error_string =  strerror( errno );
 	
-	error_message = "Unmounting " + MountPoint + " failed with ";
+	error_message = "Unmounting " + mountPoint + " failed with ";
 	error_message.append( QString( "error number: %1  ").arg(errno) );
 	error_message.append( error_string );
 	
 	KMessageBox::error(0, error_message);
-	return FALSE;
+	return false;
     }
     else{
-	removeMountEntry(MountPoint);
-	return TRUE;
+	removeMountEntry(mountPoint);
+	return true;
     }
 }

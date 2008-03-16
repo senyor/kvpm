@@ -11,6 +11,7 @@
  * 
  * See the file "COPYING" for the exact licensing terms.
  */
+
 #ifndef MASTERLIST_H
 #define MASTERLIST_H
 
@@ -32,7 +33,6 @@ class MasterList : public QObject
     QList<LogVol *>   LogVols;
     QList<PhysVol *>  PhysVols;
     QList<StorageDevice *> StorageDevices;
-    MountInformationList *mount_info_list;
     
     void scanVolGroups();
     VolGroup* scanVolGroups(QString VolumeName);
@@ -45,7 +45,7 @@ class MasterList : public QObject
 public:
     MasterList();
     ~MasterList();
-    VolGroup* rebuildVolumeGroup(VolGroup *VolumeGroup);
+    VolGroup* rebuildVolumeGroup(VolGroup *volumeGroup);
     const QList<VolGroup *> getVolGroups();
     const QList<PhysVol *> getPhysVols();
     const QList<StorageDevice *> getStorageDevices();

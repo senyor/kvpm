@@ -11,6 +11,7 @@
  * 
  * See the file "COPYING" for the exact licensing terms.
  */
+
 #ifndef UNMOUNT_H
 #define UNMOUNT_H
 
@@ -22,23 +23,25 @@ class LogVol;
 class NoMungeCheck;
 class StoragePartition;
 
+bool unmount_filesystem(StoragePartition *partition);
+bool unmount_filesystem(LogVol *logicalVolume);
+bool unmount_filesystem(const QString mountPoint);
+
+
 class UnmountDialog : public KDialog
 {
 Q_OBJECT
 
-    QList<NoMungeCheck *> check_list; // one check box for each mount point
-    QStringList mount_points;
+    QList<NoMungeCheck *> m_check_list; // one check box for each mount point
+    QStringList m_mount_points;
  
  public:
-    UnmountDialog(QString Device, QStringList MountPoints, QWidget *parent = 0);
+    UnmountDialog(QString device, QStringList mountPoints, QWidget *parent = 0);
 
  private slots:   
     void unmountFilesystems();
  
 };
 
-bool unmount_filesystem(StoragePartition *Partition);
-bool unmount_filesystem(LogVol *LogicalVolume);
-bool unmount_filesystem(const QString MountPoint);
 
 #endif
