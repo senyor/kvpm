@@ -1,3 +1,9 @@
+version 0.4.2
+Fixed a bug that caused random crashes after 
+mounting/unmounting and certain other operations.
+The mirror corelog option of lvcreate should work
+now. 
+
 version 0.4.1
 Still doing coding style unification and hunting
 down smal bugs. Extending non-linear volumes should
