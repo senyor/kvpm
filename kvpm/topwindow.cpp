@@ -137,13 +137,25 @@ TopWindow::TopWindow(QWidget *parent):KMainWindow(parent)
 
 void TopWindow::reRun()
 {
+
     VolumeGroupTab *tab;
     QList<VolGroup *> groups;
     int vg_count;
+    QString selected_vg_name;  // Name of the vg for the tab currently selected
+
+    if( m_tab_widget ){
+	
+	if( m_tab_widget->currentIndex() > 0 )
+	    selected_vg_name =  m_vg_tabs[m_tab_widget->currentIndex() - 1]->getVolumeGroupName();
+	else
+	    selected_vg_name =  "";
+    }
+    
     m_vg_tabs.clear();
 
     for(int x = 0; x < m_old_vg_tabs.size(); x++)
 	delete(m_old_vg_tabs[x]);
+
     m_old_vg_tabs.clear();
 
     m_old_tab_widget = m_tab_widget;           // with this function we delay actually deleting
@@ -161,12 +173,6 @@ void TopWindow::reRun()
     vg_count = master_list->getVolGroupCount();
     groups = master_list->getVolGroups();
 
-    for(int x = 0; x < vg_count; x++){
-	tab = new VolumeGroupTab(groups[x]);
-	m_tab_widget->addTab(tab, groups[x]->getName());
-	m_vg_tabs.append(tab);
-    }
-    
     m_tab_widget->setCurrentIndex(0);
     setupMenus(0);
 
@@ -175,6 +181,24 @@ void TopWindow::reRun()
 
     connect(m_tab_widget, SIGNAL(currentChanged(int)), 
 	    this, SLOT(setupMenus(int)));
+
+/* 
+   Here we try to select the tab with the volume group
+   that the user was looking at before the tabs were rebuilt.
+   If that group no longer exists we go back to the first
+   tab.
+*/
+
+    for(int x = 0; x < vg_count; x++){
+	tab = new VolumeGroupTab(groups[x]);
+	m_tab_widget->addTab(tab, groups[x]->getName());
+	m_vg_tabs.append(tab);
+
+	if( groups[x]->getName() == selected_vg_name ){
+	    m_tab_widget->setCurrentIndex(x + 1);
+	    setupMenus(x + 1);
+	}
+    }
 }
 
 /* This function destroys the displayed tab for the volume group at 
