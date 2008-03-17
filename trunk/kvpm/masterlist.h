@@ -29,17 +29,17 @@ class StorageDevice;
 
 class MasterList : public QObject
 {
-    QList<VolGroup *> VolGroups;
-    QList<LogVol *>   LogVols;
-    QList<PhysVol *>  PhysVols;
-    QList<StorageDevice *> StorageDevices;
+    QList<VolGroup *> m_volume_groups;
+    QList<LogVol *>   m_logical_volumes;
+    QList<PhysVol *>  m_physical_volumes;
+    QList<StorageDevice *> m_storage_devices;
     
-    void scanVolGroups();
-    VolGroup* scanVolGroups(QString VolumeName);
-    void scanLogVols(VolGroup *VolumeGroup);
-    void scanLogVols();
-    void scanPhysVols(VolGroup *VolumeGroup);
-    void scanPhysVols();
+    void scanVolumeGroups();
+    VolGroup* scanVolumeGroups(QString VolumeName);
+    void scanLogicalVolumes(VolGroup *VolumeGroup);
+    void scanLogicalVolumes();
+    void scanPhysicalVolumes(VolGroup *VolumeGroup);
+    void scanPhysicalVolumes();
     void scanStorageDevices();
     
 public:
