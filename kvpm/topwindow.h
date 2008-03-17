@@ -20,18 +20,23 @@
 #include <KMenu>
 #include <KMenuBar>
 #include <KAction>
+
 #include <QStringList>
 #include <QVBoxLayout>
 
 class StorageDevice;
+class TopWindow;
 class VolGroup;
 class VolumeGroupTab;
 class DeviceTab;
 
+extern TopWindow *MainWindow;
+
 class TopWindow : public KMainWindow
 {
 Q_OBJECT
-    KTabWidget *tab_widget, *old_tab_widget;
+    KTabWidget *m_tab_widget,          // The current tab widget we are using 
+               *m_old_tab_widget;      // The tab widget we have schedualed for deletion 
 
     KAction *quit_action, *remove_vg_action, *reduce_vg_action, *rescan_action, 
 	    *rescan_vg_action, *vgchange_alloc_action, *vgchange_pv_action, 
@@ -41,17 +46,13 @@ Q_OBJECT
     KAction *m_restart_pvmove_action,
 	    *m_stop_pvmove_action;
     
+    KMenu *m_vgchange_menu;
 
-    KMenu *vgchange_menu, *file_menu, *tool_menu, 
-	  *groups_menu, *settings_menu,
-	  *help_menu;
-    
-    QVBoxLayout *layout;
-    QList<VolumeGroupTab *> vg_tabs;
-    QList<VolumeGroupTab *> m_old_vg_tabs;
+    QList<VolumeGroupTab *> m_vg_tabs;
+    QList<VolumeGroupTab *> m_old_vg_tabs;  // These widgets are schedualed for deletion 
 
-    DeviceTab *device_tab;
-    VolGroup *vg;
+    DeviceTab *m_device_tab;
+    VolGroup *m_vg;
 
  public:
     TopWindow(QWidget *parent);
@@ -63,19 +64,17 @@ Q_OBJECT
  private slots:
     void setupMenus(int index);
     void updateTabGeometry(int index);
-    void launchVGChangeAllocDialog();
-    void launchVGChangeExtentDialog();
-    void launchVGChangeLVDialog();
-    void launchVGChangePVDialog();
-    void launchVGChangeResizeDialog();
-    void launchVGRemoveDialog();
-    void launchRemoveMissingDialog();
-    void launchVGReduceDialog();
-    void launchPVMoveRestart();
-    void launchPVMoveStop();
+    void changeAllocation();
+    void changeExtentSize();
+    void limitLogicalVolumes();
+    void limitPhysicalVolumes();
+    void changeResize();
+    void removeVolumeGroup();
+    void removeMissingVolumes();
+    void reduceVolumeGroup();
+    void restartPhysicalVolumeMove();
+    void stopPhysicalVolumeMove();
     
 };
-
-extern TopWindow *MainWindow;
 
 #endif
