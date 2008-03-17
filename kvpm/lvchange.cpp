@@ -14,36 +14,40 @@
 
 
 #include <QtGui>
+
 #include "lvchange.h"
 #include "logvol.h"
 #include "processprogress.h"
 
 
-bool change_lv(LogVol *LogicalVolume)
+bool change_lv(LogVol *logicalVolume)
 {
-    LVChangeDialog dialog(LogicalVolume);
+    LVChangeDialog dialog(logicalVolume);
     dialog.exec();
+
     if(dialog.result() == QDialog::Accepted){
         ProcessProgress change_lv(dialog.arguments(),"Changing lv attributes");
-	return TRUE;
+	return true;
     }
     else
-	return FALSE;
+	return false;
 }
 
-LVChangeDialog::LVChangeDialog(LogVol *LogicalVolume, QWidget *parent) : KDialog(parent)
+LVChangeDialog::LVChangeDialog(LogVol *logicalVolume, QWidget *parent) : 
+    KDialog(parent),
+    m_lv(logicalVolume)
 {
-    LogVol *lv;
-    lv = LogicalVolume;
-    lv_full_name = lv->getFullName();
-    
+
     setWindowTitle(tr("Change logical volume attributes"));
  
-    tab_widget = new KTabWidget();
+    KTabWidget *tab_widget = new KTabWidget();
     setMainWidget(tab_widget);
 
-    tab_widget->addTab(general_tab  = new LVChangeGeneralTab(lv), "General");
-    tab_widget->addTab(advanced_tab = new LVChangeAdvancedTab(lv), "Advanced");
+    buildGeneralTab();
+    buildAdvancedTab();
+    
+    tab_widget->addTab(m_general_tab, "General");
+    tab_widget->addTab(m_advanced_tab, "Advanced");
 }
 
 QStringList LVChangeDialog::arguments()
@@ -52,47 +56,50 @@ QStringList LVChangeDialog::arguments()
 
     args << "lvchange";
     
-    if(general_tab->available_check->isChecked())
+    if(available_check->isChecked())
 	args << "--available" << "y";
     else
 	args << "--available" << "n";
 
-    if(general_tab->contig_check->isChecked())
+    if(contig_check->isChecked())
 	args << "--contiguous" << "y";
     else
 	args << "--contiguous" << "n";
-    if(general_tab->ro_check->isChecked())
+
+    if(ro_check->isChecked())
 	args << "--permission" << "r";
     else
 	args << "--permission" << "rw";
     
-    if(advanced_tab->mirror_box->isEnabled())
-    {
-	if(advanced_tab->resync_check->isChecked())
+    if(m_mirror_box->isEnabled()){
+	if(resync_check->isChecked())
 	    args << "--resync";
-	if(advanced_tab->monitor_check->isChecked())
+
+	if(monitor_check->isChecked())
 	    args << "--monitor" << "y";
 	else
 	    args << "--monitor" << "n";
     }
        
-    if(advanced_tab->persistant_box->isChecked()){
+    if(m_persistant_box->isChecked()){
 	args << "--force" << "-My";
-	args << "--major" << advanced_tab->major_edit->text();
-	args << "--minor" << advanced_tab->minor_edit->text();
+	args << "--major" << major_edit->text();
+	args << "--minor" << minor_edit->text();
     }
-    else
+    else{
 	args << "--force" << "-Mn";
- 
-    args << lv_full_name;
+    }
+    
+    args << m_lv->getFullName();
    
     return args;
 }
 
-LVChangeGeneralTab::LVChangeGeneralTab(LogVol *lv, QWidget *parent) : QWidget(parent)
+void LVChangeDialog::buildGeneralTab()
 {
+    m_general_tab = new QWidget();
     QVBoxLayout *layout = new QVBoxLayout();
-    setLayout(layout);
+    m_general_tab->setLayout(layout);
     
     available_check  = new QCheckBox("Make volume available for use");
     contig_check     = new QCheckBox("Allocate contiguous extents");
@@ -103,45 +110,46 @@ LVChangeGeneralTab::LVChangeGeneralTab(LogVol *lv, QWidget *parent) : QWidget(pa
     layout->addWidget(ro_check);
     layout->addWidget(refresh_check);
 
-    if(lv->getState() != "Unavailable")
-	available_check->setChecked(TRUE);
+    if(m_lv->getState() != "Unavailable")
+	available_check->setChecked(true);
     
-    if(lv->getPolicy() == "Contiguous")
-	contig_check->setChecked(TRUE);
+    if(m_lv->getPolicy() == "Contiguous")
+	contig_check->setChecked(true);
 
-    if( !(lv->isWritable()) )
-	ro_check->setChecked(TRUE);
+    if( !(m_lv->isWritable()) )
+	ro_check->setChecked(true);
 }
 
-LVChangeAdvancedTab::LVChangeAdvancedTab(LogVol *lv, QWidget *parent) : QWidget(parent)
+void LVChangeDialog::buildAdvancedTab()
 {
+    m_advanced_tab = new QWidget();
     QVBoxLayout *layout = new QVBoxLayout();
-    setLayout(layout);
+    m_advanced_tab->setLayout(layout);
 
-    mirror_box = new QGroupBox("Mirrored volume operations");
+    m_mirror_box = new QGroupBox("Mirrored volume operations");
     QVBoxLayout *mirror_layout = new QVBoxLayout();
-    mirror_box->setLayout(mirror_layout);
+    m_mirror_box->setLayout(mirror_layout);
     resync_check     = new QCheckBox("Re-synchronize mirrors");
     monitor_check    = new QCheckBox("Monitor mirrors with dmeventd");
     mirror_layout->addWidget(resync_check);
     mirror_layout->addWidget(monitor_check);
-    layout->addWidget(mirror_box);
+    layout->addWidget(m_mirror_box);
     
-    persistant_box = new QGroupBox("Persistant device numbers");
-    persistant_box->setCheckable(TRUE);
+    m_persistant_box = new QGroupBox("Persistant device numbers");
+    m_persistant_box->setCheckable(TRUE);
     QVBoxLayout *persistant_layout = new QVBoxLayout();
-    persistant_box->setLayout(persistant_layout);
-    major_edit = new QLineEdit(QString("%1").arg(lv->getMajorDevice()));
+    m_persistant_box->setLayout(persistant_layout);
+    major_edit = new KLineEdit(QString("%1").arg(m_lv->getMajorDevice()));
     persistant_layout->addWidget(major_edit);
-    minor_edit = new QLineEdit(QString("%1").arg(lv->getMinorDevice()));
+    minor_edit = new KLineEdit(QString("%1").arg(m_lv->getMinorDevice()));
     persistant_layout->addWidget(minor_edit);
-    layout->addWidget(persistant_box);
+    layout->addWidget(m_persistant_box);
 
-    if(lv->getType() != "Mirror")
-	mirror_box->setEnabled(FALSE);
+    if( !m_lv->isMirror() )
+	m_mirror_box->setEnabled(false);
 
-    if(lv->isPersistant())
-	persistant_box->setChecked(TRUE);
+    if( m_lv->isPersistant() )
+	m_persistant_box->setChecked(true);
     else
-	persistant_box->setChecked(FALSE);
+	m_persistant_box->setChecked(false);
 }
