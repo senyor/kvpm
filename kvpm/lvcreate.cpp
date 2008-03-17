@@ -895,8 +895,14 @@ QStringList LVCreateDialog::argumentsLV()
 	    else
 		args << "--zero" << "n";
 
-	    if( m_mirror_box->isChecked() )
+	    if( m_mirror_box->isChecked() ){
 		args << "--mirrors" << QString("%1").arg( getMirrorCount() - 1 );
+
+		if( m_disk_log->isChecked() )
+		    args << "--mirrorlog" << "disk";
+		else
+		    args << "--mirrorlog" << "core";
+	    }
 	}
     }
     
