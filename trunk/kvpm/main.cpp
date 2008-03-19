@@ -38,7 +38,7 @@ int main(int argc, char **argv)
 {
     
     KAboutData aboutData( "kvpm", 0,
-			  ki18n("kvpm"), "0.4.2",
+			  ki18n("kvpm"), "0.4.3",
 			  ki18n("Linux volume and partition manager for KDE"),
 			  KAboutData::License_GPL,
 			  ki18n("Copyright (c) 2008 Benjamin Scott") );
@@ -58,7 +58,7 @@ int main(int argc, char **argv)
     g_executable_finder = new ExecutableFinder();
     
     MainWindow = new TopWindow(NULL);
-    MainWindow->setGeometry(0,0,1000,750);
+    MainWindow->setGeometry(0,0,900,700);
     MainWindow->show();
     return kvpm.exec();
 }
