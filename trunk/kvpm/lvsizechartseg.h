@@ -42,6 +42,7 @@ Q_OBJECT
      void changeLogicalVolume();
      void reduceLogicalVolume();
      void removeLogicalVolume();
+     void renameLogicalVolume();
      void addMirror();
      void removeMirror();
      void createSnapshot();

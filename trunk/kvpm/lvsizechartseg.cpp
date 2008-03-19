@@ -25,6 +25,7 @@
 #include "lvchange.h"
 #include "lvreduce.h"
 #include "lvremove.h"
+#include "lvrename.h"
 #include "mkfs.h"
 #include "mount.h"
 #include "processprogress.h"
@@ -127,6 +128,12 @@ void LVChartSeg::removeLogicalVolume()
 {
     if( remove_lv(m_lv) )
 	MainWindow->reRun();
+}
+
+void LVChartSeg::renameLogicalVolume()
+{
+    if( rename_lv(m_lv) )
+	MainWindow->rebuildVolumeGroupTab();
 }
 
 void LVChartSeg::createSnapshot()

@@ -60,6 +60,7 @@ private slots:
     void adjustColumnWidth(QTreeWidgetItem *);
     void mkfsLogicalVolume();
     void removeLogicalVolume();
+    void renameLogicalVolume();
     void reduceLogicalVolume();
     void createLogicalVolume();
     void createSnapshot();
