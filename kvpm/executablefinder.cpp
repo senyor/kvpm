@@ -37,6 +37,7 @@ ExecutableFinder::ExecutableFinder(QObject *parent) : QObject(parent)
 	 << "lvextend"
 	 << "lvreduce"
 	 << "lvremove"
+	 << "lvrename"
 	 << "lvs"
 	 << "mkfs"
 	 << "mkswap"

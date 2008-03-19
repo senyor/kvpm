@@ -20,6 +20,7 @@
 #include "lvcreate.h"
 #include "lvreduce.h"
 #include "lvremove.h"
+#include "lvrename.h"
 #include "logvol.h"
 #include "masterlist.h"
 #include "mkfs.h"
@@ -290,6 +291,12 @@ void VGTree::removeLogicalVolume()
 {
     if( remove_lv(m_vg_name + "/" + m_lv_name) )
 	MainWindow->reRun();
+}
+
+void VGTree::renameLogicalVolume()
+{
+    if( rename_lv(m_lv) )
+	MainWindow->rebuildVolumeGroupTab();
 }
 
 void VGTree::createLogicalVolume()

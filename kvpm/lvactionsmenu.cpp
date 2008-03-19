@@ -36,6 +36,9 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume,
     connect(lv_remove_action, SIGNAL(triggered()), 
 	    volumeGroupTree, SLOT(removeLogicalVolume()));
 
+    connect(lv_rename_action, SIGNAL(triggered()), 
+	    volumeGroupTree, SLOT(renameLogicalVolume()));
+
     connect(lv_create_action, SIGNAL(triggered()), 
 	    volumeGroupTree, SLOT(createLogicalVolume()));
 
@@ -83,6 +86,9 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume,
     connect(lv_remove_action, SIGNAL(triggered()), 
 	    ChartSeg, SLOT(removeLogicalVolume()));
 
+    connect(lv_rename_action, SIGNAL(triggered()), 
+	    ChartSeg, SLOT(renameLogicalVolume()));
+
     connect(lv_create_action, SIGNAL(triggered()), 
 	    ChartSeg, SLOT(createLogicalVolume()));
 
@@ -116,6 +122,7 @@ void LVActionsMenu::setup(LogVol *lv)
     lv_mkfs_action   = new KAction("Make filesystem...", this);
     lv_reduce_action = new KAction("Reduce logical volume...", this);
     lv_remove_action = new KAction("Remove logical volume...", this);
+    lv_rename_action = new KAction("Rename logical volume...", this);
     lv_create_action = new KAction("Create logical volume...", this);
     snap_create_action = new KAction("Create snapshot...", this);
     lv_extend_action   = new KAction("Extend logical volume...", this);
@@ -129,6 +136,7 @@ void LVActionsMenu::setup(LogVol *lv)
 
     addAction(lv_create_action);
     addAction(lv_remove_action);
+    addAction(lv_rename_action);
     addAction(snap_create_action);
     addAction(lv_reduce_action);
     addAction(lv_extend_action);

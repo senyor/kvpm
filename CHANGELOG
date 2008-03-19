@@ -2,7 +2,8 @@
 version 0.4.3 
 Added more information the the pvproperties widgets. 
 They now use a QTableWidget to show the extents 
-used by each logical volume.
+used by each logical volume. Added an new function,
+lvrename, which does just that.
 
 version 0.4.2
 Fixed a bug that caused random crashes after 
