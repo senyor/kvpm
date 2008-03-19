@@ -170,10 +170,12 @@ void LVActionsMenu::setup(LogVol *lv)
 		unmount_filesystem_action->setEnabled(false);
 		mount_filesystem_action->setEnabled(true);
 	    }
+
 	    add_mirror_action->setEnabled(true);
 	    lv_change_action->setEnabled(true);
 	    lv_extend_action->setEnabled(true);
 	    pv_move_action->setEnabled(true);
+	    lv_rename_action->setEnabled(true);
 
 	    if( lv->isMirror() )
 		remove_mirror_action->setEnabled(true);
@@ -293,6 +295,7 @@ void LVActionsMenu::setup(LogVol *lv)
 	lv_change_action->setEnabled(false);
 	lv_extend_action->setEnabled(false);
 	lv_reduce_action->setEnabled(false);
+	lv_rename_action->setEnabled(false);
 	pv_move_action->setEnabled(false);
 	remove_mirror_action->setEnabled(false);
 	remove_mirror_leg_action->setEnabled(false);
