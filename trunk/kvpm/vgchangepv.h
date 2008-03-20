@@ -11,6 +11,7 @@
  * 
  * See the file "COPYING" for the exact licensing terms.
  */
+
 #ifndef VGCHANGEPV_H
 #define VGCHANGEPV_H
 
@@ -21,18 +22,18 @@
 
 class VolGroup;
 
-bool change_vg_pv(VolGroup *VolumeGroup);
+bool change_vg_pv(VolGroup *volumeGroup);
 
 
 class VGChangePVDialog : public KDialog
 {
-    QString vg_name;
-    VolGroup *vg;
-    QGroupBox *limit_pvs;
-    QSpinBox *max_pvs;
+    QString    m_vg_name;
+    VolGroup  *m_vg;
+    QGroupBox *m_limit_pvs;
+    QSpinBox  *m_max_pvs;
     
 public:
-    VGChangePVDialog(VolGroup *VolumeGroup, QWidget *parent = 0);
+    VGChangePVDialog(VolGroup *volumeGroup, QWidget *parent = 0);
     QStringList arguments();
 };
 
