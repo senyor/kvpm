@@ -11,11 +11,12 @@
  * 
  * See the file "COPYING" for the exact licensing terms.
  */
+
 #ifndef VGREMOVE_H
 #define VGREMOVE_H
 
 class VolGroup;
 
-bool remove_vg(VolGroup *VolumeGroup);
+bool remove_vg(VolGroup *volumeGroup);
 
 #endif

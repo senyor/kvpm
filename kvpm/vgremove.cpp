@@ -21,23 +21,23 @@
 #include "vgremove.h"
 #include "volgroup.h"
 
-bool remove_vg(VolGroup *VolumeGroup)
+bool remove_vg(VolGroup *volumeGroup)
 {
     QStringList args;
     QString message;
 
     message.append("Are you certain you want to delete volume group: ");
-    message.append("<b>" + VolumeGroup->getName() + "</b>");
+    message.append("<b>" + volumeGroup->getName() + "</b>");
 
     if(KMessageBox::questionYesNo( 0, message) == 3){      // 3 = "yes" button
     
 	args << "vgremove"
-	     << VolumeGroup->getName();
+	     << volumeGroup->getName();
 
 	ProcessProgress remove(args, "Removing vg...");
 	
-	return TRUE;
+	return true;
     }
     else		   
-	return FALSE;
+	return false;
 }
