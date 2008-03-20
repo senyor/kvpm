@@ -78,6 +78,11 @@ LVChartSeg::LVChartSeg(VolGroup *volumeGroup, LogVol *logicalVolume,
     setContextMenuPolicy(Qt::CustomContextMenu);
     m_context_menu = new LVActionsMenu(m_lv, this, this);
 
+    if( m_lv )
+	setToolTip( m_lv->getName() );
+    else
+	setToolTip("free space");
+
     connect(this, SIGNAL(customContextMenuRequested(QPoint)), 
 	    this, SLOT(popupContextMenu(QPoint)) );
 }
