@@ -58,9 +58,8 @@ PVProperties::PVProperties(PhysVol *physicalVolume, QWidget *parent):QWidget(par
 	    << "Extents" 
 	    << "";
 
-    table_widget->setColumnCount(5);
+    table_widget->setColumnCount(4);
     table_widget->setRowCount(0);
-    
 
     table_widget->setFrameShape(QFrame::NoFrame);
     setBackgroundRole(QPalette::Base);
@@ -68,11 +67,20 @@ PVProperties::PVProperties(PhysVol *physicalVolume, QWidget *parent):QWidget(par
     pv_name_label->setAutoFillBackground(true);
     pv_name_label->setBackgroundRole(QPalette::Base);
 
-    QLabel *uuid_label = new QLabel("UUID: " + physicalVolume->getUuid() );
-    uuid_label->setAutoFillBackground(true);
-    uuid_label->setBackgroundRole(QPalette::Base);
-    uuid_label->setWordWrap(true);
-    layout->addWidget(uuid_label);
+    QVBoxLayout *uuid_layout = new QVBoxLayout();
+    layout->addLayout(uuid_layout);
+    
+    QLabel *uuid_label1 = new QLabel("<b>UUID</b>");
+    uuid_label1->setAlignment(Qt::AlignHCenter);
+    uuid_label1->setAutoFillBackground(true);
+    uuid_label1->setBackgroundRole(QPalette::Base);
+    uuid_layout->addWidget(uuid_label1);
+    
+    QLabel *uuid_label2 = new QLabel( physicalVolume->getUuid() );
+    uuid_label2->setAutoFillBackground(true);
+    uuid_label2->setBackgroundRole(QPalette::Base);
+    uuid_label2->setWordWrap(true);
+    uuid_layout->addWidget(uuid_label2);
     
 
 /* here we get the names of logical volumes associated
@@ -94,18 +102,25 @@ PVProperties::PVProperties(PhysVol *physicalVolume, QWidget *parent):QWidget(par
 		    table_widget->insertRow( row );
 		    
 		    new_item = new QTableWidgetItem( lv->getName() );
+		    new_item->setFlags(Qt::ItemIsEnabled);
+		    new_item->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter );
 		    table_widget->setItem(row, 0, new_item);
 		    
 		    new_item = new QTableWidgetItem( QString("%1").arg(first_extent) );
-		    new_item->setTextAlignment(Qt::AlignRight);
+		    new_item->setFlags(Qt::ItemIsEnabled);
+		    new_item->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter );
 		    table_widget->setItem(row, 1, new_item);
+
 		    new_item = new QTableWidgetItem( QString("%1").arg(last_extent) );
-		    new_item->setTextAlignment(Qt::AlignRight);
+		    new_item->setFlags(Qt::ItemIsEnabled);
+		    new_item->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter );
 		    table_widget->setItem(row, 2, new_item);
+
 		    new_item = new QTableWidgetItem( QString("%1").arg(last_extent - first_extent + 1 ) );
-		    new_item->setTextAlignment(Qt::AlignRight);
-		    
+		    new_item->setFlags(Qt::ItemIsEnabled);
+		    new_item->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter );
 		    table_widget->setItem(row, 3, new_item);
+
 		    row++;
 		}
 	    }
@@ -120,9 +135,23 @@ PVProperties::PVProperties(PhysVol *physicalVolume, QWidget *parent):QWidget(par
     table_widget->setShowGrid(false);
     table_widget->setAlternatingRowColors(true);
     table_widget->verticalHeader()->hide();
+    table_widget->resizeRowsToContents();
+//    table_widget->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+//    table_widget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+//    layout->setSizeConstraint(  QLayout::SetNoConstraint     );
 
-    table_widget->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    table_widget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    layout->setSizeConstraint(QLayout::SetFixedSize);
+
+// the uuid (sub)layout also gets its margin set to 0 when
+// the main layout margin is set to 0. So we change uuid_layout
+// back to the default here. Ditto for the spacing.
+
+    int margin  = layout->margin();
+    int spacing = layout->spacing();
+    
+    layout->setSpacing(0);
+    layout->setMargin(0);
+
+    uuid_layout->setSpacing(spacing);
+    uuid_layout->setMargin(margin);
 
 } 
