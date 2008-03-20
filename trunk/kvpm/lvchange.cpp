@@ -136,7 +136,7 @@ void LVChangeDialog::buildAdvancedTab()
     layout->addWidget(m_mirror_box);
     
     m_persistant_box = new QGroupBox("Persistant device numbers");
-    m_persistant_box->setCheckable(TRUE);
+    m_persistant_box->setCheckable(true);
     QVBoxLayout *persistant_layout = new QVBoxLayout();
     m_persistant_box->setLayout(persistant_layout);
     major_edit = new KLineEdit(QString("%1").arg(m_lv->getMajorDevice()));
