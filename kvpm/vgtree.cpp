@@ -136,7 +136,7 @@ VGTree::VGTree(VolGroup *VolumeGroup) : QTreeWidget(),
 
     hideColumn(4);
     hideColumn(5);
-
+    
     connect(this, SIGNAL(itemExpanded(QTreeWidgetItem *)), 
 	    this, SLOT(adjustColumnWidth(QTreeWidgetItem *)));
 
