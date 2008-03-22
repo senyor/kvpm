@@ -224,12 +224,19 @@ QWidget* LVCreateDialog::createGeneralTab()
      if( !m_extend ){
 	 QHBoxLayout *name_layout = new QHBoxLayout();
 	 m_name_edit = new KLineEdit();
+
+	 QRegExp rx("[0-9a-zA-Z_\\.][-0-9a-zA-Z_\\.]*");
+	 m_name_validator = new QRegExpValidator( rx, m_name_edit );
+	 m_name_edit->setValidator(m_name_validator);
+
 	 name_layout->addWidget( new QLabel("Volume name: ") );
 	 name_layout->addWidget(m_name_edit);
 	 upper_layout->insertLayout(0, name_layout);
+	 m_name_is_valid = true;
      }
      else {
 	 upper_layout->addWidget( new QLabel("Extending volume: " + m_lv->getName()) );
+	 m_name_is_valid = true;
      }
      
      QHBoxLayout *size_layout = new QHBoxLayout();
@@ -290,6 +297,9 @@ QWidget* LVCreateDialog::createGeneralTab()
 
      connect(m_size_edit, SIGNAL(textEdited(QString)), 
 	     this, SLOT(validateVolumeSize(QString)));
+
+     connect(m_name_edit, SIGNAL(textEdited(QString)), 
+	     this, SLOT(validateVolumeName(QString)));
 
      connect(m_size_spin, SIGNAL(valueChanged(int)), 
 	     this, SLOT(adjustSizeEdit(int)));
@@ -627,6 +637,23 @@ void LVCreateDialog::validateVolumeSize(QString size)
     resetOkButton();
 }
 
+void LVCreateDialog::validateVolumeName(QString name)
+{
+    int pos = 0;
+
+    if( m_name_validator->validate(name, pos) == QValidator::Acceptable &&
+        name != "." &&
+        name != ".." )
+    {
+	m_name_is_valid = true;
+    }
+    else{
+	m_name_is_valid = false;
+    }
+    
+    resetOkButton();
+}
+
 void LVCreateDialog::resetOkButton()
 {
     long long max_extents;
@@ -642,11 +669,16 @@ void LVCreateDialog::resetOkButton()
 	max_extents = getLargestVolume(1) / m_vg->getExtentSize();
     }
     
-    if( (m_volume_extents <= max_extents) && (m_volume_extents > 0) )
+    if( (m_volume_extents <= max_extents) && 
+	(m_volume_extents > 0) &&
+	 m_name_is_valid ){
+	
 	enableButtonOk(true);
-    else
+    }
+    else{
 	enableButtonOk(false);
-
+    }
+    
 }
 
 void LVCreateDialog::adjustSizeCombo(int index)
