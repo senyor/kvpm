@@ -12,6 +12,7 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
+#include <KSeparator>
 
 #include <QtGui>
 
@@ -24,8 +25,10 @@
 
 extern MasterList *master_list;
 
-PVProperties::PVProperties(PhysVol *physicalVolume, QWidget *parent):QWidget(parent)
+PVProperties::PVProperties(PhysVol *physicalVolume, QWidget *parent):
+    QTableWidget(parent)
 {
+
     VolGroup *vg = master_list->getVolGroupByName( physicalVolume->getVolumeGroupName() ) ;
     int segment_count;
     LogVol *lv;
@@ -41,16 +44,6 @@ PVProperties::PVProperties(PhysVol *physicalVolume, QWidget *parent):QWidget(par
     QStringList pv_name_list;
     QString device_name = physicalVolume->getDeviceName();
 
-    QVBoxLayout *layout = new QVBoxLayout();
-    setLayout(layout);
-
-    QLabel *pv_name_label = new QLabel( "<b>" + device_name + "</b>");
-    pv_name_label->setAlignment(Qt::AlignHCenter);
-    layout->addWidget(pv_name_label);
-    
-    QTableWidget *table_widget = new QTableWidget();
-    layout->addWidget(table_widget);
-
     QStringList headers;
     headers << "Logical Volume" 
 	    << "Start" 
@@ -58,30 +51,8 @@ PVProperties::PVProperties(PhysVol *physicalVolume, QWidget *parent):QWidget(par
 	    << "Extents" 
 	    << "";
 
-    table_widget->setColumnCount(4);
-    table_widget->setRowCount(0);
-
-    table_widget->setFrameShape(QFrame::NoFrame);
-    setBackgroundRole(QPalette::Base);
-    setAutoFillBackground(true);
-    pv_name_label->setAutoFillBackground(true);
-    pv_name_label->setBackgroundRole(QPalette::Base);
-
-    QVBoxLayout *uuid_layout = new QVBoxLayout();
-    layout->addLayout(uuid_layout);
-    
-    QLabel *uuid_label1 = new QLabel("<b>UUID</b>");
-    uuid_label1->setAlignment(Qt::AlignHCenter);
-    uuid_label1->setAutoFillBackground(true);
-    uuid_label1->setBackgroundRole(QPalette::Base);
-    uuid_layout->addWidget(uuid_label1);
-    
-    QLabel *uuid_label2 = new QLabel( physicalVolume->getUuid() );
-    uuid_label2->setAutoFillBackground(true);
-    uuid_label2->setBackgroundRole(QPalette::Base);
-    uuid_label2->setWordWrap(true);
-    uuid_layout->addWidget(uuid_label2);
-    
+    setColumnCount(4);
+    setRowCount(0);
 
 /* here we get the names of logical volumes associated
    with the physical volume */
@@ -99,27 +70,27 @@ PVProperties::PVProperties(PhysVol *physicalVolume, QWidget *parent):QWidget(par
 		    first_extent = starting_extent[y];
 		    last_extent = first_extent - 1 + (lv->getSegmentExtents(segment) / (lv->getSegmentStripes(segment)));
 		    
-		    table_widget->insertRow( row );
+		    insertRow( row );
 		    
 		    new_item = new QTableWidgetItem( lv->getName() );
 		    new_item->setFlags(Qt::ItemIsEnabled);
 		    new_item->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter );
-		    table_widget->setItem(row, 0, new_item);
+		    setItem(row, 0, new_item);
 		    
 		    new_item = new QTableWidgetItem( QString("%1").arg(first_extent) );
 		    new_item->setFlags(Qt::ItemIsEnabled);
 		    new_item->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter );
-		    table_widget->setItem(row, 1, new_item);
+		    setItem(row, 1, new_item);
 
 		    new_item = new QTableWidgetItem( QString("%1").arg(last_extent) );
 		    new_item->setFlags(Qt::ItemIsEnabled);
 		    new_item->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter );
-		    table_widget->setItem(row, 2, new_item);
+		    setItem(row, 2, new_item);
 
 		    new_item = new QTableWidgetItem( QString("%1").arg(last_extent - first_extent + 1 ) );
 		    new_item->setFlags(Qt::ItemIsEnabled);
 		    new_item->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter );
-		    table_widget->setItem(row, 3, new_item);
+		    setItem(row, 3, new_item);
 
 		    row++;
 		}
@@ -127,31 +98,47 @@ PVProperties::PVProperties(PhysVol *physicalVolume, QWidget *parent):QWidget(par
 	}
     }
 
-    table_widget->setHorizontalHeaderLabels(headers);
-    table_widget->resizeColumnToContents(0);
-    table_widget->resizeColumnToContents(1);
-    table_widget->resizeColumnToContents(2);
-    table_widget->resizeColumnToContents(3);
-    table_widget->setShowGrid(false);
-    table_widget->setAlternatingRowColors(true);
-    table_widget->verticalHeader()->hide();
-    table_widget->resizeRowsToContents();
-//    table_widget->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-//    table_widget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-//    layout->setSizeConstraint(  QLayout::SetNoConstraint     );
-
-
-// the uuid (sub)layout also gets its margin set to 0 when
-// the main layout margin is set to 0. So we change uuid_layout
-// back to the default here. Ditto for the spacing.
-
-    int margin  = layout->margin();
-    int spacing = layout->spacing();
+    if( !rowCount() ){
+	insertRow( row );
+	new_item = new QTableWidgetItem( QString("<none>") );
+	new_item->setFlags(Qt::ItemIsEnabled);
+	new_item->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter );
+	setItem(row, 0, new_item);
+	row++;
+    }
     
-    layout->setSpacing(0);
-    layout->setMargin(0);
+    setHorizontalHeaderLabels(headers);
+    resizeColumnToContents(0);
+    resizeColumnToContents(1);
+    resizeColumnToContents(2);
+    resizeColumnToContents(3);
 
-    uuid_layout->setSpacing(spacing);
-    uuid_layout->setMargin(margin);
+    insertRow( row );
+    insertRow( ++row );
+    insertRow( ++row );
+    resizeRowsToContents();
 
+    QWidget *separator_widget = new QWidget();
+    QVBoxLayout *separator_layout = new QVBoxLayout();
+    separator_widget->setLayout(separator_layout);
+    separator_layout->addStretch();
+    KSeparator *separator = new KSeparator(Qt::Horizontal);
+    separator->setFrameStyle(QFrame::Plain | QFrame::Box);
+    separator->setLineWidth(2);
+    separator->setMaximumHeight(2);
+    separator_layout->addWidget(separator);
+    separator_layout->addStretch();
+    setCellWidget(row - 2, 0, separator_widget);
+    setSpan(row - 2, 0, 1, 4 );
+    
+    new_item = new QTableWidgetItem( "PV UUID: " + physicalVolume->getUuid() );
+    new_item->setFlags(Qt::ItemIsEnabled);
+    new_item->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter );
+    setItem(row - 1, 0, new_item);
+    setSpan(row - 1, 0, 2, 4 );
+
+    setAlternatingRowColors(true);
+    verticalHeader()->hide();
+    setWordWrap(true);
+    setShowGrid(false);
 } 

@@ -15,12 +15,12 @@
 #ifndef PVPROPERTIES_H
 #define PVPROPERTIES_H
 
-#include <QScrollArea>
+
 #include <QTableWidget>
 
 class PhysVol;
 
-class PVProperties : public QWidget
+class PVProperties : public QTableWidget
 {
 
  public:
