@@ -19,6 +19,7 @@
 #include <KLineEdit>
 #include <KTabWidget>
 #include <KComboBox>
+
 #include <QGroupBox>
 #include <QCheckBox>
 #include <QList>
@@ -26,11 +27,12 @@
 #include <QRadioButton>
 #include <QLabel>
 #include <QSpinBox>
-#include <QDoubleValidator>
 
 class LogVol;
 class VolGroup;
 class PhysVol;
+class QRegExpValidator;
+class QDoubleValidator;
 
 bool lv_create(VolGroup *volumeGroup);
 bool lv_extend(LogVol *logicalVolume);
@@ -39,9 +41,11 @@ bool snapshot_create(LogVol *logicalVolume);
 class LVCreateDialog : public KDialog
 {
 Q_OBJECT
-     bool m_snapshot;   // TRUE if a snapshot
-     bool m_extend;     // TRUE if extending a volume
-     
+
+     bool m_snapshot;        // TRUE if a snapshot
+     bool m_extend;          // TRUE if extending a volume
+     bool m_name_is_valid;   // TRUE if the new new is acceptable
+
      VolGroup *m_vg;
      LogVol *m_lv;      // origin for snap or lv to extend
                         // set to NULL if creating a new logical volume
@@ -54,6 +58,8 @@ Q_OBJECT
 	       *m_major_number_edit,
 	       *m_name_edit, 
 	       *m_size_edit;
+
+     QRegExpValidator *m_name_validator;
 
      QCheckBox *m_zero_check, 
                *m_readonly_check;
@@ -116,6 +122,7 @@ Q_OBJECT
      void setMaxSize(int stripes);
      void adjustSizeEdit(int percentage);
      void validateVolumeSize(QString size);
+     void validateVolumeName(QString name);
      long long convertSizeToExtents(int index, double size);
      void calculateSpace(bool checked);
      void zeroReadonlyCheck(int state);
