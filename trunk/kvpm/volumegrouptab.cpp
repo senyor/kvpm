@@ -60,25 +60,19 @@ VolumeGroupTab::VolumeGroupTab(VolGroup *volumeGroup, QWidget *parent) :
 
     QScrollArea *lv_properties_scroll = new QScrollArea();
     lv_properties_scroll->setWidgetResizable(true);
-
-    QScrollArea *pv_properties_scroll = new QScrollArea();
-    pv_properties_scroll->setWidgetResizable(true);
     
     lv_properties_scroll->setBackgroundRole(QPalette::Base);
     lv_properties_scroll->setAutoFillBackground(true);
-    pv_properties_scroll->setBackgroundRole(QPalette::Base);
-    pv_properties_scroll->setAutoFillBackground(true);
 
     m_lv_properties_stack = new LVPropertiesStack(m_vg);
     m_pv_properties_stack = new PVPropertiesStack(m_vg);
     lv_properties_scroll->setWidget( m_lv_properties_stack );
-    pv_properties_scroll->setWidget( m_pv_properties_stack );
     lv_splitter->addWidget(lv_properties_scroll);
-    pv_splitter->addWidget(pv_properties_scroll);
+    pv_splitter->addWidget( m_pv_properties_stack );
 
     lv_splitter->setStretchFactor(0, 3);
     lv_splitter->setStretchFactor(1, 1);
-    pv_splitter->setStretchFactor(0, 8);
+    pv_splitter->setStretchFactor(0, 7);
     pv_splitter->setStretchFactor(1, 3);
 
     connect(m_vg_tree, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)), 
