@@ -20,7 +20,7 @@ set(kvpm_SRCS addmirror.cpp devicemodel.cpp deviceproperties.cpp
 	     vgchangealloc.cpp vgchangeextent.cpp vgchangelv.cpp vgchangepv.cpp 
 	     vgchangeresize.cpp vgcreate.cpp vgextend.cpp vginfolabels.cpp 
 	     vgreduce.cpp vgremove.cpp vgtree.cpp volgroup.cpp vgreduceone.cpp
-	     volumegrouptab.cpp)
+	     vgrename.cpp volumegrouptab.cpp)
  
 kde4_add_executable(kvpm ${kvpm_SRCS})
 target_link_libraries(kvpm ${KDE4_KDEUI_LIBS} ${KDE4_KFILE_LIBS} ${QT_LIBRARIES} blkid parted)

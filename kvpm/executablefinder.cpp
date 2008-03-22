@@ -53,6 +53,7 @@ ExecutableFinder::ExecutableFinder(QObject *parent) : QObject(parent)
 	 << "vgextend"
 	 << "vgreduce"
 	 << "vgremove"
+	 << "vgrename"
 	 << "vgs" 
 	 << "xfs_growfs";
     

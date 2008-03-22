@@ -31,6 +31,7 @@
 #include "vgchangepv.h"
 #include "vgchangeresize.h"
 #include "vgremove.h"
+#include "vgrename.h"
 #include "vgreduce.h"
 #include "volgroup.h"
 #include "volumegrouptab.h"
@@ -58,6 +59,7 @@ TopWindow::TopWindow(QWidget *parent):KMainWindow(parent)
 
     remove_vg_action   = new KAction( KIcon("edit-delete"), "Delete Volume Group...", this);
     reduce_vg_action   = new KAction("Reduce Volume Group...", this);
+    rename_vg_action   = new KAction("Rename Volume Group...", this);
     rescan_action      = new KAction( KIcon("rebuild"), "Rescan System", this);
     rescan_vg_action   = new KAction( KIcon("rebuild"), "Rescan This Group", this);
     m_restart_pvmove_action = new KAction("Restart interrupted pvmove", this);
@@ -87,6 +89,7 @@ TopWindow::TopWindow(QWidget *parent):KMainWindow(parent)
     groups_menu->addMenu(m_vgchange_menu);
     groups_menu->addAction(remove_vg_action);
     groups_menu->addAction(reduce_vg_action);
+    groups_menu->addAction(rename_vg_action);
     settings_menu->addAction(config_kvpm_action);
     
     master_list = 0;
@@ -110,6 +113,9 @@ TopWindow::TopWindow(QWidget *parent):KMainWindow(parent)
 
     connect(remove_vg_action,       SIGNAL(triggered()), 
 	    this, SLOT(removeVolumeGroup()));
+
+    connect(rename_vg_action,       SIGNAL(triggered()), 
+	    this, SLOT(renameVolumeGroup()));
 
     connect(remove_missing_action,  SIGNAL(triggered()), 
 	    this, SLOT(removeMissingVolumes()));
@@ -315,6 +321,12 @@ void TopWindow::changeResize()
 void TopWindow::removeVolumeGroup()
 {
     if( remove_vg(m_vg) )
+        MainWindow->reRun();
+}
+
+void TopWindow::renameVolumeGroup()
+{
+    if( rename_vg(m_vg) )
         MainWindow->reRun();
 }
 
