@@ -233,6 +233,10 @@ QWidget* LVCreateDialog::createGeneralTab()
 	 name_layout->addWidget(m_name_edit);
 	 upper_layout->insertLayout(0, name_layout);
 	 m_name_is_valid = true;
+
+	 connect(m_name_edit, SIGNAL(textEdited(QString)), 
+		 this, SLOT(validateVolumeName(QString)));
+
      }
      else {
 	 upper_layout->addWidget( new QLabel("Extending volume: " + m_lv->getName()) );
@@ -297,9 +301,6 @@ QWidget* LVCreateDialog::createGeneralTab()
 
      connect(m_size_edit, SIGNAL(textEdited(QString)), 
 	     this, SLOT(validateVolumeSize(QString)));
-
-     connect(m_name_edit, SIGNAL(textEdited(QString)), 
-	     this, SLOT(validateVolumeName(QString)));
 
      connect(m_size_spin, SIGNAL(valueChanged(int)), 
 	     this, SLOT(adjustSizeEdit(int)));
