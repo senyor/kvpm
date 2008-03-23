@@ -26,74 +26,130 @@ LVProperties::LVProperties(LogVol *logicalVolume, int segment, QWidget *parent):
     long long extents;
     int stripes;
     int stripe_size;
+    int segment_count = logicalVolume->getSegmentCount();
     
     QStringList pv_list;
     QLabel *temp_label;
     
     QVBoxLayout *layout = new QVBoxLayout();
 
-    layout->addWidget(new QLabel( "<b> " + logicalVolume->getName() + "</b>" ) );
 
-    if(segment >= 0){
+    if((segment >= 0) && (segment_count > 1)){
+
+	temp_label = new QLabel( "<b>" + 
+				 logicalVolume->getName() + 
+				 QString("[%1]").arg(segment) +
+				 "</b>"  );
+
+	temp_label->setAlignment(Qt::AlignCenter);
+	layout->addWidget(temp_label);
+
+	extents = logicalVolume->getSegmentExtents(segment);
+	stripes = logicalVolume->getSegmentStripes(segment);
+	stripe_size = logicalVolume->getSegmentStripeSize(segment);
+
+	if( !logicalVolume->isMirror() ){
+	    layout->addWidget(new QLabel( QString("Extents: %1").arg( extents ) ));
+
+	    if( stripes != 1 ){
+		layout->addWidget(new QLabel(QString("Stripes: %1").arg(stripes)));
+		layout->addWidget(new QLabel(QString("Stripe size: %1").arg(stripe_size)));
+	    }
+	    else{
+		layout->addWidget(new QLabel(QString("Stripes: none")));
+		layout->addWidget(new QLabel(QString("Stripe size: n/a")));
+	    }
+
+	}
+    }
+    else if((segment >= 0) && (segment_count == 1)){
+	temp_label = new QLabel( "<b> " + logicalVolume->getName() + "</b>" );
+	temp_label->setAlignment(Qt::AlignCenter);
+	layout->addWidget(temp_label);
 	extents = logicalVolume->getSegmentExtents(segment);
 	stripes = logicalVolume->getSegmentStripes(segment);
 	stripe_size = logicalVolume->getSegmentStripeSize(segment);
 	if( !logicalVolume->isMirror() ){
-	    layout->addWidget(new QLabel(QString("Segment: %1").arg(segment)));
-	    layout->addWidget(new QLabel(QString("Stripes: %1").arg(stripes)));
+	    layout->addWidget(new QLabel( QString("Extents: %1").arg( extents ) ));
 
-	    if( stripes != 1 )
+	    if( stripes != 1 ){
+		layout->addWidget(new QLabel(QString("Stripes: %1").arg(stripes)));
 		layout->addWidget(new QLabel(QString("Stripe size: %1").arg(stripe_size)));
+	    }
+	    else{
+		layout->addWidget(new QLabel(QString("Stripes: none")));
+		layout->addWidget(new QLabel(QString("Stripe size: n/a")));
+	    }
+
 	}
     }
     else{
+	temp_label = new QLabel( "<b> " + logicalVolume->getName() + "</b>" );
+	temp_label->setAlignment(Qt::AlignCenter);
+	layout->addWidget(temp_label);
 	extents = logicalVolume->getExtents();
 	stripes = logicalVolume->getSegmentStripes(0);
 	stripe_size = logicalVolume->getSegmentStripeSize(0);
-	if( !logicalVolume->isMirror() ){
-	    layout->addWidget(new QLabel(QString("Segment: all")));
-	    layout->addWidget(new QLabel(QString("Stripes: %1").arg(stripes)));
 
-	    if( stripes != 1 )
+	layout->addWidget(new QLabel( QString("Extents: %1").arg( extents ) ));
+
+	if( !logicalVolume->isMirror() ){
+
+	    if( stripes != 1 ){
+		layout->addWidget(new QLabel(QString("Stripes: %1").arg(stripes)));
 		layout->addWidget(new QLabel(QString("Stripe size: %1").arg(stripe_size)));
+	    }
+	    else{
+		layout->addWidget(new QLabel(QString("Stripes: none")));
+		layout->addWidget(new QLabel(QString("Stripe size: n/a")));
+	    }
+
 	}
     }
-    
+
     layout->addWidget(new QLabel("Allocation policy: " + logicalVolume->getPolicy()));
-    layout->addWidget(new QLabel( QString("Extents: %1").arg( extents ) ));
+    
+    QStringList mount_points = logicalVolume->getMountPoints();
 
-    layout->addStretch();
+    if(mount_points.size() > 1){
+	temp_label = new QLabel( "<b>Mount points</b>" ) ;
+	temp_label->setAlignment(Qt::AlignCenter);
+	layout->addWidget(temp_label);
+    }
+    else{
+	temp_label = new QLabel( "<b>Mount point</b>" ) ;
+	temp_label->setAlignment(Qt::AlignCenter);
+	layout->addWidget(temp_label);
+    }
 
-    if(logicalVolume->isMounted()){
-	QStringList mount_points = logicalVolume->getMountPoints();
-
-	if(mount_points.size() > 1)
-	    layout->addWidget( new QLabel( "<b> Mount points</b>" ) );
-	
-	else
-	    layout->addWidget( new QLabel( "<b> Mount point</b>" ) );
-	
+    if(mount_points.size() == 0){
+	temp_label = new QLabel( "<none>" ) ;
+	temp_label->setAlignment(Qt::AlignLeft);
+	layout->addWidget(temp_label);
+    }
+    else{
 	for(int x = 0; x < mount_points.size(); x++){
 	    temp_label = new QLabel( mount_points[x] );
 	    temp_label->setToolTip( mount_points[x] );
 	    layout->addWidget( temp_label );
 	}
-	
     }
-    else{
-	layout->addWidget(new QLabel("<b>Not mounted</b>") );
-    }
+    
 
     if(logicalVolume->isSnap())
 	layout->addWidget(new QLabel("Snapshot origin: "  + logicalVolume->getOrigin()));
 
-    layout->addStretch();
-
-    if( logicalVolume->isMirror() )
-	layout->addWidget(new QLabel("<b>Mirror legs</b>") );
-    else
-	layout->addWidget(new QLabel("<b>Physical Volumes</b>") );
-
+    if( logicalVolume->isMirror() ){
+	temp_label = new QLabel("<b>Mirror legs</b>");
+	temp_label->setAlignment(Qt::AlignCenter);
+	layout->addWidget(temp_label);
+    }
+    else{
+	temp_label = new QLabel("<b>Physical Volumes</b>");
+	temp_label->setAlignment(Qt::AlignCenter);
+	layout->addWidget(temp_label);
+    }
+    
     if(segment > -1){
 	pv_list = logicalVolume->getDevicePath(segment);
 	for(int pv = 0; pv < pv_list.size(); pv++){
@@ -111,6 +167,8 @@ LVProperties::LVProperties(LogVol *logicalVolume, int segment, QWidget *parent):
 	}
 
     }
+
+    layout->addStretch();
     
     setLayout(layout);
 }
