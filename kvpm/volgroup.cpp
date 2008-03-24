@@ -264,3 +264,8 @@ bool VolGroup::isPartial()
     return m_partial;
 }
 
+bool VolGroup::isExported()
+{
+    return m_exported;
+}
+

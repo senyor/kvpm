@@ -17,7 +17,8 @@ set(kvpm_SRCS addmirror.cpp devicemodel.cpp deviceproperties.cpp
 	     removemirrorleg.cpp
 	     sizetostring.cpp storagepartition.cpp storagedevice.cpp topwindow.cpp 
 	     unmount.cpp 
-	     vgchangealloc.cpp vgchangeextent.cpp vgchangelv.cpp vgchangepv.cpp 
+	     vgchangealloc.cpp vgchangeavailable.cpp vgexport.cpp vgimport.cpp
+	     vgchangeextent.cpp vgchangelv.cpp vgchangepv.cpp 
 	     vgchangeresize.cpp vgcreate.cpp vgextend.cpp vginfolabels.cpp 
 	     vgreduce.cpp vgremove.cpp vgtree.cpp volgroup.cpp vgreduceone.cpp
 	     vgrename.cpp volumegrouptab.cpp)

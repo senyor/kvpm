@@ -26,10 +26,13 @@
 #include "removemissing.h"
 #include "topwindow.h"
 #include "vgchangealloc.h"
+#include "vgchangeavailable.h"
 #include "vgchangeextent.h"
 #include "vgchangelv.h"
 #include "vgchangepv.h"
 #include "vgchangeresize.h"
+#include "vgexport.h"
+#include "vgimport.h"
 #include "vgremove.h"
 #include "vgrename.h"
 #include "vgreduce.h"
@@ -62,16 +65,19 @@ TopWindow::TopWindow(QWidget *parent):KMainWindow(parent)
     rename_vg_action   = new KAction("Rename Volume Group...", this);
     rescan_action      = new KAction( KIcon("rebuild"), "Rescan System", this);
     rescan_vg_action   = new KAction( KIcon("rebuild"), "Rescan This Group", this);
-    m_restart_pvmove_action = new KAction("Restart interrupted pvmove", this);
-    m_stop_pvmove_action    = new KAction("Abort pvmove", this);
-    remove_missing_action =  new KAction("Remove Missing Volumes...", this);
-
-    m_vgchange_menu   = new KMenu("Change Volume Group Attributes", this);
+    m_restart_pvmove_action   = new KAction("Restart interrupted pvmove", this);
+    m_stop_pvmove_action      = new KAction("Abort pvmove", this);
+    remove_missing_action     = new KAction("Remove Missing Volumes...", this);
+    m_export_vg_action        = new KAction("Export Volume Group...", this);
+    m_import_vg_action        = new KAction("Import Volume Group...", this);
+    m_vgchange_menu           = new KMenu("Change Volume Group Attributes", this);
+    vgchange_available_action = new KAction("Volume Group Availability...", this);
     vgchange_alloc_action  = new KAction("Allocation Policy...", this);
     vgchange_extent_action = new KAction("Extent Size...", this);
     vgchange_lv_action     = new KAction("Logical Volume Limits...", this);
     vgchange_pv_action     = new KAction("Physical Volume Limits...", this);
     vgchange_resize_action = new KAction("Volume Group Resizability...", this);
+    m_vgchange_menu->addAction(vgchange_available_action);
     m_vgchange_menu->addAction(vgchange_alloc_action);
     m_vgchange_menu->addAction(vgchange_extent_action);
     m_vgchange_menu->addAction(vgchange_lv_action);
@@ -90,6 +96,8 @@ TopWindow::TopWindow(QWidget *parent):KMainWindow(parent)
     groups_menu->addAction(remove_vg_action);
     groups_menu->addAction(reduce_vg_action);
     groups_menu->addAction(rename_vg_action);
+    groups_menu->addAction(m_export_vg_action);
+    groups_menu->addAction(m_import_vg_action);
     settings_menu->addAction(config_kvpm_action);
     
     master_list = 0;
@@ -98,6 +106,9 @@ TopWindow::TopWindow(QWidget *parent):KMainWindow(parent)
     
     connect(vgchange_alloc_action,  SIGNAL(triggered()), 
 	    this, SLOT(changeAllocation()));
+
+    connect(vgchange_available_action,  SIGNAL(triggered()), 
+	    this, SLOT(changeAvailable()));
 
     connect(vgchange_extent_action, SIGNAL(triggered()), 
 	    this, SLOT(changeExtentSize()));
@@ -116,6 +127,12 @@ TopWindow::TopWindow(QWidget *parent):KMainWindow(parent)
 
     connect(rename_vg_action,       SIGNAL(triggered()), 
 	    this, SLOT(renameVolumeGroup()));
+
+    connect(m_export_vg_action,       SIGNAL(triggered()), 
+	    this, SLOT(exportVolumeGroup()));
+
+    connect(m_import_vg_action,       SIGNAL(triggered()), 
+	    this, SLOT(importVolumeGroup()));
 
     connect(remove_missing_action,  SIGNAL(triggered()), 
 	    this, SLOT(removeMissingVolumes()));
@@ -246,22 +263,35 @@ void TopWindow::setupMenus(int index)
 	m_vg = NULL;
 
     if(m_vg){                                   // only enable group removal if the tab is
-	if(!m_vg->getLogVolCount())             // a volume group with no logical volumes
+	if( !m_vg->getLogVolCount() )             // a volume group with no logical volumes
 	    remove_vg_action->setEnabled(true);   
 
-	if(m_vg->isPartial())
+	if( m_vg->isPartial() )
 	    remove_missing_action->setEnabled(true);
 
+	if( m_vg->isExported() ){
+	    m_import_vg_action->setEnabled(true);
+	    m_export_vg_action->setEnabled(false);
+	}
+	else{
+	    m_import_vg_action->setEnabled(false);
+	    m_export_vg_action->setEnabled(true);
+	}
+	
 	reduce_vg_action->setEnabled(true);      // almost any group may be reduced
+	rename_vg_action->setEnabled(true);      
 	m_vgchange_menu->setEnabled(true);
 	rescan_vg_action->setEnabled(true);
     }
     else{
 	reduce_vg_action->setEnabled(false);
+	rename_vg_action->setEnabled(false);      
 	remove_vg_action->setEnabled(false);
 	remove_missing_action->setEnabled(false);
 	rescan_vg_action->setEnabled(false);
 	m_vgchange_menu->setEnabled(false);
+	m_import_vg_action->setEnabled(false);
+	m_export_vg_action->setEnabled(false);
     }
 }
 
@@ -286,6 +316,17 @@ void TopWindow::updateTabGeometry(int index)
 void TopWindow::changeAllocation()
 {
     VGChangeAllocDialog dialog( m_vg->getName() );
+    dialog.exec();
+
+    if(dialog.result() == QDialog::Accepted){
+        ProcessProgress change_vg(dialog.arguments(), "", false);
+	MainWindow->rebuildVolumeGroupTab();
+    }
+}
+
+void TopWindow::changeAvailable()
+{
+    VGChangeAvailableDialog dialog( m_vg );
     dialog.exec();
 
     if(dialog.result() == QDialog::Accepted){
@@ -333,6 +374,18 @@ void TopWindow::renameVolumeGroup()
 void TopWindow::reduceVolumeGroup()
 {
     if( reduce_vg(m_vg) )
+        MainWindow->reRun();
+}
+
+void TopWindow::exportVolumeGroup()
+{
+    if( export_vg(m_vg) )
+        MainWindow->reRun();
+}
+
+void TopWindow::importVolumeGroup()
+{
+    if( import_vg(m_vg) )
         MainWindow->reRun();
 }
 

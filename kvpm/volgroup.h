@@ -74,6 +74,7 @@ public:
     bool isWritable();
     bool isClustered();
     bool isPartial();
+    bool isExported();
     
 };
 

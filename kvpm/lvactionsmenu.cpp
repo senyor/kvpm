@@ -195,6 +195,7 @@ void LVActionsMenu::setup(LogVol *lv)
 	    lv_change_action->setEnabled(false);
 	    lv_extend_action->setEnabled(false);
 	    lv_reduce_action->setEnabled(false);
+	    lv_rename_action->setEnabled(false);
 	    pv_move_action->setEnabled(false);
 	    remove_mirror_action->setEnabled(false);
 	    remove_mirror_leg_action->setEnabled(false);
