@@ -1,7 +1,8 @@
-Kvpm is a KDE GUI for the Linux Volume Manager project and
-libparted. It uses the standard lvm tools and programs to work with
-logical volumes. It also can format volumes and mount them. I hope to
-add in the ability to repartition drives with libparted at some point.
+Kvpm is a KDE (version 4) GUI for the Linux Volume Manager project and
+libparted. It needs KDE 4 libraries and headers installed. It uses the
+standard lvm tools and programs to work with logical volumes. It also
+can format volumes and mount them. I hope to add in the ability to
+repartition drives with libparted at some point.
 
 This program is currently being developed on lvm version:
 
