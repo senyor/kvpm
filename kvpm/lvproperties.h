@@ -11,6 +11,7 @@
  * 
  * See the file "COPYING" for the exact licensing terms.
  */
+
 #ifndef LVPROPERTIES_H
 #define LVPROPERTIES_H
 

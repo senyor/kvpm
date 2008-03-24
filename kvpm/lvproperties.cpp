@@ -12,7 +12,10 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
+#include <KSeparator>
+
 #include <QtGui>
+
 #include "logvol.h"
 #include "lvproperties.h"
 
@@ -27,12 +30,12 @@ LVProperties::LVProperties(LogVol *logicalVolume, int segment, QWidget *parent):
     int stripes;
     int stripe_size;
     int segment_count = logicalVolume->getSegmentCount();
+    KSeparator *separator;
     
     QStringList pv_list;
     QLabel *temp_label;
     
     QVBoxLayout *layout = new QVBoxLayout();
-
 
     if((segment >= 0) && (segment_count > 1)){
 
@@ -48,8 +51,9 @@ LVProperties::LVProperties(LogVol *logicalVolume, int segment, QWidget *parent):
 	stripes = logicalVolume->getSegmentStripes(segment);
 	stripe_size = logicalVolume->getSegmentStripeSize(segment);
 
+	layout->addWidget(new QLabel( QString("Extents: %1").arg( extents ) ));
+
 	if( !logicalVolume->isMirror() ){
-	    layout->addWidget(new QLabel( QString("Extents: %1").arg( extents ) ));
 
 	    if( stripes != 1 ){
 		layout->addWidget(new QLabel(QString("Stripes: %1").arg(stripes)));
@@ -69,8 +73,10 @@ LVProperties::LVProperties(LogVol *logicalVolume, int segment, QWidget *parent):
 	extents = logicalVolume->getSegmentExtents(segment);
 	stripes = logicalVolume->getSegmentStripes(segment);
 	stripe_size = logicalVolume->getSegmentStripeSize(segment);
+
+	layout->addWidget(new QLabel( QString("Extents: %1").arg( extents ) ));
+
 	if( !logicalVolume->isMirror() ){
-	    layout->addWidget(new QLabel( QString("Extents: %1").arg( extents ) ));
 
 	    if( stripes != 1 ){
 		layout->addWidget(new QLabel(QString("Stripes: %1").arg(stripes)));
@@ -108,36 +114,55 @@ LVProperties::LVProperties(LogVol *logicalVolume, int segment, QWidget *parent):
     }
 
     layout->addWidget(new QLabel("Allocation policy: " + logicalVolume->getPolicy()));
+
+    if(logicalVolume->isSnap())
+	layout->addWidget(new QLabel("Origin: "  + logicalVolume->getOrigin()));
+
     
     QStringList mount_points = logicalVolume->getMountPoints();
 
-    if(mount_points.size() > 1){
-	temp_label = new QLabel( "<b>Mount points</b>" ) ;
-	temp_label->setAlignment(Qt::AlignCenter);
-	layout->addWidget(temp_label);
-    }
-    else{
-	temp_label = new QLabel( "<b>Mount point</b>" ) ;
-	temp_label->setAlignment(Qt::AlignCenter);
-	layout->addWidget(temp_label);
-    }
+    if( !logicalVolume->isMirrorLeg() && 
+	!logicalVolume->isMirrorLog() &&
+	( (segment_count == 1) ||
+	  (segment == -1) ) )
+    {
 
-    if(mount_points.size() == 0){
-	temp_label = new QLabel( "<none>" ) ;
-	temp_label->setAlignment(Qt::AlignLeft);
-	layout->addWidget(temp_label);
-    }
-    else{
-	for(int x = 0; x < mount_points.size(); x++){
-	    temp_label = new QLabel( mount_points[x] );
-	    temp_label->setToolTip( mount_points[x] );
-	    layout->addWidget( temp_label );
+	separator = new KSeparator(Qt::Horizontal);
+	separator->setFrameStyle(QFrame::Plain | QFrame::Box);
+	separator->setLineWidth(2);
+	separator->setMaximumHeight(2);
+	layout->addWidget(separator);
+
+	if(mount_points.size() > 1){
+	    temp_label = new QLabel( "<b>Mount points</b>" ) ;
+	    temp_label->setAlignment(Qt::AlignCenter);
+	    layout->addWidget(temp_label);
+	}
+	else{
+	    temp_label = new QLabel( "<b>Mount point</b>" ) ;
+	    temp_label->setAlignment(Qt::AlignCenter);
+	    layout->addWidget(temp_label);
+	}
+	
+	if(mount_points.size() == 0){
+	    temp_label = new QLabel( "<none>" ) ;
+	    temp_label->setAlignment(Qt::AlignLeft);
+	    layout->addWidget(temp_label);
+	}
+	else{
+	    for(int x = 0; x < mount_points.size(); x++){
+		temp_label = new QLabel( mount_points[x] );
+		temp_label->setToolTip( mount_points[x] );
+		layout->addWidget( temp_label );
+	    }
 	}
     }
     
-
-    if(logicalVolume->isSnap())
-	layout->addWidget(new QLabel("Snapshot origin: "  + logicalVolume->getOrigin()));
+    separator = new KSeparator(Qt::Horizontal);
+    separator->setFrameStyle(QFrame::Plain | QFrame::Box);
+    separator->setLineWidth(2);
+    separator->setMaximumHeight(2);
+    layout->addWidget(separator);
 
     if( logicalVolume->isMirror() ){
 	temp_label = new QLabel("<b>Mirror legs</b>");
