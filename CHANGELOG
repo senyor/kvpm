@@ -1,3 +1,7 @@
+version 0.4.5
+Added new dialogs to import and export volumes
+groups.
+
 version 0.4.4
 The lvproperties widgets have a little bit diffent
 look now. Small bug fixes. Lvcreate now has a name
