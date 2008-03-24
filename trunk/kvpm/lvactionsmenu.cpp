@@ -212,6 +212,7 @@ void LVActionsMenu::setup(LogVol *lv)
 	    lv_reduce_action->setEnabled(false);
 	    pv_move_action->setEnabled(false);
 	    remove_mirror_action->setEnabled(false);
+	    lv_rename_action->setEnabled(false);
 
 	    if( lv->isMirrorLeg() )
 		remove_mirror_leg_action->setEnabled(true);
