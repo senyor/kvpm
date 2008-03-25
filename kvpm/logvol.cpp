@@ -19,7 +19,6 @@
 #include "logvol.h"
 #include "mountentry.h"
 #include "mountinfo.h"
-//#include "processprogress.h"
 #include "storagedevice.h"
 #include "volgroup.h"
 
@@ -162,12 +161,15 @@ LogVol::LogVol(QStringList lvDataList, MountInformationList *mountInformationLis
 	m_fixed = false;
     }
 
+    m_active = false;
+    
     switch(flags[4]){
     case '-':
 	m_state = "Unavailable";
 	break;
     case 'a':
 	m_state = "Active";
+	m_active = true;
 	break;
     case 's':
 	m_state = "Suspended";
@@ -397,6 +399,11 @@ int LogVol::getMajorDevice()
 bool LogVol::isMounted()
 {
     return m_mounted;
+}
+
+bool LogVol::isActive()
+{
+    return m_active;
 }
 
 bool LogVol::isMirror()

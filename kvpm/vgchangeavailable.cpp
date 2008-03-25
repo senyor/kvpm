@@ -17,6 +17,7 @@
 
 #include <QtGui>
 
+#include "logvol.h"
 #include "processprogress.h"
 #include "vgchangeavailable.h"
 #include "volgroup.h"
@@ -31,29 +32,48 @@ bool change_vg_available(VolGroup *volumeGroup)
     QStringList args;
     QString vg_name, message;
     int result;
+    bool has_mounted = false;
+    QList<LogVol *> lv_list = volumeGroup->getLogicalVolumes();
     
     vg_name = volumeGroup->getName();
-    
-    message.append("Make volume group: <b>" + vg_name + "</b>");
-    message.append(" available for use?");
 
-    result = KMessageBox::questionYesNo( 0, message);
+    for(int x = 0; x < lv_list.size(); x++){
+	if( lv_list[x]->isMounted() )
+	    has_mounted = true;
+    }
     
-    if( result == 3){      // 3 = "yes" button
-	args << "vgchange" 
-	     << "--available" << "y"
-	     << vg_name;
-    }
-    else if( result == 4){ // 4 = "no" button
-	args << "vgchange" 
-	     << "--available" << "n"
-	     << vg_name;
-    }
-    else{                  // do nothing and return
+    if( has_mounted ){
+	message.append("Groups with mounted logical volumes ");
+	message.append("may not be made unavailable");
+
+	KMessageBox::error( 0, message);
+	
 	return false;
     }
+    else{
+	
+	message.append("Make volume group: <b>" + vg_name + "</b>");
+	message.append(" available for use?");
 
-    ProcessProgress resize(args, "Changing vg availability...");
+	result = KMessageBox::questionYesNo( 0, message);
+    
+	if( result == 3){      // 3 = "yes" button
+	    args << "vgchange" 
+		 << "--available" << "y"
+		 << vg_name;
+	}
+	else if( result == 4){ // 4 = "no" button
+	    args << "vgchange" 
+		 << "--available" << "n"
+		 << vg_name;
+	}
+	else{                  // do nothing and return
+	    return false;
+	}
 
-    return true;
+	ProcessProgress resize(args, "Changing vg availability...");
+
+	return true;
+    }
+    
 }
