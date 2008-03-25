@@ -14,29 +14,32 @@
 
 
 #include <KMessageBox>
+
 #include <QtGui>
 
 #include "processprogress.h"
 #include "removemissing.h"
 #include "volgroup.h"
 
-bool remove_missing_pv(VolGroup *VolumeGroup)
+bool remove_missing_pv(VolGroup *volumeGroup)
 {
     QStringList args;
-    QString vg_name = VolumeGroup->getName();
+    QString vg_name = volumeGroup->getName();
 
     QString message = "Removing missing physical volumes may cause some data in ";
     message.append("volume group <b>" + vg_name + "</b> to become permanently inaccessible!");
 
     if(KMessageBox::warningYesNo( 0, message) == 3){      // 3 = "yes" button
 
-    args << "vgreduce"
-	 << "--removemissing"
-	 << vg_name;
+	args << "vgreduce"
+	     << "--removemissing"
+	     << vg_name;
 
-    ProcessProgress remove(args, "Removing missing volumes...", true);
-    return TRUE;
+	ProcessProgress remove(args, "Removing missing volumes...", true);
+
+	return true;
     }
-    else
-	return FALSE;
+    else{
+	return false;
+    }
 }
