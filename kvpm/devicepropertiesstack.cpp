@@ -25,7 +25,8 @@
    an empty widget is used.
 */
 
-DevicePropertiesStack::DevicePropertiesStack( QList<StorageDevice *> Devices, QWidget *parent) : QStackedWidget(parent)
+DevicePropertiesStack::DevicePropertiesStack( QList<StorageDevice *> Devices, QWidget *parent) : 
+    QStackedWidget(parent)
 {
 
     device_count = Devices.size();

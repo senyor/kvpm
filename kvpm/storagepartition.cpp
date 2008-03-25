@@ -21,108 +21,106 @@
 #include "storagepartition.h"
 
 
-StoragePartition::StoragePartition(QString PartitionPath,
-				   QString PartitionType,
-				   long long PartitionSize, 
-				   QList<PhysVol *> pv_list, 
-				   MountInformationList *mount_info_list):
-    partition_path( PartitionPath ),
-    partition_type( PartitionType ),
-    partition_size( PartitionSize )
+StoragePartition::StoragePartition(QString partitionPath,
+				   QString partitionType,
+				   long long partitionSize, 
+				   QList<PhysVol *> pvList, 
+				   MountInformationList *mountInfoList):
+    m_partition_path( partitionPath ),
+    m_partition_type( partitionType ),
+    m_partition_size( partitionSize )
 
 {
 
-    physical_volume = FALSE;
-    pv = NULL;
+    m_is_pv = false;
+    m_pv = NULL;
     
-    for(int x = 0; x < pv_list.size(); x++){
-	if(partition_path == pv_list[x]->getDeviceName()){
-	    physical_volume = TRUE;
-	    pv = pv_list[x];
-	    volume_group = pv->getVolumeGroupName();
-	    pv_uuid = pv->getUuid();
+    for(int x = 0; x < pvList.size(); x++){
+	if(m_partition_path == pvList[x]->getDeviceName()){
+	    m_is_pv = true;
+	    m_pv = pvList[x];
 	}
     }
     
-    device_mount_info_list = mount_info_list->getMountInformation(partition_path);
-    if( device_mount_info_list.size() )
-	mounted = TRUE;
-    else
-	mounted = FALSE;
+    m_device_mount_info_list = mountInfoList->getMountInformation(m_partition_path);
 
-    if( partition_type == "extended" ){
-	mountable = FALSE;
-	fs_type = "";
+    if( m_device_mount_info_list.size() ){
+	m_is_mounted = true;
     }
     else{
-	fs_type = fsprobe_getfstype2(partition_path);
-	if( fs_type == "swap" || fs_type == "" )
-	    mountable = FALSE;
-	else
-	    mountable = TRUE;
+	m_is_mounted = false;
+    }
+
+    if( m_partition_type == "extended" ){
+	m_is_mountable = false;
+	m_fs_type = "";
+    }
+    else{
+	m_fs_type = fsprobe_getfstype2(m_partition_path);
+
+	if( m_fs_type == "swap" || m_fs_type == "" ){
+	    m_is_mountable = false;
+	}
+	else{
+		m_is_mountable = true;
+	}
     }
 }
 
 StoragePartition::~StoragePartition()
 {
-    for(int x = 0; x < device_mount_info_list.size(); x++)
-	delete device_mount_info_list[x];
-}
-
-int StoragePartition::getNumber()
-{
-    return num;
+    for(int x = 0; x < m_device_mount_info_list.size(); x++)
+	delete m_device_mount_info_list[x];
 }
 
 QString StoragePartition::getType()
 {
-    return partition_type;
+    return m_partition_type;
 }
 
 QString StoragePartition::getFileSystem()
 {
-    return fs_type;
+    return m_fs_type;
 }
 
 PhysVol* StoragePartition::getPhysicalVolume()
 {
-    return pv;
+    return m_pv;
 }
 
 
 QString StoragePartition::getPartitionPath()
 {
-    return partition_path;
+    return m_partition_path;
 }
 
 
 long long StoragePartition::getPartitionSize()
 {
-    return partition_size;
+    return m_partition_size;
 }
 
 bool StoragePartition::isMounted()
 {
-    return mounted;
+    return m_is_mounted;
 }
 
 bool StoragePartition::isMountable()
 {
-    return mountable;
+    return m_is_mountable;
 }
 
 bool StoragePartition::isPV()
 {
-    return physical_volume;
+    return m_is_pv;
 }
-
 
 QStringList StoragePartition::getMountPoints()
 {
     QStringList mount_points;
     
-    for(int x = 0; x < device_mount_info_list.size(); x++)
-	mount_points.append( device_mount_info_list[x]->getMountPoint() );
+    for(int x = 0; x < m_device_mount_info_list.size(); x++)
+	mount_points.append( m_device_mount_info_list[x]->getMountPoint() );
 
     return mount_points;
 }

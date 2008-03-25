@@ -16,8 +16,10 @@
 
 #include <KMenu>
 #include <KAction>
+
 #include <QTreeView>
 #include <QAbstractItemModel>
+
 #include "devicemodel.h"
 
 class StoragePartition;
