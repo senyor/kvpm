@@ -11,6 +11,7 @@
  * 
  * See the file "COPYING" for the exact licensing terms.
  */
+
 #ifndef LOGVOL_H
 #define LOGVOL_H
 
@@ -55,7 +56,7 @@ class LogVol
 
     bool m_alloc_locked;         // allocation type is fixed when pvmove is underway 
                                  // (and maybe other times)
-
+    bool m_active;
     bool m_mounted;              // has a mounted filesystem
     bool m_open;                 // device is open
     bool m_pvmove;               // is a pvmove temporary volume
@@ -93,6 +94,7 @@ class LogVol
     double getCopyPercent();
     int getMinorDevice();
     int getMajorDevice();
+    bool isActive();
     bool isFixed();
     bool isLocked();
     bool isMirror();
