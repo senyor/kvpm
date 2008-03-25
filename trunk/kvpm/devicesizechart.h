@@ -18,6 +18,7 @@
 #include <QList>
 #include <QLabel>
 #include <QFrame>
+#include <QHBoxLayout>
 
 #include "devicemodel.h"
 #include "devicesizechartseg.h"
