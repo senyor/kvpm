@@ -15,24 +15,10 @@
 #ifndef VGCHANGEAVAILABLE_H
 #define VGCHANGEAVAILABLE_H
 
-#include <KDialog>
-#include <QStringList>
-#include <QCheckBox>
 
 class VolGroup;
 
+bool change_vg_available(VolGroup *volumeGroup);
 
-class VGChangeAvailableDialog : public KDialog
-{
-Q_OBJECT
-
-    QString    m_vg_name;
-    QCheckBox *m_avail_check;
-
-public:
-    VGChangeAvailableDialog(VolGroup *volumeGroup, QWidget *parent = 0);
-    QStringList arguments();
-    
-};
 
 #endif
