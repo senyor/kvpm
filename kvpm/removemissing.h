@@ -11,14 +11,14 @@
  * 
  * See the file "COPYING" for the exact licensing terms.
  */
+
 #ifndef REMOVEMISSING_H
 #define REMOVEMISSING_H
 
-#include <KDialog>
 #include <QStringList>
 
 class VolGroup;
 
-bool remove_missing_pv(VolGroup *VolumeGroup);
+bool remove_missing_pv(VolGroup *volumeGroup);
 
 #endif
