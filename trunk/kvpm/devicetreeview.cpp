@@ -14,6 +14,7 @@
 
 
 #include <QtGui>
+
 #include "devicetreeview.h"
 #include "mkfs.h"
 #include "mount.h"
@@ -36,7 +37,7 @@ DeviceTreeView::DeviceTreeView(QWidget *parent) : QTreeView(parent)
     setContextMenuPolicy(Qt::CustomContextMenu);
     menu = new KMenu(this);
     vgextend_menu = new KMenu("Extend volume group",this);
-    mkfs_action = new KAction("Make filesystem", this);
+    mkfs_action     = new KAction("Make filesystem", this);
     pvcreate_action = new KAction("Create physical volume", this);
     pvremove_action = new KAction("Remove physical volume", this);
     vgcreate_action = new KAction("Create volume group", this);
@@ -58,14 +59,16 @@ DeviceTreeView::DeviceTreeView(QWidget *parent) : QTreeView(parent)
         vgextend_menu->addAction(vgextend_actions[x]);
     }
     
-    connect(mkfs_action, SIGNAL(triggered()), this, SLOT(mkfsPartition()));
+    connect(mkfs_action,     SIGNAL(triggered()), this, SLOT(mkfsPartition()));
     connect(pvcreate_action, SIGNAL(triggered()), this, SLOT(pvcreatePartition()));
     connect(pvremove_action, SIGNAL(triggered()), this, SLOT(pvremovePartition()));
     connect(vgcreate_action, SIGNAL(triggered()), this, SLOT(vgcreatePartition()));
     connect(vgreduce_action, SIGNAL(triggered()), this, SLOT(vgreducePartition()));
-    connect(vgextend_menu, SIGNAL(triggered(QAction*)), this, SLOT(vgextendPartition(QAction*)));
-    connect(mount_action,   SIGNAL(triggered()), this, SLOT(mountPartition()));
-    connect(unmount_action, SIGNAL(triggered()), this, SLOT(unmountPartition()));
+    connect(mount_action,    SIGNAL(triggered()), this, SLOT(mountPartition()));
+    connect(unmount_action,  SIGNAL(triggered()), this, SLOT(unmountPartition()));
+
+    connect(vgextend_menu, SIGNAL(triggered(QAction*)), 
+	    this, SLOT(vgextendPartition(QAction*)));
 
     connect(this, SIGNAL(customContextMenuRequested(QPoint)), 
 	    this, SLOT(popupContextMenu(QPoint)) );

@@ -11,6 +11,7 @@
  * 
  * See the file "COPYING" for the exact licensing terms.
  */
+
 #ifndef STORAGEPARTITION_H
 #define STORAGEPARTITION_H
 
@@ -24,32 +25,24 @@ class MountInformationList;
 
 class StoragePartition 
 {
-    QList<MountInformation *> device_mount_info_list;
-    PhysVol *pv;
-    
-    int num;
-    QString partition_scheme;
-    QString type_string;
-    
-    QString partition_path;
-    QString partition_type;
-    QString fs_type;
-    QString volume_group;
-    QString pv_uuid;
-    long long partition_size;
-    bool physical_volume;
-    bool mounted;
-    bool mountable;
+    QList<MountInformation *> m_device_mount_info_list;
+    PhysVol *m_pv;
+    QString m_partition_path;
+    QString m_partition_type;
+    QString m_fs_type;
+    long long m_partition_size;
+    bool m_is_pv;
+    bool m_is_mounted;
+    bool m_is_mountable;
     
 public: 
-    StoragePartition(QString PartitionPath,
-		     QString PartitionType,
-		     long long PartitionSize, 
-		     QList<PhysVol *> pv_list, 
-		     MountInformationList *mount_info_list);
+    StoragePartition(QString partitionPath,
+		     QString partitionType,
+		     long long partitionSize, 
+		     QList<PhysVol *> pvList, 
+		     MountInformationList *mountInfoList);
     ~StoragePartition();
     
-    int getNumber();
     QString getFileSystem();
     QString getPartitionPath();
     PhysVol *getPhysicalVolume();
