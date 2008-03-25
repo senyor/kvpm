@@ -11,6 +11,7 @@
  * 
  * See the file "COPYING" for the exact licensing terms.
  */
+
 #ifndef MKFS_H
 #define MKFS_H
 
@@ -24,18 +25,18 @@ class VolGroup;
 class LogVol;
 class StoragePartition;
 
-bool make_fs(LogVol *LogicalVolume);
-bool make_fs(StoragePartition *Partition);
+bool make_fs(LogVol *logicalVolume);
+bool make_fs(StoragePartition *partition);
 
 class MkfsDialog : public KDialog
 {
      QGroupBox *radio_box;
      QRadioButton *ext2, *ext3, *reiser, *jfs, *xfs, *vfat, *swap;
-     QString type;
-     QString path;
+
+     QString m_path;
 
  public:
-     MkfsDialog(QString DevicePath, QWidget *parent = 0);
+     MkfsDialog(QString devicePath, QWidget *parent = 0);
      QStringList arguments();
 
 };
