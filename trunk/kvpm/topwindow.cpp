@@ -326,13 +326,8 @@ void TopWindow::changeAllocation()
 
 void TopWindow::changeAvailable()
 {
-    VGChangeAvailableDialog dialog( m_vg );
-    dialog.exec();
-
-    if(dialog.result() == QDialog::Accepted){
-        ProcessProgress change_vg(dialog.arguments(), "", false);
+    if( change_vg_available(m_vg) )
 	MainWindow->rebuildVolumeGroupTab();
-    }
 }
 
 void TopWindow::changeExtentSize()

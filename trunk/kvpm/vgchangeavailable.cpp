@@ -13,8 +13,11 @@
  */
 
 
+#include <KMessageBox>
+
 #include <QtGui>
 
+#include "processprogress.h"
 #include "vgchangeavailable.h"
 #include "volgroup.h"
 
@@ -22,43 +25,35 @@
 /* This dialog changes the available status of
    the volume group */
 
-VGChangeAvailableDialog::VGChangeAvailableDialog(VolGroup *volumeGroup, QWidget *parent):
-    KDialog(parent)
+
+bool change_vg_available(VolGroup *volumeGroup)
 {
-
-    setWindowTitle("Volume group availability");
-
-    QWidget *dialog_body = new QWidget(this);
-    setMainWidget(dialog_body);
-    QVBoxLayout *layout = new QVBoxLayout();
-    dialog_body->setLayout(layout);
-
-    m_vg_name = volumeGroup->getName();
-    QLabel *name_label = new QLabel( "Volume group: <b>" + m_vg_name + "</b>" );
-    name_label->setAlignment(Qt::AlignCenter);
-    layout->addWidget(name_label);
-
-    m_avail_check = new QCheckBox("Make available?");
-    m_avail_check->setChecked(true);
-    layout->addWidget(m_avail_check);
-
-}
-
-QStringList VGChangeAvailableDialog::arguments()
-{  
-    QString allocation_policy;
     QStringList args;
-
-    if(m_avail_check->isChecked()){
-	args << "vgchange" 
-	     << "--available"
-	     << "y";
-    }
-    else{
-	args << "vgchange" 
-	     << "--available"
-	     << "n";
-    }
+    QString vg_name, message;
+    int result;
     
-    return args;
+    vg_name = volumeGroup->getName();
+    
+    message.append("Make volume group: <b>" + vg_name + "</b>");
+    message.append(" available for use?");
+
+    result = KMessageBox::questionYesNo( 0, message);
+    
+    if( result == 3){      // 3 = "yes" button
+	args << "vgchange" 
+	     << "--available" << "y"
+	     << vg_name;
+    }
+    else if( result == 4){ // 4 = "no" button
+	args << "vgchange" 
+	     << "--available" << "n"
+	     << vg_name;
+    }
+    else{                  // do nothing and return
+	return false;
+    }
+
+    ProcessProgress resize(args, "Changing vg availability...");
+
+    return true;
 }
