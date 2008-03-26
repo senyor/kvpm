@@ -19,19 +19,19 @@
 
 class mntent;
 
-int addMountEntry(QString Device, QString MountPoint, QString Type, 
-		  QString Options, int DumpFreq, int Pass);
+int addMountEntry(QString device, QString mountPoint, QString type, 
+		  QString options, int dumpFreq, int pass);
 
-bool addMountEntryOptions(QString MountPoint, QString NewOptions);
+bool addMountEntryOptions(QString mountPoint, QString newOptions);
 
-bool removeMountEntry(QString MountPoint);
-mntent *copyMountEntry(mntent *MountEntry);
+bool removeMountEntry(QString mountPoint);
+mntent *copyMountEntry(mntent *mountEntry);
 
-bool hasMountEntry(QString Device);
-bool hasFstabEntry(QString Device);
+bool hasMountEntry(QString device);
+bool hasFstabEntry(QString device);
 
-QString getMountEntry(QString Device);
-QString getFstabEntry(QString Device);
+QString getMountEntry(QString device);
+QString getFstabEntry(QString device);
 
 
 #endif
