@@ -14,28 +14,33 @@
 
 
 #include <KMessageBox>
+
 #include <QtGui>
+
 #include "processprogress.h"
 #include "pvcreate.h"
 
-bool create_pv(QString PhysicalVolumePath)
+bool create_pv(QString physicalVolumeName)
 {
     QStringList args;
     QString message;
     
     message.append("Are you certain you want to create a physical volume on: ");
-    message.append("<b>" + PhysicalVolumePath + "</b>?");
+    message.append("<b>" + physicalVolumeName + "</b>?");
     message.append(" Any information already on that device will be lost.");
 
     if(KMessageBox::warningContinueCancel( 0, message) == 5){  // 5 = continue button
 
 	args << "pvcreate" 
 	     << "--force"
-	     << PhysicalVolumePath;
+	     << physicalVolumeName;
 
 	ProcessProgress create(args, "Creating pv...", false);
-	return TRUE;
+
+	return true;
     }
-    else
-	return FALSE;
+    else{
+	return false;
+    }
 }
+

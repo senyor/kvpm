@@ -11,11 +11,12 @@
  * 
  * See the file "COPYING" for the exact licensing terms.
  */
+
 #ifndef VGREDUCEONE_H
 #define VGREDUCEONE_H
 
 #include <QStringList>
 
-bool reduce_vg_one(QString VolumeGroupName, QString PhysicalVolumePath);
+bool reduce_vg_one(QString volumeGroupName, QString physicalVolumeName);
 
 #endif

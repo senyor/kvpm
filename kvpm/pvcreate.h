@@ -11,11 +11,12 @@
  * 
  * See the file "COPYING" for the exact licensing terms.
  */
+
 #ifndef PVCREATE_H
 #define PVCREATE_H
 
 #include <QString>
 
-bool create_pv(QString PhysicalVolumePath);
+bool create_pv(QString physicalVolumeName);
 
 #endif
