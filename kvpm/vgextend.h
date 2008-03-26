@@ -11,11 +11,12 @@
  * 
  * See the file "COPYING" for the exact licensing terms.
  */
+
 #ifndef VGEXTEND_H
 #define VGEXTEND_H
 
 #include <QString>
 
-bool extend_vg(QString VolumeGroupName, QString PhysicalVolumePath);
+bool extend_vg(QString volumeGroupName, QString physicalVolumeName);
 
 #endif

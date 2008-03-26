@@ -20,25 +20,27 @@
 #include "processprogress.h"
 #include "vgextend.h"
 
-bool extend_vg(QString VolumeGroupName, QString PhysicalVolumePath)
+bool extend_vg(QString volumeGroupName, QString physicalVolumeName)
 {
     QString message;
     QStringList args;
     
-    message.append("Do you want to extend volume Group: ");
-    message.append("<b>" + VolumeGroupName + "</b>");
-    message.append(" with Physical Volume: ");
-    message.append("<b>" + PhysicalVolumePath + "</b>?");
+    message.append("Do you want to extend volume group: ");
+    message.append("<b>" + volumeGroupName + "</b>");
+    message.append(" with physical volume: ");
+    message.append("<b>" + physicalVolumeName + "</b>?");
 
     if( KMessageBox::questionYesNo(0, message) == 3 ){     // 3 is the "yes" button
 
 	args << "vgextend"
-	     << VolumeGroupName
-	     << PhysicalVolumePath;
+	     << volumeGroupName
+	     << physicalVolumeName;
 
 	ProcessProgress extend(args, "Extending vg...", true);
-	return TRUE;
+
+	return true;
     }
-    else
-	return FALSE;
+    else{ 
+	return false;  // do nothing
+    }
 }
