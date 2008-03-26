@@ -11,25 +11,29 @@
  * 
  * See the file "COPYING" for the exact licensing terms.
  */
+
 #ifndef VGCHANGEEXTENT_H
 #define VGCHANGEEXTENT_H
 
 #include <KDialog>
+
 #include <QStringList>
 #include <QComboBox>
 
 class VolGroup;
 
-bool change_vg_extent(VolGroup *VolumeGroup);
+bool change_vg_extent(VolGroup *volumeGroup);
 
 class VGChangeExtentDialog : public KDialog
 {
 Q_OBJECT
-    QString vg_name;
-    QComboBox *extent_size, *extent_suffix;
+    QString m_vg_name;
+
+    QComboBox *m_extent_size, 
+	      *m_extent_suffix;
 
 public:
-    VGChangeExtentDialog(VolGroup *VolumeGroup, QWidget *parent = 0);
+    VGChangeExtentDialog(VolGroup *volumeGroup, QWidget *parent = 0);
     QStringList arguments();
     
 };
