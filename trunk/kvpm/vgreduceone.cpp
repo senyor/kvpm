@@ -14,29 +14,35 @@
 
 
 #include <KMessageBox>
+
 #include <QtGui>
+
 #include "vgreduceone.h"
 #include "processprogress.h"
 
 
-bool reduce_vg_one(QString VolumeGroupName, QString PhysicalVolumePath)
+bool reduce_vg_one(QString volumeGroupName, QString physicalVolumeName)
 {
 
     QStringList args;
  
-    QString message = "Remove physical volume: <b>" + PhysicalVolumePath + "</b>";
-    message.append(" from volume group: <b>" + VolumeGroupName + "</b>");
+    QString message = "Remove physical volume: <b>" + physicalVolumeName + "</b>";
+    message.append(" from volume group: <b>" + volumeGroupName + "</b>");
     
 
     int return_code =  KMessageBox::questionYesNo( 0, message);
 
     if(return_code == 3){  // 3 = yes button
+
 	args << "vgreduce"
-	     << VolumeGroupName
-	     << PhysicalVolumePath;
+	     << volumeGroupName
+	     << physicalVolumeName;
+
 	ProcessProgress remove( args, "Reducing vg...", true );
-	return TRUE;
+
+	return true;
     }
-    else
-	return FALSE;
+    else{
+	return false;
+    }
 }
