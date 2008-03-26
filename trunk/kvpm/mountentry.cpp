@@ -17,7 +17,9 @@
 #include <fstab.h>
 #include <string.h>
 #include <stdio.h>
+
 #include <QtGui>
+
 #include "logvol.h"
 #include "volgroup.h"
 #include "mountentry.h"
@@ -27,23 +29,29 @@ const int BUFF_LEN = 2000;   // Enough?
 /* Adds an entry into the mount table file, usually /etc/mtab.
    It returns 0 on success and 1 on failure  */
 
-int addMountEntry(QString Device, QString MountPoint, QString Type, 
-		   QString Options, int DumpFreq, int Pass)
+int addMountEntry(QString device, QString mountPoint, QString type, 
+		  QString options, int dumpFreq, int pass)
 {
-    char mount_table[] = _PATH_MOUNTED;
-    char device[BUFF_LEN];
-    char mount_point[BUFF_LEN];
-    char type[BUFF_LEN];
-    char options[BUFF_LEN];
+    char mount_table_char[] = _PATH_MOUNTED;
+    char device_char[BUFF_LEN];
+    char mount_point_char[BUFF_LEN];
+    char type_char[BUFF_LEN];
+    char options_char[BUFF_LEN];
 
-    strncpy(device,      Device.toAscii().data(),     BUFF_LEN);
-    strncpy(mount_point, MountPoint.toAscii().data(), BUFF_LEN);
-    strncpy(type,        Type.toAscii().data(),       BUFF_LEN);
-    strncpy(options,     Options.toAscii().data(),    BUFF_LEN);
+    strncpy(device_char,      device.toAscii().data(),     BUFF_LEN);
+    strncpy(mount_point_char, mountPoint.toAscii().data(), BUFF_LEN);
+    strncpy(type_char,        type.toAscii().data(),       BUFF_LEN);
+    strncpy(options_char,     options.toAscii().data(),    BUFF_LEN);
     
-    const struct mntent mount_entry  = { device, mount_point, type, options, DumpFreq, Pass };
+    const struct mntent mount_entry  = { device_char, 
+					 mount_point_char, 
+					 type_char, 
+					 options_char, 
+					 dumpFreq, 
+					 pass };
     
-    FILE *fp = setmntent(mount_table, "a");
+    FILE *fp = setmntent(mount_table_char, "a");
+
     if(fp){
 	if( addmntent(fp, &mount_entry) ){
 	    endmntent(fp);
@@ -54,8 +62,11 @@ int addMountEntry(QString Device, QString MountPoint, QString Type,
 	    return 0;
 	}
     }
-    return 1;
+    else{
+	return 1;
+    }
 }
+
 
 
 /* 
@@ -63,7 +74,7 @@ int addMountEntry(QString Device, QString MountPoint, QString Type,
    in the /etc/mtab file. 
 */
 
-bool addMountEntryOptions(QString MountPoint, QString NewOptions)
+bool addMountEntryOptions(QString mountPoint, QString newOptions)
 {
     QString options, type, device;
     int dump_freq, pass;
@@ -77,15 +88,15 @@ bool addMountEntryOptions(QString MountPoint, QString NewOptions)
 
     while( (mount_entry = getmntent(fp_old)) ){
 	temp_entry = copyMountEntry(mount_entry);
-	if( QString(temp_entry->mnt_dir) == MountPoint ){
+	if( QString(temp_entry->mnt_dir) == mountPoint ){
 
 	    options = temp_entry->mnt_opts;
 	    options = options.simplified();
 
-	    if( NewOptions.startsWith("," ) )
-		options.append(NewOptions);
+	    if( newOptions.startsWith("," ) )
+		options.append(newOptions);
 	    else
-		options.append( "," + NewOptions);
+		options.append( "," + newOptions);
 
 	    type = temp_entry->mnt_type;
 	    device = temp_entry->mnt_fsname;
@@ -93,19 +104,19 @@ bool addMountEntryOptions(QString MountPoint, QString NewOptions)
 	    pass = temp_entry->mnt_passno;
 	    
 	    endmntent(fp_old);
-	    removeMountEntry(MountPoint);
-	    addMountEntry(device, MountPoint, type, options, dump_freq, pass);
+	    removeMountEntry(mountPoint);
+	    addMountEntry(device, mountPoint, type, options, dump_freq, pass);
 
-	    return TRUE;
+	    return true;
 	}
     }
     endmntent(fp_old);
 
-    return FALSE;
+    return false;
 }
 
 
-bool removeMountEntry(QString MountPoint)
+bool removeMountEntry(QString mountPoint)
 {
     QList<mntent *> mount_entry_list;
     mntent *mount_entry;
@@ -118,7 +129,7 @@ bool removeMountEntry(QString MountPoint)
 
     while( (mount_entry = getmntent(fp_old)) ){
 	temp_entry = copyMountEntry(mount_entry);
-	if( QString(temp_entry->mnt_dir) != MountPoint )
+	if( QString(temp_entry->mnt_dir) != mountPoint )
 	    mount_entry_list.append(temp_entry);
     }
     endmntent(fp_old);
@@ -131,14 +142,14 @@ bool removeMountEntry(QString MountPoint)
     endmntent(fp_new);
 
     rename("/etc/mtab.new", _PATH_MOUNTED);
-    return TRUE;
+    return true;
 }
 	    
 /* here we compare the complete path to a logical volume
    to a series of entries in _PATH_MOUNTED (probably "/etc/mtab") 
-   to see if any of them match. Returns FALSE on error*/
+   to see if any of them match. Returns false on error*/
 
-bool hasMountEntry(QString Device)
+bool hasMountEntry(QString device)
 {
     QString name_entry;        // returned entry to compare to
 
@@ -149,15 +160,17 @@ bool hasMountEntry(QString Device)
     if(fp){
 	while( (mount_entry = getmntent(fp)) ){
 	    name_entry = QString( mount_entry->mnt_fsname );
-	    if(name_entry == Device){
+	    if(name_entry == device){
 		endmntent(fp);
-		return TRUE;
+		return true;
 	    }
 	}
 	endmntent(fp);
-	return FALSE;
+	return false;
     }
-    return FALSE;
+    else{
+	return false;
+    }
 }
 
 
@@ -165,7 +178,7 @@ bool hasMountEntry(QString Device)
    filesystem's mount point if the device is has an entry
    in the table. It returns NULL on failure */
 
-QString getMountEntry(QString Device)
+QString getMountEntry(QString device)
 {
     const char mount_table[] = _PATH_MOUNTED;
     mntent *mount_entry;
@@ -176,19 +189,23 @@ QString getMountEntry(QString Device)
     if(fp){
 	while( (mount_entry = getmntent(fp)) ){
 	    name_entry = QString( mount_entry->mnt_fsname );
-	    if(name_entry == Device){
+	    if(name_entry == device){
 		mount_dir = QString( mount_entry->mnt_dir );
 		endmntent(fp);
 		return mount_dir;
 	    }
 	}
 	endmntent(fp);
+
 	return NULL;
     }
-    return NULL;
+    else{
+	return NULL;
+    }
 }
 
-bool hasFstabEntry(QString Device)
+
+bool hasFstabEntry(QString device)
 {
     QString name_entry;                // returned entry to compare to
 
@@ -199,18 +216,23 @@ bool hasFstabEntry(QString Device)
     if(fp){
 	while( (mount_entry = getmntent(fp)) ){
 	    name_entry = QString( mount_entry->mnt_fsname );
-	    if(name_entry == Device){
+	    if(name_entry == device){
 		endmntent(fp);
-		return TRUE;
+
+		return true;
 	    }
 	}
 	endmntent(fp);
-	return FALSE;
+
+	return false;
     }
-    return FALSE;
+    else{
+	return false;
+    }
 }
 
-QString getFstabEntry(QString Device)
+
+QString getFstabEntry(QString device)
 {
     QString mount_table = _PATH_FSTAB;
     QString name_entry;                // returned entry to compare to
@@ -223,17 +245,19 @@ QString getFstabEntry(QString Device)
 
     while( (mount_entry = getmntent(fp)) ){
 	name_entry = QByteArray( mount_entry->mnt_fsname );
-	if(name_entry == Device){
+
+	if(name_entry == device){
 	    mount_dir = QByteArray( mount_entry->mnt_dir );
 	    endmntent(fp);
 	    return mount_dir;
 	}
     }
     endmntent(fp);
+
     return NULL;
 }
 
-mntent *copyMountEntry(mntent *MountEntry)
+mntent *copyMountEntry(mntent *mountEntry)
 {
     mntent *new_entry = new mntent;
 
@@ -242,13 +266,13 @@ mntent *copyMountEntry(mntent *MountEntry)
     new_entry->mnt_type   = new char[BUFF_LEN];
     new_entry->mnt_opts   = new char[BUFF_LEN];
     
-    strncpy(new_entry->mnt_fsname, MountEntry->mnt_fsname, BUFF_LEN);
-    strncpy(new_entry->mnt_dir,    MountEntry->mnt_dir,    BUFF_LEN);
-    strncpy(new_entry->mnt_type,   MountEntry->mnt_type,   BUFF_LEN);
-    strncpy(new_entry->mnt_opts,   MountEntry->mnt_opts,   BUFF_LEN);
+    strncpy(new_entry->mnt_fsname, mountEntry->mnt_fsname, BUFF_LEN);
+    strncpy(new_entry->mnt_dir,    mountEntry->mnt_dir,    BUFF_LEN);
+    strncpy(new_entry->mnt_type,   mountEntry->mnt_type,   BUFF_LEN);
+    strncpy(new_entry->mnt_opts,   mountEntry->mnt_opts,   BUFF_LEN);
     
-    new_entry->mnt_freq   = MountEntry->mnt_freq;
-    new_entry->mnt_passno = MountEntry->mnt_passno;
+    new_entry->mnt_freq   = mountEntry->mnt_freq;
+    new_entry->mnt_passno = mountEntry->mnt_passno;
     
     return new_entry;
 }
