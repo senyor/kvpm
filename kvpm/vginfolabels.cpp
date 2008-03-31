@@ -26,7 +26,7 @@ VGInfoLabels::VGInfoLabels(VolGroup *volumeGroup, QWidget *parent) : QFrame(pare
 	   *free_label, *lvm_fmt_label, *resizable_label, 
 	   *clustered_label, *allocateable_label,
 	   *max_lv_label, *max_pv_label, *policy_label,
-	   *partial_label, *vg_write_mode;
+	   *vg_write_mode;
 
     setFrameStyle(QFrame::Sunken | QFrame::Box);
     setLineWidth(2);
@@ -94,8 +94,11 @@ VGInfoLabels::VGInfoLabels(VolGroup *volumeGroup, QWidget *parent) : QFrame(pare
     
     if(volumeGroup->isPartial())
     {
-	partial_label = new QLabel("<b>*** Warning: Partial Volume Group ***</b>");
-	hlayout2->addWidget(partial_label);
+	hlayout2->addWidget( new QLabel("<b>*** Warning: Partial Volume Group ***</b>") );
+    }
+    else if(volumeGroup->isExported())
+    {
+	hlayout2->addWidget( new QLabel("<b>*** Exported Volume Group ***</b>") );
     }
 
     used_label   = new QLabel("Used: " + sizeToString( volumeGroup->getUsedSpace() ));
