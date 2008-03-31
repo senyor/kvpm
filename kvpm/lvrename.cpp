@@ -17,6 +17,7 @@
 
 #include "lvrename.h"
 #include "logvol.h"
+#include "mountentry.h"
 #include "volgroup.h" 
 #include "processprogress.h"
 
@@ -27,10 +28,12 @@ bool rename_lv(LogVol *logicalVolume)
     
     if(dialog.result() == QDialog::Accepted){
         ProcessProgress rename( dialog.arguments(), "Renaming logical volume...", false );
-        return true;
+
+	return true;
     }
-    else
+    else{
         return false;
+    }
 }
 
 LVRenameDialog::LVRenameDialog(LogVol *logicalVolume, QWidget *parent) : 
@@ -65,6 +68,9 @@ LVRenameDialog::LVRenameDialog(LogVol *logicalVolume, QWidget *parent) :
 
     connect(m_new_name, SIGNAL(textChanged(QString)), 
 	    this, SLOT(validateName(QString)));
+
+    connect(this, SIGNAL(okClicked()), 
+	    this, SLOT(renameMountEntries()));
 }
 
 QStringList LVRenameDialog::arguments()
@@ -96,3 +102,10 @@ void LVRenameDialog::validateName(QString name)
     else
 	enableButtonOk(false);
 }
+
+void LVRenameDialog::renameMountEntries()
+{
+    rename_mount_entries("/dev/mapper/" + m_vg_name + "-" + m_old_name, 
+			 "/dev/mapper/" + m_vg_name + "-" + m_new_name->text());
+}
+

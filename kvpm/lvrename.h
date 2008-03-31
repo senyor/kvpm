@@ -39,6 +39,7 @@ public:
 
 private slots:
     void validateName(QString);
+    void renameMountEntries();
 
 };
 
