@@ -22,6 +22,9 @@ class mntent;
 int addMountEntry(QString device, QString mountPoint, QString type, 
 		  QString options, int dumpFreq, int pass);
 
+mntent* buildMountEntry(QString device, QString mountPoint, QString type, 
+			QString options, int dumpFreq, int pass);
+
 bool addMountEntryOptions(QString mountPoint, QString newOptions);
 
 bool removeMountEntry(QString mountPoint);
@@ -33,5 +36,6 @@ bool hasFstabEntry(QString device);
 QString getMountEntry(QString device);
 QString getFstabEntry(QString device);
 
+bool rename_mount_entries(QString oldName, QString newName);
 
 #endif

@@ -68,6 +68,37 @@ int addMountEntry(QString device, QString mountPoint, QString type,
 }
 
 
+/* This function generates an mntent structure from its parameters
+and returns it  */
+
+
+mntent* buildMountEntry(QString device, QString mountPoint, 
+			QString type, QString options, 
+			int dumpFreq, int pass)
+{
+    char *device_char      = new char[BUFF_LEN];
+    char *mount_point_char = new char[BUFF_LEN];
+    char *type_char        = new char[BUFF_LEN];
+    char *options_char     = new char[BUFF_LEN];
+
+    strncpy(device_char,      device.toAscii().data(),     BUFF_LEN);
+    strncpy(mount_point_char, mountPoint.toAscii().data(), BUFF_LEN);
+    strncpy(type_char,        type.toAscii().data(),       BUFF_LEN);
+    strncpy(options_char,     options.toAscii().data(),    BUFF_LEN);
+    
+    mntent *mount_entry = new mntent;
+    
+    mount_entry->mnt_fsname = device_char;
+    mount_entry->mnt_dir    = mount_point_char;
+    mount_entry->mnt_type   = type_char;
+    mount_entry->mnt_opts   = options_char;
+
+    mount_entry->mnt_freq   = dumpFreq;
+    mount_entry->mnt_passno = pass;
+
+    return mount_entry;
+}
+
 
 /* 
    Add a comma separated list of mount options to an existing entry
@@ -275,5 +306,49 @@ mntent *copyMountEntry(mntent *mountEntry)
     new_entry->mnt_passno = mountEntry->mnt_passno;
     
     return new_entry;
+}
+
+bool rename_mount_entries(QString oldName, QString newName)
+{
+
+    QList<mntent *> mount_entry_list;
+    mntent *mount_entry;
+    mntent *temp_entry;
+    
+    const char *mount_table_old = _PATH_MOUNTED;
+    const char *mount_table_new = "/etc/mtab.new";
+    
+    FILE *fp_old = setmntent(mount_table_old, "r");
+
+    while( (mount_entry = getmntent(fp_old)) ){
+	temp_entry = copyMountEntry(mount_entry);
+
+	if( QString(temp_entry->mnt_fsname) != oldName ){
+	    mount_entry_list.append(temp_entry);
+	}
+	else{
+	    temp_entry = buildMountEntry( newName, 
+					  temp_entry->mnt_dir,
+					  temp_entry->mnt_type,	 
+					  temp_entry->mnt_opts,
+					  temp_entry->mnt_freq,
+					  temp_entry->mnt_passno );
+	    
+	    mount_entry_list.append(temp_entry);
+	}
+    }
+    
+    endmntent(fp_old);
+
+    FILE *fp_new = setmntent(mount_table_new, "w");
+    for(int x = 0; x < mount_entry_list.size(); x++){
+	const mntent *entry = mount_entry_list[x];
+	addmntent(fp_new, entry);
+    }
+    endmntent(fp_new);
+
+    rename("/etc/mtab.new", _PATH_MOUNTED);
+
+    return true;
 }
 
