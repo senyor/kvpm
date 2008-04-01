@@ -79,9 +79,7 @@ void LVSizeChart::populateChart()
 	}
     }
 
-// only create a free space widget if we have some space free
-
-    if( free_extents ){
+    if( free_extents ){ // only create a free space widget if we have some
 
 	if( m_widgets.size() ){
 	    KSeparator *separator = new KSeparator(Qt::Vertical);
@@ -99,7 +97,17 @@ void LVSizeChart::populateChart()
 	m_layout->addWidget(widget);
 	m_ratios.append(seg_ratio);
     }
+    else if ( m_widgets.size() == 0 ){ // if we have no chart segs then put in a blank one
+                                       // because lvsizechart won't work with zero segments
+	usage = "" ;
+	widget = new LVChartSeg(m_vg, 0, usage, this);
+	m_widgets.append(widget);
+	
+	m_layout->addWidget(widget);
+	m_ratios.append( 1.0 );
 
+    }
+    
     max_segment_width = (int) ( width() * m_ratios[0] ); 
 
     if( max_segment_width < 1 )
