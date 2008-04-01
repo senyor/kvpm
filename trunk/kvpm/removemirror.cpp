@@ -16,43 +16,58 @@
 #include <QtGui>
 
 #include "logvol.h"
+#include "nomungecheck.h"
 #include "processprogress.h"
 #include "removemirror.h"
 #include "volgroup.h"
 
-bool remove_mirror(LogVol *LogicalVolume)
+bool remove_mirror(LogVol *logicalVolume)
 {
-    RemoveMirrorDialog dialog(LogicalVolume);
+    RemoveMirrorDialog dialog(logicalVolume);
     dialog.exec();
+
     if(dialog.result() == QDialog::Accepted){
         ProcessProgress remove_mirror(dialog.arguments(), "Removing mirror...");
-        return TRUE;
+        return true;
     }
-    else
-        return FALSE;
+    else{
+        return false;
+    }
 }
 
-RemoveMirrorDialog::RemoveMirrorDialog(LogVol *LogicalVolume, QWidget *parent):KDialog(parent)
+RemoveMirrorDialog::RemoveMirrorDialog(LogVol *logicalVolume, QWidget *parent):
+    KDialog(parent),
+    m_lv(logicalVolume)
 {
-    lv = LogicalVolume;
-    vg = lv->getVolumeGroup();
-    logical_volume_name = lv->getFullName();
+    NoMungeCheck *temp_check;
+    QStringList   pv_names;
+    
+    m_vg = m_lv->getVolumeGroup();
+    QList<LogVol *> lvs = m_vg->getLogicalVolumes();
 
-    setWindowTitle(tr("Add Mirror to Logical Volume"));
+    setWindowTitle(tr("Remove mirrors"));
 
     QWidget *dialog_body = new QWidget(this);
     QVBoxLayout *layout = new QVBoxLayout;
     dialog_body->setLayout(layout);
     setMainWidget(dialog_body);
     
-    QHBoxLayout *count_layout = new QHBoxLayout();
-    QLabel *message = new QLabel("Number of mirrors:");
-    count_layout->addWidget(message);
+    QLabel *message = new QLabel("Select the mirror legs to remove:");
+    layout->addWidget(message);
 
-    count_spin = new QSpinBox();
-    count_spin->setMinimum(0);
-    count_layout->addWidget(count_spin);
-    layout->addLayout(count_layout);
+    for(int x = lvs.size() - 1; x >= 0 ;x--){
+	if( lvs[x]->isMirrorLeg() && (lvs[x]->getOrigin() == m_lv->getName()) ){
+
+	    temp_check = new NoMungeCheck( lvs[x]->getName() );
+	    pv_names = lvs[x]->getDevicePathAll();  // mirror legs have only one pv
+	    temp_check->setAlternateText( pv_names[0] );
+	    m_mirror_leg_checks.append(temp_check);
+	    layout->addWidget(temp_check);
+	    
+	    connect(temp_check, SIGNAL(stateChanged(int)),
+		    this ,SLOT(validateCheckStates(int)));
+	}
+    }
 }
 
 /* Here we create a string based on all
@@ -62,16 +77,59 @@ RemoveMirrorDialog::RemoveMirrorDialog(LogVol *LogicalVolume, QWidget *parent):K
 
 QStringList RemoveMirrorDialog::arguments()
 {
-    QStringList tempstrings;
+    int mirror_count = m_mirror_leg_checks.size();
     QStringList args;
+    QStringList legs;       // mirror legs (actually pv names) being deleted
+    
+    for(int x = 0; x < m_mirror_leg_checks.size(); x++){
+	if( m_mirror_leg_checks[x]->isChecked() ){
+	    legs << m_mirror_leg_checks[x]->getAlternateText();
+	    mirror_count--;
+	}
+    }
 
     args << "lvconvert"
 	 << "--mirrors" 
-	 << QString("%1").arg(count_spin->value()) 
-	 << logical_volume_name;
+	 << QString("%1").arg(mirror_count - 1)
+	 << m_lv->getFullName()
+	 << legs;
+    
+    qDebug() << "ARGS:  " << args;
     
     return args;
 }
 
+/* One leg of the mirror must always be left intact, 
+   so we make certain at least one check box is left
+   unchecked. The unchecked one is disabled. */
 
+void RemoveMirrorDialog::validateCheckStates(int)
+{
+
+    int check_box_count = m_mirror_leg_checks.size();
+    int checked_count = 0;
+    
+    for(int x = 0; x < check_box_count; x++){
+	if( m_mirror_leg_checks[x]->isChecked() ){
+	    checked_count++;
+	}
+    }
+
+    if( checked_count == (check_box_count - 1) ){
+
+	for(int x = 0; x < check_box_count; x++){
+	    if( !m_mirror_leg_checks[x]->isChecked() ){
+		m_mirror_leg_checks[x]->setEnabled(false);
+	    }
+	}
+    }
+    else{
+	for(int x = 0; x < check_box_count; x++){
+	    m_mirror_leg_checks[x]->setEnabled(true);
+
+	}
+
+    }
+    
+}
 

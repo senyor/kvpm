@@ -11,31 +11,38 @@
  * 
  * See the file "COPYING" for the exact licensing terms.
  */
+
 #ifndef LVREMOVEMIRROR_H
 #define LVREMOVEMIRROR_H
 
 #include <KDialog>
-#include <QStringList>
+
 #include <QLabel>
-#include <QSpinBox>
-//#include "topwindow.h"
+#include <QList>
+#include <QStringList>
 
-class VolGroup;
+
 class LogVol;
+class NoMungeCheck;
+class VolGroup;
 
-bool remove_mirror(LogVol *LogicalVolume);
+bool remove_mirror(LogVol *logicalVolume);
 
 class RemoveMirrorDialog : public KDialog
 {
-     LogVol *lv;
-     VolGroup *vg;
-     QString logical_volume_name;
-     int mirrors;
-     QSpinBox *count_spin;
+Q_OBJECT
 
- public:
-     RemoveMirrorDialog(LogVol *LogicalVolume, QWidget *parent = 0);
+     LogVol *m_lv;
+     VolGroup *m_vg;
+
+     QList<NoMungeCheck *> m_mirror_leg_checks;
+     
+public:
+     RemoveMirrorDialog(LogVol *logicalVolume, QWidget *parent = 0);
      QStringList arguments();
+
+private slots:     
+     void validateCheckStates(int);
      
 };
 
