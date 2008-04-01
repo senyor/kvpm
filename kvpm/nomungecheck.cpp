@@ -14,16 +14,27 @@
 
 
 #include <QtGui>
+
 #include "nomungecheck.h"
 
 
 NoMungeCheck::NoMungeCheck(const QString text, QWidget *parent) : QCheckBox(text, parent)
 {
-    unmunged_text = text;
+    m_unmunged_text = text;
+}
+
+QString NoMungeCheck::getAlternateText()
+{
+    return m_alternate_text;
 }
 
 QString NoMungeCheck::getUnmungedText()
 {
-    return unmunged_text;
+    return m_unmunged_text;
+}
+
+void NoMungeCheck::setAlternateText(QString alternateText)
+{
+    m_alternate_text = alternateText;
 }
 
