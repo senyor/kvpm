@@ -103,7 +103,7 @@ TopWindow::TopWindow(QWidget *parent):KMainWindow(parent)
     master_list = 0;
     m_tab_widget = 0;
     m_old_tab_widget =0;
-    
+
     connect(vgchange_alloc_action,  SIGNAL(triggered()), 
 	    this, SLOT(changeAllocation()));
 

@@ -147,12 +147,16 @@ VGTree::VGTree(VolGroup *VolumeGroup) : QTreeWidget(),
 
 void VGTree::setupContextMenu()
 {
-    setContextMenuPolicy(Qt::CustomContextMenu);   
+    if( !m_vg->isExported() ){
 
-    connect(this, SIGNAL(customContextMenuRequested(QPoint)), 
-	    this, SLOT(popupContextMenu(QPoint)) );
+	setContextMenuPolicy(Qt::CustomContextMenu);   
 
+	connect(this, SIGNAL(customContextMenuRequested(QPoint)), 
+		this, SLOT(popupContextMenu(QPoint)) );
+
+    }
 }
+
 
 void VGTree::insertSegmentItems(LogVol *logicalVolume, QTreeWidgetItem *item)
 {

@@ -17,6 +17,7 @@
 #include <KAction>
 
 #include <QtGui>
+
 #include "addmirror.h"
 #include "logvol.h"
 #include "lvactionsmenu.h"
@@ -75,16 +76,19 @@ LVChartSeg::LVChartSeg(VolGroup *volumeGroup, LogVol *logicalVolume,
     setPalette(*colorset);
     setAutoFillBackground(true);
 
-    setContextMenuPolicy(Qt::CustomContextMenu);
-    m_context_menu = new LVActionsMenu(m_lv, this, this);
+    if( !m_vg->isExported() ){
+	
+	setContextMenuPolicy(Qt::CustomContextMenu);
+	m_context_menu = new LVActionsMenu(m_lv, this, this);
 
-    if( m_lv )
-	setToolTip( m_lv->getName() );
-    else
-	setToolTip("free space");
+	if( m_lv )
+	    setToolTip( m_lv->getName() );
+	else
+	    setToolTip("free space");
 
-    connect(this, SIGNAL(customContextMenuRequested(QPoint)), 
-	    this, SLOT(popupContextMenu(QPoint)) );
+	connect(this, SIGNAL(customContextMenuRequested(QPoint)), 
+		this, SLOT(popupContextMenu(QPoint)) );
+    }
 }
 
 void LVChartSeg::popupContextMenu(QPoint)
