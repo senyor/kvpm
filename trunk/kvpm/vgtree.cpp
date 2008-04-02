@@ -161,8 +161,6 @@ void VGTree::setupContextMenu()
 void VGTree::insertSegmentItems(LogVol *logicalVolume, QTreeWidgetItem *item)
 {
 
-    qDebug() << "inserting segs";
-    
     QStringList segment_data;
     QTreeWidgetItem *lv_seg_item;
 
@@ -207,10 +205,6 @@ void VGTree::insertMirrorLegItems(LogVol *mirrorVolume, QTreeWidgetItem *item)
 	    
 	    leg_data.clear();
 
-    qDebug() << "Volume: " << leg_volume->getName();
-	    
-    qDebug("Segment count %d", leg_volume->getSegmentCount());
-    
 	    if( leg_volume->getSegmentCount() == 1 ) {	    
 
 		leg_data << leg_volume->getName() 
@@ -242,7 +236,6 @@ void VGTree::insertMirrorLegItems(LogVol *mirrorVolume, QTreeWidgetItem *item)
 	    }
 	    else {
 
-    qDebug() << "Got here.2...." ;
 		leg_data << leg_volume->getName() 
 			 << sizeToString(leg_volume->getSize()) 
 			 << leg_volume->getFilesystem()
