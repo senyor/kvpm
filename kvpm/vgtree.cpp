@@ -160,6 +160,9 @@ void VGTree::setupContextMenu()
 
 void VGTree::insertSegmentItems(LogVol *logicalVolume, QTreeWidgetItem *item)
 {
+
+    qDebug() << "inserting segs";
+    
     QStringList segment_data;
     QTreeWidgetItem *lv_seg_item;
 
@@ -188,14 +191,14 @@ void VGTree::insertMirrorLegItems(LogVol *mirrorVolume, QTreeWidgetItem *item)
 {
     QStringList leg_data;
     QTreeWidgetItem *leg_item;
-    VolGroup *volume_group;
-    QList<LogVol *>  logical_volume_list;
-    LogVol *leg_volume;
-    
-    volume_group = mirrorVolume->getVolumeGroup();    
-    logical_volume_list = volume_group->getLogicalVolumes();
 
-    for(int x = 0; x < volume_group->getLogVolCount(); x++){
+    LogVol *leg_volume;
+
+    VolGroup *volume_group = mirrorVolume->getVolumeGroup();    
+    int lv_count = volume_group->getLogVolCount();
+    QList<LogVol *>  logical_volume_list = volume_group->getLogicalVolumes();
+
+    for(int x = 0; x < lv_count; x++){
 	
 	leg_volume = logical_volume_list[x];
 	
@@ -204,6 +207,10 @@ void VGTree::insertMirrorLegItems(LogVol *mirrorVolume, QTreeWidgetItem *item)
 	    
 	    leg_data.clear();
 
+    qDebug() << "Volume: " << leg_volume->getName();
+	    
+    qDebug("Segment count %d", leg_volume->getSegmentCount());
+    
 	    if( leg_volume->getSegmentCount() == 1 ) {	    
 
 		leg_data << leg_volume->getName() 
@@ -234,6 +241,8 @@ void VGTree::insertMirrorLegItems(LogVol *mirrorVolume, QTreeWidgetItem *item)
 		leg_item->setData(1, Qt::UserRole, 0);      
 	    }
 	    else {
+
+    qDebug() << "Got here.2...." ;
 		leg_data << leg_volume->getName() 
 			 << sizeToString(leg_volume->getSize()) 
 			 << leg_volume->getFilesystem()
@@ -251,8 +260,8 @@ void VGTree::insertMirrorLegItems(LogVol *mirrorVolume, QTreeWidgetItem *item)
 		    leg_data << "r/w";
 		else
 		    leg_data << "r/o";
-		
-		leg_item = new QTreeWidgetItem( (QTreeWidgetItem *)0, leg_data );
+
+		leg_item = new QTreeWidgetItem( item, leg_data );
 		leg_item->setData(0, Qt::UserRole, leg_volume->getName());
 
 // -1 means this item has no segment data. The segment data will be on 
