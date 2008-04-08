@@ -49,6 +49,8 @@ class LogVol
     int m_seg_total;             // total number of segments in logical volume
     int m_major_device;          // Unix device major number, if set
     int m_minor_device;          // Unix device minor number, if set
+    bool m_virtual;              // virtual volume
+    bool m_under_conversion;     // Is going to be a mirrored volume
     bool m_mirror;               // Is a mirrored volume
     bool m_mirror_leg;           // Is one of the underlying legs of a mirrored volume
     bool m_mirror_log;           // Is the log for a mirrored volume
@@ -106,6 +108,8 @@ class LogVol
     bool isPersistant();
     bool isPvmove();
     bool isSnap();
+    bool isUnderConversion();
+    bool isVirtual();
     bool isWritable();
     
 };
