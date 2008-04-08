@@ -60,11 +60,15 @@ VGTree::VGTree(VolGroup *VolumeGroup) : QTreeWidget(),
     logical_volumes = m_vg->getLogicalVolumes();
 
     for(int x = 0; x < m_vg->getLogVolCount(); x++){
+	
 	m_lv = logical_volumes[x];
 	lv_data.clear();
 
-	if( ( !m_lv->isMirrorLeg() ) && ( !m_lv->isMirrorLog() ) ) { 
-
+	if( ( !m_lv->isMirrorLeg() ) && 
+	    ( !m_lv->isMirrorLog() ) &&
+	    ( !m_lv->isVirtual() ) &&
+	    ( !(m_lv->isMirror() && m_lv->getOrigin() != "" ) ) ){
+	    
 	    if( m_lv->getSegmentCount() == 1 ) {
 		lv_data << m_lv->getName() 
 			<< sizeToString(m_lv->getSize()) 
@@ -91,9 +95,15 @@ VGTree::VGTree(VolGroup *VolumeGroup) : QTreeWidget(),
 		lv_tree_items.append(lv_item);
 		lv_item->setData(0, Qt::UserRole, m_lv->getName());
 		lv_item->setData(1, Qt::UserRole, 0);            // 0 means segment 0 data present
-		if( m_lv->isMirror() )
+
+		if((m_lv->isMirror() && m_lv->getOrigin() == "" ) || 
+		   (m_lv->isVirtual() && m_lv->getOrigin() == "" ) || 
+		    m_lv->isUnderConversion() ){
+
 		    insertMirrorLegItems(m_lv, lv_item);
+		}
 	    }
+	    
 	    else {
 		lv_data << m_lv->getName() 
 			<< sizeToString(m_lv->getSize()) 
@@ -201,7 +211,10 @@ void VGTree::insertMirrorLegItems(LogVol *mirrorVolume, QTreeWidgetItem *item)
 	leg_volume = logical_volume_list[x];
 	
 	if( ( leg_volume->getOrigin() == mirrorVolume->getName() ) && 
-	    ( leg_volume->isMirrorLog() || leg_volume->isMirrorLeg() ) ){
+	    ( leg_volume->isMirrorLog() || 
+	      leg_volume->isMirrorLeg() ||
+	      leg_volume->isVirtual() ||
+	      leg_volume->isMirror() ) ){
 	    
 	    leg_data.clear();
 
@@ -232,7 +245,10 @@ void VGTree::insertMirrorLegItems(LogVol *mirrorVolume, QTreeWidgetItem *item)
 // In the following "setData()" 0 means segment 0 (the only segment) 
 // data is present on the same line as the rest of the lv data.
 
-		leg_item->setData(1, Qt::UserRole, 0);      
+		leg_item->setData(1, Qt::UserRole, 0);  
+
+		if( leg_volume->isMirror() ) 
+		    insertMirrorLegItems(leg_volume, leg_item);    
 	    }
 	    else {
 

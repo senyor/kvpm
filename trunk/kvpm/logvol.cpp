@@ -55,15 +55,18 @@ LogVol::LogVol(QStringList lvDataList, MountInformationList *mountInformationLis
     QString attr = lvdata.section('|',2,2);
     flags.append(attr);
 	
+    m_under_conversion = false;
     m_mirror     = false;
     m_mirror_leg = false;
     m_mirror_log = false;
     m_snap       = false;
     m_pvmove     = false;
+    m_virtual    = false;
     
     switch( flags[0] ){
     case 'c':
 	m_type = "under conversion";
+	m_under_conversion = true;
 	break;
     case 'I':
 	m_type = "un-synced mirror leg";
@@ -103,6 +106,7 @@ LogVol::LogVol(QStringList lvDataList, MountInformationList *mountInformationLis
 	break;
     case 'v':
 	m_type = "virtual";
+	m_virtual = true;
 	break;
     default:
 	m_type = "standard";
@@ -216,7 +220,25 @@ LogVol::LogVol(QStringList lvDataList, MountInformationList *mountInformationLis
 	m_origin.truncate( m_origin.indexOf("_mlog]") );
 	m_snap_percent = 0.0;
     }
+    else if( m_mirror || m_virtual ){
+	if( m_lv_name.contains("_mimagetmp_") )
+	{
+	    m_origin = m_lv_name;
+	    m_origin.remove(0,1);
+	    m_origin.truncate( m_origin.indexOf("_mimagetmp_") );
+	    m_snap_percent = 0.0;
+	}
+	else{
+	    m_origin = "";
+	    m_snap_percent = 0.0;
+	}
+    }
+    else{
+	m_origin = "";
+	m_snap_percent = 0.0;
+    }
     
+
     m_copy_percent = (lvdata.section('|',8,8)).toDouble();
     m_major_device = (lvdata.section('|',15,15)).toInt();
     m_minor_device = (lvdata.section('|',16,16)).toInt();
@@ -240,9 +262,10 @@ LogVol::LogVol(QStringList lvDataList, MountInformationList *mountInformationLis
     m_mount_info_list.clear();
 
     m_mounted = !m_mount_points.isEmpty();
-
+    
     for(int x = 0; x < m_seg_total ; x++)
 	m_segments.append(processSegments(lvDataList[x]));
+    
 }
 
 Segment* LogVol::processSegments(QString segmentData)
@@ -255,16 +278,19 @@ Segment* LogVol::processSegments(QString segmentData)
     segment->m_stripes     = (segmentData.section('|',11,11)).toInt();
     segment->m_stripe_size = (segmentData.section('|',12,12)).toInt();
     segment->m_size        = (segmentData.section('|',13,13)).toLongLong();
-
+    
     raw_paths = (segmentData.section('|',14,14)).trimmed();
-    devices_and_starts = raw_paths.split(",");
 
-    for(int x = 0; x < devices_and_starts.size(); x++){
-	temp = devices_and_starts[x].split("(");
-	segment->m_device_path.append(temp[0]);
-	segment->m_starting_extent.append((temp[1].remove(")")).toLongLong());
+    if( raw_paths.size() ){
+	devices_and_starts = raw_paths.split(",");
+
+	for(int x = 0; x < devices_and_starts.size(); x++){
+	    temp = devices_and_starts[x].split("(");
+	    segment->m_device_path.append(temp[0]);
+	    segment->m_starting_extent.append((temp[1].remove(")")).toLongLong());
+	}
     }
-
+    
     return segment;
 }
 
@@ -436,9 +462,19 @@ bool LogVol::isLocked()
     return m_alloc_locked;
 }
 
+bool LogVol::isUnderConversion()
+{
+    return m_under_conversion;
+}
+
 bool LogVol::isWritable()
 {
     return m_writable;
+}
+
+bool LogVol::isVirtual()
+{
+    return m_virtual;
 }
 
 bool LogVol::isSnap()

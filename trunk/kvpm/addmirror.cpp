@@ -331,7 +331,7 @@ QStringList AddMirrorDialog::arguments()
 	args << "--corelog";
 
     args << "--mirrors" 
-	 << QString("%1").arg(m_current_leg_count - 1 + m_add_mirrors_spin->value() )
+	 << QString("+%1").arg( m_add_mirrors_spin->value() )
 	 << "--background"
 	 << m_logical_volume_name
 	 << physical_volumes;

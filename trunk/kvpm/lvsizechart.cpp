@@ -57,7 +57,11 @@ void LVSizeChart::populateChart()
     for(int x = 0; x < lv_count; x++){
 	m_lv = logical_volumes[x];
 
-	if( !m_lv->isMirrorLeg() && !m_lv->isMirrorLog() ){
+	if( !m_lv->isMirrorLeg() && 
+	    !m_lv->isMirrorLog() &&
+	    !m_lv->isVirtual() &&
+	    !(m_lv->isMirror() && m_lv->getOrigin() != "" ) ){
+
 	    if( m_widgets.size() ){
 		KSeparator *separator = new KSeparator(Qt::Vertical);
 		separator->setFrameStyle(QFrame::Sunken | QFrame::Box);
@@ -69,7 +73,7 @@ void LVSizeChart::populateChart()
 	    usage = m_lv->getFilesystem();
 	    seg_ratio = m_lv->getExtents() / (double) total_extents;
 
-	    if( m_lv->isMirror() )
+	    if( m_lv->isMirror()|| m_lv->isUnderConversion() )
 		seg_ratio *= m_lv->getSegmentStripes(0);
 	
 	    m_ratios.append(seg_ratio);

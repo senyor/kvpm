@@ -24,7 +24,6 @@
 
 bool remove_mirror_leg(LogVol *mirrorLeg)
 {
-
     QStringList args;
 
     VolGroup *vg = mirrorLeg->getVolumeGroup();
@@ -38,10 +37,10 @@ bool remove_mirror_leg(LogVol *mirrorLeg)
 
 	args << "lvconvert"
 	     << "--mirrors" 
-	     << QString("%1").arg( current_leg_count - 2 )
+	     << QString("-1")
 	     << mirror->getFullName()
 	     << pv_to_remove;
-	
+
 	ProcessProgress remove(args, "Removing mirror leg...", true);
 	return true;
     }

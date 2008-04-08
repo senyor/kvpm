@@ -150,7 +150,7 @@ void MasterList::scanLogicalVolumes()
     
     ProcessProgress lvscan(arguments, "Scanning logical volumes...");
     lv_output = lvscan.programOutput();
-
+    
     for(int i = 0; i < lv_output.size(); ) {
 	seg_data.clear();
 	lv_segments = (lv_output[i].section('|',10,10)).toInt();
@@ -160,8 +160,9 @@ void MasterList::scanLogicalVolumes()
 	}
 
 	m_logical_volumes.append(new LogVol(seg_data, &mount_info_list));
+
     } 
-    
+
     /* put pointers to the lvs in their associated vgs */
     
     lv_count = m_logical_volumes.size();
