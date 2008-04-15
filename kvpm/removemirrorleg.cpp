@@ -28,22 +28,22 @@ bool remove_mirror_leg(LogVol *mirrorLeg)
 
     VolGroup *vg = mirrorLeg->getVolumeGroup();
     LogVol *mirror = vg->getLogVolByName( mirrorLeg->getOrigin() );
-    QStringList pv_to_remove  = mirrorLeg->getDevicePath(0);
-    int current_leg_count = mirror->getSegmentStripes(0);
+    QStringList pvs_to_remove  = mirrorLeg->getDevicePathAll();
 
     QString message = "Remove mirror leg: " + mirrorLeg->getName() + " ?";
     
-    if(KMessageBox::questionYesNo( 0, message) == 3){      // 3 = "yes" button
+    if(KMessageBox::warningYesNo( 0, message) == 3){      // 3 = "yes" button
 
 	args << "lvconvert"
 	     << "--mirrors" 
 	     << QString("-1")
 	     << mirror->getFullName()
-	     << pv_to_remove;
+	     << pvs_to_remove;
 
 	ProcessProgress remove(args, "Removing mirror leg...", true);
 	return true;
     }
-    else
+    else{
 	return false;
+    }
 }

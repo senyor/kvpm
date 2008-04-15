@@ -64,7 +64,8 @@ ExecutableFinder::ExecutableFinder(QObject *parent) : QObject(parent)
 		<< "/usr/sbin/" 
 		<< "/bin/" 
 		<< "/usr/bin/" 
-		<< "/usr/local/bin/";
+		<< "/usr/local/bin/"
+		<< "/usr/local/sbin/";
     
 
     for(int y = 0; y < keys.size(); y++){
