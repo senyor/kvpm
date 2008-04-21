@@ -11,6 +11,7 @@
  * 
  * See the file "COPYING" for the exact licensing terms.
  */
+
 #ifndef ADDMIRROR_H
 #define ADDMIRROR_H
 
@@ -43,7 +44,7 @@ Q_OBJECT
     QVBoxLayout *m_physical_layout;
 
     QGroupBox *m_mirror_group;
-    QGroupBox *m_mirror_log_group;
+
     QString m_logical_volume_name;
     LogVol *m_lv;                      // The volume we are adding a mirror to. 
     
@@ -54,14 +55,14 @@ Q_OBJECT
 	         *anywhere_button, *inherited_button,  // the allocation policy
 	         *cling_button;
 
-    QRadioButton *core_log, *disk_log;
+    QRadioButton *core_log, 
+                 *disk_log;
+
     bool m_mirror_has_log;             // True if the volume is a mirror with an
                                        // existing mirror log.
-    bool m_has_log_only_suitable_pvs;  // Are there any pvs that can fit a log but 
-                                       // not a complete leg? 
     
     QList<NoMungeCheck *> m_pv_leg_checks;
-    QList<NoMungeCheck *> m_pv_log_checks;
+    QList<long long> m_pv_leg_size;
 
     void setupGeneralTab();
     void setupPhysicalTab();
@@ -72,8 +73,7 @@ public:
     QStringList arguments();
 
 private slots:
-    void showMirrorLogBox(bool show);
-    void enableMirrorLogBox(bool enable);
+
     void comparePvsNeededPvsAvailable(int);
     void comparePvsNeededPvsAvailable(bool);
     void comparePvsNeededPvsAvailable();
