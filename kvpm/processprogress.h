@@ -18,6 +18,7 @@
 #include <QWidget>
 #include <QStringList>
 #include <QEventLoop>
+#include <QProcess>
 #include <KProgressDialog>
 
 class KProcess;
