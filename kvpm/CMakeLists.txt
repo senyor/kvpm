@@ -25,3 +25,4 @@ set(kvpm_SRCS addmirror.cpp devicemodel.cpp deviceproperties.cpp
  
 kde4_add_executable(kvpm ${kvpm_SRCS})
 target_link_libraries(kvpm ${KDE4_KDEUI_LIBS} ${KDE4_KFILE_LIBS} ${QT_LIBRARIES} blkid parted)
+INSTALL(TARGETS kvpm DESTINATION bin)
