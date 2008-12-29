@@ -14,6 +14,7 @@
 
 
 #include <QtGui>
+#include <KLocale>
 
 #include "lvchange.h"
 #include "logvol.h"
@@ -26,7 +27,7 @@ bool change_lv(LogVol *logicalVolume)
     dialog.exec();
 
     if(dialog.result() == QDialog::Accepted){
-        ProcessProgress change_lv(dialog.arguments(),"Changing lv attributes");
+        ProcessProgress change_lv(dialog.arguments(), i18n("Changing lv attributes") );
 	return true;
     }
     else
@@ -38,7 +39,7 @@ LVChangeDialog::LVChangeDialog(LogVol *logicalVolume, QWidget *parent) :
     m_lv(logicalVolume)
 {
 
-    setWindowTitle(tr("Change logical volume attributes"));
+    setWindowTitle( i18n("Change logical volume attributes") );
  
     KTabWidget *tab_widget = new KTabWidget();
     setMainWidget(tab_widget);
@@ -46,8 +47,8 @@ LVChangeDialog::LVChangeDialog(LogVol *logicalVolume, QWidget *parent) :
     buildGeneralTab();
     buildAdvancedTab();
     
-    tab_widget->addTab(m_general_tab, "General");
-    tab_widget->addTab(m_advanced_tab, "Advanced");
+    tab_widget->addTab(m_general_tab,  i18n("General") );
+    tab_widget->addTab(m_advanced_tab, i18n("Advanced") );
 }
 
 QStringList LVChangeDialog::arguments()
@@ -101,10 +102,10 @@ void LVChangeDialog::buildGeneralTab()
     QVBoxLayout *layout = new QVBoxLayout();
     m_general_tab->setLayout(layout);
     
-    available_check  = new QCheckBox("Make volume available for use");
-    contig_check     = new QCheckBox("Allocate contiguous extents");
-    ro_check         = new QCheckBox("Make volume read only");
-    refresh_check    = new QCheckBox("Refresh volume metadata");
+    available_check  = new QCheckBox( i18n("Make volume available for use") );
+    contig_check     = new QCheckBox( i18n("Allocate contiguous extents")  );
+    ro_check         = new QCheckBox( i18n("Make volume read only") );
+    refresh_check    = new QCheckBox( i18n("Refresh volume metadata") );
     layout->addWidget(available_check);
     layout->addWidget(contig_check);
     layout->addWidget(ro_check);
@@ -126,16 +127,16 @@ void LVChangeDialog::buildAdvancedTab()
     QVBoxLayout *layout = new QVBoxLayout();
     m_advanced_tab->setLayout(layout);
 
-    m_mirror_box = new QGroupBox("Mirrored volume operations");
+    m_mirror_box = new QGroupBox( i18n("Mirrored volume operations") );
     QVBoxLayout *mirror_layout = new QVBoxLayout();
     m_mirror_box->setLayout(mirror_layout);
-    resync_check     = new QCheckBox("Re-synchronize mirrors");
-    monitor_check    = new QCheckBox("Monitor mirrors with dmeventd");
+    resync_check     = new QCheckBox( i18n("Re-synchronize mirrors") );
+    monitor_check    = new QCheckBox( i18n("Monitor mirrors with dmeventd") );
     mirror_layout->addWidget(resync_check);
     mirror_layout->addWidget(monitor_check);
     layout->addWidget(m_mirror_box);
     
-    m_persistant_box = new QGroupBox("Persistant device numbers");
+    m_persistant_box = new QGroupBox( i18n("Persistant device numbers") );
     m_persistant_box->setCheckable(true);
     QVBoxLayout *persistant_layout = new QVBoxLayout();
     m_persistant_box->setLayout(persistant_layout);
