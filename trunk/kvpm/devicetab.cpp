@@ -3,7 +3,7 @@
  * 
  * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
  *
- * This file is part of the Kvpm project.
+ * This file is part of the kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License,  version 3, as 
@@ -14,6 +14,7 @@
 
 
 #include <QtGui>
+#include <KLocale>
 
 #include "devicetab.h"
 #include "devicetreeview.h"
@@ -66,8 +67,8 @@ QSplitter *DeviceTab::setupPropertyWidgets()
     device_box->setLayout(device_box_layout);
     partition_box->setLayout(partition_box_layout);
 
-    QLabel *device_label    = new QLabel("Device Properties");
-    QLabel *partition_label = new QLabel("Partition / Volume Properties");
+    QLabel *device_label    = new QLabel( i18n("Device Properties") );
+    QLabel *partition_label = new QLabel( i18n("Partition / Volume Properties") );
     device_label->setAlignment(Qt::AlignCenter);
     partition_label->setAlignment(Qt::AlignCenter);
     device_box_layout->addWidget(device_label);

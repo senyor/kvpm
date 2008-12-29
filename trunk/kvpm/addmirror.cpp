@@ -13,6 +13,7 @@
  */
 
 #include <KIntSpinBox>
+#include <KLocale>
 
 #include <QtGui>
 
@@ -31,7 +32,7 @@ bool add_mirror(LogVol *logicalVolume)
   dialog.exec();
 
   if(dialog.result() == QDialog::Accepted){
-    ProcessProgress add_mirror(dialog.arguments(), "Adding Mirror...", false);
+    ProcessProgress add_mirror(dialog.arguments(), i18n("Adding Mirror..."), true);
     return true;
   }
   else{
@@ -44,7 +45,7 @@ AddMirrorDialog::AddMirrorDialog(LogVol *logicalVolume, QWidget *parent):
     KDialog(parent), 
     m_lv(logicalVolume)
 {
-    setWindowTitle(tr("Add Mirror"));
+    setWindowTitle( i18n("Add Mirror") );
 
     m_logical_volume_name = logicalVolume->getFullName();
  
@@ -53,8 +54,8 @@ AddMirrorDialog::AddMirrorDialog(LogVol *logicalVolume, QWidget *parent):
    
     QWidget *general_tab  = new QWidget(this);
     QWidget *physical_tab = new QWidget(this);
-    m_tab_widget->addTab(general_tab,  "General");
-    m_tab_widget->addTab(physical_tab, "Physical layout");
+    m_tab_widget->addTab(general_tab,  i18n("General") );
+    m_tab_widget->addTab(physical_tab, i18n("Physical layout") );
     m_general_layout  = new QVBoxLayout;
     m_physical_layout = new QVBoxLayout();
     general_tab->setLayout(m_general_layout);
@@ -84,11 +85,11 @@ void AddMirrorDialog::setupGeneralTab()
 
   if( m_lv->isMirror() ){
     m_current_leg_count = m_lv->getSegmentStripes(0);
-    current_mirrors_label->setText( QString("Existing mirror legs: %1")
+    current_mirrors_label->setText( i18n("Existing mirror legs: %1")
 				    .arg(m_current_leg_count) );
   }
   else{
-    current_mirrors_label->setText("Existing mirror legs: none");
+    current_mirrors_label->setText( i18n("Existing mirror legs: none") );
     m_current_leg_count = 1;   // Even without a mirror it is using a pv.
   }
     
@@ -96,20 +97,20 @@ void AddMirrorDialog::setupGeneralTab()
   m_general_layout->addWidget(current_mirrors_label);
   QHBoxLayout *spin_box_layout = new QHBoxLayout();
   
-  QLabel *add_mirrors_label = new QLabel("Add mirror legs: ");
+  QLabel *add_mirrors_label = new QLabel( i18n("Add mirror legs: ") );
   m_add_mirrors_spin = new KIntSpinBox(0, 10, 1, 1, this);
   spin_box_layout->addWidget(add_mirrors_label);
   spin_box_layout->addWidget(m_add_mirrors_spin);
   m_general_layout->addLayout(spin_box_layout);
   m_general_layout->addStretch();
   
-  QGroupBox *alloc_box = new QGroupBox("Allocation Policy");
+  QGroupBox *alloc_box = new QGroupBox( i18n("Allocation Policy") );
   QVBoxLayout *alloc_box_layout = new QVBoxLayout;
-  normal_button     = new QRadioButton("Normal");
-  contiguous_button = new QRadioButton("Contiguous");
-  anywhere_button   = new QRadioButton("Anywhere");
-  inherited_button  = new QRadioButton("Inherited");
-  cling_button      = new QRadioButton("Cling");
+  normal_button     = new QRadioButton( i18n("Normal") );
+  contiguous_button = new QRadioButton( i18n("Contiguous") );
+  anywhere_button   = new QRadioButton( i18n("Anywhere") );
+  inherited_button  = new QRadioButton( i18n("Inherited") );
+  cling_button      = new QRadioButton( i18n("Cling") );
   normal_button->setChecked(true);
   alloc_box_layout->addWidget(normal_button);
   alloc_box_layout->addWidget(contiguous_button);
@@ -124,13 +125,13 @@ void AddMirrorDialog::setupGeneralTab()
 void AddMirrorDialog::setupPhysicalTab()
 {
   NoMungeCheck *temp_check;
-  long long temp_size;
+  long long     temp_size;
   QHBoxLayout  *temp_layout;
 
-  QGroupBox *log_box = new QGroupBox("Mirror logging");
+  QGroupBox *log_box = new QGroupBox( i18n("Mirror logging") );
   QVBoxLayout *log_box_layout = new QVBoxLayout;
-  core_log = new QRadioButton("Memory based log");
-  disk_log = new QRadioButton("Disk based log");
+  core_log = new QRadioButton( i18n("Memory based log") );
+  disk_log = new QRadioButton( i18n("Disk based log") );
   disk_log->setChecked(true);
   log_box_layout->addWidget(disk_log);
   log_box_layout->addWidget(core_log);
@@ -141,11 +142,11 @@ void AddMirrorDialog::setupPhysicalTab()
   connect(disk_log, SIGNAL(toggled(bool)),
 	  this, SLOT(comparePvsNeededPvsAvailable(bool)));
 
-  m_mirror_group = new QGroupBox("Manually select physical volumes");
+  m_mirror_group = new QGroupBox( i18n("Manually select physical volumes") );
   m_mirror_group->setCheckable(true);
   m_mirror_group->setChecked(false);
   
-  QGroupBox *mirror_leg_group = new QGroupBox("Suitable for new mirrors");
+  QGroupBox *mirror_leg_group = new QGroupBox( i18n("Suitable for new mirrors") );
   
   QVBoxLayout *mirror_layout     = new QVBoxLayout();
   QVBoxLayout *mirror_leg_layout = new QVBoxLayout();
@@ -268,8 +269,6 @@ QStringList AddMirrorDialog::arguments()
 	 << "--background"
 	 << m_logical_volume_name
 	 << physical_volumes;
-
-    qDebug() << "ARGS: " << args;
 
     return args;
 }
