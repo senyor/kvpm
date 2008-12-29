@@ -14,6 +14,7 @@
 
 
 #include <QtGui>
+#include <KLocale>
 
 #include "lvactionsmenu.h"
 #include "logvol.h"
@@ -119,20 +120,20 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume,
 
 void LVActionsMenu::setup(LogVol *lv)
 {
-    lv_mkfs_action   = new KAction("Make filesystem...", this);
-    lv_reduce_action = new KAction("Reduce logical volume...", this);
-    lv_remove_action = new KAction("Remove logical volume...", this);
-    lv_rename_action = new KAction("Rename logical volume...", this);
-    lv_create_action = new KAction("Create logical volume...", this);
-    snap_create_action = new KAction("Create snapshot...", this);
-    lv_extend_action   = new KAction("Extend logical volume...", this);
-    pv_move_action     = new KAction("Move physical extents...", this);
-    lv_change_action   = new KAction("Change logical volume attributes...", this);
-    add_mirror_action  = new KAction("Add logical volume mirror...", this);
-    mount_filesystem_action   = new KAction("Mount filesystem...", this);
-    unmount_filesystem_action = new KAction("Unmount filesystem...", this);
-    remove_mirror_action      = new KAction("Remove mirror leg...", this);
-    remove_mirror_leg_action  = new KAction("Remove this mirror leg...", this);
+    lv_mkfs_action   = new KAction( i18n("Make filesystem..."), this);
+    lv_reduce_action = new KAction( i18n("Reduce logical volume..."), this);
+    lv_remove_action = new KAction( i18n("Remove logical volume..."), this);
+    lv_rename_action = new KAction( i18n("Rename logical volume..."), this);
+    lv_create_action = new KAction( i18n("Create logical volume..."), this);
+    snap_create_action = new KAction( i18n("Create snapshot..."), this);
+    lv_extend_action   = new KAction( i18n("Extend logical volume..."), this);
+    pv_move_action     = new KAction( i18n("Move physical extents..."), this);
+    lv_change_action   = new KAction( i18n("Change logical volume attributes..."), this);
+    add_mirror_action  = new KAction( i18n("Add logical volume mirror..."), this);
+    mount_filesystem_action   = new KAction( i18n("Mount filesystem..."), this);
+    unmount_filesystem_action = new KAction( i18n("Unmount filesystem..."), this);
+    remove_mirror_action      = new KAction( i18n("Remove mirror leg..."), this);
+    remove_mirror_leg_action  = new KAction( i18n("Remove this mirror leg..."), this);
 
     addAction(lv_create_action);
     addAction(lv_remove_action);
@@ -146,7 +147,7 @@ void LVActionsMenu::setup(LogVol *lv)
     addAction(remove_mirror_action);
     addAction(remove_mirror_leg_action);
 
-    filesystem_menu = new KMenu("Filesystem Operations", this);
+    filesystem_menu = new KMenu( i18n("Filesystem Operations"), this);
     addMenu(filesystem_menu);
     filesystem_menu->addAction(mount_filesystem_action);
     filesystem_menu->addAction(unmount_filesystem_action);

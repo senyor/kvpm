@@ -13,7 +13,7 @@
  */
 
 #include <KSeparator>
-
+#include <KLocale>
 #include <QtGui>
 
 #include "logvol.h"
@@ -51,17 +51,17 @@ LVProperties::LVProperties(LogVol *logicalVolume, int segment, QWidget *parent):
 	stripes = logicalVolume->getSegmentStripes(segment);
 	stripe_size = logicalVolume->getSegmentStripeSize(segment);
 
-	layout->addWidget(new QLabel( QString("Extents: %1").arg( extents ) ));
+	layout->addWidget(new QLabel( i18n("Extents: %1").arg(extents) ));
 
 	if( !logicalVolume->isMirror() ){
 
 	    if( stripes != 1 ){
-		layout->addWidget(new QLabel(QString("Stripes: %1").arg(stripes)));
-		layout->addWidget(new QLabel(QString("Stripe size: %1").arg(stripe_size)));
+		layout->addWidget(new QLabel( i18n("Stripes: %1").arg(stripes) ));
+		layout->addWidget(new QLabel( i18n("Stripe size: %1").arg(stripe_size) ));
 	    }
 	    else{
-		layout->addWidget(new QLabel(QString("Stripes: none")));
-		layout->addWidget(new QLabel(QString("Stripe size: n/a")));
+		layout->addWidget(new QLabel( i18n("Stripes: none") ));
+		layout->addWidget(new QLabel( i18n("Stripe size: n/a") ));
 	    }
 
 	}
@@ -74,17 +74,17 @@ LVProperties::LVProperties(LogVol *logicalVolume, int segment, QWidget *parent):
 	stripes = logicalVolume->getSegmentStripes(segment);
 	stripe_size = logicalVolume->getSegmentStripeSize(segment);
 
-	layout->addWidget(new QLabel( QString("Extents: %1").arg( extents ) ));
+	layout->addWidget(new QLabel( i18n("Extents: %1").arg(extents) ));
 
 	if( !logicalVolume->isMirror() ){
 
 	    if( stripes != 1 ){
-		layout->addWidget(new QLabel(QString("Stripes: %1").arg(stripes)));
-		layout->addWidget(new QLabel(QString("Stripe size: %1").arg(stripe_size)));
+		layout->addWidget(new QLabel( i18n("Stripes: %1").arg(stripes) ));
+		layout->addWidget(new QLabel( i18n("Stripe size: %1").arg(stripe_size) ));
 	    }
 	    else{
-		layout->addWidget(new QLabel(QString("Stripes: none")));
-		layout->addWidget(new QLabel(QString("Stripe size: n/a")));
+		layout->addWidget(new QLabel( i18n("Stripes: none") ));
+		layout->addWidget(new QLabel( i18n("Stripe size: n/a") ));
 	    }
 
 	}
@@ -97,27 +97,26 @@ LVProperties::LVProperties(LogVol *logicalVolume, int segment, QWidget *parent):
 	stripes = logicalVolume->getSegmentStripes(0);
 	stripe_size = logicalVolume->getSegmentStripeSize(0);
 
-	layout->addWidget(new QLabel( QString("Extents: %1").arg( extents ) ));
+	layout->addWidget(new QLabel( i18n("Extents: %1").arg(extents) ));
 
 	if( !logicalVolume->isMirror() ){
 
 	    if( stripes != 1 ){
-		layout->addWidget(new QLabel(QString("Stripes: %1").arg(stripes)));
-		layout->addWidget(new QLabel(QString("Stripe size: %1").arg(stripe_size)));
+		layout->addWidget(new QLabel( i18n("Stripes: %1").arg(stripes) ));
+		layout->addWidget(new QLabel( i18n("Stripe size: %1").arg(stripe_size) ));
 	    }
 	    else{
-		layout->addWidget(new QLabel(QString("Stripes: none")));
-		layout->addWidget(new QLabel(QString("Stripe size: n/a")));
+		layout->addWidget(new QLabel( i18n("Stripes: none") ));
+		layout->addWidget(new QLabel( i18n("Stripe size: n/a") ));
 	    }
 
 	}
     }
 
-    layout->addWidget(new QLabel("Allocation policy: " + logicalVolume->getPolicy()));
+    layout->addWidget(new QLabel( i18n("Allocation policy: %1").arg(logicalVolume->getPolicy())));
 
     if(logicalVolume->isSnap())
-	layout->addWidget(new QLabel("Origin: "  + logicalVolume->getOrigin()));
-
+        layout->addWidget(new QLabel( i18n("Origin: %1").arg(logicalVolume->getOrigin()) ));
     
     QStringList mount_points = logicalVolume->getMountPoints();
 
@@ -134,18 +133,18 @@ LVProperties::LVProperties(LogVol *logicalVolume, int segment, QWidget *parent):
 	layout->addWidget(separator);
 
 	if(mount_points.size() > 1){
-	    temp_label = new QLabel( "<b>Mount points</b>" ) ;
+	  temp_label = new QLabel( i18n("<b>Mount points</b>") );
 	    temp_label->setAlignment(Qt::AlignCenter);
 	    layout->addWidget(temp_label);
 	}
 	else{
-	    temp_label = new QLabel( "<b>Mount point</b>" ) ;
+	    temp_label = new QLabel( i18n("<b>Mount point</b>") ) ;
 	    temp_label->setAlignment(Qt::AlignCenter);
 	    layout->addWidget(temp_label);
 	}
 	
 	if(mount_points.size() == 0){
-	    temp_label = new QLabel( "<none>" ) ;
+	    temp_label = new QLabel( i18n("<none>") ) ;
 	    temp_label->setAlignment(Qt::AlignLeft);
 	    layout->addWidget(temp_label);
 	}
@@ -165,12 +164,12 @@ LVProperties::LVProperties(LogVol *logicalVolume, int segment, QWidget *parent):
     layout->addWidget(separator);
 
     if( logicalVolume->isMirror() ){
-	temp_label = new QLabel("<b>Mirror legs</b>");
+        temp_label = new QLabel( i18n("<b>Mirror legs</b>") );
 	temp_label->setAlignment(Qt::AlignCenter);
 	layout->addWidget(temp_label);
     }
     else{
-	temp_label = new QLabel("<b>Physical Volumes</b>");
+        temp_label = new QLabel( i18n("<b>Physical Volumes</b>") );
 	temp_label->setAlignment(Qt::AlignCenter);
 	layout->addWidget(temp_label);
     }
