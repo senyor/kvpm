@@ -3,7 +3,7 @@
  * 
  * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
  *
- * This file is part of the Kvpm project.
+ * This file is part of the kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License,  version 3, as 
@@ -14,6 +14,7 @@
 
 
 #include <QtGui>
+#include <KLocale>
 
 #include "devicemodel.h"
 #include "devicesizechartseg.h"
@@ -75,15 +76,15 @@ DeviceChartSeg::DeviceChartSeg(StorageDeviceItem *storageDeviceItem, QWidget *pa
 
     setContextMenuPolicy(Qt::CustomContextMenu);
     m_context_menu  = new QMenu(this);
-    m_vgextend_menu = new QMenu("Extend Volume Group", this);
+    m_vgextend_menu = new QMenu( i18n("Extend Volume Group"), this);
 
-    m_mkfs_action     = new QAction("Make Filesystem", this);
-    m_pvcreate_action = new QAction("Create physical volume", this);
-    m_pvremove_action = new QAction("Remove physical volume", this);
-    m_vgcreate_action = new QAction("Create volume group", this);
-    m_vgreduce_action = new QAction("Remove from volume group", this);
-    m_mount_action    = new QAction("Mount filesystem", this);
-    m_unmount_action  = new QAction("Unmount filesystem", this);
+    m_mkfs_action     = new QAction( i18n("Make Filesystem"), this);
+    m_pvcreate_action = new QAction( i18n("Create physical volume"), this);
+    m_pvremove_action = new QAction( i18n("Remove physical volume"), this);
+    m_vgcreate_action = new QAction( i18n("Create volume group"), this);
+    m_vgreduce_action = new QAction( i18n("Remove from volume group"), this);
+    m_mount_action    = new QAction( i18n("Mount filesystem"), this);
+    m_unmount_action  = new QAction( i18n("Unmount filesystem"), this);
     
     group_names = master_list->getVolumeGroupNames();
 

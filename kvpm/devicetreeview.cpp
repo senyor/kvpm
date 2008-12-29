@@ -14,6 +14,7 @@
 
 
 #include <QtGui>
+#include <KLocale>
 
 #include "devicetreeview.h"
 #include "mkfs.h"
@@ -36,14 +37,14 @@ DeviceTreeView::DeviceTreeView(QWidget *parent) : QTreeView(parent)
  
     setContextMenuPolicy(Qt::CustomContextMenu);
     menu = new KMenu(this);
-    vgextend_menu = new KMenu("Extend volume group",this);
-    mkfs_action     = new KAction("Make filesystem", this);
-    pvcreate_action = new KAction("Create physical volume", this);
-    pvremove_action = new KAction("Remove physical volume", this);
-    vgcreate_action = new KAction("Create volume group", this);
-    vgreduce_action = new KAction("Remove from volume group", this);
-    mount_action    = new KAction("Mount filesystem", this);
-    unmount_action  = new KAction("Unmount filesystem", this);
+    vgextend_menu = new KMenu( i18n("Extend volume group"), this);
+    mkfs_action     = new KAction( i18n("Make filesystem"), this);
+    pvcreate_action = new KAction( i18n("Create physical volume"), this);
+    pvremove_action = new KAction( i18n("Remove physical volume"), this);
+    vgcreate_action = new KAction( i18n("Create volume group"), this);
+    vgreduce_action = new KAction( i18n("Remove from volume group"), this);
+    mount_action    = new KAction( i18n("Mount filesystem"), this);
+    unmount_action  = new KAction( i18n("Unmount filesystem"), this);
     menu->addAction(mkfs_action);
     menu->addAction(pvcreate_action);
     menu->addAction(pvremove_action);
