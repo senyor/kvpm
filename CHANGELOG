@@ -1,4 +1,8 @@
 version 0.4.5
+Added calls to i18n() for support of translation
+to other languages.
+
+version 0.4.5
 Added new dialogs to import and export volumes
 groups.
 
