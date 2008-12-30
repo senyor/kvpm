@@ -14,7 +14,7 @@
 
 
 #include <KMessageBox>
-
+#include <KLocale>
 #include <QtGui>
 
 #include "processprogress.h"
@@ -26,18 +26,20 @@ bool remove_vg(VolGroup *volumeGroup)
     QStringList args;
     QString message;
 
-    message.append("Are you certain you want to delete volume group: ");
-    message.append("<b>" + volumeGroup->getName() + "</b>");
+    message = i18n("Are you certain you want to "
+		   "delete volume group: <b>%1</b>").arg(volumeGroup->getName());
+
 
     if(KMessageBox::questionYesNo( 0, message) == 3){      // 3 = "yes" button
     
 	args << "vgremove"
 	     << volumeGroup->getName();
 
-	ProcessProgress remove(args, "Removing vg...");
+	ProcessProgress remove(args, i18n("Removing volume group...") );
 	
 	return true;
     }
-    else		   
+    else{		   
 	return false;
+    }
 }

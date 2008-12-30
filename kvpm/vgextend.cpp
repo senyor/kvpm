@@ -3,7 +3,7 @@
  * 
  * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
  *
- * This file is part of the Kvpm project.
+ * This file is part of the kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License,  version 3, as 
@@ -14,7 +14,7 @@
 
 
 #include <KMessageBox>
-
+#include <KLocale>
 #include <QtGui>
 
 #include "processprogress.h"
@@ -25,10 +25,8 @@ bool extend_vg(QString volumeGroupName, QString physicalVolumeName)
     QString message;
     QStringList args;
     
-    message.append("Do you want to extend volume group: ");
-    message.append("<b>" + volumeGroupName + "</b>");
-    message.append(" with physical volume: ");
-    message.append("<b>" + physicalVolumeName + "</b>?");
+    message = i18n("Do you want to extend volume group: <b>%1</b> with "
+		   "physical volume: <b>%2</b>").arg(volumeGroupName).arg(physicalVolumeName);
 
     if( KMessageBox::questionYesNo(0, message) == 3 ){     // 3 is the "yes" button
 
@@ -36,7 +34,7 @@ bool extend_vg(QString volumeGroupName, QString physicalVolumeName)
 	     << volumeGroupName
 	     << physicalVolumeName;
 
-	ProcessProgress extend(args, "Extending vg...", true);
+	ProcessProgress extend(args, i18n("Extending volume group..."), true);
 
 	return true;
     }

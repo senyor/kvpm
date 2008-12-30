@@ -3,7 +3,7 @@
  * 
  * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
  *
- * This file is part of the Kvpm project.
+ * This file is part of the kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License,  version 3, as 
@@ -13,6 +13,7 @@
  */
 
 
+#include <KLocale>
 #include <QtGui>
 
 #include "vgrename.h"
@@ -25,7 +26,7 @@ bool rename_vg(VolGroup *volumeGroup)
     dialog.exec();
     
     if(dialog.result() == QDialog::Accepted){
-        ProcessProgress rename( dialog.arguments(), "Renaming volume group...", false );
+        ProcessProgress rename( dialog.arguments(), i18n("Renaming volume group..."), false );
         return true;
     }
     else
@@ -36,7 +37,7 @@ VGRenameDialog::VGRenameDialog(VolGroup *volumeGroup, QWidget *parent) :
     KDialog(parent)
 {
 
-    setWindowTitle(tr("Rename volume group"));
+    setWindowTitle( i18n("Rename volume group") );
 
     QWidget *dialog_body = new QWidget(this);
     setMainWidget(dialog_body);
@@ -44,10 +45,10 @@ VGRenameDialog::VGRenameDialog(VolGroup *volumeGroup, QWidget *parent) :
     dialog_body->setLayout(layout);
 
     m_old_name = volumeGroup->getName();
-    QLabel *old_name_label = new QLabel("Old volume group name: " + m_old_name);
+    QLabel *old_name_label = new QLabel( i18n("Old volume group name: %1").arg(m_old_name) );
     layout->addWidget(old_name_label);
     
-    QLabel *name_label = new QLabel("New volume group name: ");
+    QLabel *name_label = new QLabel( i18n("New volume group name: ") );
     m_new_name = new KLineEdit();
 
     QRegExp rx("[0-9a-zA-Z_\\.][-0-9a-zA-Z_\\.]*");

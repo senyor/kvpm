@@ -3,7 +3,7 @@
  * 
  * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
  *
- * This file is part of the Kvpm project.
+ * This file is part of the kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License,  version 3, as 
@@ -12,8 +12,9 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
-#include <KMessageBox>
 
+#include <KMessageBox>
+#include <KLocale>
 #include <QtGui>
 
 #include "logvol.h"
@@ -27,16 +28,17 @@ bool import_vg(VolGroup *volumeGroup)
 
     QStringList args;
 
-    QString message = "Import volume group: " + volumeGroup->getName() + " ?";
+    QString message = i18n("Import volume group: %1 ?").arg(volumeGroup->getName());
     
     if(KMessageBox::questionYesNo( 0, message) == 3){      // 3 = "yes" button
 
 	args << "vgimport"
 	     << volumeGroup->getName();
 	
-	ProcessProgress remove(args, "Importing volume group...", true);
+	ProcessProgress remove(args, i18n("Importing volume group..."), true);
 	return true;
     }
-    else
+    else{
 	return false;
+    }
 }
