@@ -3,7 +3,7 @@
  * 
  * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
  *
- * This file is part of the Kvpm project.
+ * This file is part of the kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License,  version 3, as 
@@ -14,7 +14,7 @@
 
 
 #include <KStandardAction>
-
+#include <KLocale>
 #include <QtGui>
 
 #include "devicetab.h"
@@ -45,12 +45,12 @@ extern MasterList *master_list;
 TopWindow::TopWindow(QWidget *parent):KMainWindow(parent)
 {
 
-    KMenu *file_menu     = new KMenu("File");
-    KMenu *tool_menu     = new KMenu("Tools");
-    KMenu *groups_menu   = new KMenu("Volume Groups");
-    KMenu *settings_menu = new KMenu("Settings");
+    KMenu *file_menu     = new KMenu( i18n("File") );
+    KMenu *tool_menu     = new KMenu( i18n("Tools") );
+    KMenu *groups_menu   = new KMenu( i18n("Volume Groups") );
+    KMenu *settings_menu = new KMenu( i18n("Settings") );
     
-    KMenu *help_menu = helpMenu( "Linux volume and partition manager for KDE" );
+    KMenu *help_menu = helpMenu( i18n("Linux volume and partition manager for KDE") );
 
     menuBar()->addMenu(file_menu);
     menuBar()->addMenu(tool_menu);
@@ -60,23 +60,23 @@ TopWindow::TopWindow(QWidget *parent):KMainWindow(parent)
 
     quit_action =  KStandardAction::quit(qApp, SLOT( quit() ), file_menu );
 
-    remove_vg_action   = new KAction( KIcon("edit-delete"), "Delete Volume Group...", this);
-    reduce_vg_action   = new KAction("Reduce Volume Group...", this);
-    rename_vg_action   = new KAction("Rename Volume Group...", this);
-    rescan_action      = new KAction( KIcon("rebuild"), "Rescan System", this);
-    rescan_vg_action   = new KAction( KIcon("rebuild"), "Rescan This Group", this);
-    m_restart_pvmove_action   = new KAction("Restart interrupted pvmove", this);
-    m_stop_pvmove_action      = new KAction("Abort pvmove", this);
-    remove_missing_action     = new KAction("Remove Missing Volumes...", this);
-    m_export_vg_action        = new KAction("Export Volume Group...", this);
-    m_import_vg_action        = new KAction("Import Volume Group...", this);
-    m_vgchange_menu           = new KMenu("Change Volume Group Attributes", this);
-    vgchange_available_action = new KAction("Volume Group Availability...", this);
-    vgchange_alloc_action  = new KAction("Allocation Policy...", this);
-    vgchange_extent_action = new KAction("Extent Size...", this);
-    vgchange_lv_action     = new KAction("Logical Volume Limits...", this);
-    vgchange_pv_action     = new KAction("Physical Volume Limits...", this);
-    vgchange_resize_action = new KAction("Volume Group Resizability...", this);
+    remove_vg_action   = new KAction( KIcon("edit-delete"), i18n("Delete Volume Group..."), this);
+    reduce_vg_action   = new KAction( i18n("Reduce Volume Group..."), this);
+    rename_vg_action   = new KAction( i18n("Rename Volume Group..."), this);
+    rescan_action      = new KAction( KIcon("rebuild"), i18n("Rescan System"), this);
+    rescan_vg_action   = new KAction( KIcon("rebuild"), i18n("Rescan This Group"), this);
+    m_restart_pvmove_action   = new KAction( i18n("Restart interrupted pvmove"), this);
+    m_stop_pvmove_action      = new KAction( i18n("Abort pvmove"), this);
+    remove_missing_action     = new KAction( i18n("Remove Missing Volumes..."), this);
+    m_export_vg_action        = new KAction( i18n("Export Volume Group..."), this);
+    m_import_vg_action        = new KAction( i18n("Import Volume Group..."), this);
+    m_vgchange_menu           = new KMenu( i18n("Change Volume Group Attributes"), this);
+    vgchange_available_action = new KAction( i18n("Volume Group Availability..."), this);
+    vgchange_alloc_action  = new KAction( i18n("Allocation Policy..."), this);
+    vgchange_extent_action = new KAction( i18n("Extent Size..."), this);
+    vgchange_lv_action     = new KAction( i18n("Logical Volume Limits..."), this);
+    vgchange_pv_action     = new KAction( i18n("Physical Volume Limits..."), this);
+    vgchange_resize_action = new KAction( i18n("Volume Group Resizability..."), this);
     m_vgchange_menu->addAction(vgchange_available_action);
     m_vgchange_menu->addAction(vgchange_alloc_action);
     m_vgchange_menu->addAction(vgchange_extent_action);
@@ -84,7 +84,7 @@ TopWindow::TopWindow(QWidget *parent):KMainWindow(parent)
     m_vgchange_menu->addAction(vgchange_pv_action);
     m_vgchange_menu->addAction(vgchange_resize_action);
 
-    config_kvpm_action     = new KAction("Configure kvpm...", this);
+    config_kvpm_action     = new KAction( i18n("Configure kvpm..."), this);
 
     file_menu->addAction(quit_action);
     tool_menu->addAction(rescan_action);
@@ -183,7 +183,7 @@ void TopWindow::reRun()
 
     m_old_tab_widget = m_tab_widget;           // with this function we delay actually deleting
 
-    if(m_old_tab_widget)                     // the widgets for one cycle.
+    if(m_old_tab_widget)                       // the widgets for one cycle.
 	m_old_tab_widget->setParent(0);
 
     m_tab_widget = new KTabWidget(this);
@@ -191,7 +191,7 @@ void TopWindow::reRun()
     master_list = new MasterList();
 
     m_device_tab = new DeviceTab(master_list->getStorageDevices());
-    m_tab_widget->addTab(m_device_tab, "storage devices");
+    m_tab_widget->addTab(m_device_tab, i18n("Storage devices") );
 
     vg_count = master_list->getVolGroupCount();
     groups = master_list->getVolGroups();
@@ -262,7 +262,7 @@ void TopWindow::setupMenus(int index)
     else 
 	m_vg = NULL;
 
-    if(m_vg){                                   // only enable group removal if the tab is
+    if(m_vg){                                     // only enable group removal if the tab is
 	if( !m_vg->getLogVolCount() )             // a volume group with no logical volumes
 	    remove_vg_action->setEnabled(true);   
 

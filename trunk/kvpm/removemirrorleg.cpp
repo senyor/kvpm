@@ -3,7 +3,7 @@
  * 
  * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
  *
- * This file is part of the Kvpm project.
+ * This file is part of the kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License,  version 3, as 
@@ -13,7 +13,7 @@
  */
 
 #include <KMessageBox>
-
+#include <KLocale>
 #include <QtGui>
 
 #include "logvol.h"
@@ -30,7 +30,7 @@ bool remove_mirror_leg(LogVol *mirrorLeg)
     LogVol *mirror = vg->getLogVolByName( mirrorLeg->getOrigin() );
     QStringList pvs_to_remove  = mirrorLeg->getDevicePathAll();
 
-    QString message = "Remove mirror leg: " + mirrorLeg->getName() + " ?";
+    QString message = i18n("Remove mirror leg: %1 ?").arg(mirrorLeg->getName());
     
     if(KMessageBox::warningYesNo( 0, message) == 3){      // 3 = "yes" button
 
@@ -40,7 +40,7 @@ bool remove_mirror_leg(LogVol *mirrorLeg)
 	     << mirror->getFullName()
 	     << pvs_to_remove;
 
-	ProcessProgress remove(args, "Removing mirror leg...", true);
+	ProcessProgress remove(args, i18n("Removing mirror leg..."), true);
 	return true;
     }
     else{

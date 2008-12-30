@@ -3,7 +3,7 @@
  * 
  * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
  *
- * This file is part of the Kvpm project.
+ * This file is part of the kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License,  version 3, as 
@@ -13,6 +13,7 @@
  */
 
 
+#include <KLocale>
 #include <QtGui>
 
 #include "logvol.h"
@@ -27,7 +28,7 @@ bool remove_mirror(LogVol *logicalVolume)
     dialog.exec();
 
     if(dialog.result() == QDialog::Accepted){
-        ProcessProgress remove_mirror(dialog.arguments(), "Removing mirror...");
+        ProcessProgress remove_mirror(dialog.arguments(), i18n("Removing mirror...") );
         return true;
     }
     else{
@@ -45,14 +46,14 @@ RemoveMirrorDialog::RemoveMirrorDialog(LogVol *logicalVolume, QWidget *parent):
     m_vg = m_lv->getVolumeGroup();
     QList<LogVol *> lvs = m_vg->getLogicalVolumes();
 
-    setWindowTitle(tr("Remove mirrors"));
+    setWindowTitle( i18n("Remove mirrors") );
 
     QWidget *dialog_body = new QWidget(this);
     QVBoxLayout *layout = new QVBoxLayout;
     dialog_body->setLayout(layout);
     setMainWidget(dialog_body);
     
-    QLabel *message = new QLabel("Select the mirror legs to remove:");
+    QLabel *message = new QLabel( i18n("Select the mirror legs to remove:") );
     layout->addWidget(message);
 
     for(int x = lvs.size() - 1; x >= 0 ;x--){
@@ -94,8 +95,6 @@ QStringList RemoveMirrorDialog::arguments()
 	 << m_lv->getFullName()
 	 << legs;
     
-    qDebug() << "ARGS:  " << args;
-    
     return args;
 }
 
@@ -132,4 +131,3 @@ void RemoveMirrorDialog::validateCheckStates(int)
     }
     
 }
-

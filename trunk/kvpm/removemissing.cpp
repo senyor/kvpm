@@ -3,7 +3,7 @@
  * 
  * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
  *
- * This file is part of the Kvpm project.
+ * This file is part of the kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License,  version 3, as 
@@ -14,7 +14,7 @@
 
 
 #include <KMessageBox>
-
+#include <KLocale>
 #include <QtGui>
 
 #include "processprogress.h"
@@ -26,8 +26,9 @@ bool remove_missing_pv(VolGroup *volumeGroup)
     QStringList args;
     QString vg_name = volumeGroup->getName();
 
-    QString message = "Removing missing physical volumes may cause some data in ";
-    message.append("volume group <b>" + vg_name + "</b> to become permanently inaccessible!");
+    QString message = i18n("Removing missing physical volumes may cause some "
+			   "data in volume group <b>%1</b> to become permanently "
+			   "inaccessible!").arg(vg_name);
 
     if(KMessageBox::warningYesNo( 0, message) == 3){      // 3 = "yes" button
 
@@ -35,7 +36,7 @@ bool remove_missing_pv(VolGroup *volumeGroup)
 	     << "--removemissing"
 	     << vg_name;
 
-	ProcessProgress remove(args, "Removing missing volumes...", true);
+	ProcessProgress remove(args, i18n("Removing missing volumes..."), true);
 
 	return true;
     }
