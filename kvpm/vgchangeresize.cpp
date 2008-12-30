@@ -3,7 +3,7 @@
  * 
  * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
  *
- * This file is part of the Kvpm project.
+ * This file is part of the kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License,  version 3, as 
@@ -14,7 +14,7 @@
 
 
 #include <KMessageBox>
-
+#include <KLocale>
 #include <QtGui>
 
 #include "processprogress.h"
@@ -33,12 +33,13 @@ bool change_vg_resize(VolGroup *VolumeGroup)
     vg_name = VolumeGroup->getName();
     
     if( VolumeGroup->isResizable() ){
-	message.append("Volume group: <b>" + vg_name + "</b> is currently resizeable.");
-	message.append(" Do you wish to change it to <b>not</b> be resizeable?");
+	message = i18n("Volume group: <b>%1</b> is currently resizeable. "
+		       "Do you wish to change it to <b>not</b> be "
+		       "resizeable?").arg(vg_name);
     }
     else{
-	message.append("Volume group: <b>" + vg_name + "</b> is currently <b>not</b> resizeable.");
-	message.append(" Do you wish to change it to be resizeable?");
+	message =i18n("Volume group: <b>%1</b> is currently <b>not</b> resizeable. "
+		      "Do you wish to change it to be resizeable?").arg(vg_name);
     }
 
     if(KMessageBox::questionYesNo( 0, message) == 3){      // 3 = "yes" button
@@ -51,9 +52,9 @@ bool change_vg_resize(VolGroup *VolumeGroup)
 	    args << "--resizeable" << "y";
 	
 	args << vg_name;
-        ProcessProgress resize(args, "Changing vg resize...");
-        return TRUE;
+        ProcessProgress resize(args, i18n("Changing vg resize...") );
+        return true;
     }
     else
-        return FALSE;
+        return false;
 }
