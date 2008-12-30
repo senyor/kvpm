@@ -14,7 +14,7 @@
 
 
 #include <KMessageBox>
-
+#include <KLocale>
 #include <QtGui>
 
 #include "masterlist.h"
@@ -31,7 +31,7 @@ bool reduce_vg(VolGroup *volumeGroup)
     dialog.exec();
 
     if(dialog.result() == QDialog::Accepted){
-        ProcessProgress reduce( dialog.arguments(), "Reducing vg...", true );
+        ProcessProgress reduce( dialog.arguments(), i18n("Reducing vg..."), true );
         return true;
     }
 
@@ -40,7 +40,7 @@ bool reduce_vg(VolGroup *volumeGroup)
 
 VGReduceDialog::VGReduceDialog(VolGroup *volumeGroup, QWidget *parent) : KDialog(parent)
 {
-    setWindowTitle(tr("Reduce Volume Group"));
+    setWindowTitle( i18n("Reduce Volume Group") );
     QWidget *dialog_body = new QWidget(this);
     setMainWidget(dialog_body);
     QVBoxLayout *layout = new QVBoxLayout;
@@ -49,19 +49,18 @@ VGReduceDialog::VGReduceDialog(VolGroup *volumeGroup, QWidget *parent) : KDialog
     m_unremovable_pvs_present = false;
     m_vg_name = volumeGroup->getName();
 
-    QLabel *label = new QLabel( QString( "Select any of the following physical volumes" ) +
-				" to remove them from volume group <b>" +
-				m_vg_name +
-				"</b>" );
+    QLabel *label = new QLabel( i18n( "Select any of the following physical volumes to "
+				      "remove them from volume group <b>%1</b>").arg(m_vg_name));
+
     label->setWordWrap(true);
     layout->addWidget(label);
 
-    QGroupBox *pv_unused_box = new QGroupBox("Unused physical volumes");
+    QGroupBox *pv_unused_box = new QGroupBox( i18n("Unused physical volumes") );
     QVBoxLayout *pv_unused_layout = new QVBoxLayout;
     pv_unused_box->setLayout(pv_unused_layout);
     layout->addWidget(pv_unused_box);
 
-    QGroupBox *pv_used_box = new QGroupBox("In use physical volumes");
+    QGroupBox *pv_used_box = new QGroupBox( i18n("In use physical volumes") );
     QVBoxLayout *pv_used_layout = new QVBoxLayout;
     pv_used_box->setLayout(pv_used_layout);
 
@@ -83,10 +82,10 @@ VGReduceDialog::VGReduceDialog(VolGroup *volumeGroup, QWidget *parent) : KDialog
     }
 
     if(	!m_pv_check_boxes.size() )                             // no unused pvs present
-	pv_unused_layout->addWidget( new QLabel("none") );
+        pv_unused_layout->addWidget( new QLabel( i18n("none") ) );
     
     if(m_unremovable_pvs_present){
-	layout->addWidget( new QLabel("<b>The following may not be removed</b>") );
+        layout->addWidget( new QLabel( i18n("<b>The following may not be removed</b>") ) );
 	layout->addWidget(pv_used_box);
     }
 
