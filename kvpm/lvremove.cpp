@@ -14,7 +14,7 @@
 
 
 #include <KMessageBox>
-
+#include <KLocale>
 #include <QtGui>
 
 #include "lvremove.h"
@@ -30,9 +30,8 @@ bool remove_lv(QString fullName)
 {
     QStringList args;
     
-    QString message = "Are you certain you want to delete the logical volume named: ";
-    message.append("<b>" + fullName + "</b>");
-    message.append(" Any data on it will be lost.");
+    QString message = i18n("Are you certain you want to delete the logical volume named: %1 "
+			   "Any data on it will be lost.").arg("<b>" + fullName + "</b>");
 
     if( KMessageBox::warningYesNo( 0, message) == 3){  // 3 = yes button
     
@@ -40,7 +39,7 @@ bool remove_lv(QString fullName)
 	     << "--force" 
 	     << fullName;
 
-	ProcessProgress remove( args, "Removing volume...", false);
+	ProcessProgress remove( args, i18n("Removing volume..."), false);
 
 	return true;
     }

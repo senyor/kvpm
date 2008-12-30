@@ -3,7 +3,7 @@
  * 
  * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
  *
- * This file is part of the Kvpm project.
+ * This file is part of the kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License,  version 3, as 
@@ -14,6 +14,7 @@
 
 #include <parted/parted.h>
 
+#include <KLocale>
 #include <QtGui>
 
 #include "fsprobe.h"
@@ -100,7 +101,7 @@ void MasterList::scanVolumeGroups()
 	      << "--units" << "b" 
 	      << "--partial"; 
     
-    ProcessProgress vgscan(arguments, "Scanning volume groups");
+    ProcessProgress vgscan(arguments, i18n("Scanning volume groups") );
     vg_output = vgscan.programOutput();
     vg_count = vg_output.size();
     
@@ -123,7 +124,7 @@ VolGroup* MasterList::scanVolumeGroups(QString VolumeGroupName)
 	      << "--units" << "b" 
 	      << "--partial" << VolumeGroupName; 
     
-    ProcessProgress vgscan(arguments, "Scanning volume groups");
+    ProcessProgress vgscan(arguments, i18n("Scanning volume groups") );
     vg_output = vgscan.programOutput();
     
     return (new VolGroup(vg_output[0]));
@@ -148,7 +149,7 @@ void MasterList::scanLogicalVolumes()
 	      << "--units" << "b" 
 	      << "--partial"; 
     
-    ProcessProgress lvscan(arguments, "Scanning logical volumes...");
+    ProcessProgress lvscan(arguments, i18n("Scanning logical volumes...") );
     lv_output = lvscan.programOutput();
     
     for(int i = 0; i < lv_output.size(); ) {
@@ -198,7 +199,7 @@ void MasterList::scanLogicalVolumes(VolGroup *VolumeGroup)
 	      << "--units" << "b" 
 	      << "--partial" << group_name; 
     
-    ProcessProgress lvscan(arguments, "Scanning logical volumes...");
+    ProcessProgress lvscan(arguments, i18n("Scanning logical volumes...") );
     lv_output = lvscan.programOutput();
 
     for(int i = 0; i < lv_output.size(); ) {
@@ -235,7 +236,7 @@ void MasterList::scanPhysicalVolumes()
 	      << "--partial" 
 	      << "-o" << "+pv_used,pv_uuid";
     
-    ProcessProgress pvscan(arguments, "Scanning physical volumes...");
+    ProcessProgress pvscan(arguments, i18n("Scanning physical volumes...") );
     pv_output = pvscan.programOutput();
     
     pv_count = pv_output.size();
@@ -276,7 +277,7 @@ void MasterList::scanPhysicalVolumes(VolGroup *VolumeGroup)
 	      << "--partial" 
 	      << "-o" << "+pv_used,pv_uuid";
     
-    ProcessProgress pvscan(arguments, "Scanning physical volumes...");
+    ProcessProgress pvscan(arguments, i18n("Scanning physical volumes...") );
     pv_output = pvscan.programOutput();
     
     pv_count = pv_output.size();

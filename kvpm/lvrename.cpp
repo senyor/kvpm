@@ -13,6 +13,7 @@
  */
 
 
+#include <KLocale>
 #include <QtGui>
 
 #include "lvrename.h"
@@ -27,7 +28,7 @@ bool rename_lv(LogVol *logicalVolume)
     dialog.exec();
     
     if(dialog.result() == QDialog::Accepted){
-        ProcessProgress rename( dialog.arguments(), "Renaming logical volume...", false );
+        ProcessProgress rename( dialog.arguments(), i18n("Renaming logical volume..."), false );
 
 	return true;
     }
@@ -40,7 +41,7 @@ LVRenameDialog::LVRenameDialog(LogVol *logicalVolume, QWidget *parent) :
     KDialog(parent)
 {
 
-    setWindowTitle(tr("Rename logical volume"));
+    setWindowTitle( i18n("Rename logical volume") );
 
     QWidget *dialog_body = new QWidget(this);
     setMainWidget(dialog_body);
@@ -50,10 +51,10 @@ LVRenameDialog::LVRenameDialog(LogVol *logicalVolume, QWidget *parent) :
     m_vg_name  = logicalVolume->getVolumeGroupName();
     m_old_name = logicalVolume->getName();
 
-    QLabel *old_name_label = new QLabel("Old logical volume name: " + m_old_name);
+    QLabel *old_name_label = new QLabel( i18n("Old logical volume name: %1").arg(m_old_name) );
     layout->addWidget(old_name_label);
 
-    QLabel *name_label = new QLabel("New logical volume name: ");
+    QLabel *name_label = new QLabel( i18n("New logical volume name: ") );
     m_new_name = new KLineEdit();
 
     QRegExp rx("[0-9a-zA-Z_\\.][-0-9a-zA-Z_\\.]*");
