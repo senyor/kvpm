@@ -13,6 +13,7 @@
  */
 
 
+#include <KLocale>
 #include <QtGui>
 
 #include "partitionproperties.h"
@@ -33,18 +34,17 @@ PartitionProperties::PartitionProperties( StoragePartition *Partition, QWidget *
 
     if( Partition->isPV() ){
 	pv = Partition->getPhysicalVolume();
-	layout->addWidget( new QLabel( QString("Physical Volume: %1").arg(path) ) );
-	layout->addWidget( new QLabel( QString("UUID: %1").arg( pv->getUuid() ) ) );
+	layout->addWidget( new QLabel( i18n("Physical Volume: %1").arg(path) ) );
+	layout->addWidget( new QLabel( i18n("UUID: %1").arg( pv->getUuid() ) ) );
     }
     else
-	layout->addWidget( new QLabel( QString("Partition: %1").arg(path) ) );
+	layout->addWidget( new QLabel( i18n("Partition: %1").arg(path) ) );
 
     mount_points = Partition->getMountPoints();
     
 
     for(int x = 0; x < mount_points.size(); x++)
-	layout->addWidget( new QLabel("Mount point: " + mount_points[x] ) );
-
+      layout->addWidget( new QLabel( i18n("Mount point: %1").arg(mount_points[x]) ) );
 
 }
 
