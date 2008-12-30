@@ -13,7 +13,7 @@
  */
 
 #include <KProcess>
-
+#include <KLocale>
 #include <QtGui>
 
 #include "executablefinder.h"
@@ -46,7 +46,7 @@ ProcessProgress::ProcessProgress(QStringList arguments,
 	m_loop = new QEventLoop(this);
 	
 	if(m_show_progress){
-	    m_progress_dialog = new KProgressDialog(this, "progress", operation);
+	    m_progress_dialog = new KProgressDialog(this, i18n("progress"), operation);
 	    m_progress_dialog->setAllowCancel(false);
 	    progress_bar = m_progress_dialog->progressBar();
 	    progress_bar->setRange(0,0);
@@ -73,7 +73,7 @@ ProcessProgress::ProcessProgress(QStringList arguments,
 	
 	if (m_process->exitCode()){
 	    QMessageBox::critical(this, 
-				  "Execution of " + executable_path + " produced errors", 
+				  i18n("Execution of %1 produced errors").arg(executable_path), 
 				  m_output_all.join(""));
 	}
     }

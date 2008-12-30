@@ -39,9 +39,9 @@ class PhysVol
     QString getUuid();
     bool isAllocateable();
     bool isExported();
-    long long getSize();       // size in bytes    
+    long long getSize();       // size of the physical volume in bytes    
     long long getUnused();     // free space in bytes
-    long long getUsed();       // space left in bytes
+    long long getUsed();       // bytes used 
     int getPercentUsed();      // 0 - 100
     
 };

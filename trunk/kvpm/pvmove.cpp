@@ -3,7 +3,7 @@
  * 
  * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
  *
- * This file is part of the Kvpm project.
+ * This file is part of the kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License,  version 3, as 
@@ -14,6 +14,7 @@
 
 
 #include <KMessageBox>
+#include <KLocale>
 #include <QtGui>
 
 #include "logvol.h"
@@ -32,7 +33,7 @@ bool move_pv(PhysVol *physicalVolume)
     PVMoveDialog dialog(physicalVolume);
     dialog.exec();
     if(dialog.result() == QDialog::Accepted){
-        ProcessProgress move( dialog.arguments(), "Moving extents...", false );
+        ProcessProgress move( dialog.arguments(), i18n("Moving extents..."), false );
 	return true;
     }
     else
@@ -44,7 +45,7 @@ bool move_pv(LogVol *logicalVolume)
     PVMoveDialog dialog(logicalVolume);
     dialog.exec();
     if(dialog.result() == QDialog::Accepted){
-        ProcessProgress move( dialog.arguments(), "Moving extents...", false );
+        ProcessProgress move( dialog.arguments(), i18n("Moving extents..."), false );
 	return true;
     }
     else
@@ -55,15 +56,13 @@ bool restart_pvmove()
 {
 
     QStringList args;
-    QString message;
-
-    message.append("Do you wish to restart all interupted physical volume moves?");
+    QString message = i18n("Do you wish to restart all interupted physical volume moves?");
 
     if(KMessageBox::questionYesNo( 0, message) == 3){      // 3 = "yes" button
 
         args << "pvmove";
 
-        ProcessProgress resize(args, "Restarting pvmove...");
+        ProcessProgress resize(args, i18n("Restarting pvmove...") );
         return true;
     }
     else
@@ -74,16 +73,14 @@ bool stop_pvmove()
 {
 
     QStringList args;
-    QString message;
-
-    message.append("Do you wish to abort all physical volume moves");
-    message.append(" currently in progress?");
+    QString message = i18n("Do you wish to abort all physical volume moves " 
+			   "currently in progress?");
     
     if(KMessageBox::questionYesNo( 0, message) == 3){      // 3 = "yes" button
 
         args << "pvmove" << "--abort";
 
-        ProcessProgress resize(args, "Stopping pvmove...");
+        ProcessProgress resize(args, i18n("Stopping pvmove...") );
         return true;
     }
     else
@@ -128,11 +125,12 @@ PVMoveDialog::PVMoveDialog(LogVol *logicalVolume, QWidget *parent) :
    a pv move will hve no place to go */
 
     if(m_destination_pvs.size() < 2){
-	KMessageBox::error(this, tr("Only one physical volume is "
-				    "assigned to this volume group. "
-				    "At least two are required to move extents:\n"
-				    "One source and one or more destination"), 
-			            "Insufficient physical volumes");
+	KMessageBox::error(this, 
+			   i18n("Only one physical volume is "
+				"assigned to this volume group. "
+				"At least two are required to move extents:\n"
+				"One source and one or more destination"), 
+			   i18n("Too few physical volumes") );
 	QEventLoop loop(this);
 	loop.exec();
 	reject();
@@ -160,18 +158,19 @@ void PVMoveDialog::buildDialog()
     long long pv_free_space;
     long long pv_used_space;
     
-    setWindowTitle(tr("Move Physical Volume Extents"));
+    setWindowTitle( i18n("Move Physical Volume Extents") );
     QWidget *dialog_body = new QWidget(this);
     setMainWidget(dialog_body);
     QVBoxLayout *layout = new QVBoxLayout;
     dialog_body->setLayout(layout);
 
     if(move_lv){
-	layout->addWidget( new QLabel("<b>Move only physical extents on:</b>") );
+        layout->addWidget( new QLabel( i18n("<b>Move only physical extents on:</b>") ) );
 	layout->addWidget( new QLabel("<b>" + m_lv->getFullName() + "</b>") );
     }
 
-    QGroupBox *radio_group = new QGroupBox("Source Physical Volume");
+
+    QGroupBox *radio_group = new QGroupBox( i18n("Source Physical Volume") );
     QHBoxLayout *radio_group_layout = new QHBoxLayout();
     radio_group->setLayout(radio_group_layout);
     layout->addWidget(radio_group);
@@ -189,8 +188,13 @@ void PVMoveDialog::buildDialog()
 
 	    radio_button_layout->addWidget(radio_button);
 	    radio_buttons.append(radio_button);
-	    pv_used_space = m_lv->getSpaceOnPhysicalVolume(m_source_pvs[x]->getDeviceName());
-	    label = new QLabel("Used space: " + sizeToString( pv_used_space ) );
+
+	    if(move_lv)
+	        pv_used_space = m_lv->getSpaceOnPhysicalVolume(m_source_pvs[x]->getDeviceName());
+	    else
+	        pv_used_space = m_source_pvs[x]->getUsed();
+
+	    label = new QLabel( i18n("Used space: %1").arg(sizeToString( pv_used_space ) ));
 	    radio_label_layout->addWidget(label);
 	    
 	    connect(radio_button, SIGNAL(toggled(bool)), 
@@ -198,17 +202,23 @@ void PVMoveDialog::buildDialog()
 	}
     }
     else{
-	radio_button_layout->addWidget( new QLabel( m_source_pvs[0]->getDeviceName() ) );
-	pv_used_space = m_lv->getSpaceOnPhysicalVolume( m_source_pvs[0]->getDeviceName() );
+
+ 	radio_button_layout->addWidget( new QLabel( m_source_pvs[0]->getDeviceName() ) );
+
+	if(move_lv)
+	    pv_used_space = m_lv->getSpaceOnPhysicalVolume(m_source_pvs[0]->getDeviceName());
+	else
+	    pv_used_space = m_source_pvs[0]->getUsed();
+    
 	label = new QLabel("Used space: " + sizeToString( pv_used_space ) );
 	radio_label_layout->addWidget(label);
     }
     
-    QGroupBox *check_group = new QGroupBox("Destination Physical Volumes");
+    QGroupBox *check_group = new QGroupBox( i18n("Destination Physical Volumes") );
     QVBoxLayout *check_layout = new QVBoxLayout();
     check_group->setLayout(check_layout);
     layout->addWidget(check_group);
-    check_box_any = new QCheckBox("Any available volume");
+    check_box_any = new QCheckBox( i18n("Any available volume") );
     check_layout->addWidget(check_box_any);
     check_layout->addSpacing(5);
 
@@ -227,8 +237,7 @@ void PVMoveDialog::buildDialog()
 	check_box->setEnabled(false);
 	check_layout_left->addWidget(check_box);
 	pv_free_space = m_destination_pvs[x]->getUnused();
-	check_layout_right->addWidget(new QLabel("Free space: " + 
-						 sizeToString( pv_free_space )));
+	check_layout_right->addWidget(new QLabel( i18n("Free space: %1").arg(sizeToString( pv_free_space ))));
 
 	check_boxes.append(check_box);
 
@@ -257,8 +266,7 @@ void PVMoveDialog::calculateSpace(bool)
 	    free_space_total += m_destination_pvs[x]->getUnused();
     }
     
-    free_space_total_label->setText("Selected space total: " + 
-				    sizeToString(free_space_total));
+    free_space_total_label->setText( i18n("Selected space total: %1").arg(sizeToString(free_space_total)));
 
     if(move_lv){
 	if(radio_buttons.size() > 1){
@@ -331,7 +339,7 @@ QStringList PVMoveDialog::arguments()
 {
     QStringList args;
     QString source;
-    
+
     args << "pvmove" << "--background";
 
     if(move_lv){

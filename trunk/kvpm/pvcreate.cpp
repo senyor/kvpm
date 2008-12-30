@@ -3,7 +3,7 @@
  * 
  * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
  *
- * This file is part of the Kvpm project.
+ * This file is part of the kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License,  version 3, as 
@@ -14,7 +14,7 @@
 
 
 #include <KMessageBox>
-
+#include <KLocale>
 #include <QtGui>
 
 #include "processprogress.h"
@@ -23,11 +23,9 @@
 bool create_pv(QString physicalVolumeName)
 {
     QStringList args;
-    QString message;
-    
-    message.append("Are you certain you want to create a physical volume on: ");
-    message.append("<b>" + physicalVolumeName + "</b>?");
-    message.append(" Any information already on that device will be lost.");
+    QString message = i18n("Are you certain you want to create a " 
+			   "physical volume on: <b>%1</b>? Any information "
+			   "already on that device will be lost." ).arg(physicalVolumeName);
 
     if(KMessageBox::warningContinueCancel( 0, message) == 5){  // 5 = continue button
 
@@ -35,7 +33,7 @@ bool create_pv(QString physicalVolumeName)
 	     << "--force"
 	     << physicalVolumeName;
 
-	ProcessProgress create(args, "Creating pv...", false);
+	ProcessProgress create(args, i18n("Creating pv..."), false);
 
 	return true;
     }
