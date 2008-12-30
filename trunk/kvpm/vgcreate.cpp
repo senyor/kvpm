@@ -3,7 +3,7 @@
  * 
  * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
  *
- * This file is part of the Kvpm project.
+ * This file is part of the kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License,  version 3, as 
@@ -13,6 +13,7 @@
  */
 
 
+#include <KLocale>
 #include <QtGui>
 
 #include "processprogress.h"
@@ -25,7 +26,7 @@ bool create_vg(QString physicalVolumePath)
     dialog.exec();
     
     if(dialog.result() == QDialog::Accepted){
-        ProcessProgress create_vg( dialog.arguments(), "Creating vg...", true );
+        ProcessProgress create_vg( dialog.arguments(), i18n("Creating vg..."), true );
         return true;
     }
     else
@@ -38,14 +39,14 @@ VGCreateDialog::VGCreateDialog(QString physicalVolumePath, QWidget *parent) :
     m_pv_path(physicalVolumePath)
 {
 
-    setWindowTitle(tr("Create Volume Group"));
+    setWindowTitle( i18n("Create Volume Group") );
 
     QWidget *dialog_body = new QWidget(this);
     setMainWidget(dialog_body);
     QVBoxLayout *layout = new QVBoxLayout();
     dialog_body->setLayout(layout);
 
-    QLabel *name_label = new QLabel("Volume Group Name: ");
+    QLabel *name_label = new QLabel( i18n("Volume Group Name: ") );
     m_vg_name = new KLineEdit();
 
     QRegExp rx("[0-9a-zA-Z_\\.][-0-9a-zA-Z_\\.]*");
@@ -55,7 +56,7 @@ VGCreateDialog::VGCreateDialog(QString physicalVolumePath, QWidget *parent) :
     name_layout->addWidget(name_label);
     name_layout->addWidget(m_vg_name);
 
-    QLabel *extent_label = new QLabel("Physical Extent Size: ");
+    QLabel *extent_label = new QLabel( i18n("Physical Extent Size: ") );
     m_extent_size = new KComboBox();
     m_extent_size->insertItem(0,"1");
     m_extent_size->insertItem(1,"2");
@@ -81,15 +82,15 @@ VGCreateDialog::VGCreateDialog(QString physicalVolumePath, QWidget *parent) :
     extent_layout->addWidget(m_extent_size);
     extent_layout->addWidget(m_extent_suffix);
 
-    QGroupBox *lv_box = new QGroupBox("Number of Logical Volumes");
+    QGroupBox *lv_box = new QGroupBox( i18n("Number of Logical Volumes") );
     QVBoxLayout *lv_layout_v = new QVBoxLayout();
     QHBoxLayout *lv_layout_h = new QHBoxLayout();
     lv_box->setLayout(lv_layout_v);
-    m_max_lvs_check = new QCheckBox("No Limit");
+    m_max_lvs_check = new QCheckBox( i18n("No Limit") );
     m_max_lvs_check->setCheckState(Qt::Checked);
     lv_layout_v->addWidget(m_max_lvs_check);
     lv_layout_v->addLayout(lv_layout_h);
-    QLabel *lv_label = new QLabel("Maximum: ");
+    QLabel *lv_label = new QLabel( i18n("Maximum: ") );
     m_max_lvs = new KLineEdit();
     QIntValidator *lv_validator = new QIntValidator(1,255,this);
     m_max_lvs->setValidator(lv_validator);
@@ -97,15 +98,15 @@ VGCreateDialog::VGCreateDialog(QString physicalVolumePath, QWidget *parent) :
     lv_layout_h->addWidget(lv_label);
     lv_layout_h->addWidget(m_max_lvs);
 
-    QGroupBox *pv_box = new QGroupBox("Number of Physical Volumes");
+    QGroupBox *pv_box = new QGroupBox( i18n("Number of Physical Volumes") );
     QVBoxLayout *pv_layout_v = new QVBoxLayout();
     QHBoxLayout *pv_layout_h = new QHBoxLayout();
     pv_box->setLayout(pv_layout_v);
-    m_max_pvs_check = new QCheckBox("No Limit");
+    m_max_pvs_check = new QCheckBox( i18n("No Limit") );
     m_max_pvs_check->setCheckState(Qt::Checked);
     pv_layout_v->addWidget(m_max_pvs_check);
     pv_layout_v->addLayout(pv_layout_h);
-    QLabel *pv_label = new QLabel("Maximum: ");
+    QLabel *pv_label = new QLabel( i18n("Maximum: ") );
     m_max_pvs = new KLineEdit();
     QIntValidator *pv_validator = new QIntValidator(1,255,this);
     m_max_pvs->setValidator(pv_validator);
@@ -113,10 +114,10 @@ VGCreateDialog::VGCreateDialog(QString physicalVolumePath, QWidget *parent) :
     pv_layout_h->addWidget(pv_label);
     pv_layout_h->addWidget(m_max_pvs);
 
-    m_clustered = new QCheckBox("Cluster Aware");
+    m_clustered = new QCheckBox( i18n("Cluster Aware") );
     m_clustered->setEnabled(false);
     
-    m_auto_backup = new QCheckBox("Automatic Backup");
+    m_auto_backup = new QCheckBox( i18n("Automatic Backup") );
     m_auto_backup->setCheckState(Qt::Checked);
 
     layout->addLayout(name_layout);
