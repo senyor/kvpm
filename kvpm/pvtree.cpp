@@ -3,7 +3,7 @@
  * 
  * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
  *
- * This file is part of the Kvpm project.
+ * This file is part of the kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License,  version 3, as 
@@ -13,6 +13,7 @@
  */
 
 
+#include <KLocale>
 #include <QtGui>
 
 #include "logvol.h"
@@ -50,8 +51,10 @@ PVTree::PVTree(VolGroup *volumeGroup, QWidget *parent) : QTreeWidget(parent)
     setupContextMenu();
     setColumnCount(6);
 
-    header_labels << "Name" << "Size" << "Free" << "Used"
-		  << "Allocatable" << "Exported" << "Logical Volumes";
+    header_labels << i18n("Name") << i18n("Size") 
+		  << i18n("Free") << i18n("Used")
+		  << i18n("Allocatable") << i18n("Exported") 
+		  << i18n("Logical volumes");
     setHeaderLabels(header_labels);
 
     for(int n = 0; n < pvs.size(); n++){
@@ -113,9 +116,9 @@ void PVTree::setupContextMenu()
 {
     setContextMenuPolicy(Qt::CustomContextMenu);   
 
-    pv_move_action   = new QAction("Move physical extents", this);
-    vg_reduce_action = new QAction("Remove from volume group", this);
-    pv_change_action = new QAction("Change physical volume attributes", this);
+    pv_move_action   = new QAction( i18n("Move physical extents"), this);
+    vg_reduce_action = new QAction( i18n("Remove from volume group"), this);
+    pv_change_action = new QAction( i18n("Change physical volume attributes"), this);
 
     context_menu = new QMenu(this);
     context_menu->addAction(pv_move_action);
@@ -197,7 +200,7 @@ void PVTree::changePhysicalVolume()
     dialog.exec();
 
     if(dialog.result() == QDialog::Accepted){
-        ProcessProgress change_pv(dialog.arguments(), "Changing physical volume...");
+        ProcessProgress change_pv(dialog.arguments(), i18n("Changing physical volume...") );
 	MainWindow->rebuildVolumeGroupTab();
     }
 }

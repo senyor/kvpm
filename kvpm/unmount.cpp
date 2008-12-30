@@ -3,7 +3,7 @@
  * 
  * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
  *
- * This file is part of the Kvpm project.
+ * This file is part of the kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License,  version 3, as 
@@ -18,7 +18,7 @@
 #include <string.h>
 
 #include <KMessageBox>
-
+#include <KLocale>
 #include <QtGui>
 
 #include "logvol.h"
@@ -47,14 +47,16 @@ UnmountDialog::UnmountDialog(QString device, QStringList mountPoints, QWidget *p
     QVBoxLayout *layout    = new QVBoxLayout();
     dialog_body->setLayout(layout);
 
-    unmount_message.append( "<b>" + device + "</b> is mounted at multiple locatations.");
-    unmount_message.append( " Check the boxes for any you wish to unmount." );
+    unmount_message = i18n( "<b>%1</b> is mounted at multiple locatations. "
+			    "Check the boxes for any you "
+			    "wish to unmount." ).arg(device);
+
     QLabel *unmount_message_label = new QLabel();
     unmount_message_label->setText(unmount_message);
     unmount_message_label->setWordWrap(true);
     layout->addWidget(unmount_message_label);
 
-    QGroupBox *mount_group = new QGroupBox("Mount points");
+    QGroupBox *mount_group = new QGroupBox( i18n("Mount points") );
     QVBoxLayout *mount_group_layout = new QVBoxLayout();
     mount_group->setLayout(mount_group_layout);
     layout->addWidget(mount_group);
@@ -80,10 +82,10 @@ void UnmountDialog::unmountFilesystems()
 	    mount_point = m_check_list[x]->getUnmungedText();
 	    if( umount2( mount_point.toAscii().data() , 0) ){
 		error_string =  strerror( errno );
-		error_message = "Unmounting " + mount_point + " failed with ";
-		error_message.append( QString( "error number: %1  ").arg(errno) );
-		error_message.append( error_string );
-		
+
+		error_message = i18n("Unmounting %1 failed with error number: %2 "
+				     "%3").arg(mount_point).arg(errno).arg(error_string);
+
 		KMessageBox::error(0, error_message);
 	    }
 	    else
@@ -102,9 +104,8 @@ bool unmount_filesystem(LogVol *logicalVolume)
 
     if( logicalVolume->isMounted() ){
 
-        unused_message.append("The volume <b>" + name + "</b> is mounted at ");
-        unused_message.append("<b>" + mount_points[0] + "</b>" );
-        unused_message.append(" Do you want to unmount it?" );
+        unused_message = i18n("The volume <b>%1</b> is mounted on <b>%2</b> "
+			      "Do you want to unmount it?" ).arg(name).arg(mount_points[0]);
 
         if( mount_points.size() == 1 ){
             if( KMessageBox::questionYesNo(0, unused_message) == 3 ){     // 3 is "yes"
@@ -121,7 +122,7 @@ bool unmount_filesystem(LogVol *logicalVolume)
         }
     }
 
-    KMessageBox::error(0, "The volume: <b>" + name + "</b> does not seem to be mounted");
+    KMessageBox::error(0, i18n("The volume: <b>%1</b> does not seem to be mounted").arg(name) );
     return false;
 }
 
@@ -135,9 +136,8 @@ bool unmount_filesystem(StoragePartition *partition)
 
     if( partition->isMounted() ){
     
-	unused_message.append("The partition <b>" + path + "</b> is mounted at ");
-	unused_message.append("<b>" + mount_points[0] + "</b>" );
-	unused_message.append(" Do you want to unmount it?" );
+	unused_message = i18n("The partition <b>%1</b> is mounted on <b>%2</b> "
+			      "Do you want to unmount it?").arg(path).arg(mount_points[0]);
 
 	if( mount_points.size() == 1 ){
 	    if( KMessageBox::questionYesNo(0, unused_message) == 3 ){     // 3 is "yes"
@@ -153,7 +153,7 @@ bool unmount_filesystem(StoragePartition *partition)
 	    return true;
 	}
     }
-    KMessageBox::error(0, "The partition: <b>" + path + "</b> does not seem to be mounted"); 
+    KMessageBox::error(0, i18n("The partition: <b>%1</b> does not seem to be mounted").arg(path)); 
     return false;
 }
 
@@ -170,9 +170,8 @@ bool unmount_filesystem(const QString mountPoint)
     if( umount2(mount_point, 0) ){
 	error_string =  strerror( errno );
 	
-	error_message = "Unmounting " + mountPoint + " failed with ";
-	error_message.append( QString( "error number: %1  ").arg(errno) );
-	error_message.append( error_string );
+	error_message = i18n("Unmounting %1 failed with error number: %2 "
+			     "%3").arg(mountPoint).arg(errno).arg(error_string);
 	
 	KMessageBox::error(0, error_message);
 	return false;
