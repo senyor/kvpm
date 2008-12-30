@@ -3,7 +3,7 @@
  * 
  * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
  *
- * This file is part of the Kvpm project.
+ * This file is part of the kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License,  version 3, as 
@@ -22,7 +22,7 @@
 #include <KPushButton>
 #include <KMessageBox>
 #include <KUrl>
-
+#include <KLocale>
 #include <QtGui>
 
 #include "logvol.h"
@@ -50,8 +50,8 @@ m_filesystem_type(filesystemType)
     main_layout->addWidget( filesystemBox() );
     main_layout->addWidget( mountPointBox() );
 
-    dialog_body->addTab(main_tab,    "Main");
-    dialog_body->addTab(optionsTab() , "Options");
+    dialog_body->addTab(main_tab,     i18n("Main") );
+    dialog_body->addTab(optionsTab(), i18n("Options") );
 
     connect(this, SIGNAL( accepted() ), 
 	    this, SLOT( mountFilesystem() ));
@@ -59,7 +59,7 @@ m_filesystem_type(filesystemType)
 
 QWidget* MountDialog::filesystemBox()
 {
-    QGroupBox   *filesystem_box = new QGroupBox("Filesystem type", this);
+    QGroupBox   *filesystem_box = new QGroupBox( i18n("Filesystem type"), this);
     QVBoxLayout *layout_left    = new QVBoxLayout();
     QVBoxLayout *layout_center  = new QVBoxLayout();
     QVBoxLayout *layout_right   = new QVBoxLayout();
@@ -84,7 +84,7 @@ QWidget* MountDialog::filesystemBox()
     iso9660_button   = new QRadioButton("iso9660", this);
     hfs_button       = new QRadioButton("hfs", this);
     
-    specify_button   = new QRadioButton("Specify other:", this);
+    specify_button   = new QRadioButton( i18n("Specify other:"), this);
 
     if( m_filesystem_type == "ext2" )
 	ext2_button->setChecked(true);
@@ -144,7 +144,7 @@ QWidget* MountDialog::optionsTab()
     QVBoxLayout *options_layout = new QVBoxLayout();
     options_tab->setLayout(options_layout);
     
-    QGroupBox *common_options_box = new QGroupBox("Common mount options", this);
+    QGroupBox *common_options_box = new QGroupBox( i18n("Common mount options"), this);
     QVBoxLayout *layout_left      = new QVBoxLayout();
     QVBoxLayout *layout_right     = new QVBoxLayout();
     QHBoxLayout *common_options_layout   = new QHBoxLayout();
@@ -168,13 +168,13 @@ QWidget* MountDialog::optionsTab()
     dev_check->setChecked(true);
     exec_check->setChecked(true);
     
-    sync_check->setToolTip("Always use synchronous I/O");
-    rw_check->setToolTip("Allow writing in addition to reading");
-    suid_check->setToolTip("Allow the suid bit to have effect");
-    dev_check->setToolTip("Allow the use of block and special devices");
-    exec_check->setToolTip("Allow the execution of binary files");
-    mand_check->setToolTip("Allow manditory file locks");
-    acl_check->setToolTip("Allow use of access control lists");
+    sync_check->setToolTip( i18n("Always use synchronous I/O") );
+    rw_check->setToolTip( i18n("Allow writing in addition to reading") );
+    suid_check->setToolTip( i18n("Allow the suid bit to have effect") );
+    dev_check->setToolTip( i18n("Allow the use of block and special devices") );
+    exec_check->setToolTip( i18n("Allow the execution of binary files") );
+    mand_check->setToolTip( i18n("Allow manditory file locks") );
+    acl_check->setToolTip( i18n("Allow use of access control lists") );
     
     layout_left->addWidget(rw_check);
     layout_left->addWidget(suid_check);
@@ -190,12 +190,12 @@ QWidget* MountDialog::optionsTab()
     
     QHBoxLayout *options_atime_layout = new QHBoxLayout();
     options_layout->addLayout(options_atime_layout);
-    QGroupBox *atime_box = new QGroupBox("Update atime", this);
+    QGroupBox *atime_box = new QGroupBox( i18n("Update atime"), this);
     QVBoxLayout *atime_layout = new QVBoxLayout();
     atime_box->setLayout(atime_layout);
     options_atime_layout->addWidget(common_options_box);
 
-    m_filesystem_journal_box = new QGroupBox("Journaling");
+    m_filesystem_journal_box = new QGroupBox( i18n("Journaling") );
     QVBoxLayout *journaling_layout = new QVBoxLayout;
     m_filesystem_journal_box->setLayout(journaling_layout);
     data_journal_button   = new QRadioButton("data=journal");
@@ -217,16 +217,19 @@ QWidget* MountDialog::optionsTab()
     atime_layout->addWidget(noatime_button);
     atime_layout->addWidget(nodiratime_button);
     atime_layout->addWidget(relatime_button);
-    atime_button->setToolTip("Always update atime, this is the default");
-    noatime_button->setToolTip("Do not update atime");
-    nodiratime_button->setToolTip("Do not update atime for directory access");
-    relatime_button->setToolTip("Access time is only updated if the previous access time was earlier than  the  current  modify  or  change time");
+
+    atime_button->setToolTip( i18n("Always update atime, this is the default") );
+    noatime_button->setToolTip( i18n("Do not update atime") );
+    nodiratime_button->setToolTip( i18n("Do not update atime for directory access") );
+    relatime_button->setToolTip( i18n("Access time is only updated if the previous "
+				      "access time was earlier than the current modify "
+				      "or change time") );
     
     options_atime_layout->addWidget(atime_box);
 
-    QGroupBox *filesystem_options_box = new QGroupBox("Filesystem specific  mount options");
+    QGroupBox *filesystem_options_box = new QGroupBox( i18n("Filesystem specific  mount options") );
     m_filesystem_edit = new KLineEdit();
-    QLabel *additional_options_label = new QLabel("comma separated list of additional mount options");
+    QLabel *additional_options_label = new QLabel( i18n("comma separated list of additional mount options") );
     
     options_layout->addWidget(filesystem_options_box);
     QVBoxLayout *filesystem_options_box_layout = new QVBoxLayout();
@@ -259,7 +262,7 @@ QWidget* MountDialog::mountPointBox()
     else
 	m_mount_point = "";
 
-    QGroupBox *mount_point_box = new QGroupBox("Mount point");
+    QGroupBox *mount_point_box = new QGroupBox( i18n("Mount point") );
     QHBoxLayout *mount_point_layout = new QHBoxLayout();
     mount_point_box->setLayout(mount_point_layout);
     
@@ -270,7 +273,7 @@ QWidget* MountDialog::mountPointBox()
 
     mount_point_layout->addWidget(m_mount_point_edit);
     
-    QPushButton *browse_button = new QPushButton("Browse", this);
+    QPushButton *browse_button = new QPushButton( i18n("Browse"), this);
     mount_point_layout->addWidget(browse_button);
 
     connect(m_mount_point_edit, SIGNAL( textChanged(const QString) ), 

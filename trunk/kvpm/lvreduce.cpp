@@ -14,6 +14,7 @@
 
 
 #include <KMessageBox>
+#include <KLocale>
 #include <QtGui>
 
 #include "logvol.h"
@@ -31,12 +32,13 @@ bool lv_reduce(LogVol *logicalVolume)
     fs    = logicalVolume->getFilesystem();
     state = logicalVolume->getState();
 
-    QString warning_message = "Currently only the ext2 and ext3  file systems are supported";
-    warning_message.append("for file system reduction. If this logical volume is reduced");
-    warning_message.append(" any data it contains will be lost!");
+    QString warning_message = i18n("Currently only the ext2 and ext3  file systems "
+				   "are supported for file system reduction. If this " 
+				   "logical volume is reduced any data it contains "
+				   "will be lost!");
 
-    QString warning_message2 = "If this <b>Inactive</b> logical volume is reduced";
-    warning_message2.append(" any data it contains will be lost!");
+    QString warning_message2 = i18n("If this <b>Inactive</b> logical volume is reduced "
+				    "any data it contains will be lost!");
 
     if( state != "Active" ){
 	if(KMessageBox::warningContinueCancel(0, warning_message2) != KMessageBox::Continue)
@@ -45,7 +47,7 @@ bool lv_reduce(LogVol *logicalVolume)
 	    LVReduceDialog dialog(logicalVolume);
 	    dialog.exec();
 	    if(dialog.result() == QDialog::Accepted){
-		ProcessProgress reduce_lv(dialog.argumentsLV(), "Reducing volume...", true);
+	        ProcessProgress reduce_lv(dialog.argumentsLV(), i18n("Reducing volume..."), true);
 		return true;
 	    }
 	    else
@@ -53,7 +55,7 @@ bool lv_reduce(LogVol *logicalVolume)
 	}
     }
     else if( logicalVolume->isMirror() ){
-	KMessageBox::error(0, "Resizing mirrors is not supported yet");
+        KMessageBox::error(0, i18n("Resizing mirrors is not supported yet") );
 	return false;
     }
     else if( logicalVolume->isSnap() ){
@@ -61,18 +63,18 @@ bool lv_reduce(LogVol *logicalVolume)
 	dialog.exec();
 	if(dialog.result() == QDialog::Accepted){
 	    ProcessProgress reduce_lv(dialog.argumentsLV(), 
-				      QString("Reducing volume..."), 
+				      i18n("Reducing volume..."), 
 				      true);
 	    return true;
 	}
 	return true;
     }
     else if( logicalVolume->isOrigin() ){
-	KMessageBox::error(0, "Resizing snapshot origin is not supported yet");
+        KMessageBox::error(0, i18n("Resizing snapshot origin is not supported yet") );
 	return false;
     }
     else if( logicalVolume->isMounted() ){
-	KMessageBox::error(0, "The filesystem must be unmounted first");
+        KMessageBox::error(0, i18n("The filesystem must be unmounted first") );
 	return false;
     }
     else if( (fs != "ext2") && (fs != "ext3") ){
@@ -82,7 +84,7 @@ bool lv_reduce(LogVol *logicalVolume)
 	    LVReduceDialog dialog(logicalVolume);
 	    dialog.exec();
 	    if(dialog.result() == QDialog::Accepted){
-		ProcessProgress reduce_lv(dialog.argumentsLV(), "Reducing volume...", true);
+	        ProcessProgress reduce_lv(dialog.argumentsLV(), i18n("Reducing volume..."), true);
 		return true;
 	    }
 	    else
@@ -93,9 +95,9 @@ bool lv_reduce(LogVol *logicalVolume)
 	LVReduceDialog dialog(logicalVolume);
 	dialog.exec();
 	if(dialog.result() == QDialog::Accepted){
-	    ProcessProgress reduce_fs(dialog.argumentsFS(), "Reducing filesystem...", true);
+	    ProcessProgress reduce_fs(dialog.argumentsFS(), i18n("Reducing filesystem..."), true);
 	    if( !reduce_fs.exitCode() )
-		ProcessProgress reduce_lv(dialog.argumentsLV(), "Reducing volume...", true);
+	        ProcessProgress reduce_lv(dialog.argumentsLV(), i18n("Reducing volume..."), true);
 	    return true;
 	}
 	else
@@ -110,7 +112,7 @@ LVReduceDialog::LVReduceDialog(LogVol *logicalVolume, QWidget *parent) :
 {
 
     m_vg = m_lv->getVolumeGroup();
-    setWindowTitle(tr("Reduce Logical Volume"));
+    setWindowTitle( i18n("Reduce Logical Volume") );
 
     QWidget *dialog_body = new QWidget(this);
     setMainWidget(dialog_body);
@@ -119,16 +121,14 @@ LVReduceDialog::LVReduceDialog(LogVol *logicalVolume, QWidget *parent) :
 
     m_current_lv_size = m_lv->getSize();
 
-    QLabel *ext_size_label = new QLabel("Extent size: " + 
-					sizeToString(m_vg->getExtentSize()));
+    QLabel *ext_size_label = new QLabel( i18n("Extent size: %1").arg(sizeToString(m_vg->getExtentSize())) );
 
-    QLabel *current_lv_size_label = new QLabel("Current size: " + 
-					       sizeToString(m_current_lv_size));
+    QLabel *current_lv_size_label = new QLabel( i18n("Current size: %1").arg(sizeToString(m_current_lv_size)) );
 
     layout->addWidget(ext_size_label);
     layout->addWidget(current_lv_size_label);
     QHBoxLayout *size_layout = new QHBoxLayout();
-    size_layout->addWidget(new QLabel("New size: "));
+    size_layout->addWidget(new QLabel( i18n("New size: ") ));
     
     m_size_edit = new KLineEdit();
     m_size_validator = new KDoubleValidator(m_size_edit);

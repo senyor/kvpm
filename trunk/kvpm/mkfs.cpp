@@ -3,7 +3,7 @@
  * 
  * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
  *
- * This file is part of the Kvpm project.
+ * This file is part of the kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License,  version 3, as 
@@ -16,7 +16,7 @@
 #include <KMessageBox>
 #include <KDialog>
 #include <KProgressDialog>
-
+#include <KLocale>
 #include <QtGui>
 
 #include "logvol.h"
@@ -35,8 +35,9 @@ bool make_fs(LogVol *logicalVolume)
 	
 	QString full_name = logicalVolume->getFullName();
     
-	QString error_message = "The volume: <b>" + full_name + "</b> is mounted. It must be ";
-	error_message.append("unmounted before a new filesystem can be written on it");
+	QString error_message = i18n("The volume: <b>%1</b> is mounted. It must be "
+				     "unmounted before a new filesystem " 
+				     "can be written on it").arg(full_name);
 
 	if( logicalVolume->isMounted() ){
 	    KMessageBox::error(0, error_message);
@@ -57,8 +58,9 @@ bool make_fs(StoragePartition *partition)
 
 	QString full_name = partition->getPartitionPath();
     
-	QString error_message = "The partition: <b>" + full_name + "</b> is mounted. It must ";
-	error_message.append("be unmounted before a new filesystem can be written on it");
+	QString error_message = i18n("The partition: <b>%1</b> is mounted. It must "
+				     "be unmounted before a new filesystem " 
+				     "can be written on it").arg(full_name);
 
 	if( partition->isMounted() ){
 	    KMessageBox::error(0, error_message);
@@ -75,8 +77,8 @@ bool make_fs(StoragePartition *partition)
 
 bool call_dialog(QString devicePath)
 {
-    QString warning_message = "By writing a new file system to this device or volume";
-    warning_message.append(" any existing data on it will be lost. ");
+    QString warning_message = i18n("By writing a new file system to this device or volume "
+				   "any existing data on it will be lost.");
 
     if(KMessageBox::warningContinueCancel(0, warning_message) != KMessageBox::Continue){
 	return false;
@@ -85,7 +87,7 @@ bool call_dialog(QString devicePath)
 	MkfsDialog dialog(devicePath);
 	dialog.exec();
 	if(dialog.result() == QDialog::Accepted){
-	    ProcessProgress mkfs(dialog.arguments(), "Writing filesystem...", true);
+	    ProcessProgress mkfs(dialog.arguments(), i18n("Writing filesystem..."), true);
 	    return true;
 	}
 	else{
@@ -110,20 +112,20 @@ MkfsDialog::MkfsDialog(QString devicePath, QWidget *parent) :
     radio_layout->addLayout(radio_right_layout);
     dialog_body->setLayout(layout);
 
-    QLabel *label = new QLabel("Device");
+    QLabel *label = new QLabel( i18n("Device") );
     label->setAlignment(Qt::AlignCenter);
     layout->addWidget(label);
     label = new QLabel(m_path);
     label->setAlignment(Qt::AlignCenter);
     layout->addWidget(label);
 
-    radio_box = new QGroupBox("Filesystem");
+    radio_box = new QGroupBox( i18n("Filesystem") );
     ext2   = new QRadioButton("Ext2", this);
     ext3   = new QRadioButton("Ext3", this);
     reiser = new QRadioButton("Reiser", this);
     jfs    = new QRadioButton("jfs", this);
     xfs    = new QRadioButton("xfs", this);
-    swap   = new QRadioButton("Linux swap", this);
+    swap   = new QRadioButton( i18n("Linux swap"), this);
     vfat   = new QRadioButton("ms-dos", this);
     radio_left_layout->addWidget(ext2);
     radio_left_layout->addWidget(ext3);

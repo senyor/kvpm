@@ -3,7 +3,7 @@
  * 
  * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
  *
- * This file is part of the Kvpm project.
+ * This file is part of the kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License,  version 3, as 
@@ -17,7 +17,7 @@
 #include <KAboutData>
 #include <KCmdLineArgs>
 #include <KMessageBox>
-
+#include <KLocale>
 #include <QtGui>
 
 #include "executablefinder.h"
@@ -38,7 +38,7 @@ int main(int argc, char **argv)
 {
     
     KAboutData aboutData( "kvpm", 0,
-			  ki18n("kvpm"), "0.4.5",
+			  ki18n("kvpm"), "0.4.6",
 			  ki18n("Linux volume and partition manager for KDE"),
 			  KAboutData::License_GPL,
 			  ki18n("Copyright (c) 2008 Benjamin Scott") );
@@ -50,8 +50,8 @@ int main(int argc, char **argv)
     if( geteuid() != 0 ){
 	
 	KMessageBox::error( 0, 
-			    "This program must be run as root (uid = 0)",
-			    "Insufficient Privilege");
+			    i18n("This program must be run as root (uid = 0) "),
+			    i18n("Insufficient Privilege") );
 	return 0;
     }
 
