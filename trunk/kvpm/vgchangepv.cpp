@@ -3,7 +3,7 @@
  * 
  * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
  *
- * This file is part of the Kvpm project.
+ * This file is part of the kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License,  version 3, as 
@@ -13,6 +13,7 @@
  */
 
 
+#include <KLocale>
 #include <QtGui>
 
 #include "processprogress.h"
@@ -30,7 +31,7 @@ bool change_vg_pv(VolGroup *volumeGroup)
     VGChangePVDialog dialog(volumeGroup);
     dialog.exec();
     if(dialog.result() == QDialog::Accepted){
-        ProcessProgress change( dialog.arguments(), "Changing limits..." );
+        ProcessProgress change( dialog.arguments(), i18n("Changing limits...") );
 	return true;
     }
     else
@@ -56,11 +57,11 @@ VGChangePVDialog::VGChangePVDialog(VolGroup *volumeGroup, QWidget *parent) :
     QVBoxLayout *layout = new QVBoxLayout();
     dialog_body->setLayout(layout);
 
-    QLabel *name_label = new QLabel("Volume group: <b>" + m_vg_name);
+    QLabel *name_label = new QLabel( i18n("Volume group: <b>%1</b>").arg(m_vg_name) );
     name_label->setAlignment(Qt::AlignCenter);
     layout->addWidget(name_label);
 
-    m_limit_pvs = new QGroupBox("Limit maximum physical volumes");
+    m_limit_pvs = new QGroupBox( i18n("Limit maximum physical volumes") );
     QVBoxLayout *groupbox_layout = new QVBoxLayout();
     m_limit_pvs->setLayout(groupbox_layout);
 
@@ -71,26 +72,26 @@ VGChangePVDialog::VGChangePVDialog(VolGroup *volumeGroup, QWidget *parent) :
     layout->addWidget(current_limit_label);
 
     if( m_vg->getPhysVolMax() )
-	current_limit_label->setText( QString( "Current limit: %1" ).arg( m_vg->getPhysVolMax() ) );
+	current_limit_label->setText( i18n("Current limit: %1").arg( m_vg->getPhysVolMax() ) );
     else
-	current_limit_label->setText( QString("Current limit: unlimited") );
+	current_limit_label->setText( i18n("Current limit: unlimited") );
     
     m_max_pvs = new QSpinBox();
     groupbox_layout->addWidget(m_max_pvs);
 
     if(m_vg->getFormat() == "lvm1"){
-	message_label->setText( (QString) "This volume group is in lvm1 format. Unless you" +
-	                       " have a reason to set the limit lower, it is normally best" +
-	                       " to leave the it at the maximum allowed: 255." );
+        message_label->setText( i18n("This volume group is in lvm1 format. Unless you "
+				     "have a reason to set the limit lower, it is normally best"
+				     "to leave the it at the maximum allowed: 255.") );
 	
 	m_max_pvs->setEnabled(true);
 	m_max_pvs->setRange(pv_count, 255);
 	m_max_pvs->setValue(255);
     }
     else{
-	message_label->setText( (QString) "This volume group is in lvm2 format. Unless you" +
-	                       " have a reason to limit the maximum physical volumes it is" +
-	                       " normally best to leave them unlimited" );
+        message_label->setText( i18n("This volume group is in lvm2 format. Unless you "
+				"have a reason to limit the maximum physical volumes it is "
+				"normally best to leave them unlimited") );
 	
 	m_limit_pvs->setCheckable(true);
 	m_limit_pvs->setChecked(false);

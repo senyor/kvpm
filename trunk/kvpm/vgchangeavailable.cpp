@@ -3,7 +3,7 @@
  * 
  * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
  *
- * This file is part of the Kvpm project.
+ * This file is part of the kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License,  version 3, as 
@@ -14,7 +14,7 @@
 
 
 #include <KMessageBox>
-
+#include <KLocale>
 #include <QtGui>
 
 #include "logvol.h"
@@ -43,8 +43,8 @@ bool change_vg_available(VolGroup *volumeGroup)
     }
     
     if( has_mounted ){
-	message.append("Groups with mounted logical volumes ");
-	message.append("may not be made unavailable");
+	message = i18n("Groups with mounted logical volumes "
+		       "may not be made unavailable");
 
 	KMessageBox::error( 0, message);
 	
@@ -52,8 +52,8 @@ bool change_vg_available(VolGroup *volumeGroup)
     }
     else{
 	
-	message.append("Make volume group: <b>" + vg_name + "</b>");
-	message.append(" available for use?");
+	message = i18n("Make volume group: <b>%1</b> "
+		       "available for use?").arg(vg_name);
 
 	result = KMessageBox::questionYesNo( 0, message);
     
@@ -71,7 +71,7 @@ bool change_vg_available(VolGroup *volumeGroup)
 	    return false;
 	}
 
-	ProcessProgress resize(args, "Changing vg availability...");
+	ProcessProgress resize(args, i18n("Changing volume group availability..."));
 
 	return true;
     }
