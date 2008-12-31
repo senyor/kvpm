@@ -13,6 +13,8 @@
  */
 
 
+#include <KHelpMenu>
+#include <KAboutData>
 #include <KStandardAction>
 #include <KLocale>
 #include <QtGui>
@@ -49,14 +51,30 @@ TopWindow::TopWindow(QWidget *parent):KMainWindow(parent)
     KMenu *tool_menu     = new KMenu( i18n("Tools") );
     KMenu *groups_menu   = new KMenu( i18n("Volume Groups") );
     KMenu *settings_menu = new KMenu( i18n("Settings") );
-    
-    KMenu *help_menu = helpMenu( i18n("Linux volume and partition manager for KDE") );
+
+
+    KAboutData *about_data = new KAboutData( QByteArray("kvpm"),
+					     QByteArray(""),
+					     ki18n("kvpm"),
+					     QByteArray("0.4.6"),
+					     ki18n("Linux volume and partition manager for KDE.\n"
+						   "This program is under development and testing\n"
+						   "and should not be used on critical systems.\n"
+						   "Bug reports and comments are welcomed.\n"),
+					     KAboutData::License_GPL_V3, 
+					     ki18n("(c) 2008, 2009, Benjamin Scott"),
+					     ki18n(""),
+					     QByteArray("http://sourceforge.net/projects/kvpm/"),
+					     QByteArray("benscott@nwlink.com") );
+
+
+    KHelpMenu *help_menu = new KHelpMenu( this, about_data );
 
     menuBar()->addMenu(file_menu);
     menuBar()->addMenu(tool_menu);
     menuBar()->addMenu(groups_menu);
     menuBar()->addMenu(settings_menu);
-    menuBar()->addMenu(help_menu);
+    menuBar()->addMenu( help_menu->menu() );
 
     quit_action =  KStandardAction::quit(qApp, SLOT( quit() ), file_menu );
 

@@ -19,6 +19,7 @@
 #include <KMessageBox>
 #include <KLocale>
 #include <QtGui>
+#include <QString>
 
 #include "executablefinder.h"
 #include "topwindow.h"
@@ -39,8 +40,8 @@ int main(int argc, char **argv)
     
     KAboutData aboutData( "kvpm", 0,
 			  ki18n("kvpm"), "0.4.6",
-			  ki18n("Linux volume and partition manager for KDE"),
-			  KAboutData::License_GPL,
+			  ki18n( "Linux volume and partition manager for KDE. This program is still in testing and development and not recommended for production systems"),
+			  KAboutData::License_GPL_V3,
 			  ki18n("Copyright (c) 2008 Benjamin Scott") );
 
     KCmdLineArgs::init( argc, argv, &aboutData);
@@ -62,4 +63,5 @@ int main(int argc, char **argv)
     MainWindow->show();
     return kvpm.exec();
 }
+
 
