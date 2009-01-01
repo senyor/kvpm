@@ -105,7 +105,7 @@ bool unmount_filesystem(LogVol *logicalVolume)
     if( logicalVolume->isMounted() ){
 
         unused_message = i18n("The volume <b>%1</b> is mounted on <b>%2</b> "
-			      "Do you want to unmount it?" ).arg(name).arg(mount_points[0]);
+			      "Do you want to unmount it?", name, mount_points[0]);
 
         if( mount_points.size() == 1 ){
             if( KMessageBox::questionYesNo(0, unused_message) == 3 ){     // 3 is "yes"
@@ -122,7 +122,7 @@ bool unmount_filesystem(LogVol *logicalVolume)
         }
     }
 
-    KMessageBox::error(0, i18n("The volume: <b>%1</b> does not seem to be mounted").arg(name) );
+    KMessageBox::error(0, i18n("The volume: <b>%1</b> does not seem to be mounted", name) );
     return false;
 }
 

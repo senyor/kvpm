@@ -158,10 +158,20 @@ bool removeMountEntry(QString mountPoint)
     
     FILE *fp_old = setmntent(mount_table_old, "r");
 
+
+/* Multiple devices can be mounted on a directory but only the
+   last one mounted will be unmounted at one time. So only the
+   last mtab entry gets deleted upon unmounting  */
+
     while( (mount_entry = getmntent(fp_old)) ){
 	temp_entry = copyMountEntry(mount_entry);
-	if( QString(temp_entry->mnt_dir) != mountPoint )
-	    mount_entry_list.append(temp_entry);
+	mount_entry_list.append(temp_entry);
+    }
+    for( int x = mount_entry_list.size() - 1; x >= 0; x--){
+        if( QString( (mount_entry_list[x])->mnt_dir ) == mountPoint ){
+	    mount_entry_list.removeAt(x);
+	    break;
+	}
     }
     endmntent(fp_old);
 
