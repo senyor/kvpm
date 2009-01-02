@@ -1,9 +1,9 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009 Benjamin Scott   <benscott@nwlink.com>
  *
- * This file is part of the Kvpm project.
+ * This file is part of the kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License,  version 3, as 
@@ -162,7 +162,7 @@ void LVActionsMenu::setup(LogVol *lv)
 		lv_reduce_action->setEnabled(false);
 		lv_remove_action->setEnabled(false);
 		unmount_filesystem_action->setEnabled(true);
-		mount_filesystem_action->setEnabled(false);
+		mount_filesystem_action->setEnabled(true);
 	    }
 	    else{
 		lv_mkfs_action->setEnabled(true);
