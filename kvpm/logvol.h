@@ -40,7 +40,10 @@ class LogVol
     QString m_policy;        // the allocation policy
     QString m_state;         // the lv state
     QString m_vg_name;           // associated volume group name
+
     QStringList m_mount_points;  // empty if not mounted
+    QList<int> m_mount_position; // if mountpoint has multiple mounts 
+                                 // position 1 is the most recently mounted one.
 
     double  m_snap_percent;      // the percentage used, if this is a snapshot
     double  m_copy_percent;      // the percentage of extents moved, if pvmove underway
@@ -87,6 +90,7 @@ class LogVol
     QStringList getDevicePath(int segment);     
     QStringList getDevicePathAll();         // full path of physical volumes for all segments
     QStringList getMountPoints();
+    QList<int>  getMountPosition();
     long long getSpaceOnPhysicalVolume(QString physicalVolume);
     long long getExtents();
     long long getSize();
