@@ -33,23 +33,28 @@
    KMessageBox type dialogs are used otherwise */
 
 
-UnmountDialog::UnmountDialog(QString device, QStringList mountPoints, QWidget *parent) : 
+UnmountDialog::UnmountDialog(QString device, QStringList mountPoints, 
+			     QList<int> mountPosition, QWidget *parent) : 
     KDialog(parent),
     m_mount_points(mountPoints)
 {
 
     NoMungeCheck *temp_check;
-    QString unmount_message;
-    
+    bool checks_disabled = false;
     QWidget *dialog_body = new QWidget(this);
     setMainWidget(dialog_body);
 
     QVBoxLayout *layout    = new QVBoxLayout();
     dialog_body->setLayout(layout);
 
-    unmount_message = i18n( "<b>%1</b> is mounted at multiple locatations. "
-			    "Check the boxes for any you "
-			    "wish to unmount." ).arg(device);
+    QString unmount_message = i18n( "<b>%1</b> is mounted at multiple locatations. "
+				    "Check the boxes for any you "
+				    "wish to unmount." ).arg(device);
+
+    QString position_message = i18n( "One or more unmount selections have been disabled. "
+				     "Another device or volume is mounted over the same "
+				     "mount point and must be unmounted first" );
+
 
     QLabel *unmount_message_label = new QLabel();
     unmount_message_label->setText(unmount_message);
@@ -63,8 +68,21 @@ UnmountDialog::UnmountDialog(QString device, QStringList mountPoints, QWidget *p
     
     for(int x = 0; x < m_mount_points.size(); x++){
 	temp_check = new NoMungeCheck( m_mount_points[x] );
+	if( mountPosition[x] > 1 ){
+      	    temp_check->setChecked(false);
+	    temp_check->setEnabled(false);
+	    checks_disabled = true;
+	}
 	mount_group_layout->addWidget(temp_check);
 	m_check_list.append(temp_check);
+    }
+    if( checks_disabled ){
+
+    QLabel *position_message_label = new QLabel();
+    position_message_label->setText(position_message);
+    position_message_label->setWordWrap(true);
+    layout->addWidget(position_message_label);
+
     }
 
     connect(this, SIGNAL( accepted() ), 
@@ -96,27 +114,42 @@ void UnmountDialog::unmountFilesystems()
 
 bool unmount_filesystem(LogVol *logicalVolume)
 {
-    QStringList mount_points = logicalVolume->getMountPoints();
+    QStringList mount_points   = logicalVolume->getMountPoints();
+    QList<int>  mount_position = logicalVolume->getMountPosition();
+
     QString name = logicalVolume->getName();
     QString vg_name = logicalVolume->getVolumeGroupName();
-    QString unused_message;
+
+    QString unused_message = i18n("The volume <b>%1</b> is mounted on <b>%2</b> "
+				  "Do you want to unmount it?", name, mount_points[0]);
+
+    QString position_message = i18n("Another device or volume is mounted at the same "
+				    "mount point over this one. It must be unmounted "
+				    "before this one can be unmounted" );
+
     QString unmount_point;                 // mount point to unmount
 
     if( logicalVolume->isMounted() ){
 
-        unused_message = i18n("The volume <b>%1</b> is mounted on <b>%2</b> "
-			      "Do you want to unmount it?", name, mount_points[0]);
 
         if( mount_points.size() == 1 ){
-            if( KMessageBox::questionYesNo(0, unused_message) == 3 ){     // 3 is "yes"
-                unmount_point = mount_points[0];
-                return( unmount_filesystem( unmount_point ) );
-            }
-            else
-                return false;
+
+	    if( mount_position[0] < 2 )  {
+                if( KMessageBox::questionYesNo(0, unused_message) == 3 ){     // 3 is "yes"
+                    unmount_point = mount_points[0];
+                    return( unmount_filesystem( unmount_point ) );
+                }
+		else
+                    return false;
+	    }
+	    else{
+	        KMessageBox::error(0, position_message);
+	        return false;
+	    }
+
         }
         else{
-            UnmountDialog dialog("/dev/mapper/" + vg_name + "-" + name  ,mount_points);
+	    UnmountDialog dialog("/dev/mapper/" + vg_name + "-" + name  ,mount_points, mount_position);
             dialog.exec();
             return true;
         }
@@ -128,17 +161,21 @@ bool unmount_filesystem(LogVol *logicalVolume)
 
 bool unmount_filesystem(StoragePartition *partition)
 {
+    QList<int> mount_position; 
     QStringList mount_points = partition->getMountPoints();
     QString path = partition->getPartitionPath();
 
-    QString unused_message;
+    QString unused_message = i18n("The partition <b>%1</b> is mounted on <b>%2</b> "
+				  "Do you want to unmount it?").arg(path).arg(mount_points[0]);
+
+    QString position_message = i18n("Another device or volume is mounted at the same "
+				    "mount point over this one. It must be unmounted "
+				    "before this one can be unmounted" );
+
     QString unmount_point;                 // mount point to unmount
 
     if( partition->isMounted() ){
     
-	unused_message = i18n("The partition <b>%1</b> is mounted on <b>%2</b> "
-			      "Do you want to unmount it?").arg(path).arg(mount_points[0]);
-
 	if( mount_points.size() == 1 ){
 	    if( KMessageBox::questionYesNo(0, unused_message) == 3 ){     // 3 is "yes"
 		unmount_point = mount_points[0];
@@ -148,7 +185,7 @@ bool unmount_filesystem(StoragePartition *partition)
 		return false;
 	}
 	else{
-	    UnmountDialog dialog(path, mount_points);
+	    UnmountDialog dialog(path, mount_points, mount_position );
 	    dialog.exec();
 	    return true;
 	}

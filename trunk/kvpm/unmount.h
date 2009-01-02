@@ -36,7 +36,8 @@ Q_OBJECT
     QStringList m_mount_points;
  
  public:
-    UnmountDialog(QString device, QStringList mountPoints, QWidget *parent = 0);
+    UnmountDialog(QString device, QStringList mountPoints, 
+		  QList<int> mountPosition, QWidget *parent = 0);
 
  private slots:   
     void unmountFilesystems();
