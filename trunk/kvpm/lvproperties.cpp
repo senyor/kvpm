@@ -3,7 +3,7 @@
  * 
  * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
  *
- * This file is part of the Kvpm project.
+ * This file is part of the kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License,  version 3, as 
@@ -119,6 +119,7 @@ LVProperties::LVProperties(LogVol *logicalVolume, int segment, QWidget *parent):
         layout->addWidget(new QLabel( i18n("Origin: %1").arg(logicalVolume->getOrigin()) ));
     
     QStringList mount_points = logicalVolume->getMountPoints();
+    QList<int>  mount_position = logicalVolume->getMountPosition();
 
     if( !logicalVolume->isMirrorLeg() && 
 	!logicalVolume->isMirrorLog() &&
@@ -149,10 +150,18 @@ LVProperties::LVProperties(LogVol *logicalVolume, int segment, QWidget *parent):
 	    layout->addWidget(temp_label);
 	}
 	else{
+
 	    for(int x = 0; x < mount_points.size(); x++){
-		temp_label = new QLabel( mount_points[x] );
-		temp_label->setToolTip( mount_points[x] );
-		layout->addWidget( temp_label );
+	        if(mount_position[x] > 0){
+		    temp_label = new QLabel( QString("%1 <%2>").arg(mount_points[x]).arg(mount_position[x]) );
+		    temp_label->setToolTip( QString("%1 <%2>").arg(mount_points[x]).arg(mount_position[x]) );
+		    layout->addWidget( temp_label );
+		}
+		else{
+		    temp_label = new QLabel( mount_points[x] );
+		    temp_label->setToolTip( mount_points[x] );
+		    layout->addWidget( temp_label );
+		}
 	    }
 	}
     }

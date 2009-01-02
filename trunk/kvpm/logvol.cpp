@@ -256,7 +256,8 @@ LogVol::LogVol(QStringList lvDataList, MountInformationList *mountInformationLis
 /* To Do: get all the rest of the mount info, not just mount points */
 
     for(int x = 0; x < m_mount_info_list.size(); x++){
-	m_mount_points <<  m_mount_info_list[x]->getMountPoint();
+        m_mount_points.append( m_mount_info_list[x]->getMountPoint() );
+	m_mount_position.append( m_mount_info_list[x]->getMountPosition() );
 	delete m_mount_info_list[x];
     }
     m_mount_info_list.clear();
@@ -517,9 +518,19 @@ QString LogVol::getOrigin()
     return  m_origin;
 }
 
+/* TO DO: Merge these next two lists in a single
+   list of objects containing mount point and relevent
+   mount position. See "mountinfo.h" for more on mount 
+   position. */
+
 QStringList LogVol::getMountPoints()
 {
     return m_mount_points;
+}
+
+QList<int> LogVol::getMountPosition()
+{
+    return m_mount_position;
 }
 
 double LogVol::getSnapPercent()

@@ -219,30 +219,26 @@ bool hasMountEntry(QString device)
    filesystem's mount point if the device is has an entry
    in the table. It returns NULL on failure */
 
-QString getMountEntry(QString device)
+
+QStringList getMountedDevices(QString mountPoint)
 {
     const char mount_table[] = _PATH_MOUNTED;
     mntent *mount_entry;
-    QString name_entry;                // returned entry to compare to
-    QString mount_dir;
     
+    QStringList mounted_devices;
+
     FILE *fp = setmntent(mount_table, "r");
     if(fp){
 	while( (mount_entry = getmntent(fp)) ){
-	    name_entry = QString( mount_entry->mnt_fsname );
-	    if(name_entry == device){
-		mount_dir = QString( mount_entry->mnt_dir );
-		endmntent(fp);
-		return mount_dir;
+
+	    if( QString( mount_entry->mnt_dir ) == mountPoint ){
+	       mounted_devices.append( QString( mount_entry->mnt_fsname ) );
+
 	    }
 	}
 	endmntent(fp);
-
-	return NULL;
     }
-    else{
-	return NULL;
-    }
+    return mounted_devices;
 }
 
 

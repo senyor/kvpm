@@ -20,6 +20,7 @@
 
 #include "logvol.h"
 #include "mountinfo.h"
+#include "mountentry.h"
 #include "volgroup.h"
 
 
@@ -58,6 +59,9 @@ QList<MountInformation *> MountInformationList::getMountInformation(QString devi
 
 MountInformation::MountInformation(mntent *mountTableEntry, QObject *parent) : QObject(parent)
 {
+
+    QStringList mounted_devices;
+
     m_device_name     = QString( mountTableEntry->mnt_fsname );
     m_mount_point     = QString( mountTableEntry->mnt_dir );
     m_filesystem_type = QString( mountTableEntry->mnt_type );
@@ -65,6 +69,22 @@ MountInformation::MountInformation(mntent *mountTableEntry, QObject *parent) : Q
 
     m_dump_frequency = mountTableEntry->mnt_freq;
     m_dump_passno    = mountTableEntry->mnt_passno;
+    m_mount_position = 0;
+
+    mounted_devices = getMountedDevices(m_mount_point);
+    if( mounted_devices.size() > 1 ){
+        m_mount_position = 1;
+        for( int x = mounted_devices.size() - 1; x >= 0; x-- ){
+	    if( m_device_name == mounted_devices[x] )
+	        break;
+	    else
+	        m_mount_position++;
+	}
+    }
+    else{
+        m_mount_position = 0;
+    }
+
 }
 
 QString MountInformation::getDeviceName()
@@ -95,4 +115,9 @@ int MountInformation::getDumpFrequency()
 int MountInformation::getDumpPassNumber()
 {
     return m_dump_passno;
+}
+
+int MountInformation::getMountPosition()
+{
+    return m_mount_position;
 }

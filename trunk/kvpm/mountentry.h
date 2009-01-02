@@ -3,7 +3,7 @@
  * 
  * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
  *
- * This file is part of the Kvpm project.
+ * This file is part of the kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License,  version 3, as 
@@ -33,7 +33,7 @@ mntent *copyMountEntry(mntent *mountEntry);
 bool hasMountEntry(QString device);
 bool hasFstabEntry(QString device);
 
-QString getMountEntry(QString device);
+QStringList getMountedDevices(QString mountPoint); // Returns devices mounted to mountPoint
 QString getFstabEntry(QString device);
 
 bool rename_mount_entries(QString oldName, QString newName);

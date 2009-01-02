@@ -43,6 +43,11 @@ class MountInformation : public QObject
     int m_dump_frequency; 
     int m_dump_passno;
 
+    int m_mount_position;         // More than on device may be mounted on a mount point.
+                                  // This number is zero if nothing else is mounted on
+                                  // this mount point. Otherwise numbers go in reverse 
+                                  // of mount order. 1 is the *last* one mounted, highest 
+                                  // number is the first one mounted. 
  public:
     MountInformation(mntent *mountTableEntry, QObject *parent = 0);
     QString getDeviceName();
@@ -51,7 +56,7 @@ class MountInformation : public QObject
     QString getMountOptions();
     int getDumpFrequency();
     int getDumpPassNumber();
-    
+    int getMountPosition();    
 };
 
 #endif
