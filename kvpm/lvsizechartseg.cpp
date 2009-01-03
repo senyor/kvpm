@@ -160,13 +160,13 @@ void LVChartSeg::changeLogicalVolume()
 void LVChartSeg::mountFilesystem()
 {
     if( mount_filesystem(m_lv) )
-	MainWindow->rebuildVolumeGroupTab();
+	MainWindow->reRun();
 }
 
 void LVChartSeg::unmountFilesystem()
 {
     if( unmount_filesystem(m_lv) )
-	MainWindow->rebuildVolumeGroupTab();
+	MainWindow->reRun();
 }
 
 void LVChartSeg::movePhysicalExtents()

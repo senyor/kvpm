@@ -40,6 +40,7 @@ DeviceTab::DeviceTab(QList<StorageDevice *> Devices, QWidget *parent) :
     tree = new DeviceTreeView(this);
     tree->setModel(model);
     tree->expandAll();
+    tree->setAlternatingRowColors(true); 
     tree->resizeColumnToContents(0);
     tree->resizeColumnToContents(3);
     layout->addWidget(size_chart);

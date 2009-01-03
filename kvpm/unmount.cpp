@@ -77,12 +77,10 @@ UnmountDialog::UnmountDialog(QString device, QStringList mountPoints,
 	m_check_list.append(temp_check);
     }
     if( checks_disabled ){
-
-    QLabel *position_message_label = new QLabel();
-    position_message_label->setText(position_message);
-    position_message_label->setWordWrap(true);
-    layout->addWidget(position_message_label);
-
+        QLabel *position_message_label = new QLabel();
+	position_message_label->setText(position_message);
+	position_message_label->setWordWrap(true);
+	mount_group_layout->addWidget(position_message_label);
     }
 
     connect(this, SIGNAL( accepted() ), 
@@ -146,8 +144,10 @@ bool unmount_filesystem(LogVol *logicalVolume)
         }
         else{
 	    UnmountDialog dialog("/dev/mapper/" + vg_name + "-" + name  ,mount_points, mount_position);
-            dialog.exec();
-            return true;
+	    if( dialog.exec() )
+	      return true;
+	    else
+	      return false;
         }
     }
 
@@ -187,8 +187,11 @@ bool unmount_filesystem(StoragePartition *partition)
 	}
 	else{
   	    UnmountDialog dialog(path, mount_points, mount_position );
-	    dialog.exec();
-	    return true;
+
+	    if( dialog.exec() )
+	      return true;
+	    else
+	      return false;
 	}
     }
 
