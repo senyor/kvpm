@@ -25,6 +25,7 @@ PartitionProperties::PartitionProperties( StoragePartition *Partition, QWidget *
     : QWidget(parent) 
 {
     QStringList mount_points;
+    QList<int> mount_position;
     PhysVol *pv;
     
     QVBoxLayout *layout = new QVBoxLayout();
@@ -40,11 +41,13 @@ PartitionProperties::PartitionProperties( StoragePartition *Partition, QWidget *
     else
 	layout->addWidget( new QLabel( i18n("Partition: %1").arg(path) ) );
 
-    mount_points = Partition->getMountPoints();
-    
+    mount_points   = Partition->getMountPoints();
+    mount_position = Partition->getMountPosition();
 
-    for(int x = 0; x < mount_points.size(); x++)
-      layout->addWidget( new QLabel( i18n("Mount point: %1").arg(mount_points[x]) ) );
-
+    for(int x = 0; x < mount_points.size(); x++){
+        if( mount_position[x] > 1 )
+	    mount_points[x] = mount_points[x] + QString("<%1>").arg(mount_position[x]);
+        layout->addWidget( new QLabel( i18n("Mount point: %1").arg(mount_points[x]) ) );
+    }
 }
 
