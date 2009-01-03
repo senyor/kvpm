@@ -130,10 +130,7 @@ bool unmount_filesystem(LogVol *logicalVolume)
     QString unmount_point;                 // mount point to unmount
 
     if( logicalVolume->isMounted() ){
-
-
         if( mount_points.size() == 1 ){
-
 	    if( mount_position[0] < 2 )  {
                 if( KMessageBox::questionYesNo(0, unused_message) == 3 ){     // 3 is "yes"
                     unmount_point = mount_points[0];
@@ -146,7 +143,6 @@ bool unmount_filesystem(LogVol *logicalVolume)
 	        KMessageBox::error(0, position_message);
 	        return false;
 	    }
-
         }
         else{
 	    UnmountDialog dialog("/dev/mapper/" + vg_name + "-" + name  ,mount_points, mount_position);
@@ -161,8 +157,8 @@ bool unmount_filesystem(LogVol *logicalVolume)
 
 bool unmount_filesystem(StoragePartition *partition)
 {
-    QList<int> mount_position; 
-    QStringList mount_points = partition->getMountPoints();
+    QList<int> mount_position = partition->getMountPosition();
+    QStringList mount_points  = partition->getMountPoints();
     QString path = partition->getPartitionPath();
 
     QString unused_message = i18n("The partition <b>%1</b> is mounted on <b>%2</b> "
@@ -175,22 +171,28 @@ bool unmount_filesystem(StoragePartition *partition)
     QString unmount_point;                 // mount point to unmount
 
     if( partition->isMounted() ){
-    
-	if( mount_points.size() == 1 ){
-	    if( KMessageBox::questionYesNo(0, unused_message) == 3 ){     // 3 is "yes"
-		unmount_point = mount_points[0];
-		return( unmount_filesystem( unmount_point ) );
+        if( mount_points.size() == 1 ){
+	    if( mount_position[0] < 2 )  {
+	        if( KMessageBox::questionYesNo(0, unused_message) == 3 ){     // 3 is "yes"
+		  unmount_point = mount_points[0];
+		  return( unmount_filesystem( unmount_point ) );
+		}
+		else
+		    return false;
 	    }
-	    else
+	    else{
+	        KMessageBox::error(0, position_message);
 		return false;
+	    }
 	}
 	else{
-	    UnmountDialog dialog(path, mount_points, mount_position );
+  	    UnmountDialog dialog(path, mount_points, mount_position );
 	    dialog.exec();
 	    return true;
 	}
     }
-    KMessageBox::error(0, i18n("The partition: <b>%1</b> does not seem to be mounted").arg(path)); 
+
+    KMessageBox::error(0, i18n("The partition: <b>%1</b> does not seem to be mounted", path) ); 
     return false;
 }
 

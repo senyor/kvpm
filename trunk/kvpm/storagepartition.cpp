@@ -124,3 +124,13 @@ QStringList StoragePartition::getMountPoints()
 
     return mount_points;
 }
+
+QList<int> StoragePartition::getMountPosition()
+{
+  QList<int> mount_position;
+    
+    for(int x = 0; x < m_device_mount_info_list.size(); x++)
+	mount_position.append( m_device_mount_info_list[x]->getMountPosition() );
+
+    return mount_position;
+}
