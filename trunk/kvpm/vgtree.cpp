@@ -379,13 +379,13 @@ void VGTree::removeMirrorLeg()
 void VGTree::mountFilesystem()
 {
     if( mount_filesystem(m_lv) )
-	MainWindow->rebuildVolumeGroupTab();
+	MainWindow->reRun();
 }
 
 void VGTree::unmountFilesystem()
 {
     if( unmount_filesystem(m_lv) ) 
-	MainWindow->rebuildVolumeGroupTab();
+	MainWindow->reRun();
 }
 
 void VGTree::adjustColumnWidth(QTreeWidgetItem *)
