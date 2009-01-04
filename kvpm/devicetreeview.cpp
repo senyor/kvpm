@@ -89,7 +89,7 @@ void DeviceTreeView::popupContextMenu(QPoint point)
 
 
 	if(item->data(6) == "yes"){
-	    mount_action->setEnabled(false);
+	    mount_action->setEnabled(true);
 	    unmount_action->setEnabled(true);
 	}
 	else if(item->data(6) == "no"){

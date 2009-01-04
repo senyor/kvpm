@@ -120,7 +120,7 @@ void DeviceChartSeg::popupContextMenu(QPoint point)
     (void)point;
 
     if(m_item->data(6) == "yes"){
-	m_mount_action->setEnabled(false);
+	m_mount_action->setEnabled(true);
 	m_unmount_action->setEnabled(true);
     }
     else if(m_item->data(6) == "no"){

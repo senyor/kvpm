@@ -88,32 +88,21 @@ LVProperties::LVProperties(LogVol *logicalVolume, int segment, QWidget *parent):
 	    }
 
 	}
+	if( !(logicalVolume->isMirrorLeg() || logicalVolume->isMirrorLog() )){
+	    layout->addWidget(new QLabel( i18n("Allocation policy: %1").arg(logicalVolume->getPolicy())));
+	}
     }
     else{
 	temp_label = new QLabel( "<b> " + logicalVolume->getName() + "</b>" );
 	temp_label->setAlignment(Qt::AlignCenter);
 	layout->addWidget(temp_label);
+
 	extents = logicalVolume->getExtents();
-	stripes = logicalVolume->getSegmentStripes(0);
-	stripe_size = logicalVolume->getSegmentStripeSize(0);
-
 	layout->addWidget(new QLabel( i18n("Extents: %1").arg(extents) ));
-
-	if( !logicalVolume->isMirror() ){
-
-	    if( stripes != 1 ){
-		layout->addWidget(new QLabel( i18n("Stripes: %1").arg(stripes) ));
-		layout->addWidget(new QLabel( i18n("Stripe size: %1").arg(stripe_size) ));
-	    }
-	    else{
-		layout->addWidget(new QLabel( i18n("Stripes: none") ));
-		layout->addWidget(new QLabel( i18n("Stripe size: n/a") ));
-	    }
-
+	if( !( logicalVolume->isMirrorLeg() || logicalVolume->isMirrorLog() )){
+	    layout->addWidget(new QLabel( i18n("Allocation policy: %1").arg(logicalVolume->getPolicy())));
 	}
     }
-
-    layout->addWidget(new QLabel( i18n("Allocation policy: %1").arg(logicalVolume->getPolicy())));
 
     if(logicalVolume->isSnap())
         layout->addWidget(new QLabel( i18n("Origin: %1").arg(logicalVolume->getOrigin()) ));
