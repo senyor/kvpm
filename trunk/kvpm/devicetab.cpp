@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -28,32 +28,40 @@
 
 
 DeviceTab::DeviceTab(QList<StorageDevice *> Devices, QWidget *parent) : 
-    QWidget(parent), devs(Devices)
+    QWidget(parent), m_devs(Devices)
 {
 
     QVBoxLayout *layout;
 
     layout = new QVBoxLayout;
-    StorageDeviceModel *model = new StorageDeviceModel(devs, this);
-    DeviceSizeChart *size_chart = new DeviceSizeChart(model, this);
+    m_model = new StorageDeviceModel(m_devs, this);
+    DeviceSizeChart *size_chart = new DeviceSizeChart(m_model, this);
 
-    tree = new DeviceTreeView(this);
-    tree->setModel(model);
-    tree->expandAll();
-    tree->setAlternatingRowColors(true); 
-    tree->resizeColumnToContents(0);
-    tree->resizeColumnToContents(3);
+    m_tree = new DeviceTreeView(this);
+    m_tree->setModel(m_model);
+    m_tree->expandAll();
+    m_tree->setAlternatingRowColors(true); 
+    m_tree->resizeColumnToContents(0);
+    m_tree->resizeColumnToContents(3);
+    m_tree->setAllColumnsShowFocus(true);
+    m_tree->setExpandsOnDoubleClick(true);
+    m_tree->setSelectionBehavior(QAbstractItemView::SelectRows);
     layout->addWidget(size_chart);
-    layout->addWidget(tree);
+    layout->addWidget(m_tree);
     layout->addWidget( setupPropertyWidgets() );
     
     setLayout(layout);
 
-    connect(tree, SIGNAL(clicked(const QModelIndex)), 
+
+    connect(m_tree, SIGNAL(clicked(const QModelIndex)), 
 	    size_chart, SLOT(setNewDevice(const QModelIndex)));
 
-    connect(tree, SIGNAL(activated(const QModelIndex)), 
+    connect(m_tree, SIGNAL(activated(const QModelIndex)), 
 	    size_chart, SLOT(setNewDevice(const QModelIndex)));
+
+    // initial index setting
+    m_tree->setCurrentIndex( m_model->index(0, 0) );
+    size_chart->setNewDevice( m_model->index(0, 0) );
 }
 
 QSplitter *DeviceTab::setupPropertyWidgets()
@@ -77,8 +85,8 @@ QSplitter *DeviceTab::setupPropertyWidgets()
 
     QScrollArea *device_scroll    = new QScrollArea();
     QScrollArea *partition_scroll = new QScrollArea();
-    DevicePropertiesStack *device_stack       = new DevicePropertiesStack(devs);
-    PartitionPropertiesStack *partition_stack = new PartitionPropertiesStack(devs);
+    DevicePropertiesStack *device_stack       = new DevicePropertiesStack(m_devs);
+    PartitionPropertiesStack *partition_stack = new PartitionPropertiesStack(m_devs);
     device_scroll->setBackgroundRole(QPalette::Base);
     partition_scroll->setBackgroundRole(QPalette::Base);
     device_scroll->setAutoFillBackground(true);
@@ -94,17 +102,21 @@ QSplitter *DeviceTab::setupPropertyWidgets()
     splitter->addWidget(partition_box);
 
 
-    connect(tree, SIGNAL( clicked(const QModelIndex) ), 
+    connect(m_tree, SIGNAL( clicked(const QModelIndex) ), 
 	    device_stack, SLOT( changeDeviceStackIndex(const QModelIndex) ));
 
-    connect(tree, SIGNAL( activated(const QModelIndex) ), 
+    connect(m_tree, SIGNAL( activated(const QModelIndex) ), 
 	    device_stack, SLOT( changeDeviceStackIndex(const QModelIndex) ));
 
-    connect(tree, SIGNAL( clicked(const QModelIndex) ), 
+    connect(m_tree, SIGNAL( clicked(const QModelIndex) ), 
 	    partition_stack, SLOT( changePartitionStackIndex(const QModelIndex) ));
 
-    connect(tree, SIGNAL( activated(const QModelIndex) ), 
+    connect(m_tree, SIGNAL( activated(const QModelIndex) ), 
 	    partition_stack, SLOT( changePartitionStackIndex(const QModelIndex) ));
+
+    // initial index setting
+    partition_stack->changePartitionStackIndex( m_model->index(0, 0) );
+    device_stack->changeDeviceStackIndex( m_model->index(0, 0) ); 
 
     return splitter;
 }
