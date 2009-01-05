@@ -32,6 +32,9 @@ class VolGroup;
 
 bool add_mirror(LogVol *logicalVolume);
 
+/* AddMirror is also used to change mirror properties,
+   such as logging, on existing mirrors */
+
 
 class AddMirrorDialog : public KDialog
 {
@@ -44,6 +47,7 @@ Q_OBJECT
     QVBoxLayout *m_physical_layout;
 
     QGroupBox *m_mirror_group;
+    QGroupBox *m_add_mirror_box;
 
     QString m_logical_volume_name;
     LogVol *m_lv;                      // The volume we are adding a mirror to. 

@@ -129,7 +129,7 @@ void LVActionsMenu::setup(LogVol *lv)
     lv_extend_action   = new KAction( i18n("Extend logical volume..."), this);
     pv_move_action     = new KAction( i18n("Move physical extents..."), this);
     lv_change_action   = new KAction( i18n("Change logical volume attributes..."), this);
-    add_mirror_action  = new KAction( i18n("Add logical volume mirror..."), this);
+    add_mirror_action  = new KAction( i18n("Add or change volume mirror..."), this);
     mount_filesystem_action   = new KAction( i18n("Mount filesystem..."), this);
     unmount_filesystem_action = new KAction( i18n("Unmount filesystem..."), this);
     remove_mirror_action      = new KAction( i18n("Remove mirror leg..."), this);

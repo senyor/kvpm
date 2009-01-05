@@ -1,9 +1,9 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009 Benjamin Scott   <benscott@nwlink.com>
  *
- * This file is part of the Kvpm project.
+ * This file is part of the kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License,  version 3, as 
@@ -32,7 +32,7 @@ bool add_mirror(LogVol *logicalVolume)
   dialog.exec();
 
   if(dialog.result() == QDialog::Accepted){
-    ProcessProgress add_mirror(dialog.arguments(), i18n("Adding Mirror..."), true);
+    ProcessProgress add_mirror(dialog.arguments(), i18n("Changing Mirror..."), true);
     return true;
   }
   else{
@@ -55,7 +55,7 @@ AddMirrorDialog::AddMirrorDialog(LogVol *logicalVolume, QWidget *parent):
     QWidget *general_tab  = new QWidget(this);
     QWidget *physical_tab = new QWidget(this);
     m_tab_widget->addTab(general_tab,  i18n("General") );
-    m_tab_widget->addTab(physical_tab, i18n("Physical layout") );
+    m_tab_widget->addTab(physical_tab, i18n("Logging and layout") );
     m_general_layout  = new QVBoxLayout;
     m_physical_layout = new QVBoxLayout();
     general_tab->setLayout(m_general_layout);
@@ -80,31 +80,37 @@ void AddMirrorDialog::setupGeneralTab()
 {
   QLabel *current_mirrors_label = new QLabel();
 
+  m_general_layout->addStretch();
+  m_add_mirror_box = new QGroupBox( i18n("Add mirror legs") );
+  QVBoxLayout *add_mirror_box_layout = new QVBoxLayout;
+  m_add_mirror_box->setLayout(add_mirror_box_layout);
+  m_general_layout->addWidget(m_add_mirror_box);
+
 // The number of stripes is really the number of mirror legs 
 // for a mirror volume.
 
   if( m_lv->isMirror() ){
     m_current_leg_count = m_lv->getSegmentStripes(0);
-    current_mirrors_label->setText( i18n("Existing mirror legs: %1")
-				    .arg(m_current_leg_count) );
+    current_mirrors_label->setText( i18n("Existing mirror legs: %1", m_current_leg_count) );
+    m_add_mirror_box->setCheckable( true );
   }
   else{
     current_mirrors_label->setText( i18n("Existing mirror legs: none") );
     m_current_leg_count = 1;   // Even without a mirror it is using a pv.
+    m_add_mirror_box->setCheckable( false );
   }
-    
-  m_general_layout->addStretch();
-  m_general_layout->addWidget(current_mirrors_label);
+
+  add_mirror_box_layout->addWidget(current_mirrors_label);
   QHBoxLayout *spin_box_layout = new QHBoxLayout();
   
   QLabel *add_mirrors_label = new QLabel( i18n("Add mirror legs: ") );
-  m_add_mirrors_spin = new KIntSpinBox(0, 10, 1, 1, this);
+  m_add_mirrors_spin = new KIntSpinBox(1, 10, 1, 1, this);
   spin_box_layout->addWidget(add_mirrors_label);
   spin_box_layout->addWidget(m_add_mirrors_spin);
-  m_general_layout->addLayout(spin_box_layout);
-  m_general_layout->addStretch();
+  add_mirror_box_layout->addLayout(spin_box_layout);
+  add_mirror_box_layout->addStretch();
   
-  QGroupBox *alloc_box = new QGroupBox( i18n("Allocation Policy") );
+  QGroupBox *alloc_box = new QGroupBox( i18n("Allocation policy") );
   QVBoxLayout *alloc_box_layout = new QVBoxLayout;
   normal_button     = new QRadioButton( i18n("Normal") );
   contiguous_button = new QRadioButton( i18n("Contiguous") );
@@ -252,7 +258,15 @@ QStringList AddMirrorDialog::arguments()
 {
     QStringList args;
     QStringList physical_volumes; // the physical volumes to use for the new mirrors and log
+    QString mirror_count_arg;
 
+    if( ! m_add_mirror_box->isCheckable() )
+      mirror_count_arg = QString("+%1").arg( m_add_mirrors_spin->value() );
+    else if( m_add_mirror_box->isChecked() )
+      mirror_count_arg = QString("+%1").arg( m_add_mirrors_spin->value() );
+    else
+      mirror_count_arg = QString("+0");
+    
     for(int x = 0; x < m_pv_leg_checks.size(); x++){
 	if( m_pv_leg_checks[x]->isChecked() && m_pv_leg_checks[x]->isEnabled() ){
 	    physical_volumes << m_pv_leg_checks[x]->getUnmungedText();
@@ -265,7 +279,7 @@ QStringList AddMirrorDialog::arguments()
 	args << "--corelog";
 
     args << "--mirrors" 
-	 << QString("+%1").arg( m_add_mirrors_spin->value() )
+	 << mirror_count_arg
 	 << "--background"
 	 << m_logical_volume_name
 	 << physical_volumes;
