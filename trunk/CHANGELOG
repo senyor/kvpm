@@ -1,6 +1,8 @@
-version 0.4.5
+version 0.4.6
 Added calls to i18n() for support of translation
-to other languages.
+to other languages. Some bug fixes and work to
+the mount and unmount operations to allow for
+overlayed mounting.
 
 version 0.4.5
 Added new dialogs to import and export volumes
