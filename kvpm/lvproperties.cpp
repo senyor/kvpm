@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -167,7 +167,7 @@ LVProperties::LVProperties(LogVol *logicalVolume, int segment, QWidget *parent):
 	layout->addWidget(temp_label);
     }
     else{
-        temp_label = new QLabel( i18n("<b>Physical Volumes</b>") );
+        temp_label = new QLabel( i18n("<b>Physical volumes</b>") );
 	temp_label->setAlignment(Qt::AlignCenter);
 	layout->addWidget(temp_label);
     }
@@ -189,6 +189,21 @@ LVProperties::LVProperties(LogVol *logicalVolume, int segment, QWidget *parent):
 	}
 
     }
+
+    separator = new KSeparator(Qt::Horizontal);
+    separator->setFrameStyle(QFrame::Plain | QFrame::Box);
+    separator->setLineWidth(2);
+    separator->setMaximumHeight(2);
+    layout->addWidget(separator);
+
+    temp_label = new QLabel("<b>Logical volume uuid</b>");
+    temp_label->setAlignment(Qt::AlignCenter);
+    layout->addWidget( temp_label );
+
+    temp_label = new QLabel( logicalVolume->getUuid() );
+    temp_label->setToolTip( logicalVolume->getUuid() );
+    temp_label->setWordWrap(true);
+    layout->addWidget( temp_label );
 
     layout->addStretch();
     

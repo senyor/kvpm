@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -116,7 +116,7 @@ PVProperties::PVProperties(PhysVol *physicalVolume, QWidget *parent):
     insertRow( row );
     insertRow( ++row );
     insertRow( ++row );
-    resizeRowsToContents();
+    //    insertRow( ++row );
 
     QWidget *separator_widget = new QWidget();
     QVBoxLayout *separator_layout = new QVBoxLayout();
@@ -130,12 +130,20 @@ PVProperties::PVProperties(PhysVol *physicalVolume, QWidget *parent):
     separator_layout->addStretch();
     setCellWidget(row - 2, 0, separator_widget);
     setSpan(row - 2, 0, 1, 4 );
+    resizeRowToContents(row - 2);
     
-    new_item = new QTableWidgetItem( "PV UUID: " + physicalVolume->getUuid() );
+    new_item = new QTableWidgetItem( "Physical volume uuid" );
     new_item->setFlags(Qt::ItemIsEnabled);
     new_item->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter );
     setItem(row - 1, 0, new_item);
-    setSpan(row - 1, 0, 2, 4 );
+    setSpan(row - 1, 0, 1, 4 );
+
+    new_item = new QTableWidgetItem( physicalVolume->getUuid() );
+    new_item->setFlags(Qt::ItemIsEnabled);
+    new_item->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter );
+    new_item->setToolTip(physicalVolume->getUuid());
+    setItem(row - 0, 0, new_item);
+    setSpan(row - 0, 0, 1, 4 );
 
     setAlternatingRowColors(true);
     verticalHeader()->hide();

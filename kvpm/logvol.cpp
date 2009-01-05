@@ -248,7 +248,12 @@ LogVol::LogVol(QStringList lvDataList, MountInformationList *mountInformationLis
     else
 	m_persistant = false;
 
-    m_lv_fs = fsprobe_getfstype2( "/dev/mapper/" + m_vg_name + "-" + m_lv_name );
+    m_uuid  = lvdata.section('|',18,18);
+
+    if( m_lv_name.contains("_mlog", Qt::CaseSensitive) )
+        m_lv_fs = "mirror log";
+    else
+        m_lv_fs = fsprobe_getfstype2( "/dev/mapper/" + m_vg_name + "-" + m_lv_name );
 
     m_mount_info_list = mountInformationList->getMountInformation( "/dev/mapper/" + 
 							 m_vg_name + "-" + m_lv_name );
@@ -543,3 +548,7 @@ double LogVol::getCopyPercent()
     return m_copy_percent;
 }
 
+QString LogVol::getUuid()
+{
+  return m_uuid;
+}
