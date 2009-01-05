@@ -1,9 +1,9 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009 Benjamin Scott   <benscott@nwlink.com>
  *
- * This file is part of the Kvpm project.
+ * This file is part of the kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License,  version 3, as 
@@ -71,11 +71,15 @@ void LVSizeChart::populateChart()
 	    }
 
 	    usage = m_lv->getFilesystem();
+
 	    seg_ratio = m_lv->getExtents() / (double) total_extents;
 
-	    if( m_lv->isMirror()|| m_lv->isUnderConversion() )
-		seg_ratio *= m_lv->getSegmentStripes(0);
-	
+	    if( m_lv->isUnderConversion() )
+	        seg_ratio *= ( m_lv->getSegmentStripes(0) + 1);
+	    else if( m_lv->isMirror() )
+	        seg_ratio *= m_lv->getSegmentStripes(0);
+
+
 	    m_ratios.append(seg_ratio);
 	    widget = new LVChartSeg(m_vg, m_lv, usage, this);
 	    m_layout->addWidget(widget);
