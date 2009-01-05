@@ -41,6 +41,7 @@ class LogVol
     QString m_state;         // the lv state
     QString m_vg_name;           // associated volume group name
 
+    QString m_uuid;
     QStringList m_mount_points;  // empty if not mounted
     QList<int> m_mount_position; // if mountpoint has multiple mounts 
                                  // position 1 is the most recently mounted one.
@@ -81,6 +82,7 @@ class LogVol
     QString getState();
     QString getType();
     QString getOrigin();        // The name of the parent volume to a snapshot or mirror leg
+    QString getUuid();
     int getSegmentCount();
     int getSegmentStripes(int segment);
     int getSegmentStripeSize(int segment);
