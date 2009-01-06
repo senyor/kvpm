@@ -24,11 +24,15 @@
 StoragePartition::StoragePartition(QString partitionPath,
 				   QString partitionType,
 				   long long partitionSize, 
+				   long long firstSector, 
+				   long long lastSector, 
 				   QList<PhysVol *> pvList, 
 				   MountInformationList *mountInfoList):
     m_partition_path( partitionPath ),
     m_partition_type( partitionType ),
-    m_partition_size( partitionSize )
+    m_partition_size( partitionSize ),
+    m_first_sector( firstSector ),
+    m_last_sector( lastSector )
 
 {
 
@@ -98,6 +102,16 @@ QString StoragePartition::getPartitionPath()
 long long StoragePartition::getPartitionSize()
 {
     return m_partition_size;
+}
+
+long long StoragePartition::getFirstSector()
+{
+    return m_first_sector;
+}
+
+long long StoragePartition::getLastSector()
+{
+    return m_last_sector;
 }
 
 bool StoragePartition::isMounted()

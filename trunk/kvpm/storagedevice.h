@@ -32,6 +32,10 @@ class StorageDevice : public QObject
     long long m_device_size;
     QString   m_device_path;
     QString   m_disk_label;
+    QString   m_hardware;
+    long long m_sector_size;
+    long long m_physical_sector_size;
+    bool      m_readonly;
     bool      m_physical_volume;
     PhysVol  *m_pv;
 
@@ -44,9 +48,13 @@ class StorageDevice : public QObject
 
     QString getDevicePath();
     QString getDiskLabel();
+    QString getHardware();
     QList<StoragePartition *> getStoragePartitions();
     int getPartitionCount();
     long long getSize();
+    long long getSectorSize();
+    long long getPhysicalSectorSize();
+    bool isReadOnly();
     bool isPhysicalVolume();
     PhysVol *getPhysicalVolume();
     
