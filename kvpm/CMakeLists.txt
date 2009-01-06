@@ -11,8 +11,8 @@ set(kvpm_SRCS addmirror.cpp devicemodel.cpp deviceproperties.cpp
 	     lvcreate.cpp lvproperties.cpp lvpropertiesstack.cpp lvreduce.cpp 
 	     lvremove.cpp lvsizechart.cpp main.cpp mkfs.cpp masterlist.cpp  mount.cpp 
 	     lvsizechartseg.cpp mountentry.cpp mountinfo.cpp 
-	     partitionproperties.cpp pvproperties.cpp  pvpropertiesstack.cpp 
-	     partitionpropertiesstack.cpp devicetreeview.cpp physvol.cpp 
+	     pvproperties.cpp  pvpropertiesstack.cpp 
+	     devicetreeview.cpp physvol.cpp 
 	     nomungecheck.cpp processprogress.cpp pvchange.cpp pvcreate.cpp 
 	     pvmove.cpp pvremove.cpp pvtree.cpp removemissing.cpp removemirror.cpp 
 	     removemirrorleg.cpp

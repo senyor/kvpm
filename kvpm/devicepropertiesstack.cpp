@@ -19,6 +19,8 @@
 #include "devicepropertiesstack.h"
 #include "deviceproperties.h"
 #include "storagedevice.h"
+#include "storagepartition.h"
+
 
 /* This stack widget simply displays some information about the
    drive or device selected in the tree view. If nothing is selected
@@ -29,17 +31,24 @@ DevicePropertiesStack::DevicePropertiesStack( QList<StorageDevice *> Devices, QW
     QStackedWidget(parent)
 {
 
-    device_count = Devices.size();
+    int device_count = Devices.size();
 
-    QWidget *empty_widget = new QWidget(this);
-    
+    QList<StoragePartition *> partitions;
+
     for(int x = 0; x < device_count; x++){
-	device_path_list.append( Devices[x]->getDevicePath() );
+	m_device_path_list.append( Devices[x]->getDevicePath() );
 	addWidget( new DeviceProperties( Devices[x] ) );
+
+	partitions << Devices[x]->getStoragePartitions() ;
+
+	for(int n = 0; n < partitions.size(); n++ ){
+	    m_device_path_list.append( partitions[n]->getPartitionPath() );
+	    addWidget( new DeviceProperties( partitions[n] ) );
+	}
     }
 
-    addWidget( empty_widget );
-    setCurrentIndex( device_count );
+    addWidget( new QWidget(this) ); // empty default widget
+    setCurrentIndex( 0 );
 }
 
 void DevicePropertiesStack::changeDeviceStackIndex(QModelIndex Index)
@@ -47,16 +56,17 @@ void DevicePropertiesStack::changeDeviceStackIndex(QModelIndex Index)
     QModelIndex model_index = Index;
     StorageDeviceItem *device_item;
 
-    while(model_index.parent() != QModelIndex())
-        model_index = model_index.parent();
-
     device_item = static_cast<StorageDeviceItem*> (model_index.internalPointer());
 
     QString device_path = device_item->data(0).toString();
 
-    setCurrentIndex( device_count );
+    setCurrentIndex( 0 );
     
-    for(int x = 0; x < device_count; x++)
-	if( device_path_list[x] == device_path )
+    for(int x = 0; x < m_device_path_list.size(); x++){
+
+	if( m_device_path_list[x] == device_path ){
 	    setCurrentIndex ( x );
+
+	}
+    }
 }

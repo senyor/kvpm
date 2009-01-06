@@ -26,9 +26,8 @@ class DevicePropertiesStack : public QStackedWidget
 {
 Q_OBJECT
 
-    QStringList device_path_list;  // full path of each device on the stack, in the same order
-    int device_count;
- 
+    QStringList m_device_path_list;  // full path of each device on the stack, in the same order
+
  public:
      DevicePropertiesStack(QList<StorageDevice *> Devices, QWidget *parent = 0);
 

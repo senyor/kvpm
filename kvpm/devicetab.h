@@ -19,6 +19,7 @@
 #include <QList>
 #include <QWidget>
 #include <QSplitter>
+#include <QScrollArea>
 					
 class StorageDevice;
 class StorageDeviceModel;
@@ -31,7 +32,7 @@ class DeviceTab : public QWidget
     DeviceTreeView *m_tree;
     StorageDeviceModel *m_model;
 
-    QSplitter *setupPropertyWidgets();
+    QScrollArea *setupPropertyWidgets();
 
  public:
     DeviceTab(QList<StorageDevice *> Devices, QWidget *parent = 0);

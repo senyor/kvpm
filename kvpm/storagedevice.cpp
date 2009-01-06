@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -26,13 +26,21 @@ StorageDevice::StorageDevice( PedDevice *pedDevice,
 {
     QString   partition_path;
     QString   partition_type;
-    long long partition_size;
+
+    long long partition_size;          // bytes
+    long long partition_first_sector;
+    long long partition_last_sector;
     
     PedPartition *part = NULL;
     PedDisk      *disk = NULL;
+    PedGeometry   geometry;
     PedPartitionType  part_type;
-    
-    m_device_size = (pedDevice->length) * 512;
+
+    m_sector_size = pedDevice->sector_size;
+    m_physical_sector_size = pedDevice->phys_sector_size;
+    m_hardware = QString(pedDevice->model);
+
+    m_device_size = (pedDevice->length) * m_sector_size;
     m_device_path = QString("%1").arg(pedDevice->path);
 
     m_physical_volume = false;
@@ -49,8 +57,12 @@ StorageDevice::StorageDevice( PedDevice *pedDevice,
     if( disk && !m_physical_volume ){
 	m_disk_label = QString( (disk->type)->name );
 	while( (part = ped_disk_next_partition (disk, part)) ){
+
 	    part_type = part->type;
-	    
+	    geometry = part->geom;
+	    partition_first_sector = geometry.start;
+	    partition_last_sector = geometry.end;
+
 	    if( !(part_type & 0x08) ) {
 
 		partition_size = ((part->geom).length) * 512;
@@ -76,10 +88,12 @@ StorageDevice::StorageDevice( PedDevice *pedDevice,
 		    partition_path = "freespace"; 
 		}
 		m_storage_partitions.append(new StoragePartition( partition_path,
-								partition_type,
-								partition_size,
-								pvList, 
-								mountInformationList ));
+								  partition_type,
+								  partition_size,
+								  partition_first_sector,
+								  partition_last_sector,
+								  pvList, 
+								  mountInformationList ));
 	    }
 	}
     }
@@ -99,6 +113,11 @@ QString StorageDevice::getDiskLabel()
     return m_disk_label;
 }
 
+QString StorageDevice::getHardware()
+{
+    return m_hardware;
+}
+
 QList<StoragePartition *> StorageDevice::getStoragePartitions()
 {
     return m_storage_partitions;
@@ -112,6 +131,21 @@ int StorageDevice::getPartitionCount()
 long long StorageDevice::getSize()
 {
     return m_device_size;
+}
+
+long long StorageDevice::getSectorSize()
+{
+    return m_sector_size;
+}
+
+long long StorageDevice::getPhysicalSectorSize()
+{
+    return m_physical_sector_size;
+}
+
+bool StorageDevice::isReadOnly()
+{
+    return m_readonly;
 }
 
 bool StorageDevice::isPhysicalVolume()

@@ -31,6 +31,8 @@ class StoragePartition
     QString m_partition_type;
     QString m_fs_type;
     long long m_partition_size;
+    long long m_first_sector;
+    long long m_last_sector;
     bool m_is_pv;
     bool m_is_mounted;
     bool m_is_mountable;
@@ -39,6 +41,8 @@ public:
     StoragePartition(QString partitionPath,
 		     QString partitionType,
 		     long long partitionSize, 
+		     long long firstSector, 
+		     long long lastSector, 
 		     QList<PhysVol *> pvList, 
 		     MountInformationList *mountInfoList);
     ~StoragePartition();
@@ -50,6 +54,8 @@ public:
     QStringList getMountPoints();
     QList<int> getMountPosition();
     long long getPartitionSize();
+    long long getFirstSector();
+    long long getLastSector();
     bool isPV();
     bool isMounted();
     bool isMountable();

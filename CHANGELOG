@@ -1,3 +1,5 @@
+Needs cmake version 2.6 or better.
+
 version 0.4.6
 Added calls to i18n() for support of translation
 to other languages. Some bug fixes and work to
