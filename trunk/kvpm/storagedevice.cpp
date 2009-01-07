@@ -27,6 +27,7 @@ StorageDevice::StorageDevice( PedDevice *pedDevice,
     QString   partition_path;
     QString   partition_type;
 
+    int free_space_counter = 1;
     long long partition_size;          // bytes
     long long partition_first_sector;
     long long partition_last_sector;
@@ -65,7 +66,7 @@ StorageDevice::StorageDevice( PedDevice *pedDevice,
 
 	    if( !(part_type & 0x08) ) {
 
-		partition_size = ((part->geom).length) * 512;
+		partition_size = ((part->geom).length) * m_sector_size;
 
 		if( part_type == 0 ){
 		    partition_type = "normal";
@@ -80,12 +81,16 @@ StorageDevice::StorageDevice( PedDevice *pedDevice,
 		    partition_path = ped_partition_get_path(part);
 		}
 		else if( (part_type & 0x01) && (part_type & 0x04) ){
-		    partition_type = "logical";
-		    partition_path = "freespace"; 
+		    partition_type = "freespace (logical)";
+		    partition_path = ped_partition_get_path(part);
+		    partition_path.chop(1);
+		    partition_path.append( QString("%1").arg(free_space_counter++) );
 		}
 		else{
-		    partition_type = "normal";
-		    partition_path = "freespace"; 
+		    partition_type = "freespace";
+		    partition_path = ped_partition_get_path(part);
+		    partition_path.chop(1);
+		    partition_path.append( QString("%1").arg(free_space_counter++) );
 		}
 		m_storage_partitions.append(new StoragePartition( partition_path,
 								  partition_type,

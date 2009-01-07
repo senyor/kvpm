@@ -101,7 +101,10 @@ void DeviceTreeView::popupContextMenu(QPoint point)
 	    unmount_action->setEnabled(false);
 	}
 
-	if(item->data(0) == "freespace" || item->data(1) == "extended" ){
+	if(item->data(0) == "freespace" || 
+	   item->data(1) == "extended"  ||
+	   item->data(0) == "freespace (logical)")
+	  {
 	    pvcreate_action->setEnabled(false);
 	    mkfs_action->setEnabled(false);
 	    pvremove_action->setEnabled(false);

@@ -250,7 +250,7 @@ void StorageDeviceModel::setupModelData(QList<StorageDevice *> devices, StorageD
 		    extended = new StorageDeviceItem(data, dataAlternate, item);
 		    item->appendChild(extended);
 		}
-		else if( type != "logical" ){
+		else if( !( (type == "logical") || (type == "freespace (logical)") ) ){
 		    child = new StorageDeviceItem(data, dataAlternate, item);
 		    item->appendChild(child);
 		}
