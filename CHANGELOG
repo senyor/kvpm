@@ -1,3 +1,5 @@
+Better support for GPT disk labels and
+a visual make over of the device tab. 
 Needs cmake version 2.6 or better.
 
 version 0.4.6

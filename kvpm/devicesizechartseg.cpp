@@ -57,6 +57,8 @@ DeviceChartSeg::DeviceChartSeg(StorageDeviceItem *storageDeviceItem, QWidget *pa
 	    colorset->setColor(QPalette::Window, Qt::darkBlue);
 	else if(use == "reiserfs")
 	    colorset->setColor(QPalette::Window, Qt::red);
+	else if(use == "reiser4")
+	    colorset->setColor(QPalette::Window, Qt::darkRed);
 	else if(use == "vfat")
 	    colorset->setColor(QPalette::Window, Qt::yellow);
 	else if(use == "jfs")
