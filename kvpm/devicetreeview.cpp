@@ -23,6 +23,7 @@
 #include "processprogress.h"
 #include "pvcreate.h"
 #include "pvremove.h"
+#include "partremove.h"
 #include "vgreduce.h"
 #include "vgreduceone.h"
 #include "vgcreate.h"
@@ -37,15 +38,17 @@ DeviceTreeView::DeviceTreeView(QWidget *parent) : QTreeView(parent)
  
     setContextMenuPolicy(Qt::CustomContextMenu);
     menu = new KMenu(this);
-    vgextend_menu = new KMenu( i18n("Extend volume group"), this);
-    mkfs_action     = new KAction( i18n("Make filesystem"), this);
-    pvcreate_action = new KAction( i18n("Create physical volume"), this);
-    pvremove_action = new KAction( i18n("Remove physical volume"), this);
-    vgcreate_action = new KAction( i18n("Create volume group"), this);
-    vgreduce_action = new KAction( i18n("Remove from volume group"), this);
-    mount_action    = new KAction( i18n("Mount filesystem"), this);
-    unmount_action  = new KAction( i18n("Unmount filesystem"), this);
+    vgextend_menu     = new KMenu( i18n("Extend volume group"), this);
+    mkfs_action       = new KAction( i18n("Make filesystem"), this);
+    partremove_action = new KAction( i18n("Remove disk partition"), this);
+    pvcreate_action   = new KAction( i18n("Create physical volume"), this);
+    pvremove_action   = new KAction( i18n("Remove physical volume"), this);
+    vgcreate_action   = new KAction( i18n("Create volume group"), this);
+    vgreduce_action   = new KAction( i18n("Remove from volume group"), this);
+    mount_action      = new KAction( i18n("Mount filesystem"), this);
+    unmount_action    = new KAction( i18n("Unmount filesystem"), this);
     menu->addAction(mkfs_action);
+    menu->addAction(partremove_action);
     menu->addAction(pvcreate_action);
     menu->addAction(pvremove_action);
     menu->addAction(vgcreate_action);
@@ -60,13 +63,14 @@ DeviceTreeView::DeviceTreeView(QWidget *parent) : QTreeView(parent)
         vgextend_menu->addAction(vgextend_actions[x]);
     }
     
-    connect(mkfs_action,     SIGNAL(triggered()), this, SLOT(mkfsPartition()));
-    connect(pvcreate_action, SIGNAL(triggered()), this, SLOT(pvcreatePartition()));
-    connect(pvremove_action, SIGNAL(triggered()), this, SLOT(pvremovePartition()));
-    connect(vgcreate_action, SIGNAL(triggered()), this, SLOT(vgcreatePartition()));
-    connect(vgreduce_action, SIGNAL(triggered()), this, SLOT(vgreducePartition()));
-    connect(mount_action,    SIGNAL(triggered()), this, SLOT(mountPartition()));
-    connect(unmount_action,  SIGNAL(triggered()), this, SLOT(unmountPartition()));
+    connect(mkfs_action,       SIGNAL(triggered()), this, SLOT(mkfsPartition()));
+    connect(partremove_action, SIGNAL(triggered()), this, SLOT(removePartition()));
+    connect(pvcreate_action,   SIGNAL(triggered()), this, SLOT(pvcreatePartition()));
+    connect(pvremove_action,   SIGNAL(triggered()), this, SLOT(pvremovePartition()));
+    connect(vgcreate_action,   SIGNAL(triggered()), this, SLOT(vgcreatePartition()));
+    connect(vgreduce_action,   SIGNAL(triggered()), this, SLOT(vgreducePartition()));
+    connect(mount_action,      SIGNAL(triggered()), this, SLOT(mountPartition()));
+    connect(unmount_action,    SIGNAL(triggered()), this, SLOT(unmountPartition()));
 
     connect(vgextend_menu, SIGNAL(triggered(QAction*)), 
 	    this, SLOT(vgextendPartition(QAction*)));
@@ -101,12 +105,21 @@ void DeviceTreeView::popupContextMenu(QPoint point)
 	    unmount_action->setEnabled(false);
 	}
 
-	if(item->data(0) == "freespace" || 
-	   item->data(1) == "extended"  ||
-	   item->data(0) == "freespace (logical)")
+	if(item->data(1) == "freespace" || 
+	   item->data(1) == "freespace (logical)")
 	  {
 	    pvcreate_action->setEnabled(false);
 	    mkfs_action->setEnabled(false);
+	    partremove_action->setEnabled(false);
+	    pvremove_action->setEnabled(false);
+	    vgcreate_action->setEnabled(false);
+	    vgextend_menu->setEnabled(false);
+	    vgreduce_action->setEnabled(false);
+	}
+	else if(item->data(1) == "extended"){
+	    pvcreate_action->setEnabled(false);
+	    mkfs_action->setEnabled(false);
+	    partremove_action->setEnabled(true);
 	    pvremove_action->setEnabled(false);
 	    vgcreate_action->setEnabled(false);
 	    vgextend_menu->setEnabled(false);
@@ -114,6 +127,7 @@ void DeviceTreeView::popupContextMenu(QPoint point)
 	}
 	else if(item->data(6) == "yes"){
 	    pvcreate_action->setEnabled(false);
+	    partremove_action->setEnabled(false);
 	    mkfs_action->setEnabled(false);
 	    pvremove_action->setEnabled(false);
 	    vgcreate_action->setEnabled(false);
@@ -123,6 +137,7 @@ void DeviceTreeView::popupContextMenu(QPoint point)
 	else if( (item->data(4) == "physical volume") && (item->data(5) == "" ) ){
 	    pvcreate_action->setEnabled(false);
 	    mkfs_action->setEnabled(false);
+	    partremove_action->setEnabled(false);
 	    pvremove_action->setEnabled(true);
 	    vgcreate_action->setEnabled(true);
 	    vgextend_menu->setEnabled(true);
@@ -131,6 +146,7 @@ void DeviceTreeView::popupContextMenu(QPoint point)
 	else if( (item->data(4) == "physical volume") && (item->data(5) != "" ) ){
 	    pvcreate_action->setEnabled(false);
 	    mkfs_action->setEnabled(false);
+	    partremove_action->setEnabled(false);
 	    pvremove_action->setEnabled(false);
 	    vgcreate_action->setEnabled(false);
 	    vgextend_menu->setEnabled(false);
@@ -140,6 +156,12 @@ void DeviceTreeView::popupContextMenu(QPoint point)
 		vgreduce_action->setEnabled(false);
 	}
 	else if(item->data(1) == "logical" || item->data(1) == "normal"){
+
+	    if(item->data(6) == "no")
+   	        partremove_action->setEnabled(true);
+	    else
+	        partremove_action->setEnabled(false);
+
 	    pvcreate_action->setEnabled(true);
 	    pvremove_action->setEnabled(false);
 	    mkfs_action->setEnabled(true);
@@ -148,6 +170,7 @@ void DeviceTreeView::popupContextMenu(QPoint point)
 	    vgreduce_action->setEnabled(false);
 	}
 	else{
+	    partremove_action->setEnabled(false);
 	    pvcreate_action->setEnabled(false);
 	    pvremove_action->setEnabled(false);
 	    mkfs_action->setEnabled(false);
@@ -176,6 +199,12 @@ void DeviceTreeView::pvcreatePartition()
 void DeviceTreeView::pvremovePartition()
 {
     if( remove_pv( item->data(0).toString() ) )
+	MainWindow->reRun();
+}
+
+void DeviceTreeView::removePartition()
+{
+  if( remove_partition( part ) )
 	MainWindow->reRun();
 }
 

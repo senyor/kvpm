@@ -16,16 +16,15 @@
 #ifndef STORAGEDEVICE_H
 #define STORAGEDEVICE_H
 
-#include <parted/parted.h>
-
 #include <QWidget>
 #include <QString>
 
 #include "mountinfo.h"
 
+#include <parted/parted.h>
+
 class PhysVol;
 class StoragePartition;
-
 
 class StorageDevice : public QObject
 {
