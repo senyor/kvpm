@@ -12,8 +12,6 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
-#include <parted/parted.h>
-
 #include <KLocale>
 #include <QtGui>
 
@@ -26,6 +24,8 @@
 #include "processprogress.h"
 #include "storagedevice.h"
 #include "volgroup.h"
+
+#include <parted/parted.h>
 
 
 MasterList::MasterList() : QObject()

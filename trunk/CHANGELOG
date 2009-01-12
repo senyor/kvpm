@@ -1,6 +1,9 @@
+version 0.5.0
 Better support for GPT disk labels and
 a visual make over of the device tab. 
 Needs cmake version 2.6 or better.
+Removes partitions from partition table.
+
 
 version 0.4.6
 Added calls to i18n() for support of translation

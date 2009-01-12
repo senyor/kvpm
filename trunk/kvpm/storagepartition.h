@@ -19,14 +19,19 @@
 #include <QList>
 #include <QStringList>
 
+#include <parted/parted.h>
+
+
 class PhysVol;
 class MountInformation;
 class MountInformationList;
+
 
 class StoragePartition 
 {
     QList<MountInformation *> m_device_mount_info_list;
     PhysVol *m_pv;
+    PedPartition *m_ped_partition;
     QString m_partition_path;
     QString m_partition_type;
     QString m_fs_type;
@@ -38,15 +43,14 @@ class StoragePartition
     bool m_is_mountable;
     
 public: 
-    StoragePartition(QString partitionPath,
-		     QString partitionType,
-		     long long partitionSize, 
-		     long long firstSector, 
-		     long long lastSector, 
+    StoragePartition(PedPartition *part,
+		     int freespaceCount,
 		     QList<PhysVol *> pvList, 
 		     MountInformationList *mountInfoList);
+
     ~StoragePartition();
     
+    PedPartition *getPedPartition();
     QString getFileSystem();
     QString getPartitionPath();
     PhysVol *getPhysicalVolume();

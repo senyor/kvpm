@@ -12,6 +12,9 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
+
+#include <parted/parted.h>
+
 #include <QtGui>
 
 #include "storagedevice.h"
@@ -24,18 +27,11 @@ StorageDevice::StorageDevice( PedDevice *pedDevice,
 			      QList<PhysVol *> pvList, 
 			      MountInformationList *mountInformationList) : QObject()
 {
-    QString   partition_path;
-    QString   partition_type;
 
-    int free_space_counter = 1;
-    long long partition_size;          // bytes
-    long long partition_first_sector;
-    long long partition_last_sector;
-    
     PedPartition *part = NULL;
     PedDisk      *disk = NULL;
-    PedGeometry   geometry;
     PedPartitionType  part_type;
+    int freespace_counter = 0;
 
     m_sector_size = pedDevice->sector_size;
     m_physical_sector_size = pedDevice->phys_sector_size;
@@ -60,43 +56,14 @@ StorageDevice::StorageDevice( PedDevice *pedDevice,
 	while( (part = ped_disk_next_partition (disk, part)) ){
 
 	    part_type = part->type;
-	    geometry = part->geom;
-	    partition_first_sector = geometry.start;
-	    partition_last_sector = geometry.end;
+
+	    if( part_type & 0x04 )
+	        freespace_counter++;
 
 	    if( !(part_type & 0x08) ) {
 
-		partition_size = ((part->geom).length) * m_sector_size;
-
-		if( part_type == 0 ){
-		    partition_type = "normal";
-		    partition_path = ped_partition_get_path(part);
-		}
-		else if( part_type & 0x02 ){
-		    partition_type = "extended";
-		    partition_path = ped_partition_get_path(part);
-		}
-		else if( (part_type & 0x01) && !(part_type & 0x04) ){
-		    partition_type = "logical";
-		    partition_path = ped_partition_get_path(part);
-		}
-		else if( (part_type & 0x01) && (part_type & 0x04) ){
-		    partition_type = "freespace (logical)";
-		    partition_path = ped_partition_get_path(part);
-		    partition_path.chop(1);
-		    partition_path.append( QString("%1").arg(free_space_counter++) );
-		}
-		else{
-		    partition_type = "freespace";
-		    partition_path = ped_partition_get_path(part);
-		    partition_path.chop(1);
-		    partition_path.append( QString("%1").arg(free_space_counter++) );
-		}
-		m_storage_partitions.append(new StoragePartition( partition_path,
-								  partition_type,
-								  partition_size,
-								  partition_first_sector,
-								  partition_last_sector,
+		m_storage_partitions.append(new StoragePartition( part,
+								  freespace_counter,
 								  pvList, 
 								  mountInformationList ));
 	    }

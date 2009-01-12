@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -21,24 +21,53 @@
 #include "storagepartition.h"
 
 
-StoragePartition::StoragePartition(QString partitionPath,
-				   QString partitionType,
-				   long long partitionSize, 
-				   long long firstSector, 
-				   long long lastSector, 
+StoragePartition::StoragePartition(PedPartition *part,
+				   int freespaceCount,
 				   QList<PhysVol *> pvList, 
 				   MountInformationList *mountInfoList):
-    m_partition_path( partitionPath ),
-    m_partition_type( partitionType ),
-    m_partition_size( partitionSize ),
-    m_first_sector( firstSector ),
-    m_last_sector( lastSector )
+    m_ped_partition (part)
 
 {
-
+    long long sector_size;
     m_is_pv = false;
     m_pv = NULL;
-    
+
+    PedDisk   *ped_disk   = part->disk;
+    PedDevice *ped_device = ped_disk->dev;
+    PedGeometry ped_geometry    = part->geom;
+    PedPartitionType  part_type = part->type;
+
+    sector_size      = ped_device->sector_size;
+    m_first_sector   = (ped_geometry).start;
+    m_last_sector    = (ped_geometry).end;
+    m_partition_size = (ped_geometry.length) * sector_size; // in bytes
+
+
+    if( part_type == 0 ){
+      m_partition_type = "normal";
+      m_partition_path = ped_partition_get_path(part);
+    }
+    else if( part_type & 0x02 ){
+      m_partition_type = "extended";
+      m_partition_path = ped_partition_get_path(part);
+    }
+    else if( (part_type & 0x01) && !(part_type & 0x04) ){
+      m_partition_type = "logical";
+      m_partition_path = ped_partition_get_path(part);
+    }
+    else if( (part_type & 0x01) && (part_type & 0x04) ){
+      m_partition_type = "freespace (logical)";
+      m_partition_path = ped_partition_get_path(part);
+      m_partition_path.chop(1);
+      m_partition_path.append( QString("%1").arg(freespaceCount) );
+    }
+    else{
+      m_partition_type = "freespace";
+      m_partition_path = ped_partition_get_path(part);
+      m_partition_path.chop(1);
+      m_partition_path.append( QString("%1").arg(freespaceCount) );
+    }
+
     for(int x = 0; x < pvList.size(); x++){
 	if(m_partition_path == pvList[x]->getDeviceName()){
 	    m_is_pv = true;
@@ -75,6 +104,11 @@ StoragePartition::~StoragePartition()
 {
     for(int x = 0; x < m_device_mount_info_list.size(); x++)
 	delete m_device_mount_info_list[x];
+}
+
+PedPartition* StoragePartition::getPedPartition()
+{
+    return m_ped_partition;
 }
 
 QString StoragePartition::getType()
