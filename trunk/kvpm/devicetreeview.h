@@ -33,7 +33,8 @@ Q_OBJECT
 
     KAction *mkfs_action, *pvcreate_action, *pvremove_action,
 	    *vgcreate_action, *vgreduce_action,
-            *mount_action, *unmount_action, *partremove_action;
+            *mount_action, *unmount_action, 
+            *partremove_action, *partadd_action;
 
     QList<QAction *> vgextend_actions;
     QModelIndex index;
@@ -50,6 +51,7 @@ private slots:
     void mkfsPartition();
     void pvcreatePartition();
     void pvremovePartition();
+    void addPartition();
     void removePartition();
     void vgcreatePartition();
     void vgreducePartition();
