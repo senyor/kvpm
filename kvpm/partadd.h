@@ -17,11 +17,20 @@
 
 #include <parted/parted.h>
 
+
 #include <KDialog>
-#include <QSpinBox>
+#include <KLineEdit>
+#include <KComboBox>
+#include <QGroupBox>
 #include <QCheckBox>
 
+#include <QLabel>
+#include <QSpinBox>
+
 #include "storagepartition.h"
+
+class QDoubleValidator;
+
 
 bool add_partition(StoragePartition *partition);
 
@@ -34,33 +43,39 @@ Q_OBJECT
     PedConstraint    *m_ped_constraints;
     PedDisk          *m_ped_disk;
 
-    PedSector m_ped_start_sector, 
-              m_ped_end_sector,
-              m_ped_sector_length;
+    PedSector m_ped_start_sector,   // first available sector of free space
+              m_ped_end_sector,     // last available sector of free space 
+              m_ped_sector_length;  // sectors available of free space 
 
-    long long m_ped_sector_size;
+    long long m_ped_sector_size;    // bytes per logical sector
+    long long m_partition_sectors;  // proposed size of partition
+    long long m_excluded_sectors;   // proposed excluded sectors of partition
 
-    QSpinBox *m_start_sector_spin,
-             *m_end_sector_spin;
+    QSpinBox *m_total_size_spin;
 
-    QSpinBox *m_start_size_spin,
-             *m_end_size_spin,
-             *m_total_size_spin;
+    KLineEdit *m_size_edit;
+
+    QDoubleValidator *m_size_validator;
+
+    KComboBox *m_size_combo;
 
     QGroupBox *m_size_group,
               *m_sector_group;
 
     QCheckBox *m_align64_check;
 
+    void resetOkButton();
+
 public:
     PartitionAddDialog(StoragePartition *partition, QWidget *parent = 0);
     void commit_partition();
+    long long convertSizeToSectors(int index, double size);
 
 public slots:
-    void recalculate(int);
-    void sectorGroupBoxAlternate(bool checked);
-    void sizeGroupBoxAlternate(bool checked);
-    
+    void adjustSizeEdit(int percentage);
+    void adjustSizeCombo(int index);
+    void validateVolumeSize(QString size);
+
 };
 
 #endif
