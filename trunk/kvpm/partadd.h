@@ -43,6 +43,9 @@ Q_OBJECT
     PedConstraint    *m_ped_constraints;
     PedDisk          *m_ped_disk;
 
+    bool m_extended_freespace;      // true if we are inside an extended partition
+    bool m_extended_allowed;        // true if we can create an extended partition here
+
     PedSector m_ped_start_sector,   // first available sector of free space
               m_ped_end_sector,     // last available sector of free space 
               m_ped_sector_length;  // sectors available of free space 
@@ -57,7 +60,8 @@ Q_OBJECT
 
     QDoubleValidator *m_size_validator;
 
-    KComboBox *m_size_combo;
+    KComboBox *m_size_combo,
+              *m_type_combo;
 
     QGroupBox *m_size_group,
               *m_sector_group;

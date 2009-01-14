@@ -45,9 +45,28 @@ PartitionAddDialog::PartitionAddDialog(StoragePartition *partition,
     PedGeometry   ped_geometry       = ped_free_partition->geom;
 
     m_ped_disk = ped_free_partition->disk;
+
     PedDevice  *ped_device    = m_ped_disk->dev;
     m_ped_sector_size = ped_device->sector_size;
- 
+
+
+    /* check to see if partition table supports extended
+       partitions and if it already has one */
+
+    if( (PED_DISK_TYPE_EXTENDED & m_ped_disk->type->features) && 
+	(! ped_disk_extended_partition(m_ped_disk) )  ){
+        m_extended_allowed = true;
+    }
+    else
+        m_extended_allowed = false;
+
+
+    if( ped_free_partition->type & PED_PARTITION_LOGICAL )
+        m_extended_freespace = true;
+    else
+        m_extended_freespace = false;
+
+
 // The hardware's own constraints, if any
     m_ped_constraints = ped_device_get_constraint(ped_device); 
 
@@ -61,8 +80,25 @@ PartitionAddDialog::PartitionAddDialog(StoragePartition *partition,
     setMainWidget(dialog_body);
     QVBoxLayout *layout = new QVBoxLayout();
     dialog_body->setLayout(layout);
-    QLabel *path = new QLabel( m_partition->getPartitionPath() );
+    QLabel *path = new QLabel("<b>" + m_partition->getPartitionPath() + "</b>");
+    path->setAlignment( Qt::AlignHCenter );
     layout->addWidget(path);
+
+    m_type_combo = new KComboBox;
+    layout->addWidget(m_type_combo);
+
+    if( ! m_extended_freespace){
+        m_type_combo->insertItem(0,"Primary");
+	m_type_combo->insertItem(1,"Extended");
+	if(! m_extended_allowed){
+	    m_type_combo->setCurrentIndex(0);
+	    m_type_combo->setEnabled(false);
+	}
+    }
+    else{
+      m_type_combo->insertItem(0,"Logical");
+      m_type_combo->setEnabled(false);
+    }
 
     m_size_group   = new QGroupBox("Specify partition size");
     QGridLayout *size_group_layout = new QGridLayout();
@@ -123,6 +159,7 @@ void PartitionAddDialog::commit_partition()
 {
 
     m_excluded_sectors = 0;
+    PedPartitionType type = PED_PARTITION_NORMAL ;
 
 
     PedSector first_sector = m_ped_start_sector + m_excluded_sectors;
@@ -158,7 +195,15 @@ void PartitionAddDialog::commit_partition()
 	m_ped_constraints = ped_constraint_intersect(ped_constraint64, m_ped_constraints);
 
 
-    PedPartitionType type = PED_PARTITION_NORMAL ;
+    if( ! m_extended_freespace){
+        if(m_type_combo->currentIndex() == 0)
+	    type = PED_PARTITION_NORMAL ;
+	else if(m_type_combo->currentIndex() == 1)
+	    type = PED_PARTITION_EXTENDED ;
+    }
+    else
+        type = PED_PARTITION_LOGICAL ;
+
 
     PedPartition *ped_new_partition = ped_partition_new(m_ped_disk, 
 							type, 
