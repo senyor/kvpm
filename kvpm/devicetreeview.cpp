@@ -123,6 +123,7 @@ void DeviceTreeView::popupContextMenu(QPoint point)
 	else if(item->data(1) == "extended"){
 	    pvcreate_action->setEnabled(false);
 	    mkfs_action->setEnabled(false);
+	    partadd_action->setEnabled(false);
 	    partremove_action->setEnabled(true);
 	    pvremove_action->setEnabled(false);
 	    vgcreate_action->setEnabled(false);

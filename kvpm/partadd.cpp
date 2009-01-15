@@ -13,6 +13,8 @@
  */
 
 #include <KLocale>
+#include <KMessageBox>
+
 #include <QtGui>
 
 #include "partadd.h"
@@ -25,10 +27,8 @@ bool add_partition(StoragePartition *partition)
     PartitionAddDialog dialog(partition);
     dialog.exec();
     
-    if(dialog.result() == QDialog::Accepted){
-        dialog.commit_partition();
+    if(dialog.result() == QDialog::Accepted)
         return true;
-    }
     else
         return false;
 }
@@ -49,22 +49,25 @@ PartitionAddDialog::PartitionAddDialog(StoragePartition *partition,
     PedDevice  *ped_device    = m_ped_disk->dev;
     m_ped_sector_size = ped_device->sector_size;
 
+    bool logical_freespace;      // true if we are inside an extended partition
+    bool extended_allowed;        // true if we can create an extended partition here
+
 
     /* check to see if partition table supports extended
        partitions and if it already has one */
 
     if( (PED_DISK_TYPE_EXTENDED & m_ped_disk->type->features) && 
 	(! ped_disk_extended_partition(m_ped_disk) )  ){
-        m_extended_allowed = true;
+        extended_allowed = true;
     }
     else
-        m_extended_allowed = false;
+        extended_allowed = false;
 
 
     if( ped_free_partition->type & PED_PARTITION_LOGICAL )
-        m_extended_freespace = true;
+        logical_freespace = true;
     else
-        m_extended_freespace = false;
+        logical_freespace = false;
 
 
 // The hardware's own constraints, if any
@@ -87,17 +90,17 @@ PartitionAddDialog::PartitionAddDialog(StoragePartition *partition,
     m_type_combo = new KComboBox;
     layout->addWidget(m_type_combo);
 
-    if( ! m_extended_freespace){
-        m_type_combo->insertItem(0,"Primary");
-	m_type_combo->insertItem(1,"Extended");
-	if(! m_extended_allowed){
-	    m_type_combo->setCurrentIndex(0);
-	    m_type_combo->setEnabled(false);
-	}
+    m_type_combo->insertItem(0,"Primary");
+    m_type_combo->insertItem(1,"Extended");
+
+    if( logical_freespace){
+        m_type_combo->insertItem(2,"Logical");
+        m_type_combo->setEnabled(false);
+	m_type_combo->setCurrentIndex(2);
     }
-    else{
-      m_type_combo->insertItem(0,"Logical");
-      m_type_combo->setEnabled(false);
+    else if(! extended_allowed){
+	    m_type_combo->setEnabled(false);
+	    m_type_combo->setCurrentIndex(0);
     }
 
     m_size_group   = new QGroupBox("Specify partition size");
@@ -117,9 +120,9 @@ PartitionAddDialog::PartitionAddDialog(StoragePartition *partition,
 
     m_size_combo = new KComboBox();
     m_size_combo->insertItem(0,"Sectors");
-    m_size_combo->insertItem(1,"MB");
-    m_size_combo->insertItem(2,"GB");
-    m_size_combo->insertItem(3,"TB");
+    m_size_combo->insertItem(1,"MiB");
+    m_size_combo->insertItem(2,"GiB");
+    m_size_combo->insertItem(3,"TiB");
     m_size_combo->setInsertPolicy(KComboBox::NoInsert);
     m_size_combo->setCurrentIndex(2);
 
@@ -128,20 +131,47 @@ PartitionAddDialog::PartitionAddDialog(StoragePartition *partition,
     size_group_layout->addWidget(m_size_edit,0,0);
     size_group_layout->addWidget(m_size_combo,0,1);
     size_group_layout->addWidget(m_total_size_spin,1,0);
-    size_group_layout->addWidget( new QLabel("Total length"),1,1);
     m_align64_check = new QCheckBox("Align to 64 sectors");
     size_group_layout->addWidget(m_align64_check, 3, 0, 1, 2, Qt::AlignHCenter );
 
     double total_mib = (m_ped_sector_length * m_ped_sector_size) / (1024 *1024);
-    QLabel *length_label = new QLabel( i18n("Maximum size: %1 MiB",  total_mib) );
+    QLabel *length_label = new QLabel( i18n("Available space: %1 MiB",  total_mib) );
     size_group_layout->addWidget( length_label, 4, 0, 1, 2, Qt::AlignHCenter );
 
     m_sector_group = new QGroupBox("Exclude preceding space");
-    QVBoxLayout *sector_group_layout = new QVBoxLayout;
+    QGridLayout *excluded_group_layout = new QGridLayout();
     m_sector_group->setCheckable(true);
     m_sector_group->setChecked(false);
-    m_sector_group->setLayout(sector_group_layout);
+    m_sector_group->setLayout(excluded_group_layout);
     layout->addWidget(m_sector_group);
+
+    m_excluded_combo = new KComboBox();
+    m_excluded_combo->insertItem(0,"Sectors");
+    m_excluded_combo->insertItem(1,"MiB");
+    m_excluded_combo->insertItem(2,"GiB");
+    m_excluded_combo->insertItem(3,"TiB");
+    m_excluded_combo->setInsertPolicy(KComboBox::NoInsert);
+    m_excluded_combo->setCurrentIndex(2);
+
+    m_excluded_spin = new QSpinBox();
+    m_excluded_spin->setRange(0,100);
+    m_excluded_spin->setValue(0);
+    m_excluded_spin->setSuffix("%");
+
+    m_excluded_edit  = new KLineEdit();
+    m_excluded_validator = new QDoubleValidator(m_excluded_edit);
+    m_excluded_edit->setValidator(m_excluded_validator);
+    m_excluded_validator->setBottom(0);
+
+    adjustExcludedEdit(0);
+
+    excluded_group_layout->addWidget(m_excluded_edit,0,0);
+    excluded_group_layout->addWidget(m_excluded_combo,0,1);
+    excluded_group_layout->addWidget(m_excluded_spin,1,0);
+
+    total_mib = (m_ped_sector_length * m_ped_sector_size) / (1024 *1024);
+    QLabel *excluded_label = new QLabel( i18n("Maximum size: %1 MiB",  total_mib) );
+    excluded_group_layout->addWidget( excluded_label, 4, 0, 1, 2, Qt::AlignHCenter );
 
 
     connect(m_size_combo, SIGNAL(currentIndexChanged(int)),
@@ -152,6 +182,18 @@ PartitionAddDialog::PartitionAddDialog(StoragePartition *partition,
 
     connect(m_total_size_spin, SIGNAL(valueChanged(int)),
 	    this, SLOT(adjustSizeEdit(int)));
+
+    connect(m_excluded_combo, SIGNAL(currentIndexChanged(int)),
+	    this , SLOT(adjustExcludedCombo(int)));
+
+    connect(m_excluded_edit, SIGNAL(textEdited(QString)),
+	    this, SLOT(validateExcludedSize(QString)));
+
+    connect(m_excluded_spin, SIGNAL(valueChanged(int)),
+	    this, SLOT(adjustExcludedEdit(int)));
+
+    connect(this, SIGNAL(okClicked()),
+	    this, SLOT(commit_partition()));
 
 }
 
@@ -195,12 +237,10 @@ void PartitionAddDialog::commit_partition()
 	m_ped_constraints = ped_constraint_intersect(ped_constraint64, m_ped_constraints);
 
 
-    if( ! m_extended_freespace){
-        if(m_type_combo->currentIndex() == 0)
-	    type = PED_PARTITION_NORMAL ;
-	else if(m_type_combo->currentIndex() == 1)
-	    type = PED_PARTITION_EXTENDED ;
-    }
+    if(m_type_combo->currentIndex() == 0)
+        type = PED_PARTITION_NORMAL ;
+    else if(m_type_combo->currentIndex() == 1)
+        type = PED_PARTITION_EXTENDED ;
     else
         type = PED_PARTITION_LOGICAL ;
 
@@ -210,13 +250,16 @@ void PartitionAddDialog::commit_partition()
 							0, 
 							first_sector, 
 							(first_sector + length) -1);
-    int error;
+    int error;  // error = 0 on failure
 
     error = ped_disk_add_partition(m_ped_disk, ped_new_partition, m_ped_constraints);
-    qDebug("Add part error: %d", error);
 
-    error = ped_disk_commit(m_ped_disk);
-    qDebug("Commit error: %d", error);
+    if( error )
+        error = ped_disk_commit(m_ped_disk);
+
+    if( ! error )  
+        KMessageBox::error( 0, "Creation of partition failed");
+    
 
 }
 
@@ -312,3 +355,65 @@ void PartitionAddDialog::resetOkButton(){
         enableButtonOk(false);
 
 }
+
+void PartitionAddDialog::adjustExcludedEdit(int percentage){
+
+    long long free_sectors = m_ped_sector_length;
+
+    if(percentage == 100)
+        m_excluded_sectors = free_sectors;
+    else if(percentage == 0)
+        m_excluded_sectors = 0;
+    else
+        m_excluded_sectors = (long long)(( (double) percentage / 100) * free_sectors);
+
+    adjustExcludedCombo( m_excluded_combo->currentIndex() );
+
+    resetOkButton();
+}
+
+
+void PartitionAddDialog::adjustExcludedCombo(int index){
+
+    long double sized;
+
+    if(index){
+        sized = ((long double)m_excluded_sectors * m_ped_sector_size);
+        if(index == 1)
+            sized /= (long double)0x100000;
+        if(index == 2)
+            sized /= (long double)0x40000000;
+        if(index == 3){
+            sized /= (long double)(0x100000);
+            sized /= (long double)(0x100000);
+        }
+        m_excluded_edit->setText(QString("%1").arg((double)sized));
+    }
+    else
+        m_excluded_edit->setText(QString("%1").arg(m_excluded_sectors));
+
+}
+
+
+void PartitionAddDialog::validateExcludedSize(QString size){
+
+    int x = 0;
+
+    const int excluded_combo_index = m_excluded_combo->currentIndex();
+
+    if(m_excluded_validator->validate(size, x) == QValidator::Acceptable){
+
+        if(!excluded_combo_index)
+            m_excluded_sectors = size.toLongLong();
+        else
+            m_excluded_sectors = convertSizeToSectors( excluded_combo_index, size.toDouble() );
+
+    }
+    else{
+        m_excluded_sectors = 0;
+    }
+
+    resetOkButton();
+}
+
+
