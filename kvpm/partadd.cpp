@@ -49,6 +49,8 @@ PartitionAddDialog::PartitionAddDialog(StoragePartition *partition,
     PedDevice  *ped_device    = m_ped_disk->dev;
     m_ped_sector_size = ped_device->sector_size;
 
+    m_excluded_sectors = 0;
+
     bool logical_freespace;      // true if we are inside an extended partition
     bool extended_allowed;        // true if we can create an extended partition here
 
@@ -126,8 +128,6 @@ PartitionAddDialog::PartitionAddDialog(StoragePartition *partition,
     m_size_combo->setInsertPolicy(KComboBox::NoInsert);
     m_size_combo->setCurrentIndex(2);
 
-    adjustSizeEdit(100);
-
     size_group_layout->addWidget(m_size_edit,0,0);
     size_group_layout->addWidget(m_size_combo,0,1);
     size_group_layout->addWidget(m_total_size_spin,1,0);
@@ -135,15 +135,15 @@ PartitionAddDialog::PartitionAddDialog(StoragePartition *partition,
     size_group_layout->addWidget(m_align64_check, 3, 0, 1, 2, Qt::AlignHCenter );
 
     double total_mib = (m_ped_sector_length * m_ped_sector_size) / (1024 *1024);
-    QLabel *length_label = new QLabel( i18n("Available space: %1 MiB",  total_mib) );
-    size_group_layout->addWidget( length_label, 4, 0, 1, 2, Qt::AlignHCenter );
+    m_unexcluded_label = new QLabel( i18n("Available space: %1 MiB",  total_mib) );
+    size_group_layout->addWidget( m_unexcluded_label, 4, 0, 1, 2, Qt::AlignHCenter );
 
-    m_sector_group = new QGroupBox("Exclude preceding space");
+    m_excluded_group = new QGroupBox("Exclude preceding space");
     QGridLayout *excluded_group_layout = new QGridLayout();
-    m_sector_group->setCheckable(true);
-    m_sector_group->setChecked(false);
-    m_sector_group->setLayout(excluded_group_layout);
-    layout->addWidget(m_sector_group);
+    m_excluded_group->setCheckable(true);
+    m_excluded_group->setChecked(false);
+    m_excluded_group->setLayout(excluded_group_layout);
+    layout->addWidget(m_excluded_group);
 
     m_excluded_combo = new KComboBox();
     m_excluded_combo->insertItem(0,"Sectors");
@@ -164,6 +164,7 @@ PartitionAddDialog::PartitionAddDialog(StoragePartition *partition,
     m_excluded_validator->setBottom(0);
 
     adjustExcludedEdit(0);
+    adjustSizeEdit(100);
 
     excluded_group_layout->addWidget(m_excluded_edit,0,0);
     excluded_group_layout->addWidget(m_excluded_combo,0,1);
@@ -192,6 +193,9 @@ PartitionAddDialog::PartitionAddDialog(StoragePartition *partition,
     connect(m_excluded_spin, SIGNAL(valueChanged(int)),
 	    this, SLOT(adjustExcludedEdit(int)));
 
+    connect(m_excluded_group, SIGNAL(toggled(bool)),
+	    this, SLOT(clearExcludedGroup(bool)));
+
     connect(this, SIGNAL(okClicked()),
 	    this, SLOT(commit_partition()));
 
@@ -200,11 +204,12 @@ PartitionAddDialog::PartitionAddDialog(StoragePartition *partition,
 void PartitionAddDialog::commit_partition()
 {
 
-    m_excluded_sectors = 0;
-    PedPartitionType type = PED_PARTITION_NORMAL ;
+    PedPartitionType type;
+    PedSector first_sector = m_ped_start_sector;
 
+    if( m_excluded_group->isChecked() )
+        first_sector = m_ped_start_sector + m_excluded_sectors;
 
-    PedSector first_sector = m_ped_start_sector + m_excluded_sectors;
     PedSector last_sector  = first_sector + m_partition_sectors;
     if( last_sector > m_ped_end_sector )
         last_sector = m_ped_end_sector;
@@ -263,9 +268,10 @@ void PartitionAddDialog::commit_partition()
 
 }
 
+
 void PartitionAddDialog::adjustSizeEdit(int percentage){
 
-    long long free_sectors = m_ped_sector_length;
+    long long free_sectors = m_ped_sector_length - m_excluded_sectors;
 
     if(percentage == 100)
         m_partition_sectors = free_sectors;
@@ -275,6 +281,9 @@ void PartitionAddDialog::adjustSizeEdit(int percentage){
         m_partition_sectors = (long long)(( (double) percentage / 100) * free_sectors);
 
     adjustSizeCombo( m_size_combo->currentIndex() );
+
+    double total_mib = (m_ped_sector_size * free_sectors) / (1024 * 1024);
+    m_unexcluded_label->setText( i18n("Available space: %1 MiB",  total_mib) );
 
     resetOkButton();
 }
@@ -347,7 +356,7 @@ long long PartitionAddDialog::convertSizeToSectors(int index, double size)
 
 void PartitionAddDialog::resetOkButton(){
 
-    long long max_sectors = m_ped_sector_length;
+    long long max_sectors = m_ped_sector_length - m_excluded_sectors;
 
     if( (m_partition_sectors <= max_sectors) && (m_partition_sectors > 0) )
         enableButtonOk(true);
@@ -368,7 +377,7 @@ void PartitionAddDialog::adjustExcludedEdit(int percentage){
         m_excluded_sectors = (long long)(( (double) percentage / 100) * free_sectors);
 
     adjustExcludedCombo( m_excluded_combo->currentIndex() );
-
+    adjustSizeEdit(m_total_size_spin->value());
     resetOkButton();
 }
 
@@ -376,22 +385,33 @@ void PartitionAddDialog::adjustExcludedEdit(int percentage){
 void PartitionAddDialog::adjustExcludedCombo(int index){
 
     long double sized;
+    long double valid_topd = ((long double)m_ped_sector_length * m_ped_sector_size);
 
     if(index){
+ 
         sized = ((long double)m_excluded_sectors * m_ped_sector_size);
-        if(index == 1)
+
+        if(index == 1){
             sized /= (long double)0x100000;
-        if(index == 2)
+	    valid_topd /= (long double)0x100000;
+	}
+        if(index == 2){
             sized /= (long double)0x40000000;
+	    valid_topd /= (long double)0x40000000;
+	}
         if(index == 3){
             sized /= (long double)(0x100000);
             sized /= (long double)(0x100000);
+	    valid_topd /= (long double)0x100000;
+	    valid_topd /= (long double)0x100000;
         }
         m_excluded_edit->setText(QString("%1").arg((double)sized));
     }
-    else
+    else{
         m_excluded_edit->setText(QString("%1").arg(m_excluded_sectors));
+    }
 
+    m_excluded_validator->setTop((double)valid_topd);
 }
 
 
@@ -410,10 +430,18 @@ void PartitionAddDialog::validateExcludedSize(QString size){
 
     }
     else{
-        m_excluded_sectors = 0;
+        m_excluded_sectors = m_ped_sector_length;
     }
 
-    resetOkButton();
+    adjustSizeEdit( m_total_size_spin->value() );
+
 }
 
+/* if the excluded group is unchecked then zero the excluded sectors */
 
+void PartitionAddDialog::clearExcludedGroup(bool on){
+
+    if( ! on )
+	m_excluded_spin->setValue(0);
+
+}

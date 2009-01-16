@@ -64,9 +64,11 @@ Q_OBJECT
               *m_excluded_combo;
 
     QGroupBox *m_size_group,
-              *m_sector_group;
+              *m_excluded_group;
 
     QCheckBox *m_align64_check;
+
+    QLabel    *m_unexcluded_label;  // Space left for new partition
 
     void resetOkButton();
     long long convertSizeToSectors(int index, double size);
@@ -82,7 +84,7 @@ private slots:
     void adjustExcludedCombo(int index);
     void validateExcludedSize(QString size);
     void commit_partition();
-
+    void clearExcludedGroup(bool on);
 };
 
 #endif
