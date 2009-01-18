@@ -69,7 +69,8 @@ Q_OBJECT
     QCheckBox *m_align64_check;
 
     QLabel    *m_unexcluded_label,  // Space left for new partition
-              *m_remaining_label;
+              *m_remaining_label,
+              *m_preceding_label;
 
     void resetOkButton();
     long long convertSizeToSectors(int index, double size);
@@ -84,7 +85,7 @@ private slots:
     void adjustExcludedEdit(int percentage);
     void adjustExcludedCombo(int index);
     void validateExcludedSize(QString size);
-    void commit_partition();
+    void commitPartition();
     void clearExcludedGroup(bool on);
 };
 
