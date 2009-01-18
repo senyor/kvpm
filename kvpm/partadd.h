@@ -68,7 +68,8 @@ Q_OBJECT
 
     QCheckBox *m_align64_check;
 
-    QLabel    *m_unexcluded_label;  // Space left for new partition
+    QLabel    *m_unexcluded_label,  // Space left for new partition
+              *m_remaining_label;
 
     void resetOkButton();
     long long convertSizeToSectors(int index, double size);

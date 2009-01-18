@@ -23,22 +23,11 @@ class StorageDeviceItem;
 #include <QFrame>
 
 
-class DeviceChartSeg : public QWidget
+class DeviceChartSeg : public QFrame
 {
 Q_OBJECT
 
-    QMenu *m_context_menu, 
-          *m_vgextend_menu;
-
     StorageDeviceItem *m_item;
-
-    QAction *m_mkfs_action, 
-	    *m_pvcreate_action, 
-            *m_pvremove_action,
-            *m_vgcreate_action, 
-            *m_vgreduce_action, 
-            *m_mount_action, 
-            *m_unmount_action;
 
     QString m_pv_name;
     
@@ -49,15 +38,17 @@ public:
 
 public slots:
     void popupContextMenu(QPoint point);
-
-private slots:
+    void addPartition();
     void mkfsPartition();
+    void mountPartition();
     void pvcreatePartition();
     void pvremovePartition();
+    void removePartition();
     void vgcreatePartition();
     void vgreducePartition();
     void vgextendPartition(QAction *action);
-    
+    void unmountPartition();
+
 };
 	
 #endif
