@@ -1,0 +1,62 @@
+/*
+ *
+ * 
+ * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ *
+ * This file is part of the Kvpm project.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License,  version 3, as 
+ * published by the Free Software Foundation.
+ * 
+ * See the file "COPYING" for the exact licensing terms.
+ */
+
+#ifndef DEVICEACTIONSMENU_H
+#define DEVICEACTIONSMENU_H
+
+#include <KMenu>
+#include <KAction>
+
+#include <QTreeView>
+#include <QAbstractItemModel>
+
+#include "devicemodel.h"
+
+class StoragePartition;
+class DeviceTreeView;
+class DeviceChartSeg;
+
+class DeviceActionsMenu : public KMenu
+{
+Q_OBJECT
+
+    KMenu *m_vgextend_menu;
+
+    KAction *m_mkfs_action,
+            *m_partremove_action,
+            *m_partadd_action,
+	    *m_pvcreate_action,
+            *m_pvremove_action,
+	    *m_vgcreate_action,
+	    *m_vgreduce_action,
+	    *m_mount_action,
+            *m_unmount_action;
+
+    QList<QAction *> vgextend_actions;
+
+    void setup(StorageDeviceItem *item);
+    
+public:
+    DeviceActionsMenu( StorageDeviceItem *item,
+		       DeviceTreeView *view,
+		       QWidget *parent = 0);
+
+    DeviceActionsMenu( StorageDeviceItem *item,
+		       DeviceChartSeg *segment,
+		       QWidget *parent = 0);
+
+
+};
+
+#endif

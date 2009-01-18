@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -24,8 +24,8 @@ DeviceSizeChart::DeviceSizeChart(StorageDeviceModel *model, QWidget *parent) : Q
     device_model = model;
     QModelIndex index;
 
-    setFrameStyle(QFrame::Sunken | QFrame::Box);
-    setLineWidth(2);
+    setFrameStyle(QFrame::Sunken | QFrame::Panel);
+    setLineWidth(3);
 
     index = model->index(0,0);
     layout = new QHBoxLayout();
@@ -99,23 +99,10 @@ void DeviceSizeChart::setNewDevice(QModelIndex index)
 		ratio = part_size / (double) device_size;
 		extended_segments.append(extended_segment);
 		extended_ratios.append(ratio);
-		if( y > 0 ){
-		    KSeparator *separator = new KSeparator(Qt::Vertical);
-		    separator->setFrameStyle(QFrame::Sunken | QFrame::Box);
-		    separator->setLineWidth(2);
-		    separator->setMaximumWidth(2);
-		    extended_layout->addWidget(separator);
-		}
+
 		extended_layout->addWidget(extended_segment);
 	    }
 	    segment->setLayout(extended_layout);
-	}
-	if( x > 0 ){
-	    KSeparator *separator = new KSeparator(Qt::Vertical);
-	    separator->setFrameStyle(QFrame::Sunken | QFrame::Box);
-	    separator->setLineWidth(2);
-	    separator->setMaximumWidth(2);
-	    layout->addWidget(separator);
 	}
 	layout->addWidget(segment);
     }

@@ -28,14 +28,6 @@ class DeviceTreeView : public QTreeView
 {
 Q_OBJECT
 
-    KMenu *menu;
-    KMenu *vgextend_menu;
-
-    KAction *mkfs_action, *pvcreate_action, *pvremove_action,
-	    *vgcreate_action, *vgreduce_action,
-            *mount_action, *unmount_action, 
-            *partremove_action, *partadd_action;
-
     QList<QAction *> vgextend_actions;
     QModelIndex index;
     StorageDeviceItem *item;

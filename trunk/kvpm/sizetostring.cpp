@@ -27,13 +27,13 @@ QString sizeToString(long long bytes)
 	return QString("%1").arg(bytes);
 
     if( (size /= 1024) < 1000)
-	return QString("%1 KB").arg(size, 0,'g', 3);
+	return QString("%1 KiB").arg(size, 0,'g', 3);
 
     if( (size /= 1024) < 1000)
-	return QString("%1 MB").arg(size, 0, 'g', 3);
+	return QString("%1 MiB").arg(size, 0, 'g', 3);
 
     if( (size /= 1024) < 1000)
-	return QString("%1 GB").arg(size, 0,'g', 3);
+	return QString("%1 GiB").arg(size, 0,'g', 3);
 
     size /= 1024;
 
