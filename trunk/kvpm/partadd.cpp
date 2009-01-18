@@ -134,12 +134,11 @@ PartitionAddDialog::PartitionAddDialog(StoragePartition *partition,
     m_align64_check = new QCheckBox("Align to 64 sectors");
     size_group_layout->addWidget(m_align64_check, 3, 0, 1, 2, Qt::AlignHCenter );
 
-    QString total_bytes = sizeToString(m_ped_sector_length * m_ped_sector_size);
-    m_unexcluded_label = new QLabel( i18n("Available space: %1", total_bytes) );
-    size_group_layout->addWidget( m_unexcluded_label, 4, 0, 1, 2, Qt::AlignHCenter );
+    m_preceding_label = new QLabel();
+    size_group_layout->addWidget( m_preceding_label, 5, 0, 1, 2, Qt::AlignHCenter );
 
     m_remaining_label = new QLabel();
-    size_group_layout->addWidget( m_remaining_label, 5, 0, 1, 2, Qt::AlignHCenter );
+    size_group_layout->addWidget( m_remaining_label, 6, 0, 1, 2, Qt::AlignHCenter );
 
     m_excluded_group = new QGroupBox("Exclude preceding space");
     QGridLayout *excluded_group_layout = new QGridLayout();
@@ -166,17 +165,20 @@ PartitionAddDialog::PartitionAddDialog(StoragePartition *partition,
     m_excluded_edit->setValidator(m_excluded_validator);
     m_excluded_validator->setBottom(0);
 
-    adjustExcludedEdit(0);
-    adjustSizeEdit(100);
-
     excluded_group_layout->addWidget(m_excluded_edit,0,0);
     excluded_group_layout->addWidget(m_excluded_combo,0,1);
     excluded_group_layout->addWidget(m_excluded_spin,1,0);
 
-    total_bytes = sizeToString( m_ped_sector_length * m_ped_sector_size );
+    QString total_bytes = sizeToString( m_ped_sector_length * m_ped_sector_size );
     QLabel *excluded_label = new QLabel( i18n("Maximum size: %1",  total_bytes) );
     excluded_group_layout->addWidget( excluded_label, 4, 0, 1, 2, Qt::AlignHCenter );
 
+    total_bytes = sizeToString(m_ped_sector_length * m_ped_sector_size);
+    m_unexcluded_label = new QLabel( i18n("Remaining space: %1", total_bytes) );
+    excluded_group_layout->addWidget( m_unexcluded_label, 5, 0, 1, 2, Qt::AlignHCenter );
+
+    adjustExcludedEdit(0);
+    adjustSizeEdit(100);
 
     connect(m_size_combo, SIGNAL(currentIndexChanged(int)),
 	    this , SLOT(adjustSizeCombo(int)));
@@ -200,11 +202,11 @@ PartitionAddDialog::PartitionAddDialog(StoragePartition *partition,
 	    this, SLOT(clearExcludedGroup(bool)));
 
     connect(this, SIGNAL(okClicked()),
-	    this, SLOT(commit_partition()));
+	    this, SLOT(commitPartition()));
 
 }
 
-void PartitionAddDialog::commit_partition()
+void PartitionAddDialog::commitPartition()
 {
 
     PedPartitionType type;
@@ -265,22 +267,32 @@ void PartitionAddDialog::adjustSizeEdit(int percentage){
 
     long long free_sectors = m_ped_sector_length - m_excluded_sectors;
 
-    if(percentage == 100)
+    int top = qRound( ( (double)free_sectors / m_ped_sector_length ) * 100);
+
+    m_total_size_spin->setMaximum( top );
+
+    if( percentage == m_total_size_spin->maximum() )
         m_partition_sectors = free_sectors;
     else if(percentage == 0)
         m_partition_sectors = 0;
     else
-        m_partition_sectors = (long long)(( (double) percentage / 100) * free_sectors);
-
-    adjustSizeCombo( m_size_combo->currentIndex() );
+        m_partition_sectors = (long long)(( (double) percentage / 100) * m_ped_sector_length);
 
     QString total_bytes = sizeToString(m_ped_sector_size * free_sectors);
     m_unexcluded_label->setText( i18n("Available space: %1", total_bytes) );
 
+    QString preceding_bytes_string = sizeToString(m_excluded_sectors * m_ped_sector_size);
+    m_preceding_label->setText( i18n("Preceding space: %1", preceding_bytes_string) );
+
     PedSector following_space = (m_ped_sector_length - (m_partition_sectors + m_excluded_sectors)) * m_ped_sector_size;
 
+    if(following_space < 0)
+        following_space = 0;
+
     QString following_bytes_string = sizeToString(following_space);
-    m_remaining_label->setText( i18n("Remaining space: %1", following_bytes_string) );
+    m_remaining_label->setText( i18n("Following space: %1", following_bytes_string) );
+
+    adjustSizeCombo( m_size_combo->currentIndex() );
 
     resetOkButton();
 }
@@ -325,6 +337,22 @@ void PartitionAddDialog::validateVolumeSize(QString size){
     else{
         m_partition_sectors = 0;
     }
+
+    long long free_sectors = m_ped_sector_length - m_excluded_sectors;
+
+    QString total_bytes = sizeToString(m_ped_sector_size * free_sectors);
+    m_unexcluded_label->setText( i18n("Available space: %1", total_bytes) );
+
+    QString preceding_bytes_string = sizeToString(m_excluded_sectors * m_ped_sector_size);
+    m_preceding_label->setText( i18n("Preceding space: %1", preceding_bytes_string) );
+
+    PedSector following_space = (m_ped_sector_length - (m_partition_sectors + m_excluded_sectors)) * m_ped_sector_size;
+
+    if(following_space < 0)
+        following_space = 0;
+
+    QString following_bytes_string = sizeToString(following_space);
+    m_remaining_label->setText( i18n("Following space: %1", following_bytes_string) );
 
     resetOkButton();
 }
