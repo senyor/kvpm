@@ -218,29 +218,19 @@ void PartitionAddDialog::commit_partition()
         last_sector = m_ped_end_sector;
     PedSector length  = (last_sector - first_sector) + 1;
 
-    PedAlignment *ped_start_alignment = new PedAlignment();
-    ped_start_alignment->offset = 0;
-    ped_start_alignment->grain_size = 64;
-    
-    PedAlignment *ped_end_alignment = new PedAlignment();
-    ped_end_alignment->offset = 0;
-    ped_end_alignment->grain_size = 1;
-    
-    PedGeometry *start_geom = new PedGeometry();
-    PedGeometry *end_geom   = new PedGeometry();
+    PedAlignment *ped_start_alignment = ped_alignment_new(0, 64);
+    PedAlignment *ped_end_alignment   = ped_alignment_new(0, 1);
 
-    ped_geometry_init(start_geom, m_ped_disk->dev, first_sector, 127);
-    ped_geometry_init(end_geom,   m_ped_disk->dev, first_sector, length);
+    PedGeometry *start_geom = ped_geometry_new(m_ped_disk->dev, first_sector, 127);
+    PedGeometry *end_geom   = ped_geometry_new(m_ped_disk->dev, first_sector, length);
 
-    PedConstraint *ped_constraint64 = new PedConstraint;
-    
-    ped_constraint64->start_align = ped_start_alignment;
-    ped_constraint64->end_align   = ped_end_alignment;
-    ped_constraint64->start_range = start_geom;
-    ped_constraint64->end_range   = end_geom;
-    ped_constraint64->min_size    = 128;
-    ped_constraint64->max_size    = length;
-	
+
+    PedConstraint *ped_constraint64 = ped_constraint_new(ped_start_alignment,
+							 ped_end_alignment, 
+							 start_geom, 
+							 end_geom, 
+							 128, 
+							 length);
     if( m_align64_check->isChecked() )
 	m_ped_constraints = ped_constraint_intersect(ped_constraint64, m_ped_constraints);
 
