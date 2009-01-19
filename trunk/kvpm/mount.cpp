@@ -75,6 +75,7 @@ QWidget* MountDialog::filesystemBox()
     
     ext2_button      = new QRadioButton("Ext2", this);
     ext3_button      = new QRadioButton("Ext3", this);
+    ext4_button      = new QRadioButton("Ext4", this);
     reiserfs3_button = new QRadioButton("Reiserfs Ver. 3", this);
     reiserfs4_button = new QRadioButton("Reiserfs Ver. 4", this);
     xfs_button       = new QRadioButton("Xfs", this);
@@ -90,6 +91,8 @@ QWidget* MountDialog::filesystemBox()
 	ext2_button->setChecked(true);
     else if( m_filesystem_type == "ext3" )
 	ext3_button->setChecked(true);
+    else if( m_filesystem_type == "ext4" )
+	ext4_button->setChecked(true);
     else if( m_filesystem_type == "reiserfs" )
 	reiserfs3_button->setChecked(true);
     else if( m_filesystem_type == "reiser4" )
@@ -116,6 +119,7 @@ QWidget* MountDialog::filesystemBox()
     
     layout_left->addWidget(ext2_button);
     layout_left->addWidget(ext3_button);
+    layout_left->addWidget(ext4_button);
     layout_left->addWidget(vfat_button);
     layout_center->addWidget(reiserfs3_button);
     layout_center->addWidget(reiserfs4_button);

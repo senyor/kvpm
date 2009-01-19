@@ -106,9 +106,11 @@ MkfsDialog::MkfsDialog(QString devicePath, QWidget *parent) :
     
     QVBoxLayout *layout = new QVBoxLayout;
     QHBoxLayout *radio_layout = new QHBoxLayout;
-    QVBoxLayout *radio_left_layout = new QVBoxLayout;
-    QVBoxLayout *radio_right_layout = new QVBoxLayout;
+    QVBoxLayout *radio_left_layout   = new QVBoxLayout;
+    QVBoxLayout *radio_center_layout = new QVBoxLayout;
+    QVBoxLayout *radio_right_layout  = new QVBoxLayout;
     radio_layout->addLayout(radio_left_layout);
+    radio_layout->addLayout(radio_center_layout);
     radio_layout->addLayout(radio_right_layout);
     dialog_body->setLayout(layout);
 
@@ -120,20 +122,24 @@ MkfsDialog::MkfsDialog(QString devicePath, QWidget *parent) :
     layout->addWidget(label);
 
     radio_box = new QGroupBox( i18n("Filesystem") );
-    ext2   = new QRadioButton("Ext2", this);
-    ext3   = new QRadioButton("Ext3", this);
-    reiser = new QRadioButton("Reiser", this);
-    jfs    = new QRadioButton("jfs", this);
-    xfs    = new QRadioButton("xfs", this);
-    swap   = new QRadioButton( i18n("Linux swap"), this);
-    vfat   = new QRadioButton("ms-dos", this);
+    ext2    = new QRadioButton("Ext2", this);
+    ext3    = new QRadioButton("Ext3", this);
+    ext4    = new QRadioButton("Ext4", this);
+    reiser  = new QRadioButton("Reiser", this);
+    reiser4 = new QRadioButton("Reiser4", this);
+    jfs     = new QRadioButton("jfs", this);
+    xfs     = new QRadioButton("xfs", this);
+    swap    = new QRadioButton( i18n("Linux swap"), this);
+    vfat    = new QRadioButton("ms-dos", this);
     radio_left_layout->addWidget(ext2);
     radio_left_layout->addWidget(ext3);
-    radio_left_layout->addWidget(reiser);
-    radio_left_layout->addWidget(jfs);
+    radio_left_layout->addWidget(ext4);
+    radio_center_layout->addWidget(reiser);
+    radio_center_layout->addWidget(reiser4);
+    radio_center_layout->addWidget(swap);
+    radio_right_layout->addWidget(jfs);
     radio_right_layout->addWidget(xfs);
     radio_right_layout->addWidget(vfat);
-    radio_right_layout->addWidget(swap);
     ext3->setChecked(true);
     
     radio_box->setLayout(radio_layout);
@@ -152,9 +158,16 @@ QStringList MkfsDialog::arguments()
     else if(ext3->isChecked()){
 	type = "ext3";
     }
+    else if(ext4->isChecked()){
+	type = "ext4";
+    }
     else if(reiser->isChecked()){
 	mkfs_options << "-q";
 	type = "reiserfs";
+    }
+    else if(reiser4->isChecked()){
+	mkfs_options << "-y";
+	type = "reiser4";
     }
     else if(jfs->isChecked()){
 	mkfs_options << "-q";

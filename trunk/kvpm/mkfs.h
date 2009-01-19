@@ -31,7 +31,7 @@ bool make_fs(StoragePartition *partition);
 class MkfsDialog : public KDialog
 {
      QGroupBox *radio_box;
-     QRadioButton *ext2, *ext3, *reiser, *jfs, *xfs, *vfat, *swap;
+     QRadioButton *ext2, *ext3, *ext4, *reiser, *reiser4, *jfs, *xfs, *vfat, *swap;
 
      QString m_path;
 
