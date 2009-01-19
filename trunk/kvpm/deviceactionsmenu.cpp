@@ -161,6 +161,7 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
 	else if(item->data(6) == "yes"){
 	    m_pvcreate_action->setEnabled(false);
 	    m_partremove_action->setEnabled(false);
+	    m_partadd_action->setEnabled(false);
 	    m_mkfs_action->setEnabled(false);
 	    m_pvremove_action->setEnabled(false);
 	    m_vgcreate_action->setEnabled(false);
