@@ -39,6 +39,7 @@ Q_OBJECT
 	    *m_pvcreate_action,
             *m_pvremove_action,
 	    *m_vgcreate_action,
+	    *m_tablecreate_action,
 	    *m_vgreduce_action,
 	    *m_mount_action,
             *m_unmount_action;

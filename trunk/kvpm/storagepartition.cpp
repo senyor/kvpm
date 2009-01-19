@@ -42,7 +42,6 @@ StoragePartition::StoragePartition(PedPartition *part,
     m_last_sector    = (ped_geometry).end;
     m_partition_size = (ped_geometry.length) * sector_size; // in bytes
 
-
     if( part_type == 0 ){
       m_partition_type = "normal";
       m_partition_path = ped_partition_get_path(part);
@@ -74,7 +73,22 @@ StoragePartition::StoragePartition(PedPartition *part,
 	    m_pv = pvList[x];
 	}
     }
-    
+
+    // Iterate though all the possible flags and check each one
+
+    PedPartitionFlag ped_flag = PED_PARTITION_BOOT;
+
+    if( ! m_partition_type.contains("freespace", Qt::CaseInsensitive) ){
+        while( ped_flag != 0  ){
+	    if( ped_partition_get_flag(part, ped_flag) )
+	        m_flags << ped_partition_flag_get_name(ped_flag);
+	
+	    ped_flag = ped_partition_flag_next( ped_flag );
+        }
+	if( ! m_flags.size() )
+	    m_flags << "none";
+    }
+
     m_device_mount_info_list = mountInfoList->getMountInformation(m_partition_path);
 
     if( m_device_mount_info_list.size() ){
@@ -181,4 +195,9 @@ QList<int> StoragePartition::getMountPosition()
 	mount_position.append( m_device_mount_info_list[x]->getMountPosition() );
 
     return mount_position;
+}
+
+QStringList StoragePartition::getFlags()
+{
+    return m_flags;
 }

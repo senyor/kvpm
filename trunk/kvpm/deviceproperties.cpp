@@ -38,7 +38,6 @@ DeviceProperties::DeviceProperties( StorageDevice *Device, QWidget *parent) : QW
     QFrame *basic_info_frame = new QFrame;
     QVBoxLayout *basic_info_layout = new QVBoxLayout();
     basic_info_frame->setLayout(basic_info_layout);
-
     basic_info_frame->setFrameStyle( QFrame::Sunken | QFrame::StyledPanel );
     basic_info_frame->setLineWidth(2);   
 
@@ -156,6 +155,26 @@ DeviceProperties::DeviceProperties( StoragePartition *Partition, QWidget *parent
 	}
         layout->addWidget(mount_info_frame);
     }
+
+    QFrame *flag_info_frame = new QFrame;
+    QVBoxLayout *flag_info_layout = new QVBoxLayout();
+    flag_info_frame->setLayout(flag_info_layout);
+    flag_info_frame->setFrameStyle( QFrame::Sunken | QFrame::StyledPanel );
+    flag_info_frame->setLineWidth(2);   
+    temp_label = new QLabel( i18n("<b>Flags</b>") );
+    temp_label->setAlignment( Qt::AlignCenter );
+    flag_info_layout->addWidget(temp_label);
+
+    QStringList flags = Partition->getFlags();
+
+    for( int x = 0; x < flags.size(); x++){
+        temp_label = new QLabel( flags[x] );
+        flag_info_layout->addWidget(temp_label);
+    }
+
+    layout->addWidget(flag_info_frame);
+
+
 
     layout->addStretch();
 }

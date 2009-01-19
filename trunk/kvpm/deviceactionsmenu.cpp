@@ -26,6 +26,7 @@
 #include "pvremove.h"
 #include "partremove.h"
 #include "partadd.h"
+#include "tablecreate.h"
 #include "vgreduce.h"
 #include "vgreduceone.h"
 #include "vgcreate.h"
@@ -47,6 +48,7 @@ DeviceActionsMenu::DeviceActionsMenu( StorageDeviceItem *item,
     connect(m_partadd_action,    SIGNAL(triggered()), view, SLOT(addPartition()));
     connect(m_pvcreate_action,   SIGNAL(triggered()), view, SLOT(pvcreatePartition()));
     connect(m_pvremove_action,   SIGNAL(triggered()), view, SLOT(pvremovePartition()));
+    connect(m_tablecreate_action,SIGNAL(triggered()), view, SLOT(tablecreatePartition()));
     connect(m_vgcreate_action,   SIGNAL(triggered()), view, SLOT(vgcreatePartition()));
     connect(m_vgreduce_action,   SIGNAL(triggered()), view, SLOT(vgreducePartition()));
     connect(m_mount_action,      SIGNAL(triggered()), view, SLOT(mountPartition()));
@@ -70,6 +72,7 @@ DeviceActionsMenu::DeviceActionsMenu( StorageDeviceItem *item,
     connect(m_pvcreate_action,   SIGNAL(triggered()), segment, SLOT(pvcreatePartition()));
     connect(m_pvremove_action,   SIGNAL(triggered()), segment, SLOT(pvremovePartition()));
     connect(m_vgcreate_action,   SIGNAL(triggered()), segment, SLOT(vgcreatePartition()));
+    //    connect(m_tablecreate_action,SIGNAL(triggered()), segment, SLOT(tablecreatePartition()));
     connect(m_vgreduce_action,   SIGNAL(triggered()), segment, SLOT(vgreducePartition()));
     connect(m_mount_action,      SIGNAL(triggered()), segment, SLOT(mountPartition()));
     connect(m_unmount_action,    SIGNAL(triggered()), segment, SLOT(unmountPartition()));
@@ -91,6 +94,7 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
     m_pvcreate_action   = new KAction( i18n("Create physical volume"), this);
     m_pvremove_action   = new KAction( i18n("Remove physical volume"), this);
     m_vgcreate_action   = new KAction( i18n("Create volume group"), this);
+    m_tablecreate_action= new KAction( i18n("Create new partition table"), this);
     m_vgreduce_action   = new KAction( i18n("Remove from volume group"), this);
     m_mount_action      = new KAction( i18n("Mount filesystem"), this);
     m_unmount_action    = new KAction( i18n("Unmount filesystem"), this);
@@ -100,6 +104,7 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
     addAction(m_pvcreate_action);
     addAction(m_pvremove_action);
     addAction(m_vgcreate_action);
+    addAction(m_tablecreate_action);
     addAction(m_vgreduce_action);
     addMenu(m_vgextend_menu);
     addAction(m_mount_action);
@@ -115,6 +120,8 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
     if(item){
 
 	setEnabled(true);
+
+	m_tablecreate_action->setEnabled(false);
 
 	if(item->data(6) == "yes"){
 	    m_mount_action->setEnabled(true);
@@ -205,6 +212,7 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
 	    m_vgcreate_action->setEnabled(false);
 	    m_vgextend_menu->setEnabled(false);
 	    m_vgreduce_action->setEnabled(false);
+	    m_tablecreate_action->setEnabled(true);
 	}
     }
     else
