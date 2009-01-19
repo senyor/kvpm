@@ -43,11 +43,21 @@
 
 LVChartSeg::LVChartSeg(VolGroup *volumeGroup, LogVol *logicalVolume, 
 		       QString use, QWidget *parent) : 
-    QWidget(parent), 
+    QFrame(parent), 
     m_vg(volumeGroup),
     m_lv(logicalVolume)
 {
     
+    setFrameStyle( QFrame::Sunken | QFrame::Panel );
+    setLineWidth(2);
+
+    QVBoxLayout *layout = new QVBoxLayout();
+    QWidget *color_widget = new QWidget();
+    layout->addWidget(color_widget);
+    layout->setSpacing(0);
+    layout->setMargin(0);
+    setLayout(layout);
+
     QPalette *colorset = new QPalette();
 
     if(use == "ext2")
@@ -73,8 +83,8 @@ LVChartSeg::LVChartSeg(VolGroup *volumeGroup, LogVol *logicalVolume,
     else
 	colorset->setColor(QPalette::Window, Qt::black);
 
-    setPalette(*colorset);
-    setAutoFillBackground(true);
+    color_widget->setPalette(*colorset);
+    color_widget->setAutoFillBackground(true);
 
     if( !m_vg->isExported() ){
 	

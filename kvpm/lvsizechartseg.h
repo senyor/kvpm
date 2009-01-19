@@ -24,7 +24,7 @@ class VolGroup;
 class LogVol;
 
 
-class LVChartSeg : public QWidget
+class LVChartSeg : public QFrame
 {
 Q_OBJECT
 

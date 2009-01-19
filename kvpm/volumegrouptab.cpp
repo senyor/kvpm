@@ -57,10 +57,9 @@ VolumeGroupTab::VolumeGroupTab(VolGroup *volumeGroup, QWidget *parent) :
     lv_splitter->addWidget(m_vg_tree);
     pv_splitter->addWidget(m_pv_tree);
 
-
     QScrollArea *lv_properties_scroll = new QScrollArea();
     lv_properties_scroll->setWidgetResizable(true);
-    
+    lv_properties_scroll->setFrameStyle( QFrame::NoFrame );
     lv_properties_scroll->setBackgroundRole(QPalette::Base);
     lv_properties_scroll->setAutoFillBackground(true);
 
