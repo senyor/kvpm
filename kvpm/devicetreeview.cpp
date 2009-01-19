@@ -31,6 +31,7 @@
 #include "vgcreate.h"
 #include "vgextend.h"
 #include "topwindow.h"
+#include "tablecreate.h"
 
 extern MasterList *master_list;
 
@@ -101,6 +102,12 @@ void DeviceTreeView::addPartition()
 void DeviceTreeView::vgcreatePartition()
 {
     if( create_vg( item->data(0).toString() ) )
+        MainWindow->reRun();
+}
+
+void DeviceTreeView::tablecreatePartition()
+{
+  if( create_table( item->data(0).toString() ) )
         MainWindow->reRun();
 }
 

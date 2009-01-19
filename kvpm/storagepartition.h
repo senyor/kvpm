@@ -35,6 +35,7 @@ class StoragePartition
     QString m_partition_path;
     QString m_partition_type;
     QString m_fs_type;
+    QStringList m_flags;
     long long m_partition_size;
     long long m_first_sector;
     long long m_last_sector;
@@ -56,6 +57,7 @@ public:
     PhysVol *getPhysicalVolume();
     QString getType();
     QStringList getMountPoints();
+    QStringList getFlags();
     QList<int> getMountPosition();
     long long getPartitionSize();
     long long getFirstSector();

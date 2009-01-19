@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -11,6 +11,7 @@
  * 
  * See the file "COPYING" for the exact licensing terms.
  */
+
 #ifndef DEVICETREEVIEW_H
 #define DEVICETREEVIEW_H
 
@@ -46,6 +47,7 @@ private slots:
     void addPartition();
     void removePartition();
     void vgcreatePartition();
+    void tablecreatePartition();
     void vgreducePartition();
     void vgextendPartition(QAction *action);
     void mountPartition();
