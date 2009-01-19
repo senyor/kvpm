@@ -69,6 +69,9 @@ QScrollArea *DeviceTab::setupPropertyWidgets()
 {
 
     QScrollArea *device_scroll = new QScrollArea();
+
+    device_scroll->setFrameStyle(QFrame::NoFrame);
+
     DevicePropertiesStack *device_stack = new DevicePropertiesStack(m_devs);
 
     device_scroll->setBackgroundRole(QPalette::Base);

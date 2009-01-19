@@ -29,40 +29,51 @@ DeviceProperties::DeviceProperties( StorageDevice *Device, QWidget *parent) : QW
     QStringList mount_points;
     QList<int>  mount_position;
     QLabel     *temp_label;
-    KSeparator *separator;
 
     QVBoxLayout *layout = new QVBoxLayout();
+    layout->setSpacing(0);
+    layout->setMargin(0);
     setLayout(layout);
-    
+
+    QFrame *basic_info_frame = new QFrame;
+    QVBoxLayout *basic_info_layout = new QVBoxLayout();
+    basic_info_frame->setLayout(basic_info_layout);
+
+    basic_info_frame->setFrameStyle( QFrame::Sunken | QFrame::StyledPanel );
+    basic_info_frame->setLineWidth(2);   
+
     temp_label = new QLabel( QString("<b>%1</b>").arg( Device->getDevicePath() ) );
     temp_label->setAlignment( Qt::AlignCenter );
-    layout->addWidget( temp_label );
+    basic_info_layout->addWidget( temp_label );
 
-    layout->addWidget( new QLabel( i18n("Partition table: %1").arg( Device->getDiskLabel() ) ) );
-    layout->addWidget( new QLabel( i18n("Logical sector size: %1").arg( Device->getSectorSize() ) ) );
-    layout->addWidget( new QLabel( i18n("Physical sector size: %1").arg( Device->getPhysicalSectorSize() ) ) );
+    basic_info_layout->addWidget( new QLabel( i18n("Partition table: %1").arg( Device->getDiskLabel() ) ) );
+    basic_info_layout->addWidget( new QLabel( i18n("Logical sector size: %1").arg( Device->getSectorSize() ) ) );
+    basic_info_layout->addWidget( new QLabel( i18n("Physical sector size: %1").arg( Device->getPhysicalSectorSize() ) ) );
  
     if( Device->isReadOnly() )
-        layout->addWidget( new QLabel( i18n("Read only") ) );
+        basic_info_layout->addWidget( new QLabel( i18n("Read only") ) );
     else
-        layout->addWidget( new QLabel( i18n("Read/write") ) );
+        basic_info_layout->addWidget( new QLabel( i18n("Read/write") ) );
 
-    separator = new KSeparator(Qt::Horizontal);
-    separator->setFrameStyle(QFrame::Plain | QFrame::Box);
-    separator->setLineWidth(2);
-    separator->setMaximumHeight(2);
-    layout->addWidget(separator);
+    layout->addWidget(basic_info_frame);
+
+    QFrame *hardware_info_frame = new QFrame;
+    QVBoxLayout *hardware_info_layout = new QVBoxLayout();
+    hardware_info_frame->setLayout(hardware_info_layout);
+
+    hardware_info_frame->setFrameStyle( QFrame::Sunken | QFrame::StyledPanel );
+    hardware_info_frame->setLineWidth(2);   
 
     temp_label = new QLabel( i18n("<b>Hardware</b>") );
     temp_label->setAlignment( Qt::AlignCenter );
-    layout->addWidget( temp_label );
+    hardware_info_layout->addWidget( temp_label );
 
     temp_label = new QLabel( Device->getHardware() );
     temp_label->setWordWrap(true);
-    layout->addWidget( temp_label );
+    hardware_info_layout->addWidget( temp_label );
+    hardware_info_layout->addStretch();
 
-
-    layout->addStretch();
+    layout->addWidget(hardware_info_frame);
 
 }
 
@@ -74,45 +85,66 @@ DeviceProperties::DeviceProperties( StoragePartition *Partition, QWidget *parent
     PhysVol *pv;
     QLabel *temp_label;
 
-    KSeparator *separator;
-    
     QVBoxLayout *layout = new QVBoxLayout();
     setLayout(layout);
+    layout->setSpacing(0);
+    layout->setMargin(0);
 
     QString path = Partition->getPartitionPath();
 
+    QFrame *basic_info_frame = new QFrame;
+    QVBoxLayout *basic_info_layout = new QVBoxLayout();
+    basic_info_frame->setLayout(basic_info_layout);
+    layout->addWidget(basic_info_frame);
+    basic_info_frame->setFrameStyle( QFrame::Sunken | QFrame::StyledPanel );
+    basic_info_frame->setLineWidth(2);   
+
     temp_label =  new QLabel( QString("<b>%1</b>").arg(path) );
     temp_label->setAlignment( Qt::AlignCenter );
-    layout->addWidget( temp_label );
+    basic_info_layout->addWidget( temp_label );
 
-    layout->addWidget( new QLabel( i18n("First sector: %1", Partition->getFirstSector() ) ) );
-    layout->addWidget( new QLabel( i18n("Last sector: %1", Partition->getLastSector() ) ) );
+    basic_info_layout->addWidget( new QLabel( i18n("First sector: %1", Partition->getFirstSector() ) ) );
+    basic_info_layout->addWidget( new QLabel( i18n("Last sector: %1", Partition->getLastSector() ) ) );
 
     if( Partition->isPV() ){
         pv = Partition->getPhysicalVolume();
  
-        separator = new KSeparator(Qt::Horizontal);
-        separator->setFrameStyle(QFrame::Plain | QFrame::Box);
-        separator->setLineWidth(2);
-        separator->setMaximumHeight(2);
-        layout->addWidget(separator);
-
 	temp_label =  new QLabel( "<b>Physical volume UUID</b>" );
 	temp_label->setAlignment( Qt::AlignCenter );
-	layout->addWidget( temp_label );
+	basic_info_layout->addWidget( temp_label );
 
 	temp_label =  new QLabel( pv->getUuid() );
 	temp_label->setWordWrap(true);
-	layout->addWidget( temp_label );
+	basic_info_layout->addWidget( temp_label );
     }
+
+    QFrame *mount_info_frame = new QFrame;
+    QVBoxLayout *mount_info_layout = new QVBoxLayout();
+    mount_info_frame->setLayout(mount_info_layout);
+    layout->addWidget(mount_info_frame);
+    mount_info_frame->setFrameStyle( QFrame::Sunken | QFrame::StyledPanel );
+    mount_info_frame->setLineWidth(2);   
 
     mount_points   = Partition->getMountPoints();
     mount_position = Partition->getMountPosition();
 
-    for(int x = 0; x < mount_points.size(); x++){
-        if( mount_position[x] > 1 )
-	    mount_points[x] = mount_points[x] + QString("<%1>").arg(mount_position[x]);
-        layout->addWidget( new QLabel( i18n("Mount point: %1").arg(mount_points[x]) ) );
+    if( mount_points.size() <= 1 )
+        temp_label = new QLabel( i18n("<b>Mount point</b>") );
+    else
+        temp_label = new QLabel( i18n("<b>Mount points</b>") );
+
+    temp_label->setAlignment( Qt::AlignCenter );
+    mount_info_layout->addWidget( temp_label );
+
+    if( mount_points.size() ){
+        for(int x = 0; x < mount_points.size(); x++){
+	    if( mount_position[x] > 1 )
+	        mount_points[x] = mount_points[x] + QString("<%1>").arg(mount_position[x]);
+	    mount_info_layout->addWidget( new QLabel( mount_points[x] ) );
+	}
+    }
+    else{
+      mount_info_layout->addWidget( new QLabel( i18n("Not mounted") ) );
     }
 
     layout->addStretch();
