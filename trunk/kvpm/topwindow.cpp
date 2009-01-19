@@ -58,9 +58,8 @@ TopWindow::TopWindow(QWidget *parent):KMainWindow(parent)
 					     ki18n("kvpm"),
 					     QByteArray("0.5.0"),
 					     ki18n("Linux volume and partition manager for KDE.\n"
-						   "This program is under development and testing\n"
-						   "and should not be used on critical systems.\n"
-						   "Bug reports and comments are welcomed.\n"),
+						   "This program is still under development,\n"
+						   "bug reports and any comments are welcomed.\n"),
 					     KAboutData::License_GPL_V3, 
 					     ki18n("(c) 2008, 2009, Benjamin Scott"),
 					     ki18n(""),
