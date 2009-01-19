@@ -106,48 +106,57 @@ DeviceProperties::DeviceProperties( StoragePartition *Partition, QWidget *parent
     basic_info_layout->addWidget( new QLabel( i18n("First sector: %1", Partition->getFirstSector() ) ) );
     basic_info_layout->addWidget( new QLabel( i18n("Last sector: %1", Partition->getLastSector() ) ) );
 
-    if( Partition->isPV() ){
-        pv = Partition->getPhysicalVolume();
- 
-	temp_label =  new QLabel( "<b>Physical volume UUID</b>" );
-	temp_label->setAlignment( Qt::AlignCenter );
-	basic_info_layout->addWidget( temp_label );
-
-	temp_label =  new QLabel( pv->getUuid() );
-	temp_label->setWordWrap(true);
-	basic_info_layout->addWidget( temp_label );
-    }
+    QFrame *pv_info_frame = new QFrame;
+    QVBoxLayout *pv_info_layout = new QVBoxLayout();
+    pv_info_frame->setLayout(pv_info_layout);
+    pv_info_frame->setFrameStyle( QFrame::Sunken | QFrame::StyledPanel );
+    pv_info_frame->setLineWidth(2);   
 
     QFrame *mount_info_frame = new QFrame;
     QVBoxLayout *mount_info_layout = new QVBoxLayout();
     mount_info_frame->setLayout(mount_info_layout);
-    layout->addWidget(mount_info_frame);
     mount_info_frame->setFrameStyle( QFrame::Sunken | QFrame::StyledPanel );
     mount_info_frame->setLineWidth(2);   
 
-    mount_points   = Partition->getMountPoints();
-    mount_position = Partition->getMountPosition();
+    if( Partition->isPV() ){
 
-    if( mount_points.size() <= 1 )
-        temp_label = new QLabel( i18n("<b>Mount point</b>") );
-    else
-        temp_label = new QLabel( i18n("<b>Mount points</b>") );
+        pv = Partition->getPhysicalVolume();
+ 
+	temp_label =  new QLabel( "<b>Physical volume UUID</b>" );
+	temp_label->setAlignment( Qt::AlignCenter );
+	pv_info_layout->addWidget( temp_label );
 
-    temp_label->setAlignment( Qt::AlignCenter );
-    mount_info_layout->addWidget( temp_label );
-
-    if( mount_points.size() ){
-        for(int x = 0; x < mount_points.size(); x++){
-	    if( mount_position[x] > 1 )
-	        mount_points[x] = mount_points[x] + QString("<%1>").arg(mount_position[x]);
-	    mount_info_layout->addWidget( new QLabel( mount_points[x] ) );
-	}
+	temp_label =  new QLabel( pv->getUuid() );
+	temp_label->setWordWrap(true);
+	pv_info_layout->addWidget( temp_label );
+	layout->addWidget(pv_info_frame);
     }
     else{
-      mount_info_layout->addWidget( new QLabel( i18n("Not mounted") ) );
+
+	mount_points   = Partition->getMountPoints();
+	mount_position = Partition->getMountPosition();
+
+	if( mount_points.size() <= 1 )
+	    temp_label = new QLabel( i18n("<b>Mount point</b>") );
+	else
+	    temp_label = new QLabel( i18n("<b>Mount points</b>") );
+
+	temp_label->setAlignment( Qt::AlignCenter );
+	mount_info_layout->addWidget( temp_label );
+
+	if( mount_points.size() ){
+	    for(int x = 0; x < mount_points.size(); x++){
+	        if( mount_position[x] > 1 )
+		    mount_points[x] = mount_points[x] + QString("<%1>").arg(mount_position[x]);
+		mount_info_layout->addWidget( new QLabel( mount_points[x] ) );
+	    }
+	}
+	else{
+	    mount_info_layout->addWidget( new QLabel( i18n("Not mounted") ) );
+	}
+        layout->addWidget(mount_info_frame);
     }
 
     layout->addStretch();
-
 }
 
