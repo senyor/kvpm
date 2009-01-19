@@ -30,8 +30,10 @@ StorageDevice::StorageDevice( PedDevice *pedDevice,
 
     PedPartition *part = NULL;
     PedDisk      *disk = NULL;
+    PedGeometry       geometry;
     PedPartitionType  part_type;
     int freespace_counter = 0;
+    long long length;
 
     m_sector_size = pedDevice->sector_size;
     m_physical_sector_size = pedDevice->phys_sector_size;
@@ -60,12 +62,14 @@ StorageDevice::StorageDevice( PedDevice *pedDevice,
 	m_disk_label = QString( (disk->type)->name );
 	while( (part = ped_disk_next_partition (disk, part)) ){
 
+	    geometry  = part->geom;
+	    length = geometry.length * m_sector_size;
 	    part_type = part->type;
 
-	    if( part_type & 0x04 )
-	        freespace_counter++;
+	    if( !( (part_type & 0x08) || (  (part_type & 0x04) && (length < (1024 * 1024))))){
 
-	    if( !(part_type & 0x08) ) {
+	        if( part_type & 0x04 )
+		    freespace_counter++;
 
 		m_storage_partitions.append(new StoragePartition( part,
 								  freespace_counter,
