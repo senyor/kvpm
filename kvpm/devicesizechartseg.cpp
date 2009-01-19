@@ -44,21 +44,21 @@ DeviceChartSeg::DeviceChartSeg(StorageDeviceItem *storageDeviceItem, QWidget *pa
 {
     QStringList group_names;
     QString use;
-   
+
     if (( m_item->data(1)).toString()== "extended" ){
-        setFrameStyle(QFrame::Raised | QFrame::Panel);
-        setLineWidth( 2 );
+        setFrameStyle(QFrame::Raised | QFrame::Box);
+        setLineWidth( 1 );
     }
     else if (( m_item->data(1)).toString()== "logical" ){
-        setFrameStyle(QFrame::Sunken | QFrame::Panel);
+        setFrameStyle(QFrame::Sunken | QFrame::StyledPanel);
         setLineWidth( 2 );
     }
     else if (( m_item->data(1)).toString()== "logical (freespace)" ){
-        setFrameStyle(QFrame::Sunken | QFrame::Panel);
+        setFrameStyle(QFrame::Sunken | QFrame::StyledPanel);
         setLineWidth( 2 );
     }
     else{
-        setFrameStyle(QFrame::Sunken | QFrame::Panel);
+        setFrameStyle( QFrame::Sunken | QFrame::StyledPanel );
 	setLineWidth( 2 );
     }
 
@@ -74,7 +74,7 @@ DeviceChartSeg::DeviceChartSeg(StorageDeviceItem *storageDeviceItem, QWidget *pa
     if(m_pv_name == "freespace" || m_pv_name == "freespace (logical)"){
 	colorset->setColor(QPalette::Window, Qt::green);
     }
-    else{
+    else if( m_pv_name != "extended" ){
 	if(use == "ext2")
 	    colorset->setColor(QPalette::Window, Qt::blue);
 	else if(use == "ext3")

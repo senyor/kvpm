@@ -24,8 +24,8 @@ DeviceSizeChart::DeviceSizeChart(StorageDeviceModel *model, QWidget *parent) : Q
     device_model = model;
     QModelIndex index;
 
-    setFrameStyle(QFrame::Sunken | QFrame::Panel);
-    setLineWidth(3);
+    setFrameStyle( QFrame::Sunken | QFrame::Panel );
+    setLineWidth(2);
 
     index = model->index(0,0);
     layout = new QHBoxLayout();
