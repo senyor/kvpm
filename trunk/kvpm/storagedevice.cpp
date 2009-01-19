@@ -40,6 +40,11 @@ StorageDevice::StorageDevice( PedDevice *pedDevice,
     m_device_size = (pedDevice->length) * m_sector_size;
     m_device_path = QString("%1").arg(pedDevice->path);
 
+    if( pedDevice->read_only )
+      m_readonly = true;
+    else
+      m_readonly = false;
+
     m_physical_volume = false;
     m_pv = NULL;
 
