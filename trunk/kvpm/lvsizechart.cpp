@@ -13,7 +13,6 @@
  */
 
 
-#include <KSeparator>
 #include <QtGui>
 
 #include "logvol.h"
@@ -26,8 +25,8 @@ LVSizeChart::LVSizeChart(VolGroup *VolumeGroup, QWidget *parent) :
     m_vg(VolumeGroup)
 {
 
-    setFrameStyle(QFrame::Sunken | QFrame::Box);
-    setLineWidth(2);
+  //setFrameStyle(QFrame::Sunken | QFrame::StyledPanel);
+  //setLineWidth(2);
 
     m_layout = new QHBoxLayout(this);
     m_layout->setSpacing(0);
@@ -62,14 +61,6 @@ void LVSizeChart::populateChart()
 	    !m_lv->isVirtual() &&
 	    !(m_lv->isMirror() && m_lv->getOrigin() != "" ) ){
 
-	    if( m_widgets.size() ){
-		KSeparator *separator = new KSeparator(Qt::Vertical);
-		separator->setFrameStyle(QFrame::Sunken | QFrame::Box);
-		separator->setLineWidth(2);
-		separator->setMaximumWidth(2);
-		m_layout->addWidget(separator);
-	    }
-
 	    usage = m_lv->getFilesystem();
 
 	    seg_ratio = m_lv->getExtents() / (double) total_extents;
@@ -78,7 +69,6 @@ void LVSizeChart::populateChart()
 	        seg_ratio *= ( m_lv->getSegmentStripes(0) + 1);
 	    else if( m_lv->isMirror() )
 	        seg_ratio *= m_lv->getSegmentStripes(0);
-
 
 	    m_ratios.append(seg_ratio);
 	    widget = new LVChartSeg(m_vg, m_lv, usage, this);
@@ -89,14 +79,6 @@ void LVSizeChart::populateChart()
 
     if( free_extents ){ // only create a free space widget if we have some
 
-	if( m_widgets.size() ){
-	    KSeparator *separator = new KSeparator(Qt::Vertical);
-	    separator->setFrameStyle(QFrame::Sunken | QFrame::Box);
-	    separator->setLineWidth(2);
-	    separator->setMaximumWidth(2);
-	    m_layout->addWidget(separator);
-	}
-	
 	seg_ratio = free_extents / (double) total_extents;
 	usage = "freespace" ;
 	widget = new LVChartSeg(m_vg, 0, usage, this);

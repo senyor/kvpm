@@ -29,7 +29,7 @@ VGInfoLabels::VGInfoLabels(VolGroup *volumeGroup, QWidget *parent) : QFrame(pare
 	   *max_lv_label, *max_pv_label, *policy_label,
 	   *vg_write_mode;
 
-    setFrameStyle(QFrame::Sunken | QFrame::Box);
+    setFrameStyle(QFrame::Sunken | QFrame::StyledPanel);
     setLineWidth(2);
 
     QString clustered, resizable, write_mode;
