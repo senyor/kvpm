@@ -1,9 +1,9 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009 Benjamin Scott   <benscott@nwlink.com>
  *
- * This file is part of the Kvpm project.
+ * This file is part of the kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License,  version 3, as 
@@ -258,9 +258,9 @@ QWidget* LVCreateDialog::createGeneralTab()
      m_size_edit->setText(QString("%1").arg(m_volume_extents));
      size_combo = new KComboBox();
      size_combo->insertItem(0,"Extents");
-     size_combo->insertItem(1,"MB");
-     size_combo->insertItem(2,"GB");
-     size_combo->insertItem(3,"TB");
+     size_combo->insertItem(1,"MiB");
+     size_combo->insertItem(2,"GiB");
+     size_combo->insertItem(3,"TiB");
      size_combo->setInsertPolicy(KComboBox::NoInsert);
      size_combo->setCurrentIndex(2);
      size_layout->addWidget(size_combo);

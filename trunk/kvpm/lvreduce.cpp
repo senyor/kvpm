@@ -144,9 +144,9 @@ LVReduceDialog::LVReduceDialog(LogVol *logicalVolume, QWidget *parent) :
 	    this, SLOT(sizeComboAdjust(int)));
 
     m_size_combo->insertItem(0,"Extents");
-    m_size_combo->insertItem(1,"MB");
-    m_size_combo->insertItem(2,"GB");
-    m_size_combo->insertItem(3,"TB");
+    m_size_combo->insertItem(1,"MiB");
+    m_size_combo->insertItem(2,"GiB");
+    m_size_combo->insertItem(3,"TiB");
     m_size_combo->setInsertPolicy(QComboBox::NoInsert);
     m_size_combo->setCurrentIndex(0);
 
