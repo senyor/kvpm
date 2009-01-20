@@ -17,7 +17,7 @@
 
 #include <parted/parted.h>
 
-
+#include <QFrame>
 #include <KDialog>
 #include <KLineEdit>
 #include <KComboBox>
@@ -29,7 +29,7 @@
 #include "storagepartition.h"
 
 class QDoubleValidator;
-
+class PartAddGraphic;
 
 bool add_partition(StoragePartition *partition);
 
@@ -50,6 +50,8 @@ Q_OBJECT
     long long m_partition_sectors;  // proposed size of partition
     long long m_excluded_sectors;   // proposed excluded sectors of partition
 
+    PartAddGraphic *m_display_graphic; // The color bar that shows the relative
+                                       // size of the partition graphically
     QSpinBox *m_total_size_spin,
              *m_excluded_spin;
 
