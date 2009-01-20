@@ -18,6 +18,7 @@
 #include <QtGui>
 
 #include "partadd.h"
+#include "partaddgraphic.h"
 #include "sizetostring.h"
 
 
@@ -85,6 +86,19 @@ PartitionAddDialog::PartitionAddDialog(StoragePartition *partition,
     setMainWidget(dialog_body);
     QVBoxLayout *layout = new QVBoxLayout();
     dialog_body->setLayout(layout);
+
+    QFrame *display_graphic_frame = new QFrame();
+    QVBoxLayout *display_graphic_layout = new QVBoxLayout();
+    display_graphic_layout->setSpacing(0);
+    display_graphic_layout->setMargin(0);
+    display_graphic_frame->setFrameStyle(QFrame::Sunken | QFrame::Panel);
+    display_graphic_frame->setLineWidth(2);
+    display_graphic_frame->setLayout(display_graphic_layout);
+
+    m_display_graphic = new PartAddGraphic();
+    display_graphic_layout->addWidget(m_display_graphic);
+    layout->addWidget(display_graphic_frame, 0, Qt::AlignCenter);
+ 
     QLabel *path = new QLabel("<b>" + m_partition->getPartitionPath() + "</b>");
     path->setAlignment( Qt::AlignHCenter );
     layout->addWidget(path);
@@ -284,7 +298,8 @@ void PartitionAddDialog::adjustSizeEdit(int percentage){
     QString preceding_bytes_string = sizeToString(m_excluded_sectors * m_ped_sector_size);
     m_preceding_label->setText( i18n("Preceding space: %1", preceding_bytes_string) );
 
-    PedSector following_space = (m_ped_sector_length - (m_partition_sectors + m_excluded_sectors)) * m_ped_sector_size;
+    PedSector following_sectors = m_ped_sector_length - (m_partition_sectors + m_excluded_sectors);
+    PedSector following_space = following_sectors * m_ped_sector_size;
 
     if(following_space < 0)
         following_space = 0;
@@ -293,6 +308,12 @@ void PartitionAddDialog::adjustSizeEdit(int percentage){
     m_remaining_label->setText( i18n("Following space: %1", following_bytes_string) );
 
     adjustSizeCombo( m_size_combo->currentIndex() );
+
+    m_display_graphic->setPrecedingSectors(m_excluded_sectors);
+    m_display_graphic->setPartitionSectors(m_partition_sectors);
+    m_display_graphic->setFollowingSectors(following_sectors);
+    m_display_graphic->repaint();
+
 
     resetOkButton();
 }
@@ -346,13 +367,19 @@ void PartitionAddDialog::validateVolumeSize(QString size){
     QString preceding_bytes_string = sizeToString(m_excluded_sectors * m_ped_sector_size);
     m_preceding_label->setText( i18n("Preceding space: %1", preceding_bytes_string) );
 
-    PedSector following_space = (m_ped_sector_length - (m_partition_sectors + m_excluded_sectors)) * m_ped_sector_size;
+    PedSector following_sectors = m_ped_sector_length - (m_partition_sectors + m_excluded_sectors);
+    PedSector following_space = following_sectors * m_ped_sector_size;
 
     if(following_space < 0)
         following_space = 0;
 
     QString following_bytes_string = sizeToString(following_space);
     m_remaining_label->setText( i18n("Following space: %1", following_bytes_string) );
+
+    m_display_graphic->setPrecedingSectors(m_excluded_sectors);
+    m_display_graphic->setPartitionSectors(m_partition_sectors);
+    m_display_graphic->setFollowingSectors(following_sectors);
+    m_display_graphic->repaint();
 
     resetOkButton();
 }
@@ -470,3 +497,4 @@ void PartitionAddDialog::clearExcludedGroup(bool on){
 	m_excluded_spin->setValue(0);
 
 }
+
