@@ -71,9 +71,9 @@ VGCreateDialog::VGCreateDialog(QString physicalVolumePath, QWidget *parent) :
     m_extent_size->setInsertPolicy(QComboBox::NoInsert);
     m_extent_size->setCurrentIndex(2);
     m_extent_suffix = new KComboBox();
-    m_extent_suffix->insertItem(0,"KB");
-    m_extent_suffix->insertItem(1,"MB");
-    m_extent_suffix->insertItem(2,"GB");
+    m_extent_suffix->insertItem(0,"KiB");
+    m_extent_suffix->insertItem(1,"MiB");
+    m_extent_suffix->insertItem(2,"GiB");
     m_extent_suffix->setInsertPolicy(QComboBox::NoInsert);
     m_extent_suffix->setCurrentIndex(1);
     
