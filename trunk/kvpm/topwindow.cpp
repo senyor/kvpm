@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -19,6 +19,7 @@
 #include <KLocale>
 #include <QtGui>
 
+#include "configmodule.h"
 #include "devicetab.h"
 #include "logvol.h"
 #include "masterlist.h"
@@ -56,7 +57,7 @@ TopWindow::TopWindow(QWidget *parent):KMainWindow(parent)
     KAboutData *about_data = new KAboutData( QByteArray("kvpm"),
 					     QByteArray(""),
 					     ki18n("kvpm"),
-					     QByteArray("0.5.1"),
+					     QByteArray("0.5.2"),
 					     ki18n("Linux volume and partition manager for KDE.\n"
 						   "This program is still under development,\n"
 						   "bug reports and any comments are welcomed.\n"),
@@ -168,6 +169,9 @@ TopWindow::TopWindow(QWidget *parent):KMainWindow(parent)
 
     connect(m_stop_pvmove_action,    SIGNAL(triggered()), 
 	    this, SLOT(stopPhysicalVolumeMove()));
+
+    connect(config_kvpm_action,    SIGNAL(triggered()), 
+	    this, SLOT(configKvpm()));
 
     reRun();    // reRun also does the initial run
 }
@@ -416,5 +420,11 @@ void TopWindow::restartPhysicalVolumeMove()
 void TopWindow::stopPhysicalVolumeMove()
 {
     if( stop_pvmove() )
+        MainWindow->reRun();
+}
+
+void TopWindow::configKvpm()
+{
+    if( config_kvpm() )
         MainWindow->reRun();
 }

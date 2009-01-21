@@ -41,6 +41,7 @@ class StoragePartition
     long long m_last_sector;
     bool m_is_pv;
     bool m_is_mounted;
+    bool m_is_busy;
     bool m_is_mountable;
     
 public: 
@@ -64,6 +65,7 @@ public:
     long long getLastSector();
     bool isPV();
     bool isMounted();
+    bool isBusy();
     bool isMountable();
 };
 

@@ -41,9 +41,12 @@ DeviceTab::DeviceTab(QList<StorageDevice *> Devices, QWidget *parent) :
     m_tree->setAlternatingRowColors(true); 
     m_tree->resizeColumnToContents(0);
     m_tree->resizeColumnToContents(3);
+    m_tree->resizeColumnToContents(5);
     m_tree->setAllColumnsShowFocus(true);
     m_tree->setExpandsOnDoubleClick(true);
     m_tree->setSelectionBehavior(QAbstractItemView::SelectRows);
+    m_tree->setColumnHidden( 6, true );
+
     layout->addWidget(size_chart);
     layout->addWidget( tree_properties_splitter );
 

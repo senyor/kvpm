@@ -119,17 +119,17 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
     
     if(item){
 
-	setEnabled(true);
+        setEnabled(true);
 
 	m_tablecreate_action->setEnabled(false);
 
-	if(item->data(6) == "yes"){
+	if(item->dataAlternate(7).toString() == "Yes"){        // yes = is mountable
 	    m_mount_action->setEnabled(true);
-	    m_unmount_action->setEnabled(true);
-	}
-	else if(item->data(6) == "no"){
-	    m_mount_action->setEnabled(true);
-	    m_unmount_action->setEnabled(false);
+
+	    if(item->data(7) != "")                            // "" = not mounted
+	        m_unmount_action->setEnabled(true);
+	    else
+	        m_unmount_action->setEnabled(false);
 	}
 	else{
 	    m_mount_action->setEnabled(false);
@@ -172,6 +172,7 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
 	    m_pvcreate_action->setEnabled(false);
 	    m_mkfs_action->setEnabled(false);
 	    m_partremove_action->setEnabled(false);
+	    m_partadd_action->setEnabled(false);
 	    m_pvremove_action->setEnabled(true);
 	    m_vgcreate_action->setEnabled(true);
 	    m_vgextend_menu->setEnabled(true);
@@ -181,6 +182,7 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
 	    m_pvcreate_action->setEnabled(false);
 	    m_mkfs_action->setEnabled(false);
 	    m_partremove_action->setEnabled(false);
+	    m_partadd_action->setEnabled(false);
 	    m_pvremove_action->setEnabled(false);
 	    m_vgcreate_action->setEnabled(false);
 	    m_vgextend_menu->setEnabled(false);
