@@ -112,6 +112,9 @@ StoragePartition::StoragePartition(PedPartition *part,
 		m_is_mountable = true;
 	}
     }
+
+    m_is_busy = ped_partition_is_busy(m_ped_partition);
+
 }
 
 StoragePartition::~StoragePartition()
@@ -127,12 +130,12 @@ PedPartition* StoragePartition::getPedPartition()
 
 QString StoragePartition::getType()
 {
-    return m_partition_type;
+    return m_partition_type.trimmed();
 }
 
 QString StoragePartition::getFileSystem()
 {
-    return m_fs_type;
+    return m_fs_type.trimmed();
 }
 
 PhysVol* StoragePartition::getPhysicalVolume()
@@ -165,6 +168,11 @@ long long StoragePartition::getLastSector()
 bool StoragePartition::isMounted()
 {
     return m_is_mounted;
+}
+
+bool StoragePartition::isBusy()
+{
+    return m_is_busy;
 }
 
 bool StoragePartition::isMountable()

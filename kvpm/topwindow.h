@@ -81,6 +81,7 @@ Q_OBJECT
     void importVolumeGroup();
     void restartPhysicalVolumeMove();
     void stopPhysicalVolumeMove();
+    void configKvpm();
     
 };
 

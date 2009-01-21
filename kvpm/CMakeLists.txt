@@ -4,7 +4,7 @@ project (kvpm)
 find_package(KDE4 REQUIRED)
 include_directories( ${KDE4_INCLUDES} ${QT4_INCLUDES} )
  
-set(kvpm_SRCS addmirror.cpp devicemodel.cpp deviceproperties.cpp 
+set(kvpm_SRCS addmirror.cpp kvpmconfigdialog.cpp devicemodel.cpp deviceproperties.cpp 
 	     devicepropertiesstack.cpp devicesizechart.cpp devicesizechartseg.cpp 
 	     devicetab.cpp executablefinder.cpp deviceactionsmenu.cpp
 	     fsprobe.cpp logvol.cpp lvactionsmenu.cpp lvchange.cpp lvrename.cpp

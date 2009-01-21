@@ -47,6 +47,8 @@ StorageDevice::StorageDevice( PedDevice *pedDevice,
     else
       m_readonly = false;
 
+    m_busy = ped_device_is_busy(pedDevice);
+
     m_physical_volume = false;
     m_pv = NULL;
 
@@ -127,6 +129,11 @@ long long StorageDevice::getPhysicalSectorSize()
 bool StorageDevice::isReadOnly()
 {
     return m_readonly;
+}
+
+bool StorageDevice::isBusy()
+{
+    return m_busy;
 }
 
 bool StorageDevice::isPhysicalVolume()

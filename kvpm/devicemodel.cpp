@@ -1,9 +1,9 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009 Benjamin Scott   <benscott@nwlink.com>
  *
- * This file is part of the Kvpm project.
+ * This file is part of the kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License,  version 3, as 
@@ -23,7 +23,9 @@
 extern QString sizeToString(long long bytes);
 
 
-StorageDeviceItem::StorageDeviceItem(const QList<QVariant> &data, const QList<QVariant> &dataAlternate, StorageDeviceItem *parent)
+StorageDeviceItem::StorageDeviceItem(const QList<QVariant> &data, 
+				     const QList<QVariant> &dataAlternate, 
+				     StorageDeviceItem *parent)
 {
     parentItem = parent;
     itemData = data;
@@ -82,7 +84,7 @@ StorageDeviceModel::StorageDeviceModel(QList<StorageDevice *> devices, QObject *
 {
     QList<QVariant> rootData;
     rootData << "Device" << "Type" << "Capacity" << "Used" << "Usage" 
-	     << "Volume Group" <<"Mounted" ;
+	     << "Group" << "Busy" << "Mount point" ;
     
     rootItem = new StorageDeviceItem(rootData, rootData);
     setupModelData(devices, rootItem);
@@ -238,12 +240,26 @@ void StorageDeviceModel::setupModelData(QList<StorageDevice *> devices, StorageD
 		}
 		else{
 		    data << "" << part->getFileSystem();
-		    if(part->isMounted())
+
+		    if(part->isBusy())
 			data << "" <<"yes";
-		    else if(part->isMountable())
-			data << "" << "no";
 		    else
 			data << "" << "";
+
+		    if(part->isMounted())
+		        data << (part->getMountPoints())[0];
+		    else if( part->isBusy() && ( part->getFileSystem() == "swap" ) )
+		        data << "swapping";
+		    else
+		        data << "";
+
+		    dataAlternate << "" << "" << "" << "";
+
+		    if(part->isMountable())
+		        dataAlternate << "Yes";   // dataAlternate for mountpoint (position 7)
+		    else
+		        dataAlternate << "No";
+
 		}
 		
 		if(type == "extended"){

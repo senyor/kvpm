@@ -115,14 +115,11 @@ LVProperties::LVProperties(LogVol *logicalVolume, int segment, QWidget *parent):
     if(logicalVolume->isSnap())
         basic_info_layout->addWidget(new QLabel( i18n("Origin: %1").arg(logicalVolume->getOrigin()) ));
     
-
-
     QFrame *mount_info_frame = new QFrame();
     QVBoxLayout *mount_info_layout = new QVBoxLayout();
     mount_info_frame->setLayout(mount_info_layout);
     mount_info_frame->setFrameStyle( QFrame::Sunken | QFrame::StyledPanel );
     mount_info_frame->setLineWidth(2);
-    layout->addWidget(mount_info_frame);
 
     QStringList mount_points = logicalVolume->getMountPoints();
     QList<int>  mount_position = logicalVolume->getMountPosition();
@@ -132,6 +129,7 @@ LVProperties::LVProperties(LogVol *logicalVolume, int segment, QWidget *parent):
 	( (segment_count == 1) ||
 	  (segment == -1) ) )
     {
+        layout->addWidget(mount_info_frame); // don't add this widget at all if in a mirror leg 
 
 	if(mount_points.size() > 1){
 	  temp_label = new QLabel( i18n("<b>Mount points</b>") );

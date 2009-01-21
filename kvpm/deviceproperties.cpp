@@ -54,6 +54,11 @@ DeviceProperties::DeviceProperties( StorageDevice *Device, QWidget *parent) : QW
     else
         basic_info_layout->addWidget( new QLabel( i18n("Read/write") ) );
 
+    if( Device->isBusy() )
+        basic_info_layout->addWidget( new QLabel( i18n("Busy: Yes") ) );
+    else
+        basic_info_layout->addWidget( new QLabel( i18n("Busy: No") ) );
+
     layout->addWidget(basic_info_frame);
 
     QFrame *hardware_info_frame = new QFrame;
