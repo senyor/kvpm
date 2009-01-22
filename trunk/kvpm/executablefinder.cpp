@@ -1,9 +1,9 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009 Benjamin Scott   <benscott@nwlink.com>
  *
- * This file is part of the Kvpm project.
+ * This file is part of the kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License,  version 3, as 
@@ -17,20 +17,23 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include <KSharedConfig>
+#include <KConfigGroup>
+
 #include <QtGui>
 
 #include "executablefinder.h"
 
-/* The purpoise of this class is to map he name of a program
+/* The purpoise of this class is to map the name of a program
    with the full path of the executable */
 
 ExecutableFinder::ExecutableFinder(QObject *parent) : QObject(parent)
 {
     struct stat buf;
     QStringList keys;
-    QStringList search_path;
+    QStringList default_search_paths;
     const char *path;
-    
+
     keys << "lvchange"
 	 << "lvconvert" 
 	 << "lvcreate"
@@ -60,23 +63,37 @@ ExecutableFinder::ExecutableFinder(QObject *parent) : QObject(parent)
 	 << "xfs_growfs";
     
     
-    search_path << "/sbin/" 
-		<< "/usr/sbin/" 
-		<< "/bin/" 
-		<< "/usr/bin/" 
-		<< "/usr/local/bin/"
-		<< "/usr/local/sbin/";
+    default_search_paths << "/sbin/" 
+			 << "/usr/sbin/" 
+			 << "/bin/" 
+			 << "/usr/bin/" 
+			 << "/usr/local/bin/"
+			 << "/usr/local/sbin/";
     
 
+    // Read the kvpmrc files and get the search paths or use the default
+    // if none are found, then write out the default. 
+
+    KConfig kvpm_config( "kvpmrc", KConfig::SimpleConfig );
+    KConfigGroup system_paths_group( &kvpm_config, "SystemPaths" );
+
+    QStringList search_paths = system_paths_group.readEntry( "SearchPath", QStringList() );
+    if( search_paths.isEmpty() ){
+        search_paths = default_search_paths ;
+        system_paths_group.writeEntry( "SearchPath",    search_paths );
+        system_paths_group.sync();
+    }
+
     for(int y = 0; y < keys.size(); y++){
-	for(int x = 0; x < search_path.size(); x++){
-	    path = QString( search_path[x] + keys[y] ).toAscii().data();
+	for(int x = 0; x < search_paths.size(); x++){
+	    path = QString( search_paths[x] + keys[y] ).toAscii().data();
 	    if( lstat(path, &buf) == 0 ){
-		m_path_map.insert( keys[y], search_path[x] + keys[y] );
+		m_path_map.insert( keys[y], search_paths[x] + keys[y] );
 		break;
 	    }
 	}
     }
+
 }
 
 QString ExecutableFinder::getExecutablePath(QString name)
