@@ -148,11 +148,21 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
 	    m_vgextend_menu->setEnabled(false);
 	    m_vgreduce_action->setEnabled(false);
 	}
-	else if(item->data(1) == "extended"){
+	else if(item->data(1) == "extended" && item->dataAlternate(1) == "empty"){
 	    m_pvcreate_action->setEnabled(false);
 	    m_mkfs_action->setEnabled(false);
 	    m_partadd_action->setEnabled(false);
 	    m_partremove_action->setEnabled(true);
+	    m_pvremove_action->setEnabled(false);
+	    m_vgcreate_action->setEnabled(false);
+	    m_vgextend_menu->setEnabled(false);
+	    m_vgreduce_action->setEnabled(false);
+	}
+	else if(item->data(1) == "extended" && item->dataAlternate(1) != "empty"){
+	    m_pvcreate_action->setEnabled(false);
+	    m_mkfs_action->setEnabled(false);
+	    m_partadd_action->setEnabled(false);
+	    m_partremove_action->setEnabled(false);
 	    m_pvremove_action->setEnabled(false);
 	    m_vgcreate_action->setEnabled(false);
 	    m_vgextend_menu->setEnabled(false);

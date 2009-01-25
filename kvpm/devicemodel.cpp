@@ -226,8 +226,11 @@ void StorageDeviceModel::setupModelData(QList<StorageDevice *> devices, StorageD
 		
 		part_variant.setValue( (void *) part);
 		
-		dataAlternate << part_variant << "" << part->getPartitionSize();
-		
+		if(part->isEmpty())
+		    dataAlternate << part_variant << "empty" << part->getPartitionSize();
+		else
+		    dataAlternate << part_variant << "" << part->getPartitionSize();
+		 
 		if(part->isPV()){
 		    pv = part->getPhysicalVolume();
 		    data << QString("%1 ( %2% ) ").arg( sizeToString( pv->getUsed() ))

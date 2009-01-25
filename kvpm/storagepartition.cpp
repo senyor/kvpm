@@ -115,6 +115,24 @@ StoragePartition::StoragePartition(PedPartition *part,
 
     m_is_busy = ped_partition_is_busy(m_ped_partition);
 
+    PedPartition *temp_part = NULL;
+    PedDisk      *temp_disk = ped_disk_new(ped_device);
+
+    if( m_partition_type == "extended" ){
+        m_is_empty = true;
+	if( temp_disk ){
+	    while( (temp_part = ped_disk_next_partition (temp_disk, temp_part)) ){
+	        if( (temp_part->type  == PED_PARTITION_LOGICAL) ){
+		    m_is_empty = false;
+		    break;
+		}
+	    }
+	}
+    }
+    else
+        m_is_empty = false;
+
+    ped_disk_destroy(temp_disk); 
 }
 
 StoragePartition::~StoragePartition()
@@ -168,6 +186,14 @@ long long StoragePartition::getLastSector()
 bool StoragePartition::isMounted()
 {
     return m_is_mounted;
+}
+
+/* function returns true if the partition is extended 
+   and has no logical partitions */
+
+bool StoragePartition::isEmpty()
+{
+    return m_is_empty;
 }
 
 bool StoragePartition::isBusy()
