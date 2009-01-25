@@ -210,6 +210,8 @@ void StorageDeviceModel::setupModelData(QList<StorageDevice *> devices, StorageD
 	    }
 	    else{
 		data << dev->getDevicePath() << "" << sizeToString(dev->getSize());
+		if( dev->isBusy() )
+		    dataAlternate << "" << "busy" << dev->getSize();
 		dataAlternate << "" << "" << dev->getSize();
 	    }
 	    
