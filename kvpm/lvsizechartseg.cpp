@@ -64,19 +64,21 @@ LVChartSeg::LVChartSeg(VolGroup *volumeGroup, LogVol *logicalVolume,
 	colorset->setColor(QPalette::Window, Qt::blue);
     else if(use == "ext3")
 	colorset->setColor(QPalette::Window, Qt::darkBlue);
+    else if(use == "ext4")
+	colorset->setColor(QPalette::Window, Qt::cyan);
     else if(use == "reiserfs")
 	colorset->setColor(QPalette::Window, Qt::red);
     else if(use == "reiser4")
-	colorset->setColor(QPalette::Window, Qt::darkGray);
-    else if(use == "hfs")
 	colorset->setColor(QPalette::Window, Qt::darkRed);
+    else if(use == "hfs")
+	colorset->setColor(QPalette::Window, Qt::magenta);
     else if(use == "vfat")
 	colorset->setColor(QPalette::Window, Qt::yellow);
     else if(use == "jfs")
-	colorset->setColor(QPalette::Window, Qt::magenta);
+	colorset->setColor(QPalette::Window, Qt::darkMagenta);
     else if(use == "xfs")
-	colorset->setColor(QPalette::Window, Qt::cyan);
-    else if(use == "linux-swap")
+	colorset->setColor(QPalette::Window, Qt::darkCyan);
+    else if(use == "swap")
 	colorset->setColor(QPalette::Window, Qt::lightGray);
     else if(use == "freespace")
 	colorset->setColor(QPalette::Window, Qt::green);
