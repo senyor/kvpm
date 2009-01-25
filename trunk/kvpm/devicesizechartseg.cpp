@@ -50,15 +50,15 @@ DeviceChartSeg::DeviceChartSeg(StorageDeviceItem *storageDeviceItem, QWidget *pa
         setLineWidth( 1 );
     }
     else if (( m_item->data(1)).toString()== "logical" ){
-        setFrameStyle(QFrame::Sunken | QFrame::StyledPanel);
+        setFrameStyle(QFrame::Sunken | QFrame::Panel);
         setLineWidth( 2 );
     }
     else if (( m_item->data(1)).toString()== "logical (freespace)" ){
-        setFrameStyle(QFrame::Sunken | QFrame::StyledPanel);
+        setFrameStyle(QFrame::Sunken | QFrame::Panel);
         setLineWidth( 2 );
     }
     else{
-        setFrameStyle( QFrame::Sunken | QFrame::StyledPanel );
+        setFrameStyle( QFrame::Sunken | QFrame::Panel );
 	setLineWidth( 2 );
     }
 
@@ -75,24 +75,31 @@ DeviceChartSeg::DeviceChartSeg(StorageDeviceItem *storageDeviceItem, QWidget *pa
 	colorset->setColor(QPalette::Window, Qt::green);
     }
     else if( m_pv_name != "extended" ){
-	if(use == "ext2")
+
+        if(use == "ext2")
 	    colorset->setColor(QPalette::Window, Qt::blue);
 	else if(use == "ext3")
 	    colorset->setColor(QPalette::Window, Qt::darkBlue);
+	else if(use == "ext4")
+	    colorset->setColor(QPalette::Window, Qt::cyan);
 	else if(use == "reiserfs")
 	    colorset->setColor(QPalette::Window, Qt::red);
 	else if(use == "reiser4")
 	    colorset->setColor(QPalette::Window, Qt::darkRed);
+	else if(use == "hfs")
+	    colorset->setColor(QPalette::Window, Qt::magenta);
 	else if(use == "vfat")
 	    colorset->setColor(QPalette::Window, Qt::yellow);
 	else if(use == "jfs")
-	    colorset->setColor(QPalette::Window, Qt::darkGray);
+	    colorset->setColor(QPalette::Window, Qt::darkMagenta);
 	else if(use == "xfs")
-	    colorset->setColor(QPalette::Window, Qt::cyan);
+	    colorset->setColor(QPalette::Window, Qt::darkCyan);
 	else if(use == "swap")
 	    colorset->setColor(QPalette::Window, Qt::lightGray);
+	else if(use == "freespace")
+	    colorset->setColor(QPalette::Window, Qt::green);
 	else if(use == "physical volume")
-	    colorset->setColor(QPalette::Window, Qt::magenta);
+	    colorset->setColor(QPalette::Window, Qt::darkGreen);
 	else
 	    colorset->setColor(QPalette::Window, Qt::black);
     }
