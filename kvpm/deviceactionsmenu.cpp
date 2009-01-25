@@ -225,7 +225,11 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
 	    m_vgcreate_action->setEnabled(false);
 	    m_vgextend_menu->setEnabled(false);
 	    m_vgreduce_action->setEnabled(false);
-	    m_tablecreate_action->setEnabled(true);
+
+	    if( item->dataAlternate(1) == "busy" )
+	        m_tablecreate_action->setEnabled(false);
+	    else
+	        m_tablecreate_action->setEnabled(true);
 	}
     }
     else
