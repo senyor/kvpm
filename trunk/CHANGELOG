@@ -1,3 +1,20 @@
+version 0.5.3
+The settings menu is partly implemented. The search 
+path for the needed programs such as "vgs" can be 
+configured.
+
+version 0.5.2
+mount points are on the main tree view now.
+New and blingy "create partition" graphic
+like "gparted" has to show the size of a partition
+about to be created along with the free space around
+it.
+
+version 0.5.1
+The panels get a more finished look and small
+areas (under 1 MiB) of free space are not shown
+anymore.
+
 version 0.5.0
 Can create a new partition table.
 Better support for GPT disk labels and
