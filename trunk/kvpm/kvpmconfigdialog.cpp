@@ -7,9 +7,13 @@
 
 #include <QtGui>
 #include <QListWidgetItem>
+#include <QTableWidget>
 
 #include "kvpmconfigdialog.h"
+#include "executablefinder.h"
 
+
+extern ExecutableFinder *g_executable_finder;
 
 
 bool config_kvpm()
@@ -21,45 +25,22 @@ bool config_kvpm()
 
   dialog->exec();
 
-  return false;
+  return true;
 
 }
 
  
 
 KvpmConfigDialog::KvpmConfigDialog( QWidget *parent, QString name, KConfigSkeleton *skeleton ) 
-  : KConfigDialog(  parent, name, skeleton) 
+  : KConfigDialog(  parent, name, skeleton), m_skeleton(skeleton) 
 {
 
-    KIconLoader *icon_loader = KIconLoader::global();
+  //    KIconLoader *icon_loader = KIconLoader::global();
 
     setFaceType(KPageDialog::List);
 
-    QWidget *kcfg_general = new QWidget;
-    QVBoxLayout *general_layout = new QVBoxLayout();
-    QLabel *general_label = new QLabel("Not Implemented");
-    general_layout->addWidget(general_label);
-    kcfg_general->setLayout(general_layout);
-
-    addPage( kcfg_general, 
-	     "General", 
-	     icon_loader->iconPath("configure", 0), 
-	     "General", 
-	     true );
-
-    QWidget *kcfg_colors = new QWidget;
-    QVBoxLayout *colors_layout = new QVBoxLayout();
-    QLabel *colors_label = new QLabel("Not Implemented");
-    colors_layout->addWidget(colors_label);
-    kcfg_colors->setLayout(colors_layout);
-
-
-    addPage( kcfg_colors, 
-	     "Colors", 
-	     icon_loader->iconPath("color-picker", 0), 
-	     "Colors", 
-	     true );
-
+    buildGeneralPage();
+    buildColorsPage();
     buildProgramsPage();
 
 }
@@ -70,14 +51,36 @@ KvpmConfigDialog::~KvpmConfigDialog()
     delete m_system_paths_group;
 }
 
+void KvpmConfigDialog::buildGeneralPage()
+{
+    QWidget *general = new QWidget;
+    QVBoxLayout *general_layout = new QVBoxLayout();
+    QLabel *general_label = new QLabel("Not Implemented Yet");
+    general_layout->addWidget(general_label);
+    general->setLayout(general_layout);
+
+    KPageWidgetItem  *page_widget_item =  addPage( general, "General"); 
+    page_widget_item->setIcon( KIcon("configure") );
+}
+
+void KvpmConfigDialog::buildColorsPage()
+{
+    QWidget *colors = new QWidget;
+    QVBoxLayout *colors_layout = new QVBoxLayout();
+    QLabel *colors_label = new QLabel("Not Implemented Yet");
+    colors_layout->addWidget(colors_label);
+    colors->setLayout(colors_layout);
+
+
+    KPageWidgetItem  *page_widget_item =  addPage( colors, "Colors"); 
+    page_widget_item->setIcon( KIcon("color-picker") );
+}
+
 void KvpmConfigDialog::buildProgramsPage()
 {
-    KPageWidgetItem *page_widget_item;
+    m_executables_table = new QTableWidget();
 
-    m_kvpm_config =  new KConfig( "kvpmrc", KConfig::SimpleConfig );
-    m_system_paths_group = new KConfigGroup( m_kvpm_config, "SystemPaths" );
-
-    KTabWidget  *kcfg_programs = new KTabWidget;
+    KTabWidget  *programs = new KTabWidget;
     QVBoxLayout *programs1_layout = new QVBoxLayout();
     QVBoxLayout *programs2_layout = new QVBoxLayout();
     QWidget *programs1 = new QWidget();
@@ -85,28 +88,109 @@ void KvpmConfigDialog::buildProgramsPage()
     programs1->setLayout(programs1_layout);
     programs2->setLayout(programs2_layout);
 
-    KEditListBox *edit_list = new KEditListBox();
-    programs1_layout->addWidget(edit_list);
-    kcfg_programs->insertTab( 1, programs1, "Search path");
+    m_skeleton->setCurrentGroup("SystemPaths");
+    m_skeleton->addItemStringList("SearchPath", m_search_entries, QStringList() );
 
-    KListWidget *program_list = new KListWidget();
-    programs2_layout->addWidget(program_list);
-    kcfg_programs->insertTab( 1, programs2, "Executables");
+    m_edit_list = new KEditListBox();
+    programs1_layout->addWidget(m_edit_list);
 
-    QStringList search_entries = m_system_paths_group->readEntry( "SearchPath", QStringList() );
-    edit_list->insertStringList( search_entries );
+    programs->insertTab( 1, programs1, "Search path");
+    m_edit_list->insertStringList( m_search_entries );
 
-    QIcon *check_icon = new KIcon("checkmark");
-    QListWidgetItem  *check_item = new QListWidgetItem( *check_icon, "Test"  );
-    program_list->addItem( check_item  );
+    programs2_layout->addWidget(m_executables_table);
+    programs->insertTab( 1, programs2, "Executables");
 
-    page_widget_item =  addPage( kcfg_programs, "Programs"); 
+    fillExecutablesTable();
+
+    KPageWidgetItem  *page_widget_item =  addPage( programs, "Programs"); 
     page_widget_item->setIcon( KIcon("applications-system") );
+
+    connect( m_edit_list  , SIGNAL(changed()), this, SLOT(updateConfig()));
 
 } 
 
 
 void KvpmConfigDialog::updateSettings()
 {
-  qDebug() << "Got here....";
+    m_search_entries = m_edit_list->items();
+
+    for( int x = 0; x < m_search_entries.size(); x++)
+      if( ! m_search_entries[x].endsWith("/") )
+	m_search_entries[x].append("/");
+
+    m_skeleton->writeConfig();
+
+    g_executable_finder->reload();
+    fillExecutablesTable();
+}
+
+void KvpmConfigDialog::updateWidgetsDefault()
+{
+    QStringList default_entries;
+
+    default_entries << "/sbin/" 
+		    << "/usr/sbin/" 
+		    << "/bin/" 
+		    << "/usr/bin/" 
+		    << "/usr/local/bin/"
+		    << "/usr/local/sbin/";
+
+    m_edit_list->clear();
+    m_edit_list->insertStringList( default_entries );
+}
+
+void KvpmConfigDialog::updateConfig()
+{
+    g_executable_finder->getAllNames();
+
+}
+
+void KvpmConfigDialog::fillExecutablesTable()
+{
+
+    QTableWidgetItem *table_widget_item = NULL;
+
+    QStringList all_names = g_executable_finder->getAllNames();
+    QStringList all_paths = g_executable_finder->getAllPaths();
+    QStringList not_found = g_executable_finder->getNotFound();
+    int not_found_length = not_found.size();
+
+    m_executables_table->clear();
+    m_executables_table->setColumnCount(2);
+    m_executables_table->setRowCount( all_names.size() + not_found_length );
+
+    for(int x = 0; x < not_found_length; x++){
+        table_widget_item = new QTableWidgetItem( not_found[x] );
+	m_executables_table->setItem(x, 0, table_widget_item);
+
+	table_widget_item = new QTableWidgetItem( KIcon("dialog-error"), "Not Found" );
+	m_executables_table->setItem(x, 1, table_widget_item);
+    }
+
+    // these lists should be the same length, but just in case...
+
+    for(int x = 0; (x < all_names.size()) && (x < all_paths.size()); x++){
+
+        table_widget_item = new QTableWidgetItem( all_names[x] );
+	m_executables_table->setItem(x + not_found_length, 0, table_widget_item);
+
+	table_widget_item = new QTableWidgetItem( all_paths[x] );
+	m_executables_table->setItem(x + not_found_length, 1, table_widget_item);
+
+    }
+    m_executables_table->resizeColumnsToContents();
+    m_executables_table->setAlternatingRowColors( true );
+    m_executables_table->verticalHeader()->hide();
+}
+
+
+bool KvpmConfigDialog::isDefault()
+{
+    return false;    // This keeps the "defaults" button enabled
+}
+
+
+bool KvpmConfigDialog::hasChanged()
+{
+    return true;     // This keeps the "apply" button enabled
 }

@@ -19,7 +19,7 @@
 #include <KLocale>
 #include <QtGui>
 
-#include "configmodule.h"
+#include "kvpmconfigdialog.h"
 #include "devicetab.h"
 #include "logvol.h"
 #include "masterlist.h"
