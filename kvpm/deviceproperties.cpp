@@ -166,20 +166,21 @@ DeviceProperties::DeviceProperties( StoragePartition *Partition, QWidget *parent
     flag_info_frame->setLayout(flag_info_layout);
     flag_info_frame->setFrameStyle( QFrame::Sunken | QFrame::StyledPanel );
     flag_info_frame->setLineWidth(2);   
-    temp_label = new QLabel( i18n("<b>Flags</b>") );
-    temp_label->setAlignment( Qt::AlignCenter );
-    flag_info_layout->addWidget(temp_label);
 
-    QStringList flags = Partition->getFlags();
+    QStringList flags;
+    if( Partition->getType() == "logical" || Partition->getType() == "normal"){
+        temp_label = new QLabel( i18n("<b>Flags</b>") );
+	temp_label->setAlignment( Qt::AlignCenter );
+	flag_info_layout->addWidget(temp_label);
+	flags = Partition->getFlags();
 
-    for( int x = 0; x < flags.size(); x++){
-        temp_label = new QLabel( flags[x] );
-        flag_info_layout->addWidget(temp_label);
+	for( int x = 0; x < flags.size(); x++){
+	    temp_label = new QLabel( flags[x] );
+	    flag_info_layout->addWidget(temp_label);
+	}
+
+	layout->addWidget(flag_info_frame);
     }
-
-    layout->addWidget(flag_info_frame);
-
-
 
     layout->addStretch();
 }
