@@ -1,3 +1,8 @@
+version 0.5.4
+The volume group creation dialog can be called from
+the "volume group" menu now and create new groups
+from multiple physical volumes.
+
 version 0.5.3
 The settings menu is partly implemented. The search 
 path for the needed programs such as "vgs" can be 

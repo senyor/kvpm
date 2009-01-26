@@ -23,33 +23,43 @@
 #include <QCheckBox>
 #include <QRegExpValidator>
 
+#include "nomungecheck.h"
+
 
 bool create_vg(QString physicalVolumePath);
+
+bool create_vg();
 
 
 class VGCreateDialog : public KDialog
 {
 Q_OBJECT
 
-    QString   m_pv_path;
+    QStringList  m_pv_paths;
+    QList<NoMungeCheck *> m_pv_checks;
 
-    KLineEdit *m_vg_name, *m_max_lvs, *m_max_pvs;
+    KLineEdit *m_vg_name, 
+              *m_max_lvs, 
+              *m_max_pvs;
 
-    QCheckBox *m_clustered, *m_auto_backup, 
-	      *m_max_lvs_check, *m_max_pvs_check;
+    QCheckBox *m_clustered, 
+              *m_auto_backup, 
+	      *m_max_lvs_check, 
+              *m_max_pvs_check;
 
-    KComboBox *m_extent_size, *m_extent_suffix;
+    KComboBox *m_extent_size, 
+              *m_extent_suffix;
 
     QRegExpValidator *m_validator;
     
  public:
-    VGCreateDialog(QString physicalVolumePath, QWidget *parent = 0);
+    VGCreateDialog(QStringList physicalVolumePathList, QWidget *parent = 0);
     QStringList arguments();
     
  private slots:
     void limitLogicalVolumes(int boxstate);
     void limitPhysicalVolumes(int boxstate);
-    void validateName(QString name);
+    void validateOK();
     
 };
 
