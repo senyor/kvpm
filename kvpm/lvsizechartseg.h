@@ -19,6 +19,7 @@
 
 #include <QHBoxLayout>
 #include <QString>
+#include <QFrame>
 
 class VolGroup;
 class LogVol;
