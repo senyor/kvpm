@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -14,19 +14,54 @@
 
 
 #include <KLocale>
+#include <KMessageBox>
 #include <QtGui>
 
+#include "physvol.h"
 #include "processprogress.h"
 #include "vgcreate.h"
+#include "masterlist.h"
 
+extern MasterList *master_list;
+
+bool create_vg()
+{
+    QList<PhysVol *> physical_volumes;
+    QStringList unused_pv_paths;
+
+    physical_volumes = master_list->getPhysVols();
+    for(int x = 0; x < physical_volumes.size(); x++){
+
+      if( physical_volumes[x]->getVolumeGroupName() == "" )
+	unused_pv_paths.append( physical_volumes[x]->getDeviceName() );
+    }
+
+    if( unused_pv_paths.size() > 0 ){
+      VGCreateDialog dialog( unused_pv_paths );
+      dialog.exec();
+    
+      if(dialog.result() == QDialog::Accepted){
+          ProcessProgress create_vg( dialog.arguments(), i18n("Creating vg..."), true );
+	  return true;
+      }
+      else
+          return false;
+    }
+    else
+        KMessageBox::error(0, i18n("No unused physical volumes found") );
+
+    return false;
+}
 
 bool create_vg(QString physicalVolumePath)
 {
-    VGCreateDialog dialog(physicalVolumePath);
+    QStringList physicalVolumePathList(physicalVolumePath);
+
+    VGCreateDialog dialog(physicalVolumePathList);
     dialog.exec();
     
     if(dialog.result() == QDialog::Accepted){
-        ProcessProgress create_vg( dialog.arguments(), i18n("Creating vg..."), true );
+        ProcessProgress create_vg( dialog.arguments(), i18n("Creating volume group..."), true );
         return true;
     }
     else
@@ -34,9 +69,8 @@ bool create_vg(QString physicalVolumePath)
 }
 
 
-VGCreateDialog::VGCreateDialog(QString physicalVolumePath, QWidget *parent) : 
-    KDialog(parent),
-    m_pv_path(physicalVolumePath)
+VGCreateDialog::VGCreateDialog(QStringList physicalVolumePathList, QWidget *parent) : 
+  KDialog(parent), m_pv_paths(physicalVolumePathList)
 {
 
     setWindowTitle( i18n("Create Volume Group") );
@@ -76,6 +110,23 @@ VGCreateDialog::VGCreateDialog(QString physicalVolumePath, QWidget *parent) :
     m_extent_suffix->insertItem(2,"GiB");
     m_extent_suffix->setInsertPolicy(QComboBox::NoInsert);
     m_extent_suffix->setCurrentIndex(1);
+
+    QGroupBox *available_pv_box = new QGroupBox( i18n("Available physical volumes") ); 
+    QVBoxLayout *available_pv_box_layout = new QVBoxLayout();
+    available_pv_box->setLayout(available_pv_box_layout);
+    NoMungeCheck *temp_check;
+    if(m_pv_paths.size() < 2)
+        available_pv_box_layout->addWidget( new QLabel(m_pv_paths[0] ) );
+    else{
+        for(int x = 0; x < m_pv_paths.size(); x++){
+	    temp_check = new NoMungeCheck(m_pv_paths[x]);
+	    available_pv_box_layout->addWidget(temp_check);
+	    m_pv_checks.append(temp_check);
+
+	    connect(temp_check, SIGNAL(toggled(bool)), 
+		    this, SLOT(validateOK()));
+	}
+    }
     
     QHBoxLayout *extent_layout = new QHBoxLayout();
     extent_layout->addWidget(extent_label);
@@ -122,6 +173,7 @@ VGCreateDialog::VGCreateDialog(QString physicalVolumePath, QWidget *parent) :
 
     layout->addLayout(name_layout);
     layout->addLayout(extent_layout);
+    layout->addWidget(available_pv_box);
     layout->addWidget(lv_box);
     layout->addWidget(pv_box);
     layout->addWidget(m_clustered);
@@ -130,7 +182,7 @@ VGCreateDialog::VGCreateDialog(QString physicalVolumePath, QWidget *parent) :
     enableButtonOk(false);
 
     connect(m_vg_name, SIGNAL(textChanged(QString)), 
-	    this, SLOT(validateName(QString)));
+	    this, SLOT(validateOK()));
 
     connect(m_max_lvs_check, SIGNAL(stateChanged(int)), 
 	    this, SLOT(limitLogicalVolumes(int)));
@@ -162,10 +214,46 @@ QStringList VGCreateDialog::arguments()
 
     if((!m_max_pvs_check->isChecked()) && (m_max_pvs->text() != ""))
 	args << "--maxphysicalvolumes" << m_max_pvs->text();
-    
-    args << m_vg_name->text() << m_pv_path;
+
+    args << m_vg_name->text(); 
+
+    if( m_pv_checks.size() > 1 ){
+        m_pv_paths.clear();	for(int x = 0; x < m_pv_checks.size(); x++){
+	    if( m_pv_checks[x]->isChecked() )
+	        m_pv_paths.append( m_pv_checks[x]->getUnmungedText() );
+	}
+    }
+    args << m_pv_paths;
 
     return args;
+}
+
+
+/* The allowed characters in the name are letters, numbers, periods
+   hyphens and underscores. Also, the names ".", ".." and names starting
+   with a hyphen are disallowed. Finally disable the OK button if no 
+   pvs are checked  */
+
+void VGCreateDialog::validateOK()
+{
+    QString name = m_vg_name->text();
+    int pos = 0;
+
+    enableButtonOk(false);
+
+    if(m_validator->validate(name, pos) == QValidator::Acceptable && name != "." && name != ".."){
+
+        if( ! m_pv_checks.size() )        // if there is only one pv possible, there is no list
+	        enableButtonOk(true);
+	else{
+	    for(int x = 0; x < m_pv_checks.size(); x++){
+	        if( m_pv_checks[x]->isChecked() ){
+		    enableButtonOk(true);
+		    break;
+		}
+	    }
+	}
+    }
 }
 
 void VGCreateDialog::limitLogicalVolumes(int boxstate)
@@ -182,22 +270,4 @@ void VGCreateDialog::limitPhysicalVolumes(int boxstate)
 	m_max_pvs->setEnabled(true);
     else
 	m_max_pvs->setEnabled(false);
-}
-
-/* The allowed characters in the name are letters, numbers, periods
-   hyphens and underscores. Also the names ".", ".." and names starting
-   with a hyphen are disallowed */
-
-void VGCreateDialog::validateName(QString name)
-{
-    int pos = 0;
-
-    if( m_validator->validate(name, pos) == QValidator::Acceptable &&
-	name != "." && 
-	name != ".." )
-    {
-	enableButtonOk(true);
-    }
-    else
-	enableButtonOk(false);
 }

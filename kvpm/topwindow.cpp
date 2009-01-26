@@ -28,6 +28,7 @@
 #include "pvmove.h"
 #include "removemissing.h"
 #include "topwindow.h"
+#include "vgcreate.h"
 #include "vgchangealloc.h"
 #include "vgchangeavailable.h"
 #include "vgchangeextent.h"
@@ -57,7 +58,7 @@ TopWindow::TopWindow(QWidget *parent):KMainWindow(parent)
     KAboutData *about_data = new KAboutData( QByteArray("kvpm"),
 					     QByteArray(""),
 					     ki18n("kvpm"),
-					     QByteArray("0.5.3"),
+					     QByteArray("0.5.4"),
 					     ki18n("Linux volume and partition manager for KDE.\n"
 						   "This program is still under development,\n"
 						   "bug reports and any comments are welcomed.\n"),
@@ -89,6 +90,7 @@ TopWindow::TopWindow(QWidget *parent):KMainWindow(parent)
     m_export_vg_action        = new KAction( i18n("Export Volume Group..."), this);
     m_import_vg_action        = new KAction( i18n("Import Volume Group..."), this);
     m_vgchange_menu           = new KMenu( i18n("Change Volume Group Attributes"), this);
+    create_vg_action           = new KAction( i18n("Create Volume Group..."), this);
     vgchange_available_action = new KAction( i18n("Volume Group Availability..."), this);
     vgchange_alloc_action  = new KAction( i18n("Allocation Policy..."), this);
     vgchange_extent_action = new KAction( i18n("Extent Size..."), this);
@@ -112,12 +114,16 @@ TopWindow::TopWindow(QWidget *parent):KMainWindow(parent)
     tool_menu->addAction(m_stop_pvmove_action);
     tool_menu->addSeparator();
     tool_menu->addAction(remove_missing_action);
-    groups_menu->addMenu(m_vgchange_menu);
+
+    groups_menu->addAction(create_vg_action);
+    groups_menu->addSeparator();
     groups_menu->addAction(remove_vg_action);
     groups_menu->addAction(reduce_vg_action);
     groups_menu->addAction(rename_vg_action);
     groups_menu->addAction(m_export_vg_action);
     groups_menu->addAction(m_import_vg_action);
+    groups_menu->addMenu(m_vgchange_menu);
+
     settings_menu->addAction(config_kvpm_action);
     
     master_list = 0;
@@ -141,6 +147,9 @@ TopWindow::TopWindow(QWidget *parent):KMainWindow(parent)
 
     connect(vgchange_resize_action, SIGNAL(triggered()), 
 	    this, SLOT(changeResize()));
+
+    connect(create_vg_action,       SIGNAL(triggered()), 
+	    this, SLOT(createVolumeGroup()));
 
     connect(remove_vg_action,       SIGNAL(triggered()), 
 	    this, SLOT(removeVolumeGroup()));
@@ -375,6 +384,12 @@ void TopWindow::changeResize()
 {
     if( change_vg_resize(m_vg) )
 	MainWindow->rebuildVolumeGroupTab();
+}
+
+void TopWindow::createVolumeGroup()
+{
+    if( create_vg() )
+        MainWindow->reRun();
 }
 
 void TopWindow::removeVolumeGroup()

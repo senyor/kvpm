@@ -38,9 +38,9 @@ Q_OBJECT
     KTabWidget *m_tab_widget,          // The current tab widget we are using 
                *m_old_tab_widget;      // The tab widget we have schedualed for deletion 
 
-    KAction *quit_action, *remove_vg_action, *rename_vg_action, 
-            *reduce_vg_action, *rescan_action, 
-	    *rescan_vg_action, *vgchange_alloc_action, *vgchange_pv_action, 
+    KAction *quit_action,        *remove_vg_action,       *rename_vg_action, 
+            *reduce_vg_action,   *rescan_action,          *create_vg_action,
+	    *rescan_vg_action,   *vgchange_alloc_action,  *vgchange_pv_action, 
 	    *vgchange_lv_action, *vgchange_resize_action, *vgchange_available_action, 
 	    *vgchange_extent_action, *remove_missing_action, *config_kvpm_action;
 
@@ -73,6 +73,7 @@ Q_OBJECT
     void limitLogicalVolumes();
     void limitPhysicalVolumes();
     void changeResize();
+    void createVolumeGroup();
     void removeVolumeGroup();
     void renameVolumeGroup();
     void removeMissingVolumes();
