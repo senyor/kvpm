@@ -86,8 +86,8 @@ DeviceActionsMenu::DeviceActionsMenu( StorageDeviceItem *item,
 void DeviceActionsMenu::setup(StorageDeviceItem *item)
 {
     QStringList group_names;
-     
-    m_vgextend_menu     = new KMenu( i18n("Extend volume group"), this);
+    KMenu *filesystem_ops = new KMenu( i18n("Filesystem operations"), this);
+    m_vgextend_menu       = new KMenu( i18n("Extend volume group"), this);
     m_mkfs_action       = new KAction( i18n("Make filesystem"), this);
     m_partadd_action    = new KAction( i18n("Add disk partition"), this);
     m_partremove_action = new KAction( i18n("Remove disk partition"), this);
@@ -98,17 +98,20 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
     m_vgreduce_action   = new KAction( i18n("Remove from volume group"), this);
     m_mount_action      = new KAction( i18n("Mount filesystem"), this);
     m_unmount_action    = new KAction( i18n("Unmount filesystem"), this);
-    addAction(m_mkfs_action);
+    addAction(m_tablecreate_action);
+    addSeparator();
     addAction(m_partremove_action);
     addAction(m_partadd_action);
     addAction(m_pvcreate_action);
     addAction(m_pvremove_action);
     addAction(m_vgcreate_action);
-    addAction(m_tablecreate_action);
     addAction(m_vgreduce_action);
     addMenu(m_vgextend_menu);
-    addAction(m_mount_action);
-    addAction(m_unmount_action);
+    addMenu(filesystem_ops);
+    filesystem_ops->addAction(m_mount_action);
+    filesystem_ops->addAction(m_unmount_action);
+    filesystem_ops->addSeparator();
+    filesystem_ops->addAction(m_mkfs_action);
 
     group_names = master_list->getVolumeGroupNames();
     for(int x = 0; x < group_names.size(); x++){

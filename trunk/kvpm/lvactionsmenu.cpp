@@ -141,16 +141,20 @@ void LVActionsMenu::setup(LogVol *lv)
     addAction(snap_create_action);
     addAction(lv_reduce_action);
     addAction(lv_extend_action);
-    addAction(pv_move_action);
     addAction(lv_change_action);
-    addAction(add_mirror_action);
-    addAction(remove_mirror_action);
-    addAction(remove_mirror_leg_action);
+    addAction(pv_move_action);
 
-    filesystem_menu = new KMenu( i18n("Filesystem Operations"), this);
+    KMenu *mirror_menu = new KMenu( i18n("Mirror operations"), this);
+    addMenu(mirror_menu);
+    mirror_menu->addAction(add_mirror_action);
+    mirror_menu->addAction(remove_mirror_action);
+    mirror_menu->addAction(remove_mirror_leg_action);
+
+    filesystem_menu = new KMenu( i18n("Filesystem operations"), this);
     addMenu(filesystem_menu);
     filesystem_menu->addAction(mount_filesystem_action);
     filesystem_menu->addAction(unmount_filesystem_action);
+    filesystem_menu->addSeparator();
     filesystem_menu->addAction(lv_mkfs_action);
 
     if( lv ){

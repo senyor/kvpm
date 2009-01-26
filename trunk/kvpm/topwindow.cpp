@@ -80,11 +80,11 @@ TopWindow::TopWindow(QWidget *parent):KMainWindow(parent)
 
     remove_vg_action   = new KAction( KIcon("edit-delete"), i18n("Delete Volume Group..."), this);
     reduce_vg_action   = new KAction( i18n("Reduce Volume Group..."), this);
-    rename_vg_action   = new KAction( i18n("Rename Volume Group..."), this);
-    rescan_action      = new KAction( KIcon("rebuild"), i18n("Rescan System"), this);
-    rescan_vg_action   = new KAction( KIcon("rebuild"), i18n("Rescan This Group"), this);
-    m_restart_pvmove_action   = new KAction( i18n("Restart interrupted pvmove"), this);
-    m_stop_pvmove_action      = new KAction( i18n("Abort pvmove"), this);
+    rename_vg_action   = new KAction( KIcon("edit-rename"), i18n("Rename Volume Group..."), this);
+    rescan_action      = new KAction( KIcon("view-refresh"), i18n("Rescan System"), this);
+    rescan_vg_action   = new KAction( KIcon("view-refresh"), i18n("Rescan This Group"), this);
+    m_restart_pvmove_action   = new KAction( KIcon("system-restart"), i18n("Restart interrupted pvmove"), this);
+    m_stop_pvmove_action      = new KAction( KIcon("process-stop"), i18n("Abort pvmove"), this);
     remove_missing_action     = new KAction( i18n("Remove Missing Volumes..."), this);
     m_export_vg_action        = new KAction( i18n("Export Volume Group..."), this);
     m_import_vg_action        = new KAction( i18n("Import Volume Group..."), this);
@@ -102,14 +102,16 @@ TopWindow::TopWindow(QWidget *parent):KMainWindow(parent)
     m_vgchange_menu->addAction(vgchange_pv_action);
     m_vgchange_menu->addAction(vgchange_resize_action);
 
-    config_kvpm_action     = new KAction( i18n("Configure kvpm..."), this);
+    config_kvpm_action     = new KAction( KIcon("configure"), i18n("Configure kvpm..."), this);
 
     file_menu->addAction(quit_action);
     tool_menu->addAction(rescan_action);
     tool_menu->addAction(rescan_vg_action);
-    tool_menu->addAction(remove_missing_action);
+    tool_menu->addSeparator();
     tool_menu->addAction(m_restart_pvmove_action);
     tool_menu->addAction(m_stop_pvmove_action);
+    tool_menu->addSeparator();
+    tool_menu->addAction(remove_missing_action);
     groups_menu->addMenu(m_vgchange_menu);
     groups_menu->addAction(remove_vg_action);
     groups_menu->addAction(reduce_vg_action);
