@@ -54,11 +54,41 @@ KvpmConfigDialog::~KvpmConfigDialog()
 void KvpmConfigDialog::buildGeneralPage()
 {
     QWidget *general = new QWidget;
-    QVBoxLayout *general_layout = new QVBoxLayout();
+    QHBoxLayout *general_layout = new QHBoxLayout();
     general->setLayout(general_layout);
 
-    QGridLayout *selection_layout = new QGridLayout();
-    general_layout->addLayout(selection_layout);
+    QGroupBox *device_columns_group = new QGroupBox( i18n("Show these columns in device tree") );
+    QGroupBox *volume_columns_group = new QGroupBox( i18n("Show these columns in volume tree") );
+    general_layout->addWidget(device_columns_group);
+    general_layout->addWidget(volume_columns_group);
+    QVBoxLayout *device_layout = new QVBoxLayout();
+    QVBoxLayout *volume_layout = new QVBoxLayout();
+    device_columns_group->setLayout(device_layout);
+    volume_columns_group->setLayout(volume_layout);
+
+    m_skeleton->setCurrentGroup("DeviceTreeColumns");
+    m_skeleton->addItemBool( "device",    m_device_column );
+    m_skeleton->addItemBool( "partition", m_partition_column );
+    m_skeleton->addItemBool( "capacity",  m_capacity_column );
+    m_skeleton->addItemBool( "used",      m_used_column );
+    m_skeleton->addItemBool( "usage",     m_usage_column );
+
+    m_device_check    = new QCheckBox("Device name");
+    m_partition_check = new QCheckBox("Partition type");
+    m_capacity_check  = new QCheckBox("Capacity");
+    m_used_check      = new QCheckBox("Space used");
+    m_usage_check     = new QCheckBox("Usage of device");
+    m_device_check->setChecked(m_device_column);
+    m_partition_check->setChecked(m_partition_column);
+    m_capacity_check->setChecked(m_capacity_column);
+    m_used_check->setChecked(m_used_column);
+    m_usage_check->setChecked(m_usage_column);
+
+    device_layout->addWidget(m_device_check);
+    device_layout->addWidget(m_partition_check);
+    device_layout->addWidget(m_capacity_check);
+    device_layout->addWidget(m_used_check);
+    device_layout->addWidget(m_usage_check);
 
     KPageWidgetItem  *page_widget_item =  addPage( general, "General"); 
     page_widget_item->setIcon( KIcon("configure") );
@@ -226,6 +256,12 @@ void KvpmConfigDialog::updateSettings()
     m_reiser4_color  = m_reiser4_button->color();
     m_physical_color = m_physical_button->color();
 
+    m_device_column    = m_device_check->isChecked();
+    m_partition_column = m_partition_check->isChecked();
+    m_capacity_column  = m_capacity_check->isChecked();
+    m_used_column      = m_used_check->isChecked();
+    m_usage_column     = m_usage_check->isChecked();
+
     m_skeleton->writeConfig();
 
     g_executable_finder->reload();
@@ -260,6 +296,11 @@ void KvpmConfigDialog::updateWidgetsDefault()
     m_reiser4_button->setColor(Qt::darkRed);
     m_physical_button->setColor(Qt::darkGreen);
 
+    m_device_check->setChecked(true);
+    m_partition_check->setChecked(true);
+    m_capacity_check->setChecked(true);
+    m_used_check->setChecked(true);
+    m_usage_check->setChecked(true);
 }
 
 /*

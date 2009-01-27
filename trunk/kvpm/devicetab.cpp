@@ -15,6 +15,7 @@
 
 #include <QtGui>
 #include <KLocale>
+#include <KConfigSkeleton>
 
 #include "devicetab.h"
 #include "devicetreeview.h"
@@ -45,7 +46,8 @@ DeviceTab::DeviceTab(QList<StorageDevice *> Devices, QWidget *parent) :
     m_tree->setAllColumnsShowFocus(true);
     m_tree->setExpandsOnDoubleClick(true);
     m_tree->setSelectionBehavior(QAbstractItemView::SelectRows);
-    m_tree->setColumnHidden( 6, true );
+
+    setHiddenColumns();
 
     layout->addWidget(size_chart);
     layout->addWidget( tree_properties_splitter );
@@ -98,3 +100,32 @@ QScrollArea *DeviceTab::setupPropertyWidgets()
 }
 
 
+void DeviceTab::setHiddenColumns()
+{  
+    KConfigSkeleton skeleton;
+
+    bool device, 
+         partition, 
+         capacity, 
+         used, 
+         usage;
+
+    skeleton.setCurrentGroup("DeviceTreeColumns");
+    skeleton.addItemBool( "device",    device );
+    skeleton.addItemBool( "partition", partition );
+    skeleton.addItemBool( "capacity",  capacity );
+    skeleton.addItemBool( "used",      used );
+    skeleton.addItemBool( "usage",     usage );
+
+    if( !device )
+      m_tree->setColumnHidden( 0, true );
+    if( !partition )
+      m_tree->setColumnHidden( 1, true );
+    if( !capacity )
+      m_tree->setColumnHidden( 2, true );
+    if( !used )
+      m_tree->setColumnHidden( 3, true );
+    if ( !usage )
+      m_tree->setColumnHidden( 4, true );
+
+}
