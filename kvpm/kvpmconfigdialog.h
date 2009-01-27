@@ -32,7 +32,8 @@ Q_OBJECT
                  *m_jfs_button,
                  *m_hfs_button,
                  *m_free_button,
-                 *m_none_button;
+                 *m_none_button,
+                 *m_physical_button;
 
     QColor m_ext2_color,
            m_ext3_color,
@@ -45,8 +46,8 @@ Q_OBJECT
            m_jfs_color,
            m_hfs_color,
            m_free_color,
-           m_none_color;
-
+           m_none_color,
+           m_physical_color;
 
     void buildGeneralPage();
     void buildColorsPage();
