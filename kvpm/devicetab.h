@@ -34,6 +34,8 @@ class DeviceTab : public QWidget
 
     QScrollArea *setupPropertyWidgets();
 
+    void setHiddenColumns();
+
  public:
     DeviceTab(QList<StorageDevice *> Devices, QWidget *parent = 0);
 

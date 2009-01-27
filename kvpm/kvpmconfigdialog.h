@@ -6,6 +6,7 @@
 #include <QTableWidget>
 #include <QStringList>
 #include <QColor>
+#include <QCheckBox>
 
 bool config_kvpm();
 
@@ -48,6 +49,19 @@ Q_OBJECT
            m_free_color,
            m_none_color,
            m_physical_color;
+
+    QCheckBox *m_device_check,
+              *m_partition_check,
+              *m_capacity_check,
+              *m_used_check,
+              *m_usage_check;
+
+    bool m_device_column,
+         m_partition_column,
+         m_capacity_column,
+         m_used_column,
+         m_usage_column;
+
 
     void buildGeneralPage();
     void buildColorsPage();
