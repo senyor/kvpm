@@ -82,8 +82,8 @@ void KvpmConfigDialog::buildColorsPage()
     left_separator->setFrameStyle(  QFrame::Sunken | QFrame::StyledPanel );
     right_separator->setFrameStyle( QFrame::Sunken | QFrame::StyledPanel );
 
-    selection_layout->addWidget( left_separator,  0, 2, 4, 1 );
-    selection_layout->addWidget( right_separator, 0, 5, 4, 1 );
+    selection_layout->addWidget( left_separator,  0, 2, 5, 1 );
+    selection_layout->addWidget( right_separator, 0, 5, 5, 1 );
 
     m_skeleton->setCurrentGroup("FilesystemColors");
     m_skeleton->addItemColor("ext2",   m_ext2_color);
@@ -94,10 +94,11 @@ void KvpmConfigDialog::buildColorsPage()
     m_skeleton->addItemColor("msdos", m_msdos_color);
     m_skeleton->addItemColor("jfs",   m_jfs_color);
     m_skeleton->addItemColor("xfs",   m_xfs_color);
-    m_skeleton->addItemColor("hfs",   m_xfs_color);
+    m_skeleton->addItemColor("hfs",   m_hfs_color);
     m_skeleton->addItemColor("none",  m_none_color);
     m_skeleton->addItemColor("free",  m_free_color);
     m_skeleton->addItemColor("swap",  m_swap_color);
+    m_skeleton->addItemColor("physvol",  m_physical_color);
 
 
     QLabel *ext2_label = new QLabel("ext2");
@@ -160,6 +161,11 @@ void KvpmConfigDialog::buildColorsPage()
     m_hfs_button = new KColorButton( m_hfs_color );
     selection_layout->addWidget(m_hfs_button, 3, 7, Qt::AlignLeft);
 
+    QLabel *physical_label = new QLabel("physical volumes");
+    selection_layout->addWidget(physical_label, 4, 0,  Qt::AlignRight);
+    m_physical_button = new KColorButton( m_physical_color );
+    selection_layout->addWidget(m_physical_button, 4, 1, Qt::AlignLeft);
+
     KPageWidgetItem  *page_widget_item =  addPage( colors, "Colors"); 
     page_widget_item->setIcon( KIcon("color-picker") );
 }
@@ -216,8 +222,9 @@ void KvpmConfigDialog::updateSettings()
     m_msdos_color = m_msdos_button->color();
     m_none_color  = m_none_button->color();
     m_free_color  = m_free_button->color();
-    m_reiser_color  = m_reiser_button->color();
-    m_reiser4_color = m_reiser4_button->color();
+    m_reiser_color   = m_reiser_button->color();
+    m_reiser4_color  = m_reiser4_button->color();
+    m_physical_color = m_physical_button->color();
 
     m_skeleton->writeConfig();
 
@@ -251,6 +258,7 @@ void KvpmConfigDialog::updateWidgetsDefault()
     m_msdos_button->setColor(Qt::yellow);
     m_reiser_button->setColor(Qt::red);
     m_reiser4_button->setColor(Qt::darkRed);
+    m_physical_button->setColor(Qt::darkGreen);
 
 }
 
