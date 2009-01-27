@@ -30,6 +30,7 @@ Q_OBJECT
                  *m_swap_button,
                  *m_xfs_button,
                  *m_jfs_button,
+                 *m_hfs_button,
                  *m_free_button,
                  *m_none_button;
 
@@ -42,6 +43,7 @@ Q_OBJECT
            m_swap_color,
            m_xfs_color,
            m_jfs_color,
+           m_hfs_color,
            m_free_color,
            m_none_color;
 
