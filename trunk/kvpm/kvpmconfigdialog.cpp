@@ -94,6 +94,7 @@ void KvpmConfigDialog::buildColorsPage()
     m_skeleton->addItemColor("msdos", m_msdos_color);
     m_skeleton->addItemColor("jfs",   m_jfs_color);
     m_skeleton->addItemColor("xfs",   m_xfs_color);
+    m_skeleton->addItemColor("hfs",   m_xfs_color);
     m_skeleton->addItemColor("none",  m_none_color);
     m_skeleton->addItemColor("free",  m_free_color);
     m_skeleton->addItemColor("swap",  m_swap_color);
@@ -154,6 +155,11 @@ void KvpmConfigDialog::buildColorsPage()
     m_none_button = new KColorButton( m_none_color );
     selection_layout->addWidget(m_none_button, 3, 4, Qt::AlignLeft);
 
+    QLabel *hfs_label = new QLabel("hfs");
+    selection_layout->addWidget(hfs_label, 3, 6,  Qt::AlignRight);
+    m_hfs_button = new KColorButton( m_hfs_color );
+    selection_layout->addWidget(m_hfs_button, 3, 7, Qt::AlignLeft);
+
     KPageWidgetItem  *page_widget_item =  addPage( colors, "Colors"); 
     page_widget_item->setIcon( KIcon("color-picker") );
 }
@@ -205,6 +211,7 @@ void KvpmConfigDialog::updateSettings()
     m_ext4_color  = m_ext4_button->color();
     m_xfs_color   = m_xfs_button->color();
     m_jfs_color   = m_jfs_button->color();
+    m_hfs_color   = m_hfs_button->color();
     m_swap_color  = m_swap_button->color();
     m_msdos_color = m_msdos_button->color();
     m_none_color  = m_none_button->color();
@@ -239,7 +246,8 @@ void KvpmConfigDialog::updateWidgetsDefault()
     m_none_button->setColor(Qt::black);
     m_free_button->setColor(Qt::green);
     m_xfs_button->setColor(Qt::darkCyan);
-    m_jfs_button->setColor(Qt::darkMagenta);
+    m_hfs_button->setColor(Qt::darkMagenta);
+    m_jfs_button->setColor(Qt::magenta);
     m_msdos_button->setColor(Qt::yellow);
     m_reiser_button->setColor(Qt::red);
     m_reiser4_button->setColor(Qt::darkRed);
