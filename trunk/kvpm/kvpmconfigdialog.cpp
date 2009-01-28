@@ -30,7 +30,6 @@ bool config_kvpm()
   return false;
 
 }
-
  
 
 KvpmConfigDialog::KvpmConfigDialog( QWidget *parent, QString name, KConfigSkeleton *skeleton ) 
@@ -72,23 +71,35 @@ void KvpmConfigDialog::buildGeneralPage()
     m_skeleton->addItemBool( "capacity",  m_capacity_column );
     m_skeleton->addItemBool( "used",      m_used_column );
     m_skeleton->addItemBool( "usage",     m_usage_column );
+    m_skeleton->addItemBool( "group",     m_group_column );
+    m_skeleton->addItemBool( "flags",     m_flags_column );
+    m_skeleton->addItemBool( "mount",     m_mount_column );
 
     m_device_check    = new QCheckBox("Device name");
     m_partition_check = new QCheckBox("Partition type");
     m_capacity_check  = new QCheckBox("Capacity");
     m_used_check      = new QCheckBox("Space used");
     m_usage_check     = new QCheckBox("Usage of device");
+    m_group_check     = new QCheckBox("Volume group");
+    m_flags_check     = new QCheckBox("Partition flags");
+    m_mount_check     = new QCheckBox("Mount point");
     m_device_check->setChecked(m_device_column);
     m_partition_check->setChecked(m_partition_column);
     m_capacity_check->setChecked(m_capacity_column);
     m_used_check->setChecked(m_used_column);
     m_usage_check->setChecked(m_usage_column);
+    m_group_check->setChecked(m_group_column);
+    m_flags_check->setChecked(m_flags_column);
+    m_mount_check->setChecked(m_mount_column);
 
     device_layout->addWidget(m_device_check);
     device_layout->addWidget(m_partition_check);
     device_layout->addWidget(m_capacity_check);
     device_layout->addWidget(m_used_check);
     device_layout->addWidget(m_usage_check);
+    device_layout->addWidget(m_group_check);
+    device_layout->addWidget(m_flags_check);
+    device_layout->addWidget(m_mount_check);
 
     KPageWidgetItem  *page_widget_item =  addPage( general, "General"); 
     page_widget_item->setIcon( KIcon("configure") );
@@ -261,6 +272,9 @@ void KvpmConfigDialog::updateSettings()
     m_capacity_column  = m_capacity_check->isChecked();
     m_used_column      = m_used_check->isChecked();
     m_usage_column     = m_usage_check->isChecked();
+    m_group_column     = m_group_check->isChecked();
+    m_flags_column     = m_flags_check->isChecked();
+    m_mount_column     = m_mount_check->isChecked();
 
     m_skeleton->writeConfig();
 
@@ -301,6 +315,9 @@ void KvpmConfigDialog::updateWidgetsDefault()
     m_capacity_check->setChecked(true);
     m_used_check->setChecked(true);
     m_usage_check->setChecked(true);
+    m_group_check->setChecked(true);
+    m_flags_check->setChecked(true);
+    m_mount_check->setChecked(true);
 }
 
 /*

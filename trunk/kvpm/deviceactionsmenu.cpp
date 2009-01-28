@@ -171,7 +171,7 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
 	    m_vgextend_menu->setEnabled(false);
 	    m_vgreduce_action->setEnabled(false);
 	}
-	else if(item->data(6) == "yes"){
+	else if(item->data(7) != ""){
 	    m_pvcreate_action->setEnabled(false);
 	    m_partremove_action->setEnabled(false);
 	    m_partadd_action->setEnabled(false);
@@ -206,7 +206,7 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
 	}
 	else if(item->data(1) == "logical" || item->data(1) == "normal"){
 
-	    if(item->data(6) == "yes")
+	    if(item->data(7) != "")
    	        m_partremove_action->setEnabled(false);
 	    else
 	        m_partremove_action->setEnabled(true);

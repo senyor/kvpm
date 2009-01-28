@@ -84,7 +84,7 @@ StorageDeviceModel::StorageDeviceModel(QList<StorageDevice *> devices, QObject *
 {
     QList<QVariant> rootData;
     rootData << "Device" << "Type" << "Capacity" << "Used" << "Usage" 
-	     << "Group" << "Busy" << "Mount point" ;
+	     << "Group" << "Flags" << "Mount point" ;
     
     rootItem = new StorageDeviceItem(rootData, rootData);
     setupModelData(devices, rootItem);
@@ -210,8 +210,6 @@ void StorageDeviceModel::setupModelData(QList<StorageDevice *> devices, StorageD
 	    }
 	    else{
 		data << dev->getDevicePath() << "" << sizeToString(dev->getSize());
-		if( dev->isBusy() )
-		    dataAlternate << "" << "busy" << dev->getSize();
 		dataAlternate << "" << "" << dev->getSize();
 	    }
 	    
@@ -240,16 +238,13 @@ void StorageDeviceModel::setupModelData(QList<StorageDevice *> devices, StorageD
 
 			 << "physical volume"
 			 << pv->getVolumeGroupName()
-			 << " ";
+			 << "" << "";
 		    dataAlternate << pv->getUsed();
 		}
 		else{
 		    data << "" << part->getFileSystem();
 
-		    if(part->isBusy())
-			data << "" <<"yes";
-		    else
-			data << "" << "";
+		    data << "" << "";
 
 		    if(part->isMounted())
 		        data << (part->getMountPoints())[0];
