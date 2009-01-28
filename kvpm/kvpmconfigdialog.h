@@ -54,14 +54,19 @@ Q_OBJECT
               *m_partition_check,
               *m_capacity_check,
               *m_used_check,
-              *m_usage_check;
+              *m_usage_check,
+              *m_group_check,
+              *m_flags_check,
+              *m_mount_check;
 
     bool m_device_column,
          m_partition_column,
          m_capacity_column,
          m_used_column,
-         m_usage_column;
-
+         m_usage_column,
+         m_group_column,
+         m_flags_column,
+         m_mount_column;
 
     void buildGeneralPage();
     void buildColorsPage();
