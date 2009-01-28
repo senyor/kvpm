@@ -1,9 +1,9 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009 Benjamin Scott   <benscott@nwlink.com>
  *
- * This file is part of the Kvpm project.
+ * This file is part of the kvpm project.
  * * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License,  version 3, as 
  * published by the Free Software Foundation.
@@ -11,6 +11,7 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
+#include <KConfigSkeleton>
 
 #include <QtGui>
 
@@ -139,14 +140,10 @@ VGTree::VGTree(VolGroup *VolumeGroup) : QTreeWidget(),
     if( lv_tree_items.size() )
 	setCurrentItem( lv_tree_items[0] );
     
-    resizeColumnToContents ( 0 );
+    resizeColumnToContents(0);
 
-// At some point the columns shown and hidden will
-// be set by a configuration menu
+    setHiddenColumns();
 
-    hideColumn(4);
-    hideColumn(5);
-    
     connect(this, SIGNAL(itemExpanded(QTreeWidgetItem *)), 
 	    this, SLOT(adjustColumnWidth(QTreeWidgetItem *)));
 
@@ -302,6 +299,43 @@ void VGTree::popupContextMenu(QPoint point)
 	context_menu->exec(QCursor::pos());
     }
 }
+
+void VGTree::setHiddenColumns()
+{
+    KConfigSkeleton skeleton;
+
+    bool volume,
+         size,
+         filesystem,
+         type,
+         stripes,
+         stripesize,
+         snapmove,
+         state,
+         access;
+
+    skeleton.setCurrentGroup("VolumeTreeColumns");
+    skeleton.addItemBool( "volume",     volume );
+    skeleton.addItemBool( "size",       size );
+    skeleton.addItemBool( "filesystem", filesystem );
+    skeleton.addItemBool( "type",       type );
+    skeleton.addItemBool( "stripes",    stripes );
+    skeleton.addItemBool( "stripesize", stripesize );
+    skeleton.addItemBool( "snapmove",   snapmove );
+    skeleton.addItemBool( "state",      state );
+    skeleton.addItemBool( "access",     access );
+
+    setColumnHidden( 0, !volume );
+    setColumnHidden( 1, !size );
+    setColumnHidden( 2, !filesystem );
+    setColumnHidden( 3, !type );
+    setColumnHidden( 4, !stripes );
+    setColumnHidden( 5, !stripesize );
+    setColumnHidden( 6, !snapmove );
+    setColumnHidden( 7, !state );
+    setColumnHidden( 8, !access );
+}
+
 
 void VGTree::mkfsLogicalVolume()
 {

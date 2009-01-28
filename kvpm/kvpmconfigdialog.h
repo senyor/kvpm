@@ -50,23 +50,26 @@ Q_OBJECT
            m_none_color,
            m_physical_color;
 
-    QCheckBox *m_device_check,
-              *m_partition_check,
-              *m_capacity_check,
-              *m_used_check,
-              *m_usage_check,
-              *m_group_check,
-              *m_flags_check,
-              *m_mount_check;
+    QCheckBox *m_device_check,      *m_volume_check,
+              *m_partition_check,   *m_size_check,
+              *m_capacity_check,    *m_type_check,
+              *m_used_check,        *m_filesystem_check,
+              *m_usage_check,       *m_stripes_check,
+              *m_group_check,       *m_stripesize_check,
+              *m_flags_check,       *m_snapmove_check,
+              *m_mount_check,       *m_state_check,
+                                    *m_access_check;
 
-    bool m_device_column,
-         m_partition_column,
-         m_capacity_column,
-         m_used_column,
-         m_usage_column,
-         m_group_column,
-         m_flags_column,
-         m_mount_column;
+
+    bool m_device_column,      m_volume_column,
+         m_partition_column,   m_size_column,
+         m_capacity_column,    m_type_column,
+         m_used_column,        m_filesystem_column,
+         m_usage_column,       m_stripes_column,
+         m_group_column,       m_stripesize_column,
+         m_flags_column,       m_snapmove_column,
+         m_mount_column,       m_state_column,
+                               m_access_column;
 
     void buildGeneralPage();
     void buildColorsPage();

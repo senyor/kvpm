@@ -101,6 +101,45 @@ void KvpmConfigDialog::buildGeneralPage()
     device_layout->addWidget(m_flags_check);
     device_layout->addWidget(m_mount_check);
 
+    m_skeleton->setCurrentGroup("VolumeTreeColumns");
+    m_skeleton->addItemBool( "volume",     m_volume_column );
+    m_skeleton->addItemBool( "size",       m_size_column );
+    m_skeleton->addItemBool( "type",       m_type_column );
+    m_skeleton->addItemBool( "filesystem", m_filesystem_column );
+    m_skeleton->addItemBool( "stripes",    m_stripes_column );
+    m_skeleton->addItemBool( "stripesize", m_stripesize_column );
+    m_skeleton->addItemBool( "state",      m_state_column );
+    m_skeleton->addItemBool( "access",     m_access_column );
+
+    m_volume_check     = new QCheckBox("Volume name");
+    m_size_check       = new QCheckBox("Size");
+    m_type_check       = new QCheckBox("Volume type");
+    m_filesystem_check = new QCheckBox("Filesystem type");
+    m_stripes_check    = new QCheckBox("Stripe count");
+    m_stripesize_check = new QCheckBox("Stripe size");
+    m_state_check      = new QCheckBox("Volume state");
+    m_access_check     = new QCheckBox("Volume access");
+
+    m_volume_check->setChecked(m_volume_column);
+    m_size_check->setChecked(m_size_column);
+    m_type_check->setChecked(m_type_column);
+
+    m_filesystem_check->setChecked(m_filesystem_column);
+    m_stripes_check->setChecked(m_stripes_column);
+    m_stripesize_check->setChecked(m_stripesize_column);
+    m_state_check->setChecked(m_state_column);
+    m_access_check->setChecked(m_access_column);
+
+    volume_layout->addWidget(m_volume_check);
+    volume_layout->addWidget(m_size_check);
+    volume_layout->addWidget(m_type_check);
+    volume_layout->addWidget(m_filesystem_check);
+    volume_layout->addWidget(m_stripes_check);
+    volume_layout->addWidget(m_stripesize_check);
+    volume_layout->addWidget(m_state_check);
+    volume_layout->addWidget(m_access_check);
+
+
     KPageWidgetItem  *page_widget_item =  addPage( general, "General"); 
     page_widget_item->setIcon( KIcon("configure") );
 }
@@ -276,6 +315,15 @@ void KvpmConfigDialog::updateSettings()
     m_flags_column     = m_flags_check->isChecked();
     m_mount_column     = m_mount_check->isChecked();
 
+    m_volume_column     = m_volume_check->isChecked();
+    m_size_column       = m_size_check->isChecked();
+    m_type_column       = m_type_check->isChecked();
+    m_filesystem_column = m_filesystem_check->isChecked();
+    m_stripes_column    = m_stripes_check->isChecked();
+    m_stripesize_column = m_stripesize_check->isChecked();
+    m_state_column      = m_state_check->isChecked();
+    m_access_column     = m_access_check->isChecked();
+
     m_skeleton->writeConfig();
 
     g_executable_finder->reload();
@@ -318,6 +366,16 @@ void KvpmConfigDialog::updateWidgetsDefault()
     m_group_check->setChecked(true);
     m_flags_check->setChecked(true);
     m_mount_check->setChecked(true);
+
+    m_volume_check->setChecked(true);
+    m_size_check->setChecked(true);
+    m_type_check->setChecked(true);
+    m_filesystem_check->setChecked(true);
+    m_stripes_check->setChecked(true);
+    m_stripesize_check->setChecked(true);
+    m_state_check->setChecked(true);
+    m_access_check->setChecked(true);
+
 }
 
 /*
