@@ -238,13 +238,14 @@ void StorageDeviceModel::setupModelData(QList<StorageDevice *> devices, StorageD
 
 			 << "physical volume"
 			 << pv->getVolumeGroupName()
-			 << "" << "";
+			 << (part->getFlags()).join(", ") 
+			 << "";
 		    dataAlternate << pv->getUsed();
 		}
 		else{
 		    data << "" << part->getFileSystem();
 
-		    data << "" << "";
+		    data << "" << (part->getFlags()).join(", ");
 
 		    if(part->isMounted())
 		        data << (part->getMountPoints())[0];
