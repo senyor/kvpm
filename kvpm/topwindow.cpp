@@ -58,7 +58,7 @@ TopWindow::TopWindow(QWidget *parent):KMainWindow(parent)
     KAboutData *about_data = new KAboutData( QByteArray("kvpm"),
 					     QByteArray(""),
 					     ki18n("kvpm"),
-					     QByteArray("0.5.4"),
+					     QByteArray("0.5.5"),
 					     ki18n("Linux volume and partition manager for KDE.\n"
 						   "This program is still under development,\n"
 						   "bug reports and any comments are welcomed.\n"),
@@ -90,7 +90,7 @@ TopWindow::TopWindow(QWidget *parent):KMainWindow(parent)
     m_export_vg_action        = new KAction( i18n("Export Volume Group..."), this);
     m_import_vg_action        = new KAction( i18n("Import Volume Group..."), this);
     m_vgchange_menu           = new KMenu( i18n("Change Volume Group Attributes"), this);
-    create_vg_action           = new KAction( i18n("Create Volume Group..."), this);
+    create_vg_action          = new KAction( i18n("Create Volume Group..."), this);
     vgchange_available_action = new KAction( i18n("Volume Group Availability..."), this);
     vgchange_alloc_action  = new KAction( i18n("Allocation Policy..."), this);
     vgchange_extent_action = new KAction( i18n("Extent Size..."), this);
@@ -288,7 +288,7 @@ void TopWindow::rebuildVolumeGroupTab()
 void TopWindow::setupMenus(int index)
 {
     index = m_tab_widget->currentIndex();
-    
+
     if(index)
 	m_vg = m_vg_tabs[index - 1]->getVolumeGroup();
     else 
@@ -297,6 +297,8 @@ void TopWindow::setupMenus(int index)
     if(m_vg){                                     // only enable group removal if the tab is
 	if( !m_vg->getLogVolCount() )             // a volume group with no logical volumes
 	    remove_vg_action->setEnabled(true);   
+	else
+	    remove_vg_action->setEnabled(false);   
 
 	if( m_vg->isPartial() )
 	    remove_missing_action->setEnabled(true);
