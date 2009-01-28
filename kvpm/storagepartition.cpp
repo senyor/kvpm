@@ -86,7 +86,7 @@ StoragePartition::StoragePartition(PedPartition *part,
 	    ped_flag = ped_partition_flag_next( ped_flag );
         }
 	if( ! m_flags.size() )
-	    m_flags << "none";
+	    m_flags << "";
     }
 
     m_device_mount_info_list = mountInfoList->getMountInformation(m_partition_path);

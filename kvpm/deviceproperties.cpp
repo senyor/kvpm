@@ -174,6 +174,10 @@ DeviceProperties::DeviceProperties( StoragePartition *Partition, QWidget *parent
 	flag_info_layout->addWidget(temp_label);
 	flags = Partition->getFlags();
 
+	if( flags.size() == 1)
+	    if( flags[0] == "" )
+	        flags << "no flags set";
+
 	for( int x = 0; x < flags.size(); x++){
 	    temp_label = new QLabel( flags[x] );
 	    flag_info_layout->addWidget(temp_label);
