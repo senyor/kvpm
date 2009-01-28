@@ -1,3 +1,7 @@
+version 0.5.5
+The kvpm "settings" dialog can set the column hidden/show for
+both of the tree views and save it in the config file.
+
 version 0.5.4
 The volume group creation dialog can be called from
 the "volume group" menu now and create new groups
