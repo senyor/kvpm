@@ -26,6 +26,7 @@
 #include "pvremove.h"
 #include "partremove.h"
 #include "partadd.h"
+#include "partmoveresize.h"
 #include "vgreduce.h"
 #include "vgreduceone.h"
 #include "vgcreate.h"
@@ -96,6 +97,12 @@ void DeviceTreeView::removePartition()
 void DeviceTreeView::addPartition()
 {
   if( add_partition( part ) )
+	MainWindow->reRun();
+}
+
+void DeviceTreeView::moveresizePartition()
+{
+  if( moveresize_partition( part ) )
 	MainWindow->reRun();
 }
 

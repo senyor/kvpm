@@ -176,7 +176,7 @@ DeviceProperties::DeviceProperties( StoragePartition *Partition, QWidget *parent
 
 	if( flags.size() == 1)
 	    if( flags[0] == "" )
-	        flags << "no flags set";
+	        flags << "No flags set";
 
 	for( int x = 0; x < flags.size(); x++){
 	    temp_label = new QLabel( flags[x] );

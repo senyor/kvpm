@@ -44,6 +44,7 @@ public slots:
     void pvcreatePartition();
     void pvremovePartition();
     void removePartition();
+    void moveresizePartition();
     void vgcreatePartition();
     void vgreducePartition();
     void vgextendPartition(QAction *action);

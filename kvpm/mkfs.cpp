@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -103,7 +103,8 @@ MkfsDialog::MkfsDialog(QString devicePath, QWidget *parent) :
 
     QWidget *dialog_body = new QWidget();
     setMainWidget(dialog_body);
-    
+    setCaption( i18n("Write filesystem") );
+
     QVBoxLayout *layout = new QVBoxLayout;
     QHBoxLayout *radio_layout = new QHBoxLayout;
     QVBoxLayout *radio_left_layout   = new QVBoxLayout;
@@ -114,7 +115,7 @@ MkfsDialog::MkfsDialog(QString devicePath, QWidget *parent) :
     radio_layout->addLayout(radio_right_layout);
     dialog_body->setLayout(layout);
 
-    QLabel *label = new QLabel( i18n("Device") );
+    QLabel *label = new QLabel( i18n("Write filesystem on:") );
     label->setAlignment(Qt::AlignCenter);
     layout->addWidget(label);
     label = new QLabel(m_path);

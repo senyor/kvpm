@@ -45,6 +45,7 @@ private slots:
     void pvcreatePartition();
     void pvremovePartition();
     void addPartition();
+    void moveresizePartition();
     void removePartition();
     void vgcreatePartition();
     void tablecreatePartition();
