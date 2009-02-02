@@ -25,6 +25,7 @@
 #include "mount.h"
 #include "partadd.h"
 #include "partremove.h"
+#include "partmoveresize.h"
 #include "processprogress.h"
 #include "pvcreate.h"
 #include "pvremove.h"
@@ -214,6 +215,12 @@ void DeviceChartSeg::unmountPartition()
 void DeviceChartSeg::removePartition()
 {
   if( remove_partition(m_partition) )
+        MainWindow->reRun();
+}
+
+void DeviceChartSeg::moveresizePartition()
+{
+  if( moveresize_partition(m_partition) )
         MainWindow->reRun();
 }
 

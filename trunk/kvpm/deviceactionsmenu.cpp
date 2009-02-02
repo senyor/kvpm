@@ -46,6 +46,7 @@ DeviceActionsMenu::DeviceActionsMenu( StorageDeviceItem *item,
     connect(m_mkfs_action,       SIGNAL(triggered()), view, SLOT(mkfsPartition()));
     connect(m_partremove_action, SIGNAL(triggered()), view, SLOT(removePartition()));
     connect(m_partadd_action,    SIGNAL(triggered()), view, SLOT(addPartition()));
+    connect(m_partmoveresize_action, SIGNAL(triggered()), view, SLOT(moveresizePartition()));
     connect(m_pvcreate_action,   SIGNAL(triggered()), view, SLOT(pvcreatePartition()));
     connect(m_pvremove_action,   SIGNAL(triggered()), view, SLOT(pvremovePartition()));
     connect(m_tablecreate_action,SIGNAL(triggered()), view, SLOT(tablecreatePartition()));
@@ -69,6 +70,7 @@ DeviceActionsMenu::DeviceActionsMenu( StorageDeviceItem *item,
     connect(m_mkfs_action,       SIGNAL(triggered()), segment, SLOT(mkfsPartition()));
     connect(m_partremove_action, SIGNAL(triggered()), segment, SLOT(removePartition()));
     connect(m_partadd_action,    SIGNAL(triggered()), segment, SLOT(addPartition()));
+    connect(m_partmoveresize_action, SIGNAL(triggered()), segment, SLOT(moveresizePartition()));
     connect(m_pvcreate_action,   SIGNAL(triggered()), segment, SLOT(pvcreatePartition()));
     connect(m_pvremove_action,   SIGNAL(triggered()), segment, SLOT(pvremovePartition()));
     connect(m_vgcreate_action,   SIGNAL(triggered()), segment, SLOT(vgcreatePartition()));
@@ -90,6 +92,7 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
     m_vgextend_menu       = new KMenu( i18n("Extend volume group"), this);
     m_mkfs_action       = new KAction( i18n("Make filesystem"), this);
     m_partadd_action    = new KAction( i18n("Add disk partition"), this);
+    m_partmoveresize_action = new KAction( i18n("Move or resize disk partition"), this);
     m_partremove_action = new KAction( i18n("Remove disk partition"), this);
     m_pvcreate_action   = new KAction( i18n("Create physical volume"), this);
     m_pvremove_action   = new KAction( i18n("Remove physical volume"), this);
@@ -102,6 +105,7 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
     addSeparator();
     addAction(m_partremove_action);
     addAction(m_partadd_action);
+    addAction(m_partmoveresize_action);
     addAction(m_pvcreate_action);
     addAction(m_pvremove_action);
     addAction(m_vgcreate_action);

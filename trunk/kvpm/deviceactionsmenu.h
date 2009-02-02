@@ -36,6 +36,7 @@ Q_OBJECT
     KAction *m_mkfs_action,
             *m_partremove_action,
             *m_partadd_action,
+            *m_partmoveresize_action,
 	    *m_pvcreate_action,
             *m_pvremove_action,
 	    *m_vgcreate_action,
