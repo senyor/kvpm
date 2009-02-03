@@ -38,7 +38,7 @@ class PartitionMoveResizeDialog : public KDialog
 {
 Q_OBJECT
 
-    StoragePartition *m_old_part;    
+    StoragePartition *m_old_storage_part;    
     PedConstraint    *m_ped_constraints;
     PedDisk          *m_ped_disk;
 
@@ -80,6 +80,13 @@ Q_OBJECT
     void setup();
     void resetOkButton();
     long long convertSizeToSectors(int index, double size);
+    bool shrinkfs();
+    bool growfs();
+    bool movefs(long long from_start, long long to_start, long long length);
+    bool shrinkPartition();
+    bool growPartition();
+    bool movePartition();
+    void resetDisplayGraphic();
 
 public:
     PartitionMoveResizeDialog(StoragePartition *partition, QWidget *parent = 0);

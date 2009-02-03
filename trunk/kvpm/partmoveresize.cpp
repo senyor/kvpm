@@ -12,6 +12,7 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
+
 #include <KLocale>
 #include <KMessageBox>
 
@@ -38,7 +39,7 @@ bool moveresize_partition(StoragePartition *partition)
 PartitionMoveResizeDialog::PartitionMoveResizeDialog(StoragePartition *partition, 
 				       QWidget *parent) : 
   KDialog(parent),
-  m_old_part(partition)
+  m_old_storage_part(partition)
   
 {
     setup();
@@ -62,7 +63,7 @@ PartitionMoveResizeDialog::PartitionMoveResizeDialog(StoragePartition *partition
     display_graphic_layout->addWidget(m_display_graphic);
     layout->addWidget(display_graphic_frame, 0, Qt::AlignCenter);
  
-    QLabel *path = new QLabel("<b>" + m_old_part->getPartitionPath() + "</b>");
+    QLabel *path = new QLabel("<b>" + m_old_storage_part->getPartitionPath() + "</b>");
     path->setAlignment( Qt::AlignHCenter );
     layout->addWidget(path);
 
@@ -134,9 +135,6 @@ PartitionMoveResizeDialog::PartitionMoveResizeDialog(StoragePartition *partition
 
     const long long max_size = 1 + m_max_part_end - m_max_part_start;
 
-    qDebug("Max Size: %lld", max_size);
-
-
     QString total_bytes = sizeToString( max_size * m_ped_sector_size );
     QLabel *preceding_label = new QLabel( i18n("Maximum size: %1",  total_bytes) );
     offset_group_layout->addWidget( preceding_label, 4, 0, 1, 2, Qt::AlignHCenter );
@@ -146,6 +144,9 @@ PartitionMoveResizeDialog::PartitionMoveResizeDialog(StoragePartition *partition
     m_unexcluded_label = new QLabel( i18n("Remaining space: %1", remaining_bytes ));
     offset_group_layout->addWidget( m_unexcluded_label, 5, 0, 1, 2, Qt::AlignHCenter );
 
+    m_size_spin->setValue( 100 * ( (long double)m_old_part_size )/ max_size ); 
+
+    m_offset_spin->setValue( 100 * (( (long double)m_old_part_start - m_max_part_start ) / max_size) );
 
     connect(m_size_combo, SIGNAL(currentIndexChanged(int)),
 	    this , SLOT(adjustSizeCombo(int)));
@@ -174,61 +175,47 @@ PartitionMoveResizeDialog::PartitionMoveResizeDialog(StoragePartition *partition
     connect(this, SIGNAL(okClicked()),
 	    this, SLOT(commitPartition()));
 
-    m_size_spin->setValue( 100 * ( (long double)m_new_part_size )/ max_size ); 
 
-    m_offset_spin->setValue( 100 * (( (long double)m_new_part_start - m_max_part_start ) / max_size) );
+    adjustSizeCombo( m_size_combo->currentIndex() );
+    adjustPrecedingCombo( m_preceding_combo->currentIndex() );
+    resetDisplayGraphic();
 
 }
 
 void PartitionMoveResizeDialog::commitPartition()
 {
-    /*
-    PedPartitionType type;
-    PedSector first_sector = m_new_part_start;
+    bool grow   = false;
+    bool shrink = false;
+    bool move   = ( m_offset_group->isChecked() && ( m_new_part_start != m_old_part_start ) );
 
-    if( m_offset_group->isChecked() )
-        first_sector = m_ped_start_sector + m_preceding_sectors;
+    if( m_size_group->isChecked() ){
+        if( m_new_part_size < m_old_part_size ){
+            grow   = false;
+            shrink = true;
+        }
+        else if( m_new_part_size > m_old_part_size ){
+            grow   = true;
+            shrink = false;
+        }
+        else{
+            grow   = false;
+            shrink = false;
+        }
+    }
 
-    PedSector last_sector  = first_sector + m_partition_sectors;
-    if( last_sector > m_ped_end_sector )
-        last_sector = m_ped_end_sector;
-    PedSector length  = (last_sector - first_sector) + 1;
+    if(grow){
+        if(move)
+            movePartition();
+        growPartition();
+    }
+    else if(shrink){
+        shrinkPartition();
+        if(move)
+            movePartition();
+    }
+    else if(move)
+            movePartition();
 
-    PedAlignment *ped_start_alignment = ped_alignment_new(0, 64);
-    PedAlignment *ped_end_alignment   = ped_alignment_new(0, 1);
-
-    PedGeometry *start_geom = ped_geometry_new(m_ped_disk->dev, first_sector, 127);
-    PedGeometry *end_geom   = ped_geometry_new(m_ped_disk->dev, first_sector, length);
-
-
-    PedConstraint *ped_constraint64 = ped_constraint_new(ped_start_alignment,
-							 ped_end_alignment, 
-							 start_geom, 
-							 end_geom, 
-							 128, 
-							 length);
-    if( m_align64_check->isChecked() )
-	m_ped_constraints = ped_constraint_intersect(ped_constraint64, m_ped_constraints);
-
-
-        type = PED_PARTITION_NORMAL ;
-
-
-    PedPartition *ped_new_partition = ped_partition_new(m_ped_disk, 
-							type, 
-							0, 
-							first_sector, 
-							(first_sector + length) -1);
-    int error;  // error = 0 on failure
-
-    error = ped_disk_add_partition(m_ped_disk, ped_new_partition, m_ped_constraints);
-
-    if( error )
-        error = ped_disk_commit(m_ped_disk);
-
-    if( ! error )  
-        KMessageBox::error( 0, "Creation of partition failed");
-    */
 }
 
 
@@ -264,12 +251,7 @@ void PartitionMoveResizeDialog::adjustSizeEdit(int percentage){
     m_remaining_label->setText( i18n("Following space: %1", following_bytes_string) );
 
     adjustSizeCombo( m_size_combo->currentIndex() );
-
-    m_display_graphic->setPrecedingSectors(preceding_sectors);
-    m_display_graphic->setPartitionSectors(m_new_part_size);
-    m_display_graphic->setFollowingSectors(following_sectors);
-    m_display_graphic->repaint();
-
+    resetDisplayGraphic();
     resetOkButton();
 }
 
@@ -371,6 +353,11 @@ void PartitionMoveResizeDialog::resetOkButton(){
         enableButtonOk(true);
     else
         enableButtonOk(false);
+
+
+
+        enableButtonOk(true);
+
 
 }
 
@@ -483,6 +470,7 @@ void PartitionMoveResizeDialog::resetOffsetGroup(bool on){
     if( ! on ){
         m_offset_spin->setValue( 100 * (( (long double)m_new_part_start - m_max_part_start ) / max_size) );
         m_new_part_start = m_old_part_start;
+        adjustPrecedingCombo( m_preceding_combo->currentIndex() );
     }
 }
 
@@ -495,12 +483,13 @@ void PartitionMoveResizeDialog::resetSizeGroup(bool on){
     if( ! on ){
         m_size_spin->setValue( 100 * ( (long double)m_new_part_size )/ max_size ); 
         m_new_part_size = m_old_part_size;
+        adjustSizeCombo( m_size_combo->currentIndex() );
    }
 }
 
 void PartitionMoveResizeDialog::setup(){
 
-    PedPartition  *ped_old_partition = m_old_part->getPedPartition();
+    PedPartition  *ped_old_partition = m_old_storage_part->getPedPartition();
     PedGeometry    ped_old_geometry  = ped_old_partition->geom;         
     PedGeometry   *ped_max_geometry  = NULL;
 
@@ -531,3 +520,179 @@ void PartitionMoveResizeDialog::setup(){
 
 }
 
+bool PartitionMoveResizeDialog::shrinkfs(){
+    return true;
+}
+
+bool PartitionMoveResizeDialog::growfs(){
+    return true;
+}
+
+bool PartitionMoveResizeDialog::movefs(long long from_start, 
+                                       long long to_start, 
+                                       long long length){
+
+    qDebug("From: %lld", from_start);
+    qDebug("To:   %lld", to_start);
+    qDebug("Leng: %lld", length);
+    qDebug();
+
+    const long long blocksize = 1000;
+
+    PedDevice *device = m_ped_disk->dev;
+
+    char *buff = static_cast<char *>( malloc( blocksize * m_ped_sector_size ) ) ;
+
+    int error;
+    long long blockcount = length / blocksize;
+    long long extra = length % blocksize;
+    qDebug("Block count: %lld", blockcount);
+    ped_device_open( device );
+
+    if( to_start < from_start ){                       // moving left
+        for( long long x = 0; x < blockcount  ; x++){
+            
+            error = ped_device_read( device, buff, from_start + (x * blocksize), blocksize);
+            ped_device_write(device, buff, to_start   + (x * blocksize), blocksize);
+
+            qDebug() << "Goin left......"; 
+            qDebug("From: %lld  To: %lld", from_start + (x*blocksize), to_start + (x*blocksize));
+
+        }
+        ped_device_read(device,  buff, from_start + (blockcount * blocksize), extra);
+        ped_device_write(device, buff, to_start   + (blockcount * blocksize), extra);
+
+        qDebug();
+        qDebug("Start: %lld   End: %lld", to_start + (blocksize*blockcount), 
+               to_start + (blocksize*blockcount) + extra -1 );
+        qDebug();
+        qDebug();
+    }
+    else{
+
+        ped_device_read(device,  buff, from_start + (blockcount * blocksize), extra);
+        ped_device_write(device, buff, to_start   + (blockcount * blocksize), extra);
+
+        qDebug();
+        qDebug("Start: %lld   End: %lld", to_start + (blocksize*blockcount), 
+               to_start + (blocksize*blockcount) + extra - 1 );
+        qDebug();
+        qDebug();
+
+        for( long long x = blockcount - 1; x >= 0 ; x--){
+            
+            qDebug() << "Goin Right......"; 
+            qDebug("From: %lld  To: %lld", from_start + (x*blocksize), to_start + (x*blocksize));
+
+            ped_device_read( device, buff, from_start + (x * blocksize), blocksize);
+            ped_device_write(device, buff, to_start   + (x * blocksize), blocksize);
+
+        }
+        qDebug();
+        qDebug();
+    }
+
+    ped_device_sync( device );
+    ped_device_close( device );
+
+    return true;
+}
+
+bool PartitionMoveResizeDialog::shrinkPartition(){
+    return true;
+}
+
+bool PartitionMoveResizeDialog::growPartition(){
+    return true;
+}
+
+bool PartitionMoveResizeDialog::movePartition(){
+
+    //    PedAlignment *ped_start_alignment = ped_alignment_new(0, 64);
+
+    PedPartition     *old_partition = m_old_storage_part->getPedPartition();
+    PedPartition     *new_partition = NULL;
+    PedPartitionType  type   = old_partition->type;
+    PedDevice        *device = m_ped_disk->dev;
+    PedAlignment     *start_alignment = ped_alignment_new(0, 1);
+    PedAlignment     *end_alignment   = ped_alignment_new(0, 1);
+    int error;
+
+    // This constraint assures we have a new partition at least as long as the old one
+    // We give +/- 64 sectors for the start and end of the partition
+
+    PedGeometry *start_range = ped_geometry_new( device, m_new_part_start - 64, 128 );
+    PedGeometry *end_range = ped_geometry_new( device, m_new_part_start + m_old_part_size - 64, 128 );
+
+    PedSector minimum_size = m_old_part_size;
+    PedSector maximum_size = m_old_part_size + 128;
+
+    PedConstraint *min_size_constraint = ped_constraint_new( start_alignment,
+                                                             end_alignment,
+                                                             start_range,
+                                                             end_range,
+                                                             minimum_size,
+                                                             maximum_size);
+
+    // This constraint assures we don't go past the edges of any
+    // adjoining partitions or the partition table itself
+
+    PedSector max_part_length = m_max_part_end - m_max_part_start + 1;
+
+    PedGeometry *max_start_range = ped_geometry_new( device, m_max_part_start, max_part_length ); 
+    PedGeometry *max_end_range   = ped_geometry_new( device, m_max_part_start, max_part_length );
+
+    PedConstraint *max_size_constraint = ped_constraint_new( start_alignment,
+                                                             end_alignment,
+                                                             max_start_range,
+                                                             max_end_range,
+                                                             1,
+                                                             max_part_length);
+
+    PedConstraint *constraint = ped_constraint_intersect(max_size_constraint, 
+                                                         min_size_constraint);
+
+
+    ped_disk_delete_partition( m_ped_disk, old_partition );
+
+    new_partition = ped_partition_new( m_ped_disk, 
+                                       type, 
+                                       0, 
+                                       m_max_part_start, 
+                                       m_max_part_end );
+
+
+    error = ped_disk_add_partition( m_ped_disk, 
+                                    new_partition, 
+                                    constraint);
+
+    PedSector new_start = new_partition->geom.start;
+
+    if( error ){
+
+        movefs( m_old_part_start, new_start, m_old_part_size   );
+        error = ped_disk_commit(m_ped_disk);
+
+        if( ! error )  
+            KMessageBox::error( 0, "Commiting of partition failed");
+    }
+    if( ! error )  
+        KMessageBox::error( 0, "Creation of partition failed");
+
+
+
+
+    return true;
+}
+
+
+void PartitionMoveResizeDialog::resetDisplayGraphic(){
+   
+    PedSector preceding_sectors = m_new_part_start - m_max_part_start;
+    PedSector following_sectors = m_max_part_end - ( m_new_part_start + m_new_part_size );
+
+    m_display_graphic->setPrecedingSectors(preceding_sectors);
+    m_display_graphic->setPartitionSectors(m_new_part_size);
+    m_display_graphic->setFollowingSectors(following_sectors);
+    m_display_graphic->repaint();
+}

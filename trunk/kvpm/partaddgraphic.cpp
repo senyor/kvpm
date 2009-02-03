@@ -22,8 +22,11 @@ void PartAddGraphic::paintEvent(QPaintEvent *){
 
      double offset;
      double length;
+     long double total_sectors;
 
-     double total_sectors =  m_preceding_sectors + m_following_sectors + m_partition_sectors;
+     total_sectors =  m_preceding_sectors + m_following_sectors + m_partition_sectors;
+     qDebug("total:   %Lf", total_sectors);
+     qDebug();
 
      offset = 0;
      length = (m_preceding_sectors / total_sectors) * 199;
@@ -31,18 +34,20 @@ void PartAddGraphic::paintEvent(QPaintEvent *){
 
      offset += length;
      length = (m_partition_sectors / total_sectors) * 199;
-     QRectF partition_rectangle(offset, 0.0, offset + length, 29.0);
+     if( length < 1.0 )                                     // always show at least a sliver
+         length = 1;
+     QRectF partition_rectangle(offset, 0.0, length, 29.0);
 
      offset += length;
      length = (m_following_sectors / total_sectors) * 199;
-     QRectF following_rectangle(offset, 0.0, offset + length, 29.0);
+     QRectF following_rectangle(offset, 0.0, length, 29.0);
 
      QBrush free_brush( Qt::green, Qt::SolidPattern );
      QBrush partition_brush( Qt::blue, Qt::SolidPattern );
 
      painter.fillRect( preceding_rectangle, free_brush );
-     painter.fillRect( partition_rectangle, partition_brush );
      painter.fillRect( following_rectangle, free_brush );
+     painter.fillRect( partition_rectangle, partition_brush );
 }
 
 void PartAddGraphic::setPrecedingSectors(long long precedingSectors)
