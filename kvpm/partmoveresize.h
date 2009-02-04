@@ -39,9 +39,10 @@ class PartitionMoveResizeDialog : public KDialog
 Q_OBJECT
 
     StoragePartition *m_old_storage_part;    
-    PedConstraint    *m_ped_constraints;
     PedDisk          *m_ped_disk;
+    PedPartition     *m_current_part; // The partition on the disk now
 
+    PedSector m_min_shrink_size;     // Minimum size of the fs after shrinking
     long long m_ped_sector_size;     // bytes per logical sector
     long long m_new_part_size;       // proposed size of partition
     long long m_new_part_start;      // start of new partition in sectors
@@ -80,7 +81,9 @@ Q_OBJECT
     void setup();
     void resetOkButton();
     long long convertSizeToSectors(int index, double size);
-    bool shrinkfs();
+    long long shrinkfs(PedSector length);
+    long long getMinShrinkSize();
+    long long getFsBlockSize();
     bool growfs();
     bool movefs(long long from_start, long long to_start, long long length);
     bool shrinkPartition();
