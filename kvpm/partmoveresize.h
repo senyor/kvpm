@@ -90,6 +90,7 @@ Q_OBJECT
     bool growPartition();
     bool movePartition();
     void resetDisplayGraphic();
+    void setSizeLabels();
 
 public:
     PartitionMoveResizeDialog(StoragePartition *partition, QWidget *parent = 0);
@@ -98,12 +99,14 @@ private slots:
     void adjustSizeEdit(int percentage);
     void adjustSizeCombo(int index);
     void validateVolumeSize(QString size);
-    void adjustPrecedingEdit(int percentage);
-    void adjustPrecedingCombo(int index);
+    void adjustOffsetEdit(int percentage);
+    void adjustOffsetCombo(int index);
     void validatePrecedingSize(QString size);
     void commitPartition();
     void resetOffsetGroup(bool on);
     void resetSizeGroup(bool on);
+    void setOffsetSpinTop();
+    void setSizeSpinTop();
 };
 
 #endif
