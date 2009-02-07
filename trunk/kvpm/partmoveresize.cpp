@@ -162,16 +162,19 @@ PartitionMoveResizeDialog::PartitionMoveResizeDialog(StoragePartition *partition
 	    this, SLOT(adjustSizeEdit(int)));
 
     connect(m_preceding_combo, SIGNAL(currentIndexChanged(int)),
-	    this , SLOT(adjustPrecedingCombo(int)));
+	    this , SLOT(adjustOffsetCombo(int)));
 
     connect(m_offset_edit, SIGNAL(textEdited(QString)),
 	    this, SLOT(validatePrecedingSize(QString)));
 
     connect(m_offset_spin, SIGNAL(valueChanged(int)),
-	    this, SLOT(adjustPrecedingEdit(int)));
+	    this, SLOT(adjustOffsetEdit(int)));
 
     connect(m_size_group, SIGNAL(toggled(bool)),
 	    this, SLOT(resetSizeGroup(bool)));
+
+    connect(m_size_group, SIGNAL(toggled(bool)),
+	    this, SLOT(setOffsetSpinTop()));
 
     connect(m_offset_group, SIGNAL(toggled(bool)),
 	    this, SLOT(resetOffsetGroup(bool)));
@@ -181,9 +184,10 @@ PartitionMoveResizeDialog::PartitionMoveResizeDialog(StoragePartition *partition
 
 
     adjustSizeCombo( m_size_combo->currentIndex() );
-    adjustPrecedingCombo( m_preceding_combo->currentIndex() );
+    adjustOffsetCombo( m_preceding_combo->currentIndex() );
     resetDisplayGraphic();
-
+    setOffsetSpinTop();
+    setSizeLabels();
 }
 
 void PartitionMoveResizeDialog::commitPartition()
@@ -228,12 +232,9 @@ void PartitionMoveResizeDialog::commitPartition()
 
 void PartitionMoveResizeDialog::adjustSizeEdit(int percentage){
 
-    const long long preceding_sectors = m_new_part_start - m_max_part_start;
-    const long long max_sectors       = 1 + m_max_part_end - m_max_part_start;
+    const long long max_sectors = 1 + m_max_part_end - m_max_part_start;
 
-    const int top = qRound( (1.0 - ( (double)preceding_sectors / max_sectors ) )  * 100);
-
-    m_size_spin->setMaximum( top );
+    setSizeSpinTop();
 
     if( percentage >= m_size_spin->maximum() )
         m_new_part_size = m_max_part_end - m_new_part_start;
@@ -242,21 +243,7 @@ void PartitionMoveResizeDialog::adjustSizeEdit(int percentage){
     else
         m_new_part_size = (long long)(( (double) percentage / 100) * ( max_sectors ));
 
-    QString total_bytes = sizeToString(m_ped_sector_size * ( max_sectors - m_new_part_size ));
-    m_unexcluded_label->setText( i18n("Available space: %1", total_bytes) );
-
-    QString preceding_bytes_string = sizeToString(preceding_sectors * m_ped_sector_size);
-    m_preceding_label->setText( i18n("Preceding space: %1", preceding_bytes_string) );
-
-    PedSector following_sectors = m_max_part_end - ( m_new_part_start + m_new_part_size );
-    long long following_space   = following_sectors * m_ped_sector_size;
-
-    if(following_space < 0)
-        following_space = 0;
-
-    QString following_bytes_string = sizeToString(following_space);
-    m_remaining_label->setText( i18n("Following space: %1", following_bytes_string) );
-
+    setSizeLabels();
     adjustSizeCombo( m_size_combo->currentIndex() );
     resetDisplayGraphic();
     resetOkButton();
@@ -266,22 +253,30 @@ void PartitionMoveResizeDialog::adjustSizeEdit(int percentage){
 void PartitionMoveResizeDialog::adjustSizeCombo(int index){
 
     long double sized;
+    long double valid_topd = (((long double)m_max_part_end - m_new_part_start + 1) * m_ped_sector_size);
 
     if(index){
         sized = ((long double)m_new_part_size * m_ped_sector_size);
-        if(index == 1)
+        if(index == 1){
             sized /= (long double)0x100000;
-        if(index == 2)
+	    valid_topd /= (long double)0x100000;
+        }
+        if(index == 2){
             sized /= (long double)0x40000000;
+	    valid_topd /= (long double)0x40000000;
+        }
         if(index == 3){
             sized /= (long double)(0x100000);
             sized /= (long double)(0x100000);
+	    valid_topd /= (long double)0x100000;
+	    valid_topd /= (long double)0x100000;
         }
         m_size_edit->setText(QString("%1").arg((double)sized));
     }
     else
         m_size_edit->setText(QString("%1").arg(m_new_part_size));
 
+    m_offset_validator->setTop( (double)valid_topd );
 }
 
 
@@ -303,24 +298,17 @@ void PartitionMoveResizeDialog::validateVolumeSize(QString size){
         m_new_part_size = 0;
     }
 
+
+    /*
+    if( m_new_part_size > ( 1 + m_max_part_end - m_new_part_start ) )
+        m_new_part_size = 1 + m_max_part_end - m_new_part_start;
+    */
+
+
     long long preceding_sectors = m_new_part_start - m_max_part_start;
-    long long max_sectors       = 1 + m_max_part_end - m_max_part_start;
-
-
-    QString total_bytes = sizeToString(m_ped_sector_size * ( max_sectors - m_new_part_size ));
-    m_unexcluded_label->setText( i18n("Available space: %1", total_bytes) );
-
-    QString preceding_bytes_string = sizeToString(preceding_sectors * m_ped_sector_size);
-    m_preceding_label->setText( i18n("Preceding space: %1", preceding_bytes_string) );
-
     PedSector following_sectors = m_max_part_end - ( m_new_part_start + m_new_part_size );
-    long long following_space   = following_sectors * m_ped_sector_size;
 
-    if(following_space < 0)
-        following_space = 0;
-
-    QString following_bytes_string = sizeToString(following_space);
-    m_remaining_label->setText( i18n("Following space: %1", following_bytes_string) );
+    setSizeLabels();
 
     m_display_graphic->setPrecedingSectors(preceding_sectors);
     m_display_graphic->setPartitionSectors(m_new_part_size);
@@ -366,29 +354,25 @@ void PartitionMoveResizeDialog::resetOkButton(){
         enableButtonOk(true);
 }
 
-void PartitionMoveResizeDialog::adjustPrecedingEdit(int percentage){
+void PartitionMoveResizeDialog::adjustOffsetEdit(int percentage){
 
     const long long max_length = 1 + m_max_part_end - m_max_part_start;
 
     // This is how far right we can move partition and keep it the same size
     const long long max_start  = 1 + m_max_part_end - m_old_part_size;
 
-    const int top = qRound( (1.0 - ( (double)m_old_part_size / max_length ) )  * 100);
-
     if( m_size_group->isChecked() ){
-        m_offset_spin->setMaximum( 100 );
-
         if(percentage == 100)
             m_new_part_start = m_max_part_end;
         else if(percentage == 0)
             m_new_part_start = m_max_part_start;
         else
             m_new_part_start = m_max_part_start + ( ( (double)percentage / 100 ) * max_length ); 
+
+        adjustSizeCombo( m_size_combo->currentIndex() );
     }
     else{
-        m_offset_spin->setMaximum( top );
-
-        if(percentage >= top)
+        if( percentage >= m_offset_spin->maximum() )
             m_new_part_start = max_start;
         else if(percentage == 0)
             m_new_part_start = m_max_part_start;
@@ -399,19 +383,14 @@ void PartitionMoveResizeDialog::adjustPrecedingEdit(int percentage){
             m_new_part_start = max_start;
     }
 
-    adjustPrecedingCombo( m_preceding_combo->currentIndex() );
-
-
-// WRONG 
-    adjustSizeEdit(m_size_spin->value());
-
-
-
+    setSizeLabels();
+    adjustOffsetCombo( m_preceding_combo->currentIndex() );
+    resetDisplayGraphic();
     resetOkButton();
 }
 
 
-void PartitionMoveResizeDialog::adjustPrecedingCombo(int index){
+void PartitionMoveResizeDialog::adjustOffsetCombo(int index){
 
     const long long max_length = 1 + m_max_part_end - m_max_part_start;
 
@@ -446,7 +425,6 @@ void PartitionMoveResizeDialog::adjustPrecedingCombo(int index){
 
 }
 
-
 void PartitionMoveResizeDialog::validatePrecedingSize(QString size){
 
     int x = 0;
@@ -479,7 +457,7 @@ void PartitionMoveResizeDialog::resetOffsetGroup(bool on){
     if( ! on ){
         m_offset_spin->setValue( 100 * (( (long double)m_new_part_start - m_max_part_start ) / max_size) );
         m_new_part_start = m_old_part_start;
-        adjustPrecedingCombo( m_preceding_combo->currentIndex() );
+        adjustOffsetCombo( m_preceding_combo->currentIndex() );
     }
 }
 
@@ -490,7 +468,7 @@ void PartitionMoveResizeDialog::resetSizeGroup(bool on){
     const long long max_size = 1 + m_max_part_end - m_max_part_start; 
 
     if( ! on ){
-        m_size_spin->setValue( 100 * ( (long double)m_new_part_size )/ max_size ); 
+        m_size_spin->setValue( 100 * ( (long double)m_old_part_size )/ max_size ); 
         m_new_part_size = m_old_part_size;
         adjustSizeCombo( m_size_combo->currentIndex() );
    }
@@ -693,7 +671,6 @@ bool PartitionMoveResizeDialog::shrinkPartition(){
     PedConstraint *constraint = ped_constraint_intersect(max_size_constraint, 
                                                          min_size_constraint);
 
-
     ped_disk_delete_partition( m_ped_disk, m_current_part );
 
     m_current_part = ped_partition_new( m_ped_disk, 
@@ -705,8 +682,6 @@ bool PartitionMoveResizeDialog::shrinkPartition(){
     error = ped_disk_add_partition( m_ped_disk, 
                                     m_current_part, 
                                     constraint);
-
-
 
     if( error ){
 
@@ -873,4 +848,47 @@ long long PartitionMoveResizeDialog::getFsBlockSize(){
         return 0;
 
     return block_string.toLongLong();
+}
+
+void PartitionMoveResizeDialog::setOffsetSpinTop(){
+
+    const long long max_sectors = 1 + m_max_part_end - m_max_part_start;
+
+    const int top = qRound( (1.0 - ( (double)m_old_part_size / max_sectors ) )  * 100);
+
+    if( m_size_group->isChecked() )
+        m_offset_spin->setMaximum(100);
+    else
+        m_offset_spin->setMaximum(top);
+}
+
+void PartitionMoveResizeDialog::setSizeSpinTop(){
+
+    const long long preceding_sectors = m_new_part_start - m_max_part_start;
+    const long long max_sectors       = 1 + m_max_part_end - m_max_part_start;
+
+    const int top = qRound( (1.0 - ( (double)preceding_sectors / max_sectors ) )  * 100);
+
+    m_size_spin->setMaximum( top );
+}
+
+void PartitionMoveResizeDialog::setSizeLabels(){
+
+    const long long preceding_sectors = m_new_part_start - m_max_part_start;
+    const long long max_sectors       = 1 + m_max_part_end - m_max_part_start;
+
+    QString total_bytes = sizeToString(m_ped_sector_size * ( max_sectors - m_new_part_size ));
+    m_unexcluded_label->setText( i18n("Available space: %1", total_bytes) );
+
+    QString preceding_bytes_string = sizeToString(preceding_sectors * m_ped_sector_size);
+    m_preceding_label->setText( i18n("Preceding space: %1", preceding_bytes_string) );
+
+    PedSector following_sectors = m_max_part_end - ( m_new_part_start + m_new_part_size );
+    long long following_space   = following_sectors * m_ped_sector_size;
+
+    if(following_space < 0)
+        following_space = 0;
+
+    QString following_bytes_string = sizeToString(following_space);
+    m_remaining_label->setText( i18n("Following space: %1", following_bytes_string) );
 }
