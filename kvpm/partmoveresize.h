@@ -17,14 +17,16 @@
 
 #include <parted/parted.h>
 
-#include <QFrame>
 #include <KDialog>
 #include <KLineEdit>
 #include <KComboBox>
+
+#include <QFrame>
 #include <QGroupBox>
 #include <QCheckBox>
 #include <QLabel>
 #include <QSpinBox>
+#include <QEventLoop>
 
 #include "storagepartition.h"
 
