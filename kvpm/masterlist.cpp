@@ -309,6 +309,7 @@ void MasterList::scanStorageDevices()
 
     m_storage_devices.clear();
 
+    ped_device_free_all();
     ped_device_probe_all();
 
     MountInformationList *mount_info_list = new MountInformationList();

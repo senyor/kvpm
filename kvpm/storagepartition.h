@@ -52,8 +52,8 @@ public:
 		     MountInformationList *mountInfoList);
 
     ~StoragePartition();
-    
-    PedPartition *getPedPartition();
+
+    PedPartition *getPedPartition();    
     QString getFileSystem();
     QString getPartitionPath();
     PhysVol *getPhysicalVolume();

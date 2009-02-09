@@ -12,12 +12,22 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/ioctl.h>
+#include <errno.h>
+#include <sys/mount.h>
+#include <errno.h>
+#include <string.h>
 
 #include <KLocale>
 #include <KMessageBox>
 #include <KProgressDialog>
 
 #include <QtGui>
+#include <QThread>
 
 #include "partmoveresize.h"
 #include "partaddgraphic.h"
@@ -37,6 +47,50 @@ bool moveresize_partition(StoragePartition *partition)
         return false;
 }
 
+/* This if passed "true" function checks the /dev directory to see if 
+   the partition in question exists or waits for its creation if it does 
+   not before returning. If passed "false" it waits for the partition
+   to be deleted */ 
+
+
+bool waitPartitionTableReload(QString partitionPath , bool exists){
+
+    QString error_string;
+    int fd;
+    char buff[512];
+    errno = 0;
+
+    if(exists){
+
+        // wait for the /dev entry to appear
+
+        while( (fd = open( partitionPath.toAscii().data(), O_RDONLY)) < 1 ){
+            sleep( 1 );
+        }
+
+        // make sure we can read from it
+
+        while( read(fd, buff, 512) == 0 )
+            sleep( 1 );
+
+        close(fd);
+    }
+    else{
+
+        // if the dev entry still exists, wait until we can't read from it
+
+        if( (fd = open( partitionPath.toAscii().data(), O_RDONLY)) > 0 ){
+            while( read(fd, buff, 512) != 0 ){
+                lseek(fd, 0, SEEK_SET);
+                sleep( 1 );
+            }
+        }
+        close(fd);        
+    }
+
+    return true;
+
+}
 
 PartitionMoveResizeDialog::PartitionMoveResizeDialog(StoragePartition *partition, 
 				       QWidget *parent) : 
@@ -475,6 +529,16 @@ void PartitionMoveResizeDialog::setup(){
     m_ped_disk = ped_old_partition->disk;
     PedDevice  *ped_device = m_ped_disk->dev;
 
+    /*
+    PedDevice      *ped_device        = ped_device_get("/dev/hde");
+    m_ped_disk = ped_disk_new(ped_device);
+    PedPartition   *ped_old_partition = ped_disk_get_partition(m_ped_disk, 5);
+    PedGeometry     ped_old_geometry  = ped_old_partition->geom;         
+    PedGeometry    *ped_max_geometry  = NULL;
+
+    m_current_part = ped_old_partition;
+    */
+
     // Basic constraints on device
  
     PedConstraint *constraint = ped_device_get_constraint(ped_device);
@@ -498,9 +562,7 @@ void PartitionMoveResizeDialog::setup(){
     else
         m_logical = false;
 
-
     m_min_shrink_size = getMinShrinkSize();
-
 }
 
 long long PartitionMoveResizeDialog::shrinkfs(PedSector length){
@@ -554,7 +616,7 @@ bool PartitionMoveResizeDialog::movefs(long long from_start,
                                        long long to_start, 
                                        long long length){
 
-    const long long blocksize = 4000;
+    const long long blocksize = 8000;    // sectors moved in each block
 
     PedDevice *device = m_ped_disk->dev;
 
@@ -609,7 +671,7 @@ bool PartitionMoveResizeDialog::shrinkPartition(){
     PedDevice        *device = m_ped_disk->dev;
     PedAlignment     *start_alignment = ped_alignment_new(0, 1);
     PedAlignment     *end_alignment   = ped_alignment_new(0, 1);
-    int error;
+    int success;
     PedSector new_size;
 
     if( m_new_part_size < m_min_shrink_size)
@@ -663,24 +725,26 @@ bool PartitionMoveResizeDialog::shrinkPartition(){
                                         m_max_part_start, 
                                         m_max_part_end );
 
-    error = ped_disk_add_partition( m_ped_disk, 
+    success = ped_disk_add_partition( m_ped_disk, 
                                     m_current_part, 
                                     constraint);
 
-    if( error ){
+    if( success ){
 
-        error = ped_disk_commit(m_ped_disk);
+        success = ped_disk_commit(m_ped_disk);
 
-        if( ! error )  
+        if( ! success ){  
             KMessageBox::error( 0, "Could not commit partition");
-        return false;
+            return false;
+        }
+        else
+            return true;
     }
-    if( ! error ){  
-        KMessageBox::error( 0, "Could not creation partition");
+    else {
+        KMessageBox::error( 0, "Could not create partition");
         return false;
     }
 
-    return true;
 }
 
 bool PartitionMoveResizeDialog::growPartition(){
@@ -689,7 +753,7 @@ bool PartitionMoveResizeDialog::growPartition(){
     PedDevice        *device = m_ped_disk->dev;
     PedAlignment     *start_alignment = ped_alignment_new(0, 1);
     PedAlignment     *end_alignment   = ped_alignment_new(0, 1);
-    int error;
+    int success;
 
     //        new_size = m_new_part_size;
 
@@ -726,33 +790,45 @@ bool PartitionMoveResizeDialog::growPartition(){
 
     ped_disk_delete_partition( m_ped_disk, m_current_part );
 
+    success = ped_disk_commit(m_ped_disk);
+    waitPartitionTableReload( m_old_storage_part->getPartitionPath() , false  );
+
     m_current_part = ped_partition_new( m_ped_disk, 
                                         type, 
                                         0, 
                                         m_max_part_start, 
                                         m_max_part_end );
 
-    error = ped_disk_add_partition( m_ped_disk, 
+    success = ped_disk_add_partition( m_ped_disk, 
                                     m_current_part, 
                                     constraint);
 
-    if( error ){
 
-        error = ped_disk_commit(m_ped_disk);
-
-        if( ! error )  
-            KMessageBox::error( 0, "Could not commit partition");
-        return false;
-    }
-    if( ! error ){  
+    if( ! success ){  
         KMessageBox::error( 0, "Could not create partition");
         return false;
     }
+    else {
 
-    if( growfs() )
-        return true;
-    else
-        return false;
+        success = ped_disk_commit(m_ped_disk);
+
+        if( ! success ){  
+            KMessageBox::error( 0, "Could not commit partition");
+            return false;
+        }
+        else{
+
+            // Here we wait for linux to re-read the partition table before doing anything else.
+            // Otherwise the resize program will fail.
+
+            waitPartitionTableReload( m_old_storage_part->getPartitionPath() , true  );
+
+            if( growfs() )
+                return true;
+            else
+                return false;
+        }
+    }
 }
 
 bool PartitionMoveResizeDialog::movePartition(){

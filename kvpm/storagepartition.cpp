@@ -141,14 +141,14 @@ StoragePartition::~StoragePartition()
 	delete m_device_mount_info_list[x];
 }
 
-PedPartition* StoragePartition::getPedPartition()
-{
-    return m_ped_partition;
-}
-
 QString StoragePartition::getType()
 {
     return m_partition_type.trimmed();
+}
+
+PedPartition* StoragePartition::getPedPartition()
+{
+    return m_ped_partition;
 }
 
 QString StoragePartition::getFileSystem()
@@ -164,7 +164,7 @@ PhysVol* StoragePartition::getPhysicalVolume()
 
 QString StoragePartition::getPartitionPath()
 {
-    return m_partition_path;
+    return m_partition_path.trimmed();
 }
 
 
