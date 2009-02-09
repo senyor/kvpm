@@ -74,8 +74,8 @@ Q_OBJECT
 
     QCheckBox *m_align64_check;
 
-    QLabel    *m_unexcluded_label,  // Space left for new partition
-              *m_remaining_label,
+    QLabel    *m_remaining_label,
+              *m_size_label,
               *m_preceding_label;
 
     bool m_logical;      // Are we a primary or logical partition?

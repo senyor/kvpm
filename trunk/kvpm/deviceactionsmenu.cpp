@@ -106,11 +106,13 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
     addAction(m_partremove_action);
     addAction(m_partadd_action);
     addAction(m_partmoveresize_action);
+    addSeparator();
     addAction(m_pvcreate_action);
     addAction(m_pvremove_action);
     addAction(m_vgcreate_action);
     addAction(m_vgreduce_action);
     addMenu(m_vgextend_menu);
+    addSeparator();
     addMenu(filesystem_ops);
     filesystem_ops->addAction(m_mount_action);
     filesystem_ops->addAction(m_unmount_action);
@@ -123,7 +125,7 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
         m_vgextend_menu->addAction(vgextend_actions[x]);
     }
 
-    
+
     if(item){
 
         setEnabled(true);
@@ -149,6 +151,7 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
 	    m_pvcreate_action->setEnabled(false);
 	    m_mkfs_action->setEnabled(false);
 	    m_partremove_action->setEnabled(false);
+            m_partmoveresize_action->setEnabled(false);
 	    m_partadd_action->setEnabled(true);
 	    m_pvremove_action->setEnabled(false);
 	    m_vgcreate_action->setEnabled(false);
@@ -160,6 +163,7 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
 	    m_mkfs_action->setEnabled(false);
 	    m_partadd_action->setEnabled(false);
 	    m_partremove_action->setEnabled(true);
+            m_partmoveresize_action->setEnabled(false);
 	    m_pvremove_action->setEnabled(false);
 	    m_vgcreate_action->setEnabled(false);
 	    m_vgextend_menu->setEnabled(false);
@@ -170,6 +174,7 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
 	    m_mkfs_action->setEnabled(false);
 	    m_partadd_action->setEnabled(false);
 	    m_partremove_action->setEnabled(false);
+            m_partmoveresize_action->setEnabled(false);
 	    m_pvremove_action->setEnabled(false);
 	    m_vgcreate_action->setEnabled(false);
 	    m_vgextend_menu->setEnabled(false);
@@ -178,6 +183,7 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
 	else if(item->data(7) != ""){
 	    m_pvcreate_action->setEnabled(false);
 	    m_partremove_action->setEnabled(false);
+            m_partmoveresize_action->setEnabled(false);
 	    m_partadd_action->setEnabled(false);
 	    m_mkfs_action->setEnabled(false);
 	    m_pvremove_action->setEnabled(false);
@@ -189,6 +195,7 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
 	    m_pvcreate_action->setEnabled(false);
 	    m_mkfs_action->setEnabled(false);
 	    m_partremove_action->setEnabled(false);
+            m_partmoveresize_action->setEnabled(true);
 	    m_partadd_action->setEnabled(false);
 	    m_pvremove_action->setEnabled(true);
 	    m_vgcreate_action->setEnabled(true);
@@ -199,6 +206,7 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
 	    m_pvcreate_action->setEnabled(false);
 	    m_mkfs_action->setEnabled(false);
 	    m_partremove_action->setEnabled(false);
+            m_partmoveresize_action->setEnabled(true);
 	    m_partadd_action->setEnabled(false);
 	    m_pvremove_action->setEnabled(false);
 	    m_vgcreate_action->setEnabled(false);
@@ -212,9 +220,10 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
 
 	    if(item->data(7) != "")
    	        m_partremove_action->setEnabled(false);
-	    else
+	    else{
 	        m_partremove_action->setEnabled(true);
-
+                m_partmoveresize_action->setEnabled(true);
+            }
 	    m_partadd_action->setEnabled(false);
 	    m_pvcreate_action->setEnabled(true);
 	    m_pvremove_action->setEnabled(false);
@@ -225,6 +234,7 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
 	}
 	else{
 	    m_partremove_action->setEnabled(false);
+            m_partmoveresize_action->setEnabled(false);
 	    m_partadd_action->setEnabled(false);
 	    m_pvcreate_action->setEnabled(false);
 	    m_pvremove_action->setEnabled(false);

@@ -65,9 +65,19 @@ PartitionMoveResizeDialog::PartitionMoveResizeDialog(StoragePartition *partition
     display_graphic_layout->addWidget(m_display_graphic);
     layout->addWidget(display_graphic_frame, 0, Qt::AlignCenter);
  
-    QLabel *path = new QLabel("<b>" + m_old_storage_part->getPartitionPath() + "</b>");
-    path->setAlignment( Qt::AlignHCenter );
-    layout->addWidget(path);
+    QGroupBox *info_group = new QGroupBox( m_old_storage_part->getPartitionPath() );  
+    QVBoxLayout *info_group_layout = new QVBoxLayout();
+    info_group->setLayout(info_group_layout);
+    layout->addWidget(info_group);
+
+    m_preceding_label = new QLabel();
+    info_group_layout->addWidget( m_preceding_label );
+
+    m_size_label = new QLabel();
+    info_group_layout->addWidget( m_size_label );
+
+    m_remaining_label = new QLabel();
+    info_group_layout->addWidget( m_remaining_label );
 
     m_size_group   = new QGroupBox( i18n("Modify partition size") );
     m_size_group->setCheckable(true);
@@ -79,7 +89,6 @@ PartitionMoveResizeDialog::PartitionMoveResizeDialog(StoragePartition *partition
 
     m_size_spin = new QSpinBox();
     m_size_spin->setRange(0,100);
-
     m_size_spin->setSuffix("%");
 
     m_size_edit  = new KLineEdit();
@@ -98,14 +107,17 @@ PartitionMoveResizeDialog::PartitionMoveResizeDialog(StoragePartition *partition
     size_group_layout->addWidget(m_size_edit,0,0);
     size_group_layout->addWidget(m_size_combo,0,1);
     size_group_layout->addWidget(m_size_spin,1,0);
-    m_align64_check = new QCheckBox("Align to 64 sectors");
-    size_group_layout->addWidget(m_align64_check, 3, 0, 1, 2, Qt::AlignHCenter );
 
-    m_preceding_label = new QLabel();
-    size_group_layout->addWidget( m_preceding_label, 5, 0, 1, 2, Qt::AlignHCenter );
 
-    m_remaining_label = new QLabel();
-    size_group_layout->addWidget( m_remaining_label, 6, 0, 1, 2, Qt::AlignHCenter );
+    QLabel *min_size_label = new QLabel( QString("Minimum size: %1").arg( sizeToString( m_min_shrink_size * m_ped_sector_size )));
+    size_group_layout->addWidget( min_size_label, 5, 0, 1, 2 );
+
+
+    const long long max_size = 1 + m_max_part_end - m_max_part_start;
+
+    QString total_bytes = sizeToString( max_size * m_ped_sector_size );
+    QLabel *preceding_label = new QLabel( i18n("Maximum size: %1",  total_bytes) );
+    size_group_layout->addWidget( preceding_label, 6, 0, 1, 2);
 
     m_offset_group = new QGroupBox("Move partition start");
     QGridLayout *offset_group_layout = new QGridLayout();
@@ -131,23 +143,12 @@ PartitionMoveResizeDialog::PartitionMoveResizeDialog(StoragePartition *partition
     m_offset_edit->setValidator(m_offset_validator);
     m_offset_validator->setBottom(0);
 
+    m_align64_check = new QCheckBox("Align to 64 KiB");
+    offset_group_layout->addWidget(m_align64_check, 3, 0, 1, 2, Qt::AlignHCenter );
+
     offset_group_layout->addWidget(m_offset_edit,0,0);
     offset_group_layout->addWidget(m_preceding_combo,0,1);
     offset_group_layout->addWidget(m_offset_spin,1,0);
-
-    const long long max_size = 1 + m_max_part_end - m_max_part_start;
-
-    QString total_bytes = sizeToString( max_size * m_ped_sector_size );
-    QLabel *preceding_label = new QLabel( i18n("Maximum size: %1",  total_bytes) );
-    offset_group_layout->addWidget( preceding_label, 4, 0, 1, 2, Qt::AlignHCenter );
-
-    QString remaining_bytes = sizeToString( (max_size - m_new_part_size) * m_ped_sector_size );
-
-    m_unexcluded_label = new QLabel( i18n("Remaining space: %1", remaining_bytes ));
-    offset_group_layout->addWidget( m_unexcluded_label, 5, 0, 1, 2, Qt::AlignHCenter );
-
-    QLabel *min_size_label = new QLabel( QString("Minimum size: %1").arg( sizeToString( m_min_shrink_size * m_ped_sector_size )));
-    layout->addWidget(min_size_label);
 
     m_size_spin->setValue( 100 * ( (long double)m_old_part_size )/ max_size ); 
 
@@ -299,13 +300,6 @@ void PartitionMoveResizeDialog::validateVolumeSize(QString size){
         m_new_part_size = 0;
     }
 
-
-    /*
-    if( m_new_part_size > ( 1 + m_max_part_end - m_new_part_start ) )
-        m_new_part_size = 1 + m_max_part_end - m_new_part_start;
-    */
-
-
     long long preceding_sectors = m_new_part_start - m_max_part_start;
     PedSector following_sectors = m_max_part_end - ( m_new_part_start + m_new_part_size );
 
@@ -343,16 +337,12 @@ long long PartitionMoveResizeDialog::convertSizeToSectors(int index, double size
 
 void PartitionMoveResizeDialog::resetOkButton(){
 
-    long long max_sectors = 1 + m_max_part_end - m_max_part_start;
+    long long max_sectors = 1 + m_max_part_end - m_new_part_start;
 
     if( (m_new_part_size <= max_sectors) && (m_new_part_size > 0) )
         enableButtonOk(true);
     else
         enableButtonOk(false);
-
-/*  ******  FIX ME  *******  */
-
-        enableButtonOk(true);
 }
 
 void PartitionMoveResizeDialog::adjustOffsetEdit(int percentage){
@@ -384,6 +374,7 @@ void PartitionMoveResizeDialog::adjustOffsetEdit(int percentage){
             m_new_part_start = max_start;
     }
 
+    setSizeSpinTop();
     setSizeLabels();
     adjustOffsetCombo( m_preceding_combo->currentIndex() );
     resetDisplayGraphic();
@@ -451,7 +442,6 @@ void PartitionMoveResizeDialog::validatePrecedingSize(QString size){
 /* if the offset group is unchecked then reset to original value */
 
 void PartitionMoveResizeDialog::resetOffsetGroup(bool on){
-
 
     const long long max_size = 1 + m_max_part_end - m_max_part_start; 
 
@@ -554,10 +544,10 @@ bool PartitionMoveResizeDialog::growfs(){
     ProcessProgress fs_grow(arguments, i18n("Growing filesystem..."), true );
     output = fs_grow.programOutput();
 
-
-    /* FIX ME  + ERROR OUT */
-
-    return true;
+    if ( fs_grow.exitCode() )
+        return false;
+    else
+        return true;
 }
 
 bool PartitionMoveResizeDialog::movefs(long long from_start, 
@@ -608,6 +598,8 @@ bool PartitionMoveResizeDialog::movefs(long long from_start,
     ped_device_sync( device );
     ped_device_close( device );
 
+    // ADD ERROR MESSAGE
+
     return true;
 }
 
@@ -619,8 +611,6 @@ bool PartitionMoveResizeDialog::shrinkPartition(){
     PedAlignment     *end_alignment   = ped_alignment_new(0, 1);
     int error;
     PedSector new_size;
-
-    //    PedAlignment *ped_start_alignment = ped_alignment_new(0, 64);
 
     if( m_new_part_size < m_min_shrink_size)
         new_size = m_min_shrink_size;
@@ -682,11 +672,11 @@ bool PartitionMoveResizeDialog::shrinkPartition(){
         error = ped_disk_commit(m_ped_disk);
 
         if( ! error )  
-            KMessageBox::error( 0, "Commiting of partition failed");
+            KMessageBox::error( 0, "Could not commit partition");
         return false;
     }
     if( ! error ){  
-        KMessageBox::error( 0, "Creation of partition failed");
+        KMessageBox::error( 0, "Could not creation partition");
         return false;
     }
 
@@ -694,7 +684,6 @@ bool PartitionMoveResizeDialog::shrinkPartition(){
 }
 
 bool PartitionMoveResizeDialog::growPartition(){
-
 
     PedPartitionType  type   = m_current_part->type;
     PedDevice        *device = m_ped_disk->dev;
@@ -752,17 +741,18 @@ bool PartitionMoveResizeDialog::growPartition(){
         error = ped_disk_commit(m_ped_disk);
 
         if( ! error )  
-            KMessageBox::error( 0, "Commiting of partition failed");
+            KMessageBox::error( 0, "Could not commit partition");
         return false;
     }
     if( ! error ){  
-        KMessageBox::error( 0, "Creation of partition failed");
+        KMessageBox::error( 0, "Could not create partition");
         return false;
     }
 
-    /* RETURN VALUE? */
-    growfs();
-    return true;
+    if( growfs() )
+        return true;
+    else
+        return false;
 }
 
 bool PartitionMoveResizeDialog::movePartition(){
@@ -937,10 +927,9 @@ void PartitionMoveResizeDialog::setSizeSpinTop(){
 void PartitionMoveResizeDialog::setSizeLabels(){
 
     const long long preceding_sectors = m_new_part_start - m_max_part_start;
-    const long long max_sectors       = 1 + m_max_part_end - m_max_part_start;
 
-    QString total_bytes = sizeToString(m_ped_sector_size * ( max_sectors - m_new_part_size ));
-    m_unexcluded_label->setText( i18n("Available space: %1", total_bytes) );
+    QString part_size = sizeToString(m_ped_sector_size * m_new_part_size);
+    m_size_label->setText( i18n("Partition size: %1", part_size) );
 
     QString preceding_bytes_string = sizeToString(preceding_sectors * m_ped_sector_size);
     m_preceding_label->setText( i18n("Preceding space: %1", preceding_bytes_string) );
