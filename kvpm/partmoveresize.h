@@ -44,6 +44,8 @@ Q_OBJECT
     PedDisk          *m_ped_disk;
     PedPartition     *m_current_part; // The partition on the disk now
 
+    int m_cylinder_sectors;          // sectors per cylinder
+
     PedSector m_min_shrink_size;     // Minimum size of the fs after shrinking
     long long m_ped_sector_size;     // bytes per logical sector
     long long m_new_part_size;       // proposed size of partition

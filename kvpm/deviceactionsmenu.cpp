@@ -190,6 +190,13 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
 	    m_vgcreate_action->setEnabled(false);
 	    m_vgextend_menu->setEnabled(false);
 	    m_vgreduce_action->setEnabled(false);
+
+            /* This needs to be checked on */
+	    if( item->dataAlternate(1) == "busy" )
+	        m_tablecreate_action->setEnabled(false);
+	    else
+	        m_tablecreate_action->setEnabled(true);
+
 	}
 	else if( (item->data(4) == "physical volume") && (item->data(5) == "" ) ){
 	    m_pvcreate_action->setEnabled(false);

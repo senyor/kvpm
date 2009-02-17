@@ -28,14 +28,15 @@ StoragePartition::StoragePartition(PedPartition *part,
     m_ped_partition (part)
 
 {
+
     long long sector_size;
     m_is_pv = false;
     m_pv = NULL;
 
-    PedDisk   *ped_disk   = part->disk;
+    PedDisk   *ped_disk   = m_ped_partition->disk;
     PedDevice *ped_device = ped_disk->dev;
-    PedGeometry ped_geometry    = part->geom;
-    PedPartitionType  part_type = part->type;
+    PedGeometry ped_geometry    = m_ped_partition->geom;
+    PedPartitionType  part_type = m_ped_partition->type;
 
     sector_size      = ped_device->sector_size;
     m_first_sector   = (ped_geometry).start;
@@ -80,7 +81,7 @@ StoragePartition::StoragePartition(PedPartition *part,
 
     if( ! m_partition_type.contains("freespace", Qt::CaseInsensitive) ){
         while( ped_flag != 0  ){
-	    if( ped_partition_get_flag(part, ped_flag) )
+	    if( ped_partition_get_flag(m_ped_partition, ped_flag) )
 	        m_flags << ped_partition_flag_get_name(ped_flag);
 	
 	    ped_flag = ped_partition_flag_next( ped_flag );
