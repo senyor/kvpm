@@ -25,8 +25,6 @@ void PartAddGraphic::paintEvent(QPaintEvent *){
      long double total_sectors;
 
      total_sectors =  m_preceding_sectors + m_following_sectors + m_partition_sectors;
-     qDebug("total:   %Lf", total_sectors);
-     qDebug();
 
      offset = 0;
      length = (m_preceding_sectors / total_sectors) * 199;
