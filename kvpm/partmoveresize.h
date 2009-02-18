@@ -51,9 +51,6 @@ Q_OBJECT
     long long m_new_part_size;       // proposed size of partition
     long long m_new_part_start;      // start of new partition in sectors
 
-    long long m_old_part_size;       // original size of partition
-    long long m_old_part_start;      // start of original partition in sectors
-
     long long m_max_part_start;      // start of biggest possible partition
     long long m_max_part_end;        // end of largest possible partition
 
@@ -69,7 +66,7 @@ Q_OBJECT
                      *m_offset_validator;
 
     KComboBox *m_size_combo,
-              *m_preceding_combo;
+              *m_offset_combo;
 
     QGroupBox *m_size_group,
               *m_offset_group;
@@ -105,7 +102,7 @@ private slots:
     void validateVolumeSize(QString size);
     void adjustOffsetEdit(int percentage);
     void adjustOffsetCombo(int index);
-    void validatePrecedingSize(QString size);
+    void validateOffsetSize(QString size);
     void commitPartition();
     void resetOffsetGroup(bool on);
     void resetSizeGroup(bool on);
