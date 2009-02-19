@@ -608,12 +608,12 @@ long long PartitionMoveResizeDialog::shrinkfs(PedSector length){
     return m_current_part->geom.length;
 }
 
-bool PartitionMoveResizeDialog::growfs(){
+bool PartitionMoveResizeDialog::growfs(QString path){
 
     QStringList arguments, output;
 
     arguments << "resize2fs" 
-              << m_old_storage_part->getPartitionPath(); 
+              << path; 
 
     ProcessProgress fs_grow(arguments, i18n("Growing filesystem..."), true );
     output = fs_grow.programOutput();
@@ -746,14 +746,14 @@ bool PartitionMoveResizeDialog::shrinkPartition(){
         success = ped_disk_commit(m_ped_disk);
 
         if( ! success ){  
-            KMessageBox::error( 0, "Could not commit partition");
+            KMessageBox::error( 0, "Could not commit moved partition");
             return false;
         }
         else
             return true;
     }
     else {
-        KMessageBox::error( 0, "Could not create partition");
+        KMessageBox::error( 0, "Could not create moved partition");
         return false;
     }
 
@@ -765,42 +765,35 @@ bool PartitionMoveResizeDialog::growPartition(){
     PedDevice        *device = m_ped_disk->dev;
     int success;
 
-    PedSector min_size;
-    PedSector max_size;
+    PedSector min_new_size, 
+              max_new_size;  // max desired size
 
-    if( m_new_part_size <= m_current_part->geom.length )
-        min_size = m_current_part->geom.length;
+    PedSector current_start = m_current_part->geom.start;
+    PedSector current_size  = m_current_part->geom.length;
+    PedSector max_part_size = 1 + m_max_part_end - current_start; // max possible size
+
+    if( m_new_part_size <= ( current_size + 128 ) )
+        return false;
+    else if( m_new_part_size >= max_part_size )
+        min_new_size = max_part_size - 128;
     else
-        min_size = m_new_part_size;
+        min_new_size = m_new_part_size - 128;
 
-    max_size = min_size + 128;
+    max_new_size = min_new_size + 128;
 
-    PedGeometry *start_range = ped_geometry_new(device, m_current_part->geom.start, 1);
-    PedGeometry *end_range   = ped_geometry_new(device, m_current_part->geom.start + min_size, 128);
+    PedGeometry *start_range = ped_geometry_new(device, current_start, 1);
+    PedGeometry *end_range   = ped_geometry_new(device, current_start + min_new_size - 1, 127);
 
-    PedConstraint *min_constraint = ped_constraint_new( ped_alignment_new(0, 1),
-                                                        ped_alignment_new(0, 1),      
-                                                        start_range,
-                                                        end_range,
-                                                        min_size,
-                                                        max_size);
+    PedConstraint *constraint = ped_constraint_new( ped_alignment_new(0, 1),
+                                                    ped_alignment_new(0, 1),      
+                                                    start_range,
+                                                    end_range,
+                                                    min_new_size,
+                                                    max_new_size);
 
-    // This constraint assures we don't go past the edges of any
-    // adjoining partitions or the partition table itself
-
-    PedSector max_part_length = m_max_part_end - m_max_part_start + 1;
-
-    PedGeometry *max_start_range = ped_geometry_new( device, m_max_part_start, max_part_length ); 
-    PedGeometry *max_end_range   = ped_geometry_new( device, m_max_part_start, max_part_length );
-
-    PedConstraint *max_constraint = ped_constraint_new( ped_alignment_new(0, 1),
-                                                        ped_alignment_new(0, 1),
-                                                        max_start_range,
-                                                        max_end_range,
-                                                        1,
-                                                        max_part_length);
-
-    PedConstraint *constraint = ped_constraint_intersect(max_constraint, min_constraint);
+    /* if constraint solves to NULL then the new part will fail, so just bail out */
+    if( ped_constraint_solve_max( constraint ) == NULL )
+        return false;
 
     QString old_path = ped_partition_get_path(m_current_part);
 
@@ -827,12 +820,12 @@ bool PartitionMoveResizeDialog::growPartition(){
                                       constraint);
 
     if( ! success ){  
-        KMessageBox::error( 0, "Could not create partition");
+        KMessageBox::error( 0, "Could not create grown partition");
         return false;
     }
     else {
         if( ! ped_disk_commit(m_ped_disk) ){  
-            KMessageBox::error( 0, "Could not commit partition");
+            KMessageBox::error( 0, "Could not commit grown partition");
             return false;
         }
         else{
@@ -842,7 +835,7 @@ bool PartitionMoveResizeDialog::growPartition(){
             
             waitPartitionTableReload( ped_partition_get_path(m_current_part), true  );
             
-            if( growfs() )
+            if( growfs( ped_partition_get_path(m_current_part) ) )
                 return true;
             else
                 return false;
