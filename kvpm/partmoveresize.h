@@ -85,7 +85,7 @@ Q_OBJECT
     long long shrinkfs(PedSector length);
     long long getMinShrinkSize();
     long long getFsBlockSize();
-    bool growfs();
+    bool growfs(QString path);
     bool movefs(long long from_start, long long to_start, long long length);
     bool shrinkPartition();
     bool growPartition();
