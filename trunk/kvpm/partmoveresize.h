@@ -44,8 +44,6 @@ Q_OBJECT
     PedDisk          *m_ped_disk;
     PedPartition     *m_current_part; // The partition on the disk now
 
-    int m_cylinder_sectors;          // sectors per cylinder
-
     PedSector m_min_shrink_size;     // Minimum size of the fs after shrinking
     long long m_ped_sector_size;     // bytes per logical sector
     long long m_new_part_size;       // proposed size of partition
@@ -85,6 +83,7 @@ Q_OBJECT
     long long shrinkfs(PedSector length);
     long long getMinShrinkSize();
     long long getFsBlockSize();
+    bool fsck(QString path);
     bool growfs(QString path);
     bool movefs(long long from_start, long long to_start, long long length);
     bool shrinkPartition();
@@ -107,6 +106,7 @@ private slots:
     void commitPartition();
     void resetOffsetGroup(bool on);
     void resetSizeGroup(bool on);
+    void resetPartition();
     void setOffsetSpinMinMax();
     void setSizeSpinMinMax();
     void minimizePartition(bool);

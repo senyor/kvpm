@@ -30,6 +30,7 @@
 ExecutableFinder::ExecutableFinder(QObject *parent) : QObject(parent)
 {
     m_keys << "dumpe2fs"
+           << "fsck"
            << "lvchange"
 	   << "lvconvert" 
 	   << "lvcreate"
