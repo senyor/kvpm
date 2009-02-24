@@ -24,6 +24,8 @@
 #include <KLocale>
 #include <KMessageBox>
 #include <KProgressDialog>
+#include <KPushButton>
+#include <KButtonGroup>
 
 #include <QtGui>
 #include <QThread>
@@ -138,6 +140,21 @@ PartitionMoveResizeDialog::PartitionMoveResizeDialog(StoragePartition *partition
     QLabel *preceding_label = new QLabel( i18n("Maximum size: %1",  total_bytes) );
     size_group_layout->addWidget( preceding_label, 6, 0, 1, 2);
 
+
+
+
+
+    KButtonGroup *size_arrow_group = new KButtonGroup;
+    QHBoxLayout *size_arrow_layout = new QHBoxLayout;
+    size_group_layout->addWidget( size_arrow_group, 7, 0, 1, 2, Qt::AlignCenter );
+
+    size_arrow_group->setLayout( size_arrow_layout );
+    KPushButton *size_min_arrow = new KPushButton(KIcon("go-first-view"), "Minimize");
+    KPushButton *size_max_arrow = new KPushButton(KIcon("go-last-view"),  "Maximize");
+    size_arrow_layout->addWidget( size_min_arrow );
+    size_arrow_layout->addWidget( size_max_arrow );
+
+
     m_offset_group = new QGroupBox("Move partition start");
     QGridLayout *offset_group_layout = new QGridLayout();
     m_offset_group->setCheckable(true);
@@ -164,10 +181,23 @@ PartitionMoveResizeDialog::PartitionMoveResizeDialog(StoragePartition *partition
 
     m_align64_check = new QCheckBox("Align to 64 KiB");
     m_align64_check->setChecked(true);
-    offset_group_layout->addWidget(m_align64_check, 3, 0, 1, 2, Qt::AlignHCenter );
+    offset_group_layout->addWidget(m_align64_check, 3, 0);//,  1, 2, Qt::AlignHCenter );
     offset_group_layout->addWidget(m_offset_edit,0,0);
     offset_group_layout->addWidget(m_offset_combo,0,1);
     offset_group_layout->addWidget(m_offset_spin,1,0);
+
+
+
+    KButtonGroup *offset_arrow_group = new KButtonGroup;
+    QHBoxLayout *offset_arrow_layout = new QHBoxLayout;
+    offset_group_layout->addWidget( offset_arrow_group, 4, 0, 1, 2, Qt::AlignCenter );
+
+    offset_arrow_group->setLayout( offset_arrow_layout );
+    KPushButton *offset_min_arrow = new KPushButton(KIcon("go-first-view"), "Left");
+    KPushButton *offset_max_arrow = new KPushButton(KIcon("go-last-view"),  "Right");
+    offset_arrow_layout->addWidget( offset_min_arrow );
+    offset_arrow_layout->addWidget( offset_max_arrow );
+
 
     m_size_spin->setValue( 100 * ( (long double)m_current_part->geom.length )/ max_size ); 
 
@@ -195,7 +225,7 @@ PartitionMoveResizeDialog::PartitionMoveResizeDialog(StoragePartition *partition
 	    this, SLOT(resetSizeGroup(bool)));
 
     connect(m_size_group, SIGNAL(toggled(bool)),
-	    this, SLOT(setOffsetSpinTop()));
+	    this, SLOT(setOffsetSpinMinMax()));
 
     connect(m_offset_group, SIGNAL(toggled(bool)),
 	    this, SLOT(resetOffsetGroup(bool)));
@@ -203,13 +233,25 @@ PartitionMoveResizeDialog::PartitionMoveResizeDialog(StoragePartition *partition
     connect(this, SIGNAL(okClicked()),
 	    this, SLOT(commitPartition()));
 
+    connect(size_min_arrow, SIGNAL(clicked(bool)),
+	    this, SLOT(minimizePartition(bool)));
+
+    connect(size_max_arrow, SIGNAL(clicked(bool)),
+	    this, SLOT(maximizePartition(bool)));
+
+    connect(offset_min_arrow, SIGNAL(clicked(bool)),
+	    this, SLOT(minimizeOffset(bool)));
+
+    connect(offset_max_arrow, SIGNAL(clicked(bool)),
+	    this, SLOT(maximizeOffset(bool)));
+
 
     adjustSizeCombo( m_size_combo->currentIndex() );
     adjustOffsetCombo( m_offset_combo->currentIndex() );
     resetDisplayGraphic();
     resetOffsetGroup(false);
     resetSizeGroup(false);
-    setOffsetSpinTop();
+    setOffsetSpinMinMax();
     setSizeLabels();
 }
 
@@ -258,14 +300,14 @@ void PartitionMoveResizeDialog::adjustSizeEdit(int percentage){
     const PedSector max_sectors  = 1 + m_max_part_end - m_max_part_start;
     const PedSector current_size = m_current_part->geom.length;
 
-    setSizeSpinTop();
+    setSizeSpinMinMax();
 
     if( m_size_group->isChecked() ){
 
         if( percentage >= m_size_spin->maximum() )
             m_new_part_size = m_max_part_end - m_new_part_start;
-        else if(percentage == 0)
-            m_new_part_size = 0;
+        else if( ( percentage <= m_size_spin->minimum() ) || ( percentage <= 0 ) )
+            m_new_part_size = m_min_shrink_size;
         else
             m_new_part_size = (long long)(( (double) percentage / 100) * ( max_sectors ));
     }
@@ -404,7 +446,7 @@ void PartitionMoveResizeDialog::adjustOffsetEdit(int percentage){
             m_new_part_start = max_start;
     }
 
-    setSizeSpinTop();
+    setSizeSpinMinMax();
     setSizeLabels();
     adjustOffsetCombo( m_offset_combo->currentIndex() );
     resetDisplayGraphic();
@@ -841,32 +883,35 @@ long long PartitionMoveResizeDialog::getFsBlockSize(){
     return block_string.toLongLong();
 }
 
-void PartitionMoveResizeDialog::setOffsetSpinTop(){
+void PartitionMoveResizeDialog::setOffsetSpinMinMax(){
 
-    const long long max_sectors = 1 + m_max_part_end - m_max_part_start;
-    int top;
+    const PedSector max_sectors = 1 + m_max_part_end - m_max_part_start;
+    int max;
 
     if( ! m_size_group->isChecked() )
-        top = qRound( (1.0 - ( (double)m_current_part->geom.length / max_sectors ) ) * 100);
+        max = qRound( (1.0 - ( (double)m_current_part->geom.length / max_sectors ) ) * 100);
     else
-        top = qRound( (1.0 - ( (double)m_min_shrink_size / max_sectors ) ) * 100);
+        max = qRound( (1.0 - ( (double)m_min_shrink_size / max_sectors ) ) * 100);
 
-    m_offset_spin->setMaximum(top);
+    m_offset_spin->setMaximum( max );
+    m_offset_spin->setMinimum(0);
 }
 
-void PartitionMoveResizeDialog::setSizeSpinTop(){
+void PartitionMoveResizeDialog::setSizeSpinMinMax(){
 
-    const long long preceding_sectors = m_new_part_start - m_max_part_start;
-    const long long max_sectors       = 1 + m_max_part_end - m_max_part_start;
+    const PedSector preceding_sectors = m_new_part_start - m_max_part_start;
+    const PedSector max_sectors       = 1 + m_max_part_end - m_max_part_start;
 
-    const int top = qRound( (1.0 - ( (double)preceding_sectors / max_sectors ) )  * 100);
+    const int max = qRound( (1.0 - ( (double)preceding_sectors / max_sectors ) )  * 100);
+    const int min = qRound( ( (double)m_min_shrink_size / max_sectors ) * 100);
 
-    m_size_spin->setMaximum( top );
+    m_size_spin->setMaximum( max );
+    m_size_spin->setMinimum( min );
 }
 
 void PartitionMoveResizeDialog::setSizeLabels(){
 
-    const long long preceding_sectors = m_new_part_start - m_max_part_start;
+    const PedSector preceding_sectors = m_new_part_start - m_max_part_start;
 
     QString part_size = sizeToString(m_ped_sector_size * m_new_part_size);
     m_size_label->setText( i18n("Partition size: %1", part_size) );
@@ -875,7 +920,7 @@ void PartitionMoveResizeDialog::setSizeLabels(){
     m_preceding_label->setText( i18n("Preceding space: %1", preceding_bytes_string) );
 
     PedSector following_sectors = m_max_part_end - ( m_new_part_start + m_new_part_size );
-    long long following_space   = following_sectors * m_ped_sector_size;
+    PedSector following_space   = following_sectors * m_ped_sector_size;
 
     if(following_space < 0)
         following_space = 0;
@@ -992,3 +1037,26 @@ bool PartitionMoveResizeDialog::waitPartitionTableReload(char *partitionPath, Pe
 }
 
 
+void PartitionMoveResizeDialog::minimizePartition(bool){
+
+    m_size_spin->setValue( m_size_spin->minimum() );
+
+}
+
+void PartitionMoveResizeDialog::maximizePartition(bool){
+
+    m_size_spin->setValue( m_size_spin->maximum() );
+
+}
+
+void PartitionMoveResizeDialog::minimizeOffset(bool){
+
+    m_offset_spin->setValue( m_offset_spin->minimum() );
+
+}
+
+void PartitionMoveResizeDialog::maximizeOffset(bool){
+
+    m_offset_spin->setValue( m_offset_spin->maximum() );
+
+}
