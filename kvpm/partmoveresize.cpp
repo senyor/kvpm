@@ -65,6 +65,9 @@ PartitionMoveResizeDialog::PartitionMoveResizeDialog(StoragePartition *partition
 {
     setup();
 
+    const PedSector max_size = 1 + m_max_part_end - m_max_part_start;
+
+    setButtons( KDialog::Ok | KDialog::Cancel | KDialog::Reset );
     setWindowTitle( i18n("Move or resize a partition") );
 
     QWidget *dialog_body = new QWidget(this);
@@ -93,8 +96,12 @@ PartitionMoveResizeDialog::PartitionMoveResizeDialog(StoragePartition *partition
     m_size_label      = new QLabel();
     m_remaining_label = new QLabel();
     info_group_layout->addWidget( m_preceding_label );
-    info_group_layout->addWidget( m_size_label );
     info_group_layout->addWidget( m_remaining_label );
+    info_group_layout->addWidget( m_size_label );
+
+    info_group_layout->addWidget( new QLabel( i18n("Minimum size: %1", sizeToString( m_min_shrink_size * m_ped_sector_size ))));
+
+    info_group_layout->addWidget( new QLabel( i18n("Maximum size: %1", sizeToString( max_size * m_ped_sector_size ) ))); 
 
     QString filesystem = partition->getFileSystem();
     m_size_group = new QGroupBox( i18n("Modify partition size") );
@@ -131,19 +138,6 @@ PartitionMoveResizeDialog::PartitionMoveResizeDialog(StoragePartition *partition
     size_group_layout->addWidget(m_size_combo,0,1);
     size_group_layout->addWidget(m_size_spin,1,0);
 
-    QLabel *min_size_label = new QLabel( QString("Minimum size: %1").arg( sizeToString( m_min_shrink_size * m_ped_sector_size )));
-    size_group_layout->addWidget( min_size_label, 5, 0, 1, 2 );
-
-    const long long max_size = 1 + m_max_part_end - m_max_part_start;
-
-    QString total_bytes = sizeToString( max_size * m_ped_sector_size );
-    QLabel *preceding_label = new QLabel( i18n("Maximum size: %1",  total_bytes) );
-    size_group_layout->addWidget( preceding_label, 6, 0, 1, 2);
-
-
-
-
-
     KButtonGroup *size_arrow_group = new KButtonGroup;
     QHBoxLayout *size_arrow_layout = new QHBoxLayout;
     size_group_layout->addWidget( size_arrow_group, 7, 0, 1, 2, Qt::AlignCenter );
@@ -153,7 +147,6 @@ PartitionMoveResizeDialog::PartitionMoveResizeDialog(StoragePartition *partition
     KPushButton *size_max_arrow = new KPushButton(KIcon("go-last-view"),  "Maximize");
     size_arrow_layout->addWidget( size_min_arrow );
     size_arrow_layout->addWidget( size_max_arrow );
-
 
     m_offset_group = new QGroupBox("Move partition start");
     QGridLayout *offset_group_layout = new QGridLayout();
@@ -186,21 +179,16 @@ PartitionMoveResizeDialog::PartitionMoveResizeDialog(StoragePartition *partition
     offset_group_layout->addWidget(m_offset_combo,0,1);
     offset_group_layout->addWidget(m_offset_spin,1,0);
 
-
-
     KButtonGroup *offset_arrow_group = new KButtonGroup;
     QHBoxLayout *offset_arrow_layout = new QHBoxLayout;
     offset_group_layout->addWidget( offset_arrow_group, 4, 0, 1, 2, Qt::AlignCenter );
-
     offset_arrow_group->setLayout( offset_arrow_layout );
     KPushButton *offset_min_arrow = new KPushButton(KIcon("go-first-view"), "Left");
     KPushButton *offset_max_arrow = new KPushButton(KIcon("go-last-view"),  "Right");
     offset_arrow_layout->addWidget( offset_min_arrow );
     offset_arrow_layout->addWidget( offset_max_arrow );
 
-
     m_size_spin->setValue( 100 * ( (long double)m_current_part->geom.length )/ max_size ); 
-
     m_offset_spin->setValue( 100 * (( (long double)m_current_part->geom.length - m_max_part_start ) / max_size) );
 
     connect(m_size_combo, SIGNAL(currentIndexChanged(int)),
@@ -233,6 +221,9 @@ PartitionMoveResizeDialog::PartitionMoveResizeDialog(StoragePartition *partition
     connect(this, SIGNAL(okClicked()),
 	    this, SLOT(commitPartition()));
 
+    connect(this, SIGNAL(resetClicked()),
+	    this, SLOT(resetPartition()));
+
     connect(size_min_arrow, SIGNAL(clicked(bool)),
 	    this, SLOT(minimizePartition(bool)));
 
@@ -244,7 +235,6 @@ PartitionMoveResizeDialog::PartitionMoveResizeDialog(StoragePartition *partition
 
     connect(offset_max_arrow, SIGNAL(clicked(bool)),
 	    this, SLOT(maximizeOffset(bool)));
-
 
     adjustSizeCombo( m_size_combo->currentIndex() );
     adjustOffsetCombo( m_offset_combo->currentIndex() );
@@ -280,20 +270,24 @@ void PartitionMoveResizeDialog::commitPartition()
         }
     }
 
-    if(grow){
-        if(move)
-            movePartition();
+    if( grow && move ){
+        if( movePartition() )
+            growPartition();
+    }
+    else if( grow ){
         growPartition();
     }
-    else if(shrink){
-        shrinkPartition();
-        if(move)
+    else if( shrink && move ){
+        if( shrinkPartition() )
             movePartition();
     }
-    else if(move)
-            movePartition();
+    else if( shrink ){
+        shrinkPartition();
+    }
+    else if( move ){
+        movePartition();
+    }
 }
-
 
 void PartitionMoveResizeDialog::adjustSizeEdit(int percentage){
 
@@ -536,6 +530,13 @@ void PartitionMoveResizeDialog::resetSizeGroup(bool on){
    }
 }
 
+void PartitionMoveResizeDialog::resetPartition(){
+
+    resetOffsetGroup(false);
+    resetSizeGroup(false);
+
+}
+
 void PartitionMoveResizeDialog::setup(){
 
     m_current_part = m_old_storage_part->getPedPartition();
@@ -560,8 +561,6 @@ void PartitionMoveResizeDialog::setup(){
     m_max_part_end    = ped_max_geometry->end;
     m_ped_sector_size = ped_device->sector_size;
 
-    m_cylinder_sectors = (ped_device->hw_geom).heads * (ped_device->hw_geom).sectors;
-
     if( m_current_part->type & PED_PARTITION_LOGICAL )
         m_logical = true;
     else
@@ -577,11 +576,14 @@ long long PartitionMoveResizeDialog::shrinkfs(PedSector length){
                 temp_stringlist;
 
     QString size_string;
+    QString path = ped_partition_get_path(m_current_part);
+
+    fsck( path );
 
     long long block_size = getFsBlockSize();
 
     arguments << "resize2fs" 
-              << m_old_storage_part->getPartitionPath() 
+              << path
               << QString("%1s").arg(length);
 
     ProcessProgress fs_shrink(arguments, i18n("Shrinking filesystem..."), true );
@@ -605,6 +607,8 @@ bool PartitionMoveResizeDialog::growfs(QString path){
 
     QStringList arguments, output;
 
+    fsck( path );
+
     arguments << "resize2fs" 
               << path; 
 
@@ -627,7 +631,6 @@ bool PartitionMoveResizeDialog::movefs(long long from_start,
 
     char *buff = static_cast<char *>( malloc( blocksize * m_ped_sector_size ) ) ;
 
-    int error;
     long long blockcount = length / blocksize;
     long long extra = length % blocksize;
 
@@ -643,29 +646,49 @@ bool PartitionMoveResizeDialog::movefs(long long from_start,
 
     if( to_start < from_start ){                       // moving left
         for( long long x = 0; x < blockcount  ; x++){
-            error = ped_device_read( device, buff, from_start + (x * blocksize), blocksize);
-            ped_device_write(device, buff, to_start   + (x * blocksize), blocksize);
+            if( ! ped_device_read( device, buff, from_start + (x * blocksize), blocksize) ){
+                KMessageBox::error( 0, "Move failed: could not read from device");
+                return false;
+            }
+            if( ! ped_device_write(device, buff, to_start   + (x * blocksize), blocksize) ){
+                KMessageBox::error( 0, "Move failed: could not write to device");
+                return false;
+            }
             progress_bar->setValue( x );
         }
-        ped_device_read(device,  buff, from_start + (blockcount * blocksize), extra);
-        ped_device_write(device, buff, to_start   + (blockcount * blocksize), extra);
+        if( ! ped_device_read(device,  buff, from_start + (blockcount * blocksize), extra) ){
+            KMessageBox::error( 0, "Move failed: could not read from device");
+            return false;
+        }
+        if( ! ped_device_write(device, buff, to_start   + (blockcount * blocksize), extra) ){
+            KMessageBox::error( 0, "Move failed: could not write to device");
+            return false;
+        }
     }
     else{                                              // moving right
-
-        ped_device_read(device,  buff, from_start + (blockcount * blocksize), extra);
-        ped_device_write(device, buff, to_start   + (blockcount * blocksize), extra);
-
+        if( ! ped_device_read(device,  buff, from_start + (blockcount * blocksize), extra) ){
+            KMessageBox::error( 0, "Move failed: could not read from device");
+            return false;
+        }
+        if( ! ped_device_write(device, buff, to_start   + (blockcount * blocksize), extra) ){
+            KMessageBox::error( 0, "Move failed: could not write to device");
+            return false;
+        }
         for( long long x = blockcount - 1; x >= 0 ; x--){
-            ped_device_read( device, buff, from_start + (x * blocksize), blocksize);
-            ped_device_write(device, buff, to_start   + (x * blocksize), blocksize);
+            if( ! ped_device_read( device, buff, from_start + (x * blocksize), blocksize) ){
+                KMessageBox::error( 0, "Move failed: could not read from device");
+                return false;
+            }
+            if( ! ped_device_write(device, buff, to_start   + (x * blocksize), blocksize) ){
+                KMessageBox::error( 0, "Move failed: could not write to device");
+                return false;
+            }
             progress_bar->setValue( blockcount - x );
         }
     }
 
     ped_device_sync( device );
     ped_device_close( device );
-
-    // ADD ERROR MESSAGE
 
     return true;
 }
@@ -994,7 +1017,6 @@ bool PartitionMoveResizeDialog::movePartition(){
     }
     else {
         if( ! movefs( old_start, current_start, old_size) ){
-            KMessageBox::error( 0, "Filesystem move failed");
             return false;
         }
         else{
@@ -1060,3 +1082,19 @@ void PartitionMoveResizeDialog::maximizeOffset(bool){
     m_offset_spin->setValue( m_offset_spin->maximum() );
 
 }
+
+bool PartitionMoveResizeDialog::fsck(QString path){
+
+    QStringList arguments, output;
+
+    arguments << "fsck" << "-fp" << path; 
+
+    ProcessProgress fsck(arguments, i18n("Checking filesystem..."), true );
+    output = fsck.programOutput();
+
+    if ( fsck.exitCode() )
+        return false;
+    else
+        return true;
+}
+
