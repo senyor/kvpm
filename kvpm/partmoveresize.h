@@ -107,8 +107,13 @@ private slots:
     void commitPartition();
     void resetOffsetGroup(bool on);
     void resetSizeGroup(bool on);
-    void setOffsetSpinTop();
-    void setSizeSpinTop();
+    void setOffsetSpinMinMax();
+    void setSizeSpinMinMax();
+    void minimizePartition(bool);
+    void maximizePartition(bool);
+    void minimizeOffset(bool);
+    void maximizeOffset(bool);
+
 };
 
 #endif
