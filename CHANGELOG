@@ -1,3 +1,7 @@
+version 0.6.0
+Partitions can now be moved and resized for ext2 and ext3
+filesystems. The "fsck" program is now required too.
+
 version 0.5.5
 The kvpm "settings" dialog can set the column hidden/show for
 both of the tree views and save it in the config file.

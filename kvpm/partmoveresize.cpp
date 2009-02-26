@@ -341,6 +341,8 @@ void PartitionMoveResizeDialog::adjustSizeCombo(int index){
 
     m_offset_validator->setTop( (double)valid_topd );
 
+    setOffsetSpinMinMax();
+    setSizeSpinMinMax();
     setSizeLabels();
     resetDisplayGraphic();
     resetOkButton();
@@ -420,7 +422,7 @@ void PartitionMoveResizeDialog::adjustOffsetEdit(int percentage){
     if( m_size_group->isChecked() ){
 
         if(percentage >= m_offset_spin->maximum())
-            m_new_part_start = 1 + m_max_part_end - m_min_shrink_size;
+            m_new_part_start = 1 + m_max_part_end - m_new_part_size;
         else if(percentage == 0)
             m_new_part_start = m_max_part_start;
         else
@@ -581,10 +583,14 @@ long long PartitionMoveResizeDialog::shrinkfs(PedSector length){
     fsck( path );
 
     long long block_size = getFsBlockSize();
+    if( block_size <= 0 ){
+        KMessageBox::error( 0, "Shrink failed: could not determine filesystem block size");
+        return m_current_part->geom.length;
+    }
 
     arguments << "resize2fs" 
               << path
-              << QString("%1s").arg(length);
+              << QString("%1s").arg( length );
 
     ProcessProgress fs_shrink(arguments, i18n("Shrinking filesystem..."), true );
     output = fs_shrink.programOutput();
@@ -700,6 +706,11 @@ bool PartitionMoveResizeDialog::shrinkPartition(){
     PedAlignment *end_alignment   = ped_alignment_new(0, 1);
 
     PedSector new_size;
+
+    if( m_new_part_size >= m_current_part->geom.length ){
+        qDebug() << "shrinkPartition called with a *bigger* part size!";
+        return false;
+    }
 
     if( m_new_part_size < m_min_shrink_size)
         new_size = m_min_shrink_size;
@@ -888,7 +899,9 @@ long long PartitionMoveResizeDialog::getFsBlockSize(){
 
     QString block_string;
 
-    arguments << "dumpe2fs" << m_old_storage_part->getPartitionPath();
+    arguments << "dumpe2fs" 
+              << "-h" 
+              << m_old_storage_part->getPartitionPath();
 
     ProcessProgress blocksize_scan(arguments, i18n("Checking blocksize") );
     output = blocksize_scan.programOutput();
@@ -914,7 +927,8 @@ void PartitionMoveResizeDialog::setOffsetSpinMinMax(){
     if( ! m_size_group->isChecked() )
         max = qRound( (1.0 - ( (double)m_current_part->geom.length / max_sectors ) ) * 100);
     else
-        max = qRound( (1.0 - ( (double)m_min_shrink_size / max_sectors ) ) * 100);
+        max = qRound( (1.0 - ( (double)m_new_part_size / max_sectors ) ) * 100);
+    //        max = qRound( (1.0 - ( (double)m_min_shrink_size / max_sectors ) ) * 100);
 
     m_offset_spin->setMaximum( max );
     m_offset_spin->setMinimum(0);
@@ -1061,24 +1075,28 @@ bool PartitionMoveResizeDialog::waitPartitionTableReload(char *partitionPath, Pe
 
 void PartitionMoveResizeDialog::minimizePartition(bool){
 
+    m_size_spin->setValue( m_size_spin->maximum() );
     m_size_spin->setValue( m_size_spin->minimum() );
 
 }
 
 void PartitionMoveResizeDialog::maximizePartition(bool){
 
+    m_size_spin->setValue( m_size_spin->minimum() );
     m_size_spin->setValue( m_size_spin->maximum() );
 
 }
 
 void PartitionMoveResizeDialog::minimizeOffset(bool){
 
+    m_offset_spin->setValue( m_offset_spin->maximum() );
     m_offset_spin->setValue( m_offset_spin->minimum() );
 
 }
 
 void PartitionMoveResizeDialog::maximizeOffset(bool){
 
+    m_offset_spin->setValue( m_offset_spin->minimum() );
     m_offset_spin->setValue( m_offset_spin->maximum() );
 
 }

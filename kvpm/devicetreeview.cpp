@@ -48,26 +48,21 @@ DeviceTreeView::DeviceTreeView(QWidget *parent) : QTreeView(parent)
 
 void DeviceTreeView::popupContextMenu(QPoint point)
 {
-
     KMenu *context_menu;
 
     index = indexAt(point);
-    item = static_cast<StorageDeviceItem*> (index.internalPointer());
-
-    if( (item->dataAlternate(0)).canConvert<void *>() )
-        part = (StoragePartition *) (( item->dataAlternate(0)).value<void *>() );
 
     //item = 0 if there is no item a that point
 
+    item = static_cast<StorageDeviceItem*> (index.internalPointer());
+
     if(item){                          
+        if( (item->dataAlternate(0)).canConvert<void *>() )
+            part = (StoragePartition *) (( item->dataAlternate(0)).value<void *>() );
+        
         context_menu = new DeviceActionsMenu(item, this, this);
         context_menu->exec(QCursor::pos());
     }
-    else{
-        context_menu = new DeviceActionsMenu(NULL, this, this);
-        context_menu->exec(QCursor::pos());
-    }
-
 }
 
 void DeviceTreeView::mkfsPartition()

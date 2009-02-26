@@ -48,6 +48,7 @@ ProcessProgress::ProcessProgress(QStringList arguments,
 	if(m_show_progress){
 	    m_progress_dialog = new KProgressDialog(this, i18n("progress"), operation);
 	    m_progress_dialog->setAllowCancel(false);
+            m_progress_dialog->setMinimumDuration( 250 ); 
 	    progress_bar = m_progress_dialog->progressBar();
 	    progress_bar->setRange(0,0);
 	}
