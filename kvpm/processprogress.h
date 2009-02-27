@@ -41,6 +41,7 @@ Q_OBJECT
 		    QWidget *parent = 0);
 
     QStringList programOutput();
+    QStringList programOutputAll();
     int exitCode();
     
  public slots:   
