@@ -92,6 +92,11 @@ QStringList ProcessProgress::programOutput()
     return m_output_no_error;
 }
 
+QStringList ProcessProgress::programOutputAll()
+{
+    return m_output_all;
+}
+
 int ProcessProgress::exitCode()
 {
     return m_process->exitCode();

@@ -575,7 +575,8 @@ long long PartitionMoveResizeDialog::shrinkfs(PedSector length){
 
     QStringList arguments, 
                 output,
-                temp_stringlist;
+                success_stringlist,
+                nospace_stringlist;
 
     QString size_string;
     QString path = ped_partition_get_path(m_current_part);
@@ -593,20 +594,46 @@ long long PartitionMoveResizeDialog::shrinkfs(PedSector length){
               << QString("%1s").arg( length );
 
     ProcessProgress fs_shrink(arguments, i18n("Shrinking filesystem..."), true );
-    output = fs_shrink.programOutput();
-    temp_stringlist = output.filter("is now");
+    output = fs_shrink.programOutputAll();
 
-    if( temp_stringlist.size() > 0 ){
+    success_stringlist = output.filter("is now");
+    nospace_stringlist = output.filter("space left");
 
-        size_string = temp_stringlist[0];
+    if( success_stringlist.size() > 0 ){ // Try to shrink the desired amount
+
+        size_string = success_stringlist[0];
         size_string = size_string.remove( 0, size_string.indexOf("now") + 3 );
         size_string.truncate(  size_string.indexOf("blocks") );
         size_string = size_string.simplified();
         return (size_string.toLongLong() * block_size) / m_ped_sector_size;
 
     }
+    else if( nospace_stringlist.size() > 0 ){  // Couldn't shrink that much but try again with -M
+
+        arguments.clear();
+        success_stringlist.clear();
+
+        arguments << "resize2fs" 
+                  << "-M"
+                  << path;
+
+        ProcessProgress fs_shrink(arguments, i18n("Shrinking filesystem..."), true );
+        output = fs_shrink.programOutput();
+        success_stringlist = output.filter("is now");
+
+        if( success_stringlist.size() > 0 ){
+
+            size_string = success_stringlist[0];
+            size_string = size_string.remove( 0, size_string.indexOf("now") + 3 );
+            size_string.truncate(  size_string.indexOf("blocks") );
+            size_string = size_string.simplified();
+            return (size_string.toLongLong() * block_size) / m_ped_sector_size;
+        }
+    }
+    // Give up and do nothing
 
     return m_current_part->geom.length;
+
 }
 
 bool PartitionMoveResizeDialog::growfs(QString path){
