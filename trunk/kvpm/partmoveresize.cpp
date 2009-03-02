@@ -34,6 +34,8 @@
 #include "partaddgraphic.h"
 #include "processprogress.h"
 #include "sizetostring.h"
+#include "growfs.h"
+#include "shrinkfs.h"
 
 
 bool moveresize_partition(StoragePartition *partition)
@@ -568,90 +570,12 @@ void PartitionMoveResizeDialog::setup(){
     else
         m_logical = false;
 
-    m_min_shrink_size = getMinShrinkSize();
-}
+    m_min_shrink_size = get_min_fs_size(ped_partition_get_path(m_current_part), 
+                                        m_old_storage_part->getFileSystem()) / m_ped_sector_size;
 
-long long PartitionMoveResizeDialog::shrinkfs(PedSector length){
+    if( m_min_shrink_size == 0 )                 // 0 means we can't shrink it 
+        m_min_shrink_size = m_new_part_size;
 
-    QStringList arguments, 
-                output,
-                success_stringlist,
-                nospace_stringlist;
-
-    QString size_string;
-    QString path = ped_partition_get_path(m_current_part);
-
-    fsck( path );
-
-    long long block_size = getFsBlockSize();
-    if( block_size <= 0 ){
-        KMessageBox::error( 0, "Shrink failed: could not determine filesystem block size");
-        return m_current_part->geom.length;
-    }
-
-    arguments << "resize2fs" 
-              << path
-              << QString("%1s").arg( length );
-
-    ProcessProgress fs_shrink(arguments, i18n("Shrinking filesystem..."), true );
-    output = fs_shrink.programOutputAll();
-
-    success_stringlist = output.filter("is now");
-    nospace_stringlist = output.filter("space left");
-
-    if( success_stringlist.size() > 0 ){ // Try to shrink the desired amount
-
-        size_string = success_stringlist[0];
-        size_string = size_string.remove( 0, size_string.indexOf("now") + 3 );
-        size_string.truncate(  size_string.indexOf("blocks") );
-        size_string = size_string.simplified();
-        return (size_string.toLongLong() * block_size) / m_ped_sector_size;
-
-    }
-    else if( nospace_stringlist.size() > 0 ){  // Couldn't shrink that much but try again with -M
-
-        arguments.clear();
-        success_stringlist.clear();
-
-        arguments << "resize2fs" 
-                  << "-M"
-                  << path;
-
-        ProcessProgress fs_shrink(arguments, i18n("Shrinking filesystem..."), true );
-        output = fs_shrink.programOutput();
-        success_stringlist = output.filter("is now");
-
-        if( success_stringlist.size() > 0 ){
-
-            size_string = success_stringlist[0];
-            size_string = size_string.remove( 0, size_string.indexOf("now") + 3 );
-            size_string.truncate(  size_string.indexOf("blocks") );
-            size_string = size_string.simplified();
-            return (size_string.toLongLong() * block_size) / m_ped_sector_size;
-        }
-    }
-    // Give up and do nothing
-
-    return m_current_part->geom.length;
-
-}
-
-bool PartitionMoveResizeDialog::growfs(QString path){
-
-    QStringList arguments, output;
-
-    fsck( path );
-
-    arguments << "resize2fs" 
-              << path; 
-
-    ProcessProgress fs_grow(arguments, i18n("Growing filesystem..."), true );
-    output = fs_grow.programOutput();
-
-    if ( fs_grow.exitCode() )
-        return false;
-    else
-        return true;
 }
 
 bool PartitionMoveResizeDialog::movefs(long long from_start, 
@@ -746,11 +670,12 @@ bool PartitionMoveResizeDialog::shrinkPartition(){
     else
         new_size = m_new_part_size;
 
-    m_new_part_size = shrinkfs(new_size);
+    m_new_part_size = shrink_fs( ped_partition_get_path(m_current_part) , 
+                                 new_size, 
+                                 m_old_storage_part->getFileSystem() ) / m_ped_sector_size;
 
-    if( m_new_part_size == m_current_part->geom.length ){
+    if( m_new_part_size == 0 )  // The shrink failed
         return false;
-    }
 
 
     // This constraint assures we have a new partition at least as long as the fs can shrink it
@@ -860,7 +785,7 @@ bool PartitionMoveResizeDialog::growPartition(){
             
         waitPartitionTableReload( ped_partition_get_path(m_current_part), m_ped_disk);
             
-        if( growfs( ped_partition_get_path(m_current_part) ) )
+        if( grow_fs( ped_partition_get_path(m_current_part) ) )
             return true;
         else
             return false;
@@ -879,77 +804,6 @@ void PartitionMoveResizeDialog::resetDisplayGraphic(){
     m_display_graphic->repaint();
 }
 
-
-// Returns estimated minimum size of filesystem after shrinking, in sectors
-// Returns 0 on failure
-
-long long PartitionMoveResizeDialog::getMinShrinkSize(){
-
-    QStringList arguments, 
-                output;
-
-    QString size_string,
-            fs;
-
-    fs = m_old_storage_part->getFileSystem();
-
-    if( fs == "ext2" || fs == "ext3" ){
-        arguments << "resize2fs" << "-P" << m_old_storage_part->getPartitionPath();
-
-        long long block_size = getFsBlockSize();
-        if( block_size ){                        // if blocksize failed skip this part
-            
-            ProcessProgress fs_scan(arguments, i18n("Checking minimum shrink size") );
-            output = fs_scan.programOutput();
-            
-            if( output.size() > 0 ){
-
-                size_string = output[0];
-                if ( size_string.contains("Estimated", Qt::CaseInsensitive) ){
-                    size_string = size_string.remove( 0, size_string.indexOf(":") + 1 );
-                    size_string = size_string.simplified();
-                return (size_string.toLongLong() * block_size) / m_ped_sector_size;
-                }
-                else
-                    return m_current_part->geom.length;
-            }
-        }
-        
-        return m_current_part->geom.length;
-    }
-
-    return m_current_part->geom.length;
-}
-
-//Return 0 on failure or return blocksize in bytes
-
-long long PartitionMoveResizeDialog::getFsBlockSize(){
-
-    QStringList arguments, 
-                output,
-                temp_stringlist;
-
-    QString block_string;
-
-    arguments << "dumpe2fs" 
-              << "-h" 
-              << m_old_storage_part->getPartitionPath();
-
-    ProcessProgress blocksize_scan(arguments, i18n("Checking blocksize") );
-    output = blocksize_scan.programOutput();
-
-    temp_stringlist << output.filter("Block size", Qt::CaseInsensitive);
-
-    if( temp_stringlist.size() ){
-        block_string = temp_stringlist[0];
-        block_string = block_string.remove( 0, block_string.indexOf(":") + 1 );
-        block_string = block_string.simplified();
-    }
-    else
-        return 0;
-
-    return block_string.toLongLong();
-}
 
 void PartitionMoveResizeDialog::setOffsetSpinMinMax(){
 
@@ -1132,19 +986,3 @@ void PartitionMoveResizeDialog::maximizeOffset(bool){
     m_offset_spin->setValue( m_offset_spin->maximum() );
 
 }
-
-bool PartitionMoveResizeDialog::fsck(QString path){
-
-    QStringList arguments, output;
-
-    arguments << "fsck" << "-fp" << path; 
-
-    ProcessProgress fsck(arguments, i18n("Checking filesystem..."), true );
-    output = fsck.programOutput();
-
-    if ( fsck.exitCode() )
-        return false;
-    else
-        return true;
-}
-

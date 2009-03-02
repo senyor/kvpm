@@ -80,11 +80,7 @@ Q_OBJECT
     void setup();
     void resetOkButton();
     long long convertSizeToSectors(int index, double size);
-    long long shrinkfs(PedSector length);
     long long getMinShrinkSize();
-    long long getFsBlockSize();
-    bool fsck(QString path);
-    bool growfs(QString path);
     bool movefs(long long from_start, long long to_start, long long length);
     bool shrinkPartition();
     bool growPartition();

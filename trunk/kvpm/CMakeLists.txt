@@ -6,8 +6,9 @@ include_directories( ${KDE4_INCLUDES} ${QT4_INCLUDES} )
  
 set(kvpm_SRCS addmirror.cpp kvpmconfigdialog.cpp devicemodel.cpp deviceproperties.cpp 
 	     devicepropertiesstack.cpp devicesizechart.cpp devicesizechartseg.cpp 
-	     devicetab.cpp executablefinder.cpp deviceactionsmenu.cpp
-	     fsprobe.cpp logvol.cpp lvactionsmenu.cpp lvchange.cpp lvrename.cpp
+	     devicetab.cpp executablefinder.cpp deviceactionsmenu.cpp fsck.cpp
+	     fsblocksize.cpp
+	     fsprobe.cpp growfs.cpp logvol.cpp lvactionsmenu.cpp lvchange.cpp lvrename.cpp
 	     lvcreate.cpp lvproperties.cpp lvpropertiesstack.cpp lvreduce.cpp 
 	     lvremove.cpp lvsizechart.cpp main.cpp mkfs.cpp masterlist.cpp  mount.cpp 
 	     lvsizechartseg.cpp mountentry.cpp mountinfo.cpp partremove.cpp 
@@ -15,7 +16,7 @@ set(kvpm_SRCS addmirror.cpp kvpmconfigdialog.cpp devicemodel.cpp devicepropertie
 	     devicetreeview.cpp physvol.cpp partmoveresize.cpp
 	     nomungecheck.cpp processprogress.cpp pvchange.cpp pvcreate.cpp 
 	     pvmove.cpp pvremove.cpp pvtree.cpp removemissing.cpp removemirror.cpp 
-	     removemirrorleg.cpp
+	     removemirrorleg.cpp shrinkfs.cpp
 	     sizetostring.cpp storagepartition.cpp storagedevice.cpp topwindow.cpp 
 	     tablecreate.cpp unmount.cpp 
 	     vgchangealloc.cpp vgchangeavailable.cpp vgexport.cpp vgimport.cpp

@@ -1,3 +1,8 @@
+version 0.6.1
+The filesystem grow and shrink parts of PartMoveResize
+have been moved out of that object and put into their
+own files. 
+
 version 0.6.0
 Partitions can now be moved and resized for ext2 and ext3
 filesystems. The "fsck" program is now required too.
