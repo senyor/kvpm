@@ -748,6 +748,11 @@ bool PartitionMoveResizeDialog::shrinkPartition(){
 
     m_new_part_size = shrinkfs(new_size);
 
+    if( m_new_part_size == m_current_part->geom.length ){
+        return false;
+    }
+
+
     // This constraint assures we have a new partition at least as long as the fs can shrink it
     // We give an extra 128 sectors for the end of the partition
 
