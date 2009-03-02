@@ -17,12 +17,10 @@
 
 #include <QString>
 
-#include <parted/parted.h>
-
 #include "storagepartition.h"
 
-PedSector shrink_fs(QString path, PedSector new_size, QString fs);
-PedSector get_min_fs_size(QString path, QString fs);
+long long shrink_fs(QString path, long long new_size, QString fs);
+long long get_min_fs_size(QString path, QString fs);
 
 
 #endif

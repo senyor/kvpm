@@ -1,7 +1,8 @@
 version 0.6.1
 The filesystem grow and shrink parts of PartMoveResize
 have been moved out of that object and put into their
-own files. 
+own files. lv reduce now looks at the minimum shrink 
+size for a filesystem
 
 version 0.6.0
 Partitions can now be moved and resized for ext2 and ext3

@@ -39,16 +39,17 @@ Q_OBJECT
  
     int m_size_combo_last_index;
     long long m_current_lv_size;
+    long long m_min_lv_size;
+
+    long long getSizeEditExtents(int index);
 
  public:
     LVReduceDialog(LogVol *logicalVolume, QWidget *parent = 0);
-    long long getSizeEditExtents(int index);
-    QStringList argumentsFS();
-    QStringList argumentsLV();
      
  private slots:
     void sizeComboAdjust(int index);
     void validateInput(QString text);
+    void doShrink();
  
 };
 
