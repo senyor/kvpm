@@ -671,7 +671,7 @@ bool PartitionMoveResizeDialog::shrinkPartition(){
         new_size = m_new_part_size;
 
     m_new_part_size = shrink_fs( ped_partition_get_path(m_current_part) , 
-                                 new_size, 
+                                 new_size * m_ped_sector_size, 
                                  m_old_storage_part->getFileSystem() ) / m_ped_sector_size;
 
     if( m_new_part_size == 0 )  // The shrink failed

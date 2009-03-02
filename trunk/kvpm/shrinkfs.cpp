@@ -22,9 +22,12 @@
 #include "fsblocksize.h"
 #include "fsck.h"
 
-// Returns new fs size in bytes or 0 if no shrinking was done
 
-PedSector shrink_fs(QString path, PedSector new_size, QString fs)
+// Returns new fs size in bytes or 0 if no shrinking was done
+// Takes new_size in bytes.
+
+
+long long shrink_fs(QString path, long long new_size, QString fs)
 {
 
     QStringList arguments, 
@@ -48,7 +51,7 @@ PedSector shrink_fs(QString path, PedSector new_size, QString fs)
 
     arguments << "resize2fs" 
               << path
-              << QString("%1s").arg( new_size );
+              << QString("%1K").arg( new_size / 1024 );
 
     ProcessProgress fs_shrink(arguments, i18n("Shrinking filesystem..."), true );
     output = fs_shrink.programOutputAll();
@@ -93,10 +96,10 @@ PedSector shrink_fs(QString path, PedSector new_size, QString fs)
 
 }
 
-// Returns estimated minimum size of filesystem after shrinking, in sectors
+// Returns estimated minimum size of filesystem after shrinking, in bytes
 // Returns 0 on failure
 
-PedSector get_min_fs_size(QString path, QString fs){
+long long get_min_fs_size(QString path, QString fs){
 
     QStringList arguments, 
                 output;

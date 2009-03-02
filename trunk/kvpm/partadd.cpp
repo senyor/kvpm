@@ -63,7 +63,7 @@ PartitionAddDialog::PartitionAddDialog(StoragePartition *partition,
     m_excluded_sectors = 0;
 
     bool logical_freespace;      // true if we are inside an extended partition
-    bool extended_allowed;        // true if we can create an extended partition here
+    bool extended_allowed;       // true if we can create an extended partition here
 
 
     /* check to see if partition table supports extended
@@ -155,7 +155,7 @@ PartitionAddDialog::PartitionAddDialog(StoragePartition *partition,
     size_group_layout->addWidget(m_size_edit,0,0);
     size_group_layout->addWidget(m_size_combo,0,1);
     size_group_layout->addWidget(m_total_size_spin,1,0);
-    m_align64_check = new QCheckBox("Align to 64 sectors");
+    m_align64_check = new QCheckBox("Align to 64 KiB");
     size_group_layout->addWidget(m_align64_check, 3, 0, 1, 2, Qt::AlignHCenter );
 
     m_preceding_label = new QLabel();
@@ -244,10 +244,12 @@ void PartitionAddDialog::commitPartition()
         last_sector = m_ped_end_sector;
     PedSector length  = (last_sector - first_sector) + 1;
 
-    PedAlignment *ped_start_alignment = ped_alignment_new(0, 64);
+    const int sectors64kib = 0x10000 / m_ped_sector_size;
+
+    PedAlignment *ped_start_alignment = ped_alignment_new(0, sectors64kib);
     PedAlignment *ped_end_alignment   = ped_alignment_new(0, 1);
 
-    PedGeometry *start_geom = ped_geometry_new(m_ped_disk->dev, first_sector, 127);
+    PedGeometry *start_geom = ped_geometry_new(m_ped_disk->dev, first_sector, (2 * sectors64kib) - 1);
     PedGeometry *end_geom   = ped_geometry_new(m_ped_disk->dev, first_sector, length);
 
 
@@ -255,7 +257,7 @@ void PartitionAddDialog::commitPartition()
 							 ped_end_alignment, 
 							 start_geom, 
 							 end_geom, 
-							 128, 
+							 (2 * sectors64kib) - 1, 
 							 length);
     if( m_align64_check->isChecked() )
 	m_ped_constraints = ped_constraint_intersect(ped_constraint64, m_ped_constraints);

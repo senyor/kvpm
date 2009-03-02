@@ -12,7 +12,6 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
-
 #include <KMessageBox>
 #include <KLocale>
 #include <QtGui>
@@ -20,6 +19,7 @@
 #include "logvol.h"
 #include "lvreduce.h"
 #include "processprogress.h"
+#include "shrinkfs.h"
 #include "sizetostring.h"
 #include "volgroup.h"
 
@@ -47,7 +47,6 @@ bool lv_reduce(LogVol *logicalVolume)
 	    LVReduceDialog dialog(logicalVolume);
 	    dialog.exec();
 	    if(dialog.result() == QDialog::Accepted){
-	        ProcessProgress reduce_lv(dialog.argumentsLV(), i18n("Reducing volume..."), true);
 		return true;
 	    }
 	    else
@@ -62,12 +61,9 @@ bool lv_reduce(LogVol *logicalVolume)
 	LVReduceDialog dialog(logicalVolume);
 	dialog.exec();
 	if(dialog.result() == QDialog::Accepted){
-	    ProcessProgress reduce_lv(dialog.argumentsLV(), 
-				      i18n("Reducing volume..."), 
-				      true);
 	    return true;
 	}
-	return true;
+	return false;
     }
     else if( logicalVolume->isOrigin() ){
         KMessageBox::error(0, i18n("Resizing snapshot origin is not supported yet") );
@@ -83,10 +79,9 @@ bool lv_reduce(LogVol *logicalVolume)
 	else{
 	    LVReduceDialog dialog(logicalVolume);
 	    dialog.exec();
-	    if(dialog.result() == QDialog::Accepted){
-	        ProcessProgress reduce_lv(dialog.argumentsLV(), i18n("Reducing volume..."), true);
+
+	    if(dialog.result() == QDialog::Accepted)
 		return true;
-	    }
 	    else
 		return false;
 	}
@@ -94,17 +89,13 @@ bool lv_reduce(LogVol *logicalVolume)
     else{
 	LVReduceDialog dialog(logicalVolume);
 	dialog.exec();
-	if(dialog.result() == QDialog::Accepted){
-	    ProcessProgress reduce_fs(dialog.argumentsFS(), i18n("Reducing filesystem..."), true);
-	    if( !reduce_fs.exitCode() )
-	        ProcessProgress reduce_lv(dialog.argumentsLV(), i18n("Reducing volume..."), true);
+
+	if(dialog.result() == QDialog::Accepted)
 	    return true;
-	}
 	else
 	    return false;
     }
 }
-
 
 LVReduceDialog::LVReduceDialog(LogVol *logicalVolume, QWidget *parent) : 
     KDialog(parent),
@@ -121,18 +112,22 @@ LVReduceDialog::LVReduceDialog(LogVol *logicalVolume, QWidget *parent) :
 
     m_current_lv_size = m_lv->getSize();
 
+    m_min_lv_size = get_min_fs_size( m_lv->getMapperPath(), m_lv->getFilesystem() );
+
     QLabel *ext_size_label = new QLabel( i18n("Extent size: %1").arg(sizeToString(m_vg->getExtentSize())) );
 
     QLabel *current_lv_size_label = new QLabel( i18n("Current size: %1").arg(sizeToString(m_current_lv_size)) );
 
+    QLabel *min_lv_size_label = new QLabel( i18n("Minimum size: %1").arg(sizeToString(m_min_lv_size)) );
+
     layout->addWidget(ext_size_label);
     layout->addWidget(current_lv_size_label);
+    layout->addWidget(min_lv_size_label);
     QHBoxLayout *size_layout = new QHBoxLayout();
     size_layout->addWidget(new QLabel( i18n("New size: ") ));
     
     m_size_edit = new KLineEdit();
     m_size_validator = new KDoubleValidator(m_size_edit);
-    m_size_validator->setBottom(0.0);
     m_size_edit->setValidator(m_size_validator);
 
     connect(m_size_edit, SIGNAL(textEdited(QString)),
@@ -142,6 +137,9 @@ LVReduceDialog::LVReduceDialog(LogVol *logicalVolume, QWidget *parent) :
 
     connect(m_size_combo, SIGNAL(currentIndexChanged(int)), 
 	    this, SLOT(sizeComboAdjust(int)));
+
+    connect(this, SIGNAL(okClicked()),
+            this, SLOT(doShrink()));
 
     m_size_combo->insertItem(0,"Extents");
     m_size_combo->insertItem(1,"MiB");
@@ -163,39 +161,6 @@ LVReduceDialog::LVReduceDialog(LogVol *logicalVolume, QWidget *parent) :
     size_layout->addWidget(m_size_edit);
     size_layout->addWidget(m_size_combo);
     layout->addLayout(size_layout);
-}
-
-QStringList LVReduceDialog::argumentsFS()
-{
-    QStringList fs_arguments;
-
-    long long new_size = getSizeEditExtents( m_size_combo->currentIndex() );
-    new_size *= m_vg->getExtentSize();
-
-    if( (m_lv->getFilesystem() == "ext2") || (m_lv->getFilesystem() == "ext3") ){
-	fs_arguments << "resize2fs" 
-		     << "-f"
-		     << "/dev/mapper/" + m_vg->getName() + "-" + m_lv->getName() 
-		     << QString("%1k").arg(new_size / 1024);
-    }
-
-    return fs_arguments;
-}
-
-QStringList LVReduceDialog::argumentsLV()
-{
-    QStringList lv_arguments;
-    long long new_extents;
-    
-    new_extents = getSizeEditExtents( m_size_combo->currentIndex() );
-
-    lv_arguments << "lvreduce" 
-		 << "--force" 
-		 << "--extents" 
-		 << QString("%1").arg(new_extents)
-		 << m_vg->getName() + "/" + m_lv->getName();
-    
-    return lv_arguments;
 }
 
 void LVReduceDialog::validateInput(QString text)
@@ -221,14 +186,17 @@ void LVReduceDialog::sizeComboAdjust(int index)
 	sized = (long double)extents * extent_size;
 	if(index == 1){
 	    m_size_validator->setTop(m_current_lv_size / (long double)0x100000);
+	    m_size_validator->setBottom(m_min_lv_size / (long double)0x100000);
 	    sized /= (long double)0x100000;
 	}
 	if(index == 2){
 	    m_size_validator->setTop(m_current_lv_size / (long double)0x40000000);
+	    m_size_validator->setBottom(m_min_lv_size / (long double)0x40000000);
 	    sized /= (long double)0x40000000; 
 	}
 	if(index == 3){
 	    m_size_validator->setTop(m_current_lv_size / ((long double)0x100000 * 0x100000));
+	    m_size_validator->setBottom(m_min_lv_size / ((long double)0x100000 * 0x100000));
 	    sized /= (long double)(0x100000);
 	    sized /= (long double)(0x100000);
 	}
@@ -236,6 +204,7 @@ void LVReduceDialog::sizeComboAdjust(int index)
     }
     else{
 	m_size_validator->setTop(m_current_lv_size / extent_size);
+	m_size_validator->setBottom(m_min_lv_size / extent_size);
 	m_size_edit->setText(QString("%1").arg(extents));
     }
 
@@ -274,3 +243,27 @@ long long LVReduceDialog::getSizeEditExtents(int index)
 
     return extents;
 }
+
+void LVReduceDialog::doShrink()
+{
+
+    QStringList lv_arguments;
+    long long new_size = getSizeEditExtents(m_size_combo->currentIndex()) * m_vg->getExtentSize();
+
+    hide();
+
+    new_size = shrink_fs( m_lv->getMapperPath(), new_size, m_lv->getFilesystem() );
+
+    if( new_size ){
+
+        lv_arguments << "lvreduce" 
+                     << "--force" 
+                     << "--size" 
+                     << QString("%1K").arg( new_size / 1024 )
+                     << m_vg->getName() + "/" + m_lv->getName();
+    
+        ProcessProgress reduce_lv( lv_arguments, i18n("Reducing volume..."), true);
+
+    }
+}
+
