@@ -57,14 +57,6 @@ bool lv_reduce(LogVol *logicalVolume)
         KMessageBox::error(0, i18n("Resizing mirrors is not supported yet") );
 	return false;
     }
-    else if( logicalVolume->isSnap() ){
-	LVReduceDialog dialog(logicalVolume);
-	dialog.exec();
-	if(dialog.result() == QDialog::Accepted){
-	    return true;
-	}
-	return false;
-    }
     else if( logicalVolume->isOrigin() ){
         KMessageBox::error(0, i18n("Resizing snapshot origin is not supported yet") );
 	return false;
