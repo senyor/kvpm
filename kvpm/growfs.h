@@ -19,7 +19,7 @@
 
 #include "storagepartition.h"
 
-bool grow_fs(QString path);
+bool grow_fs(QString path, QString fs);
 
 
 #endif
