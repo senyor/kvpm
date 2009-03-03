@@ -145,10 +145,8 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
 	    m_unmount_action->setEnabled(false);
 	}
 
-	if(item->data(1) == "freespace" || 
-	   item->data(1) == "freespace (logical)")
-	  {
-	    m_pvcreate_action->setEnabled(false);
+	if(item->data(1) == "freespace" || item->data(1) == "freespace (logical)"){
+            m_pvcreate_action->setEnabled(false);
 	    m_mkfs_action->setEnabled(false);
 	    m_partremove_action->setEnabled(false);
             m_partmoveresize_action->setEnabled(false);
@@ -180,24 +178,6 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
 	    m_vgextend_menu->setEnabled(false);
 	    m_vgreduce_action->setEnabled(false);
 	}
-	else if(item->data(7) != ""){
-	    m_pvcreate_action->setEnabled(false);
-	    m_partremove_action->setEnabled(false);
-            m_partmoveresize_action->setEnabled(false);
-	    m_partadd_action->setEnabled(false);
-	    m_mkfs_action->setEnabled(false);
-	    m_pvremove_action->setEnabled(false);
-	    m_vgcreate_action->setEnabled(false);
-	    m_vgextend_menu->setEnabled(false);
-	    m_vgreduce_action->setEnabled(false);
-
-            /* This needs to be checked on */
-	    if( item->dataAlternate(1) == "busy" )
-	        m_tablecreate_action->setEnabled(false);
-	    else
-	        m_tablecreate_action->setEnabled(true);
-
-	}
 	else if( (item->data(4) == "physical volume") && (item->data(5) == "" ) ){
 	    m_pvcreate_action->setEnabled(false);
 	    m_mkfs_action->setEnabled(false);
@@ -224,20 +204,39 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
 		m_vgreduce_action->setEnabled(false);
 	}
 	else if(item->data(1) == "logical" || item->data(1) == "normal"){
-
-	    if(item->data(7) != "")
+	    if(item->data(7) != ""){
    	        m_partremove_action->setEnabled(false);
+                m_pvcreate_action->setEnabled(false);
+                m_partmoveresize_action->setEnabled(false);
+            }
 	    else{
 	        m_partremove_action->setEnabled(true);
+                m_pvcreate_action->setEnabled(true);
                 m_partmoveresize_action->setEnabled(true);
             }
 	    m_partadd_action->setEnabled(false);
-	    m_pvcreate_action->setEnabled(true);
 	    m_pvremove_action->setEnabled(false);
 	    m_mkfs_action->setEnabled(true);
 	    m_vgcreate_action->setEnabled(false);
 	    m_vgextend_menu->setEnabled(false);
 	    m_vgreduce_action->setEnabled(false);
+        }
+	else if(item->data(7) != ""){
+	    m_pvcreate_action->setEnabled(false);
+	    m_partremove_action->setEnabled(false);
+            m_partmoveresize_action->setEnabled(false);
+	    m_partadd_action->setEnabled(false);
+	    m_mkfs_action->setEnabled(false);
+	    m_pvremove_action->setEnabled(false);
+	    m_vgcreate_action->setEnabled(false);
+	    m_vgextend_menu->setEnabled(false);
+	    m_vgreduce_action->setEnabled(false);
+
+            // This needs to be checked on
+	    if( item->dataAlternate(1) == "busy" )
+	        m_tablecreate_action->setEnabled(false);
+	    else
+	        m_tablecreate_action->setEnabled(true);
 	}
 	else{
 	    m_partremove_action->setEnabled(false);

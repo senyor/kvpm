@@ -44,10 +44,11 @@ bool moveresize_partition(StoragePartition *partition)
     QString fs = partition->getFileSystem();
 
     QString message = i18n("Currently only the ext2 and ext3  file systems "
-                           "are supported for file system resizing. "
+                           "are supported for file system shrinking. "
+                           "Growing is supported for ext2, ext3, jfs and xfs "
                            "Moving a partition is supported for any filesystem");
 
-    if( ! (fs == "ext2" || fs == "ext3") )
+    if( ! (fs == "ext2" || fs == "ext3" || fs == "xfs" || fs == "jfs" ) )
         KMessageBox::information(0, message);
 
     dialog.exec();
@@ -108,7 +109,7 @@ PartitionMoveResizeDialog::PartitionMoveResizeDialog(StoragePartition *partition
     QString filesystem = partition->getFileSystem();
     m_size_group = new QGroupBox( i18n("Modify partition size") );
     m_size_group->setCheckable(true);
-    if ( ! (filesystem == "ext2" || filesystem == "ext3" ) ){
+    if ( ! (filesystem == "ext2" || filesystem == "ext3" || filesystem == "xfs" || filesystem == "jfs" ) ){
         m_size_group->setChecked(false);
         m_size_group->setEnabled(false);
     }
@@ -785,7 +786,7 @@ bool PartitionMoveResizeDialog::growPartition(){
             
         waitPartitionTableReload( ped_partition_get_path(m_current_part), m_ped_disk);
             
-        if( grow_fs( ped_partition_get_path(m_current_part) ) )
+        if(grow_fs( ped_partition_get_path(m_current_part), m_old_storage_part->getFileSystem()))
             return true;
         else
             return false;
