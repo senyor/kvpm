@@ -2,7 +2,9 @@ version 0.6.1
 The filesystem grow and shrink parts of PartMoveResize
 have been moved out of that object and put into their
 own files. lv reduce now looks at the minimum shrink 
-size for a filesystem
+size for a filesystem. A simple setup function was added
+to set the kvpm configuration to something sensible the 
+first time kvpm is run. 
 
 version 0.6.0
 Partitions can now be moved and resized for ext2 and ext3
