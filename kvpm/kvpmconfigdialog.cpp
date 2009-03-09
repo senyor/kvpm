@@ -372,19 +372,11 @@ void KvpmConfigDialog::updateWidgetsDefault()
     m_type_check->setChecked(true);
     m_filesystem_check->setChecked(true);
     m_stripes_check->setChecked(true);
-    m_stripesize_check->setChecked(true);
+    m_stripesize_check->setChecked(false);
     m_state_check->setChecked(true);
     m_access_check->setChecked(true);
 
 }
-
-/*
-void KvpmConfigDialog::updateConfig()
-{
-    g_executable_finder->getAllNames();
-
-}
-*/
 
 void KvpmConfigDialog::fillExecutablesTable()
 {

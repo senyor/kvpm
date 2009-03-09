@@ -23,6 +23,7 @@
 
 #include "executablefinder.h"
 #include "topwindow.h"
+#include "kvpmsetup.h"
 
 class VolGroup;
 class PhysVol;
@@ -55,6 +56,9 @@ int main(int argc, char **argv)
 			    i18n("Insufficient Privilege") );
 	return 0;
     }
+
+    if( ! isconfigured_kvpm() )
+        setup_kvpm();
 
     g_executable_finder = new ExecutableFinder();
     
