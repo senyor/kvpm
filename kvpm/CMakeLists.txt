@@ -8,7 +8,7 @@ set(kvpm_SRCS addmirror.cpp kvpmconfigdialog.cpp devicemodel.cpp devicepropertie
               devicepropertiesstack.cpp devicesizechart.cpp devicesizechartseg.cpp 
 	      devicetab.cpp executablefinder.cpp deviceactionsmenu.cpp fsck.cpp
 	      fsblocksize.cpp
-	      fsprobe.cpp growfs.cpp kvpmsetup.cpp
+	      fsprobe.cpp growfs.cpp growpv.cpp kvpmsetup.cpp
 	      logvol.cpp lvactionsmenu.cpp lvchange.cpp lvrename.cpp
 	      lvcreate.cpp lvproperties.cpp lvpropertiesstack.cpp lvreduce.cpp 
 	      lvremove.cpp lvsizechart.cpp main.cpp mkfs.cpp masterlist.cpp  mount.cpp 

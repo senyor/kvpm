@@ -1,3 +1,6 @@
+version 0.6.2
+Shrinking and growing physical volumes is now supported.
+
 version 0.6.1
 The filesystem grow and shrink parts of PartMoveResize
 have been moved out of that object and put into their
