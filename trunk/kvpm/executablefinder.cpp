@@ -45,6 +45,7 @@ ExecutableFinder::ExecutableFinder(QObject *parent) : QObject(parent)
 	   << "pvcreate"
 	   << "pvmove" 
 	   << "pvremove"
+	   << "pvresize"
 	   << "pvs"
 	   << "resize2fs" 
 	   << "resize_reiserfs"

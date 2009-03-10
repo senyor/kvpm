@@ -21,6 +21,9 @@ PhysVol::PhysVol(QString pvData)
 {
     QString attributes;
 
+    m_extent_size = 0;
+    m_last_used_extent = 0;
+
     pvData     = pvData.trimmed();
     m_device   = pvData.section('|',0,0);
     m_vg_name  = pvData.section('|',1,1);
@@ -102,4 +105,24 @@ int PhysVol::getPercentUsed()
 	percent = qRound(  ( m_used * 100.0 ) / m_size );
     
     return percent;
+}
+
+long long PhysVol::getLastUsedExtent()
+{
+    return m_last_used_extent;
+}
+
+void PhysVol::setLastUsedExtent(long long last)
+{
+    m_last_used_extent = last;
+}
+
+long PhysVol::getExtentSize()
+{
+    return m_extent_size;
+}
+
+void PhysVol::setExtentSize(long size)
+{
+    m_extent_size = size;
 }

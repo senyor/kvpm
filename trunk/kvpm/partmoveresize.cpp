@@ -32,10 +32,12 @@
 
 #include "partmoveresize.h"
 #include "partaddgraphic.h"
+#include "physvol.h"
 #include "processprogress.h"
 #include "sizetostring.h"
 #include "growfs.h"
 #include "shrinkfs.h"
+#include "shrinkpv.h"
 
 
 bool moveresize_partition(StoragePartition *partition)
@@ -43,13 +45,17 @@ bool moveresize_partition(StoragePartition *partition)
     PartitionMoveResizeDialog dialog(partition);
     QString fs = partition->getFileSystem();
 
-    QString message = i18n("Currently only the ext2 and ext3  file systems "
+    QString message = i18n("Currently only the ext2/3/4 file systems "
                            "are supported for file system shrinking. "
-                           "Growing is supported for ext2, ext3, jfs and xfs "
-                           "Moving a partition is supported for any filesystem");
+                           "Growing is supported for ext2/3/4, jfs and xfs "
+                           "Moving a partition is supported for any filesystem. "
+                           "Physical volumes may also be grown or shrunk.");
 
-    if( ! (fs == "ext2" || fs == "ext3" || fs == "ext4" ||fs == "xfs" || fs == "jfs" ) )
+    if( ! ( fs == "ext2" || fs == "ext3" || fs == "ext4" ||
+            fs == "xfs"  || fs == "jfs"  || partition->isPV() ) ){
+
         KMessageBox::information(0, message);
+    }
 
     dialog.exec();
     
@@ -109,7 +115,8 @@ PartitionMoveResizeDialog::PartitionMoveResizeDialog(StoragePartition *partition
     QString filesystem = partition->getFileSystem();
     m_size_group = new QGroupBox( i18n("Modify partition size") );
     m_size_group->setCheckable(true);
-    if ( ! (filesystem == "ext2" || filesystem == "ext3" || filesystem == "ext4" || filesystem == "xfs" || filesystem == "jfs" ) ){
+    if ( ! (filesystem == "ext2" || filesystem == "ext3" || filesystem == "ext4" || 
+            filesystem == "xfs"  || filesystem == "jfs"  || m_old_storage_part->isPV() ) ){
         m_size_group->setChecked(false);
         m_size_group->setEnabled(false);
     }
@@ -153,8 +160,13 @@ PartitionMoveResizeDialog::PartitionMoveResizeDialog(StoragePartition *partition
 
     m_offset_group = new QGroupBox("Move partition start");
     QGridLayout *offset_group_layout = new QGridLayout();
-    m_offset_group->setCheckable(true);
-    m_offset_group->setChecked(false);
+    if( m_old_storage_part->isPV() ){
+        m_offset_group->setEnabled(false);
+    }
+    else{
+        m_offset_group->setCheckable(true);
+        m_offset_group->setChecked(false);
+    }
     m_offset_group->setLayout(offset_group_layout);
     layout->addWidget(m_offset_group);
 
@@ -544,6 +556,8 @@ void PartitionMoveResizeDialog::resetPartition(){
 
 void PartitionMoveResizeDialog::setup(){
 
+    QString fs =  m_old_storage_part->getFileSystem();
+
     m_current_part = m_old_storage_part->getPedPartition();
     m_ped_disk = m_current_part->disk;   
 
@@ -571,8 +585,14 @@ void PartitionMoveResizeDialog::setup(){
     else
         m_logical = false;
 
-    m_min_shrink_size = get_min_fs_size(ped_partition_get_path(m_current_part), 
-                                        m_old_storage_part->getFileSystem()) / m_ped_sector_size;
+    if( m_old_storage_part->isPV() ){
+        m_min_shrink_size = m_old_storage_part->getPhysicalVolume()->getLastUsedExtent();
+        m_min_shrink_size *= m_old_storage_part->getPhysicalVolume()->getExtentSize();
+        m_min_shrink_size /= m_ped_sector_size;
+    }
+    else{
+        m_min_shrink_size = get_min_fs_size(ped_partition_get_path(m_current_part), fs) / m_ped_sector_size;
+    }
 
     if( m_min_shrink_size == 0 )                 // 0 means we can't shrink it 
         m_min_shrink_size = m_new_part_size;
@@ -671,9 +691,15 @@ bool PartitionMoveResizeDialog::shrinkPartition(){
     else
         new_size = m_new_part_size;
 
-    m_new_part_size = shrink_fs( ped_partition_get_path(m_current_part) , 
-                                 new_size * m_ped_sector_size, 
-                                 m_old_storage_part->getFileSystem() ) / m_ped_sector_size;
+    if( m_old_storage_part->isPV() ){
+        m_new_part_size = shrink_pv( ped_partition_get_path(m_current_part) , 
+                                     new_size * m_ped_sector_size ) / m_ped_sector_size;
+    }
+    else{
+        m_new_part_size = shrink_fs( ped_partition_get_path(m_current_part) , 
+                                     new_size * m_ped_sector_size, 
+                                     m_old_storage_part->getFileSystem() ) / m_ped_sector_size;
+    }
 
     if( m_new_part_size == 0 )  // The shrink failed
         return false;
