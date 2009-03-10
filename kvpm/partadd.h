@@ -74,7 +74,9 @@ Q_OBJECT
               *m_remaining_label,
               *m_preceding_label;
 
-    void resetOkButton();
+    bool validatePartitionSize(QString size);
+    bool validateExcludedSize(QString size);
+    void updatePartition();
     long long convertSizeToSectors(int index, double size);
 
 public:
@@ -83,10 +85,9 @@ public:
 private slots:
     void adjustSizeEdit(int percentage);
     void adjustSizeCombo(int index);
-    void validateVolumeSize(QString size);
+    void validate();
     void adjustExcludedEdit(int percentage);
     void adjustExcludedCombo(int index);
-    void validateExcludedSize(QString size);
     void commitPartition();
     void clearExcludedGroup(bool on);
 };
