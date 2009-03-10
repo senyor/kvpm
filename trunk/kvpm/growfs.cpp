@@ -38,7 +38,7 @@ bool grow_fs(QString path, QString fs){
     QStringList arguments, output;
     unsigned long options = 0;
 
-    if( fs == "ext2" || fs == "ext3" ){
+    if( fs == "ext2" || fs == "ext3" || fs == "ext4" ){
 
         fsck( path );
 

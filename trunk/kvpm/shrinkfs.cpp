@@ -37,7 +37,7 @@ long long shrink_fs(QString path, long long new_size, QString fs)
 
     QString size_string;
 
-    if( fs != "ext2" && fs != "ext3" )
+    if( fs != "ext2" && fs != "ext3" && fs != "ext4" )
         return 0;
 
     fsck( path );
@@ -108,7 +108,7 @@ long long get_min_fs_size(QString path, QString fs){
 
     qDebug() << "Filesystem" << fs ; 
 
-    if( fs == "ext2" || fs == "ext3" ){
+    if( fs == "ext2" || fs == "ext3" || fs == "ext4" ){
         arguments << "resize2fs" << "-P" << path;
 
         long block_size = get_fs_block_size(path);

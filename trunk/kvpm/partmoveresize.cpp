@@ -48,7 +48,7 @@ bool moveresize_partition(StoragePartition *partition)
                            "Growing is supported for ext2, ext3, jfs and xfs "
                            "Moving a partition is supported for any filesystem");
 
-    if( ! (fs == "ext2" || fs == "ext3" || fs == "xfs" || fs == "jfs" ) )
+    if( ! (fs == "ext2" || fs == "ext3" || fs == "ext4" ||fs == "xfs" || fs == "jfs" ) )
         KMessageBox::information(0, message);
 
     dialog.exec();
@@ -109,7 +109,7 @@ PartitionMoveResizeDialog::PartitionMoveResizeDialog(StoragePartition *partition
     QString filesystem = partition->getFileSystem();
     m_size_group = new QGroupBox( i18n("Modify partition size") );
     m_size_group->setCheckable(true);
-    if ( ! (filesystem == "ext2" || filesystem == "ext3" || filesystem == "xfs" || filesystem == "jfs" ) ){
+    if ( ! (filesystem == "ext2" || filesystem == "ext3" || filesystem == "ext4" || filesystem == "xfs" || filesystem == "jfs" ) ){
         m_size_group->setChecked(false);
         m_size_group->setEnabled(false);
     }
