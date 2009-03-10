@@ -12,12 +12,13 @@ set(kvpm_SRCS addmirror.cpp kvpmconfigdialog.cpp devicemodel.cpp devicepropertie
 	      logvol.cpp lvactionsmenu.cpp lvchange.cpp lvrename.cpp
 	      lvcreate.cpp lvproperties.cpp lvpropertiesstack.cpp lvreduce.cpp 
 	      lvremove.cpp lvsizechart.cpp main.cpp mkfs.cpp masterlist.cpp  mount.cpp 
-	      lvsizechartseg.cpp mountentry.cpp mountinfo.cpp partremove.cpp 
+	      lvsizechartseg.cpp mountentry.cpp mountinfo.cpp 
+	      partremove.cpp 
 	      partaddgraphic.cpp partadd.cpp pvproperties.cpp  pvpropertiesstack.cpp 
 	      devicetreeview.cpp physvol.cpp partmoveresize.cpp
 	      nomungecheck.cpp processprogress.cpp pvchange.cpp pvcreate.cpp 
 	      pvmove.cpp pvremove.cpp pvtree.cpp removemissing.cpp removemirror.cpp 
-	      removemirrorleg.cpp shrinkfs.cpp
+	      removemirrorleg.cpp shrinkfs.cpp shrinkpv.cpp 
 	      sizetostring.cpp storagepartition.cpp storagedevice.cpp topwindow.cpp 
 	      tablecreate.cpp unmount.cpp 
 	      vgchangealloc.cpp vgchangeavailable.cpp vgexport.cpp vgimport.cpp

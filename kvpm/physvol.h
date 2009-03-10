@@ -27,9 +27,11 @@ class PhysVol
     
     bool m_allocatable;
     bool m_exported;
+    long m_extent_size;    // 0 if not in use
     long long m_size;      // size in bytes
     long long m_unused;    // free space in bytes
     long long m_used;
+    long long m_last_used_extent;
 
  public:
     PhysVol(QString pvData);
@@ -39,10 +41,14 @@ class PhysVol
     QString getUuid();
     bool isAllocateable();
     bool isExported();
-    long long getSize();       // size of the physical volume in bytes    
-    long long getUnused();     // free space in bytes
-    long long getUsed();       // bytes used 
-    int getPercentUsed();      // 0 - 100
+    long long getSize();            // size of the physical volume in bytes    
+    long long getUnused();          // free space in bytes
+    long long getUsed();            // bytes used 
+    long long getLastUsedExtent();  // needed for minimum shrink size determination
+    void setLastUsedExtent(long long last);
+    long getExtentSize(); 
+    void setExtentSize(long size);
+    int getPercentUsed();           // 0 - 100
     
 };
 

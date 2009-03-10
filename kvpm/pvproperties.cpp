@@ -37,6 +37,7 @@ PVProperties::PVProperties(PhysVol *physicalVolume, QWidget *parent):
     
     long long first_extent;
     long long last_extent;
+    long long last_used_extent = 0; // last extent in use by the pv
     
     QList<LogVol *>  lvs = vg->getLogicalVolumes();
     QList<PhysVol *> pvs = vg->getPhysicalVolumes();
@@ -69,6 +70,9 @@ PVProperties::PVProperties(PhysVol *physicalVolume, QWidget *parent):
 		if( device_name == pv_name_list[y] ){
 		    first_extent = starting_extent[y];
 		    last_extent = first_extent - 1 + (lv->getSegmentExtents(segment) / (lv->getSegmentStripes(segment)));
+
+                    if( last_extent > last_used_extent )
+                        last_used_extent = last_extent;
 		    
 		    insertRow( row );
 		    
@@ -97,6 +101,9 @@ PVProperties::PVProperties(PhysVol *physicalVolume, QWidget *parent):
 	    }
 	}
     }
+
+    physicalVolume->setLastUsedExtent( last_used_extent );
+    physicalVolume->setExtentSize( vg->getExtentSize() );
 
     if( !rowCount() ){
 	insertRow( row );
