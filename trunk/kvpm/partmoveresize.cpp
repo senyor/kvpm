@@ -33,9 +33,9 @@
 #include "partmoveresize.h"
 #include "partaddgraphic.h"
 #include "physvol.h"
-#include "processprogress.h"
 #include "sizetostring.h"
 #include "growfs.h"
+#include "growpv.h"
 #include "shrinkfs.h"
 #include "shrinkpv.h"
 
@@ -585,8 +585,9 @@ void PartitionMoveResizeDialog::setup(){
     else
         m_logical = false;
 
+    // +2 because counting starts at zero (+1) and one is used for metadata(+1)
     if( m_old_storage_part->isPV() ){
-        m_min_shrink_size = m_old_storage_part->getPhysicalVolume()->getLastUsedExtent();
+        m_min_shrink_size = 2 + m_old_storage_part->getPhysicalVolume()->getLastUsedExtent();
         m_min_shrink_size *= m_old_storage_part->getPhysicalVolume()->getExtentSize();
         m_min_shrink_size /= m_ped_sector_size;
     }
@@ -679,6 +680,9 @@ bool PartitionMoveResizeDialog::shrinkPartition(){
 
     PedSector new_size;
 
+    const QString fs = m_old_storage_part->getFileSystem();
+    const bool is_pv = m_old_storage_part->isPV();
+
     if( m_new_part_size >= m_current_part->geom.length ){
         qDebug() << "shrinkPartition called with a *bigger* part size!";
         return false;
@@ -691,14 +695,14 @@ bool PartitionMoveResizeDialog::shrinkPartition(){
     else
         new_size = m_new_part_size;
 
-    if( m_old_storage_part->isPV() ){
+    if( is_pv ){
         m_new_part_size = shrink_pv( ped_partition_get_path(m_current_part) , 
                                      new_size * m_ped_sector_size ) / m_ped_sector_size;
     }
     else{
-        m_new_part_size = shrink_fs( ped_partition_get_path(m_current_part) , 
+        m_new_part_size = shrink_fs( ped_partition_get_path(m_current_part), 
                                      new_size * m_ped_sector_size, 
-                                     m_old_storage_part->getFileSystem() ) / m_ped_sector_size;
+                                     fs ) / m_ped_sector_size;
     }
 
     if( m_new_part_size == 0 )  // The shrink failed
@@ -764,6 +768,10 @@ bool PartitionMoveResizeDialog::shrinkPartition(){
 bool PartitionMoveResizeDialog::growPartition(){
 
     PedDevice  *device = m_ped_disk->dev;
+
+    const QString fs = m_old_storage_part->getFileSystem();
+    const bool is_pv = m_old_storage_part->isPV();
+
     int success;
 
     PedSector min_new_size, 
@@ -811,11 +819,19 @@ bool PartitionMoveResizeDialog::growPartition(){
         // Otherwise the resize program will fail.
             
         waitPartitionTableReload( ped_partition_get_path(m_current_part), m_ped_disk);
-            
-        if(grow_fs( ped_partition_get_path(m_current_part), m_old_storage_part->getFileSystem()))
-            return true;
-        else
-            return false;
+
+        if( is_pv ){            
+           if( grow_pv( ped_partition_get_path(m_current_part) ) )
+                return true;
+            else
+                return false;
+        }
+        else{
+            if(grow_fs( ped_partition_get_path(m_current_part), fs ) )
+                return true;
+            else
+                return false;
+        }
     }
 }
 
