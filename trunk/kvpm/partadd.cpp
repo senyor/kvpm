@@ -207,17 +207,11 @@ PartitionAddDialog::PartitionAddDialog(StoragePartition *partition,
     connect(m_size_combo, SIGNAL(currentIndexChanged(int)),
 	    this , SLOT(adjustSizeCombo(int)));
 
-    connect(m_size_edit, SIGNAL(textEdited(QString)),
-	    this, SLOT(validateVolumeSize(QString)));
-
     connect(m_total_size_spin, SIGNAL(valueChanged(int)),
 	    this, SLOT(adjustSizeEdit(int)));
 
     connect(m_excluded_combo, SIGNAL(currentIndexChanged(int)),
 	    this , SLOT(adjustExcludedCombo(int)));
-
-    connect(m_excluded_edit, SIGNAL(textEdited(QString)),
-	    this, SLOT(validateExcludedSize(QString)));
 
     connect(m_excluded_spin, SIGNAL(valueChanged(int)),
 	    this, SLOT(adjustExcludedEdit(int)));
@@ -228,6 +222,11 @@ PartitionAddDialog::PartitionAddDialog(StoragePartition *partition,
     connect(this, SIGNAL(okClicked()),
 	    this, SLOT(commitPartition()));
 
+    connect(m_size_edit, SIGNAL(textChanged(QString)),
+	    this, SLOT(validate()));
+
+    connect(m_excluded_edit, SIGNAL(textChanged(QString)),
+	    this, SLOT(validate()));
 }
 
 void PartitionAddDialog::commitPartition()
@@ -235,6 +234,7 @@ void PartitionAddDialog::commitPartition()
 
     PedPartitionType type;
     PedSector first_sector = m_ped_start_sector;
+    int sectors64kib;
 
     if( m_excluded_group->isChecked() )
         first_sector = m_ped_start_sector + m_excluded_sectors;
@@ -244,7 +244,10 @@ void PartitionAddDialog::commitPartition()
         last_sector = m_ped_end_sector;
     PedSector length  = (last_sector - first_sector) + 1;
 
-    const int sectors64kib = 0x10000 / m_ped_sector_size;
+    if( ( (int)(0x10000 / m_ped_sector_size) ) > 0 )
+        sectors64kib = 0x10000 / m_ped_sector_size;
+    else
+        sectors64kib = 1;
 
     PedAlignment *ped_start_alignment = ped_alignment_new(0, sectors64kib);
     PedAlignment *ped_end_alignment   = ped_alignment_new(0, 1);
@@ -288,49 +291,6 @@ void PartitionAddDialog::commitPartition()
 
 }
 
-
-void PartitionAddDialog::adjustSizeEdit(int percentage){
-
-    long long free_sectors = m_ped_sector_length - m_excluded_sectors;
-
-    int top = qRound( ( (double)free_sectors / m_ped_sector_length ) * 100);
-
-    m_total_size_spin->setMaximum( top );
-
-    if( percentage == m_total_size_spin->maximum() )
-        m_partition_sectors = free_sectors;
-    else if(percentage == 0)
-        m_partition_sectors = 0;
-    else
-        m_partition_sectors = (long long)(( (double) percentage / 100) * m_ped_sector_length);
-
-    QString total_bytes = sizeToString(m_ped_sector_size * free_sectors);
-    m_unexcluded_label->setText( i18n("Available space: %1", total_bytes) );
-
-    QString preceding_bytes_string = sizeToString(m_excluded_sectors * m_ped_sector_size);
-    m_preceding_label->setText( i18n("Preceding space: %1", preceding_bytes_string) );
-
-    PedSector following_sectors = m_ped_sector_length - (m_partition_sectors + m_excluded_sectors);
-    PedSector following_space = following_sectors * m_ped_sector_size;
-
-    if(following_space < 0)
-        following_space = 0;
-
-    QString following_bytes_string = sizeToString(following_space);
-    m_remaining_label->setText( i18n("Following space: %1", following_bytes_string) );
-
-    adjustSizeCombo( m_size_combo->currentIndex() );
-
-    m_display_graphic->setPrecedingSectors(m_excluded_sectors);
-    m_display_graphic->setPartitionSectors(m_partition_sectors);
-    m_display_graphic->setFollowingSectors(following_sectors);
-    m_display_graphic->repaint();
-
-
-    resetOkButton();
-}
-
-
 void PartitionAddDialog::adjustSizeCombo(int index){
 
     long double sized;
@@ -353,8 +313,9 @@ void PartitionAddDialog::adjustSizeCombo(int index){
 }
 
 
-void PartitionAddDialog::validateVolumeSize(QString size){
+bool PartitionAddDialog::validatePartitionSize(QString size){
 
+    long long free_sectors = m_ped_sector_length - m_excluded_sectors;
     int x = 0;
 
     const int size_combo_index = m_size_combo->currentIndex();
@@ -363,37 +324,19 @@ void PartitionAddDialog::validateVolumeSize(QString size){
 
         if(!size_combo_index)
             m_partition_sectors = size.toLongLong();
-        else
+        else{
             m_partition_sectors = convertSizeToSectors( size_combo_index, size.toDouble() );
 
+            if( m_partition_sectors > free_sectors )
+                m_partition_sectors = free_sectors;
+        }
+        return true;
     }
     else{
         m_partition_sectors = 0;
+        return false;
     }
 
-    long long free_sectors = m_ped_sector_length - m_excluded_sectors;
-
-    QString total_bytes = sizeToString(m_ped_sector_size * free_sectors);
-    m_unexcluded_label->setText( i18n("Available space: %1", total_bytes) );
-
-    QString preceding_bytes_string = sizeToString(m_excluded_sectors * m_ped_sector_size);
-    m_preceding_label->setText( i18n("Preceding space: %1", preceding_bytes_string) );
-
-    PedSector following_sectors = m_ped_sector_length - (m_partition_sectors + m_excluded_sectors);
-    PedSector following_space = following_sectors * m_ped_sector_size;
-
-    if(following_space < 0)
-        following_space = 0;
-
-    QString following_bytes_string = sizeToString(following_space);
-    m_remaining_label->setText( i18n("Following space: %1", following_bytes_string) );
-
-    m_display_graphic->setPrecedingSectors(m_excluded_sectors);
-    m_display_graphic->setPartitionSectors(m_partition_sectors);
-    m_display_graphic->setFollowingSectors(following_sectors);
-    m_display_graphic->repaint();
-
-    resetOkButton();
 }
 
 
@@ -418,17 +361,6 @@ long long PartitionAddDialog::convertSizeToSectors(int index, double size)
     return qRound64(partition_size);
 }
 
-void PartitionAddDialog::resetOkButton(){
-
-    long long max_sectors = m_ped_sector_length - m_excluded_sectors;
-
-    if( (m_partition_sectors <= max_sectors) && (m_partition_sectors > 0) )
-        enableButtonOk(true);
-    else
-        enableButtonOk(false);
-
-}
-
 void PartitionAddDialog::adjustExcludedEdit(int percentage){
 
     long long free_sectors = m_ped_sector_length;
@@ -442,7 +374,7 @@ void PartitionAddDialog::adjustExcludedEdit(int percentage){
 
     adjustExcludedCombo( m_excluded_combo->currentIndex() );
     adjustSizeEdit(m_total_size_spin->value());
-    resetOkButton();
+
 }
 
 
@@ -479,7 +411,7 @@ void PartitionAddDialog::adjustExcludedCombo(int index){
 }
 
 
-void PartitionAddDialog::validateExcludedSize(QString size){
+bool PartitionAddDialog::validateExcludedSize(QString size){
 
     int x = 0;
 
@@ -487,19 +419,63 @@ void PartitionAddDialog::validateExcludedSize(QString size){
 
     if(m_excluded_validator->validate(size, x) == QValidator::Acceptable){
 
-        if(!excluded_combo_index)
+        if( ! excluded_combo_index)
             m_excluded_sectors = size.toLongLong();
         else
             m_excluded_sectors = convertSizeToSectors( excluded_combo_index, size.toDouble() );
 
+        return true;
     }
     else{
-        m_excluded_sectors = m_ped_sector_length;
+        return false;
     }
+}
 
-    adjustSizeEdit( m_total_size_spin->value() );
+
+void PartitionAddDialog::validate(){
+
+    long long free_sectors = m_ped_sector_length - m_excluded_sectors;
+
+    if( validateExcludedSize( m_excluded_edit->text() ) && 
+        validatePartitionSize( m_size_edit->text() ) ){
+
+        if( (m_partition_sectors <= free_sectors) && (m_partition_sectors > 0) )
+            enableButtonOk(true);
+        else
+            enableButtonOk(false);
+    }
+    else
+        enableButtonOk(false);
+
+
+    updatePartition();
+}
+
+void PartitionAddDialog::adjustSizeEdit(int percentage){
+
+    long long free_sectors = m_ped_sector_length - m_excluded_sectors;
+
+    int top = qRound( ( (double)free_sectors / m_ped_sector_length ) * 100);
+
+    m_total_size_spin->setMaximum( top );
+
+    if( percentage == m_total_size_spin->maximum() )
+        m_partition_sectors = free_sectors;
+    else if(percentage == 0)
+        m_partition_sectors = 0;
+    else
+        m_partition_sectors = (long long)(( (double) percentage / 100) * m_ped_sector_length);
+
+    if( m_partition_sectors > free_sectors)
+        m_partition_sectors = free_sectors;
+
+    adjustSizeCombo( m_size_combo->currentIndex() );
+
+    updatePartition();
 
 }
+
+
 
 /* if the excluded group is unchecked then zero the excluded sectors */
 
@@ -509,4 +485,31 @@ void PartitionAddDialog::clearExcludedGroup(bool on){
 	m_excluded_spin->setValue(0);
 
 }
+
+void PartitionAddDialog::updatePartition(){
+
+    long long free_sectors = m_ped_sector_length - m_excluded_sectors;
+
+    QString total_bytes = sizeToString(m_ped_sector_size * free_sectors);
+    m_unexcluded_label->setText( i18n("Available space: %1", total_bytes) );
+
+    QString preceding_bytes_string = sizeToString(m_excluded_sectors * m_ped_sector_size);
+    m_preceding_label->setText( i18n("Preceding space: %1", preceding_bytes_string) );
+
+    PedSector following_sectors = m_ped_sector_length - (m_partition_sectors + m_excluded_sectors);
+    PedSector following_space = following_sectors * m_ped_sector_size;
+
+    if(following_space < 0)
+        following_space = 0;
+
+    QString following_bytes_string = sizeToString(following_space);
+    m_remaining_label->setText( i18n("Following space: %1", following_bytes_string) );
+
+    m_display_graphic->setPrecedingSectors(m_excluded_sectors);
+    m_display_graphic->setPartitionSectors(m_partition_sectors);
+    m_display_graphic->setFollowingSectors(following_sectors);
+    m_display_graphic->repaint();
+
+}
+
 
