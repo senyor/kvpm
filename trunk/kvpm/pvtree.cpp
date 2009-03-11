@@ -185,7 +185,7 @@ void PVTree::movePhysicalExtents()
     PhysVol *pv = master_list->getPhysVolByName(m_pv_name);
 
     if( move_pv(pv) )
-	MainWindow->rebuildVolumeGroupTab();
+	MainWindow->reRun();
 }
 
 void PVTree::reduceVolumeGroup()
@@ -201,6 +201,6 @@ void PVTree::changePhysicalVolume()
 
     if(dialog.result() == QDialog::Accepted){
         ProcessProgress change_pv(dialog.arguments(), i18n("Changing physical volume...") );
-	MainWindow->rebuildVolumeGroupTab();
+	MainWindow->reRun();
     }
 }

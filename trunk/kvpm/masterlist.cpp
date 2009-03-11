@@ -56,35 +56,6 @@ MasterList::~MasterList()
 	delete m_storage_devices[x];
 }
 
-/* The next function takes a VolGroup object as its parameter
-   then rescans the information for the volume group it represents.
-   The resulting VolGroup object is placed in the m_volume_groups
-   list at the location of the original, which is then deleted. 
-   This function is only useful when the operation, such a changing
-   logical volume attributes, is one that won't effect other groups 
-   or change information on the first tab of the main display page. */
-
-
-VolGroup* MasterList::rebuildVolumeGroup(VolGroup *volumeGroup)
-{
-    VolGroup *new_group, *old_group;
-
-    old_group = volumeGroup;
-    new_group = scanVolumeGroups( old_group->getName() );
-
-    for(int x = 0; x <  m_volume_groups.size(); x++){
-	if(m_volume_groups[x] == old_group)
-	    m_volume_groups[x] = new_group;
-    }
-
-    delete old_group;
-
-    scanLogicalVolumes(new_group);
-    scanPhysicalVolumes(new_group);
-
-    return new_group;
-}
-
 void MasterList::scanVolumeGroups()
 {
     QStringList vg_output;

@@ -340,7 +340,7 @@ void VGTree::setHiddenColumns()
 void VGTree::mkfsLogicalVolume()
 {
     if( make_fs(m_lv) )
-	MainWindow->rebuildVolumeGroupTab();
+	MainWindow->reRun();
 }
 
 void VGTree::removeLogicalVolume()
@@ -352,7 +352,7 @@ void VGTree::removeLogicalVolume()
 void VGTree::renameLogicalVolume()
 {
     if( rename_lv(m_lv) )
-	MainWindow->rebuildVolumeGroupTab();
+	MainWindow->reRun();
 }
 
 void VGTree::createLogicalVolume()
@@ -389,7 +389,7 @@ void VGTree::movePhysicalExtents()
 void VGTree::changeLogicalVolume()
 {
     if( change_lv(m_lv) )
-	MainWindow->rebuildVolumeGroupTab();
+	MainWindow->reRun();
 }
 
 void VGTree::addMirror()

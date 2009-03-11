@@ -1,5 +1,9 @@
 version 0.6.2
 Shrinking and growing physical volumes is now supported.
+Filesystems can be removed from partitions now. Removed the
+menu item for rescanning only on volume group. It was causing
+crashes but may be added back when I have time to do it 
+right.
 
 version 0.6.1
 The filesystem grow and shrink parts of PartMoveResize
