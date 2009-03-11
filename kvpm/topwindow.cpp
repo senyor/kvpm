@@ -83,7 +83,6 @@ TopWindow::TopWindow(QWidget *parent):KMainWindow(parent)
     reduce_vg_action   = new KAction( i18n("Reduce Volume Group..."), this);
     rename_vg_action   = new KAction( KIcon("edit-rename"), i18n("Rename Volume Group..."), this);
     rescan_action      = new KAction( KIcon("view-refresh"), i18n("Rescan System"), this);
-    rescan_vg_action   = new KAction( KIcon("view-refresh"), i18n("Rescan This Group"), this);
     m_restart_pvmove_action   = new KAction( KIcon("system-restart"), i18n("Restart interrupted pvmove"), this);
     m_stop_pvmove_action      = new KAction( KIcon("process-stop"), i18n("Abort pvmove"), this);
     remove_missing_action     = new KAction( i18n("Remove Missing Volumes..."), this);
@@ -108,7 +107,6 @@ TopWindow::TopWindow(QWidget *parent):KMainWindow(parent)
 
     file_menu->addAction(quit_action);
     tool_menu->addAction(rescan_action);
-    tool_menu->addAction(rescan_vg_action);
     tool_menu->addSeparator();
     tool_menu->addAction(m_restart_pvmove_action);
     tool_menu->addAction(m_stop_pvmove_action);
@@ -168,9 +166,6 @@ TopWindow::TopWindow(QWidget *parent):KMainWindow(parent)
 
     connect(reduce_vg_action,       SIGNAL(triggered()), 
 	    this, SLOT(reduceVolumeGroup()));
-
-    connect(rescan_vg_action,       SIGNAL(triggered()), 
-	    this, SLOT(rebuildVolumeGroupTab()));
 
     connect(rescan_action,          SIGNAL(triggered()), 
 	    this, SLOT(reRun()));
@@ -256,35 +251,6 @@ void TopWindow::reRun()
     }
 }
 
-/* This function destroys the displayed tab for the volume group at 
-   the tab widget's current index and replaces it with a new one. It
-   is called when something is changed in a volume group that doesn't
-   effect the information on any other tab */
-
-
-void TopWindow::rebuildVolumeGroupTab()
-{
-    int index = m_tab_widget->currentIndex();
-    VolGroup *old_vg = m_vg_tabs[index - 1]->getVolumeGroup(); 
-    QString group_name = old_vg->getName();
-
-    m_vg = master_list->rebuildVolumeGroup(old_vg);
-    VolumeGroupTab *tab = new VolumeGroupTab(m_vg);
-
-    m_tab_widget->removeTab(index);
-    m_tab_widget->insertTab(index, tab, group_name);
-
-    m_old_vg_tabs.append( m_vg_tabs[index - 1] );
-    
-    m_vg_tabs.replace(index - 1, tab);
-
-// These three lines must be last
-    m_tab_widget->setCurrentIndex(index);
-    m_vg_tabs[index - 1]->hide();
-    m_vg_tabs[index - 1]->show();
-}
-
-
 void TopWindow::setupMenus(int index)
 {
     index = m_tab_widget->currentIndex();
@@ -315,14 +281,12 @@ void TopWindow::setupMenus(int index)
 	reduce_vg_action->setEnabled(true);      // almost any group may be reduced
 	rename_vg_action->setEnabled(true);      
 	m_vgchange_menu->setEnabled(true);
-	rescan_vg_action->setEnabled(true);
     }
     else{
 	reduce_vg_action->setEnabled(false);
 	rename_vg_action->setEnabled(false);      
 	remove_vg_action->setEnabled(false);
 	remove_missing_action->setEnabled(false);
-	rescan_vg_action->setEnabled(false);
 	m_vgchange_menu->setEnabled(false);
 	m_import_vg_action->setEnabled(false);
 	m_export_vg_action->setEnabled(false);
@@ -354,38 +318,38 @@ void TopWindow::changeAllocation()
 
     if(dialog.result() == QDialog::Accepted){
         ProcessProgress change_vg(dialog.arguments(), "", false);
-	MainWindow->rebuildVolumeGroupTab();
+	MainWindow->reRun();
     }
 }
 
 void TopWindow::changeAvailable()
 {
     if( change_vg_available(m_vg) )
-	MainWindow->rebuildVolumeGroupTab();
+	MainWindow->reRun();
 }
 
 void TopWindow::changeExtentSize()
 {
     if( change_vg_extent(m_vg) )
-	MainWindow->rebuildVolumeGroupTab();
+	MainWindow->reRun();
 }
 
 void TopWindow::limitLogicalVolumes()
 {
     if( change_vg_lv(m_vg) )
-	MainWindow->rebuildVolumeGroupTab();
+	MainWindow->reRun();
 }
 
 void TopWindow::limitPhysicalVolumes()
 {
     if( change_vg_pv(m_vg) )
-	MainWindow->rebuildVolumeGroupTab();
+	MainWindow->reRun();
 }
 
 void TopWindow::changeResize()
 {
     if( change_vg_resize(m_vg) )
-	MainWindow->rebuildVolumeGroupTab();
+	MainWindow->reRun();
 }
 
 void TopWindow::createVolumeGroup()
