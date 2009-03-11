@@ -182,12 +182,7 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
 	    m_pvcreate_action->setEnabled(false);
 	    m_mkfs_action->setEnabled(false);
 	    m_partremove_action->setEnabled(false);
-
-            if( item->data(1) == "" )                        // if this is a whole disk pv
-                m_partmoveresize_action->setEnabled(false);
-            else
-                m_partmoveresize_action->setEnabled(true);
-
+            m_partmoveresize_action->setEnabled(false);
 	    m_partadd_action->setEnabled(false);
 	    m_pvremove_action->setEnabled(true);
 	    m_vgcreate_action->setEnabled(true);
