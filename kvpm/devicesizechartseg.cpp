@@ -29,6 +29,7 @@
 #include "processprogress.h"
 #include "pvcreate.h"
 #include "pvremove.h"
+#include "removefs.h"
 #include "storagepartition.h"
 #include "topwindow.h"
 #include "unmount.h"
@@ -176,6 +177,12 @@ void DeviceChartSeg::pvcreatePartition()
 void DeviceChartSeg::pvremovePartition()
 {
     if( remove_pv(m_pv_name) )
+	MainWindow->reRun();
+}
+
+void DeviceChartSeg::removefsPartition()
+{
+    if( remove_fs(m_partition) )
 	MainWindow->reRun();
 }
 

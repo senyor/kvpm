@@ -44,6 +44,7 @@ public slots:
     void pvcreatePartition();
     void pvremovePartition();
     void removePartition();
+    void removefsPartition();
     void moveresizePartition();
     void vgcreatePartition();
     void vgreducePartition();

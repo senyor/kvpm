@@ -47,6 +47,7 @@ private slots:
     void addPartition();
     void moveresizePartition();
     void removePartition();
+    void removefsPartition();
     void vgcreatePartition();
     void tablecreatePartition();
     void vgreducePartition();

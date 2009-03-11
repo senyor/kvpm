@@ -24,6 +24,7 @@
 #include "processprogress.h"
 #include "pvcreate.h"
 #include "pvremove.h"
+#include "removefs.h"
 #include "partremove.h"
 #include "partadd.h"
 #include "partmoveresize.h"
@@ -132,6 +133,12 @@ void DeviceTreeView::vgextendPartition(QAction *action)
 void DeviceTreeView::mountPartition()
 {
     if( mount_filesystem(part) )
+	MainWindow->reRun();
+}
+
+void DeviceTreeView::removefsPartition()
+{
+    if( remove_fs(part) )
 	MainWindow->reRun();
 }
 
