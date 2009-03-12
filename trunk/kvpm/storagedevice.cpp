@@ -32,8 +32,9 @@ StorageDevice::StorageDevice( PedDevice *pedDevice,
     PedDisk      *disk = NULL;
     PedGeometry       geometry;
     PedPartitionType  part_type;
-    int freespace_counter = 0;
     long long length;
+
+    m_freespace_count = 0;
 
     m_sector_size = pedDevice->sector_size;
     m_physical_sector_size = pedDevice->phys_sector_size;
@@ -71,10 +72,10 @@ StorageDevice::StorageDevice( PedDevice *pedDevice,
 	    if( !( (part_type & 0x08) || (  (part_type & 0x04) && (length < (1024 * 1024))))){
 
 	        if( part_type & 0x04 )
-		    freespace_counter++;
+		    m_freespace_count++;
 
 		m_storage_partitions.append(new StoragePartition( part,
-								  freespace_counter,
+								  m_freespace_count,
 								  pvList, 
 								  mountInformationList ));
 	    }
@@ -109,6 +110,11 @@ QList<StoragePartition *> StorageDevice::getStoragePartitions()
 int StorageDevice::getPartitionCount()
 {
     return m_storage_partitions.size();
+}
+
+int StorageDevice::getRealPartitionCount()
+{
+    return m_storage_partitions.size() - m_freespace_count;
 }
 
 long long StorageDevice::getSize()
