@@ -241,7 +241,6 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
 	    m_vgreduce_action->setEnabled(false);
         }
 	else if(item->data(7) != ""){
-	    m_pvcreate_action->setEnabled(false);
 	    m_partremove_action->setEnabled(false);
             m_partmoveresize_action->setEnabled(false);
 	    m_partadd_action->setEnabled(false);
@@ -252,11 +251,17 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
 	    m_vgextend_menu->setEnabled(false);
 	    m_vgreduce_action->setEnabled(false);
 
-	    if( item->dataAlternate(1) == "busy" || item->dataAlternate(3) != 0 )
+            m_pvcreate_action->setEnabled(false);
+
+	    if( item->dataAlternate(1) == "busy" || item->dataAlternate(3) != 0 ){
+                //    m_pvcreate_action->setEnabled(false);
 	        m_tablecreate_action->setEnabled(false);
-	    else 
+            }
+	    else{ 
+                //    m_pvcreate_action->setEnabled(true);
 	        m_tablecreate_action->setEnabled(true);
-	}
+            }
+        }
 	else{
 	    m_partremove_action->setEnabled(false);
             m_partmoveresize_action->setEnabled(false);
