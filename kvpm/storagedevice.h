@@ -38,6 +38,7 @@ class StorageDevice : public QObject
     bool      m_busy;
     bool      m_physical_volume;
     PhysVol  *m_pv;
+    int       m_freespace_count;
 
     QList<StoragePartition *> m_storage_partitions;
 
@@ -51,6 +52,7 @@ class StorageDevice : public QObject
     QString getHardware();
     QList<StoragePartition *> getStoragePartitions();
     int getPartitionCount();
+    int getRealPartitionCount();
     long long getSize();
     long long getSectorSize();
     long long getPhysicalSectorSize();

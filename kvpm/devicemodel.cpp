@@ -210,7 +210,7 @@ void StorageDeviceModel::setupModelData(QList<StorageDevice *> devices, StorageD
 	    }
 	    else{
 		data << dev->getDevicePath() << "" << sizeToString(dev->getSize());
-		dataAlternate << "" << "" << dev->getSize();
+		dataAlternate << "" << "" << dev->getSize() << dev->getRealPartitionCount();
 	    }
 	    
 	    StorageDeviceItem *item = new StorageDeviceItem(data, dataAlternate, parent);
