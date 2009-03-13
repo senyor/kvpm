@@ -330,6 +330,8 @@ void MountDialog::mountFilesystem()
 	m_filesystem_type = "ext2";
     else if( ext3_button->isChecked() )
 	m_filesystem_type = "ext3";
+    else if( ext4_button->isChecked() )
+	m_filesystem_type = "ext4";
     else if( reiserfs3_button->isChecked() )
 	m_filesystem_type = "reiserfs";
     else if( reiserfs4_button->isChecked() )
