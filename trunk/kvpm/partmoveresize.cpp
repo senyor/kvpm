@@ -161,7 +161,13 @@ PartitionMoveResizeDialog::PartitionMoveResizeDialog(StoragePartition *partition
     m_offset_group = new QGroupBox("Move partition start");
     QGridLayout *offset_group_layout = new QGridLayout();
     if( m_old_storage_part->isPV() ){
-        m_offset_group->setEnabled(false);
+        if( m_old_storage_part->getPhysicalVolume()->isActive() ){
+            m_offset_group->setEnabled(false);
+        }
+        else{
+            m_offset_group->setCheckable(true);
+            m_offset_group->setChecked(false);
+        }
     }
     else{
         m_offset_group->setCheckable(true);
