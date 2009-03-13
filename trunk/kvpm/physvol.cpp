@@ -21,6 +21,7 @@ PhysVol::PhysVol(QString pvData)
 {
     QString attributes;
 
+    m_active = false;
     m_extent_size = 0;
     m_last_used_extent = 0;
 
@@ -74,6 +75,16 @@ bool PhysVol::isAllocateable()
 bool PhysVol::isExported()
 {
     return m_exported;
+}
+
+bool PhysVol::isActive()
+{
+    return m_active;
+}
+
+void PhysVol::setActive(bool active)
+{
+    m_active = active;
 }
 
 long long PhysVol::getSize()
