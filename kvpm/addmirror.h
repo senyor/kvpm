@@ -23,6 +23,7 @@
 #include <QSpinBox>
 #include <QRadioButton>
 #include <QGroupBox>
+#include <QVBoxLayout>
 
 class KIntSpinBox;
 
