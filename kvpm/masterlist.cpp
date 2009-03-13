@@ -224,50 +224,13 @@ void MasterList::scanPhysicalVolumes()
 	m_volume_groups[vg]->clearPhysicalVolumes();
 	for(int pv = 0; pv < pv_count; pv++){
 	    if(m_physical_volumes[pv]->getVolumeGroupName() == m_volume_groups[vg]->getName()){
-		m_volume_groups[vg]->addPhysicalVolume(m_physical_volumes[pv]);
+
+                m_physical_volumes[pv]->setActive( determinePVState(m_physical_volumes[pv], 
+                                                                    m_volume_groups[vg] ) );
+
+		m_volume_groups[vg]->addPhysicalVolume( m_physical_volumes[pv] );
 	    }
 	}
-    }
-}
-
-void MasterList::scanPhysicalVolumes(VolGroup *VolumeGroup)
-{
-    PhysVol *physical_volume;
-    QString group_name;
-    QStringList pv_output;
-    QStringList arguments;
-    int pv_count;
-
-    group_name = VolumeGroup->getName();
-    
-    arguments << "pvs" 
-	      << "--noheadings" 
-	      << "--separator" << "|" 
-	      << "--nosuffix" 
-	      << "--units" << "b" 
-	      << "--partial" 
-	      << "-o" << "+pv_used,pv_uuid";
-    
-    ProcessProgress pvscan(arguments, i18n("Scanning physical volumes...") );
-    pv_output = pvscan.programOutput();
-    
-    pv_count = pv_output.size();
-
-    for(int x = m_physical_volumes.size() - 1; x >= 0; x--) // Delete old list entries for this group
-	if(m_physical_volumes[x]->getVolumeGroupName() == group_name){
-	    delete m_physical_volumes[x];
-	    m_physical_volumes.removeAt(x);
-	}
-    
-    for(int x = 0; x < pv_count; x++){
-	physical_volume = new PhysVol(pv_output[x]);
-
-	if(physical_volume->getVolumeGroupName() == group_name){
-	    VolumeGroup->addPhysicalVolume(physical_volume);
-	    m_physical_volumes.append(physical_volume);
-	}
-	else
-	    delete physical_volume;
     }
 }
 
@@ -347,4 +310,39 @@ QStringList MasterList::getVolumeGroupNames()
 	names << m_volume_groups[x]->getName();
 
     return names;
+}
+
+// pv is active if any associated lvs are active
+
+bool MasterList::determinePVState( PhysVol *pv, VolGroup *vg ){
+
+    bool is_active = false;
+    bool is_in_lv = false;
+
+    QString pv_name = pv->getDeviceName();
+    QList<LogVol *>  lvs = vg->getLogicalVolumes();
+    QStringList pvs_in_lv;
+
+    for( int x = lvs.size() - 1; x >= 0  ;x-- ){
+
+        pvs_in_lv = lvs[x]->getDevicePathAll();
+        is_in_lv  = false;
+
+        for( int y = 0; y < pvs_in_lv.size(); y++ ){ 
+            if( pvs_in_lv[y] == pv->getDeviceName() )
+                is_in_lv = true;
+
+        }
+        if( ! is_in_lv ){
+            lvs.removeAt(x);
+        }
+
+    }
+
+    for( int x = 0; x < lvs.size(); x++ ){
+         if( lvs[x]->isActive() )
+            is_active = true;
+    }
+
+    return is_active;
 }

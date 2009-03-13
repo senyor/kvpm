@@ -25,6 +25,7 @@ class PhysVol
     QString m_format;      // e.g. lvm1 or lvm2
     QString m_uuid;
     
+    bool m_active;
     bool m_allocatable;
     bool m_exported;
     long m_extent_size;    // 0 if not in use
@@ -41,6 +42,8 @@ class PhysVol
     QString getUuid();
     bool isAllocateable();
     bool isExported();
+    void setActive(bool active);
+    bool isActive();
     long long getSize();            // size of the physical volume in bytes    
     long long getUnused();          // free space in bytes
     long long getUsed();            // bytes used 

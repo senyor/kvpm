@@ -125,8 +125,18 @@ DeviceProperties::DeviceProperties( StoragePartition *Partition, QWidget *parent
     if( Partition->isPV() ){
 
         pv = Partition->getPhysicalVolume();
- 
-	temp_label =  new QLabel( "<b>Physical volume UUID</b>" );
+
+	temp_label =  new QLabel( "<b>Physical volume</b>" );
+	temp_label->setAlignment( Qt::AlignCenter );
+	pv_info_layout->addWidget( temp_label );
+
+        if( pv->isActive() )
+            temp_label = new QLabel( "active" );
+        else
+            temp_label = new QLabel( "inactive" );
+	pv_info_layout->addWidget( temp_label );
+
+	temp_label =  new QLabel( "<b>UUID</b>" );
 	temp_label->setAlignment( Qt::AlignCenter );
 	pv_info_layout->addWidget( temp_label );
 

@@ -239,8 +239,15 @@ void StorageDeviceModel::setupModelData(QList<StorageDevice *> devices, StorageD
 			 << "physical volume"
 			 << pv->getVolumeGroupName()
 			 << (part->getFlags()).join(", ") 
-			 << "";
+                         << "";
+
 		    dataAlternate << pv->getUsed();
+
+                    if( pv->isActive() )
+                        dataAlternate << "active";
+                    else
+                        dataAlternate << "inactive";
+
 		}
 		else{
 		    data << "" << part->getFileSystem();
