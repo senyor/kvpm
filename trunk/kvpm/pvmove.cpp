@@ -110,17 +110,58 @@ PVMoveDialog::PVMoveDialog(LogVol *logicalVolume, QWidget *parent) :
     m_lv(logicalVolume)
 {
     QStringList physical_volume_paths;
-    
+
+    QList<LogVol *>  lv_list;  // these 3 are only for mirrors
+    LogVol *leg; 
+    int lv_count;
+
     move_lv = true;
-    m_destination_pvs = (m_lv->getVolumeGroup())->getPhysicalVolumes();
-	
-    physical_volume_paths << m_lv->getDevicePathAll();
+    m_destination_pvs = m_lv->getVolumeGroup()->getPhysicalVolumes();
 
-    for(int x = 0; x < physical_volume_paths.size(); x++)
-	m_source_pvs.append(master_list->getPhysVolByName( physical_volume_paths[x] ));
-    
+    // Turns out mirrors don't work with pv move so the following isn't needed yet.
 
-    
+    if( m_lv->isMirror() ){  // find the mirror legs and get the pvs
+
+        lv_list = m_lv->getVolumeGroup()->getLogicalVolumes();
+        lv_count = lv_list.size();
+
+        for(int x = 0; x < lv_count; x++){
+
+            leg = lv_list[x];
+
+            if( ( leg->getOrigin() == m_lv->getName() ) && ( leg->isMirrorLog() ||
+                                                             leg->isMirrorLeg() ||
+                                                             leg->isVirtual()   ||
+                                                             leg->isMirror() ) )  {
+                
+             
+                physical_volume_paths << leg->getDevicePathAll();
+
+            }
+
+            if( physical_volume_paths.size() > 1 ){
+
+                physical_volume_paths.sort();
+
+                for( int x = ( physical_volume_paths.size() - 1 ); x > 0 ;x--){
+                    if( physical_volume_paths[x] == physical_volume_paths[x - 1] )
+                        physical_volume_paths.removeAt(x);
+                } 
+            }
+
+        }
+
+        for(int x = 0; x < physical_volume_paths.size(); x++)
+            m_source_pvs.append(master_list->getPhysVolByName( physical_volume_paths[x] ));
+
+    }
+    else{	
+        physical_volume_paths << m_lv->getDevicePathAll();
+
+        for(int x = 0; x < physical_volume_paths.size(); x++)
+            m_source_pvs.append(master_list->getPhysVolByName( physical_volume_paths[x] ));
+    }
+
 /* If there is only on physical volume in the group then
    a pv move will hve no place to go */
 
@@ -136,7 +177,6 @@ PVMoveDialog::PVMoveDialog(LogVol *logicalVolume, QWidget *parent) :
 	reject();
     }
     
-
 /* if there is only one source physical volumes possible on this logical volume
    then we eliminate it from the possible destinations pv list completely. */
 
@@ -169,7 +209,6 @@ void PVMoveDialog::buildDialog()
 	layout->addWidget( new QLabel("<b>" + m_lv->getFullName() + "</b>") );
     }
 
-
     QGroupBox *radio_group = new QGroupBox( i18n("Source Physical Volume") );
     QHBoxLayout *radio_group_layout = new QHBoxLayout();
     radio_group->setLayout(radio_group_layout);
@@ -178,9 +217,10 @@ void PVMoveDialog::buildDialog()
     QVBoxLayout *radio_label_layout  = new QVBoxLayout();
     radio_group_layout->addLayout(radio_button_layout);
     radio_group_layout->addLayout(radio_label_layout);
-    
+
     if( m_source_pvs.size() > 1){
 	for(int x = 0; x < m_source_pvs.size(); x++){
+
 	    radio_button = new QRadioButton( m_source_pvs[x]->getDeviceName() );
 
 	    if( !x )
@@ -213,7 +253,7 @@ void PVMoveDialog::buildDialog()
 	label = new QLabel("Used space: " + sizeToString( pv_used_space ) );
 	radio_label_layout->addWidget(label);
     }
-    
+
     QGroupBox *check_group = new QGroupBox( i18n("Destination Physical Volumes") );
     QVBoxLayout *check_layout = new QVBoxLayout();
     check_group->setLayout(check_layout);

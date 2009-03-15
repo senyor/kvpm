@@ -129,7 +129,7 @@ void LVActionsMenu::setup(LogVol *lv)
     lv_extend_action   = new KAction( i18n("Extend logical volume..."), this);
     pv_move_action     = new KAction( i18n("Move physical extents..."), this);
     lv_change_action   = new KAction( i18n("Change logical volume attributes..."), this);
-    add_mirror_action  = new KAction( i18n("Add or change volume mirror..."), this);
+    add_mirror_action  = new KAction( i18n("Add leg or change mirror..."), this);
     mount_filesystem_action   = new KAction( i18n("Mount filesystem..."), this);
     unmount_filesystem_action = new KAction( i18n("Unmount filesystem..."), this);
     remove_mirror_action      = new KAction( i18n("Remove mirror leg..."), this);
@@ -164,6 +164,7 @@ void LVActionsMenu::setup(LogVol *lv)
 	    if( lv->isMounted() ){
 		lv_mkfs_action->setEnabled(false);
 		lv_reduce_action->setEnabled(false);
+                lv_extend_action->setEnabled(true);
 		lv_remove_action->setEnabled(false);
 		unmount_filesystem_action->setEnabled(true);
 		mount_filesystem_action->setEnabled(true);
@@ -171,24 +172,44 @@ void LVActionsMenu::setup(LogVol *lv)
 	    else{
 		lv_mkfs_action->setEnabled(true);
 		lv_reduce_action->setEnabled(true);
+                lv_extend_action->setEnabled(true);
 		lv_remove_action->setEnabled(true);
 		unmount_filesystem_action->setEnabled(false);
 		mount_filesystem_action->setEnabled(true);
 	    }
 
-	    add_mirror_action->setEnabled(true);
-	    lv_change_action->setEnabled(true);
-	    lv_extend_action->setEnabled(true);
-	    pv_move_action->setEnabled(true);
-	    lv_rename_action->setEnabled(true);
-
-	    if( lv->isMirror() )
-		remove_mirror_action->setEnabled(true);
-	    else
+            if( lv->isSnap() || lv->isOrigin() ){
+                add_mirror_action->setEnabled(false);
 		remove_mirror_action->setEnabled(false);
+                lv_extend_action->setEnabled(false);
+		lv_reduce_action->setEnabled(false);
+                pv_move_action->setEnabled(false);
 
+                if( lv->isSnap() )
+                    snap_create_action->setEnabled(false);
+                else
+                    snap_create_action->setEnabled(true);
+
+                mirror_menu->setEnabled(false);
+            }
+            else if( lv->isMirror() ){
+                add_mirror_action->setEnabled(true);
+		remove_mirror_action->setEnabled(true);
+                lv_extend_action->setEnabled(false);
+		lv_reduce_action->setEnabled(false);
+                pv_move_action->setEnabled(false);
+                snap_create_action->setEnabled(false);
+            }
+	    else{
+                add_mirror_action->setEnabled(true);
+		remove_mirror_action->setEnabled(false);
+                pv_move_action->setEnabled(true);
+                snap_create_action->setEnabled(true);
+            }
+
+	    lv_change_action->setEnabled(true);
+	    lv_rename_action->setEnabled(true);
 	    remove_mirror_leg_action->setEnabled(false);
-	    snap_create_action->setEnabled(true);
 	    filesystem_menu->setEnabled(true);
 	}
 	else if( lv->isPvmove() ){
@@ -229,14 +250,13 @@ void LVActionsMenu::setup(LogVol *lv)
 	    filesystem_menu->setEnabled(false);
 	}
 	else if( !(lv->isWritable()) && lv->isLocked() ){
-	    if( lv->isMounted() ){
+
+	    if( lv->isMounted() )
 		unmount_filesystem_action->setEnabled(true);
-		mount_filesystem_action->setEnabled(false);
-	    }
-	    else{
+	    else
 		unmount_filesystem_action->setEnabled(false);
-		mount_filesystem_action->setEnabled(true);
-	    }
+
+            mount_filesystem_action->setEnabled(true);
 	    lv_mkfs_action->setEnabled(false);
 	    lv_remove_action->setEnabled(false);
 	    add_mirror_action->setEnabled(false);
@@ -250,14 +270,13 @@ void LVActionsMenu::setup(LogVol *lv)
 	    filesystem_menu->setEnabled(true);
 	}
 	else if( lv->isWritable() && lv->isLocked() ){
-	    if( lv->isMounted() ){
+
+	    if( lv->isMounted() )
 		unmount_filesystem_action->setEnabled(true);
-		mount_filesystem_action->setEnabled(false);
-	    }
-	    else{
+	    else
 		unmount_filesystem_action->setEnabled(false);
-		mount_filesystem_action->setEnabled(true);
-	    }
+
+            mount_filesystem_action->setEnabled(true);
 	    lv_mkfs_action->setEnabled(true);
 	    lv_remove_action->setEnabled(false);
 	    add_mirror_action->setEnabled(false);
@@ -274,22 +293,43 @@ void LVActionsMenu::setup(LogVol *lv)
 	    if( lv->isMounted() ){
 		lv_remove_action->setEnabled(false);
 		unmount_filesystem_action->setEnabled(true);
-		mount_filesystem_action->setEnabled(false);
 	    }
 	    else{
 		lv_remove_action->setEnabled(true);
 		unmount_filesystem_action->setEnabled(false);
-		mount_filesystem_action->setEnabled(true);
 	    }
+
+            if( lv->isSnap() || lv->isOrigin() ){
+                add_mirror_action->setEnabled(false);
+		remove_mirror_action->setEnabled(false);
+                pv_move_action->setEnabled(false);
+
+                if( lv->isSnap() )
+                    snap_create_action->setEnabled(false);
+                else
+                    snap_create_action->setEnabled(true);
+
+                mirror_menu->setEnabled(false);
+            }
+            else if( lv->isMirror() ){
+                add_mirror_action->setEnabled(true);
+		remove_mirror_action->setEnabled(true);
+                pv_move_action->setEnabled(false);
+                snap_create_action->setEnabled(false);
+            }
+	    else{
+                add_mirror_action->setEnabled(true);
+		remove_mirror_action->setEnabled(false);
+                pv_move_action->setEnabled(true);
+                snap_create_action->setEnabled(true);
+            }
+
+            mount_filesystem_action->setEnabled(true);
 	    lv_mkfs_action->setEnabled(false);
 	    lv_reduce_action->setEnabled(false);
-	    add_mirror_action->setEnabled(true);
 	    lv_change_action->setEnabled(true);
 	    lv_extend_action->setEnabled(false);
-	    pv_move_action->setEnabled(true);
-	    remove_mirror_action->setEnabled(true);
 	    remove_mirror_leg_action->setEnabled(false);
-	    snap_create_action->setEnabled(true);
 	    filesystem_menu->setEnabled(true);
 	}
     }
