@@ -32,7 +32,7 @@ bool lv_reduce(LogVol *logicalVolume)
     fs    = logicalVolume->getFilesystem();
     state = logicalVolume->getState();
 
-    QString warning_message = i18n("Currently only the ext2 and ext3  file systems "
+    QString warning_message = i18n("Currently only the ext2, ext3 and ext4  file systems "
 				   "are supported for file system reduction. If this " 
 				   "logical volume is reduced any data it contains "
 				   "will be lost!");
@@ -65,7 +65,7 @@ bool lv_reduce(LogVol *logicalVolume)
         KMessageBox::error(0, i18n("The filesystem must be unmounted first") );
 	return false;
     }
-    else if( (fs != "ext2") && (fs != "ext3") ){
+    else if( (fs != "ext2") && (fs != "ext3") && (fs != "ext4") ){
 	if(KMessageBox::warningContinueCancel(0, warning_message) != KMessageBox::Continue)
 	    return false;
 	else{

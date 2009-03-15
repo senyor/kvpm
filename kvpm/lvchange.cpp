@@ -57,19 +57,19 @@ QStringList LVChangeDialog::arguments()
 
     args << "lvchange";
     
-    if(available_check->isChecked())
+    if( available_check->isChecked() && ( m_lv->getState() == "Unavailable" ) )
 	args << "--available" << "y";
-    else
+    else if( ( ! available_check->isChecked() ) && ( m_lv->getState() == "Active" ) )
 	args << "--available" << "n";
 
-    if(contig_check->isChecked())
+    if( contig_check->isChecked() && ( m_lv->getPolicy() != "Contiguous" ) )
 	args << "--contiguous" << "y";
-    else
+    else if( ( ! contig_check->isChecked() ) && ( m_lv->getPolicy() == "Contiguous" ) )
 	args << "--contiguous" << "n";
 
-    if(ro_check->isChecked())
+    if( ro_check->isChecked() && m_lv->isWritable() )
 	args << "--permission" << "r";
-    else
+    else if( ( ! ro_check->isChecked() ) && ( ! m_lv->isWritable() ) )
 	args << "--permission" << "rw";
     
     if(m_mirror_box->isEnabled()){
@@ -87,7 +87,7 @@ QStringList LVChangeDialog::arguments()
 	args << "--major" << major_edit->text();
 	args << "--minor" << minor_edit->text();
     }
-    else{
+    else if( ( ! m_persistant_box->isChecked() ) && ( m_lv->isPersistant() ) ){
 	args << "--force" << "-Mn";
     }
     
@@ -140,10 +140,17 @@ void LVChangeDialog::buildAdvancedTab()
     m_persistant_box->setCheckable(true);
     QVBoxLayout *persistant_layout = new QVBoxLayout();
     m_persistant_box->setLayout(persistant_layout);
+    QHBoxLayout *major_layout = new QHBoxLayout();
+    QHBoxLayout *minor_layout = new QHBoxLayout();
+    persistant_layout->addLayout(major_layout);
+    persistant_layout->addLayout(minor_layout);
+
     major_edit = new KLineEdit(QString("%1").arg(m_lv->getMajorDevice()));
-    persistant_layout->addWidget(major_edit);
+    major_layout->addWidget( new QLabel( i18n("Major number: ") ) );
+    major_layout->addWidget(major_edit);
     minor_edit = new KLineEdit(QString("%1").arg(m_lv->getMinorDevice()));
-    persistant_layout->addWidget(minor_edit);
+    minor_layout->addWidget( new QLabel( i18n("Minor number: ") ) );
+    minor_layout->addWidget(minor_edit);
     layout->addWidget(m_persistant_box);
 
     if( !m_lv->isMirror() )

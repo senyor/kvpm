@@ -60,7 +60,7 @@ bool lv_extend(LogVol *logicalVolume)
     QString mount_point;
     
     QString fs = logicalVolume->getFilesystem();
-    QString warning_message = i18n("Currently only the ext2, ext3, xfs, jfs " 
+    QString warning_message = i18n("Currently only the ext2/3/4, xfs, jfs " 
 				   "and reiserfs file systems are "
 				   "supported for file system extention. If this logical "
 				   "volume has a filesystem or data, it will need to be " 
@@ -128,7 +128,7 @@ bool lv_extend(LogVol *logicalVolume)
 	    return false;
 	}
     }
-    else if( (fs != "ext2") && (fs != "ext3") && (fs != "reiserfs") ){
+    else if( (fs != "ext2") && (fs != "ext3") && (fs != "ext4") && (fs != "reiserfs") ){
         if(KMessageBox::warningContinueCancel(0, warning_message) != KMessageBox::Continue)
             return false;
         else{
@@ -247,7 +247,12 @@ QWidget* LVCreateDialog::createGeneralTab()
      }
      
      QHBoxLayout *size_layout = new QHBoxLayout();
-     size_layout->addWidget(new QLabel( i18n("Volume size: ") ));
+
+     if( ! m_extend )
+         size_layout->addWidget(new QLabel( i18n("Volume size: ") ));
+     else
+         size_layout->addWidget(new QLabel( i18n("Extend by: ") ));
+
      m_size_edit = new KLineEdit();
      size_layout->addWidget(m_size_edit);
      m_size_validator = new QDoubleValidator(m_size_edit); 
@@ -290,7 +295,22 @@ QWidget* LVCreateDialog::createGeneralTab()
      anywhere_button   = new QRadioButton( i18n("Anywhere") );
      inherited_button  = new QRadioButton( i18n("Inherited") );
      cling_button      = new QRadioButton( i18n("Cling") );
-     normal_button->setChecked(true);
+
+     QString policy = "Inherited";
+     if( m_extend )
+         policy = m_lv->getPolicy();
+
+     if( policy == "Normal" )
+         normal_button->setChecked(true);
+     else if( policy == "Contiguous" )
+         contiguous_button->setChecked(true);
+     else if( policy == "Anywhere" )
+         anywhere_button->setChecked(true);
+     else if( policy == "Cling" )
+         cling_button->setChecked(true);
+     else
+         inherited_button->setChecked(true);
+
      alloc_box_layout->addWidget(normal_button);
      alloc_box_layout->addWidget(contiguous_button);
      alloc_box_layout->addWidget(anywhere_button);
@@ -911,17 +931,6 @@ QStringList LVCreateDialog::argumentsLV()
 	else 
 	    args << "--permission" << "rw" ;
 
-	if ( !inherited_button->isChecked() ){        // "inherited" is what we get if
-	    args << "--alloc";                        // we don't pass "--alloc" at all
-	    if ( contiguous_button->isChecked() )     // passing "--alloc" "inherited"
-		args << "contiguous" ;                // doesn't work
-	    else if ( anywhere_button->isChecked() )
-		args << "anywhere" ;
-	    else if ( cling_button->isChecked() )
-		args << "cling" ;
-	    else
-		args << "normal" ;
-	}
 	if( !m_snapshot ){
 	    if( m_zero_check->isChecked() )
 		args << "--zero" << "y";
@@ -937,6 +946,18 @@ QStringList LVCreateDialog::argumentsLV()
 		    args << "--mirrorlog" << "core";
 	    }
 	}
+    }
+
+    if ( !inherited_button->isChecked() ){        // "inherited" is what we get if
+        args << "--alloc";                        // we don't pass "--alloc" at all
+        if ( contiguous_button->isChecked() )     // passing "--alloc" "inherited"
+            args << "contiguous" ;                // doesn't work
+        else if ( anywhere_button->isChecked() )
+            args << "anywhere" ;
+        else if ( cling_button->isChecked() )
+            args << "cling" ;
+        else
+            args << "normal" ;
     }
     
     args << "--extents" << QString("+%1").arg(m_volume_extents);
@@ -967,7 +988,7 @@ QStringList LVCreateDialog::argumentsLV()
 	if ( m_pv_checks[x]->isChecked() )
 	    args << m_physical_volumes[x]->getDeviceName();
     }
-    
+
     args.prepend(program_to_run);
     return args;
 }
@@ -981,13 +1002,11 @@ QStringList LVCreateDialog::argumentsFS()
     
     if( m_lv->getMountPoints().size() )
 	mount_point = m_lv->getMountPoints().takeFirst();
-    else
-	qDebug() << "xfs was not mounted!";
     
     if( fs == "xfs" ){
 	args << "xfs_growfs" << mount_point;
     }
-    else if( (fs == "ext2") || (fs == "ext3") ){
+    else if( (fs == "ext2") || (fs == "ext3") || (fs == "ext4")){
         args << "resize2fs" << "-f"
 	     << "/dev/" + m_vg->getName() + "/" + m_lv->getName();
     }
