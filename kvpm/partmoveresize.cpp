@@ -33,11 +33,11 @@
 #include "partmoveresize.h"
 #include "partaddgraphic.h"
 #include "physvol.h"
+#include "pvextend.h"
+#include "pvreduce.h"
 #include "sizetostring.h"
-#include "growfs.h"
-#include "growpv.h"
-#include "shrinkfs.h"
-#include "shrinkpv.h"
+#include "fsextend.h"
+#include "fsreduce.h"
 
 
 bool moveresize_partition(StoragePartition *partition)
@@ -47,12 +47,12 @@ bool moveresize_partition(StoragePartition *partition)
 
     QString message = i18n("Currently only the ext2/3/4 file systems "
                            "are supported for file system shrinking. "
-                           "Growing is supported for ext2/3/4, jfs and xfs "
+                           "Growing is supported for ext2/3/4, jfs, xfs and Reiserfs. "
                            "Moving a partition is supported for any filesystem. "
                            "Physical volumes may also be grown or shrunk and "
                            "if they are not active, may be moved as well.");
 
-    if( ! ( fs == "ext2" || fs == "ext3" || fs == "ext4" ||
+    if( ! ( fs == "ext2" || fs == "ext3" || fs == "ext4" || fs == "reiserfs" ||
             fs == "xfs"  || fs == "jfs"  || partition->isPV() ) ){
 
         KMessageBox::information(0, message);
@@ -116,7 +116,8 @@ PartitionMoveResizeDialog::PartitionMoveResizeDialog(StoragePartition *partition
     QString filesystem = partition->getFileSystem();
     m_size_group = new QGroupBox( i18n("Modify partition size") );
     m_size_group->setCheckable(true);
-    if ( ! (filesystem == "ext2" || filesystem == "ext3" || filesystem == "ext4" || 
+    if ( ! (filesystem == "ext2" || filesystem == "ext3" || 
+            filesystem == "ext4" || filesystem == "reiserfs" || 
             filesystem == "xfs"  || filesystem == "jfs"  || m_old_storage_part->isPV() ) ){
         m_size_group->setChecked(false);
         m_size_group->setEnabled(false);
@@ -703,11 +704,11 @@ bool PartitionMoveResizeDialog::shrinkPartition(){
         new_size = m_new_part_size;
 
     if( is_pv ){
-        m_new_part_size = shrink_pv( ped_partition_get_path(m_current_part) , 
+        m_new_part_size = pv_reduce( ped_partition_get_path(m_current_part) , 
                                      new_size * m_ped_sector_size ) / m_ped_sector_size;
     }
     else{
-        m_new_part_size = shrink_fs( ped_partition_get_path(m_current_part), 
+        m_new_part_size = fs_reduce( ped_partition_get_path(m_current_part), 
                                      new_size * m_ped_sector_size, 
                                      fs ) / m_ped_sector_size;
     }
@@ -828,13 +829,13 @@ bool PartitionMoveResizeDialog::growPartition(){
         waitPartitionTableReload( ped_partition_get_path(m_current_part), m_ped_disk);
 
         if( is_pv ){            
-           if( grow_pv( ped_partition_get_path(m_current_part) ) )
+           if( pv_extend( ped_partition_get_path(m_current_part) ) )
                 return true;
             else
                 return false;
         }
         else{
-            if(grow_fs( ped_partition_get_path(m_current_part), fs ) )
+            if( fs_extend( ped_partition_get_path(m_current_part), fs ) )
                 return true;
             else
                 return false;

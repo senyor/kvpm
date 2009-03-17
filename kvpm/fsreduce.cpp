@@ -18,7 +18,7 @@
 #include <QtGui>
 
 #include "processprogress.h"
-#include "shrinkfs.h"
+#include "fsreduce.h"
 #include "fsblocksize.h"
 #include "fsck.h"
 
@@ -27,7 +27,7 @@
 // Takes new_size in bytes.
 
 
-long long shrink_fs(QString path, long long new_size, QString fs)
+long long fs_reduce(QString path, long long new_size, QString fs)
 {
 
     QStringList arguments, 

@@ -7,18 +7,18 @@ include_directories( ${KDE4_INCLUDES} ${QT4_INCLUDES} )
 set(kvpm_SRCS addmirror.cpp kvpmconfigdialog.cpp devicemodel.cpp deviceproperties.cpp 
               devicepropertiesstack.cpp devicesizechart.cpp devicesizechartseg.cpp 
 	      devicetab.cpp executablefinder.cpp deviceactionsmenu.cpp fsck.cpp
-	      fsblocksize.cpp
-	      fsprobe.cpp growfs.cpp growpv.cpp kvpmsetup.cpp
+	      fsblocksize.cpp fsextend.cpp
+	      fsprobe.cpp fsreduce.cpp  kvpmsetup.cpp
 	      logvol.cpp lvactionsmenu.cpp lvchange.cpp lvrename.cpp
 	      lvcreate.cpp lvproperties.cpp lvpropertiesstack.cpp lvreduce.cpp 
 	      lvremove.cpp lvsizechart.cpp main.cpp mkfs.cpp masterlist.cpp  mount.cpp 
 	      lvsizechartseg.cpp mountentry.cpp mountinfo.cpp 
-	      partremove.cpp 
+	      partremove.cpp pvextend.cpp pvreduce.cpp
 	      partaddgraphic.cpp partadd.cpp pvproperties.cpp  pvpropertiesstack.cpp 
 	      devicetreeview.cpp physvol.cpp partmoveresize.cpp removefs.cpp
 	      nomungecheck.cpp processprogress.cpp pvchange.cpp pvcreate.cpp 
 	      pvmove.cpp pvremove.cpp pvtree.cpp removemissing.cpp removemirror.cpp 
-	      removemirrorleg.cpp shrinkfs.cpp shrinkpv.cpp 
+	      removemirrorleg.cpp 
 	      sizetostring.cpp storagepartition.cpp storagedevice.cpp topwindow.cpp 
 	      tablecreate.cpp unmount.cpp 
 	      vgchangealloc.cpp vgchangeavailable.cpp vgexport.cpp vgimport.cpp

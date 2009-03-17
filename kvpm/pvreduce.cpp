@@ -18,10 +18,14 @@
 #include <QtGui>
 
 #include "processprogress.h"
-#include "growpv.h"
+#include "pvreduce.h"
 
 
-bool grow_pv(QString path)
+// Returns new pv size in bytes or 0 if no shrinking was done
+// Takes new_size in bytes.
+
+
+long long pv_reduce(QString path, long long new_size)
 {
 
     QStringList arguments; 
@@ -29,14 +33,15 @@ bool grow_pv(QString path)
     QString size_string;
 
     arguments << "pvresize" 
+              << "--setphysicalvolumesize"
+              << QString("%1m").arg( new_size / ( 1024 * 1024 ) )
               << path;
 
-    ProcessProgress pv_grow( arguments, i18n("Growing pv..."), true );
-
-    if( pv_grow.exitCode() )
-        return false;
+    ProcessProgress pv_shrink(arguments, i18n("Shrinking pv..."), true );
+    if( pv_shrink.exitCode() )
+        return 0;
     else
-        return true;
+        return new_size;
 
 }
 
