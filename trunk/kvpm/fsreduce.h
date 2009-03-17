@@ -12,13 +12,14 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
-#ifndef GROWPV_H
-#define GROWPV_H
+#ifndef FSREDUCE_H
+#define FSREDUCE_H
 
 #include <QString>
 
 #include "storagepartition.h"
 
-bool grow_pv(QString path);
+long long fs_reduce(QString path, long long new_size, QString fs);
+long long get_min_fs_size(QString path, QString fs);
 
 #endif

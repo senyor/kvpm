@@ -12,13 +12,14 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
-#ifndef SHRINKPV_H
-#define SHRINKPV_H
+#ifndef FSEXTEND_H
+#define FSEXTEND_H
 
 #include <QString>
 
 #include "storagepartition.h"
 
-long long shrink_pv(QString path, long long new_size);
+bool fs_extend(QString path, QString fs);
+
 
 #endif

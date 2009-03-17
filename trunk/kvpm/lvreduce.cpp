@@ -19,7 +19,7 @@
 #include "logvol.h"
 #include "lvreduce.h"
 #include "processprogress.h"
-#include "shrinkfs.h"
+#include "fsreduce.h"
 #include "sizetostring.h"
 #include "volgroup.h"
 
@@ -244,7 +244,7 @@ void LVReduceDialog::doShrink()
 
     hide();
 
-    new_size = shrink_fs( m_lv->getMapperPath(), new_size, m_lv->getFilesystem() );
+    new_size = fs_reduce( m_lv->getMapperPath(), new_size, m_lv->getFilesystem() );
 
     if( new_size ){
 

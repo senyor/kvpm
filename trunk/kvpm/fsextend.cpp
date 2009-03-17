@@ -21,7 +21,7 @@
 
 #include <QtGui>
 
-#include "growfs.h"
+#include "fsextend.h"
 #include "mountinfo.h"
 #include "processprogress.h"
 #include "fsck.h"
@@ -29,7 +29,7 @@
 bool do_temp_mount(QString path, QString fs);
 void do_temp_unmount();
 
-bool grow_fs(QString path, QString fs){
+bool fs_extend(QString path, QString fs){
 
     MountInformationList mount_info_list;
     QList<MountInformation *> mounts = mount_info_list.getMountInformation( path );
@@ -94,9 +94,24 @@ bool grow_fs(QString path, QString fs){
             }
         }
         else{
-            KMessageBox::error(0, "the filesystems must be unmounted first");
+            KMessageBox::error(0, "the filesystem must be unmounted first");
             return false;
         }
+    }
+    else if( fs == "reiserfs" ){
+
+        arguments << "resize_reiserfs" 
+                  << "-fq"
+                  << path; 
+        
+        ProcessProgress fs_grow(arguments, i18n("Growing filesystem..."), true );
+        output = fs_grow.programOutput();
+        
+        if ( fs_grow.exitCode() )
+            return false;
+        else
+            return true;
+        
     }
 
     return false;
