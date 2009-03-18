@@ -29,7 +29,7 @@ bool fsck(QString path){
     ProcessProgress fsck_fs(arguments, i18n("Checking filesystem..."), true );
     output = fsck_fs.programOutput();
 
-    if ( fsck_fs.exitCode() )
+    if ( fsck_fs.exitCode() > 1 )   // 0 means no errors 1 means minor errors fixed
         return false;
     else
         return true;
