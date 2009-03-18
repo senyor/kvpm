@@ -57,8 +57,10 @@ bool fs_extend(QString path, QString fs, bool isLV){
 
     if( fs == "ext2" || fs == "ext3" || fs == "ext4" ){
 
-        if( ! isMounted )
-            fsck( path );
+        if( ! isMounted ){
+            if( ! fsck( path ) )
+                return false;
+        }
 
         arguments << "resize2fs" 
                   << path; 

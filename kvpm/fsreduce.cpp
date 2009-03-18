@@ -40,7 +40,8 @@ long long fs_reduce(QString path, long long new_size, QString fs)
     if( fs != "ext2" && fs != "ext3" && fs != "ext4" )
         return 0;
 
-    fsck( path );
+    if( ! fsck( path ) )
+        return 0;
 
     long block_size = get_fs_block_size( path );
 
