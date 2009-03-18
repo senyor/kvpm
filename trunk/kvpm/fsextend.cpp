@@ -29,73 +29,111 @@
 bool do_temp_mount(QString path, QString fs);
 void do_temp_unmount();
 
-bool fs_extend(QString path, QString fs){
+// path is the device path, not mount point
+
+bool fs_extend(QString path, QString fs, bool isLV){
 
     MountInformationList mount_info_list;
     QList<MountInformation *> mounts = mount_info_list.getMountInformation( path );
-    QString mp;      // mount point
+    QString mp;               // mount point
+    bool isMounted = false;
+
+    if( mounts.size() ){
+        mp = mounts[0]->getMountPoint();
+        isMounted = true;
+    }
 
     QStringList arguments, output;
     unsigned long options = 0;
 
+    if( ( ! isLV) && ( isMounted ) ){               
+        KMessageBox::error(0, "only logical volumes may be mounted during resize, not partitions");
+        return false;
+    }
+
+    QString error_message = i18n("It appears that the partition or volume was extented but "
+                                 "the filesystem was not. It will need to be extended before "
+                                 "the additional space can be used.");
+
     if( fs == "ext2" || fs == "ext3" || fs == "ext4" ){
 
-        fsck( path );
+        if( ! isMounted )
+            fsck( path );
 
         arguments << "resize2fs" 
                   << path; 
 
-        ProcessProgress fs_grow(arguments, i18n("Growing filesystem..."), true );
+        ProcessProgress fs_grow(arguments, i18n("Extending filesystem..."), true );
         output = fs_grow.programOutput();
 
-        if ( fs_grow.exitCode() )
+        if ( fs_grow.exitCode() ){
+            KMessageBox::error(0, error_message);
             return false;
+        }
         else
             return true;
     }
     else if( fs == "xfs" ){
+        if( mp == "" ){
+            if( do_temp_mount(path, fs) ){
 
-        if( do_temp_mount(path, fs) ){
+                arguments << "xfs_growfs" 
+                          << "/tmp/kvpm_tmp_mount"; 
+            
+                ProcessProgress fs_grow(arguments, i18n("Extending filesystem..."), true );
+
+                do_temp_unmount();
+            
+                if ( fs_grow.exitCode() ){
+                    KMessageBox::error(0, error_message);
+                    return false;
+                }
+                else
+                    return true;
+            }
+            do_temp_unmount();
+            KMessageBox::error(0, error_message);
+            return false;
+        }
+        else{
 
             arguments << "xfs_growfs" 
-                      << "/tmp/kvpm_tmp_mount"; 
+                      << mp; 
             
-            ProcessProgress fs_grow(arguments, i18n("Growing filesystem..."), true );
-
-            do_temp_unmount();
+            ProcessProgress fs_grow(arguments, i18n("Extending filesystem..."), true );
             
-            if ( fs_grow.exitCode() )
+            if ( fs_grow.exitCode() ){
+                KMessageBox::error(0, error_message);
                 return false;
+            }
             else
                 return true;
         }
-
-        do_temp_unmount();
-        return false;
     }
     else if( fs == "jfs" ){
 
         options = MS_REMOUNT;
 
-        if( mounts.size() == 0 ){
+        if( ! isMounted ){
             if( do_temp_mount(path, fs) ){
-                if(mount( path.toAscii().data(), "/tmp/kvpm_tmp_mount", NULL, options,"resize" )){
-                    KMessageBox::error(0, i18n("Error number: %1 %2", errno, strerror(errno)));
-                    do_temp_unmount();                
-                    return false;
-                }
-                else{
+                if( ! mount( path.toAscii().data(), "/tmp/kvpm_tmp_mount", NULL, options, "resize" )){
                     do_temp_unmount();
                     return true;
+                }
+                else{
+                    KMessageBox::error(0, i18n("Error number: %1 %2", errno, strerror(errno)));
+                    do_temp_unmount();                
                 }                
             }
-            else{
-                return false;
-            }
+            return false;
         }
         else{
-            KMessageBox::error(0, "the filesystem must be unmounted first");
-            return false;
+            if(mount( path.toAscii().data(), mp.toAscii().data(), NULL, options, "resize" )){
+                KMessageBox::error(0, i18n("Error number: %1 %2", errno, strerror(errno)));
+                return false;
+            }
+            else
+                return true;
         }
     }
     else if( fs == "reiserfs" ){
@@ -104,16 +142,16 @@ bool fs_extend(QString path, QString fs){
                   << "-fq"
                   << path; 
         
-        ProcessProgress fs_grow(arguments, i18n("Growing filesystem..."), true );
+        ProcessProgress fs_grow(arguments, i18n("Extending filesystem..."), true );
         output = fs_grow.programOutput();
         
-        if ( fs_grow.exitCode() )
+        if ( fs_grow.exitCode() ){
+            KMessageBox::error(0, error_message);
             return false;
+        }
         else
             return true;
-        
     }
-
     return false;
 }
 
