@@ -21,6 +21,7 @@
 #include <KMessageBox>
 #include <KLocale>
 
+#include "fsextend.h"
 #include "logvol.h"
 #include "lvcreate.h"
 #include "mountentry.h"
@@ -56,106 +57,41 @@ bool snapshot_create(LogVol *logicalVolume)
 
 bool lv_extend(LogVol *logicalVolume)
 {
-    int error;
-    QString mount_point;
-    
     QString fs = logicalVolume->getFilesystem();
+
     QString warning_message = i18n("Currently only the ext2/3/4, xfs, jfs " 
 				   "and reiserfs file systems are "
 				   "supported for file system extention. If this logical "
 				   "volume has a filesystem or data, it will need to be " 
 				   "extended separately!");
 
-    QString error_message = i18n("It appears that the volume was extented but the "
-				 "filesystem was not. It will need to be extened before "
-				 "the additional space can be used.");
+    if( fs == "xfs"  || fs == "jfs"  || fs == "reiserfs" || 
+        fs == "ext2" || fs == "ext3" || fs == "ext4" ){
 
-    if( fs == "jfs" ){
-	if( logicalVolume->isMounted() ){
-	    mount_point = logicalVolume->getMountPoints().takeFirst();
-	    LVCreateDialog dialog(logicalVolume, false);
-	    dialog.exec();
+        LVCreateDialog dialog(logicalVolume, false);
+        dialog.exec();
 
-	    if(dialog.result() == QDialog::Accepted){
-		ProcessProgress extend_lv(dialog.argumentsLV(), 
-					  i18n("Extending volume..."), 
-					  true);
-		if( !extend_lv.exitCode() ){
-		    
-		    error = mount( logicalVolume->getMapperPath().toAscii().data(),
-				   mount_point.toAscii().data(),
-				   "",
-				   MS_REMOUNT,
-				   "resize" );
-		    
-		    if( !error )
-			addMountEntryOptions( mount_point, "resize");
-		    else
-			KMessageBox::error(0, i18n("Error number: %1  %2").arg(errno).arg(strerror(errno)));
-		    
-		}
-		return true;
-	    }
-	    else
-		return false;
-	}
-	else{
-	  KMessageBox::error(0, i18n("Jfs filesystems must be mounted to extend them") );
-	    return false;
-	}
+        if( dialog.result() == QDialog::Accepted ){
+            ProcessProgress extend_lv(dialog.argumentsLV(), 
+                                      i18n("Extending volume..."), 
+                                      true);
+            if( !extend_lv.exitCode() )
+                return fs_extend( logicalVolume->getMapperPath(), fs, true );		    
+        }
+        return false;
     }
-    else if( fs == "xfs" ){
-	if( logicalVolume->isMounted() ){
+    else{
+        if(KMessageBox::warningContinueCancel(0, warning_message) == KMessageBox::Continue){
 
-	    LVCreateDialog dialog(logicalVolume, false);
-	    dialog.exec();
-
-	    if(dialog.result() == QDialog::Accepted){
-	        ProcessProgress extend_lv(dialog.argumentsLV(), i18n("Extending volume..."), true);
-		if( !extend_lv.exitCode() ){
-		    ProcessProgress extend_fs(dialog.argumentsFS(), i18n("Extending filesystem..."), true);
-		    if( extend_fs.exitCode() )
-			KMessageBox::error(0, error_message);
-		    
-		}
-		return true;
-	    }
-	    else
-		return false;
-	}
-	else{
-	    KMessageBox::error(0, i18n("Xfs filesystems must be mounted to extend them") );
-	    return false;
-	}
-    }
-    else if( (fs != "ext2") && (fs != "ext3") && (fs != "ext4") && (fs != "reiserfs") ){
-        if(KMessageBox::warningContinueCancel(0, warning_message) != KMessageBox::Continue)
-            return false;
-        else{
             LVCreateDialog dialog(logicalVolume, false);
             dialog.exec();
             if(dialog.result() == QDialog::Accepted){
-	        ProcessProgress extend_lv(dialog.argumentsLV(), i18n("Extending volume..."), true);
-                return true;
+                ProcessProgress extend_lv(dialog.argumentsLV(), i18n("Extending volume..."), true);
+                if( !extend_lv.exitCode() )
+                    return true;
             }
-            else
-                return false;
         }
-    }
-    else{
-        LVCreateDialog dialog(logicalVolume, false);
-        dialog.exec();
-        if(dialog.result() == QDialog::Accepted){
-	    ProcessProgress extend_lv(dialog.argumentsLV(), i18n("Extending volume..."), true);
-	    if( !extend_lv.exitCode() ){
-	        ProcessProgress extend_fs(dialog.argumentsFS(), i18n("Extending filesystem..."), true);
-		if( extend_fs.exitCode() )
-		    KMessageBox::error(0, error_message);
-	    }
-            return true;
-	}
-	else
-            return false;
+        return false;
     }
 }
 
@@ -993,27 +929,3 @@ QStringList LVCreateDialog::argumentsLV()
     return args;
 }
 
-QStringList LVCreateDialog::argumentsFS()
-{
-    QStringList temp;
-    QStringList args;
-    QString fs = m_lv->getFilesystem();
-    QString mount_point;
-    
-    if( m_lv->getMountPoints().size() )
-	mount_point = m_lv->getMountPoints().takeFirst();
-    
-    if( fs == "xfs" ){
-	args << "xfs_growfs" << mount_point;
-    }
-    else if( (fs == "ext2") || (fs == "ext3") || (fs == "ext4")){
-        args << "resize2fs" << "-f"
-	     << "/dev/" + m_vg->getName() + "/" + m_lv->getName();
-    }
-    else if(fs == "reiserfs"){
-        args << "resize_reiserfs"
-	     << "/dev/" + m_vg->getName() + "/" + m_lv->getName();
-    }
-
-    return args;
-}

@@ -17,9 +17,8 @@
 
 #include <QString>
 
-#include "storagepartition.h"
 
-bool fs_extend(QString path, QString fs);
+bool fs_extend(QString path, QString fs, bool isLV = false);
 
 
 #endif

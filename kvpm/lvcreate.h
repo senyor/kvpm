@@ -111,7 +111,6 @@ Q_OBJECT
      LVCreateDialog(VolGroup *volumeGroup, QWidget *parent = 0);
      LVCreateDialog(LogVol *logicalVolume, bool snapshot, QWidget *parent = 0);
      
-     QStringList argumentsFS();
      QStringList argumentsLV();
 
  private slots:
