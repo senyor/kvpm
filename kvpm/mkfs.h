@@ -16,6 +16,10 @@
 #define MKFS_H
 
 #include <KDialog>
+#include <KTabWidget>
+#include <KLineEdit>
+#include <KComboBox>
+
 #include <QGroupBox>
 #include <QRadioButton>
 #include <QLabel>
@@ -30,14 +34,30 @@ bool make_fs(StoragePartition *partition);
 
 class MkfsDialog : public KDialog
 {
-     QGroupBox *radio_box;
-     QRadioButton *ext2, *ext3, *ext4, *reiser, *reiser4, *jfs, *xfs, *vfat, *swap;
+Q_OBJECT
 
-     QString m_path;
+    KTabWidget  *m_tab_widget;
+    QGroupBox   *radio_box, *m_stripe_box;
+
+    QRadioButton *ext2, *ext3, *ext4, *reiser, *reiser4, *jfs, *xfs, *vfat, *swap;
+
+    KComboBox *m_block_combo;      // blocksize
+    KLineEdit *m_volume_edit;      // volume name
+    KLineEdit *m_stride_edit;      // stride size
+    KLineEdit *m_count_edit;       // strides per stripe
+    QString m_path;
+
+    int m_stride_size, m_stride_count;
+
+    void buildDialog();
+
+ public slots:
+    void setAdvancedTab(bool);
 
  public:
-     MkfsDialog(QString devicePath, QWidget *parent = 0);
-     QStringList arguments();
+    MkfsDialog(LogVol *logicalVolume, QWidget *parent = 0);
+    MkfsDialog(StoragePartition *partition, QWidget *parent = 0);
+    QStringList arguments();
 
 };
 
