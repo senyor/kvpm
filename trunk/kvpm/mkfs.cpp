@@ -26,83 +26,99 @@
 #include "storagepartition.h"
 #include "volgroup.h"
 
-bool call_dialog(QString devicePath);
-
 
 bool make_fs(LogVol *logicalVolume)
 {
-    if( logicalVolume ){
-	
-	QString full_name = logicalVolume->getFullName();
-    
-	QString error_message = i18n("The volume: <b>%1</b> is mounted. It must be "
-				     "unmounted before a new filesystem " 
-				     "can be written on it").arg(full_name);
 
-	if( logicalVolume->isMounted() ){
-	    KMessageBox::error(0, error_message);
-	    return false;
-	}
-	else
-	    return call_dialog("/dev/" + full_name );
+    QString warning_message = i18n("By writing a new file system to this volume "
+				   "any existing data on it will be lost.");
+
+    QString error_message = i18n("The volume: <b>%1</b> is mounted. It must be "
+                                 "unmounted before a new filesystem " 
+                                 "can be written on it").arg( logicalVolume->getFullName() );
+
+    if( logicalVolume->isMounted() ){
+        KMessageBox::error(0, error_message);
+        return false;
     }
     else{
-	qDebug() << "make_fs was passed a NULL Logical volume pointer!!";
-	return false;
+        if(KMessageBox::warningContinueCancel(0, warning_message) == KMessageBox::Continue){
+
+            MkfsDialog dialog(logicalVolume);
+            dialog.exec();
+            if(dialog.result() == QDialog::Accepted){
+                ProcessProgress mkfs(dialog.arguments(), i18n("Writing filesystem..."), true);
+                return true;
+            }
+        }
     }
+
+    return false;
 }
+
 
 bool make_fs(StoragePartition *partition)
 {
-    if( partition ){
 
-	QString full_name = partition->getPartitionPath();
-    
-	QString error_message = i18n("The partition: <b>%1</b> is mounted. It must "
-				     "be unmounted before a new filesystem " 
-				     "can be written on it").arg(full_name);
-
-	if( partition->isMounted() ){
-	    KMessageBox::error(0, error_message);
-	    return false;
-	}
-	else
-	    return call_dialog( full_name );
-    }
-    else{
-	qDebug() << "make_fs was passed a NULL StoragePartition pointer!!";
-	return false;
-    }
-}
-
-bool call_dialog(QString devicePath)
-{
-    QString warning_message = i18n("By writing a new file system to this device or volume "
+    QString warning_message = i18n("By writing a new file system to this device "
 				   "any existing data on it will be lost.");
+    
+    QString error_message = i18n("The partition: <b>%1</b> is mounted. It must "
+                                 "be unmounted before a new filesystem " 
+                                 "can be written on it").arg( partition->getPartitionPath() );
 
-    if(KMessageBox::warningContinueCancel(0, warning_message) != KMessageBox::Continue){
-	return false;
+    if( partition->isMounted() ){
+        KMessageBox::error(0, error_message);
+        return false;
     }
     else{
-	MkfsDialog dialog(devicePath);
-	dialog.exec();
-	if(dialog.result() == QDialog::Accepted){
-	    ProcessProgress mkfs(dialog.arguments(), i18n("Writing filesystem..."), true);
-	    return true;
-	}
-	else{
-	    return false;
-	}
+        if(KMessageBox::warningContinueCancel(0, warning_message) == KMessageBox::Continue){
+
+            MkfsDialog dialog(partition);
+            dialog.exec();
+            if(dialog.result() == QDialog::Accepted){
+                ProcessProgress mkfs(dialog.arguments(), i18n("Writing filesystem..."), true);
+                return true;
+            }
+        }
     }
+
+    return false;
 }
 
-MkfsDialog::MkfsDialog(QString devicePath, QWidget *parent) : 
-    KDialog(parent),
-    m_path(devicePath)
+
+MkfsDialog::MkfsDialog(LogVol *logicalVolume, QWidget *parent) : KDialog(parent)
 {
+    m_path = QString( "/dev/" + logicalVolume->getFullName() );
+
+    m_stride_size = logicalVolume->getSegmentStripeSize( 0 );   // 0 if not striped
+    m_stride_count = logicalVolume->getSegmentStripes( 0 );
+
+    buildDialog();
+}
+
+
+MkfsDialog::MkfsDialog(StoragePartition *partition, QWidget *parent) : KDialog(parent)
+{
+    m_path = partition->getPartitionPath();
+    m_stride_size = 0;
+    m_stride_count = 1;
+
+    buildDialog();
+}
+
+
+void MkfsDialog::buildDialog()
+{
+
+    m_tab_widget = new KTabWidget(this);
 
     QWidget *dialog_body = new QWidget();
-    setMainWidget(dialog_body);
+    QWidget *advanced_options = new QWidget();
+    m_tab_widget->addTab(dialog_body, i18n("General") );
+    m_tab_widget->addTab(advanced_options, i18n("Advanced") );
+
+    setMainWidget(m_tab_widget);
     setCaption( i18n("Write filesystem") );
 
     QVBoxLayout *layout = new QVBoxLayout;
@@ -145,6 +161,75 @@ MkfsDialog::MkfsDialog(QString devicePath, QWidget *parent) :
     
     radio_box->setLayout(radio_layout);
     layout->addWidget(radio_box);
+
+    QVBoxLayout *advanced_layout = new QVBoxLayout;
+    QHBoxLayout *block_layout  = new QHBoxLayout;
+    QHBoxLayout *name_layout   = new QHBoxLayout;
+    QHBoxLayout *stride_layout = new QHBoxLayout;
+    QHBoxLayout *count_layout  = new QHBoxLayout;
+    advanced_options->setLayout(advanced_layout);
+
+    block_layout->addWidget( new QLabel( i18n("Block size: ") ) );
+    m_block_combo = new KComboBox();
+    m_block_combo->insertItem(0, i18n("automatic") );
+    m_block_combo->insertItem(1,"1024 KiB");
+    m_block_combo->insertItem(2,"2048 KiB");
+    m_block_combo->insertItem(3,"4096 KiB");
+    m_block_combo->setInsertPolicy(KComboBox::NoInsert);
+    m_block_combo->setCurrentIndex(0);
+    block_layout->addWidget(m_block_combo);
+    block_layout->addStretch();
+    advanced_layout->addLayout(block_layout);
+
+    name_layout->addWidget( new QLabel( i18n("Volume name: ") ) );
+    m_volume_edit = new KLineEdit();
+    name_layout->addWidget(m_volume_edit);
+    name_layout->addStretch();
+    advanced_layout->addLayout(name_layout);
+
+    m_stripe_box = new QGroupBox( i18n("Striping") );
+    m_stripe_box->setCheckable(true);
+    m_stripe_box->setChecked(false);
+    QVBoxLayout *stripe_layout = new QVBoxLayout();
+    m_stripe_box->setLayout(stripe_layout);
+    advanced_layout->addWidget(m_stripe_box);
+
+    stride_layout->addWidget( new QLabel( i18n("Stride size: ") ) );
+    m_stride_edit = new KLineEdit( QString("%1").arg(m_stride_size) );
+    QIntValidator *stride_validator = new QIntValidator(m_stride_edit);
+    m_stride_edit->setValidator(stride_validator);
+    stride_validator->setBottom(512);
+    stride_layout->addWidget(m_stride_edit);
+    stride_layout->addStretch();
+    stripe_layout->addLayout(stride_layout);
+
+    count_layout->addWidget( new QLabel( i18n("Strides per stripe: ") ) );
+    m_count_edit = new KLineEdit( QString("%1").arg(m_stride_count) );
+    QIntValidator *count_validator = new QIntValidator(m_count_edit);
+    m_count_edit->setValidator(count_validator);
+    count_validator->setBottom(1);
+    count_layout->addWidget(m_count_edit);
+    count_layout->addStretch();
+    stripe_layout->addLayout(count_layout);
+
+
+    connect(ext2,  SIGNAL(toggled(bool)), 
+            this, SLOT(setAdvancedTab(bool)));
+
+    connect(ext3,  SIGNAL(toggled(bool)), 
+            this, SLOT(setAdvancedTab(bool)));
+
+    connect(ext4,  SIGNAL(toggled(bool)), 
+            this, SLOT(setAdvancedTab(bool)));
+
+}
+
+void MkfsDialog::setAdvancedTab(bool)
+{
+    if( ext2->isChecked() || ext3->isChecked() || ext4->isChecked() )
+        m_tab_widget->setTabEnabled( 1, true );
+    else
+        m_tab_widget->setTabEnabled( 1, false );
 }
 
 QStringList MkfsDialog::arguments()
