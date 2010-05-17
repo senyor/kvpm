@@ -1,0 +1,1513 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#: topwindow.cpp:67
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2010-05-16 17:54-0700\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: addmirror.cpp:35
+msgid "Changing Mirror..."
+msgstr ""
+
+#: addmirror.cpp:48
+msgid "Add Mirror"
+msgstr ""
+
+#: addmirror.cpp:57 lvchange.cpp:50 lvcreate.cpp:116 lvcreate.cpp:141
+#: mkfs.cpp:118
+msgid "General"
+msgstr ""
+
+#: addmirror.cpp:58
+msgid "Logging and layout"
+msgstr ""
+
+#: addmirror.cpp:84
+msgid "Add mirror legs"
+msgstr ""
+
+#: addmirror.cpp:94
+msgid "Existing mirror legs: %1"
+msgstr ""
+
+#: addmirror.cpp:98
+msgid "Existing mirror legs: none"
+msgstr ""
+
+#: addmirror.cpp:106
+msgid "Add mirror legs: "
+msgstr ""
+
+#: addmirror.cpp:113
+msgid "Allocation policy"
+msgstr ""
+
+#: addmirror.cpp:115 lvcreate.cpp:229 vgchangealloc.cpp:46
+msgid "Normal"
+msgstr ""
+
+#: addmirror.cpp:116 lvcreate.cpp:230 vgchangealloc.cpp:47
+msgid "Contiguous"
+msgstr ""
+
+#: addmirror.cpp:117 lvcreate.cpp:231
+msgid "Anywhere"
+msgstr ""
+
+#: addmirror.cpp:118 lvcreate.cpp:232
+msgid "Inherited"
+msgstr ""
+
+#: addmirror.cpp:119 lvcreate.cpp:233 vgchangealloc.cpp:49
+msgid "Cling"
+msgstr ""
+
+#: addmirror.cpp:137
+msgid "Mirror logging"
+msgstr ""
+
+#: addmirror.cpp:139 lvcreate.cpp:372
+msgid "Memory based log"
+msgstr ""
+
+#: addmirror.cpp:140 lvcreate.cpp:371
+msgid "Disk based log"
+msgstr ""
+
+#: addmirror.cpp:151
+msgid "Manually select physical volumes"
+msgstr ""
+
+#: addmirror.cpp:155
+msgid "Suitable for new mirrors"
+msgstr ""
+
+#: deviceactionsmenu.cpp:94 lvactionsmenu.cpp:153
+msgid "Filesystem operations"
+msgstr ""
+
+#: deviceactionsmenu.cpp:95
+msgid "Extend volume group"
+msgstr ""
+
+#: deviceactionsmenu.cpp:96
+msgid "Make filesystem"
+msgstr ""
+
+#: deviceactionsmenu.cpp:97
+msgid "Add disk partition"
+msgstr ""
+
+#: deviceactionsmenu.cpp:98
+msgid "Move or resize disk partition"
+msgstr ""
+
+#: deviceactionsmenu.cpp:99
+msgid "Remove disk partition"
+msgstr ""
+
+#: deviceactionsmenu.cpp:100
+msgid "Remove filesystem"
+msgstr ""
+
+#: deviceactionsmenu.cpp:101
+msgid "Create physical volume"
+msgstr ""
+
+#: deviceactionsmenu.cpp:102
+msgid "Remove physical volume"
+msgstr ""
+
+#: deviceactionsmenu.cpp:103
+msgid "Create volume group"
+msgstr ""
+
+#: deviceactionsmenu.cpp:104
+msgid "Create new partition table"
+msgstr ""
+
+#: deviceactionsmenu.cpp:105 pvtree.cpp:120
+msgid "Remove from volume group"
+msgstr ""
+
+#: deviceactionsmenu.cpp:106
+msgid "Mount filesystem"
+msgstr ""
+
+#: deviceactionsmenu.cpp:107
+msgid "Unmount filesystem"
+msgstr ""
+
+#: deviceproperties.cpp:48
+msgid "Partition table: %1"
+msgstr ""
+
+#: deviceproperties.cpp:49
+msgid "Logical sector size: %1"
+msgstr ""
+
+#: deviceproperties.cpp:50
+msgid "Physical sector size: %1"
+msgstr ""
+
+#: deviceproperties.cpp:53
+msgid "Read only"
+msgstr ""
+
+#: deviceproperties.cpp:55
+msgid "Read/write"
+msgstr ""
+
+#: deviceproperties.cpp:58
+msgid "Busy: Yes"
+msgstr ""
+
+#: deviceproperties.cpp:60
+msgid "Busy: No"
+msgstr ""
+
+#: deviceproperties.cpp:71
+msgid "<b>Hardware</b>"
+msgstr ""
+
+#: deviceproperties.cpp:110
+msgid "First sector: %1"
+msgstr ""
+
+#: deviceproperties.cpp:111
+msgid "Last sector: %1"
+msgstr ""
+
+#: deviceproperties.cpp:154 lvproperties.cpp:140
+msgid "<b>Mount point</b>"
+msgstr ""
+
+#: deviceproperties.cpp:156 lvproperties.cpp:135
+msgid "<b>Mount points</b>"
+msgstr ""
+
+#: deviceproperties.cpp:169
+msgid "Not mounted"
+msgstr ""
+
+#: deviceproperties.cpp:182
+msgid "<b>Flags</b>"
+msgstr ""
+
+#: fsblocksize.cpp:36
+msgid "Checking blocksize"
+msgstr ""
+
+#: fsck.cpp:29
+msgid "Checking filesystem..."
+msgstr ""
+
+#: fsextend.cpp:54
+msgid ""
+"It appears that the partition or volume was extented but the filesystem was "
+"not. It will need to be extended before the additional space can be used."
+msgstr ""
+
+#: fsextend.cpp:68 fsextend.cpp:85 fsextend.cpp:105 fsextend.cpp:147
+msgid "Extending filesystem..."
+msgstr ""
+
+#: fsextend.cpp:126 fsextend.cpp:134
+msgid "Error number: %1 %2"
+msgstr ""
+
+#: fsreduce.cpp:49
+msgid "Shrink failed: could not determine filesystem block size"
+msgstr ""
+
+#: fsreduce.cpp:57 fsreduce.cpp:81
+msgid "Shrinking filesystem..."
+msgstr ""
+
+#: fsreduce.cpp:118
+msgid "Checking minimum shrink size"
+msgstr ""
+
+#: kvpmconfigdialog.cpp:74
+msgid "Show these columns in device tree"
+msgstr ""
+
+#: kvpmconfigdialog.cpp:75
+msgid "Show these columns in volume tree"
+msgstr ""
+
+#: kvpmconfigdialog.cpp:168
+msgid "Filesystem types"
+msgstr ""
+
+#: lvactionsmenu.cpp:123
+msgid "Make filesystem..."
+msgstr ""
+
+#: lvactionsmenu.cpp:124
+msgid "Reduce logical volume..."
+msgstr ""
+
+#: lvactionsmenu.cpp:125
+msgid "Remove logical volume..."
+msgstr ""
+
+#: lvactionsmenu.cpp:126
+msgid "Rename logical volume..."
+msgstr ""
+
+#: lvactionsmenu.cpp:127
+msgid "Create logical volume..."
+msgstr ""
+
+#: lvactionsmenu.cpp:128
+msgid "Create snapshot..."
+msgstr ""
+
+#: lvactionsmenu.cpp:129
+msgid "Extend logical volume..."
+msgstr ""
+
+#: lvactionsmenu.cpp:130
+msgid "Move physical extents..."
+msgstr ""
+
+#: lvactionsmenu.cpp:131
+msgid "Change logical volume attributes..."
+msgstr ""
+
+#: lvactionsmenu.cpp:132
+msgid "Add leg or change mirror..."
+msgstr ""
+
+#: lvactionsmenu.cpp:133
+msgid "Mount filesystem..."
+msgstr ""
+
+#: lvactionsmenu.cpp:134
+msgid "Unmount filesystem..."
+msgstr ""
+
+#: lvactionsmenu.cpp:135
+msgid "Remove mirror leg..."
+msgstr ""
+
+#: lvactionsmenu.cpp:136
+msgid "Remove this mirror leg..."
+msgstr ""
+
+#: lvactionsmenu.cpp:147
+msgid "Mirror operations"
+msgstr ""
+
+#: lvchange.cpp:30
+msgid "Changing lv attributes"
+msgstr ""
+
+#: lvchange.cpp:42
+msgid "Change logical volume attributes"
+msgstr ""
+
+#: lvchange.cpp:51 lvcreate.cpp:118 lvcreate.cpp:143 mkfs.cpp:119
+msgid "Advanced"
+msgstr ""
+
+#: lvchange.cpp:105
+msgid "Make volume available for use"
+msgstr ""
+
+#: lvchange.cpp:106
+msgid "Allocate contiguous extents"
+msgstr ""
+
+#: lvchange.cpp:107
+msgid "Make volume read only"
+msgstr ""
+
+#: lvchange.cpp:108
+msgid "Refresh volume metadata"
+msgstr ""
+
+#: lvchange.cpp:130
+msgid "Mirrored volume operations"
+msgstr ""
+
+#: lvchange.cpp:133
+msgid "Re-synchronize mirrors"
+msgstr ""
+
+#: lvchange.cpp:134
+msgid "Monitor mirrors with dmeventd"
+msgstr ""
+
+#: lvchange.cpp:139
+msgid "Persistant device numbers"
+msgstr ""
+
+#: lvchange.cpp:149
+msgid "Major number: "
+msgstr ""
+
+#: lvchange.cpp:152
+msgid "Minor number: "
+msgstr ""
+
+#: lvcreate.cpp:39
+msgid "Creating volume..."
+msgstr ""
+
+#: lvcreate.cpp:51
+msgid "Creating snapshot..."
+msgstr ""
+
+#: lvcreate.cpp:62
+msgid ""
+"Currently only the ext2/3/4, xfs, jfs and reiserfs file systems are "
+"supported for file system extention. If this logical volume has a filesystem "
+"or data, it will need to be extended separately!"
+msgstr ""
+
+#: lvcreate.cpp:76 lvcreate.cpp:89
+msgid "Extending volume..."
+msgstr ""
+
+#: lvcreate.cpp:110
+msgid "Create Logical Volume"
+msgstr ""
+
+#: lvcreate.cpp:117 lvcreate.cpp:142
+msgid "Physical layout"
+msgstr ""
+
+#: lvcreate.cpp:133
+msgid "Create snapshot Volume"
+msgstr ""
+
+#: lvcreate.cpp:135
+msgid "Extend Logical Volume"
+msgstr ""
+
+#: lvcreate.cpp:171 mkfs.cpp:184
+msgid "Volume name: "
+msgstr ""
+
+#: lvcreate.cpp:181
+msgid "Extending volume: %1"
+msgstr ""
+
+#: lvcreate.cpp:188
+msgid "Volume size: "
+msgstr ""
+
+#: lvcreate.cpp:190
+msgid "Extend by: "
+msgstr ""
+
+#: lvcreate.cpp:215
+msgid "Volume size limit"
+msgstr ""
+
+#: lvcreate.cpp:227
+msgid "Allocation Policy"
+msgstr ""
+
+#: lvcreate.cpp:285 vgcreate.cpp:114
+msgid "Available physical volumes"
+msgstr ""
+
+#: lvcreate.cpp:302
+msgid "%1 not allocateable"
+msgstr ""
+
+#: lvcreate.cpp:324
+msgid "Disk striping"
+msgstr ""
+
+#: lvcreate.cpp:335
+msgid "Stripe Size: "
+msgstr ""
+
+#: lvcreate.cpp:341
+msgid "Number of stripes: "
+msgstr ""
+
+#: lvcreate.cpp:366
+msgid "Disk mirrors"
+msgstr ""
+
+#: lvcreate.cpp:382
+msgid "Number of mirror legs: "
+msgstr ""
+
+#: lvcreate.cpp:422
+msgid "Device numbering"
+msgstr ""
+
+#: lvcreate.cpp:427
+msgid "Set read only"
+msgstr ""
+
+#: lvcreate.cpp:433
+msgid "Write zeros at volume start"
+msgstr ""
+
+#: lvcreate.cpp:453
+msgid "Device minor number: "
+msgstr ""
+
+#: lvcreate.cpp:454
+msgid "Device major number: "
+msgstr ""
+
+#: lvcreate.cpp:494 lvcreate.cpp:506 lvcreate.cpp:517 partadd.cpp:197
+#: partmoveresize.cpp:114
+msgid "Maximum size: %1"
+msgstr ""
+
+#: lvcreate.cpp:495 lvcreate.cpp:507 lvcreate.cpp:518
+msgid "Maximum extents: %1"
+msgstr ""
+
+#: lvcreate.cpp:497
+msgid "(with %1 stripes)"
+msgstr ""
+
+#: lvcreate.cpp:508
+msgid "(with %1 mirror legs)"
+msgstr ""
+
+#: lvcreate.cpp:519
+msgid "(linear volume)"
+msgstr ""
+
+#: lvcreate.cpp:719
+msgid "Allocateable space: %1"
+msgstr ""
+
+#: lvcreate.cpp:721
+msgid "Allocateable extents: %1"
+msgstr ""
+
+#: lvproperties.cpp:62 lvproperties.cpp:85 lvproperties.cpp:109
+msgid "Extents: %1"
+msgstr ""
+
+#: lvproperties.cpp:67 lvproperties.cpp:90
+msgid "Stripes: %1"
+msgstr ""
+
+#: lvproperties.cpp:68 lvproperties.cpp:91
+msgid "Stripe size: %1"
+msgstr ""
+
+#: lvproperties.cpp:71 lvproperties.cpp:94
+msgid "Stripes: none"
+msgstr ""
+
+#: lvproperties.cpp:72 lvproperties.cpp:95
+msgid "Stripe size: n/a"
+msgstr ""
+
+#: lvproperties.cpp:100 lvproperties.cpp:111
+msgid "Allocation policy: %1"
+msgstr ""
+
+#: lvproperties.cpp:116
+msgid "Origin: %1"
+msgstr ""
+
+#: lvproperties.cpp:146
+msgid "<none>"
+msgstr ""
+
+#: lvproperties.cpp:175
+msgid "<b>Mirror legs</b>"
+msgstr ""
+
+#: lvproperties.cpp:180
+msgid "<b>Physical volumes</b>"
+msgstr ""
+
+#: lvreduce.cpp:35
+msgid ""
+"Currently only the ext2, ext3 and ext4  file systems are supported for file "
+"system reduction. If this logical volume is reduced any data it contains "
+"will be lost!"
+msgstr ""
+
+#: lvreduce.cpp:40
+msgid ""
+"If this <b>Inactive</b> logical volume is reduced any data it contains will "
+"be lost!"
+msgstr ""
+
+#: lvreduce.cpp:57
+msgid "Resizing mirrors is not supported yet"
+msgstr ""
+
+#: lvreduce.cpp:61
+msgid "Resizing snapshot origin is not supported yet"
+msgstr ""
+
+#: lvreduce.cpp:65
+msgid "The filesystem must be unmounted first"
+msgstr ""
+
+#: lvreduce.cpp:98
+msgid "Reduce Logical Volume"
+msgstr ""
+
+#: lvreduce.cpp:109 vginfolabels.cpp:114
+msgid "Extent size: %1"
+msgstr ""
+
+#: lvreduce.cpp:111
+msgid "Current size: %1"
+msgstr ""
+
+#: lvreduce.cpp:113 partmoveresize.cpp:112
+msgid "Minimum size: %1"
+msgstr ""
+
+#: lvreduce.cpp:119
+msgid "New size: "
+msgstr ""
+
+#: lvreduce.cpp:257
+msgid "Reducing volume..."
+msgstr ""
+
+#: lvremove.cpp:33
+msgid ""
+"Are you certain you want to delete the logical volume named: %1 Any data on "
+"it will be lost."
+msgstr ""
+
+#: lvremove.cpp:42
+msgid "Removing volume..."
+msgstr ""
+
+#: lvrename.cpp:31
+msgid "Renaming logical volume..."
+msgstr ""
+
+#: lvrename.cpp:44
+msgid "Rename logical volume"
+msgstr ""
+
+#: lvrename.cpp:54
+msgid "Old logical volume name: %1"
+msgstr ""
+
+#: lvrename.cpp:57
+msgid "New logical volume name: "
+msgstr ""
+
+#: lvsizechartseg.cpp:122
+msgid "free space"
+msgstr ""
+
+#: main.cpp:43 topwindow.cpp:60
+msgid "kvpm"
+msgstr ""
+
+#: main.cpp:44
+msgid "Linux volume and partition manager for KDE"
+msgstr ""
+
+#: main.cpp:46
+msgid "Copyright (c) 2008 Benjamin Scott"
+msgstr ""
+
+#: main.cpp:55
+msgid "This program must be run as root (uid = 0) "
+msgstr ""
+
+#: main.cpp:56
+msgid "Insufficient Privilege"
+msgstr ""
+
+#: masterlist.cpp:75 masterlist.cpp:98
+msgid "Scanning volume groups"
+msgstr ""
+
+#: masterlist.cpp:123 masterlist.cpp:173
+msgid "Scanning logical volumes..."
+msgstr ""
+
+#: masterlist.cpp:210
+msgid "Scanning physical volumes..."
+msgstr ""
+
+#: mkfs.cpp:33
+msgid ""
+"By writing a new file system to this volume any existing data on it will be "
+"lost."
+msgstr ""
+
+#: mkfs.cpp:36
+msgid ""
+"The volume: <b>%1</b> is mounted. It must be unmounted before a new "
+"filesystem can be written on it"
+msgstr ""
+
+#: mkfs.cpp:50 mkfs.cpp:80
+msgid "Writing filesystem..."
+msgstr ""
+
+#: mkfs.cpp:63
+msgid ""
+"By writing a new file system to this device any existing data on it will be "
+"lost."
+msgstr ""
+
+#: mkfs.cpp:66
+msgid ""
+"The partition: <b>%1</b> is mounted. It must be unmounted before a new "
+"filesystem can be written on it"
+msgstr ""
+
+#: mkfs.cpp:122
+msgid "Write filesystem"
+msgstr ""
+
+#: mkfs.cpp:134
+msgid "Write filesystem on:"
+msgstr ""
+
+#: mkfs.cpp:141
+msgid "Filesystem"
+msgstr ""
+
+#: mkfs.cpp:149
+msgid "Linux swap"
+msgstr ""
+
+#: mkfs.cpp:172
+msgid "Block size: "
+msgstr ""
+
+#: mkfs.cpp:174
+msgid "automatic"
+msgstr ""
+
+#: mkfs.cpp:190
+msgid "Striping"
+msgstr ""
+
+#: mkfs.cpp:197
+msgid "Stride size: "
+msgstr ""
+
+#: mkfs.cpp:206
+msgid "Strides per stripe: "
+msgstr ""
+
+#: mount.cpp:53
+msgid "Main"
+msgstr ""
+
+#: mount.cpp:54
+msgid "Options"
+msgstr ""
+
+#: mount.cpp:62
+msgid "Filesystem type"
+msgstr ""
+
+#: mount.cpp:88
+msgid "Specify other:"
+msgstr ""
+
+#: mount.cpp:151
+msgid "Common mount options"
+msgstr ""
+
+#: mount.cpp:175
+msgid "Always use synchronous I/O"
+msgstr ""
+
+#: mount.cpp:176
+msgid "Allow writing in addition to reading"
+msgstr ""
+
+#: mount.cpp:177
+msgid "Allow the suid bit to have effect"
+msgstr ""
+
+#: mount.cpp:178
+msgid "Allow the use of block and special devices"
+msgstr ""
+
+#: mount.cpp:179
+msgid "Allow the execution of binary files"
+msgstr ""
+
+#: mount.cpp:180
+msgid "Allow manditory file locks"
+msgstr ""
+
+#: mount.cpp:181
+msgid "Allow use of access control lists"
+msgstr ""
+
+#: mount.cpp:197
+msgid "Update atime"
+msgstr ""
+
+#: mount.cpp:202
+msgid "Journaling"
+msgstr ""
+
+#: mount.cpp:225
+msgid "Always update atime, this is the default"
+msgstr ""
+
+#: mount.cpp:226
+msgid "Do not update atime"
+msgstr ""
+
+#: mount.cpp:227
+msgid "Do not update atime for directory access"
+msgstr ""
+
+#: mount.cpp:228
+msgid ""
+"Access time is only updated if the previous access time was earlier than the "
+"current modify or change time"
+msgstr ""
+
+#: mount.cpp:234
+msgid "Filesystem specific  mount options"
+msgstr ""
+
+#: mount.cpp:236
+msgid "comma separated list of additional mount options"
+msgstr ""
+
+#: mount.cpp:269
+msgid "Mount point"
+msgstr ""
+
+#: mount.cpp:280
+msgid "Browse"
+msgstr ""
+
+#: partadd.cpp:33
+msgid "Disk already has %1 primary partitions, the maximum"
+msgstr ""
+
+#: partadd.cpp:93
+msgid "Add partition"
+msgstr ""
+
+#: partadd.cpp:201
+msgid "Remaining space: %1"
+msgstr ""
+
+#: partadd.cpp:494
+msgid "Available space: %1"
+msgstr ""
+
+#: partadd.cpp:497 partmoveresize.cpp:894
+msgid "Preceding space: %1"
+msgstr ""
+
+#: partadd.cpp:506 partmoveresize.cpp:903
+msgid "Following space: %1"
+msgstr ""
+
+#: partmoveresize.cpp:48
+msgid ""
+"Currently only the ext2/3/4 file systems are supported for file system "
+"shrinking. Growing is supported for ext2/3/4, jfs, xfs and Reiserfs. Moving "
+"a partition is supported for any filesystem. Physical volumes may also be "
+"grown or shrunk and if they are not active, may be moved as well."
+msgstr ""
+
+#: partmoveresize.cpp:81
+msgid "Move or resize a partition"
+msgstr ""
+
+#: partmoveresize.cpp:117
+msgid "Modify partition size"
+msgstr ""
+
+#: partmoveresize.cpp:627 processprogress.cpp:55
+msgid "progress"
+msgstr ""
+
+#: partmoveresize.cpp:628
+msgid "moving filesystem..."
+msgstr ""
+
+#: partmoveresize.cpp:891
+msgid "Partition size: %1"
+msgstr ""
+
+#: partremove.cpp:29
+msgid "Remove partition: <b>%1</b>? Any data on that partition will be lost!"
+msgstr ""
+
+#: processprogress.cpp:84
+msgid "Execution of %1 produced the following errors: %2"
+msgstr ""
+
+#: processprogress.cpp:90
+msgid "Executable %1 not found"
+msgstr ""
+
+#: pvchange.cpp:28 pvtree.cpp:121
+msgid "Change physical volume attributes"
+msgstr ""
+
+#: pvchange.cpp:35
+msgid "Physical volume: %1"
+msgstr ""
+
+#: pvchange.cpp:37
+msgid "Attributes"
+msgstr ""
+
+#: pvchange.cpp:41
+msgid "Enable allocation of extents"
+msgstr ""
+
+#: pvcreate.cpp:26
+msgid ""
+"Are you certain you want to create a physical volume on: <b>%1</b>? Any "
+"information already on that device will be lost."
+msgstr ""
+
+#: pvcreate.cpp:36
+msgid "Creating pv..."
+msgstr ""
+
+#: pvextend.cpp:34
+msgid "Growing pv..."
+msgstr ""
+
+#: pvmove.cpp:36 pvmove.cpp:48
+msgid "Moving extents..."
+msgstr ""
+
+#: pvmove.cpp:59
+msgid "Do you wish to restart all interupted physical volume moves?"
+msgstr ""
+
+#: pvmove.cpp:65
+msgid "Restarting pvmove..."
+msgstr ""
+
+#: pvmove.cpp:76
+msgid "Do you wish to abort all physical volume moves currently in progress?"
+msgstr ""
+
+#: pvmove.cpp:83
+msgid "Stopping pvmove..."
+msgstr ""
+
+#: pvmove.cpp:170
+msgid ""
+"Only one physical volume is assigned to this volume group. At least two are "
+"required to move extents:\n"
+"One source and one or more destination"
+msgstr ""
+
+#: pvmove.cpp:174
+msgid "Too few physical volumes"
+msgstr ""
+
+#: pvmove.cpp:201
+msgid "Move Physical Volume Extents"
+msgstr ""
+
+#: pvmove.cpp:208
+msgid "<b>Move only physical extents on:</b>"
+msgstr ""
+
+#: pvmove.cpp:212
+msgid "Source Physical Volume"
+msgstr ""
+
+#: pvmove.cpp:237
+msgid "Used space: %1"
+msgstr ""
+
+#: pvmove.cpp:257
+msgid "Destination Physical Volumes"
+msgstr ""
+
+#: pvmove.cpp:261
+msgid "Any available volume"
+msgstr ""
+
+#: pvmove.cpp:280
+msgid "Free space: %1"
+msgstr ""
+
+#: pvmove.cpp:309
+msgid "Selected space total: %1"
+msgstr ""
+
+#: pvreduce.cpp:40
+msgid "Shrinking pv..."
+msgstr ""
+
+#: pvremove.cpp:28
+msgid "Remove physical volume on: <b>%1</b>?"
+msgstr ""
+
+#: pvremove.cpp:34
+msgid "Removing physical volume..."
+msgstr ""
+
+#: pvtree.cpp:54
+msgid "Name"
+msgstr ""
+
+#: pvtree.cpp:54
+msgid "Size"
+msgstr ""
+
+#: pvtree.cpp:55
+msgid "Free"
+msgstr ""
+
+#: pvtree.cpp:55
+msgid "Used"
+msgstr ""
+
+#: pvtree.cpp:56
+msgid "Allocatable"
+msgstr ""
+
+#: pvtree.cpp:56
+msgid "Exported"
+msgstr ""
+
+#: pvtree.cpp:57
+msgid "Logical volumes"
+msgstr ""
+
+#: pvtree.cpp:119
+msgid "Move physical extents"
+msgstr ""
+
+#: pvtree.cpp:203
+msgid "Changing physical volume..."
+msgstr ""
+
+#: removefs.cpp:34
+msgid ""
+"Are you sure you want delete this filesystem? Any data on it will be lost!"
+msgstr ""
+
+#: removemirror.cpp:31
+msgid "Removing mirror..."
+msgstr ""
+
+#: removemirror.cpp:49
+msgid "Remove mirrors"
+msgstr ""
+
+#: removemirror.cpp:56
+msgid "Select the mirror legs to remove:"
+msgstr ""
+
+#: removemirrorleg.cpp:33
+msgid "Remove mirror leg: %1 ?"
+msgstr ""
+
+#: removemirrorleg.cpp:43
+msgid "Removing mirror leg..."
+msgstr ""
+
+#: removemissing.cpp:29
+msgid ""
+"Removing missing physical volumes may cause some data in volume group <b>%1</"
+"b> to become permanently inaccessible!"
+msgstr ""
+
+#: removemissing.cpp:39
+msgid "Removing missing volumes..."
+msgstr ""
+
+#: tablecreate.cpp:27
+msgid ""
+"By writing a new partition table to this device, any existing data on it "
+"will be lost!"
+msgstr ""
+
+#: tablecreate.cpp:49
+msgid "Create partition table"
+msgstr ""
+
+#: tablecreate.cpp:56
+msgid "Create partition table on:"
+msgstr ""
+
+#: topwindow.cpp:52
+msgid "File"
+msgstr ""
+
+#: topwindow.cpp:53
+msgid "Tools"
+msgstr ""
+
+#: topwindow.cpp:54
+msgid "Volume Groups"
+msgstr ""
+
+#: topwindow.cpp:55
+msgid "Settings"
+msgstr ""
+
+#: topwindow.cpp:62
+msgid ""
+"Linux volume and partition manager for KDE.\n"
+"This program is still under development,\n"
+"bug reports and any comments are welcomed.\n"
+msgstr ""
+
+#: topwindow.cpp:66
+msgid "(c) 2008, 2009, Benjamin Scott"
+msgstr ""
+
+#: topwindow.cpp:82
+msgid "Delete Volume Group..."
+msgstr ""
+
+#: topwindow.cpp:83
+msgid "Reduce Volume Group..."
+msgstr ""
+
+#: topwindow.cpp:84
+msgid "Rename Volume Group..."
+msgstr ""
+
+#: topwindow.cpp:85
+msgid "Rescan System"
+msgstr ""
+
+#: topwindow.cpp:86
+msgid "Restart interrupted pvmove"
+msgstr ""
+
+#: topwindow.cpp:87
+msgid "Abort pvmove"
+msgstr ""
+
+#: topwindow.cpp:88
+msgid "Remove Missing Volumes..."
+msgstr ""
+
+#: topwindow.cpp:89
+msgid "Export Volume Group..."
+msgstr ""
+
+#: topwindow.cpp:90
+msgid "Import Volume Group..."
+msgstr ""
+
+#: topwindow.cpp:91
+msgid "Change Volume Group Attributes"
+msgstr ""
+
+#: topwindow.cpp:92
+msgid "Create Volume Group..."
+msgstr ""
+
+#: topwindow.cpp:93
+msgid "Volume Group Availability..."
+msgstr ""
+
+#: topwindow.cpp:94
+msgid "Allocation Policy..."
+msgstr ""
+
+#: topwindow.cpp:95
+msgid "Extent Size..."
+msgstr ""
+
+#: topwindow.cpp:96
+msgid "Logical Volume Limits..."
+msgstr ""
+
+#: topwindow.cpp:97
+msgid "Physical Volume Limits..."
+msgstr ""
+
+#: topwindow.cpp:98
+msgid "Volume Group Resizability..."
+msgstr ""
+
+#: topwindow.cpp:106
+msgid "Configure kvpm..."
+msgstr ""
+
+#: topwindow.cpp:221
+msgid "Storage devices"
+msgstr ""
+
+#: unmount.cpp:50
+msgid ""
+"<b>%1</b> is mounted at multiple locatations. Check the boxes for any you "
+"wish to unmount."
+msgstr ""
+
+#: unmount.cpp:54
+msgid ""
+"One or more unmount selections have been disabled. Another device or volume "
+"is mounted over the same mount point and must be unmounted first"
+msgstr ""
+
+#: unmount.cpp:64
+msgid "Mount points"
+msgstr ""
+
+#: unmount.cpp:102 unmount.cpp:215
+msgid "Unmounting %1 failed with error number: %2 %3"
+msgstr ""
+
+#: unmount.cpp:121
+msgid "The volume <b>%1</b> is mounted on <b>%2</b> Do you want to unmount it?"
+msgstr ""
+
+#: unmount.cpp:124 unmount.cpp:167
+msgid ""
+"Another device or volume is mounted at the same mount point over this one. "
+"It must be unmounted before this one can be unmounted"
+msgstr ""
+
+#: unmount.cpp:154
+msgid "The volume: <b>%1</b> does not seem to be mounted"
+msgstr ""
+
+#: unmount.cpp:164
+msgid ""
+"The partition <b>%1</b> is mounted on <b>%2</b> Do you want to unmount it?"
+msgstr ""
+
+#: unmount.cpp:198
+msgid "The partition: <b>%1</b> does not seem to be mounted"
+msgstr ""
+
+#: vgchangealloc.cpp:29 vgchangealloc.cpp:41
+msgid "Extent allocation policy"
+msgstr ""
+
+#: vgchangealloc.cpp:36 vgchangeextent.cpp:50 vgchangelv.cpp:60
+#: vgchangepv.cpp:60
+msgid "Volume group: <b>%1</b>"
+msgstr ""
+
+#: vgchangealloc.cpp:48
+msgid "Anwhere"
+msgstr ""
+
+#: vgchangeavailable.cpp:46
+msgid "Groups with mounted logical volumes may not be made unavailable"
+msgstr ""
+
+#: vgchangeavailable.cpp:55
+msgid "Make volume group: <b>%1</b> available for use?"
+msgstr ""
+
+#: vgchangeavailable.cpp:74
+msgid "Changing volume group availability..."
+msgstr ""
+
+#: vgchangeextent.cpp:30
+msgid "Changing extents..."
+msgstr ""
+
+#: vgchangeextent.cpp:43
+msgid "Extent size"
+msgstr ""
+
+#: vgchangeextent.cpp:54
+msgid "The extent size is currently: %1"
+msgstr ""
+
+#: vgchangelv.cpp:33
+msgid "Changing limit..."
+msgstr ""
+
+#: vgchangelv.cpp:46
+msgid "Logical volumes limit"
+msgstr ""
+
+#: vgchangelv.cpp:64
+msgid "Maximum logical volumes"
+msgstr ""
+
+#: vgchangelv.cpp:75 vgchangepv.cpp:75
+msgid "Current limit: %1"
+msgstr ""
+
+#: vgchangelv.cpp:77 vgchangepv.cpp:77
+msgid "Current limit: unlimited"
+msgstr ""
+
+#: vgchangelv.cpp:83
+msgid ""
+"This volume group is in lvm1 format. Unless you have a reason to set the "
+"limit lower it is normally best to leave the limit at the maximum allowed: "
+"255."
+msgstr ""
+
+#: vgchangelv.cpp:92
+msgid ""
+"This volume group is in lvm2 format. Unless you have a reason to limit the "
+"maximum logical volumes it is normally best to leave them unlimited."
+msgstr ""
+
+#: vgchangepv.cpp:34
+msgid "Changing limits..."
+msgstr ""
+
+#: vgchangepv.cpp:64
+msgid "Limit maximum physical volumes"
+msgstr ""
+
+#: vgchangepv.cpp:83
+msgid ""
+"This volume group is in lvm1 format. Unless you have a reason to set the "
+"limit lower, it is normally bestto leave the it at the maximum allowed: 255."
+msgstr ""
+
+#: vgchangepv.cpp:92
+msgid ""
+"This volume group is in lvm2 format. Unless you have a reason to limit the "
+"maximum physical volumes it is normally best to leave them unlimited"
+msgstr ""
+
+#: vgchangeresize.cpp:36
+msgid ""
+"Volume group: <b>%1</b> is currently resizeable. Do you wish to change it to "
+"<b>not</b> be resizeable?"
+msgstr ""
+
+#: vgchangeresize.cpp:41
+msgid ""
+"Volume group: <b>%1</b> is currently <b>not</b> resizeable. Do you wish to "
+"change it to be resizeable?"
+msgstr ""
+
+#: vgchangeresize.cpp:55
+msgid "Changing vg resize..."
+msgstr ""
+
+#: vgcreate.cpp:44
+msgid "Creating vg..."
+msgstr ""
+
+#: vgcreate.cpp:51
+msgid "No unused physical volumes found"
+msgstr ""
+
+#: vgcreate.cpp:64
+msgid "Creating volume group..."
+msgstr ""
+
+#: vgcreate.cpp:76
+msgid "Create Volume Group"
+msgstr ""
+
+#: vgcreate.cpp:83
+msgid "Volume Group Name: "
+msgstr ""
+
+#: vgcreate.cpp:93
+msgid "Physical Extent Size: "
+msgstr ""
+
+#: vgcreate.cpp:136
+msgid "Number of Logical Volumes"
+msgstr ""
+
+#: vgcreate.cpp:140 vgcreate.cpp:156
+msgid "No Limit"
+msgstr ""
+
+#: vgcreate.cpp:144 vgcreate.cpp:160
+msgid "Maximum: "
+msgstr ""
+
+#: vgcreate.cpp:152
+msgid "Number of Physical Volumes"
+msgstr ""
+
+#: vgcreate.cpp:168
+msgid "Cluster Aware"
+msgstr ""
+
+#: vgcreate.cpp:171
+msgid "Automatic Backup"
+msgstr ""
+
+#: vgexport.cpp:31
+msgid "Export volume group: %1 ?"
+msgstr ""
+
+#: vgexport.cpp:38
+msgid "Exporting volume group..."
+msgstr ""
+
+#: vgextend.cpp:28
+msgid ""
+"Do you want to extend volume group: <b>%1</b> with physical volume: <b>%2</b>"
+msgstr ""
+
+#: vgextend.cpp:37
+msgid "Extending volume group..."
+msgstr ""
+
+#: vgimport.cpp:31
+msgid "Import volume group: %1 ?"
+msgstr ""
+
+#: vgimport.cpp:38
+msgid "Importing volume group..."
+msgstr ""
+
+#: vginfolabels.cpp:98
+msgid "<b>*** Warning: Partial Volume Group ***</b>"
+msgstr ""
+
+#: vginfolabels.cpp:102
+msgid "<b>*** Exported Volume Group ***</b>"
+msgstr ""
+
+#: vginfolabels.cpp:105
+msgid "Used: %1"
+msgstr ""
+
+#: vginfolabels.cpp:106
+msgid "Free: %1"
+msgstr ""
+
+#: vginfolabels.cpp:107
+msgid "Total: %1"
+msgstr ""
+
+#: vginfolabels.cpp:108
+msgid "Format: %1"
+msgstr ""
+
+#: vginfolabels.cpp:109
+msgid "Policy: %1"
+msgstr ""
+
+#: vginfolabels.cpp:110
+msgid "Resizable: %1"
+msgstr ""
+
+#: vginfolabels.cpp:111
+msgid "Clustered: %1"
+msgstr ""
+
+#: vginfolabels.cpp:112
+msgid "Access: %1"
+msgstr ""
+
+#: vginfolabels.cpp:113
+msgid "Allocateable: %1"
+msgstr ""
+
+#: vginfolabels.cpp:135
+msgid "Max pvs: %1"
+msgstr ""
+
+#: vginfolabels.cpp:137
+msgid "Max pvs: Unlimited"
+msgstr ""
+
+#: vginfolabels.cpp:139
+msgid "Max lvs: %1"
+msgstr ""
+
+#: vginfolabels.cpp:141
+msgid "Max lvs: Unlimited"
+msgstr ""
+
+#: vgreduce.cpp:34 vgreduceone.cpp:41
+msgid "Reducing vg..."
+msgstr ""
+
+#: vgreduce.cpp:43
+msgid "Reduce Volume Group"
+msgstr ""
+
+#: vgreduce.cpp:52
+msgid ""
+"Select any of the following physical volumes to remove them from volume "
+"group <b>%1</b>"
+msgstr ""
+
+#: vgreduce.cpp:58
+msgid "Unused physical volumes"
+msgstr ""
+
+#: vgreduce.cpp:63
+msgid "In use physical volumes"
+msgstr ""
+
+#: vgreduce.cpp:85
+msgid "none"
+msgstr ""
+
+#: vgreduce.cpp:88
+msgid "<b>The following may not be removed</b>"
+msgstr ""
+
+#: vgreduceone.cpp:29
+msgid "Remove physical volume: <b>%1</b> from volume group: <b>%2</b>"
+msgstr ""
+
+#: vgremove.cpp:29
+msgid "Are you certain you want to delete volume group: <b>%1</b>"
+msgstr ""
+
+#: vgremove.cpp:38
+msgid "Removing volume group..."
+msgstr ""
+
+#: vgrename.cpp:29
+msgid "Renaming volume group..."
+msgstr ""
+
+#: vgrename.cpp:40
+msgid "Rename volume group"
+msgstr ""
+
+#: vgrename.cpp:48
+msgid "Old volume group name: %1"
+msgstr ""
+
+#: vgrename.cpp:51
+msgid "New volume group name: "
+msgstr ""
+
+#: rc.cpp:1
+msgctxt "NAME OF TRANSLATORS"
+msgid "Your names"
+msgstr ""
+
+#: rc.cpp:2
+msgctxt "EMAIL OF TRANSLATORS"
+msgid "Your emails"
+msgstr ""
