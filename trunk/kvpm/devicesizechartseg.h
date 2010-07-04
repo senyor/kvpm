@@ -41,8 +41,6 @@ public slots:
     void addPartition();
     void mkfsPartition();
     void mountPartition();
-    void pvcreatePartition();
-    void pvremovePartition();
     void removePartition();
     void removefsPartition();
     void moveresizePartition();

@@ -38,7 +38,7 @@
 #include "sizetostring.h"
 #include "fsextend.h"
 #include "fsreduce.h"
-
+#include "volgroup.h"
 
 bool moveresize_partition(StoragePartition *partition)
 {
@@ -575,7 +575,6 @@ void PartitionMoveResizeDialog::setup(){
     m_new_part_start  = (m_current_part->geom).start;
     m_new_part_size   = (m_current_part->geom).length;
 
-
     /* how big can it grow? */
 
     PedConstraint *constraint = ped_device_get_constraint(ped_device);
@@ -596,7 +595,7 @@ void PartitionMoveResizeDialog::setup(){
     // +2 because counting starts at zero (+1) and one is used for metadata(+1)
     if( m_old_storage_part->isPV() ){
         m_min_shrink_size = 2 + m_old_storage_part->getPhysicalVolume()->getLastUsedExtent();
-        m_min_shrink_size *= m_old_storage_part->getPhysicalVolume()->getExtentSize();
+        m_min_shrink_size *= m_old_storage_part->getPhysicalVolume()->getVolGroup()->getExtentSize();
         m_min_shrink_size /= m_ped_sector_size;
     }
     else{

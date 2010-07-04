@@ -13,11 +13,11 @@ set(kvpm_SRCS addmirror.cpp kvpmconfigdialog.cpp devicemodel.cpp devicepropertie
 	      lvcreate.cpp lvproperties.cpp lvpropertiesstack.cpp lvreduce.cpp 
 	      lvremove.cpp lvsizechart.cpp main.cpp mkfs.cpp masterlist.cpp  mount.cpp 
 	      lvsizechartseg.cpp mountentry.cpp mountinfo.cpp 
-	      partremove.cpp pvextend.cpp pvreduce.cpp
+	      pvextend.cpp pvreduce.cpp partremove.cpp
 	      partaddgraphic.cpp partadd.cpp pvproperties.cpp  pvpropertiesstack.cpp 
 	      devicetreeview.cpp physvol.cpp partmoveresize.cpp removefs.cpp
-	      nomungecheck.cpp processprogress.cpp pvchange.cpp pvcreate.cpp 
-	      pvmove.cpp pvremove.cpp pvtree.cpp removemissing.cpp removemirror.cpp 
+	      nomungecheck.cpp processprogress.cpp pvchange.cpp 
+	      pvmove.cpp pvtree.cpp removemissing.cpp removemirror.cpp 
 	      removemirrorleg.cpp 
 	      sizetostring.cpp storagepartition.cpp storagedevice.cpp topwindow.cpp 
 	      tablecreate.cpp unmount.cpp 
@@ -28,5 +28,12 @@ set(kvpm_SRCS addmirror.cpp kvpmconfigdialog.cpp devicemodel.cpp devicepropertie
 	      vgrename.cpp volumegrouptab.cpp)
  
 kde4_add_executable(kvpm ${kvpm_SRCS})
-target_link_libraries(kvpm ${KDE4_KDEUI_LIBS} ${KDE4_KFILE_LIBS} ${QT_LIBRARIES} blkid parted)
+target_link_libraries(kvpm ${KDE4_KDEUI_LIBS} ${KDE4_KFILE_LIBS} ${QT_LIBRARIES} blkid parted lvm2app)
 INSTALL(TARGETS kvpm DESTINATION bin)
+set_target_properties(kvpm PROPERTIES COMPILE_FLAGS "-std=gnu++98")
+
+IF(NOT CMAKE_BUILD_TYPE)
+  SET(CMAKE_BUILD_TYPE Debug CACHE STRING
+      "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel."
+      FORCE)
+ENDIF(NOT CMAKE_BUILD_TYPE)

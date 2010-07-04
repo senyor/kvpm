@@ -12,6 +12,7 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
+#include <lvm2app.h>
 
 #include <KMessageBox>
 #include <KLocale>
@@ -19,9 +20,9 @@
 
 #include "masterlist.h"
 #include "nomungecheck.h"
-#include "processprogress.h"
 #include "vgreduce.h"
 #include "volgroup.h"
+#include "physvol.h"
 
 extern MasterList *master_list;
 
@@ -31,7 +32,22 @@ bool reduce_vg(VolGroup *volumeGroup)
     dialog.exec();
 
     if(dialog.result() == QDialog::Accepted){
-        ProcessProgress reduce( dialog.arguments(), i18n("Reducing vg..."), true );
+
+        QStringList pvs = dialog.arguments();  // pvs to remove by name
+        int error_number;
+        lvm_t  lvm = lvm_init(NULL);
+
+        vg_t vg_dm = lvm_vg_open(lvm, volumeGroup->getName().toAscii().data(), "w", NULL);
+
+        for(int x = 0; x < pvs.size(); x++){
+            error_number = lvm_vg_reduce(vg_dm, pvs[x].toAscii().data());
+            qDebug("Reducing VG %d", error_number);
+        }
+        error_number = lvm_vg_write(vg_dm);
+        qDebug("Writing VG %d", error_number);
+        lvm_vg_close(vg_dm);
+        lvm_quit(lvm);
+
         return true;
     }
 
@@ -69,7 +85,7 @@ VGReduceDialog::VGReduceDialog(VolGroup *volumeGroup, QWidget *parent) : KDialog
     NoMungeCheck *pv_check = NULL;
     
     for(int x = 0; x < pv_count; x++){
-	if( !( member_pvs[x]->getUsed() ) ){                  // only unused pvs can be removed
+	if( !( member_pvs[x]->getSize() - member_pvs[x]->getUnused() ) ){ // only unused pvs can be removed
 	    pv_check = new NoMungeCheck( member_pvs[x]->getDeviceName() );
 	    m_pv_check_boxes.append(pv_check);
 	    pv_unused_layout->addWidget(pv_check);
@@ -97,8 +113,7 @@ QStringList VGReduceDialog::arguments()
     QStringList args;
     int check_box_count = m_pv_check_boxes.size();
 
-    args << "vgreduce"
-	 << m_vg_name;
+    args << m_vg_name;
 
     for(int x = 0; x < check_box_count; x++){
 	if(m_pv_check_boxes[x]->isChecked())

@@ -12,44 +12,36 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
-
 #include <QtGui>
 
 #include "physvol.h"
+#include "volgroup.h"
 
-PhysVol::PhysVol(QString pvData)
+PhysVol::PhysVol(pv_t pv, VolGroup *vg)
 {
-    QString attributes;
-
-    m_active = false;
-    m_extent_size = 0;
+    m_vg = vg;
     m_last_used_extent = 0;
 
-    pvData     = pvData.trimmed();
-    m_device   = pvData.section('|',0,0);
-    m_vg_name  = pvData.section('|',1,1);
-    m_format   = pvData.section('|',2,2);
-    attributes = pvData.section('|',3,3);
+    m_device   = QString( lvm_pv_get_name(pv) );
+    m_format   = "????"; // Set these when lvm2apps ready!!!
 
-    if (attributes.at(0) == 'a')
-	m_allocatable = true;
-    else
-	m_allocatable = false;
+    m_allocatable = true; // Set these when lvm2apps ready!!!
 
-    if (attributes.at(1) == 'x')
-	m_exported = true;
-    else
-	m_exported = false;
+    // pv is active if any associated lvs are active
+    m_active   = true;    // Set these when lvm2apps ready!!!
+    m_exported = false;   // Set these when lvm2apps ready!!!
+    
+    m_device_size   = lvm_pv_get_dev_size(pv); 
+    m_unused        = lvm_pv_get_free(pv);
+    m_size          = lvm_pv_get_size(pv);
+    m_uuid          = QString( lvm_pv_get_uuid(pv) );
 
-    m_size   = (pvData.section('|',4,4)).toLongLong();
-    m_unused = (pvData.section('|',5,5)).toLongLong();
-    m_used   = (pvData.section('|',6,6)).toLongLong();
-    m_uuid   =  pvData.section('|',7,7);
+    qDebug("PV Dev Size %lld  Used %lld  Unused %lld", m_device_size, m_size, m_unused);
 }
 
-QString PhysVol::getVolumeGroupName()
+VolGroup* PhysVol::getVolGroup()
 {
-    return m_vg_name;
+    return m_vg;
 }
 
 QString PhysVol::getDeviceName()
@@ -92,28 +84,28 @@ long long PhysVol::getSize()
     return m_size;
 }
 
+long long PhysVol::getDeviceSize()
+{
+    return m_device_size;
+}
+
 long long PhysVol::getUnused()
 {
     return m_unused;
-}
-
-long long PhysVol::getUsed()
-{
-    return m_used;
 }
 
 int PhysVol::getPercentUsed()
 {
     int percent;
 
-    if( m_used == m_size )
+    if( m_unused == 0 )
 	return 100;
-    else if( m_used == 0 )
+    else if( m_unused == m_size )
 	return 0;
     else if( m_size == 0 )      // This shouldn't happen
 	return 100;
     else
-	percent = qRound(  ( m_used * 100.0 ) / m_size );
+	percent = qRound(  ( ( m_size - m_unused ) * 100.0 ) / m_size );
     
     return percent;
 }
@@ -126,14 +118,4 @@ long long PhysVol::getLastUsedExtent()
 void PhysVol::setLastUsedExtent(long long last)
 {
     m_last_used_extent = last;
-}
-
-long PhysVol::getExtentSize()
-{
-    return m_extent_size;
-}
-
-void PhysVol::setExtentSize(long size)
-{
-    m_extent_size = size;
 }

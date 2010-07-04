@@ -29,16 +29,20 @@ bool create_vg()
     QList<PhysVol *> physical_volumes;
     QStringList unused_pv_paths;
 
+    // no more pvs without a vg -- major fixme!!!
+
+    /*
     physical_volumes = master_list->getPhysVols();
     for(int x = 0; x < physical_volumes.size(); x++){
 
-      if( physical_volumes[x]->getVolumeGroupName() == "" )
-	unused_pv_paths.append( physical_volumes[x]->getDeviceName() );
+        if( physical_volumes[x]->getVolumeGroupName() == "" )
+            unused_pv_paths.append( physical_volumes[x]->getDeviceName() );
     }
+    */
 
     if( unused_pv_paths.size() > 0 ){
-      VGCreateDialog dialog( unused_pv_paths );
-      dialog.exec();
+        VGCreateDialog dialog( unused_pv_paths );
+        dialog.exec();
     
       if(dialog.result() == QDialog::Accepted){
           ProcessProgress create_vg( dialog.arguments(), i18n("Creating vg..."), true );
