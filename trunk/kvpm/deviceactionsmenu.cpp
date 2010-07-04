@@ -120,7 +120,6 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
         m_vgextend_menu->addAction(vgextend_actions[x]);
     }
 
-
     if(item){
 
         setEnabled(true);
@@ -170,17 +169,7 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
 	    m_vgextend_menu->setEnabled(false);
 	    m_vgreduce_action->setEnabled(false);
 	}
-	else if( (item->data(4) == "physical volume") && (item->data(5) == "" ) ){
-	    m_mkfs_action->setEnabled(false);
-	    m_partremove_action->setEnabled(false);
-            m_partmoveresize_action->setEnabled(false);
-	    m_partadd_action->setEnabled(false);
-            m_removefs_action->setEnabled(false);
-	    m_vgcreate_action->setEnabled(true);
-	    m_vgextend_menu->setEnabled(true);
-	    m_vgreduce_action->setEnabled(false);
-	}
-	else if( (item->data(4) == "physical volume") && (item->data(5) != "" ) ){
+	else if( item->data(4) == "physical volume" ){
 	    m_mkfs_action->setEnabled(false);
 	    m_partremove_action->setEnabled(false);
 
@@ -205,16 +194,21 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
                 m_partmoveresize_action->setEnabled(false);
                 m_mkfs_action->setEnabled(false);
                 m_removefs_action->setEnabled(false);
+                m_vgcreate_action->setEnabled(false);
+                m_vgextend_menu->setEnabled(false);
             }
 	    else{                                               // not mounted
 	        m_partremove_action->setEnabled(true);
                 m_partmoveresize_action->setEnabled(true);
                 m_mkfs_action->setEnabled(true);
                 m_removefs_action->setEnabled(true);
+                m_vgcreate_action->setEnabled(true);
+                if(group_names.size())
+                    m_vgextend_menu->setEnabled(true);
+                else
+                    m_vgextend_menu->setEnabled(false);
             }
 	    m_partadd_action->setEnabled(false);
-	    m_vgcreate_action->setEnabled(false);
-	    m_vgextend_menu->setEnabled(true);
 	    m_vgreduce_action->setEnabled(false);
         }
 	else if(item->data(7) != ""){

@@ -24,25 +24,33 @@ bool extend_vg(QString volumeGroupName, QString physicalVolumeName)
 {
     QString message;
     QStringList args;
+    lvm_t  lvm;
+    vg_t vg_dm;
     
     message = i18n("Do you want to extend volume group: <b>%1</b> with "
 		   "physical volume: <b>%2</b>").arg(volumeGroupName).arg(physicalVolumeName);
 
     if( KMessageBox::questionYesNo(0, message) == 3 ){     // 3 is the "yes" button
-        int error_number;
-        lvm_t  lvm = lvm_init(NULL);
-
-        vg_t vg_dm = lvm_vg_open(lvm, volumeGroupName.toAscii().data(), "w", NULL);
-        error_number = lvm_vg_extend(vg_dm, physicalVolumeName.toAscii().data());
-        qDebug("Extending VG %d", error_number);
-        error_number = lvm_vg_write(vg_dm);
-        qDebug("Writing VG %d", error_number);
-        lvm_vg_close(vg_dm);
-        lvm_quit(lvm);
-
-	return true;
+        if( (lvm = lvm_init(NULL)) ){
+            if( (vg_dm = lvm_vg_open(lvm, volumeGroupName.toAscii().data(), "w", NULL)) ){
+                if( ! lvm_vg_extend(vg_dm, physicalVolumeName.toAscii().data()) ){
+                    if( lvm_vg_write(vg_dm) )
+                        KMessageBox::error(0, QString(lvm_errmsg(lvm)));;
+                    lvm_vg_close(vg_dm);
+                    lvm_quit(lvm);
+                    return true;
+                }
+                KMessageBox::error(0, QString(lvm_errmsg(lvm))); 
+                lvm_vg_close(vg_dm);
+                lvm_quit(lvm);
+                return true;
+            }
+            KMessageBox::error(0, QString(lvm_errmsg(lvm))); 
+            lvm_quit(lvm);
+            return true;
+        }
+        KMessageBox::error(0, QString(lvm_errmsg(lvm)));
+        return true;
     }
-    else{ 
-	return false;  // do nothing
-    }
+    return false;  // do nothing
 }
