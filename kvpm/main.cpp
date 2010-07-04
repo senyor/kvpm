@@ -12,7 +12,6 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
-
 #include <KApplication>
 #include <KAboutData>
 #include <KCmdLineArgs>

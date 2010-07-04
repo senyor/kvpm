@@ -92,7 +92,7 @@ PVMoveDialog::PVMoveDialog(PhysVol *physicalVolume, QWidget *parent) : KDialog(p
 {
 
     PhysVol  *pv = physicalVolume;
-    VolGroup *vg = master_list->getVolGroupByName(pv->getVolumeGroupName());
+    VolGroup *vg = pv->getVolGroup();
     m_destination_pvs = vg->getPhysicalVolumes();
     
     move_lv = false;
@@ -152,14 +152,14 @@ PVMoveDialog::PVMoveDialog(LogVol *logicalVolume, QWidget *parent) :
         }
 
         for(int x = 0; x < physical_volume_paths.size(); x++)
-            m_source_pvs.append(master_list->getPhysVolByName( physical_volume_paths[x] ));
+            m_source_pvs.append( m_lv->getVolumeGroup()->getPhysVolByName( physical_volume_paths[x] ));
 
     }
     else{	
         physical_volume_paths << m_lv->getDevicePathAll();
 
         for(int x = 0; x < physical_volume_paths.size(); x++)
-            m_source_pvs.append(master_list->getPhysVolByName( physical_volume_paths[x] ));
+            m_source_pvs.append(m_lv->getVolumeGroup()->getPhysVolByName( physical_volume_paths[x] ));
     }
 
 /* If there is only on physical volume in the group then
@@ -232,7 +232,7 @@ void PVMoveDialog::buildDialog()
 	    if(move_lv)
 	        pv_used_space = m_lv->getSpaceOnPhysicalVolume(m_source_pvs[x]->getDeviceName());
 	    else
-	        pv_used_space = m_source_pvs[x]->getUsed();
+	        pv_used_space = m_source_pvs[x]->getSize() - m_source_pvs[x]->getUnused();
 
 	    label = new QLabel( i18n("Used space: %1").arg(sizeToString( pv_used_space ) ));
 	    radio_label_layout->addWidget(label);
@@ -248,7 +248,7 @@ void PVMoveDialog::buildDialog()
 	if(move_lv)
 	    pv_used_space = m_lv->getSpaceOnPhysicalVolume(m_source_pvs[0]->getDeviceName());
 	else
-	    pv_used_space = m_source_pvs[0]->getUsed();
+	    pv_used_space = m_source_pvs[0]->getSize() - m_source_pvs[0]->getUnused();
     
 	label = new QLabel("Used space: " + sizeToString( pv_used_space ) );
 	radio_label_layout->addWidget(label);

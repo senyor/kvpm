@@ -12,6 +12,8 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
+#include <parted/parted.h>
+
 #include <KLocale>
 #include <QtGui>
 
@@ -25,14 +27,14 @@
 #include "storagedevice.h"
 #include "volgroup.h"
 
-#include <parted/parted.h>
-
-
 MasterList::MasterList() : QObject()
 {
-    scanVolumeGroups();
+    lvm_t  lvm = lvm_init( NULL );
+    lvm_scan(lvm);
+    scanVolumeGroups(lvm);
+    lvm_quit(lvm);
+
     scanLogicalVolumes();
-    scanPhysicalVolumes();
     scanStorageDevices();
 }
 
@@ -49,56 +51,22 @@ MasterList::~MasterList()
     for(int x = 0; x < m_logical_volumes.size(); x++)
 	delete m_logical_volumes[x];
 
-    for(int x = 0; x < m_physical_volumes.size(); x++)
-	delete m_physical_volumes[x];
-
     for(int x = 0; x < m_storage_devices.size(); x++)
 	delete m_storage_devices[x];
 }
 
-void MasterList::scanVolumeGroups()
+void MasterList::scanVolumeGroups(lvm_t lvm)
 {
     QStringList vg_output;
     QStringList arguments;
-    int vg_count;
-    
-    /* First we run "vgs" to find out what volume groups
-       we have and get some information on them  */
-    
-    arguments << "vgs" << "-o" 
-	      <<  "+vg_extent_size,vg_extent_count,vg_free_count,vg_fmt,max_pv,max_lv"  
-	      << "--noheadings" << "--separator" 
-	      << "|" << "--nosuffix" 
-	      << "--units" << "b" 
-	      << "--partial"; 
-    
-    ProcessProgress vgscan(arguments, i18n("Scanning volume groups") );
-    vg_output = vgscan.programOutput();
-    vg_count = vg_output.size();
-    
-    for(int x = 0 ; x < vg_count ; x++)
-	m_volume_groups.append(new VolGroup(vg_output[x]));
-}
 
-VolGroup* MasterList::scanVolumeGroups(QString VolumeGroupName)
-{
-    QStringList vg_output;
-    QStringList arguments;
+    dm_list *vgnames;
+    lvm_str_list *strl;
     
-    /* Running vgs gets us the information we
-       need to have on the volume group named  */
-    
-    arguments << "vgs" << "-o" 
-	      <<  "+vg_extent_size,vg_extent_count,vg_free_count,vg_fmt,max_pv,max_lv"  
-	      << "--noheadings" << "--separator" 
-	      << "|" << "--nosuffix" 
-	      << "--units" << "b" 
-	      << "--partial" << VolumeGroupName; 
-    
-    ProcessProgress vgscan(arguments, i18n("Scanning volume groups") );
-    vg_output = vgscan.programOutput();
-    
-    return (new VolGroup(vg_output[0]));
+    vgnames = lvm_list_vg_names(lvm);
+
+    dm_list_iterate_items(strl, vgnames)
+	m_volume_groups.append( new VolGroup(lvm, strl->str) );
 }
 
 void MasterList::scanLogicalVolumes()
@@ -188,56 +156,18 @@ void MasterList::scanLogicalVolumes(VolGroup *VolumeGroup)
 
 }
 
-	  
-/*  Once the second program 'lvs' completes we start up
-    the last one 'pvs' and then get its output    */
-
-void MasterList::scanPhysicalVolumes()
-{
-    QStringList pv_output;
-    QStringList arguments;
-    int pv_count;
-    int vg_count = getVolGroupCount();
-    
-    arguments << "pvs" 
-	      << "--noheadings" 
-	      << "--separator" << "|" 
-	      << "--nosuffix" 
-	      << "--units" << "b" 
-	      << "--partial" 
-	      << "-o" << "+pv_used,pv_uuid";
-    
-    ProcessProgress pvscan(arguments, i18n("Scanning physical volumes...") );
-    pv_output = pvscan.programOutput();
-    
-    pv_count = pv_output.size();
-
-    for(int x = 0; x < m_physical_volumes.size(); x++) // Delete everything in the old list
-	delete m_physical_volumes[x];
-
-    m_physical_volumes.clear();
-    
-    for(int x = 0; x < pv_count; x++)
-	m_physical_volumes.append(new PhysVol(pv_output[x]));
-
-    for(int vg = 0; vg < vg_count; vg++){
-	m_volume_groups[vg]->clearPhysicalVolumes();
-	for(int pv = 0; pv < pv_count; pv++){
-	    if(m_physical_volumes[pv]->getVolumeGroupName() == m_volume_groups[vg]->getName()){
-
-                m_physical_volumes[pv]->setActive( determinePVState(m_physical_volumes[pv], 
-                                                                    m_volume_groups[vg] ) );
-
-		m_volume_groups[vg]->addPhysicalVolume( m_physical_volumes[pv] );
-	    }
-	}
-    }
-}
-
 void MasterList::scanStorageDevices()
 {
     PedDevice *dev = NULL;
-    
+    QList<PhysVol *>  physical_volumes;
+
+    qDebug() << "Scanning storage devices";
+
+    for(int x = 0; x < m_volume_groups.size(); x++)
+        physical_volumes.append( m_volume_groups[x]->getPhysicalVolumes() );
+
+    qDebug() << "Scanned storage devices";
+
     for(int x = 0; x < m_storage_devices.size(); x++)
 	delete m_storage_devices[x];
 
@@ -249,7 +179,7 @@ void MasterList::scanStorageDevices()
     MountInformationList *mount_info_list = new MountInformationList();
 
     while( ( dev = ped_device_get_next(dev) ) ){
-	m_storage_devices.append( new StorageDevice(dev, m_physical_volumes, mount_info_list ) );
+	m_storage_devices.append( new StorageDevice(dev, physical_volumes, mount_info_list ) );
     }
 }
 
@@ -258,36 +188,14 @@ int MasterList::getVolGroupCount()
       return m_volume_groups.size();
 }
 
-int MasterList::getPhysVolCount()
-{
-      return m_physical_volumes.size();
-}
-
 const QList<VolGroup *> MasterList::getVolGroups()
 {
       return m_volume_groups;
 }
 
-const QList<PhysVol *> MasterList::getPhysVols()
-{
-    return m_physical_volumes;
-}
-
 const QList<StorageDevice *> MasterList::getStorageDevices()
 {
     return m_storage_devices;
-}
-
-PhysVol* MasterList::getPhysVolByName(QString name)
-{
-    name = name.trimmed();
-
-    for(int x = 0; x < m_physical_volumes.size(); x++){
-	if(name == m_physical_volumes[x]->getDeviceName())
-	    return m_physical_volumes[x];
-    }
-
-    return NULL;
 }
 
 VolGroup* MasterList::getVolGroupByName(QString name)
@@ -312,37 +220,3 @@ QStringList MasterList::getVolumeGroupNames()
     return names;
 }
 
-// pv is active if any associated lvs are active
-
-bool MasterList::determinePVState( PhysVol *pv, VolGroup *vg ){
-
-    bool is_active = false;
-    bool is_in_lv = false;
-
-    QString pv_name = pv->getDeviceName();
-    QList<LogVol *>  lvs = vg->getLogicalVolumes();
-    QStringList pvs_in_lv;
-
-    for( int x = lvs.size() - 1; x >= 0  ;x-- ){
-
-        pvs_in_lv = lvs[x]->getDevicePathAll();
-        is_in_lv  = false;
-
-        for( int y = 0; y < pvs_in_lv.size(); y++ ){ 
-            if( pvs_in_lv[y] == pv->getDeviceName() )
-                is_in_lv = true;
-
-        }
-        if( ! is_in_lv ){
-            lvs.removeAt(x);
-        }
-
-    }
-
-    for( int x = 0; x < lvs.size(); x++ ){
-         if( lvs[x]->isActive() )
-            is_active = true;
-    }
-
-    return is_active;
-}

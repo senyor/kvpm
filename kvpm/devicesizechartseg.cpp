@@ -27,8 +27,6 @@
 #include "partremove.h"
 #include "partmoveresize.h"
 #include "processprogress.h"
-#include "pvcreate.h"
-#include "pvremove.h"
 #include "removefs.h"
 #include "storagepartition.h"
 #include "topwindow.h"
@@ -166,18 +164,6 @@ void DeviceChartSeg::mkfsPartition()
 {
     if( make_fs(m_partition) )
         MainWindow->reRun();
-}
-
-void DeviceChartSeg::pvcreatePartition()
-{
-    if( create_pv(m_pv_name) )
-	MainWindow->reRun();
-}
-
-void DeviceChartSeg::pvremovePartition()
-{
-    if( remove_pv(m_pv_name) )
-	MainWindow->reRun();
 }
 
 void DeviceChartSeg::removefsPartition()

@@ -22,8 +22,6 @@
 #include "mkfs.h"
 #include "mount.h"
 #include "unmount.h"
-#include "pvcreate.h"
-#include "pvremove.h"
 #include "partremove.h"
 #include "partadd.h"
 #include "tablecreate.h"
@@ -48,8 +46,6 @@ DeviceActionsMenu::DeviceActionsMenu( StorageDeviceItem *item,
     connect(m_partremove_action, SIGNAL(triggered()), view, SLOT(removePartition()));
     connect(m_partadd_action,    SIGNAL(triggered()), view, SLOT(addPartition()));
     connect(m_partmoveresize_action, SIGNAL(triggered()), view, SLOT(moveresizePartition()));
-    connect(m_pvcreate_action,   SIGNAL(triggered()), view, SLOT(pvcreatePartition()));
-    connect(m_pvremove_action,   SIGNAL(triggered()), view, SLOT(pvremovePartition()));
     connect(m_removefs_action,   SIGNAL(triggered()), view, SLOT(removefsPartition()));
     connect(m_tablecreate_action,SIGNAL(triggered()), view, SLOT(tablecreatePartition()));
     connect(m_vgcreate_action,   SIGNAL(triggered()), view, SLOT(vgcreatePartition()));
@@ -74,8 +70,6 @@ DeviceActionsMenu::DeviceActionsMenu( StorageDeviceItem *item,
     connect(m_partadd_action,    SIGNAL(triggered()), segment, SLOT(addPartition()));
     connect(m_partmoveresize_action, SIGNAL(triggered()), segment, SLOT(moveresizePartition()));
     connect(m_removefs_action,   SIGNAL(triggered()), segment, SLOT(removefsPartition()));
-    connect(m_pvcreate_action,   SIGNAL(triggered()), segment, SLOT(pvcreatePartition()));
-    connect(m_pvremove_action,   SIGNAL(triggered()), segment, SLOT(pvremovePartition()));
     connect(m_vgcreate_action,   SIGNAL(triggered()), segment, SLOT(vgcreatePartition()));
     //    connect(m_tablecreate_action,SIGNAL(triggered()), segment, SLOT(tablecreatePartition()));
     connect(m_vgreduce_action,   SIGNAL(triggered()), segment, SLOT(vgreducePartition()));
@@ -98,8 +92,6 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
     m_partmoveresize_action = new KAction( i18n("Move or resize disk partition"), this);
     m_partremove_action = new KAction( i18n("Remove disk partition"), this);
     m_removefs_action   = new KAction( i18n("Remove filesystem"), this);
-    m_pvcreate_action   = new KAction( i18n("Create physical volume"), this);
-    m_pvremove_action   = new KAction( i18n("Remove physical volume"), this);
     m_vgcreate_action   = new KAction( i18n("Create volume group"), this);
     m_tablecreate_action= new KAction( i18n("Create new partition table"), this);
     m_vgreduce_action   = new KAction( i18n("Remove from volume group"), this);
@@ -111,8 +103,6 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
     addAction(m_partadd_action);
     addAction(m_partmoveresize_action);
     addSeparator();
-    addAction(m_pvcreate_action);
-    addAction(m_pvremove_action);
     addAction(m_vgcreate_action);
     addAction(m_vgreduce_action);
     addMenu(m_vgextend_menu);
@@ -151,55 +141,46 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
 	}
 
 	if(item->data(1) == "freespace" || item->data(1) == "freespace (logical)"){
-            m_pvcreate_action->setEnabled(false);
 	    m_mkfs_action->setEnabled(false);
 	    m_partremove_action->setEnabled(false);
             m_partmoveresize_action->setEnabled(false);
 	    m_partadd_action->setEnabled(true);
-	    m_pvremove_action->setEnabled(false);
             m_removefs_action->setEnabled(false);
 	    m_vgcreate_action->setEnabled(false);
 	    m_vgextend_menu->setEnabled(false);
 	    m_vgreduce_action->setEnabled(false);
 	}
 	else if(item->data(1) == "extended" && item->dataAlternate(1) == "empty"){
-	    m_pvcreate_action->setEnabled(false);
 	    m_mkfs_action->setEnabled(false);
 	    m_partadd_action->setEnabled(false);
 	    m_partremove_action->setEnabled(true);
             m_partmoveresize_action->setEnabled(false);
-	    m_pvremove_action->setEnabled(false);
             m_removefs_action->setEnabled(false);
 	    m_vgcreate_action->setEnabled(false);
 	    m_vgextend_menu->setEnabled(false);
 	    m_vgreduce_action->setEnabled(false);
 	}
 	else if(item->data(1) == "extended" && item->dataAlternate(1) != "empty"){
-	    m_pvcreate_action->setEnabled(false);
 	    m_mkfs_action->setEnabled(false);
 	    m_partadd_action->setEnabled(false);
 	    m_partremove_action->setEnabled(false);
             m_partmoveresize_action->setEnabled(false);
-	    m_pvremove_action->setEnabled(false);
             m_removefs_action->setEnabled(false);
 	    m_vgcreate_action->setEnabled(false);
 	    m_vgextend_menu->setEnabled(false);
 	    m_vgreduce_action->setEnabled(false);
 	}
 	else if( (item->data(4) == "physical volume") && (item->data(5) == "" ) ){
-	    m_pvcreate_action->setEnabled(false);
 	    m_mkfs_action->setEnabled(false);
 	    m_partremove_action->setEnabled(false);
             m_partmoveresize_action->setEnabled(false);
 	    m_partadd_action->setEnabled(false);
-	    m_pvremove_action->setEnabled(true);
             m_removefs_action->setEnabled(false);
 	    m_vgcreate_action->setEnabled(true);
 	    m_vgextend_menu->setEnabled(true);
 	    m_vgreduce_action->setEnabled(false);
 	}
 	else if( (item->data(4) == "physical volume") && (item->data(5) != "" ) ){
-	    m_pvcreate_action->setEnabled(false);
 	    m_mkfs_action->setEnabled(false);
 	    m_partremove_action->setEnabled(false);
 
@@ -209,7 +190,6 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
                 m_partmoveresize_action->setEnabled(true);
 
 	    m_partadd_action->setEnabled(false);
-	    m_pvremove_action->setEnabled(false);
             m_removefs_action->setEnabled(false);
 	    m_vgcreate_action->setEnabled(false);
 	    m_vgextend_menu->setEnabled(false);
@@ -222,22 +202,19 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
 	else if(item->data(1) == "logical" || item->data(1) == "normal"){
 	    if(item->data(7) != ""){                            // mounted
    	        m_partremove_action->setEnabled(false);
-                m_pvcreate_action->setEnabled(false);
                 m_partmoveresize_action->setEnabled(false);
                 m_mkfs_action->setEnabled(false);
                 m_removefs_action->setEnabled(false);
             }
 	    else{                                               // not mounted
 	        m_partremove_action->setEnabled(true);
-                m_pvcreate_action->setEnabled(true);
                 m_partmoveresize_action->setEnabled(true);
                 m_mkfs_action->setEnabled(true);
                 m_removefs_action->setEnabled(true);
             }
 	    m_partadd_action->setEnabled(false);
-	    m_pvremove_action->setEnabled(false);
 	    m_vgcreate_action->setEnabled(false);
-	    m_vgextend_menu->setEnabled(false);
+	    m_vgextend_menu->setEnabled(true);
 	    m_vgreduce_action->setEnabled(false);
         }
 	else if(item->data(7) != ""){
@@ -246,19 +223,14 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
 	    m_partadd_action->setEnabled(false);
 	    m_mkfs_action->setEnabled(false);
             m_removefs_action->setEnabled(false);
-	    m_pvremove_action->setEnabled(false);
 	    m_vgcreate_action->setEnabled(false);
 	    m_vgextend_menu->setEnabled(false);
 	    m_vgreduce_action->setEnabled(false);
 
-            m_pvcreate_action->setEnabled(false);
-
 	    if( item->dataAlternate(1) == "busy" || item->dataAlternate(3) != 0 ){
-                //    m_pvcreate_action->setEnabled(false);
 	        m_tablecreate_action->setEnabled(false);
             }
 	    else{ 
-                //    m_pvcreate_action->setEnabled(true);
 	        m_tablecreate_action->setEnabled(true);
             }
         }
@@ -266,8 +238,6 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
 	    m_partremove_action->setEnabled(false);
             m_partmoveresize_action->setEnabled(false);
 	    m_partadd_action->setEnabled(false);
-	    m_pvcreate_action->setEnabled(false);
-	    m_pvremove_action->setEnabled(false);
 	    m_mkfs_action->setEnabled(false);
             m_removefs_action->setEnabled(false);
 	    m_vgcreate_action->setEnabled(false);

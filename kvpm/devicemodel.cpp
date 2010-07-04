@@ -16,6 +16,7 @@
 #include <QtGui>
 #include "devicemodel.h"
 #include "physvol.h"
+#include "volgroup.h"
 #include "storagedevice.h"
 #include "storagepartition.h"
 
@@ -201,12 +202,12 @@ void StorageDeviceModel::setupModelData(QList<StorageDevice *> devices, StorageD
 	    if(dev->isPhysicalVolume()){
 		pv = dev->getPhysicalVolume();
 		data << dev->getDevicePath() << "" << sizeToString(dev->getSize());
-		data << QString("%1 ( %2% ) ").arg( sizeToString( pv->getUsed() ))
+		data << QString("%1 ( %2% ) ").arg( sizeToString( (pv->getSize()) - (pv->getUnused()) ))
 		                              .arg(pv->getPercentUsed() );
 		
 
-		data  << "physical volume" << pv->getVolumeGroupName();
-		dataAlternate << "" << "" << pv->getSize() << pv->getUsed();
+		data  << "physical volume" << pv->getVolGroup()->getName();
+		dataAlternate << "" << "" << pv->getSize() << (pv->getSize()) - (pv->getUnused());
 	    }
 	    else{
 		data << dev->getDevicePath() << "" << sizeToString(dev->getSize());
@@ -233,15 +234,15 @@ void StorageDeviceModel::setupModelData(QList<StorageDevice *> devices, StorageD
 		 
 		if(part->isPV()){
 		    pv = part->getPhysicalVolume();
-		    data << QString("%1 ( %2% ) ").arg( sizeToString( pv->getUsed() ))
+		    data << QString("%1 ( %2% ) ").arg( sizeToString( (pv->getSize()) - (pv->getUnused())))
 			                     .arg(pv->getPercentUsed() )
 
 			 << "physical volume"
-			 << pv->getVolumeGroupName()
-			 << (part->getFlags()).join(", ") 
+			 << pv->getVolGroup()->getName()
+                         << (part->getFlags()).join(", ") 
                          << "";
 
-		    dataAlternate << pv->getUsed();
+		    dataAlternate << (pv->getSize()) - (pv->getUnused());
 
                     if( pv->isActive() )
                         dataAlternate << "active";

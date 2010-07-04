@@ -37,8 +37,6 @@ Q_OBJECT
             *m_partremove_action,
             *m_partadd_action,
             *m_partmoveresize_action,
-	    *m_pvcreate_action,
-            *m_pvremove_action,
             *m_removefs_action,
 	    *m_vgcreate_action,
 	    *m_tablecreate_action,

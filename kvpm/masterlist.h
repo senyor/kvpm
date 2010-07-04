@@ -15,6 +15,8 @@
 #ifndef MASTERLIST_H
 #define MASTERLIST_H
 
+#include <lvm2app.h>
+
 #include <QList>
 #include <QTextEdit>
 #include <QProcess>
@@ -27,18 +29,16 @@ class MountInformation;
 class MountInformationList;
 class StorageDevice;
 
+
 class MasterList : public QObject
 {
     QList<VolGroup *> m_volume_groups;
     QList<LogVol *>   m_logical_volumes;
-    QList<PhysVol *>  m_physical_volumes;
     QList<StorageDevice *> m_storage_devices;
     
-    void scanVolumeGroups();
-    VolGroup* scanVolumeGroups(QString VolumeName);
+    void scanVolumeGroups(lvm_t lvm);
     void scanLogicalVolumes(VolGroup *VolumeGroup);
     void scanLogicalVolumes();
-    void scanPhysicalVolumes();
     void scanStorageDevices();
     bool determinePVState(PhysVol *pv, VolGroup *vg); 
 
@@ -46,11 +46,8 @@ public:
     MasterList();
     ~MasterList();
     const QList<VolGroup *> getVolGroups();
-    const QList<PhysVol *> getPhysVols();
     const QList<StorageDevice *> getStorageDevices();
     int getVolGroupCount();
-    int getPhysVolCount();
-    PhysVol *getPhysVolByName(QString name);
     VolGroup *getVolGroupByName(QString name);
     QStringList getVolumeGroupNames();
     

@@ -12,12 +12,12 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
+#include <lvm2app.h>
 
 #include <KMessageBox>
 #include <KLocale>
 #include <QtGui>
 
-#include "processprogress.h"
 #include "vgextend.h"
 
 bool extend_vg(QString volumeGroupName, QString physicalVolumeName)
@@ -29,12 +29,16 @@ bool extend_vg(QString volumeGroupName, QString physicalVolumeName)
 		   "physical volume: <b>%2</b>").arg(volumeGroupName).arg(physicalVolumeName);
 
     if( KMessageBox::questionYesNo(0, message) == 3 ){     // 3 is the "yes" button
+        int error_number;
+        lvm_t  lvm = lvm_init(NULL);
 
-	args << "vgextend"
-	     << volumeGroupName
-	     << physicalVolumeName;
-
-	ProcessProgress extend(args, i18n("Extending volume group..."), true);
+        vg_t vg_dm = lvm_vg_open(lvm, volumeGroupName.toAscii().data(), "w", NULL);
+        error_number = lvm_vg_extend(vg_dm, physicalVolumeName.toAscii().data());
+        qDebug("Extending VG %d", error_number);
+        error_number = lvm_vg_write(vg_dm);
+        qDebug("Writing VG %d", error_number);
+        lvm_vg_close(vg_dm);
+        lvm_quit(lvm);
 
 	return true;
     }

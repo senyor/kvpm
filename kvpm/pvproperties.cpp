@@ -22,14 +22,13 @@
 #include "logvol.h"
 #include "volgroup.h"
 
-
 extern MasterList *master_list;
 
 PVProperties::PVProperties(PhysVol *physicalVolume, QWidget *parent):
     QTableWidget(parent)
 {
 
-    VolGroup *vg = master_list->getVolGroupByName( physicalVolume->getVolumeGroupName() ) ;
+    VolGroup *vg = physicalVolume->getVolGroup();
     int segment_count;
     LogVol *lv;
 
@@ -103,7 +102,6 @@ PVProperties::PVProperties(PhysVol *physicalVolume, QWidget *parent):
     }
 
     physicalVolume->setLastUsedExtent( last_used_extent );
-    physicalVolume->setExtentSize( vg->getExtentSize() );
 
     if( !rowCount() ){
 	insertRow( row );

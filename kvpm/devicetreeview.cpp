@@ -22,8 +22,6 @@
 #include "mount.h"
 #include "unmount.h"
 #include "processprogress.h"
-#include "pvcreate.h"
-#include "pvremove.h"
 #include "removefs.h"
 #include "partremove.h"
 #include "partadd.h"
@@ -70,18 +68,6 @@ void DeviceTreeView::mkfsPartition()
 {
     if( make_fs(part) )
 	    MainWindow->reRun();
-}
-
-void DeviceTreeView::pvcreatePartition()
-{
-    if( create_pv(item->data(0).toString() ) )
-	MainWindow->reRun();
-}
-
-void DeviceTreeView::pvremovePartition()
-{
-    if( remove_pv( item->data(0).toString() ) )
-	MainWindow->reRun();
 }
 
 void DeviceTreeView::removePartition()

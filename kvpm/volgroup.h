@@ -11,21 +11,22 @@
  * 
  * See the file "COPYING" for the exact licensing terms.
  */
+
 #ifndef VOLGROUP_H
 #define VOLGROUP_H
 
+#include <lvm2app.h>
+
 #include <QWidget>
 #include <QStringList>
-#include "physvol.h"
 
+class PhysVol;
 class LogVol;
 
 class VolGroup
 {
     long m_extent_size;
-    int m_lv_count;        // number of logical volumes in this volume group
     int m_lv_max;          // maximum number of logical volumes
-    int m_pv_count;
     int m_pv_max;
     long long m_size;      // total size of volume group in bytes
     long long m_free;      // free space in bytes
@@ -33,7 +34,6 @@ class VolGroup
     long long m_free_extents;         // free extents are not always useable
     long long m_allocateable_extents; // extents on some physical volumes
                                       // may not be allocateable
-    int m_snap_count;                 // snapshots count
     QString m_vg_name;                // this volume group name
     QString m_allocation_policy;
     QString m_lvm_fmt;                // lvm1 or lvm2
@@ -46,13 +46,12 @@ class VolGroup
     bool m_partial;        // some physical volumes may be missing
     
 public:
-    VolGroup(QString volumeGroupData);
+    VolGroup(lvm_t lvm, const char *vgname);
     void addLogicalVolume(LogVol *logicalVolume);
-    void addPhysicalVolume(PhysVol *physicalVolume);
-    void clearPhysicalVolumes();
     const QList<LogVol *>  getLogicalVolumes();
     const QList<PhysVol *> getPhysicalVolumes();
     LogVol* getLogVolByName(QString shortName);  // lv name without the vg name and "/"
+    PhysVol* getPhysVolByName(QString name);
     long long getExtents();
     long long getFreeExtents();
     long long getAllocateableExtents();
@@ -65,7 +64,6 @@ public:
     int getLogVolMax();
     int getPhysVolCount();
     int getPhysVolMax();
-    int getSnapCount();
     QString getName();
     QString getPolicy();
     QString getFormat();
