@@ -211,21 +211,23 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
 	    m_partadd_action->setEnabled(false);
 	    m_vgreduce_action->setEnabled(false);
         }
-	else if(item->data(7) != ""){
+	else if( ! (item->data(7)).isValid() ){          // whole disk device
 	    m_partremove_action->setEnabled(false);
             m_partmoveresize_action->setEnabled(false);
 	    m_partadd_action->setEnabled(false);
 	    m_mkfs_action->setEnabled(false);
             m_removefs_action->setEnabled(false);
-	    m_vgcreate_action->setEnabled(false);
-	    m_vgextend_menu->setEnabled(false);
 	    m_vgreduce_action->setEnabled(false);
 
 	    if( item->dataAlternate(1) == "busy" || item->dataAlternate(3) != 0 ){
 	        m_tablecreate_action->setEnabled(false);
+                m_vgcreate_action->setEnabled(false);
+                m_vgextend_menu->setEnabled(false);
             }
 	    else{ 
 	        m_tablecreate_action->setEnabled(true);
+                m_vgcreate_action->setEnabled(true);
+                m_vgextend_menu->setEnabled(true);
             }
         }
 	else{
