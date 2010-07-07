@@ -34,6 +34,7 @@ class StoragePartition
     PedPartition *m_ped_partition;
     QString m_partition_path;
     QString m_partition_type;
+    int     m_ped_type;
     QString m_fs_type;
     QStringList m_flags;
     long long m_partition_size;
@@ -60,7 +61,7 @@ public:
     QString getPartitionPath();
     PhysVol *getPhysicalVolume();
     QString getType();
-    int getPEDType();
+    int getPedType();
     QStringList getMountPoints();
     QStringList getFlags();
     QList<int> getMountPosition();

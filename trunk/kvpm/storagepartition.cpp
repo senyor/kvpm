@@ -37,29 +37,29 @@ StoragePartition::StoragePartition(PedPartition *part,
 
     PedDisk   *ped_disk   = m_ped_partition->disk;
     PedDevice *ped_device = ped_disk->dev;
-    PedGeometry ped_geometry    = m_ped_partition->geom;
-    PedPartitionType  ped_partition_type = m_ped_partition->type;
+    PedGeometry ped_geometry = m_ped_partition->geom;
+    int  m_ped_type = m_ped_partition->type;
 
     sector_size      = ped_device->sector_size;
     m_first_sector   = (ped_geometry).start;
     m_last_sector    = (ped_geometry).end;
     m_partition_size = (ped_geometry.length) * sector_size; // in bytes
 
-    if( ped_partition_type == 0 ){
+    if( m_ped_type == 0 ){
       m_partition_type = "normal";
       m_is_normal = true;
       m_partition_path = ped_partition_get_path(part);
     }
-    else if( ped_partition_type & 0x02 ){
+    else if( m_ped_type & 0x02 ){
       m_partition_type = "extended";
       m_partition_path = ped_partition_get_path(part);
     }
-    else if( (ped_partition_type & 0x01) && !(ped_partition_type & 0x04) ){
+    else if( (m_ped_type & 0x01) && !(m_ped_type & 0x04) ){
       m_partition_type = "logical";
       m_is_logical = true;
       m_partition_path = ped_partition_get_path(part);
     }
-    else if( (ped_partition_type & 0x01) && (ped_partition_type & 0x04) ){
+    else if( (m_ped_type & 0x01) && (m_ped_type & 0x04) ){
       m_partition_type = "freespace (logical)";
       m_partition_path = ped_partition_get_path(part);
       m_partition_path.chop(1);
@@ -149,6 +149,11 @@ StoragePartition::~StoragePartition()
 QString StoragePartition::getType()
 {
     return m_partition_type.trimmed();
+}
+
+int StoragePartition::getPedType()
+{
+    return m_ped_type;
 }
 
 PedPartition* StoragePartition::getPedPartition()
