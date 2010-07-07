@@ -54,13 +54,12 @@ Q_OBJECT
     
  public:
     VGCreateDialog(QStringList physicalVolumePathList, QWidget *parent = 0);
-    QStringList arguments();
     
  private slots:
     void limitLogicalVolumes(int boxstate);
     void limitPhysicalVolumes(int boxstate);
     void validateOK();
-    
+    void writeChanges();    
 };
 
 #endif

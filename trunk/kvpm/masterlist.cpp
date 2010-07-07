@@ -161,12 +161,8 @@ void MasterList::scanStorageDevices()
     PedDevice *dev = NULL;
     QList<PhysVol *>  physical_volumes;
 
-    qDebug() << "Scanning storage devices";
-
     for(int x = 0; x < m_volume_groups.size(); x++)
         physical_volumes.append( m_volume_groups[x]->getPhysicalVolumes() );
-
-    qDebug() << "Scanned storage devices";
 
     for(int x = 0; x < m_storage_devices.size(); x++)
 	delete m_storage_devices[x];
