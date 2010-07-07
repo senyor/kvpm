@@ -44,6 +44,8 @@ class StoragePartition
     bool m_is_empty;
     bool m_is_busy;
     bool m_is_mountable;
+    bool m_is_normal;
+    bool m_is_logical;
     
 public: 
     StoragePartition(PedPartition *part,
@@ -58,6 +60,7 @@ public:
     QString getPartitionPath();
     PhysVol *getPhysicalVolume();
     QString getType();
+    int getPEDType();
     QStringList getMountPoints();
     QStringList getFlags();
     QList<int> getMountPosition();
@@ -69,6 +72,8 @@ public:
     bool isEmpty();
     bool isBusy();
     bool isMountable();
+    bool isNormal();
+    bool isLogical();
 };
 
 #endif

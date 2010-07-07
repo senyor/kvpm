@@ -31,31 +31,35 @@ StoragePartition::StoragePartition(PedPartition *part,
 
     long long sector_size;
     m_is_pv = false;
+    m_is_normal  = false;
+    m_is_logical = false;
     m_pv = NULL;
 
     PedDisk   *ped_disk   = m_ped_partition->disk;
     PedDevice *ped_device = ped_disk->dev;
     PedGeometry ped_geometry    = m_ped_partition->geom;
-    PedPartitionType  part_type = m_ped_partition->type;
+    PedPartitionType  ped_partition_type = m_ped_partition->type;
 
     sector_size      = ped_device->sector_size;
     m_first_sector   = (ped_geometry).start;
     m_last_sector    = (ped_geometry).end;
     m_partition_size = (ped_geometry.length) * sector_size; // in bytes
 
-    if( part_type == 0 ){
+    if( ped_partition_type == 0 ){
       m_partition_type = "normal";
+      m_is_normal = true;
       m_partition_path = ped_partition_get_path(part);
     }
-    else if( part_type & 0x02 ){
+    else if( ped_partition_type & 0x02 ){
       m_partition_type = "extended";
       m_partition_path = ped_partition_get_path(part);
     }
-    else if( (part_type & 0x01) && !(part_type & 0x04) ){
+    else if( (ped_partition_type & 0x01) && !(ped_partition_type & 0x04) ){
       m_partition_type = "logical";
+      m_is_logical = true;
       m_partition_path = ped_partition_get_path(part);
     }
-    else if( (part_type & 0x01) && (part_type & 0x04) ){
+    else if( (ped_partition_type & 0x01) && (ped_partition_type & 0x04) ){
       m_partition_type = "freespace (logical)";
       m_partition_path = ped_partition_get_path(part);
       m_partition_path.chop(1);
@@ -195,6 +199,16 @@ bool StoragePartition::isMounted()
 bool StoragePartition::isEmpty()
 {
     return m_is_empty;
+}
+
+bool StoragePartition::isNormal()
+{
+    return m_is_normal;
+}
+
+bool StoragePartition::isLogical()
+{
+    return m_is_logical;
 }
 
 bool StoragePartition::isBusy()

@@ -12,13 +12,14 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
+#include <lvm2app.h>
 
 #include <KLocale>
 #include <KMessageBox>
 #include <QtGui>
 
-#include "physvol.h"
-#include "processprogress.h"
+#include "storagedevice.h"
+#include "storagepartition.h"
 #include "vgcreate.h"
 #include "masterlist.h"
 
@@ -26,52 +27,56 @@ extern MasterList *master_list;
 
 bool create_vg()
 {
-    QList<PhysVol *> physical_volumes;
-    QStringList unused_pv_paths;
+    QList<StorageDevice *> storage_devices = master_list->getStorageDevices();   
+    QStringList device_names;
+    QList<StoragePartition *> storage_partitions;
 
-    // no more pvs without a vg -- major fixme!!!
-
-    /*
-    physical_volumes = master_list->getPhysVols();
-    for(int x = 0; x < physical_volumes.size(); x++){
-
-        if( physical_volumes[x]->getVolumeGroupName() == "" )
-            unused_pv_paths.append( physical_volumes[x]->getDeviceName() );
+    for(int x = 0; x < storage_devices.size(); x++){
+        if( (storage_devices[x]->getRealPartitionCount() == 0) && 
+            (! storage_devices[x]->isBusy()) && 
+            (! storage_devices[x]->isPhysicalVolume() )){
+            device_names.append( storage_devices[x]->getDevicePath() );
+        }
+        else if( storage_devices[x]->getRealPartitionCount() > 0 ){
+            storage_partitions = storage_devices[x]->getStoragePartitions();
+            for(int y = 0; y <storage_partitions.size(); y++){
+                if( (! storage_partitions[y]->isBusy() ) &&
+                    (! storage_partitions[y]->isPV() ) &&
+                    (( storage_partitions[y]->isNormal() ) ||  
+                     ( storage_partitions[y]->isLogical() )))  
+                {
+                    device_names.append( storage_partitions[y]->getPartitionPath() );
+                }
+            }
+        }
     }
-    */
-
-    if( unused_pv_paths.size() > 0 ){
-        VGCreateDialog dialog( unused_pv_paths );
-        dialog.exec();
     
-      if(dialog.result() == QDialog::Accepted){
-          ProcessProgress create_vg( dialog.arguments(), i18n("Creating vg..."), true );
-	  return true;
-      }
-      else
-          return false;
+    if( device_names.size() > 0 ){
+        VGCreateDialog dialog( device_names );
+        dialog.exec();
+        if(dialog.result() == QDialog::Accepted)
+            return true;
+        else
+            return false;
     }
     else
-        KMessageBox::error(0, i18n("No unused physical volumes found") );
+        KMessageBox::error(0, i18n("No unused potential physical volumes found") );
 
     return false;
 }
 
-bool create_vg(QString physicalVolumePath)
-{
+bool create_vg(QString physicalVolumePath){
+
     QStringList physicalVolumePathList(physicalVolumePath);
 
     VGCreateDialog dialog(physicalVolumePathList);
     dialog.exec();
     
-    if(dialog.result() == QDialog::Accepted){
-        ProcessProgress create_vg( dialog.arguments(), i18n("Creating volume group..."), true );
+    if(dialog.result() == QDialog::Accepted)
         return true;
-    }
     else
         return false;
 }
-
 
 VGCreateDialog::VGCreateDialog(QStringList physicalVolumePathList, QWidget *parent) : 
   KDialog(parent), m_pv_paths(physicalVolumePathList)
@@ -115,7 +120,7 @@ VGCreateDialog::VGCreateDialog(QStringList physicalVolumePathList, QWidget *pare
     m_extent_suffix->setInsertPolicy(QComboBox::NoInsert);
     m_extent_suffix->setCurrentIndex(1);
 
-    QGroupBox *available_pv_box = new QGroupBox( i18n("Available physical volumes") ); 
+    QGroupBox *available_pv_box = new QGroupBox( i18n("Available potential physical volumes") ); 
     QVBoxLayout *available_pv_box_layout = new QVBoxLayout();
     available_pv_box->setLayout(available_pv_box_layout);
     NoMungeCheck *temp_check;
@@ -193,45 +198,52 @@ VGCreateDialog::VGCreateDialog(QStringList physicalVolumePathList, QWidget *pare
 
     connect(m_max_pvs_check, SIGNAL(stateChanged(int)), 
 	    this, SLOT(limitPhysicalVolumes(int)));
+
+    connect(this, SIGNAL(okClicked()), 
+	    this, SLOT(writeChanges()));
 }
 
-QStringList VGCreateDialog::arguments()
+void VGCreateDialog::writeChanges()
 {
-    QStringList args;
-    
-    args << "vgcreate"
-	 << "--physicalextentsize"
-	 << m_extent_size->currentText() + m_extent_suffix->currentText().at(0);
-    
-    if(m_clustered->isChecked())
-	args << "--clustered" << "y";
-    else
-	args << "--clustered" << "n";
 
-    if(m_auto_backup->isChecked())
-	args << "--autobackup" << "y" ;
-    else
-	args << "--autobackup" << "n" ;
-
-    if((!m_max_lvs_check->isChecked()) && (m_max_lvs->text() != ""))
-	args << "--maxlogicalvolumes" << m_max_lvs->text();
-
-    if((!m_max_pvs_check->isChecked()) && (m_max_pvs->text() != ""))
-	args << "--maxphysicalvolumes" << m_max_pvs->text();
-
-    args << m_vg_name->text(); 
+    lvm_t  lvm;
+    vg_t vg_dm;
 
     if( m_pv_checks.size() > 1 ){
-        m_pv_paths.clear();	for(int x = 0; x < m_pv_checks.size(); x++){
+        m_pv_paths.clear();	
+        for(int x = 0; x < m_pv_checks.size(); x++){
 	    if( m_pv_checks[x]->isChecked() )
 	        m_pv_paths.append( m_pv_checks[x]->getUnmungedText() );
 	}
     }
-    args << m_pv_paths;
+    
+    if( (lvm = lvm_init(NULL)) ){
+        if( (vg_dm = lvm_vg_create(lvm, m_vg_name->text().toAscii().data())) ){
+            for(int x = 0; x < m_pv_paths.size(); x++){
+                if( lvm_vg_extend(vg_dm, m_pv_paths[x].toAscii().data()) )
+                    KMessageBox::error(0, QString(lvm_errmsg(lvm)));
+            }
 
-    return args;
+            // ****To Do... None of the following are supported by liblvm2app yet****
+            //	 << m_extent_size->currentText() + m_extent_suffix->currentText().at(0);
+            //   if(m_clustered->isChecked())
+            //   if(m_auto_backup->isChecked())          
+            //   if((!m_max_lvs_check->isChecked()) && (m_max_lvs->text() != ""))
+            //   if((!m_max_pvs_check->isChecked()) && (m_max_pvs->text() != ""))
+
+            if( lvm_vg_write(vg_dm) )
+                KMessageBox::error(0, QString(lvm_errmsg(lvm)));
+            lvm_vg_close(vg_dm);
+            lvm_quit(lvm);
+            return;
+        }
+        KMessageBox::error(0, QString(lvm_errmsg(lvm))); 
+        lvm_quit(lvm);
+        return;
+    }
+    KMessageBox::error(0, QString(lvm_errmsg(lvm))); 
+    return;
 }
-
 
 /* The allowed characters in the name are letters, numbers, periods
    hyphens and underscores. Also, the names ".", ".." and names starting
