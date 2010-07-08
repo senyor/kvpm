@@ -12,13 +12,11 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
-
 #include <KSeparator>
 #include <QtGui>
 #include "devicesizechart.h"
 #include "storagedevice.h"
 #include "storagepartition.h"
-
 
 DeviceSizeChart::DeviceSizeChart(StorageDeviceModel *model, QWidget *parent) : QFrame(parent)
 {
@@ -47,6 +45,7 @@ void DeviceSizeChart::setNewDevice(QModelIndex index)
     double ratio;
     StorageDeviceItem *device_item, *partition_item, *extended_item;
     StoragePartition *partition;
+    StorageDevice    *device;
     long long part_size, device_size;
     int max_segment_width;
     unsigned int part_type;
@@ -75,14 +74,22 @@ void DeviceSizeChart::setNewDevice(QModelIndex index)
 	partition_item = device_item->child(x);
 
         partition = (StoragePartition *) (( partition_item->dataAlternate(0)).value<void *>() );
+        qDebug() << "Path: " << partition->getPartitionPath();
+	device    = (StorageDevice *) (( partition_item->dataAlternate(1)).value<void *>() );
+        if( device == NULL )
+            qDebug() << "NULL";
+
+
 
 	part_type = partition->getPedType();
-	part_size = (partition_item->dataAlternate(2)).toLongLong();
-	device_size = (device_item->dataAlternate(2)).toLongLong();
+	part_size = partition->getPartitionSize();
+	device_size = device->getSize();
+
 	if( partition->isPV() )
 	    usage = "physical volume";
 	else
 	    usage = (partition_item->data(3)).toString();
+
 	ratio = part_size / (double) device_size;
 	segment = new DeviceChartSeg(partition_item);	
 	segments.append(segment);
