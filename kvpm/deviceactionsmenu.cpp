@@ -133,9 +133,7 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
             m_tablecreate_action->setEnabled(false);
 	    m_mount_action->setEnabled( partition->isMountable() );
             m_unmount_action->setEnabled( partition->isMounted() );
-            qDebug("Type %x", partition->getPedType() );
             if( partition->getPedType() & 0x04 ){    // freespace
-                qDebug() << "Got Here....";
                 m_mkfs_action->setEnabled(false);
                 m_partremove_action->setEnabled(false);
                 m_partmoveresize_action->setEnabled(false);
@@ -173,7 +171,7 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
                     m_vgreduce_action->setEnabled(false);
             }
             else if( partition->isNormal() || partition->isLogical() ){
-                if( partition->isMounted() ){                            // mounted
+                if( partition->isMounted() || partition->isBusy() ){ 
                     m_partremove_action->setEnabled(false);
                     m_partmoveresize_action->setEnabled(false);
                     m_mkfs_action->setEnabled(false);
@@ -181,7 +179,7 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
                     m_vgcreate_action->setEnabled(false);
                     m_vgextend_menu->setEnabled(false);
                 }
-                else{                                               // not mounted
+                else{                                               // not mounted or busy
                     m_partremove_action->setEnabled(true);
                     m_partmoveresize_action->setEnabled(true);
                     m_mkfs_action->setEnabled(true);
