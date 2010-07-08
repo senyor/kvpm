@@ -214,11 +214,11 @@ void StorageDeviceModel::setupModelData(QList<StorageDevice *> devices, StorageD
 		
 
 		data  << "physical volume" << pv->getVolGroup()->getName();
-		dataAlternate << "" << dev_variant
+		dataAlternate << "" << dev_variant;
 	    }
 	    else{
 		data << dev->getDevicePath() << "" << sizeToString(dev->getSize());
-		dataAlternate << "" << dev_variant
+		dataAlternate << "" << dev_variant;
 	    }
 	    
 	    StorageDeviceItem *item = new StorageDeviceItem(data, dataAlternate, parent);
@@ -234,7 +234,7 @@ void StorageDeviceModel::setupModelData(QList<StorageDevice *> devices, StorageD
 		
 		part_variant.setValue( (void *) part);
 		
-                dataAlternate << part_variant << dev_variant
+                dataAlternate << part_variant << dev_variant;
 		 
 		if(part->isPV()){
 		    pv = part->getPhysicalVolume();
