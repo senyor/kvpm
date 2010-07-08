@@ -17,6 +17,7 @@
 #include <QtGui>
 #include "devicesizechart.h"
 #include "storagedevice.h"
+#include "storagepartition.h"
 
 
 DeviceSizeChart::DeviceSizeChart(StorageDeviceModel *model, QWidget *parent) : QFrame(parent)
@@ -42,12 +43,14 @@ DeviceSizeChart::DeviceSizeChart(StorageDeviceModel *model, QWidget *parent) : Q
 void DeviceSizeChart::setNewDevice(QModelIndex index)
 {
     QWidget *segment, *extended_segment;
-    QString usage, part_type, path;
+    QString usage, path;
     double ratio;
     StorageDeviceItem *device_item, *partition_item, *extended_item;
+    StoragePartition *partition;
     long long part_size, device_size;
     int max_segment_width;
-    
+    unsigned int part_type;
+
     for(int x = layout->count() - 1; x >= 0; x--){  // delete all the children
 	QWidget *old_widget = (layout->takeAt(x))->widget();
 	old_widget->setParent(0);
@@ -63,17 +66,20 @@ void DeviceSizeChart::setNewDevice(QModelIndex index)
 
     device_item = static_cast<StorageDeviceItem*> (index.internalPointer());
 
-    if( !device_item->childCount()){
+    if( !device_item->childCount() ){
 	QWidget *empty_widget = new QWidget(this);
 	layout->addWidget(empty_widget);
     }
 
     for(int x = 0; x < device_item->childCount(); x++){
 	partition_item = device_item->child(x);
-	part_type = (partition_item->data(1)).toString();
+
+        partition = (StoragePartition *) (( partition_item->dataAlternate(0)).value<void *>() );
+
+	part_type = partition->getPedType();
 	part_size = (partition_item->dataAlternate(2)).toLongLong();
 	device_size = (device_item->dataAlternate(2)).toLongLong();
-	if(part_type == "physical volume")
+	if( partition->isPV() )
 	    usage = "physical volume";
 	else
 	    usage = (partition_item->data(3)).toString();
@@ -81,17 +87,18 @@ void DeviceSizeChart::setNewDevice(QModelIndex index)
 	segment = new DeviceChartSeg(partition_item);	
 	segments.append(segment);
 	ratios.append(ratio);
-	if(part_type == "extended"){
+	if( part_type & 0x02 ){  // extended partition
 	    extended_layout = new QHBoxLayout();
 	    extended_layout->setSpacing(0);
 	    extended_layout->setMargin(0);
 	    extended_layout->setSizeConstraint(QLayout::SetNoConstraint);
 	    for(int y = 0 ; y < partition_item->childCount(); y++){
 		extended_item = partition_item->child(y);
-		part_type = (extended_item->data(1)).toString();
+                partition = (StoragePartition *) (( extended_item->dataAlternate(0)).value<void *>() );
+		part_type = partition->getPedType();
 		part_size = (extended_item->dataAlternate(2)).toLongLong();
 		device_size = (device_item->dataAlternate(2)).toLongLong();
-		if(extended_item->data(1).toString() == "physical volume")
+		if( partition->isPV() )
 		    usage = "physical volume";
 		else
 		    usage = (extended_item->data(3)).toString();

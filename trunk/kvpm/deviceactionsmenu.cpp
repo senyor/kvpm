@@ -24,6 +24,8 @@
 #include "unmount.h"
 #include "partremove.h"
 #include "partadd.h"
+#include "physvol.h"
+#include "storagedevice.h"
 #include "tablecreate.h"
 #include "removefs.h"
 #include "vgreduce.h"
@@ -84,6 +86,8 @@ DeviceActionsMenu::DeviceActionsMenu( StorageDeviceItem *item,
 
 void DeviceActionsMenu::setup(StorageDeviceItem *item)
 {
+    StoragePartition* partition = NULL;
+    StorageDevice* device = NULL;
     QStringList group_names;
     KMenu *filesystem_ops = new KMenu( i18n("Filesystem operations"), this);
     m_vgextend_menu       = new KMenu( i18n("Extend volume group"), this);
@@ -124,127 +128,114 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
 
         setEnabled(true);
 
-	m_tablecreate_action->setEnabled(false);
-
-	if(item->dataAlternate(7).toString() == "Yes"){        // yes = is mountable
-	    m_mount_action->setEnabled(true);
-
-	    if(item->data(7) != "")                            // "" = not mounted
-	        m_unmount_action->setEnabled(true);
-	    else
-	        m_unmount_action->setEnabled(false);
-	}
-	else{
-	    m_mount_action->setEnabled(false);
-	    m_unmount_action->setEnabled(false);
-	}
-
-	if(item->data(1) == "freespace" || item->data(1) == "freespace (logical)"){
-	    m_mkfs_action->setEnabled(false);
-	    m_partremove_action->setEnabled(false);
-            m_partmoveresize_action->setEnabled(false);
-	    m_partadd_action->setEnabled(true);
-            m_removefs_action->setEnabled(false);
-	    m_vgcreate_action->setEnabled(false);
-	    m_vgextend_menu->setEnabled(false);
-	    m_vgreduce_action->setEnabled(false);
-	}
-	else if(item->data(1) == "extended" && item->dataAlternate(1) == "empty"){
-	    m_mkfs_action->setEnabled(false);
-	    m_partadd_action->setEnabled(false);
-	    m_partremove_action->setEnabled(true);
-            m_partmoveresize_action->setEnabled(false);
-            m_removefs_action->setEnabled(false);
-	    m_vgcreate_action->setEnabled(false);
-	    m_vgextend_menu->setEnabled(false);
-	    m_vgreduce_action->setEnabled(false);
-	}
-	else if(item->data(1) == "extended" && item->dataAlternate(1) != "empty"){
-	    m_mkfs_action->setEnabled(false);
-	    m_partadd_action->setEnabled(false);
-	    m_partremove_action->setEnabled(false);
-            m_partmoveresize_action->setEnabled(false);
-            m_removefs_action->setEnabled(false);
-	    m_vgcreate_action->setEnabled(false);
-	    m_vgextend_menu->setEnabled(false);
-	    m_vgreduce_action->setEnabled(false);
-	}
-	else if( item->data(4) == "physical volume" ){
-	    m_mkfs_action->setEnabled(false);
-	    m_partremove_action->setEnabled(false);
-
-            if( item->data(1) == "" )                        // if this is a whole disk pv
-                m_partmoveresize_action->setEnabled(false);
-            else
-                m_partmoveresize_action->setEnabled(true);
-
-	    m_partadd_action->setEnabled(false);
-            m_removefs_action->setEnabled(false);
-	    m_vgcreate_action->setEnabled(false);
-	    m_vgextend_menu->setEnabled(false);
-
-	    if( item->dataAlternate(3) == 0 )
-		m_vgreduce_action->setEnabled(true);
-	    else
-		m_vgreduce_action->setEnabled(false);
-	}
-	else if(item->data(1) == "logical" || item->data(1) == "normal"){
-	    if(item->data(7) != ""){                            // mounted
-   	        m_partremove_action->setEnabled(false);
-                m_partmoveresize_action->setEnabled(false);
+        if( ( item->dataAlternate(0)).canConvert<void *>() ){  // its a partition
+            partition = (StoragePartition *) (( item->dataAlternate(0)).value<void *>() );
+            m_tablecreate_action->setEnabled(false);
+	    m_mount_action->setEnabled( partition->isMountable() );
+            m_unmount_action->setEnabled( partition->isMounted() );
+            qDebug("Type %x", partition->getPedType() );
+            if( partition->getPedType() & 0x04 ){    // freespace
+                qDebug() << "Got Here....";
                 m_mkfs_action->setEnabled(false);
+                m_partremove_action->setEnabled(false);
+                m_partmoveresize_action->setEnabled(false);
+                m_partadd_action->setEnabled(true);
                 m_removefs_action->setEnabled(false);
                 m_vgcreate_action->setEnabled(false);
                 m_vgextend_menu->setEnabled(false);
+                m_vgreduce_action->setEnabled(false);
             }
-	    else{                                               // not mounted
-	        m_partremove_action->setEnabled(true);
-                m_partmoveresize_action->setEnabled(true);
-                m_mkfs_action->setEnabled(true);
-                m_removefs_action->setEnabled(true);
-                m_vgcreate_action->setEnabled(true);
-                if(group_names.size())
-                    m_vgextend_menu->setEnabled(true);
-                else
-                    m_vgextend_menu->setEnabled(false);
-            }
-	    m_partadd_action->setEnabled(false);
-	    m_vgreduce_action->setEnabled(false);
-        }
-	else if( ! (item->data(7)).isValid() ){          // whole disk device
-	    m_partremove_action->setEnabled(false);
-            m_partmoveresize_action->setEnabled(false);
-	    m_partadd_action->setEnabled(false);
-	    m_mkfs_action->setEnabled(false);
-            m_removefs_action->setEnabled(false);
-	    m_vgreduce_action->setEnabled(false);
-
-	    if( item->dataAlternate(1) == "busy" || item->dataAlternate(3) != 0 ){
-	        m_tablecreate_action->setEnabled(false);
+            else if( partition->getPedType() & 0x02 ){  // extended partition
+                m_mkfs_action->setEnabled(false);
+                m_partadd_action->setEnabled(false);
+                m_partmoveresize_action->setEnabled(false);
+                m_removefs_action->setEnabled(false);
                 m_vgcreate_action->setEnabled(false);
                 m_vgextend_menu->setEnabled(false);
+                m_vgreduce_action->setEnabled(false);
+                if( partition->isEmpty() )
+                    m_partremove_action->setEnabled(true);
+                else
+                    m_partremove_action->setEnabled(false);
             }
-	    else{ 
-	        m_tablecreate_action->setEnabled(true);
-                m_vgcreate_action->setEnabled(true);
-                m_vgextend_menu->setEnabled(true);
+            else if( partition->isPV() ){
+                m_mkfs_action->setEnabled(false);
+                m_partremove_action->setEnabled(false);
+                m_partmoveresize_action->setEnabled(true);
+                m_partadd_action->setEnabled(false);
+                m_removefs_action->setEnabled(false);
+                m_vgcreate_action->setEnabled(false);
+                m_vgextend_menu->setEnabled(false);
+                
+                if( partition->getPhysicalVolume()->getPercentUsed() == 0 )
+                    m_vgreduce_action->setEnabled(true);
+                else
+                    m_vgreduce_action->setEnabled(false);
+            }
+            else if( partition->isNormal() || partition->isLogical() ){
+                if( partition->isMounted() ){                            // mounted
+                    m_partremove_action->setEnabled(false);
+                    m_partmoveresize_action->setEnabled(false);
+                    m_mkfs_action->setEnabled(false);
+                    m_removefs_action->setEnabled(false);
+                    m_vgcreate_action->setEnabled(false);
+                    m_vgextend_menu->setEnabled(false);
+                }
+                else{                                               // not mounted
+                    m_partremove_action->setEnabled(true);
+                    m_partmoveresize_action->setEnabled(true);
+                    m_mkfs_action->setEnabled(true);
+                    m_removefs_action->setEnabled(true);
+                    m_vgcreate_action->setEnabled(true);
+                    if(group_names.size())
+                        m_vgextend_menu->setEnabled(true);
+                    else
+                        m_vgextend_menu->setEnabled(false);
+                }
+                m_partadd_action->setEnabled(false);
+                m_vgreduce_action->setEnabled(false);
             }
         }
-	else{
-	    m_partremove_action->setEnabled(false);
-            m_partmoveresize_action->setEnabled(false);
-	    m_partadd_action->setEnabled(false);
-	    m_mkfs_action->setEnabled(false);
-            m_removefs_action->setEnabled(false);
-	    m_vgcreate_action->setEnabled(false);
-	    m_vgextend_menu->setEnabled(false);
-	    m_vgreduce_action->setEnabled(false);
+        else { // its a whole device
+            device = (StorageDevice *) (( item->dataAlternate(1)).value<void *>() );
+            m_mount_action->setEnabled(false);
+            m_unmount_action->setEnabled(false);
 
-	    if( item->dataAlternate(1) == "busy" )
-	        m_tablecreate_action->setEnabled(false);
-	    else
-	        m_tablecreate_action->setEnabled(true);
-	}
+            if( device->isPhysicalVolume() ){
+                m_tablecreate_action->setEnabled(false);
+                m_mkfs_action->setEnabled(false);
+                m_partremove_action->setEnabled(false);
+                m_partmoveresize_action->setEnabled(false);
+                m_partadd_action->setEnabled(false);
+                m_removefs_action->setEnabled(false);
+                m_vgcreate_action->setEnabled(false);
+                m_vgextend_menu->setEnabled(false);
+                if( device->getPhysicalVolume()->getPercentUsed() == 0 )   
+                    m_vgreduce_action->setEnabled(true);
+                else
+                    m_vgreduce_action->setEnabled(false);
+            }
+            else{ // not a pv
+                m_partremove_action->setEnabled(false);
+                m_partmoveresize_action->setEnabled(false);
+                m_partadd_action->setEnabled(false);
+                m_mkfs_action->setEnabled(false);
+                m_removefs_action->setEnabled(false);
+                m_vgreduce_action->setEnabled(false);
+
+                if( device->isBusy() || device->getRealPartitionCount() != 0 ){
+                    m_tablecreate_action->setEnabled(false);
+                    m_vgcreate_action->setEnabled(false);
+                    m_vgextend_menu->setEnabled(false);
+                }
+                else{ 
+                    m_tablecreate_action->setEnabled(true);
+                    m_vgcreate_action->setEnabled(true);
+                    m_vgextend_menu->setEnabled(true);
+                }
+            }
+
+        }
     }
     else
 	setEnabled(false);  // if item points to NULL, do nothing
