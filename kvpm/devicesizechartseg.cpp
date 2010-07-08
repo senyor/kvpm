@@ -26,11 +26,13 @@
 #include "partadd.h"
 #include "partremove.h"
 #include "partmoveresize.h"
+#include "physvol.h"
 #include "processprogress.h"
 #include "removefs.h"
 #include "storagepartition.h"
 #include "topwindow.h"
 #include "unmount.h"
+#include "volgroup.h"
 #include "vgcreate.h"
 #include "vgextend.h"
 #include "vgreduce.h"
@@ -45,32 +47,6 @@ DeviceChartSeg::DeviceChartSeg(StorageDeviceItem *storageDeviceItem, QWidget *pa
 {
     QStringList group_names;
     QString use;
-
-    if (( m_item->data(1)).toString()== "extended" ){
-        setFrameStyle(QFrame::Raised | QFrame::Box);
-        setLineWidth( 1 );
-    }
-    else if (( m_item->data(1)).toString()== "logical" ){
-        setFrameStyle(QFrame::Sunken | QFrame::Panel);
-        setLineWidth( 2 );
-    }
-    else if (( m_item->data(1)).toString()== "logical (freespace)" ){
-        setFrameStyle(QFrame::Sunken | QFrame::Panel);
-        setLineWidth( 2 );
-    }
-    else{
-        setFrameStyle( QFrame::Sunken | QFrame::Panel );
-	setLineWidth( 2 );
-    }
-
-    m_partition = NULL;
-    if( (m_item->dataAlternate(0)).canConvert<void *>() )
-	m_partition = (StoragePartition *) (( m_item->dataAlternate(0)).value<void *>() );
-
-    m_pv_name = (m_item->data(1)).toString();
-
-    use =  (m_item->data(4)).toString();
-
     QPalette *colorset = new QPalette();
 
     KConfigSkeleton skeleton;
@@ -96,37 +72,58 @@ DeviceChartSeg::DeviceChartSeg(StorageDeviceItem *storageDeviceItem, QWidget *pa
     skeleton.addItemColor("hfs",   hfs_color);
     skeleton.addItemColor("physvol", physical_color);
 
-    if(m_pv_name == "freespace" || m_pv_name == "freespace (logical)"){
-	colorset->setColor(QPalette::Window, Qt::green);
-    }
-    else if( m_pv_name != "extended" ){
+    use = (m_item->data(4)).toString();
 
-        if(use == "ext2")
-	    colorset->setColor(QPalette::Window, ext2_color);
-	else if(use == "ext3")
-	    colorset->setColor(QPalette::Window, ext3_color);
-	else if(use == "ext4")
-	    colorset->setColor(QPalette::Window, ext4_color);
-	else if(use == "reiserfs")
-	    colorset->setColor(QPalette::Window, reiser_color);
-	else if(use == "reiser4")
-	    colorset->setColor(QPalette::Window, reiser4_color);
-	else if(use == "hfs")
-	    colorset->setColor(QPalette::Window, hfs_color);
-	else if(use == "vfat")
-	    colorset->setColor(QPalette::Window, msdos_color);
-	else if(use == "jfs")
-	    colorset->setColor(QPalette::Window, jfs_color);
-	else if(use == "xfs")
-	    colorset->setColor(QPalette::Window, xfs_color);
-	else if(use == "swap")
-	    colorset->setColor(QPalette::Window, swap_color);
-	else if(use == "freespace")
-	    colorset->setColor(QPalette::Window, free_color);
-	else if(use == "physical volume")
-	    colorset->setColor(QPalette::Window, physical_color);
-	else
+    m_partition = NULL;
+    if( (m_item->dataAlternate(0)).canConvert<void *>() ){
+	m_partition = (StoragePartition *) (( m_item->dataAlternate(0)).value<void *>() );
+
+        if ( m_partition->getPedType() & 0x02 ){  // extended
+            setFrameStyle(QFrame::Raised | QFrame::Box);
+            setLineWidth( 1 );
 	    colorset->setColor(QPalette::Window, none_color);
+        }
+        else if( m_partition->getPedType() & 0x04 ){   // freespace
+            setFrameStyle(QFrame::Sunken | QFrame::Panel);
+            setLineWidth( 2 );
+            colorset->setColor(QPalette::Window, Qt::green);
+        }
+        else{
+            setFrameStyle(QFrame::Sunken | QFrame::Panel);
+            setLineWidth( 2 );
+            
+            if(use == "ext2")
+                colorset->setColor(QPalette::Window, ext2_color);
+            else if(use == "ext3")
+                colorset->setColor(QPalette::Window, ext3_color);
+            else if(use == "ext4")
+                colorset->setColor(QPalette::Window, ext4_color);
+            else if(use == "reiserfs")
+                colorset->setColor(QPalette::Window, reiser_color);
+            else if(use == "reiser4")
+                colorset->setColor(QPalette::Window, reiser4_color);
+            else if(use == "hfs")
+                colorset->setColor(QPalette::Window, hfs_color);
+            else if(use == "vfat")
+                colorset->setColor(QPalette::Window, msdos_color);
+            else if(use == "jfs")
+                colorset->setColor(QPalette::Window, jfs_color);
+            else if(use == "xfs")
+                colorset->setColor(QPalette::Window, xfs_color);
+            else if(use == "swap")
+                colorset->setColor(QPalette::Window, swap_color);
+            else if(use == "freespace")
+                colorset->setColor(QPalette::Window, free_color);
+            else if(use == "physical volume")
+                colorset->setColor(QPalette::Window, physical_color);
+            else
+                colorset->setColor(QPalette::Window, none_color);
+        }
+    }
+    else{  // whole device, not a partition
+            setFrameStyle( QFrame::Sunken | QFrame::Panel );
+            setLineWidth( 2 );
+            colorset->setColor(QPalette::Window, none_color);
     }
 	
     setPalette(*colorset);
@@ -148,9 +145,7 @@ void DeviceChartSeg::popupContextMenu(QPoint point)
     if( (m_item->dataAlternate(0)).canConvert<void *>() )
         m_partition = (StoragePartition *) (( m_item->dataAlternate(0)).value<void *>() );
 
-    //m_item = 0 if there is no item a that point
-
-    if(m_item){
+    if(m_item){  // m_item = 0 if there is no item a that point
         context_menu = new DeviceActionsMenu(m_item, this, this);
         context_menu->exec(QCursor::pos());
     }
@@ -174,13 +169,15 @@ void DeviceChartSeg::removefsPartition()
 
 void DeviceChartSeg::vgcreatePartition()
 {
-    if( create_vg(m_pv_name) )
+    if( create_vg(m_partition->getPartitionPath()) )
 	MainWindow->reRun();
 }
 
 void DeviceChartSeg::vgreducePartition()
 {
-    if( reduce_vg_one( m_item->data(4).toString(), m_pv_name) )
+    PhysVol  *pv = m_partition->getPhysicalVolume();
+    VolGroup *vg = pv->getVolGroup();
+    if( reduce_vg_one( vg->getName(), m_partition->getPartitionPath() ) )
 	MainWindow->reRun();
 }
 
@@ -189,7 +186,7 @@ void DeviceChartSeg::vgextendPartition(QAction *action)
     QString group = action->text();
     group.remove(QChar('&'));
 
-    if( extend_vg(group, m_pv_name) )
+    if( extend_vg(group, m_partition->getPartitionPath()) )
 	MainWindow->reRun();
 }
 

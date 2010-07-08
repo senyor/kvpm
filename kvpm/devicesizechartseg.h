@@ -28,10 +28,7 @@ class DeviceChartSeg : public QFrame
 Q_OBJECT
 
     StorageDeviceItem *m_item;
-
-    QString m_pv_name;
-    
-    StoragePartition *m_partition;
+    StoragePartition  *m_partition;
 
 public:
     DeviceChartSeg(StorageDeviceItem *storageDeviceItem, QWidget *parent = 0);

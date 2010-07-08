@@ -38,7 +38,7 @@ StoragePartition::StoragePartition(PedPartition *part,
     PedDisk   *ped_disk   = m_ped_partition->disk;
     PedDevice *ped_device = ped_disk->dev;
     PedGeometry ped_geometry = m_ped_partition->geom;
-    int  m_ped_type = m_ped_partition->type;
+    m_ped_type = m_ped_partition->type;
 
     sector_size      = ped_device->sector_size;
     m_first_sector   = (ped_geometry).start;
@@ -151,7 +151,7 @@ QString StoragePartition::getType()
     return m_partition_type.trimmed();
 }
 
-int StoragePartition::getPedType()
+unsigned int StoragePartition::getPedType()
 {
     return m_ped_type;
 }

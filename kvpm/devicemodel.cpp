@@ -191,14 +191,27 @@ void StorageDeviceModel::setupModelData(QList<StorageDevice *> devices, StorageD
     StoragePartition *part;
     QString type;
     QVariant part_variant;
+    QVariant dev_variant;
     PhysVol *pv;
     
+    /* dataAlternate
+       0:  pointer to storagepartition if partition, else "" 
+       1:  pointer to storagedevice
+       2:  device size or pv size or partition size
+       3:  device partition count or pv space used up
+       4:  pv "active" or "inactive"
+       5:
+       6:
+       7:  mountable "Yes" or "No"
+     */
+
     for(int x = 0; x < devices.size(); x++){
 	data.clear();
 	dataAlternate.clear();
 	dev = devices[x];
 	if(!QString(dev->getDevicePath()).startsWith("/dev/mapper/"))
 	{
+            dev_variant.setValue( (void *) dev);
 	    if(dev->isPhysicalVolume()){
 		pv = dev->getPhysicalVolume();
 		data << dev->getDevicePath() << "" << sizeToString(dev->getSize());
@@ -207,11 +220,11 @@ void StorageDeviceModel::setupModelData(QList<StorageDevice *> devices, StorageD
 		
 
 		data  << "physical volume" << pv->getVolGroup()->getName();
-		dataAlternate << "" << "" << pv->getSize() << (pv->getSize()) - (pv->getUnused());
+		dataAlternate << "" << dev_variant << pv->getSize() << (pv->getSize()) - (pv->getUnused());
 	    }
 	    else{
 		data << dev->getDevicePath() << "" << sizeToString(dev->getSize());
-		dataAlternate << "" << "" << dev->getSize() << dev->getRealPartitionCount();
+		dataAlternate << "" << dev_variant << dev->getSize() << dev->getRealPartitionCount();
 	    }
 	    
 	    StorageDeviceItem *item = new StorageDeviceItem(data, dataAlternate, parent);
@@ -227,10 +240,7 @@ void StorageDeviceModel::setupModelData(QList<StorageDevice *> devices, StorageD
 		
 		part_variant.setValue( (void *) part);
 		
-		if(part->isEmpty())
-		    dataAlternate << part_variant << "empty" << part->getPartitionSize();
-		else
-		    dataAlternate << part_variant << "" << part->getPartitionSize();
+                dataAlternate << part_variant << part->getPedType() << part->getPartitionSize();
 		 
 		if(part->isPV()){
 		    pv = part->getPhysicalVolume();
