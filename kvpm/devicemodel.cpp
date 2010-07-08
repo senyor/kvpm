@@ -197,13 +197,7 @@ void StorageDeviceModel::setupModelData(QList<StorageDevice *> devices, StorageD
     /* dataAlternate
        0:  pointer to storagepartition if partition, else "" 
        1:  pointer to storagedevice
-       2:  device size or pv size or partition size
-       3:  device partition count or pv space used up
-       4:  pv "active" or "inactive"
-       5:
-       6:
-       7:  mountable "Yes" or "No"
-     */
+    */
 
     for(int x = 0; x < devices.size(); x++){
 	data.clear();
@@ -220,11 +214,11 @@ void StorageDeviceModel::setupModelData(QList<StorageDevice *> devices, StorageD
 		
 
 		data  << "physical volume" << pv->getVolGroup()->getName();
-		dataAlternate << "" << dev_variant << pv->getSize() << (pv->getSize()) - (pv->getUnused());
+		dataAlternate << "" << dev_variant
 	    }
 	    else{
 		data << dev->getDevicePath() << "" << sizeToString(dev->getSize());
-		dataAlternate << "" << dev_variant << dev->getSize() << dev->getRealPartitionCount();
+		dataAlternate << "" << dev_variant
 	    }
 	    
 	    StorageDeviceItem *item = new StorageDeviceItem(data, dataAlternate, parent);
@@ -240,7 +234,7 @@ void StorageDeviceModel::setupModelData(QList<StorageDevice *> devices, StorageD
 		
 		part_variant.setValue( (void *) part);
 		
-                dataAlternate << part_variant << part->getPedType() << part->getPartitionSize();
+                dataAlternate << part_variant << dev_variant
 		 
 		if(part->isPV()){
 		    pv = part->getPhysicalVolume();
@@ -251,14 +245,6 @@ void StorageDeviceModel::setupModelData(QList<StorageDevice *> devices, StorageD
 			 << pv->getVolGroup()->getName()
                          << (part->getFlags()).join(", ") 
                          << "";
-
-		    dataAlternate << (pv->getSize()) - (pv->getUnused());
-
-                    if( pv->isActive() )
-                        dataAlternate << "active";
-                    else
-                        dataAlternate << "inactive";
-
 		}
 		else{
 		    data << "" << part->getFileSystem();
@@ -271,14 +257,6 @@ void StorageDeviceModel::setupModelData(QList<StorageDevice *> devices, StorageD
 		        data << "swapping";
 		    else
 		        data << "";
-
-		    dataAlternate << "" << "" << "" << "";
-
-		    if(part->isMountable())
-		        dataAlternate << "Yes";   // dataAlternate for mountpoint (position 7)
-		    else
-		        dataAlternate << "No";
-
 		}
 		
 		if(type == "extended"){
