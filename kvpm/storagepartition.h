@@ -58,7 +58,7 @@ public:
 
     PedPartition *getPedPartition();    
     QString getFileSystem();
-    QString getPartitionPath();
+    QString getName();
     PhysVol *getPhysicalVolume();
     QString getType();
     unsigned int getPedType();

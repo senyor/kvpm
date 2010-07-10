@@ -492,7 +492,7 @@ bool mount_filesystem(LogVol *volumeToMount)
 
 bool mount_filesystem(StoragePartition *partition)
 {
-    QString device = partition->getPartitionPath();
+    QString device = partition->getName();
     QString filesystem = partition->getFileSystem();
     
     MountDialog dialog(device, filesystem);

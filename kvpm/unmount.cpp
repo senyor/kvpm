@@ -159,7 +159,7 @@ bool unmount_filesystem(StoragePartition *partition)
 {
     QList<int> mount_position = partition->getMountPosition();
     QStringList mount_points  = partition->getMountPoints();
-    QString path = partition->getPartitionPath();
+    QString path = partition->getName();
 
     QString unused_message = i18n("The partition <b>%1</b> is mounted on <b>%2</b> "
 				  "Do you want to unmount it?").arg(path).arg(mount_points[0]);

@@ -65,7 +65,7 @@ bool make_fs(StoragePartition *partition)
     
     QString error_message = i18n("The partition: <b>%1</b> is mounted. It must "
                                  "be unmounted before a new filesystem " 
-                                 "can be written on it").arg( partition->getPartitionPath() );
+                                 "can be written on it").arg( partition->getName() );
 
     if( partition->isMounted() ){
         KMessageBox::error(0, error_message);
@@ -100,7 +100,7 @@ MkfsDialog::MkfsDialog(LogVol *logicalVolume, QWidget *parent) : KDialog(parent)
 
 MkfsDialog::MkfsDialog(StoragePartition *partition, QWidget *parent) : KDialog(parent)
 {
-    m_path = partition->getPartitionPath();
+    m_path = partition->getName();
     m_stride_size = 0;
     m_stride_count = 1;
 

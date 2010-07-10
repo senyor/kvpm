@@ -107,7 +107,7 @@ PartitionAddDialog::PartitionAddDialog(StoragePartition *partition,
     display_graphic_layout->addWidget(m_display_graphic);
     layout->addWidget(display_graphic_frame, 0, Qt::AlignCenter);
  
-    QLabel *path = new QLabel("<b>" + m_partition->getPartitionPath() + "</b>");
+    QLabel *path = new QLabel("<b>" + m_partition->getName() + "</b>");
     path->setAlignment( Qt::AlignHCenter );
     layout->addWidget(path);
 

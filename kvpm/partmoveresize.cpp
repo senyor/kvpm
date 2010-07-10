@@ -96,7 +96,7 @@ PartitionMoveResizeDialog::PartitionMoveResizeDialog(StoragePartition *partition
     display_graphic_layout->addWidget(m_display_graphic);
     layout->addWidget(display_graphic_frame, 0, Qt::AlignCenter);
  
-    QGroupBox   *info_group = new QGroupBox( m_old_storage_part->getPartitionPath() );  
+    QGroupBox   *info_group = new QGroupBox( m_old_storage_part->getName() );  
     QVBoxLayout *info_group_layout = new QVBoxLayout();
     info_group->setLayout(info_group_layout);
     layout->addWidget(info_group);

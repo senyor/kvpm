@@ -94,7 +94,7 @@ DeviceProperties::DeviceProperties( StoragePartition *Partition, QWidget *parent
     layout->setSpacing(0);
     layout->setMargin(0);
 
-    QString path = Partition->getPartitionPath();
+    QString path = Partition->getName();
 
     QFrame *basic_info_frame = new QFrame;
     QVBoxLayout *basic_info_layout = new QVBoxLayout();
