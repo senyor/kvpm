@@ -127,6 +127,7 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
     if(item){
 
         setEnabled(true);
+        device = (StorageDevice *) (( item->dataAlternate(1)).value<void *>() );
 
         if( ( item->dataAlternate(0)).canConvert<void *>() ){  // its a partition
             partition = (StoragePartition *) (( item->dataAlternate(0)).value<void *>() );
@@ -159,12 +160,14 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
             else if( partition->isPV() ){
                 m_mkfs_action->setEnabled(false);
                 m_partremove_action->setEnabled(false);
-                m_partmoveresize_action->setEnabled(true);
+                if( partition->isBusy() )        
+                    m_partmoveresize_action->setEnabled(false);
+                else
+                    m_partmoveresize_action->setEnabled(true);
                 m_partadd_action->setEnabled(false);
                 m_removefs_action->setEnabled(false);
                 m_vgcreate_action->setEnabled(false);
                 m_vgextend_menu->setEnabled(false);
-                
                 if( partition->getPhysicalVolume()->getPercentUsed() == 0 )
                     m_vgreduce_action->setEnabled(true);
                 else
@@ -195,7 +198,6 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
             }
         }
         else { // its a whole device
-            device = (StorageDevice *) (( item->dataAlternate(1)).value<void *>() );
             m_mount_action->setEnabled(false);
             m_unmount_action->setEnabled(false);
 
