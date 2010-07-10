@@ -28,22 +28,19 @@ StoragePartition::StoragePartition(PedPartition *part,
     m_ped_partition (part)
 
 {
-
     long long sector_size;
-    m_is_pv = false;
-    m_is_normal  = false;
-    m_is_logical = false;
-    m_pv = NULL;
-
     PedDisk   *ped_disk   = m_ped_partition->disk;
     PedDevice *ped_device = ped_disk->dev;
     PedGeometry ped_geometry = m_ped_partition->geom;
-    m_ped_type = m_ped_partition->type;
-
     sector_size      = ped_device->sector_size;
     m_first_sector   = (ped_geometry).start;
     m_last_sector    = (ped_geometry).end;
     m_partition_size = (ped_geometry.length) * sector_size; // in bytes
+    m_ped_type = m_ped_partition->type;
+    m_is_pv    = false;
+    m_is_normal  = false;
+    m_is_logical = false;
+    m_pv = NULL;
 
     if( m_ped_type == 0 ){
       m_partition_type = "normal";
@@ -96,12 +93,10 @@ StoragePartition::StoragePartition(PedPartition *part,
 
     m_device_mount_info_list = mountInfoList->getMountInformation(m_partition_path);
 
-    if( m_device_mount_info_list.size() ){
+    if( m_device_mount_info_list.size() )
 	m_is_mounted = true;
-    }
-    else{
+    else
 	m_is_mounted = false;
-    }
 
     if( m_partition_type == "extended" ){
 	m_is_mountable = false;
@@ -110,15 +105,16 @@ StoragePartition::StoragePartition(PedPartition *part,
     else{
 	m_fs_type = fsprobe_getfstype2(m_partition_path);
 
-	if( m_fs_type == "swap" || m_fs_type == "" ){
+	if( m_fs_type == "swap" || m_fs_type == "" || m_is_pv )
 	    m_is_mountable = false;
-	}
-	else{
-		m_is_mountable = true;
-	}
+	else
+            m_is_mountable = true;
     }
 
-    m_is_busy = ped_partition_is_busy(m_ped_partition);
+    if (m_is_pv)
+        m_is_busy = m_pv->isActive();
+    else
+        m_is_busy = ped_partition_is_busy(m_ped_partition);
 
     PedPartition *temp_part = NULL;
     PedDisk      *temp_disk = ped_disk_new(ped_device);
