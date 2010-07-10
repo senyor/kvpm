@@ -49,8 +49,7 @@ bool moveresize_partition(StoragePartition *partition)
                            "are supported for file system shrinking. "
                            "Growing is supported for ext2/3/4, jfs, xfs and Reiserfs. "
                            "Moving a partition is supported for any filesystem. "
-                           "Physical volumes may also be grown or shrunk and "
-                           "if they are not active, may be moved as well.");
+                           "Physical volumes may also be grown, shrunk or moved");
 
     if( ! ( fs == "ext2" || fs == "ext3" || fs == "ext4" || fs == "reiserfs" ||
             fs == "xfs"  || fs == "jfs"  || partition->isPV() ) ){
