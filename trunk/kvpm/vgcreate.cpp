@@ -45,7 +45,7 @@ bool create_vg()
                     (( storage_partitions[y]->isNormal() ) ||  
                      ( storage_partitions[y]->isLogical() )))  
                 {
-                    device_names.append( storage_partitions[y]->getPartitionPath() );
+                    device_names.append( storage_partitions[y]->getName() );
                 }
             }
         }

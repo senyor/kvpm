@@ -169,7 +169,7 @@ void DeviceChartSeg::removefsPartition()
 
 void DeviceChartSeg::vgcreatePartition()
 {
-    if( create_vg(m_partition->getPartitionPath()) )
+    if( create_vg(m_partition->getName()) )
 	MainWindow->reRun();
 }
 
@@ -177,7 +177,7 @@ void DeviceChartSeg::vgreducePartition()
 {
     PhysVol  *pv = m_partition->getPhysicalVolume();
     VolGroup *vg = pv->getVolGroup();
-    if( reduce_vg_one( vg->getName(), m_partition->getPartitionPath() ) )
+    if( reduce_vg_one( vg->getName(), m_partition->getName() ) )
 	MainWindow->reRun();
 }
 
@@ -186,7 +186,7 @@ void DeviceChartSeg::vgextendPartition(QAction *action)
     QString group = action->text();
     group.remove(QChar('&'));
 
-    if( extend_vg(group, m_partition->getPartitionPath()) )
+    if( extend_vg(group, m_partition->getName()) )
 	MainWindow->reRun();
 }
 

@@ -42,7 +42,7 @@ DevicePropertiesStack::DevicePropertiesStack( QList<StorageDevice *> Devices, QW
 	partitions << Devices[x]->getStoragePartitions() ;
 
 	for(int n = 0; n < partitions.size(); n++ ){
-	    m_device_path_list.append( partitions[n]->getPartitionPath() );
+	    m_device_path_list.append( partitions[n]->getName() );
 	    addWidget( new DeviceProperties( partitions[n] ) );
 	}
     }

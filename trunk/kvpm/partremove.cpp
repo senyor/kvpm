@@ -28,7 +28,7 @@ bool remove_partition( StoragePartition *partition )
 
     QString message = i18n("Remove partition: <b>%1</b>? "
 			   "Any data on that partition will be lost!",
-			   partition->getPartitionPath() );
+			   partition->getName() );
 
     ped_partition = partition->getPedPartition();
 

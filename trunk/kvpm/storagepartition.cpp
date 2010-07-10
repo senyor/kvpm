@@ -168,7 +168,7 @@ PhysVol* StoragePartition::getPhysicalVolume()
 }
 
 
-QString StoragePartition::getPartitionPath()
+QString StoragePartition::getName()
 {
     return m_partition_path.trimmed();
 }
