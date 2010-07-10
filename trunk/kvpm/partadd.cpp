@@ -25,16 +25,14 @@
 bool add_partition(StoragePartition *partition)
 {
     PedDisk *disk = partition->getPedPartition()->disk;
-    QString type = partition->getType();
+    bool logical_freespace = ( partition->getPedType() & 0x04 ) &&  ( partition->getPedType() & 0x01 );
     int count = ped_disk_get_primary_partition_count(disk);
 
-    if( ( ped_disk_get_max_primary_partition_count(disk) <= count ) && (type == "freespace") ){
-
+    if( count >= ped_disk_get_max_primary_partition_count(disk)  && ( ! logical_freespace ) ){
         KMessageBox::error(0, i18n("Disk already has %1 primary partitions, the maximum", count));
         return false;
     }
     else{
-
         PartitionAddDialog dialog(partition);
         dialog.exec();
     
