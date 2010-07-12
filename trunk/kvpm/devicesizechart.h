@@ -27,13 +27,13 @@ class DeviceSizeChart : public QFrame
 {
     Q_OBJECT
 
-    QHBoxLayout *layout;
-    QHBoxLayout *extended_layout;        // The layout for chart segments inside an extented partition
+    QHBoxLayout *m_layout;
+    QHBoxLayout *m_extended_layout;        // The layout for chart segments inside an extented partition
 
-    QList<QWidget *> segments, extended_segments;    // Segments of the bar chart, not the disk.
-    QList<double> ratios, extended_ratios;
+    QList<QWidget *> m_segments, m_extended_segments;    // Segments of the bar chart, not the disk.
+    QList<double> m_ratios, m_extended_ratios;
     
-    StorageDeviceModel *device_model;
+    StorageDeviceModel *m_device_model;
 
 public:
     DeviceSizeChart(StorageDeviceModel *model, QWidget *parent);
