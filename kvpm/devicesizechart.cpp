@@ -20,18 +20,18 @@
 
 DeviceSizeChart::DeviceSizeChart(StorageDeviceModel *model, QWidget *parent) : QFrame(parent)
 {
-    device_model = model;
+    m_device_model = model;
     QModelIndex index;
 
     setFrameStyle( QFrame::Sunken | QFrame::Panel );
     setLineWidth(2);
 
     index = model->index(0,0);
-    layout = new QHBoxLayout();
-    layout->setSpacing(0);
-    layout->setMargin(0);
-    layout->setSizeConstraint(QLayout::SetNoConstraint);
-    setLayout(layout);
+    m_layout = new QHBoxLayout();
+    m_layout->setSpacing(0);
+    m_layout->setMargin(0);
+    m_layout->setSizeConstraint(QLayout::SetNoConstraint);
+    setLayout(m_layout);
 
     setNewDevice(index);
     setMinimumHeight(45);
@@ -50,16 +50,16 @@ void DeviceSizeChart::setNewDevice(QModelIndex index)
     int max_segment_width;
     unsigned int part_type;
 
-    for(int x = layout->count() - 1; x >= 0; x--){  // delete all the children
-	QWidget *old_widget = (layout->takeAt(x))->widget();
+    for(int x = m_layout->count() - 1; x >= 0; x--){  // delete all the children
+	QWidget *old_widget = (m_layout->takeAt(x))->widget();
 	old_widget->setParent(0);
 	delete old_widget;
     }
 
-    segments.clear();
-    ratios.clear();
-    extended_segments.clear();
-    extended_ratios.clear();
+    m_segments.clear();
+    m_ratios.clear();
+    m_extended_segments.clear();
+    m_extended_ratios.clear();
     while(index.parent() != QModelIndex())
 	index = index.parent();
 
@@ -67,7 +67,7 @@ void DeviceSizeChart::setNewDevice(QModelIndex index)
 
     if( !device_item->childCount() ){
 	QWidget *empty_widget = new QWidget(this);
-	layout->addWidget(empty_widget);
+	m_layout->addWidget(empty_widget);
     }
 
     for(int x = 0; x < device_item->childCount(); x++){
@@ -87,13 +87,13 @@ void DeviceSizeChart::setNewDevice(QModelIndex index)
 
 	ratio = part_size / (double) device_size;
 	segment = new DeviceChartSeg(partition_item);	
-	segments.append(segment);
-	ratios.append(ratio);
+	m_segments.append(segment);
+	m_ratios.append(ratio);
 	if( part_type & 0x02 ){  // extended partition
-	    extended_layout = new QHBoxLayout();
-	    extended_layout->setSpacing(0);
-	    extended_layout->setMargin(0);
-	    extended_layout->setSizeConstraint(QLayout::SetNoConstraint);
+	    m_extended_layout = new QHBoxLayout();
+	    m_extended_layout->setSpacing(0);
+	    m_extended_layout->setMargin(0);
+	    m_extended_layout->setSizeConstraint(QLayout::SetNoConstraint);
 	    for(int y = 0 ; y < partition_item->childCount(); y++){
 		extended_item = partition_item->child(y);
                 partition = (StoragePartition *) (( extended_item->dataAlternate(0)).value<void *>() );
@@ -107,32 +107,32 @@ void DeviceSizeChart::setNewDevice(QModelIndex index)
 		    usage = (extended_item->data(3)).toString();
 		extended_segment = new DeviceChartSeg(extended_item);	
 		ratio = part_size / (double) device_size;
-		extended_segments.append(extended_segment);
-		extended_ratios.append(ratio);
+		m_extended_segments.append(extended_segment);
+		m_extended_ratios.append(ratio);
 
-		extended_layout->addWidget(extended_segment);
+		m_extended_layout->addWidget(extended_segment);
 	    }
-	    segment->setLayout(extended_layout);
+	    segment->setLayout(m_extended_layout);
 	}
-	layout->addWidget(segment);
+	m_layout->addWidget(segment);
     }
 
-    for(int x = segments.size() - 1 ; x >= 0; x--){
+    for(int x = m_segments.size() - 1 ; x >= 0; x--){
 
-	max_segment_width = (int)( (width()  * ratios[x]) - 2 );
+	max_segment_width = (int)( ( width() * m_ratios[x]) - 2 );
 	if( max_segment_width < 1 )
 	    max_segment_width = 1;
 	
-	segments[x]->setMaximumWidth(max_segment_width);
+	m_segments[x]->setMaximumWidth(max_segment_width);
     }
     
-    for(int x = extended_segments.size() - 1; x >= 0; x--){
+    for(int x = m_extended_segments.size() - 1; x >= 0; x--){
 	
-	max_segment_width = (int)( (width()  * extended_ratios[x]) - 2 );
+	max_segment_width = (int)( ( width() * m_extended_ratios[x] ) - 2 );
 	if( max_segment_width < 1 )
 	    max_segment_width = 1;
 	
-	extended_segments[x]->setMaximumWidth(max_segment_width);
+	m_extended_segments[x]->setMaximumWidth(max_segment_width);
     }
 }
 
@@ -141,21 +141,21 @@ void DeviceSizeChart::resizeEvent(QResizeEvent *event)
     int max_segment_width;
     int new_width = (event->size()).width();
 
-    for(int x = segments.size() - 1 ; x >= 0; x--){
+    for(int x = m_segments.size() - 1 ; x >= 0; x--){
 
-	max_segment_width = (int)( (new_width * ratios[x]) - 2 );
+	max_segment_width = (int)( (new_width * m_ratios[x]) - 2 );
 	if( max_segment_width < 1 )
 	    max_segment_width = 1;
 	
-	segments[x]->setMaximumWidth(max_segment_width);
+	m_segments[x]->setMaximumWidth(max_segment_width);
     }
     
-    for(int x = extended_segments.size() - 1; x >= 0; x--){
+    for(int x = m_extended_segments.size() - 1; x >= 0; x--){
 	
-	max_segment_width = (int)( (new_width  * extended_ratios[x]) - 2 );
+	max_segment_width = (int)( (new_width  * m_extended_ratios[x]) - 2 );
 	if( max_segment_width < 1 )
 	    max_segment_width = 1;
 	
-	extended_segments[x]->setMaximumWidth(max_segment_width);
+	m_extended_segments[x]->setMaximumWidth(max_segment_width);
     }
 }
