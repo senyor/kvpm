@@ -20,7 +20,6 @@
 #include "physvol.h"
 #include "storagepartition.h"
 
-
 StoragePartition::StoragePartition(PedPartition *part,
 				   int freespaceCount,
 				   QList<PhysVol *> pvList, 
@@ -167,14 +166,12 @@ PhysVol* StoragePartition::getPhysicalVolume()
     return m_pv;
 }
 
-
 QString StoragePartition::getName()
 {
     return m_partition_path.trimmed();
 }
 
-
-long long StoragePartition::getPartitionSize()
+long long StoragePartition::getSize()
 {
     return m_partition_size;
 }

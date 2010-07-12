@@ -230,7 +230,7 @@ void StorageDeviceModel::setupModelData(QList<StorageDevice *> devices, StorageD
 		type = part->getType();
 
 		data << part->getName() << type
-		     << sizeToString(part->getPartitionSize());
+		     << sizeToString(part->getSize());
 		
 		part_variant.setValue( (void *) part);
 		

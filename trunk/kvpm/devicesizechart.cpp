@@ -77,7 +77,7 @@ void DeviceSizeChart::setNewDevice(QModelIndex index)
 	device    = (StorageDevice *) (( partition_item->dataAlternate(1)).value<void *>() );
 
 	part_type = partition->getPedType();
-	part_size = partition->getPartitionSize();
+	part_size = partition->getSize();
 	device_size = device->getSize();
 
 	if( partition->isPV() )
@@ -99,7 +99,7 @@ void DeviceSizeChart::setNewDevice(QModelIndex index)
                 partition = (StoragePartition *) (( extended_item->dataAlternate(0)).value<void *>() );
                 device = (StorageDevice *) (( extended_item->dataAlternate(1)).value<void *>() );
 		part_type = partition->getPedType();
-		part_size = partition->getPartitionSize();
+		part_size = partition->getSize();
 		device_size = device->getSize();
 		if( partition->isPV() )
 		    usage = "physical volume";

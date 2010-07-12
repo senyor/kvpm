@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -15,17 +15,15 @@
 #ifndef STORAGEPARTITION_H
 #define STORAGEPARTITION_H
 
+#include <parted/parted.h>
+
 #include <QObject>
 #include <QList>
 #include <QStringList>
 
-#include <parted/parted.h>
-
-
 class PhysVol;
 class MountInformation;
 class MountInformationList;
-
 
 class StoragePartition 
 {
@@ -65,7 +63,7 @@ public:
     QStringList getMountPoints();
     QStringList getFlags();
     QList<int> getMountPosition();
-    long long getPartitionSize();
+    long long getSize();
     long long getFirstSector();
     long long getLastSector();
     bool isPV();
