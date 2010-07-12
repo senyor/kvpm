@@ -96,7 +96,7 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
     m_partremove_action = new KAction( i18n("Remove disk partition"), this);
     m_removefs_action   = new KAction( i18n("Remove filesystem"), this);
     m_vgcreate_action   = new KAction( i18n("Create volume group"), this);
-    m_tablecreate_action= new KAction( i18n("Create new partition table"), this);
+    m_tablecreate_action= new KAction( i18n("Create or destroy partition table"), this);
     m_vgreduce_action   = new KAction( i18n("Remove from volume group"), this);
     m_mount_action      = new KAction( i18n("Mount filesystem"), this);
     m_unmount_action    = new KAction( i18n("Unmount filesystem"), this);

@@ -28,7 +28,7 @@ bool create_table(QString devicePath)
 {
 
     QString warning_message = i18n("By writing a new partition table to this device, " 
-                                   "or destroying the old one,"
+                                   "or destroying the old one, "
                                    "any existing data on it will be lost!");
 
     if(KMessageBox::warningContinueCancel(0, warning_message) != KMessageBox::Continue)
