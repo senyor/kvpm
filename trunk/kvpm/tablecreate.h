@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2009 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2009, 2010 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -29,9 +29,9 @@ Q_OBJECT
 
     QString   m_device_path;
 
-
     QRadioButton *m_msdos_button, 
-                 *m_gpt_button;
+                 *m_gpt_button,
+                 *m_destroy_button;
     
  public:
     TableCreateDialog(QString devicePath, QWidget *parent = 0);
