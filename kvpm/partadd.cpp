@@ -21,15 +21,25 @@
 #include "partaddgraphic.h"
 #include "sizetostring.h"
 
+/* 
+   The "partition" we get here is usually a ped pointer to a the freespace 
+   between partitions. It can also be an *empty* extened partition however.
+*/
 
 bool add_partition(StoragePartition *partition)
 {
     PedDisk *disk = partition->getPedPartition()->disk;
-    bool logical_freespace = ( partition->getPedType() & 0x04 ) &&  ( partition->getPedType() & 0x01 );
+    unsigned ped_type = partition->getPedType();
+    bool logical_freespace = ( ped_type & PED_PARTITION_FREESPACE ) && ( ped_type & PED_PARTITION_LOGICAL );
     int count = ped_disk_get_primary_partition_count(disk);
+    int max_count = ped_disk_get_max_primary_partition_count(disk);
 
-    if( count >= ped_disk_get_max_primary_partition_count(disk)  && ( ! logical_freespace ) ){
+    if( count >= max_count  && ( ! ( logical_freespace || ( ped_type & PED_PARTITION_EXTENDED ) ) ) ){
         KMessageBox::error(0, i18n("Disk already has %1 primary partitions, the maximum", count));
+        return false;
+    }
+    else if( ( ped_type & PED_PARTITION_EXTENDED ) && ( ! partition->isEmpty() ) ){
+        KMessageBox::error(0, i18n("This should not happen. Try selecting the freespace and not the partiton itself"));
         return false;
     }
     else{
@@ -50,19 +60,31 @@ PartitionAddDialog::PartitionAddDialog(StoragePartition *partition,
   
 {
 
-    PedPartition *ped_free_partition = partition->getPedPartition(); // This is really freespace
-    PedGeometry   ped_geometry       = ped_free_partition->geom;
-
-    m_ped_disk = ped_free_partition->disk;
-
-    PedDevice  *ped_device    = m_ped_disk->dev;
-    m_ped_sector_size = ped_device->sector_size;
-
-    m_excluded_sectors = 0;
-
+    PedPartition *ped_free_partition = partition->getPedPartition();
+    PedGeometry   ped_geometry;
+    PedDisk      *ped_disk  = ped_free_partition->disk;
+    PedDisk      *temp_disk = ped_disk_new( ped_disk->dev );
+    PedDevice    *ped_device;
     bool logical_freespace;      // true if we are inside an extended partition
     bool extended_allowed;       // true if we can create an extended partition here
 
+    // If this is an empty extended partition and not freespace inside
+    // one then look for the freespace.
+
+    if( ped_free_partition->type & PED_PARTITION_EXTENDED ){
+        do{
+            ped_free_partition = ped_disk_next_partition (temp_disk, ped_free_partition);
+            if( ! ped_free_partition )
+                qDebug() << "Extended partition with no freespace found!";
+        }
+        while( !((ped_free_partition->type & PED_PARTITION_FREESPACE) && (ped_free_partition->type & PED_PARTITION_LOGICAL)) );
+    }
+
+    ped_geometry = ped_free_partition->geom;
+    m_ped_disk   = ped_free_partition->disk;
+    ped_device   = m_ped_disk->dev;
+    m_ped_sector_size = ped_device->sector_size;
+    m_excluded_sectors = 0;
 
     /* check to see if partition table supports extended
        partitions and if it already has one */
@@ -74,16 +96,13 @@ PartitionAddDialog::PartitionAddDialog(StoragePartition *partition,
     else
         extended_allowed = false;
 
-
     if( ped_free_partition->type & PED_PARTITION_LOGICAL )
         logical_freespace = true;
     else
         logical_freespace = false;
 
-
 // The hardware's own constraints, if any
-    m_ped_constraints = ped_device_get_constraint(ped_device); 
-
+    m_ped_constraints   = ped_device_get_constraint(ped_device); 
     m_ped_start_sector  = ped_geometry.start;
     m_ped_end_sector    = ped_geometry.end;
     m_ped_sector_length = ped_geometry.length;
