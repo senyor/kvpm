@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2009 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -83,7 +83,6 @@ DeviceActionsMenu::DeviceActionsMenu( StorageDeviceItem *item,
 
 }
 
-
 void DeviceActionsMenu::setup(StorageDeviceItem *item)
 {
     StoragePartition* partition = NULL;
@@ -134,6 +133,7 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
             m_tablecreate_action->setEnabled(false);
 	    m_mount_action->setEnabled( partition->isMountable() );
             m_unmount_action->setEnabled( partition->isMounted() );
+
             if( partition->getPedType() & 0x04 ){    // freespace
                 m_mkfs_action->setEnabled(false);
                 m_partremove_action->setEnabled(false);
@@ -146,7 +146,10 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
             }
             else if( partition->getPedType() & 0x02 ){  // extended partition
                 m_mkfs_action->setEnabled(false);
-                m_partadd_action->setEnabled(false);
+                if( partition->isEmpty() )
+                    m_partadd_action->setEnabled(true);
+                else
+                    m_partadd_action->setEnabled(false);
                 m_partmoveresize_action->setEnabled(false);
                 m_removefs_action->setEnabled(false);
                 m_vgcreate_action->setEnabled(false);
