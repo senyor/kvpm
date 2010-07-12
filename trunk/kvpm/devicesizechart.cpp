@@ -94,24 +94,26 @@ void DeviceSizeChart::setNewDevice(QModelIndex index)
 	    m_extended_layout->setSpacing(0);
 	    m_extended_layout->setMargin(0);
 	    m_extended_layout->setSizeConstraint(QLayout::SetNoConstraint);
-	    for(int y = 0 ; y < partition_item->childCount(); y++){
-		extended_item = partition_item->child(y);
-                partition = (StoragePartition *) (( extended_item->dataAlternate(0)).value<void *>() );
-                device = (StorageDevice *) (( extended_item->dataAlternate(1)).value<void *>() );
-		part_type = partition->getPedType();
-		part_size = partition->getSize();
-		device_size = device->getSize();
-		if( partition->isPV() )
-		    usage = "physical volume";
-		else
-		    usage = (extended_item->data(3)).toString();
-		extended_segment = new DeviceChartSeg(extended_item);	
-		ratio = part_size / (double) device_size;
-		m_extended_segments.append(extended_segment);
-		m_extended_ratios.append(ratio);
-
-		m_extended_layout->addWidget(extended_segment);
-	    }
+            if( ! partition->isEmpty() ){
+                for(int y = 0 ; y < partition_item->childCount(); y++){
+                    extended_item = partition_item->child(y);
+                    partition = (StoragePartition *) (( extended_item->dataAlternate(0)).value<void *>() );
+                    device = (StorageDevice *) (( extended_item->dataAlternate(1)).value<void *>() );
+                    part_type = partition->getPedType();
+                    part_size = partition->getSize();
+                    device_size = device->getSize();
+                    if( partition->isPV() )
+                        usage = "physical volume";
+                    else
+                        usage = (extended_item->data(3)).toString();
+                    extended_segment = new DeviceChartSeg(extended_item);	
+                    ratio = part_size / (double) device_size;
+                    m_extended_segments.append(extended_segment);
+                    m_extended_ratios.append(ratio);
+                    
+                    m_extended_layout->addWidget(extended_segment);
+                }
+            }
 	    segment->setLayout(m_extended_layout);
 	}
 	m_layout->addWidget(segment);

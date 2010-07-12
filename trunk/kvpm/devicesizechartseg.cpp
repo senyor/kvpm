@@ -81,7 +81,7 @@ DeviceChartSeg::DeviceChartSeg(StorageDeviceItem *storageDeviceItem, QWidget *pa
         if ( m_partition->getPedType() & 0x02 ){  // extended
             setFrameStyle(QFrame::Raised | QFrame::Box);
             setLineWidth( 1 );
-	    colorset->setColor(QPalette::Window, none_color);
+	    colorset->setColor(QPalette::Window, Qt::green);
         }
         else if( m_partition->getPedType() & 0x04 ){   // freespace
             setFrameStyle(QFrame::Sunken | QFrame::Panel);
@@ -216,6 +216,6 @@ void DeviceChartSeg::moveresizePartition()
 
 void DeviceChartSeg::addPartition()
 {
-  if( add_partition(m_partition) )
+        if( add_partition(m_partition) )
         MainWindow->reRun();
 }
