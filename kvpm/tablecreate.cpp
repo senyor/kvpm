@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2009 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2009, 2010 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -20,11 +20,15 @@
 
 #include "tablecreate.h"
 
+/*
+  Creates or deletes a partition table "disk label" on a device.
+*/
 
 bool create_table(QString devicePath)
 {
 
-    QString warning_message = i18n("By writing a new partition table to this device, "
+    QString warning_message = i18n("By writing a new partition table to this device, " 
+                                   "or destroying the old one,"
                                    "any existing data on it will be lost!");
 
     if(KMessageBox::warningContinueCancel(0, warning_message) != KMessageBox::Continue)
@@ -63,11 +67,13 @@ TableCreateDialog::TableCreateDialog(QString devicePath, QWidget *parent) :
     radio_box->setLayout(radio_box_layout);
     layout->addWidget(radio_box);
 
-    m_msdos_button = new QRadioButton("MS-DOS");
-    m_gpt_button   = new QRadioButton("GPT");
+    m_msdos_button   = new QRadioButton("MS-DOS");
+    m_gpt_button     = new QRadioButton("GPT");
+    m_destroy_button = new QRadioButton("Destroy table");
     m_msdos_button->setChecked(true);
     radio_box_layout->addWidget( m_msdos_button );
     radio_box_layout->addWidget( m_gpt_button );
+    radio_box_layout->addWidget( m_destroy_button );
 
     connect(this, SIGNAL(okClicked()),
             this, SLOT(commitTable()));
@@ -78,14 +84,30 @@ void TableCreateDialog::commitTable()
 
     PedDevice   *ped_device    = ped_device_get ( m_device_path.toAscii().data() ); 
     PedDiskType *ped_disk_type = NULL;
+    PedDisk     *ped_disk = NULL;
+    char        *buff = NULL;
 
-    if( m_msdos_button->isChecked() )
+    if( m_msdos_button->isChecked() ){
         ped_disk_type = ped_disk_type_get( "msdos" );
-    else
+        ped_disk = ped_disk_new_fresh (ped_device, ped_disk_type);
+        ped_disk_commit(ped_disk);
+    }
+    else if( m_gpt_button->isChecked() ){
         ped_disk_type = ped_disk_type_get( "gpt" );
+        ped_disk = ped_disk_new_fresh (ped_device, ped_disk_type);
+        ped_disk_commit(ped_disk);
+    }
+    else{
+        ped_disk_clobber( ped_device ); // This isn't enough for lvm
+        ped_device_open( ped_device );
+        buff = static_cast<char *>( malloc( 2 * ped_device->sector_size ) );
 
-    PedDisk *ped_disk = ped_disk_new_fresh (ped_device, ped_disk_type);
+        for( int x = 0; x < 2 * ped_device->sector_size; x++)
+            buff[x] = 0;
 
-    ped_disk_commit(ped_disk);
-
+        if( ! ped_device_write(ped_device, buff, 0, 2) )  // clobber first 2 sectors
+            KMessageBox::error( 0, "Destroying table failed: could not write to device");
+    }
 }
+
+
