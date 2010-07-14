@@ -34,8 +34,10 @@ Q_OBJECT
 
 public:
     VGChangeExtentDialog(VolGroup *volumeGroup, QWidget *parent = 0);
-    QStringList arguments();
-    
+
+private slots:
+    void commitChanges();
+    void limitExtentSize(int index);    
 };
 
 #endif
