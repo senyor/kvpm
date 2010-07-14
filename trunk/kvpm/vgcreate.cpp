@@ -200,14 +200,50 @@ VGCreateDialog::VGCreateDialog(QStringList physicalVolumePathList, QWidget *pare
 	    this, SLOT(limitPhysicalVolumes(int)));
 
     connect(this, SIGNAL(okClicked()), 
-	    this, SLOT(writeChanges()));
+	    this, SLOT(commitChanges()));
+
+    connect(m_extent_suffix, SIGNAL(activated(int)), 
+            this, SLOT(limitExtentSize(int)));
+
 }
 
-void VGCreateDialog::writeChanges()
-{
+void VGCreateDialog::limitExtentSize(int index){
 
+    int extent_index;
+
+    if( index > 1 ){  // Gigabytes selected as suffix, more than 2Gib forbidden
+        if( m_extent_size->currentIndex() > 2 )
+            m_extent_size->setCurrentIndex(0);
+        m_extent_size->setMaxCount(2);
+    }
+    else{
+        extent_index = m_extent_size->currentIndex();
+        m_extent_size->setMaxCount(10);
+        m_extent_size->setInsertPolicy(QComboBox::InsertAtBottom);
+        m_extent_size->insertItem(2,"4");
+        m_extent_size->insertItem(3,"8");
+        m_extent_size->insertItem(4,"16");
+        m_extent_size->insertItem(5,"32");
+        m_extent_size->insertItem(6,"64");
+        m_extent_size->insertItem(7,"128");
+        m_extent_size->insertItem(8,"256");
+        m_extent_size->insertItem(9,"512");
+        m_extent_size->setInsertPolicy(QComboBox::NoInsert);
+        m_extent_size->setCurrentIndex(extent_index);
+    }
+}
+
+void VGCreateDialog::commitChanges()
+{
     lvm_t  lvm;
     vg_t vg_dm;
+    uint32_t new_extent_size = m_extent_size->currentText().toULong();
+
+    new_extent_size *= 1024;
+    if( m_extent_suffix->currentIndex() > 0 )
+        new_extent_size *= 1024;
+    if( m_extent_suffix->currentIndex() > 1 )
+        new_extent_size *= 1024;
 
     if( m_pv_checks.size() > 1 ){
         m_pv_paths.clear();	
@@ -219,13 +255,16 @@ void VGCreateDialog::writeChanges()
     
     if( (lvm = lvm_init(NULL)) ){
         if( (vg_dm = lvm_vg_create(lvm, m_vg_name->text().toAscii().data())) ){
+
+            if( (lvm_vg_set_extent_size(vg_dm, new_extent_size)) )
+                KMessageBox::error(0, QString(lvm_errmsg(lvm)));
+
             for(int x = 0; x < m_pv_paths.size(); x++){
                 if( lvm_vg_extend(vg_dm, m_pv_paths[x].toAscii().data()) )
                     KMessageBox::error(0, QString(lvm_errmsg(lvm)));
             }
 
             // ****To Do... None of the following are supported by liblvm2app yet****
-            //	 << m_extent_size->currentText() + m_extent_suffix->currentText().at(0);
             //   if(m_clustered->isChecked())
             //   if(m_auto_backup->isChecked())          
             //   if((!m_max_lvs_check->isChecked()) && (m_max_lvs->text() != ""))
