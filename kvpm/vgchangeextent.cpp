@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -12,28 +12,28 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
+#include <lvm2app.h>
 
 #include <KLocale>
 #include <QtGui>
+#include <KMessageBox>
 
-#include "processprogress.h"
 #include "sizetostring.h"
 #include "vgchangeextent.h"
 #include "volgroup.h"
+
+
+// This function is for changing the extent size in a volume group
 
 bool change_vg_extent(VolGroup *volumeGroup)
 {
     VGChangeExtentDialog dialog(volumeGroup);
     dialog.exec();
 
-    if(dialog.result() == QDialog::Accepted){
-        ProcessProgress extent( dialog.arguments(), i18n("Changing extents..."));
-
+    if(dialog.result() == QDialog::Accepted)
         return true;
-    }
-    else{
+    else
         return false;
-    }
 }
 
 VGChangeExtentDialog::VGChangeExtentDialog(VolGroup *volumeGroup, QWidget *parent) : 
@@ -81,16 +81,69 @@ VGChangeExtentDialog::VGChangeExtentDialog(VolGroup *volumeGroup, QWidget *paren
     layout->addLayout(combo_layout);
     combo_layout->addWidget(m_extent_size);
     combo_layout->addWidget(m_extent_suffix);
+
+    connect(this, SIGNAL(okClicked()), 
+            this, SLOT(commitChanges()));
+
+    connect(m_extent_suffix, SIGNAL(activated(int)), 
+            this, SLOT(limitExtentSize(int)));
+
 }
 
-QStringList VGChangeExtentDialog::arguments()
-{  
-    QStringList args;
-    
-    args << "vgchange"
-	 << "--physicalextentsize"
-	 << m_extent_size->currentText() + m_extent_suffix->currentText().at(0)
-	 << m_vg_name;
+void VGChangeExtentDialog::limitExtentSize(int index){
 
-    return args;
+    int extent_index;
+
+    if( index > 1 ){  // Gigabytes selected as suffix, more than 2Gib forbidden
+        if( m_extent_size->currentIndex() > 2 )
+            m_extent_size->setCurrentIndex(0);
+        m_extent_size->setMaxCount(2);
+    }
+    else{
+        extent_index = m_extent_size->currentIndex();
+        m_extent_size->setMaxCount(10);
+        m_extent_size->setInsertPolicy(QComboBox::InsertAtBottom);
+        m_extent_size->insertItem(3,"8");
+        m_extent_size->insertItem(4,"16");
+        m_extent_size->insertItem(5,"32");
+        m_extent_size->insertItem(6,"64");
+        m_extent_size->insertItem(7,"128");
+        m_extent_size->insertItem(8,"256");
+        m_extent_size->insertItem(9,"512");
+        m_extent_size->setInsertPolicy(QComboBox::NoInsert);
+        m_extent_size->setCurrentIndex(extent_index);
+    }
+}
+
+void VGChangeExtentDialog::commitChanges()
+{  
+    lvm_t  lvm;
+    vg_t vg_dm;
+    uint32_t new_extent_size = m_extent_size->currentText().toULong();
+
+    new_extent_size *= 1024;
+    if( m_extent_suffix->currentIndex() > 0 )
+        new_extent_size *= 1024;
+    if( m_extent_suffix->currentIndex() > 1 )
+        new_extent_size *= 1024;
+
+    if( (lvm = lvm_init(NULL)) ){
+        if( (vg_dm = lvm_vg_open( lvm, m_vg_name.toAscii().data(), "w", NULL )) ){
+
+            if( (lvm_vg_set_extent_size(vg_dm, new_extent_size)) )
+                KMessageBox::error(0, QString(lvm_errmsg(lvm)));
+
+            if( lvm_vg_write(vg_dm) )
+                KMessageBox::error(0, QString(lvm_errmsg(lvm)));
+
+            lvm_vg_close(vg_dm);
+            lvm_quit(lvm);
+            return;
+        }
+        KMessageBox::error(0, QString(lvm_errmsg(lvm))); 
+        lvm_quit(lvm);
+        return;
+    }
+    KMessageBox::error(0, QString(lvm_errmsg(lvm))); 
+    return;
 }
