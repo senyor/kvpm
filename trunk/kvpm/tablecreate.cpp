@@ -107,6 +107,8 @@ void TableCreateDialog::commitTable()
 
         if( ! ped_device_write(ped_device, buff, 0, 2) )  // clobber first 2 sectors
             KMessageBox::error( 0, "Destroying table failed: could not write to device");
+
+        ped_device_close( ped_device );
     }
 }
 
