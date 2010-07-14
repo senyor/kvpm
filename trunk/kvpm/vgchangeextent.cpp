@@ -103,6 +103,7 @@ void VGChangeExtentDialog::limitExtentSize(int index){
         extent_index = m_extent_size->currentIndex();
         m_extent_size->setMaxCount(10);
         m_extent_size->setInsertPolicy(QComboBox::InsertAtBottom);
+        m_extent_size->insertItem(3,"4");
         m_extent_size->insertItem(3,"8");
         m_extent_size->insertItem(4,"16");
         m_extent_size->insertItem(5,"32");
