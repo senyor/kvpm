@@ -59,7 +59,9 @@ Q_OBJECT
     void limitLogicalVolumes(int boxstate);
     void limitPhysicalVolumes(int boxstate);
     void validateOK();
-    void writeChanges();    
+    void commitChanges();
+    void limitExtentSize(int);
+    
 };
 
 #endif
