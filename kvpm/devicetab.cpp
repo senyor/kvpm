@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2009 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -26,17 +26,41 @@
 #include "storagedevice.h"
 
 
-DeviceTab::DeviceTab(QList<StorageDevice *> Devices, QWidget *parent) : 
-    QWidget(parent), m_devs(Devices)
+DeviceTab::DeviceTab(QWidget *parent) : QWidget(parent)
 {
+    m_layout = new QVBoxLayout;
+    m_tree_properties_splitter = NULL;
+    m_model = NULL;
+    m_size_chart = NULL;
+    m_tree = NULL;
+    setLayout(m_layout);
+}
 
-    QVBoxLayout *layout = new QVBoxLayout;
-    QSplitter *tree_properties_splitter = new QSplitter(Qt::Horizontal);
+void DeviceTab::setDevices(QList<StorageDevice *> Devices)
+{
+    m_devs = Devices;
+    rescan();
+    return;
+}
 
+void DeviceTab::rescan()
+{
+    if(m_model)
+        m_model->deleteLater();
     m_model = new StorageDeviceModel(m_devs, this);
-    DeviceSizeChart *size_chart = new DeviceSizeChart(m_model, this);
 
+    if(m_size_chart)
+        m_size_chart->deleteLater();
+    m_size_chart = new DeviceSizeChart(m_model, this);
+
+    if(m_tree)
+        m_tree->deleteLater();
     m_tree = new DeviceTreeView(this);
+
+    if(m_tree_properties_splitter)
+        m_tree_properties_splitter->deleteLater();
+    m_tree_properties_splitter = new QSplitter(Qt::Horizontal);
+
     m_tree->setModel(m_model);
     m_tree->expandAll();
     m_tree->setAlternatingRowColors(true); 
@@ -47,27 +71,27 @@ DeviceTab::DeviceTab(QList<StorageDevice *> Devices, QWidget *parent) :
     m_tree->setExpandsOnDoubleClick(true);
     m_tree->setSelectionBehavior(QAbstractItemView::SelectRows);
 
-    setHiddenColumns();
+    m_layout->addWidget( m_size_chart );
+    m_layout->addWidget(m_tree_properties_splitter);
 
-    layout->addWidget(size_chart);
-    layout->addWidget( tree_properties_splitter );
-
-    tree_properties_splitter->addWidget(m_tree);
-    tree_properties_splitter->addWidget( setupPropertyWidgets() );
-    tree_properties_splitter->setStretchFactor( 0, 9 );
-    tree_properties_splitter->setStretchFactor( 1, 2 );
+    m_tree_properties_splitter->addWidget(m_tree);
+    m_tree_properties_splitter->addWidget( setupPropertyWidgets() );
+    m_tree_properties_splitter->setStretchFactor( 0, 9 );
+    m_tree_properties_splitter->setStretchFactor( 1, 2 );
     
-    setLayout(layout);
-
     connect(m_tree, SIGNAL(clicked(const QModelIndex)), 
-	    size_chart, SLOT(setNewDevice(const QModelIndex)));
+	    m_size_chart, SLOT(setNewDevice(const QModelIndex)));
 
     connect(m_tree, SIGNAL(activated(const QModelIndex)), 
-	    size_chart, SLOT(setNewDevice(const QModelIndex)));
+	    m_size_chart, SLOT(setNewDevice(const QModelIndex)));
 
     // initial index setting
     m_tree->setCurrentIndex( m_model->index(0, 0) );
-    size_chart->setNewDevice( m_model->index(0, 0) );
+    m_size_chart->setNewDevice( m_model->index(0, 0) );
+
+    setHiddenColumns();
+
+    return;
 }
 
 QScrollArea *DeviceTab::setupPropertyWidgets()

@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2009 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -21,8 +21,10 @@
 
 #include <QPoint>
 #include <QMenu>
+#include <QList>
 #include <QStringList>
 #include <QTreeWidget>
+#include <QTreeWidgetItem>
 
 #include "masterlist.h"
 
@@ -45,6 +47,7 @@ Q_OBJECT
 	    *snap_create_action, *mount_filesystem_action, 
 	    *unmount_filesystem_action, *lv_mkfs_action;
     
+    QList<QTreeWidgetItem *> m_lv_tree_items;
     QString m_vg_name;
     QString m_lv_name;
     QString m_pv_name;
@@ -56,6 +59,7 @@ Q_OBJECT
     
 public:
     VGTree(VolGroup *VolumeGroup);
+    void loadData();
 
 private slots:    
     void popupContextMenu(QPoint point);

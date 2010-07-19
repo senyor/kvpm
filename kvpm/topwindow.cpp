@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2009 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -23,6 +23,7 @@
 #include "devicetab.h"
 #include "logvol.h"
 #include "masterlist.h"
+#include "maintabwidget.h"
 #include "physvol.h"
 #include "processprogress.h"
 #include "pvmove.h"
@@ -83,11 +84,11 @@ TopWindow::TopWindow(QWidget *parent):KMainWindow(parent)
     reduce_vg_action   = new KAction( i18n("Reduce Volume Group..."), this);
     rename_vg_action   = new KAction( KIcon("edit-rename"), i18n("Rename Volume Group..."), this);
     rescan_action      = new KAction( KIcon("view-refresh"), i18n("Rescan System"), this);
-    m_restart_pvmove_action   = new KAction( KIcon("system-restart"), i18n("Restart interrupted pvmove"), this);
-    m_stop_pvmove_action      = new KAction( KIcon("process-stop"), i18n("Abort pvmove"), this);
+    restart_pvmove_action   = new KAction( KIcon("system-restart"), i18n("Restart interrupted pvmove"), this);
+    stop_pvmove_action      = new KAction( KIcon("process-stop"), i18n("Abort pvmove"), this);
     remove_missing_action     = new KAction( i18n("Remove Missing Volumes..."), this);
-    m_export_vg_action        = new KAction( i18n("Export Volume Group..."), this);
-    m_import_vg_action        = new KAction( i18n("Import Volume Group..."), this);
+    export_vg_action        = new KAction( i18n("Export Volume Group..."), this);
+    import_vg_action        = new KAction( i18n("Import Volume Group..."), this);
     m_vgchange_menu           = new KMenu( i18n("Change Volume Group Attributes"), this);
     create_vg_action          = new KAction( i18n("Create Volume Group..."), this);
     vgchange_available_action = new KAction( i18n("Volume Group Availability..."), this);
@@ -103,13 +104,13 @@ TopWindow::TopWindow(QWidget *parent):KMainWindow(parent)
     m_vgchange_menu->addAction(vgchange_pv_action);
     m_vgchange_menu->addAction(vgchange_resize_action);
 
-    config_kvpm_action     = new KAction( KIcon("configure"), i18n("Configure kvpm..."), this);
+    config_kvpm_action = new KAction( KIcon("configure"), i18n("Configure kvpm..."), this);
 
     file_menu->addAction(quit_action);
     tool_menu->addAction(rescan_action);
     tool_menu->addSeparator();
-    tool_menu->addAction(m_restart_pvmove_action);
-    tool_menu->addAction(m_stop_pvmove_action);
+    tool_menu->addAction(restart_pvmove_action);
+    tool_menu->addAction(stop_pvmove_action);
     tool_menu->addSeparator();
     tool_menu->addAction(remove_missing_action);
 
@@ -118,15 +119,14 @@ TopWindow::TopWindow(QWidget *parent):KMainWindow(parent)
     groups_menu->addAction(remove_vg_action);
     groups_menu->addAction(reduce_vg_action);
     groups_menu->addAction(rename_vg_action);
-    groups_menu->addAction(m_export_vg_action);
-    groups_menu->addAction(m_import_vg_action);
+    groups_menu->addAction(export_vg_action);
+    groups_menu->addAction(import_vg_action);
     groups_menu->addMenu(m_vgchange_menu);
 
     settings_menu->addAction(config_kvpm_action);
     
-    master_list = 0;
-    m_tab_widget = 0;
-    m_old_tab_widget =0;
+    master_list = NULL;
+    m_tab_widget = NULL;
 
     connect(vgchange_alloc_action,  SIGNAL(triggered()), 
 	    this, SLOT(changeAllocation()));
@@ -155,10 +155,10 @@ TopWindow::TopWindow(QWidget *parent):KMainWindow(parent)
     connect(rename_vg_action,       SIGNAL(triggered()), 
 	    this, SLOT(renameVolumeGroup()));
 
-    connect(m_export_vg_action,       SIGNAL(triggered()), 
+    connect(export_vg_action,       SIGNAL(triggered()), 
 	    this, SLOT(exportVolumeGroup()));
 
-    connect(m_import_vg_action,       SIGNAL(triggered()), 
+    connect(import_vg_action,       SIGNAL(triggered()), 
 	    this, SLOT(importVolumeGroup()));
 
     connect(remove_missing_action,  SIGNAL(triggered()), 
@@ -170,93 +170,83 @@ TopWindow::TopWindow(QWidget *parent):KMainWindow(parent)
     connect(rescan_action,          SIGNAL(triggered()), 
 	    this, SLOT(reRun()));
 
-    connect(m_restart_pvmove_action, SIGNAL(triggered()), 
+    connect(restart_pvmove_action, SIGNAL(triggered()), 
 	    this, SLOT(restartPhysicalVolumeMove()));
 
-    connect(m_stop_pvmove_action,    SIGNAL(triggered()), 
+    connect(stop_pvmove_action,    SIGNAL(triggered()), 
 	    this, SLOT(stopPhysicalVolumeMove()));
 
     connect(config_kvpm_action,    SIGNAL(triggered()), 
 	    this, SLOT(configKvpm()));
 
+    m_tab_widget = new MainTabWidget(this);
+    setCentralWidget(m_tab_widget);
+
+    m_device_tab = new DeviceTab();
+    m_tab_widget->appendDeviceTab(m_device_tab, i18n("Storage devices") );
+
     reRun();    // reRun also does the initial run
 }
-
-/* This destroys the central widget and its descendants
-   then rescan_actions the system and puts up the information found */
 
 void TopWindow::reRun()
 {
 
     VolumeGroupTab *tab;
     QList<VolGroup *> groups;
-    int vg_count;
-    QString selected_vg_name;  // Name of the vg for the tab currently selected
+    bool vg_exists;
 
-    if( m_tab_widget ){
-	
-	if( m_tab_widget->currentIndex() > 0 )
-	    selected_vg_name =  m_vg_tabs[m_tab_widget->currentIndex() - 1]->getVolumeGroupName();
-	else
-	    selected_vg_name =  "";
-    }
-    
-    m_vg_tabs.clear();
+    if( !master_list )
+        master_list = new MasterList();
+    else
+        master_list->rescan();
 
-    for(int x = 0; x < m_old_vg_tabs.size(); x++)
-	delete(m_old_vg_tabs[x]);
+    m_device_tab->setDevices(master_list->getStorageDevices());
+    m_device_tab->rescan();
 
-    m_old_vg_tabs.clear();
-
-    m_old_tab_widget = m_tab_widget;           // with this function we delay actually deleting
-
-    if(m_old_tab_widget)                       // the widgets for one cycle.
-	m_old_tab_widget->setParent(0);
-
-    m_tab_widget = new KTabWidget(this);
-    setCentralWidget(m_tab_widget);
-    master_list = new MasterList();
-
-    m_device_tab = new DeviceTab(master_list->getStorageDevices());
-    m_tab_widget->addTab(m_device_tab, i18n("Storage devices") );
-
-    vg_count = master_list->getVolGroupCount();
     groups = master_list->getVolGroups();
+    // if there is a tab for a deleted vg then delete the tab
 
-    m_tab_widget->setCurrentIndex(0);
-    setupMenus(0);
-
-    connect(m_tab_widget, SIGNAL(currentChanged(int)), 
-	    this, SLOT(updateTabGeometry(int)));
-
-    connect(m_tab_widget, SIGNAL(currentChanged(int)), 
-	    this, SLOT(setupMenus(int)));
-
-/* 
-   Here we try to select the tab with the volume group
-   that the user was looking at before the tabs were rebuilt.
-   If that group no longer exists we go back to the first
-   tab.
-*/
-
-    for(int x = 0; x < vg_count; x++){
-	tab = new VolumeGroupTab(groups[x]);
-	m_tab_widget->addTab(tab, groups[x]->getName());
-	m_vg_tabs.append(tab);
-
-	if( groups[x]->getName() == selected_vg_name ){
-	    m_tab_widget->setCurrentIndex(x + 1);
-	    setupMenus(x + 1);
-	}
+    for(int x = 1; x < m_tab_widget->getCount(); x++){
+        vg_exists = false;
+        for(int y = 0; y < groups.size(); y++){
+            if( m_tab_widget->getUnmungedText(x) == groups[y]->getName() )
+                vg_exists = true;
+        }
+        if( !vg_exists ){
+            m_tab_widget->deleteTab(x);
+        }
     }
+    // if there is a new vg and no tab then create one
+        
+    for( int y = 0; y < groups.size(); y++){
+        vg_exists = false;   
+        for(int x = 1; x < m_tab_widget->getCount(); x++){
+            if( m_tab_widget->getUnmungedText(x) == groups[y]->getName() )
+                vg_exists = true;
+        }
+        if( !vg_exists ){
+            tab = new VolumeGroupTab(groups[y]);
+            m_tab_widget->appendVolumeGroupTab( tab, groups[y]->getName() );
+        }
+    }
+
+    for(int x = 0; x < (m_tab_widget->getCount() - 1); x++)
+        m_tab_widget->getVolumeGroupTab(x)->rescan();
+
+
+    setupMenus();
+
+    connect(m_tab_widget, SIGNAL(currentIndexChanged()), 
+	    this, SLOT(setupMenus()));
+
 }
 
-void TopWindow::setupMenus(int index)
+void TopWindow::setupMenus()
 {
-    index = m_tab_widget->currentIndex();
+    int index = m_tab_widget->getCurrentIndex();
 
     if(index)
-	m_vg = m_vg_tabs[index - 1]->getVolumeGroup();
+        m_vg  = master_list->getVolGroupByName( m_tab_widget->getUnmungedText(index) );
     else 
 	m_vg = NULL;
 
@@ -270,12 +260,12 @@ void TopWindow::setupMenus(int index)
 	    remove_missing_action->setEnabled(true);
 
 	if( m_vg->isExported() ){
-	    m_import_vg_action->setEnabled(true);
-	    m_export_vg_action->setEnabled(false);
+	    import_vg_action->setEnabled(true);
+	    export_vg_action->setEnabled(false);
 	}
 	else{
-	    m_import_vg_action->setEnabled(false);
-	    m_export_vg_action->setEnabled(true);
+	    import_vg_action->setEnabled(false);
+	    export_vg_action->setEnabled(true);
 	}
 	
 	reduce_vg_action->setEnabled(true);      // almost any group may be reduced
@@ -288,26 +278,8 @@ void TopWindow::setupMenus(int index)
 	remove_vg_action->setEnabled(false);
 	remove_missing_action->setEnabled(false);
 	m_vgchange_menu->setEnabled(false);
-	m_import_vg_action->setEnabled(false);
-	m_export_vg_action->setEnabled(false);
-    }
-}
-
-/*
-   The next function works around what may be a Qt bug. The first
-   time a size chart is shown on a tab the geometry is wrong. Hiding
-   and then showing the tab causes the geometry to get redone correctly
-*/
-
-void TopWindow::updateTabGeometry(int index)
-{
-    if(index){
-	m_vg_tabs[index -1]->hide();
-	m_vg_tabs[index -1]->show();
-    }
-    else {
-	m_device_tab->hide();
-	m_device_tab->show();
+	import_vg_action->setEnabled(false);
+	export_vg_action->setEnabled(false);
     }
 }
 

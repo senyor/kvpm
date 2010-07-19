@@ -20,25 +20,31 @@
 #include <QWidget>
 #include <QSplitter>
 #include <QScrollArea>
+#include <QVBoxLayout>
 					
 class StorageDevice;
 class StorageDeviceModel;
 class MasterList;
 class DeviceTreeView;
+class DeviceSizeChart;
 
 class DeviceTab : public QWidget
 {
     QList<StorageDevice *> m_devs;
     DeviceTreeView *m_tree;
     StorageDeviceModel *m_model;
+    QVBoxLayout *m_layout;
+    QSplitter *m_tree_properties_splitter;
+    DeviceSizeChart *m_size_chart;
 
     QScrollArea *setupPropertyWidgets();
 
     void setHiddenColumns();
 
  public:
-    DeviceTab(QList<StorageDevice *> Devices, QWidget *parent = 0);
-
+    DeviceTab(QWidget *parent = 0);
+    void setDevices(QList<StorageDevice *> Devices);
+    void rescan();
 };
 
 

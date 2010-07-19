@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2009 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -108,7 +108,6 @@ LVCreateDialog::LVCreateDialog(VolGroup *volumeGroup, QWidget *parent):
     m_snapshot = false;
     
     setCaption( i18n("Create Logical Volume") );
-
     m_tab_widget = new KTabWidget(this);
     m_physical_tab = createPhysicalTab();
     m_advanced_tab = createAdvancedTab();

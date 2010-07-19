@@ -12,7 +12,7 @@ set(kvpm_SRCS addmirror.cpp kvpmconfigdialog.cpp devicemodel.cpp devicepropertie
 	      logvol.cpp lvactionsmenu.cpp lvchange.cpp lvrename.cpp
 	      lvcreate.cpp lvproperties.cpp lvpropertiesstack.cpp lvreduce.cpp 
 	      lvremove.cpp lvsizechart.cpp main.cpp mkfs.cpp masterlist.cpp  mount.cpp 
-	      lvsizechartseg.cpp mountentry.cpp mountinfo.cpp 
+	      lvsizechartseg.cpp mountentry.cpp mountinfo.cpp maintabwidget.cpp 
 	      pvextend.cpp pvreduce.cpp partremove.cpp
 	      partaddgraphic.cpp partadd.cpp pvproperties.cpp  pvpropertiesstack.cpp 
 	      devicetreeview.cpp physvol.cpp partmoveresize.cpp removefs.cpp

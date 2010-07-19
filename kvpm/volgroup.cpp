@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -20,9 +20,22 @@
 
 VolGroup::VolGroup(lvm_t lvm, const char *vgname)
 {
-    vg_t lvm_vg = lvm_vg_open(lvm, vgname, "r", NULL);
+    m_vg_name = QString(vgname).trimmed();
+    rescan(lvm);
+}
 
-    m_vg_name   = QString(vgname).trimmed();
+VolGroup::~VolGroup()
+{
+    for(int x = m_member_lvs.size() - 1; x >= 0; x--) 
+        delete m_member_lvs.takeAt(x);
+}
+
+void VolGroup::rescan(lvm_t lvm)
+{
+    vg_t lvm_vg = lvm_vg_open(lvm, m_vg_name.toAscii().data(), "r", NULL);
+    bool existing_pv;
+    bool deleted_pv;
+
     m_lvm_fmt   = QString("????");       // Fix Me!!!
     m_writable  = true; // Fix me!!!
     m_resizable = true; // Fix me!!!
@@ -43,16 +56,44 @@ VolGroup::VolGroup(lvm_t lvm, const char *vgname)
     dm_list* pv_dm_list = lvm_vg_list_pvs(lvm_vg);
     lvm_pv_list *pv_list;
 
-    if( pv_dm_list ){  // This should never be empty
+    if(pv_dm_list){  // This should never be empty
 
-        dm_list_iterate_items(pv_list, pv_dm_list) {
-            m_member_pvs.append(new PhysVol( pv_list->pv, this ) );
-            if( m_member_pvs.last()->isAllocateable() )
-                m_allocateable_extents += m_member_pvs.last()->getUnused() / (long long) m_extent_size;
+        dm_list_iterate_items(pv_list, pv_dm_list){ // rescan() existing PhysVols 
+            existing_pv = false;
+            for(int x = 0; x < m_member_pvs.size(); x++){
+                if( QString( lvm_pv_get_name( pv_list->pv ) ).trimmed() == m_member_pvs[x]->getDeviceName() ){
+                    existing_pv = true;
+                    m_member_pvs[x]->rescan( pv_list->pv );
+                }
+            }
+            if( !existing_pv )
+                m_member_pvs.append( new PhysVol( pv_list->pv, this ) );
         }
-    }
+    
+        for(int x = m_member_pvs.size() - 1; x >= 0; x--){ // delete PhysVolGroup if the pv is gone
+            deleted_pv = true;
+            dm_list_iterate_items(pv_list, pv_dm_list){ 
+                if( QString( lvm_pv_get_name( pv_list->pv ) ).trimmed() == m_member_pvs[x]->getDeviceName() )
+                    deleted_pv = false;
+            }
+            if(deleted_pv){
+                delete m_member_pvs.takeAt(x);
+            }
+        }
+        
+        for(int x = 0; x < m_member_pvs.size(); x++)
+            m_allocateable_extents += m_member_pvs.last()->getUnused() / (long long) m_extent_size;
+        
+        lvm_vg_close(lvm_vg);
+        
+        for(int x = m_member_lvs.size() - 1; x >= 0; x--) 
+            delete m_member_lvs.takeAt(x);
 
-    lvm_vg_close(lvm_vg);
+    }
+    else
+        qDebug() << " Empty pv_dm_list?";
+
+    return;
 }
 
 /* The following function sorts some of the member volumes

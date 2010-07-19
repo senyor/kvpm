@@ -47,6 +47,8 @@ class VolGroup
     
 public:
     VolGroup(lvm_t lvm, const char *vgname);
+    ~VolGroup();
+    void rescan(lvm_t lvm);
     void addLogicalVolume(LogVol *logicalVolume);
     const QList<LogVol *>  getLogicalVolumes();
     const QList<PhysVol *> getPhysicalVolumes();

@@ -16,12 +16,10 @@
 #define TOPWINDOW_H
 
 #include <KMainWindow>
-#include <KTabWidget>
 #include <KMenu>
 #include <KMenuBar>
 #include <KAction>
 
-#include <QStringList>
 #include <QVBoxLayout>
 
 class StorageDevice;
@@ -29,33 +27,30 @@ class TopWindow;
 class VolGroup;
 class VolumeGroupTab;
 class DeviceTab;
+class MainTabWidget;
 
 extern TopWindow *MainWindow;
 
 class TopWindow : public KMainWindow
 {
 Q_OBJECT
-    KTabWidget *m_tab_widget,          // The current tab widget we are using 
-               *m_old_tab_widget;      // The tab widget we have schedualed for deletion 
+    MainTabWidget *m_tab_widget;          // The current tab widget we are using 
 
-    KAction *quit_action,        *remove_vg_action,       *rename_vg_action, 
-            *reduce_vg_action,   *rescan_action,          *create_vg_action,
+    KAction *quit_action,            *remove_vg_action,       *rename_vg_action, 
+            *reduce_vg_action,       *rescan_action,          *create_vg_action,
 	    *vgchange_alloc_action,  *vgchange_pv_action, 
-	    *vgchange_lv_action, *vgchange_resize_action, *vgchange_available_action, 
-	    *vgchange_extent_action, *remove_missing_action, *config_kvpm_action;
+	    *vgchange_lv_action,     *vgchange_resize_action, *vgchange_available_action, 
+	    *vgchange_extent_action, *remove_missing_action,  *config_kvpm_action;
 
-    KAction *m_restart_pvmove_action,
-	    *m_stop_pvmove_action,
-	    *m_export_vg_action,
-	    *m_import_vg_action;
+    KAction *restart_pvmove_action,
+	    *stop_pvmove_action,
+	    *export_vg_action,
+	    *import_vg_action;
     
     KMenu *m_vgchange_menu;
 
-    QList<VolumeGroupTab *> m_vg_tabs;
-    QList<VolumeGroupTab *> m_old_vg_tabs;  // These widgets are schedualed for deletion 
-
     DeviceTab *m_device_tab;
-    VolGroup *m_vg;
+    VolGroup  *m_vg;
 
  public:
     TopWindow(QWidget *parent);
@@ -64,8 +59,7 @@ Q_OBJECT
     void reRun();
  
  private slots:
-    void setupMenus(int index);
-    void updateTabGeometry(int index);
+    void setupMenus();
     void changeAllocation();
     void changeAvailable();
     void changeExtentSize();

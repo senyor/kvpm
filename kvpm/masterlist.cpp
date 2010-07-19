@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -29,13 +29,20 @@
 
 MasterList::MasterList() : QObject()
 {
-    lvm_t  lvm = lvm_init( NULL );
+    rescan();
+}
+
+void MasterList::rescan()
+{
+    lvm_t lvm = lvm_init(NULL);
     lvm_scan(lvm);
     scanVolumeGroups(lvm);
     lvm_quit(lvm);
 
     scanLogicalVolumes();
     scanStorageDevices();
+
+    return;
 }
 
 
@@ -48,9 +55,6 @@ MasterList::~MasterList()
     for(int x = 0; x < m_volume_groups.size(); x++)
 	delete m_volume_groups[x];
 
-    for(int x = 0; x < m_logical_volumes.size(); x++)
-	delete m_logical_volumes[x];
-
     for(int x = 0; x < m_storage_devices.size(); x++)
 	delete m_storage_devices[x];
 }
@@ -59,18 +63,41 @@ void MasterList::scanVolumeGroups(lvm_t lvm)
 {
     QStringList vg_output;
     QStringList arguments;
+    bool existing_vg;
+    bool deleted_vg;
 
     dm_list *vgnames;
     lvm_str_list *strl;
     
     vgnames = lvm_list_vg_names(lvm);
 
-    dm_list_iterate_items(strl, vgnames)
-	m_volume_groups.append( new VolGroup(lvm, strl->str) );
+    dm_list_iterate_items(strl, vgnames){ // rescan() existing VolGroup, don't create a new one
+        existing_vg = false;
+        for(int x = 0; x < m_volume_groups.size(); x++){
+            if( QString(strl->str).trimmed() == m_volume_groups[x]->getName() ){
+                existing_vg = true;
+                m_volume_groups[x]->rescan(lvm);
+            }
+        }
+        if( !existing_vg )
+            m_volume_groups.append( new VolGroup(lvm, strl->str) );
+    }
+
+    for(int x = m_volume_groups.size() - 1; x >= 0; x--){ // delete VolGroup if the vg is gone
+        deleted_vg = true;
+        dm_list_iterate_items(strl, vgnames){ 
+            if( QString(strl->str).trimmed() == m_volume_groups[x]->getName() )
+                deleted_vg = false;
+        }
+        if(deleted_vg){
+            delete m_volume_groups.takeAt(x);
+        }
+    }
 }
 
 void MasterList::scanLogicalVolumes()
 {
+    QList<LogVol *>  logical_volumes;
     QStringList lv_output;
     QStringList seg_data;
     QStringList arguments;
@@ -79,7 +106,6 @@ void MasterList::scanLogicalVolumes()
     int lv_segments;   //number of segments in the logical volume
 
     MountInformationList mount_info_list;
-    
     
     arguments << "lvs" << "--all" << "-o" 
 	      << "lv_name,vg_name,lv_attr,lv_size,origin,snap_percent,move_pv,mirror_log,copy_percent,chunksize,seg_count,stripes,stripesize,seg_size,devices,lv_kernel_major,lv_kernel_minor,lv_minor,lv_uuid"  
@@ -99,20 +125,20 @@ void MasterList::scanLogicalVolumes()
 	    seg_data << lv_output[i++];
 	}
 
-	m_logical_volumes.append(new LogVol(seg_data, &mount_info_list));
+	logical_volumes.append(new LogVol(seg_data, &mount_info_list));
 
     } 
 
     /* put pointers to the lvs in their associated vgs */
     
-    lv_count = m_logical_volumes.size();
+    lv_count = logical_volumes.size();
     vg_count = m_volume_groups.size();
     
     for(int vg = 0; vg < vg_count; vg++){
 	for(int lv = 0; lv < lv_count; lv++){
-	    if(m_logical_volumes[lv]->getVolumeGroupName() == m_volume_groups[vg]->getName()){
-		m_volume_groups[vg]->addLogicalVolume(m_logical_volumes[lv]);
-		m_logical_volumes[lv]->setVolumeGroup(m_volume_groups[vg]);
+	    if(logical_volumes[lv]->getVolumeGroupName() == m_volume_groups[vg]->getName()){
+		m_volume_groups[vg]->addLogicalVolume(logical_volumes[lv]);
+		logical_volumes[lv]->setVolumeGroup(m_volume_groups[vg]);
 	    }
 	}    
     }

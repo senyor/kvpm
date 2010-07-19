@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008 2010 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -35,6 +35,13 @@ bool remove_lv(QString fullName)
 
     if( KMessageBox::warningYesNo( 0, message) == 3){  // 3 = yes button
     
+	args << "lvchange" 
+	     << "-an" 
+	     << fullName;
+
+	ProcessProgress deactive( args, i18n("Deactivating volume..."), false);
+
+        args.clear();
 	args << "lvremove" 
 	     << "--force" 
 	     << fullName;
