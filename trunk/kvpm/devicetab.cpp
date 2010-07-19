@@ -36,15 +36,10 @@ DeviceTab::DeviceTab(QWidget *parent) : QWidget(parent)
     setLayout(m_layout);
 }
 
-void DeviceTab::setDevices(QList<StorageDevice *> Devices)
+void DeviceTab::rescan( QList<StorageDevice *> Devices )
 {
     m_devs = Devices;
-    rescan();
-    return;
-}
 
-void DeviceTab::rescan()
-{
     if(m_model)
         m_model->deleteLater();
     m_model = new StorageDeviceModel(m_devs, this);
@@ -96,7 +91,6 @@ void DeviceTab::rescan()
 
 QScrollArea *DeviceTab::setupPropertyWidgets()
 {
-
     QScrollArea *device_scroll = new QScrollArea();
 
     device_scroll->setFrameStyle(QFrame::NoFrame);
@@ -122,7 +116,6 @@ QScrollArea *DeviceTab::setupPropertyWidgets()
 
     return device_scroll;
 }
-
 
 void DeviceTab::setHiddenColumns()
 {  
