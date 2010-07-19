@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -30,19 +30,21 @@ class PVTree : public QTreeWidget
 {
 Q_OBJECT
 
+    VolGroup *m_vg;
+
     QMenu *context_menu;
 
     QAction *pv_move_action, 
             *vg_reduce_action, 
 	    *pv_change_action;
 
-    QString m_pv_name, 
-            m_vg_name;
+    QString m_pv_name;
 
     void setupContextMenu();
     
 public:
     PVTree(VolGroup *volumeGroup, QWidget *parent = 0);
+    void loadData();
 
 private slots:    
     void popupContextMenu(QPoint point);

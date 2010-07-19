@@ -33,7 +33,6 @@ class StorageDevice;
 class MasterList : public QObject
 {
     QList<VolGroup *> m_volume_groups;
-    QList<LogVol *>   m_logical_volumes;
     QList<StorageDevice *> m_storage_devices;
     
     void scanVolumeGroups(lvm_t lvm);
@@ -45,12 +44,12 @@ class MasterList : public QObject
 public:
     MasterList();
     ~MasterList();
+    void rescan();    
     const QList<VolGroup *> getVolGroups();
     const QList<StorageDevice *> getStorageDevices();
     int getVolGroupCount();
     VolGroup *getVolGroupByName(QString name);
     QStringList getVolumeGroupNames();
-    
 };
 
 #endif

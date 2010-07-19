@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2009 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  * * This program is free software; you can redistribute it and/or modify
@@ -41,115 +41,142 @@ extern MasterList *master_list;
 VGTree::VGTree(VolGroup *VolumeGroup) : QTreeWidget(),
 					m_vg(VolumeGroup)
 {
-    QList<QTreeWidgetItem *> lv_tree_items;
-    QList<LogVol *>  logical_volumes;
-
-    QTreeWidgetItem *lv_item;
-
     QStringList header_labels;
-    QStringList lv_data;
 
     m_vg_name = m_vg->getName();
     setupContextMenu();
-    
     setColumnCount(9);
+
     header_labels << "Volume" << "Size" << "Filesystem" << "type"
 		  << "Stripes" << "Stripe size" 
 		  << "Snap/Move" << "State" << "Access" ;
+
     setHeaderLabels(header_labels);
-
-    logical_volumes = m_vg->getLogicalVolumes();
-
-    for(int x = 0; x < m_vg->getLogVolCount(); x++){
-	
-	m_lv = logical_volumes[x];
-	lv_data.clear();
-
-	if( ( !m_lv->isMirrorLeg() ) && 
-	    ( !m_lv->isMirrorLog() ) &&
-	    ( !m_lv->isVirtual() ) &&
-	    ( !(m_lv->isMirror() && m_lv->getOrigin() != "" ) ) ){
-	    
-	    if( m_lv->getSegmentCount() == 1 ) {
-		lv_data << m_lv->getName() 
-			<< sizeToString(m_lv->getSize()) 
-			<< m_lv->getFilesystem()
-			<< m_lv->getType() 
-			<< QString("%1").arg(m_lv->getSegmentStripes(0)) 
-			<< sizeToString(m_lv->getSegmentStripeSize(0));
-		
-		if( m_lv->isSnap() )
-		    lv_data    << QString("%%1").arg(m_lv->getSnapPercent());
-		else if( m_lv->isPvmove() )
-		    lv_data    << QString("%%1").arg(m_lv->getCopyPercent());
-		else
-		    lv_data << " ";
-		
-		lv_data << m_lv->getState();
-
-		if(m_lv->isWritable())
-		    lv_data << "r/w";
-		else
-		    lv_data << "r/o";
-
-		lv_item = new QTreeWidgetItem((QTreeWidgetItem *)0, lv_data);
-		lv_tree_items.append(lv_item);
-		lv_item->setData(0, Qt::UserRole, m_lv->getName());
-		lv_item->setData(1, Qt::UserRole, 0);            // 0 means segment 0 data present
-
-		if((m_lv->isMirror() && m_lv->getOrigin() == "" ) || 
-		   (m_lv->isVirtual() && m_lv->getOrigin() == "" ) || 
-		    m_lv->isUnderConversion() ){
-
-		    insertMirrorLegItems(m_lv, lv_item);
-		}
-	    }
-	    
-	    else {
-		lv_data << m_lv->getName() 
-			<< sizeToString(m_lv->getSize()) 
-			<< m_lv->getFilesystem()
-			<< m_lv->getType() 
-			<< "" << "";
-		
-		if( m_lv->isSnap() )
-		    lv_data    << QString("%%1").arg(m_lv->getSnapPercent());
-		else if( m_lv->isPvmove() )
-		    lv_data    << QString("%%1").arg(m_lv->getCopyPercent());
-		else
-		    lv_data << " ";
-		
-		lv_data << m_lv->getState();
-		
-		if(m_lv->isWritable())
-		    lv_data << "r/w";
-		else
-		    lv_data << "r/o";
-		
-		lv_item = new QTreeWidgetItem((QTreeWidgetItem *)0, lv_data);
-		lv_item->setData(0, Qt::UserRole, m_lv->getName());
-		lv_item->setData(1, Qt::UserRole, -1);            // -1 means not segment data
-		lv_tree_items.append(lv_item);
-		
-		insertSegmentItems(m_lv, lv_item);
-	    }
-	}
-    }
-    insertTopLevelItems(0, lv_tree_items);
-
-    if( lv_tree_items.size() )
-	setCurrentItem( lv_tree_items[0] );
-    
-    resizeColumnToContents(0);
-
-    setHiddenColumns();
 
     connect(this, SIGNAL(itemExpanded(QTreeWidgetItem *)), 
 	    this, SLOT(adjustColumnWidth(QTreeWidgetItem *)));
 
     connect(this, SIGNAL(itemCollapsed(QTreeWidgetItem *)), 
 	    this, SLOT(adjustColumnWidth(QTreeWidgetItem *)));
+}
 
+void VGTree::loadData()
+{
+    QList<LogVol *> logical_volumes = m_vg->getLogicalVolumes();
+    LogVol *lv = NULL;   
+    QTreeWidgetItem *lv_item = NULL;
+    QTreeWidgetItem *current_item = currentItem(); // The current item in the tree we are about to clear
+    bool current_is_expanded = false;              // Is that current item expanded
+    QStringList lv_data;
+    QString current_lv_name;
+
+    // Get the currently selected item so it can be reselected
+    // after the tree is cleared and all the new data is loaded.
+
+    if( m_lv_tree_items.size() && current_item ){
+        current_is_expanded = current_item->isExpanded();
+        current_lv_name   = ( current_item->data(0, Qt::UserRole) ).toString();
+    }
+    else{
+        current_is_expanded = false;
+        current_lv_name = "";
+    }
+
+    clear();
+    m_lv_tree_items.clear();
+    current_item = NULL;
+
+    for(int x = 0; x < m_vg->getLogVolCount(); x++){
+	
+	lv = logical_volumes[x];
+	lv_data.clear();
+
+	if( ( !lv->isMirrorLeg() ) && 
+	    ( !lv->isMirrorLog() ) &&
+	    ( !lv->isVirtual() ) &&
+	    ( !(lv->isMirror() && lv->getOrigin() != "" ) ) ){
+	    
+	    if( lv->getSegmentCount() == 1 ) {
+		lv_data << lv->getName() 
+			<< sizeToString(lv->getSize()) 
+			<< lv->getFilesystem()
+			<< lv->getType() 
+			<< QString("%1").arg(lv->getSegmentStripes(0)) 
+			<< sizeToString(lv->getSegmentStripeSize(0));
+		
+		if( lv->isSnap() )
+		    lv_data    << QString("%%1").arg(lv->getSnapPercent());
+		else if( lv->isPvmove() )
+		    lv_data    << QString("%%1").arg(lv->getCopyPercent());
+		else
+		    lv_data << " ";
+		
+		lv_data << lv->getState();
+
+		if(lv->isWritable())
+		    lv_data << "r/w";
+		else
+		    lv_data << "r/o";
+
+		lv_item = new QTreeWidgetItem((QTreeWidgetItem *)0, lv_data);
+		m_lv_tree_items.append(lv_item);
+		lv_item->setData(0, Qt::UserRole, lv->getName());
+		lv_item->setData(1, Qt::UserRole, 0);            // 0 means segment 0 data present
+
+		if((lv->isMirror() && lv->getOrigin() == "" ) || 
+		   (lv->isVirtual() && lv->getOrigin() == "" ) || 
+		    lv->isUnderConversion() ){
+
+		    insertMirrorLegItems(lv, lv_item);
+		}
+	    }
+	    else {
+		lv_data << lv->getName() 
+			<< sizeToString(lv->getSize()) 
+			<< lv->getFilesystem()
+			<< lv->getType() 
+			<< "" << "";
+		
+		if( lv->isSnap() )
+		    lv_data    << QString("%%1").arg(lv->getSnapPercent());
+		else if( lv->isPvmove() )
+		    lv_data    << QString("%%1").arg(lv->getCopyPercent());
+		else
+		    lv_data << " ";
+		
+		lv_data << lv->getState();
+		
+		if(lv->isWritable())
+		    lv_data << "r/w";
+		else
+		    lv_data << "r/o";
+		
+		lv_item = new QTreeWidgetItem((QTreeWidgetItem *)0, lv_data);
+		lv_item->setData(0, Qt::UserRole, lv->getName());
+		lv_item->setData(1, Qt::UserRole, -1);            // -1 means not segment data
+		m_lv_tree_items.append(lv_item);
+
+		insertSegmentItems(lv, lv_item);
+	    }
+            if(lv->getName() == current_lv_name){
+                current_item = lv_item;
+            }        
+        }
+    }
+    insertTopLevelItems(0, m_lv_tree_items);
+    resizeColumnToContents(0);
+    setHiddenColumns();
+
+    if( m_lv_tree_items.size() ){
+        if( !current_item )
+            setCurrentItem(m_lv_tree_items[0]);
+        else{
+            setCurrentItem(current_item); 	
+            current_item->setExpanded(current_is_expanded);
+        }
+    }
+
+    return;
 }
 
 void VGTree::setupContextMenu()
@@ -162,8 +189,8 @@ void VGTree::setupContextMenu()
 		this, SLOT(popupContextMenu(QPoint)) );
 
     }
+    return;
 }
-
 
 void VGTree::insertSegmentItems(LogVol *logicalVolume, QTreeWidgetItem *item)
 {

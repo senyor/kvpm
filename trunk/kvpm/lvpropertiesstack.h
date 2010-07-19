@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -25,9 +25,9 @@ class LVPropertiesStack : public QStackedWidget
 {
 Q_OBJECT
 
-    bool is_vg;
-    VolGroup *vg;
-    QList<QStackedWidget *> lv_stack_list;
+    bool m_is_vg;
+    VolGroup *m_vg;
+    QList<QStackedWidget *> m_lv_stack_list;
     
  public:
     LVPropertiesStack(VolGroup *Group, QWidget *parent = 0);

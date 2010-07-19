@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -20,6 +20,11 @@
 PhysVol::PhysVol(pv_t pv, VolGroup *vg)
 {
     m_vg = vg;
+    rescan(pv);
+}
+
+void PhysVol::rescan(pv_t pv)
+{
     m_last_used_extent = 0;
 
     m_device   = QString( lvm_pv_get_name(pv) );
@@ -36,7 +41,7 @@ PhysVol::PhysVol(pv_t pv, VolGroup *vg)
     m_size          = lvm_pv_get_size(pv);
     m_uuid          = QString( lvm_pv_get_uuid(pv) );
 
-    qDebug("PV Dev Size %lld  Used %lld  Unused %lld", m_device_size, m_size, m_unused);
+    return;
 }
 
 VolGroup* PhysVol::getVolGroup()

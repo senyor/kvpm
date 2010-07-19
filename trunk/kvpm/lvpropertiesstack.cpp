@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -26,13 +26,14 @@
 
 LVPropertiesStack::LVPropertiesStack(VolGroup *Group, QWidget *parent) : QStackedWidget(parent)
 {
-    vg = Group;
-    QList<LogVol *> members  = vg->getLogicalVolumes();
+    m_vg = Group;
+    QList<LogVol *> members  = m_vg->getLogicalVolumes();
 
     for(int x = 0; x < members.size(); x++){
 	QStackedWidget *segment_properties_stack = new QStackedWidget();
-	lv_stack_list.append(segment_properties_stack);
-	addWidget(segment_properties_stack);  
+	m_lv_stack_list.append(segment_properties_stack);
+	addWidget(segment_properties_stack);
+  
 	if(members[x]->getSegmentCount() > 1){
 	    segment_properties_stack->addWidget(new LVProperties(members[x], -1));
 	    for(int segment = 0; segment < members[x]->getSegmentCount(); segment++)
@@ -42,40 +43,38 @@ LVPropertiesStack::LVPropertiesStack(VolGroup *Group, QWidget *parent) : QStacke
 	    segment_properties_stack->addWidget(new LVProperties(members[x], 0));
 	    addWidget(segment_properties_stack);  
 	}
+
     }
     if( members.size() )
 	setCurrentIndex(0);
-/*
-    setBackgroundRole(QPalette::Base);
-    setAutoFillBackground(true);
-*/
-
-
 }
 
 void LVPropertiesStack::changeLVStackIndex(QTreeWidgetItem *item, QTreeWidgetItem*)
 {
-/* If *item points to a volume we set the widget stack to the
+
+/* If *item points to a logical volume we set the widget stack to the
    widget with that volume's information.
    If *item points to nothing but volumes exist we go to the
    first stack widget.
-   Else we set the stack widget index to -1, nothing */ 
+   Else we set the stack widget index to -1, nothing 
+*/ 
 
     QString lv_name;
     int segment;
-    
-    QList<LogVol *> members  = vg->getLogicalVolumes();
-    if(item){
+    QList<LogVol *> members  = m_vg->getLogicalVolumes();
+
+    if(item && ( members.size() == m_lv_stack_list.size() ) ){  // These *should* be equal
 	lv_name = QVariant(item->data(0, Qt::UserRole)).toString();
-	for(int x = 0; x < members.size(); x++)
-	    if(lv_name == (members[x])->getName()){
+	for(int x = 0; x < members.size(); x++){
+            if(lv_name == ( members[x])->getName() ){
 		setCurrentIndex(x);
 		segment = QVariant(item->data(1, Qt::UserRole)).toInt();
 		if(segment == -1)
-		    lv_stack_list[x]->setCurrentIndex(0);
+		    m_lv_stack_list[x]->setCurrentIndex(0);
 		else
-		    lv_stack_list[x]->setCurrentIndex(segment + 1);
+		    m_lv_stack_list[x]->setCurrentIndex(segment + 1);
 	    }
+        }
     }
     else if( members.size() )
 	setCurrentIndex(0);

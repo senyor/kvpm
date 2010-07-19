@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -33,21 +33,10 @@ extern MasterList *master_list;
 
 /* This is the physical volume tree list on the volume group tab */
 
-PVTree::PVTree(VolGroup *volumeGroup, QWidget *parent) : QTreeWidget(parent)
+PVTree::PVTree(VolGroup *volumeGroup, QWidget *parent) : QTreeWidget(parent), m_vg(volumeGroup)
 {
+    QStringList header_labels;
 
-    QList<QTreeWidgetItem *> pv_tree_items;
-    QList<LogVol *>  lvs = volumeGroup->getLogicalVolumes();
-    QList<PhysVol *> pvs = volumeGroup->getPhysicalVolumes();
-
-    QStringList lv_name_list;
-    QStringList pv_name_list;
-    QString device_name;
-    
-    PhysVol *pv;
-    QStringList header_labels, pv_data;
-    QTreeWidgetItem *item;
-    
     setupContextMenu();
     setColumnCount(6);
 
@@ -55,8 +44,27 @@ PVTree::PVTree(VolGroup *volumeGroup, QWidget *parent) : QTreeWidget(parent)
 		  << i18n("Free") << i18n("Used")
 		  << i18n("Allocatable") << i18n("Exported") 
 		  << i18n("Logical volumes");
-    setHeaderLabels(header_labels);
 
+    setHeaderLabels(header_labels);
+}
+
+void PVTree::loadData()
+{
+
+    QList<QTreeWidgetItem *> pv_tree_items;
+    QList<LogVol *>  lvs = m_vg->getLogicalVolumes();
+    QList<PhysVol *> pvs = m_vg->getPhysicalVolumes();
+
+    QStringList lv_name_list;
+    QStringList pv_name_list;
+    QString device_name;
+    
+    PhysVol *pv;
+    QStringList pv_data;
+    QTreeWidgetItem *item;
+
+    clear();
+    
     for(int n = 0; n < pvs.size(); n++){
 	pv = pvs[n];
 	pv_data.clear();
@@ -110,6 +118,7 @@ PVTree::PVTree(VolGroup *volumeGroup, QWidget *parent) : QTreeWidget(parent)
 	setCurrentItem( pv_tree_items[0] );
 
     setColumnHidden(6, true);
+    return;
 }
 
 void PVTree::setupContextMenu()
@@ -140,50 +149,29 @@ void PVTree::setupContextMenu()
 
 void PVTree::popupContextMenu(QPoint point)
 {
-    QList<VolGroup *>  volGroups;
-    VolGroup *vg = NULL;
-    PhysVol *pv = NULL;
-    QTreeWidgetItem *item;
+    QTreeWidgetItem *item = itemAt(point);
 
-    item = itemAt(point);
     if(item){
 	if( (QVariant(item->data(3, 0)).toString()) == "0" ){  // 0 =  Zero used extents on pv
 	    m_pv_name = QVariant(item->data(0, 0)).toString();
-            volGroups = master_list->getVolGroups();
-            for( int x = 0; x < volGroups.size(); x++ ){ // walk the vgs to find the pv
-                if (volGroups[x]->getPhysVolByName(m_pv_name)){ 
-                    vg = volGroups[x];
-                    pv = vg->getPhysVolByName(m_pv_name);
-                }
-            }
-	    m_vg_name = vg->getName();
-	    pv_move_action->setEnabled(false);
 
-	    if(vg->getPhysVolCount() > 1)
-		vg_reduce_action->setEnabled(true);
-	    else
-		vg_reduce_action->setEnabled(false);  // can't remove last pv from group
-	}
+            pv_move_action->setEnabled(false);
+            
+            if(m_vg->getPhysVolCount() > 1)
+                vg_reduce_action->setEnabled(true);
+            else
+                vg_reduce_action->setEnabled(false);  // can't remove last pv from group
+        }
 	else{
 	    m_pv_name = QVariant(item->data(0, 0)).toString();
 
-            volGroups = master_list->getVolGroups();
-            for( int x = 0; x < volGroups.size(); x++ ){ // walk the vgs to find the pv
-                if (volGroups[x]->getPhysVolByName(m_pv_name)){ 
-                    vg = volGroups[x];
-                    pv = vg->getPhysVolByName(m_pv_name);
-                }
-            }
-
-	    m_vg_name = vg->getName();
 	    vg_reduce_action->setEnabled(false);
 
-	    if(vg->getPhysVolCount() > 1)              // can't move extents if there isn't
+	    if(m_vg->getPhysVolCount() > 1)            // can't move extents if there isn't
 		pv_move_action->setEnabled(true);      // another volume to put them on
 	    else
 		pv_move_action->setEnabled(false);
 	}
-
 	context_menu->setEnabled(true);
 	context_menu->exec(QCursor::pos());
     }
@@ -193,21 +181,16 @@ void PVTree::popupContextMenu(QPoint point)
 
 void PVTree::movePhysicalExtents()
 {
-    PhysVol *pv = NULL; 
-    QList<VolGroup *>  volGroups;
-
-    for( int x = 0; x < volGroups.size(); x++ ){ // walk the vgs to find the pv
-        if (volGroups[x]->getPhysVolByName(m_pv_name)) 
-            pv = volGroups[x]->getPhysVolByName(m_pv_name);
+    PhysVol *pv = m_vg->getPhysVolByName(m_pv_name);
+    if(pv){
+        if( move_pv(pv) )
+            MainWindow->reRun();
     }
-
-    if( move_pv(pv) )
-	MainWindow->reRun();
 }
 
 void PVTree::reduceVolumeGroup()
 {
-    if( reduce_vg_one(m_vg_name, m_pv_name) )
+    if( reduce_vg_one(m_vg->getName(), m_pv_name) )
         MainWindow->reRun();
 }
 
