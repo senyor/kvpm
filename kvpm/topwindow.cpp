@@ -80,15 +80,15 @@ TopWindow::TopWindow(QWidget *parent):KMainWindow(parent)
 
     quit_action =  KStandardAction::quit(qApp, SLOT( quit() ), file_menu );
 
-    remove_vg_action   = new KAction( KIcon("edit-delete"), i18n("Delete Volume Group..."), this);
-    reduce_vg_action   = new KAction( i18n("Reduce Volume Group..."), this);
-    rename_vg_action   = new KAction( KIcon("edit-rename"), i18n("Rename Volume Group..."), this);
-    rescan_action      = new KAction( KIcon("view-refresh"), i18n("Rescan System"), this);
-    restart_pvmove_action   = new KAction( KIcon("system-restart"), i18n("Restart interrupted pvmove"), this);
-    stop_pvmove_action      = new KAction( KIcon("process-stop"), i18n("Abort pvmove"), this);
-    remove_missing_action     = new KAction( i18n("Remove Missing Volumes..."), this);
-    export_vg_action        = new KAction( i18n("Export Volume Group..."), this);
-    import_vg_action        = new KAction( i18n("Import Volume Group..."), this);
+    remove_vg_action  = new KAction( KIcon("edit-delete"), i18n("Delete Volume Group..."), this);
+    reduce_vg_action  = new KAction( i18n("Reduce Volume Group..."), this);
+    rename_vg_action  = new KAction( KIcon("edit-rename"), i18n("Rename Volume Group..."), this);
+    rescan_action     = new KAction( KIcon("view-refresh"), i18n("Rescan System"), this);
+    restart_pvmove_action  = new KAction( KIcon("system-restart"), i18n("Restart interrupted pvmove"), this);
+    stop_pvmove_action     = new KAction( KIcon("process-stop"), i18n("Abort pvmove"), this);
+    remove_missing_action  = new KAction( i18n("Remove Missing Volumes..."), this);
+    export_vg_action       = new KAction( i18n("Export Volume Group..."), this);
+    import_vg_action       = new KAction( i18n("Import Volume Group..."), this);
     m_vgchange_menu           = new KMenu( i18n("Change Volume Group Attributes"), this);
     create_vg_action          = new KAction( i18n("Create Volume Group..."), this);
     vgchange_available_action = new KAction( i18n("Volume Group Availability..."), this);
@@ -200,8 +200,8 @@ void TopWindow::reRun()
     else
         master_list->rescan();
 
-    m_device_tab->setDevices(master_list->getStorageDevices());
-    m_device_tab->rescan();
+    //    m_device_tab->setDevices( master_list->getStorageDevices() );
+    m_device_tab->rescan( master_list->getStorageDevices() );
 
     groups = master_list->getVolGroups();
     // if there is a tab for a deleted vg then delete the tab
