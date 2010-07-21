@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2009 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -24,19 +24,15 @@
 
 extern MasterList *master_list;
 
-PVProperties::PVProperties(PhysVol *physicalVolume, QWidget *parent):
-    QTableWidget(parent)
+PVProperties::PVProperties(PhysVol *physicalVolume, QWidget *parent):QWidget(parent)
 {
-
     VolGroup *vg = physicalVolume->getVolGroup();
-    int segment_count;
+    QGridLayout *layout = new QGridLayout;
     LogVol *lv;
-
-    QTableWidgetItem *new_item;
+    QLabel *temp_label;
     
     long long first_extent;
     long long last_extent;
-    long long last_used_extent = 0; // last extent in use by the pv
     
     QList<LogVol *>  lvs = vg->getLogicalVolumes();
     QList<PhysVol *> pvs = vg->getPhysicalVolumes();
@@ -44,25 +40,34 @@ PVProperties::PVProperties(PhysVol *physicalVolume, QWidget *parent):
     QStringList pv_name_list;
     QString device_name = physicalVolume->getDeviceName();
 
-    QStringList headers;
-    headers << "Logical Volume" 
-	    << "Start" 
-	    << "End" 
-	    << "Extents" 
-	    << "";
+    layout->setMargin(0);
+    temp_label = new QLabel( "<b>" + device_name + "</b>");
+    temp_label->setAlignment(Qt::AlignCenter);
+    layout->addWidget(temp_label, 0, 0, 1, -1);
 
-    setColumnCount(4);
-    setRowCount(0);
+    temp_label = new QLabel("Volume name");
+    temp_label->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+    layout->addWidget(temp_label, 1, 0);
+    temp_label =  new QLabel("Start");
+    temp_label->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+    layout->addWidget(temp_label, 1, 1);
+    temp_label = new QLabel("End");
+    temp_label->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+    layout->addWidget(temp_label, 1, 2);
+    temp_label =  new QLabel("Extents");
+    temp_label->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+    layout->addWidget(temp_label, 1, 3);
+
+    setLayout(layout);
 
 /* here we get the names of logical volumes associated
    with the physical volume */
 
-    int row = 0;
+    int row = 2;
     
     for(int x = 0; x < lvs.size() ; x++){
 	lv = lvs[x];
-	segment_count = lv->getSegmentCount();
-	for(int segment = 0; segment < segment_count; segment++){
+	for(int segment = 0; segment < lv->getSegmentCount(); segment++){
 	    pv_name_list = lv->getDevicePath(segment);
 	    starting_extent = lv->getSegmentStartingExtent(segment);
 	    for(int y = 0; y < pv_name_list.size() ; y++){
@@ -70,88 +75,77 @@ PVProperties::PVProperties(PhysVol *physicalVolume, QWidget *parent):
 		    first_extent = starting_extent[y];
 		    last_extent = first_extent - 1 + (lv->getSegmentExtents(segment) / (lv->getSegmentStripes(segment)));
 
-                    if( last_extent > last_used_extent )
-                        last_used_extent = last_extent;
-		    
-		    insertRow( row );
-		    
-		    new_item = new QTableWidgetItem( lv->getName() );
-		    new_item->setFlags(Qt::ItemIsEnabled);
-		    new_item->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter );
-		    setItem(row, 0, new_item);
-		    
-		    new_item = new QTableWidgetItem( QString("%1").arg(first_extent) );
-		    new_item->setFlags(Qt::ItemIsEnabled);
-		    new_item->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter );
-		    setItem(row, 1, new_item);
-
-		    new_item = new QTableWidgetItem( QString("%1").arg(last_extent) );
-		    new_item->setFlags(Qt::ItemIsEnabled);
-		    new_item->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter );
-		    setItem(row, 2, new_item);
-
-		    new_item = new QTableWidgetItem( QString("%1").arg(last_extent - first_extent + 1 ) );
-		    new_item->setFlags(Qt::ItemIsEnabled);
-		    new_item->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter );
-		    setItem(row, 3, new_item);
-
-		    row++;
-		}
-	    }
-	}
+                    if( row % 2 == 0 ){		    
+                        temp_label = new QLabel( lv->getName() );
+                        temp_label->setAlignment(Qt::AlignLeft | Qt::AlignVCenter );
+                        temp_label->setBackgroundRole(QPalette::Base);
+                        temp_label->setAutoFillBackground(true);
+                        layout->addWidget(temp_label,row, 0);
+                        
+                        temp_label = new QLabel( QString("%1").arg(first_extent) );
+                        temp_label->setAlignment(Qt::AlignRight | Qt::AlignVCenter );
+                        temp_label->setBackgroundRole(QPalette::Base);
+                        temp_label->setAutoFillBackground(true);
+                        layout->addWidget(temp_label,row, 1);
+                        
+                        temp_label = new QLabel( QString("%1").arg(last_extent) );
+                        temp_label->setAlignment(Qt::AlignRight | Qt::AlignVCenter );
+                        temp_label->setBackgroundRole(QPalette::Base);
+                        temp_label->setAutoFillBackground(true);
+                        layout->addWidget(temp_label, row, 2);
+                        
+                        temp_label = new QLabel( QString("%1").arg(last_extent - first_extent + 1 ) );
+                        temp_label->setBackgroundRole(QPalette::Base);
+                        temp_label->setAutoFillBackground(true);
+                        temp_label->setAlignment(Qt::AlignRight | Qt::AlignVCenter );
+                        layout->addWidget(temp_label, row, 3);
+                    }
+                    else{
+                        temp_label = new QLabel( lv->getName() );
+                        temp_label->setAlignment(Qt::AlignLeft | Qt::AlignVCenter );
+                        temp_label->setBackgroundRole(QPalette::AlternateBase);
+                        temp_label->setAutoFillBackground(true);
+                        layout->addWidget(temp_label,row, 0);
+                        
+                        temp_label = new QLabel( QString("%1").arg(first_extent) );
+                        temp_label->setAlignment(Qt::AlignRight | Qt::AlignVCenter );
+                        temp_label->setBackgroundRole(QPalette::AlternateBase);
+                        temp_label->setAutoFillBackground(true);
+                        layout->addWidget(temp_label,row, 1);
+                        
+                        temp_label = new QLabel( QString("%1").arg(last_extent) );
+                        temp_label->setAlignment(Qt::AlignRight | Qt::AlignVCenter );
+                        temp_label->setBackgroundRole(QPalette::AlternateBase);
+                        temp_label->setAutoFillBackground(true);
+                        layout->addWidget(temp_label, row, 2);
+                        
+                        temp_label = new QLabel( QString("%1").arg(last_extent - first_extent + 1 ) );
+                        temp_label->setAlignment(Qt::AlignRight | Qt::AlignVCenter );
+                        temp_label->setBackgroundRole(QPalette::AlternateBase);
+                        temp_label->setAutoFillBackground(true);
+                        layout->addWidget(temp_label, row, 3);
+                    }
+                    row++;
+                }
+            }
+        }
     }
 
-    physicalVolume->setLastUsedExtent( last_used_extent );
-
-    if( !rowCount() ){
-	insertRow( row );
-	new_item = new QTableWidgetItem( QString("<none>") );
-	new_item->setFlags(Qt::ItemIsEnabled);
-	new_item->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter );
-	setItem(row, 0, new_item);
-	row++;
-    }
-    
-    setHorizontalHeaderLabels(headers);
-    resizeColumnToContents(0);
-    resizeColumnToContents(1);
-    resizeColumnToContents(2);
-    resizeColumnToContents(3);
-
-    insertRow( row );
-    insertRow( ++row );
-    insertRow( ++row );
-    //    insertRow( ++row );
-
-    QWidget *separator_widget = new QWidget();
-    QVBoxLayout *separator_layout = new QVBoxLayout();
-    separator_widget->setLayout(separator_layout);
-    separator_layout->addStretch();
     KSeparator *separator = new KSeparator(Qt::Horizontal);
     separator->setFrameStyle(QFrame::Plain | QFrame::Box);
     separator->setLineWidth(2);
     separator->setMaximumHeight(2);
-    separator_layout->addWidget(separator);
-    separator_layout->addStretch();
-    setCellWidget(row - 2, 0, separator_widget);
-    setSpan(row - 2, 0, 1, 4 );
-    resizeRowToContents(row - 2);
-    
-    new_item = new QTableWidgetItem( "Physical volume uuid" );
-    new_item->setFlags(Qt::ItemIsEnabled);
-    new_item->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter );
-    setItem(row - 1, 0, new_item);
-    setSpan(row - 1, 0, 1, 4 );
+    layout->addWidget(separator, row, 0, 1, -1 );
+ 
+    temp_label = new QLabel( "Physical volume UUID" );
+    temp_label->setAlignment( Qt::AlignCenter );
+    layout->addWidget(temp_label, row + 1, 0, 1, -1 );
 
-    new_item = new QTableWidgetItem( physicalVolume->getUuid() );
-    new_item->setFlags(Qt::ItemIsEnabled);
-    new_item->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter );
-    new_item->setToolTip(physicalVolume->getUuid());
-    setItem(row - 0, 0, new_item);
-    setSpan(row - 0, 0, 1, 4 );
+    temp_label = new QLabel( physicalVolume->getUuid() );
+    temp_label->setAlignment( Qt::AlignCenter );
+    temp_label->setWordWrap(true);
+    layout->addWidget(temp_label, row + 2, 0, 1, -1 );
 
-    setAlternatingRowColors(true);
-    verticalHeader()->hide();
-    setWordWrap(true);
-    setShowGrid(false);
+    layout->setRowStretch(row + 3, 10);
+
 } 

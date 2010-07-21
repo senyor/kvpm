@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -21,9 +21,11 @@
  
 class PhysVol;
 
-class PVPropertiesStack : public QStackedWidget
+class PVPropertiesStack : public QWidget
 {
 Q_OBJECT
+
+    QStackedWidget *m_stack_widget;
     bool m_is_pv;
     VolGroup *m_vg;
     QList<QStackedWidget *> m_pv_stack_list;

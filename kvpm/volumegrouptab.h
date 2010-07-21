@@ -17,26 +17,31 @@
 
 #include <QString>
 #include <QVBoxLayout>
+#include <QScrollArea>
 
 class VolGroup;
 class LVPropertiesStack;
 class PVPropertiesStack;
 class PVTree;
 class VGTree;
-
+class VGInfoLabels;
+class LVSizeChart;
 
 class VolumeGroupTab : public QWidget
 {
 Q_OBJECT
 
-    QVBoxLayout *m_layout;
-    QWidget *m_visable_widget;
-    VolGroup *m_vg;
-    QString m_group_name;
+    LVSizeChart  *m_lv_size_chart;
+    VGInfoLabels *m_vg_info_labels;
+    QVBoxLayout  *m_layout;
+    QScrollArea  *m_lv_properties_scroll;
+    QScrollArea  *m_pv_properties_scroll;
+    VolGroup     *m_vg;
     LVPropertiesStack *m_lv_properties_stack;
     PVPropertiesStack *m_pv_properties_stack;
     PVTree *m_pv_tree;
     VGTree *m_vg_tree;
+    QString m_group_name;
 
  public:
     VolumeGroupTab(VolGroup *volumeGroup, QWidget *parent = 0);

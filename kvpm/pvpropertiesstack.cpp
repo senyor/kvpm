@@ -23,27 +23,28 @@
 
 
 PVPropertiesStack::PVPropertiesStack(VolGroup *volumeGroup, QWidget *parent) 
-  : QStackedWidget(parent)
+    : QWidget(parent), m_vg(volumeGroup)
 {
-    m_vg = volumeGroup;
-    PVProperties *pv_properties;
-    
     QList<PhysVol *> devices  = m_vg->getPhysicalVolumes();
+    m_stack_widget = new QStackedWidget;
+    QVBoxLayout *vlayout = new QVBoxLayout();
+    QHBoxLayout *hlayout = new QHBoxLayout();
+    PVProperties  *pv_props;
+    vlayout->addWidget(m_stack_widget);
+    vlayout->setSizeConstraint(QLayout::SetMinimumSize);
+    hlayout->setSizeConstraint(QLayout::SetMinimumSize);
+    vlayout->addLayout(hlayout);
+    setLayout(vlayout);
 
     for(int x = 0; x < devices.size(); x++){
-	pv_properties = new PVProperties(devices[x]);
-	
-	addWidget(pv_properties);  
+        pv_props = new PVProperties(devices[x]);
+        m_stack_widget->addWidget( pv_props );
+        qDebug("Minimum size: %d   %d", pv_props->baseSize().height(), pv_props->baseSize().width());
     }
 
+    
     if( devices.size() )
-	setCurrentIndex(0);
-/*
-    setBackgroundRole(QPalette::Base);
-    setAutoFillBackground(true);
-*/
-
-
+	m_stack_widget->setCurrentIndex(0);
 }
 
 /* If *item points to a volume we set the widget stack to the
@@ -65,12 +66,12 @@ void PVPropertiesStack::changePVStackIndex(QTreeWidgetItem *item, QTreeWidgetIte
 	for(int x = 0; x < devices.size(); x++){
 	    
 	    if(pv_name == (devices[x])->getDeviceName()){
-		setCurrentIndex(x);
+		m_stack_widget->setCurrentIndex(x);
 	    }
 	}
     }
     else if( devices.size() )
-	setCurrentIndex(0);
+	m_stack_widget->setCurrentIndex(0);
     else
-	setCurrentIndex(-1);
+	m_stack_widget->setCurrentIndex(-1);
 }

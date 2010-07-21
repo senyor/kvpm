@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -16,11 +16,11 @@
 #define PVPROPERTIES_H
 
 
-#include <QTableWidget>
+#include <QWidget>
 
 class PhysVol;
 
-class PVProperties : public QTableWidget
+class PVProperties : public QWidget
 {
 
  public:
