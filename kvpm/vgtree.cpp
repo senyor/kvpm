@@ -181,9 +181,15 @@ void VGTree::loadData()
 
 void VGTree::setupContextMenu()
 {
-    if( !m_vg->isExported() ){
+    setContextMenuPolicy(Qt::CustomContextMenu);   
 
-	setContextMenuPolicy(Qt::CustomContextMenu);   
+    // disconnect the last connect, otherwise the following connect get repeated
+    // and piles up.
+
+    disconnect(this, SIGNAL(customContextMenuRequested(QPoint)), 
+               this, SLOT(popupContextMenu(QPoint)) );
+
+    if( !m_vg->isExported() ){
 
 	connect(this, SIGNAL(customContextMenuRequested(QPoint)), 
 		this, SLOT(popupContextMenu(QPoint)) );
