@@ -51,7 +51,7 @@ VolGroup* PhysVol::getVolGroup()
 
 QString PhysVol::getDeviceName()
 {
-    return m_device;
+    return m_device.trimmed();
 }
 
 QString PhysVol::getFormat()

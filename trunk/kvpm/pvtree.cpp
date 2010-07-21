@@ -37,7 +37,6 @@ PVTree::PVTree(VolGroup *volumeGroup, QWidget *parent) : QTreeWidget(parent), m_
 {
     QStringList header_labels;
 
-    setupContextMenu();
     setColumnCount(6);
 
     header_labels << i18n("Name") << i18n("Size") 
@@ -64,6 +63,7 @@ void PVTree::loadData()
     QTreeWidgetItem *item;
 
     clear();
+    setupContextMenu();
     
     for(int n = 0; n < pvs.size(); n++){
 	pv = pvs[n];

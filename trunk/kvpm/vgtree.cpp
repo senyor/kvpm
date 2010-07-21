@@ -44,7 +44,6 @@ VGTree::VGTree(VolGroup *VolumeGroup) : QTreeWidget(),
     QStringList header_labels;
 
     m_vg_name = m_vg->getName();
-    setupContextMenu();
     setColumnCount(9);
 
     header_labels << "Volume" << "Size" << "Filesystem" << "type"
@@ -85,6 +84,7 @@ void VGTree::loadData()
     clear();
     m_lv_tree_items.clear();
     current_item = NULL;
+    setupContextMenu();
 
     for(int x = 0; x < m_vg->getLogVolCount(); x++){
 	
@@ -311,7 +311,7 @@ void VGTree::popupContextMenu(QPoint point)
 {
     QTreeWidgetItem *item;
     KMenu *context_menu;
-    
+
     item = itemAt(point);
     if(item){                                 //item = 0 if there is no item a that point
 	m_lv_name = QVariant(item->data(0, Qt::UserRole)).toString();

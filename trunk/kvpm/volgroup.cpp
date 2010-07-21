@@ -167,7 +167,35 @@ PhysVol* VolGroup::getPhysVolByName(QString name)
 
 void VolGroup::addLogicalVolume(LogVol *logicalVolume)
 {
+    LogVol *lv;
+    QList<long long> starting_extent;
+    QStringList pv_name_list;
+    QString pv_name;
+    long long last_extent, last_used_extent;
+
+    logicalVolume->setVolumeGroup(this);
     m_member_lvs.append(logicalVolume);
+
+    for(int z = 0; z < m_member_pvs.size(); z++){
+        last_extent = 0;
+        last_used_extent = 0;
+        pv_name = m_member_pvs[z]->getDeviceName();
+        for(int x = 0; x < m_member_lvs.size() ; x++){
+            lv = m_member_lvs[x];
+            for(int segment = 0; segment < lv->getSegmentCount(); segment++){
+                pv_name_list = lv->getDevicePath(segment);
+                starting_extent = lv->getSegmentStartingExtent(segment);
+                for(int y = 0; y < pv_name_list.size() ; y++){
+                    if( pv_name == pv_name_list[y] ){
+                        last_extent = starting_extent[y] - 1 + (lv->getSegmentExtents(segment) / (lv->getSegmentStripes(segment)));
+                        if( last_extent > last_used_extent )
+                            last_used_extent = last_extent;
+                    }
+                }
+            }
+        }
+        m_member_pvs[z]->setLastUsedExtent(last_used_extent);
+    }
 }
 
 long VolGroup::getExtentSize()
