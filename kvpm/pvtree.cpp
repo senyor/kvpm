@@ -41,7 +41,7 @@ PVTree::PVTree(VolGroup *volumeGroup, QWidget *parent) : QTreeWidget(parent), m_
 
     header_labels << i18n("Name") << i18n("Size") 
 		  << i18n("Free") << i18n("Used")
-		  << i18n("Allocatable") << i18n("Exported") 
+		  << i18n("Allocatable") << i18n("Tag") 
 		  << i18n("Logical volumes");
 
     setHeaderLabels(header_labels);
@@ -78,11 +78,8 @@ void PVTree::loadData()
 	    pv_data << "Yes";
 	else
 	    pv_data << "No";
-	
-	if(pv->isExported())
-	    pv_data << "Yes";
-	else
-	    pv_data << "No";
+
+        pv_data << "   "; // replace with pv->getTag();
 
 /* here we get the names of logical volumes associated
    with the physical volume */

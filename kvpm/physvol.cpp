@@ -34,7 +34,6 @@ void PhysVol::rescan(pv_t pv)
 
     // pv is active if any associated lvs are active
     m_active   = true;    // Set these when lvm2apps ready!!!
-    m_exported = false;   // Set these when lvm2apps ready!!!
     
     m_device_size   = lvm_pv_get_dev_size(pv); 
     m_unused        = lvm_pv_get_free(pv);
@@ -67,11 +66,6 @@ QString PhysVol::getUuid()
 bool PhysVol::isAllocateable()
 {
     return m_allocatable;
-}
-
-bool PhysVol::isExported()
-{
-    return m_exported;
 }
 
 bool PhysVol::isActive()
