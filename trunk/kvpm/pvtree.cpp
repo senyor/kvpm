@@ -36,7 +36,7 @@ extern MasterList *master_list;
 PVTree::PVTree(VolGroup *volumeGroup, QWidget *parent) : QTreeWidget(parent), m_vg(volumeGroup)
 {
     QStringList header_labels;
-
+    m_context_menu = NULL;
     setColumnCount(6);
 
     header_labels << i18n("Name") << i18n("Size") 
@@ -49,7 +49,6 @@ PVTree::PVTree(VolGroup *volumeGroup, QWidget *parent) : QTreeWidget(parent), m_
 
 void PVTree::loadData()
 {
-
     QList<QTreeWidgetItem *> pv_tree_items;
     QList<LogVol *>  lvs = m_vg->getLogicalVolumes();
     QList<PhysVol *> pvs = m_vg->getPhysicalVolumes();
@@ -129,10 +128,26 @@ void PVTree::setupContextMenu()
     vg_reduce_action = new QAction( i18n("Remove from volume group"), this);
     pv_change_action = new QAction( i18n("Change physical volume attributes"), this);
 
-    context_menu = new QMenu(this);
-    context_menu->addAction(pv_move_action);
-    context_menu->addAction(vg_reduce_action);
-    context_menu->addAction(pv_change_action);
+    if(m_context_menu)
+        m_context_menu->deleteLater();
+    m_context_menu = new QMenu(this);
+    m_context_menu->addAction(pv_move_action);
+    m_context_menu->addAction(vg_reduce_action);
+    m_context_menu->addAction(pv_change_action);
+
+    // disconnect the last run's connections or they pile up.
+
+    disconnect(this, SIGNAL(customContextMenuRequested(QPoint)), 
+	       this, SLOT(popupContextMenu(QPoint)) );
+
+    disconnect(pv_move_action, SIGNAL(triggered()), 
+	       this, SLOT(movePhysicalExtents()));
+
+    disconnect(vg_reduce_action, SIGNAL(triggered()), 
+	       this, SLOT(reduceVolumeGroup()));
+
+    disconnect(pv_change_action, SIGNAL(triggered()), 
+	       this, SLOT(changePhysicalVolume()));
 
     connect(this, SIGNAL(customContextMenuRequested(QPoint)), 
 	    this, SLOT(popupContextMenu(QPoint)) );
@@ -172,11 +187,11 @@ void PVTree::popupContextMenu(QPoint point)
 	    else
 		pv_move_action->setEnabled(false);
 	}
-	context_menu->setEnabled(true);
-	context_menu->exec(QCursor::pos());
+	m_context_menu->setEnabled(true);
+	m_context_menu->exec(QCursor::pos());
     }
     else
-	context_menu->setEnabled(false);  //item = 0 if there is no item a that point
+	m_context_menu->setEnabled(false);  //item = 0 if there is no item a that point
 }
 
 void PVTree::movePhysicalExtents()

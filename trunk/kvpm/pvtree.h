@@ -32,7 +32,7 @@ Q_OBJECT
 
     VolGroup *m_vg;
 
-    QMenu *context_menu;
+    QMenu *m_context_menu;
 
     QAction *pv_move_action, 
             *vg_reduce_action, 
