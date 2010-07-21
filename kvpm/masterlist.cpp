@@ -138,7 +138,6 @@ void MasterList::scanLogicalVolumes()
 	for(int lv = 0; lv < lv_count; lv++){
 	    if(logical_volumes[lv]->getVolumeGroupName() == m_volume_groups[vg]->getName()){
 		m_volume_groups[vg]->addLogicalVolume(logical_volumes[lv]);
-                //		logical_volumes[lv]->setVolumeGroup(m_volume_groups[vg]);
 	    }
 	}    
     }
