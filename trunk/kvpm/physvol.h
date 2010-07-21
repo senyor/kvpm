@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -30,7 +30,6 @@ class PhysVol
     VolGroup *m_vg;        // all pvs now must be in a vg
     bool m_active;
     bool m_allocatable;
-    bool m_exported;
     long long m_size;         // size in bytes of physical volume
     long long m_device_size;  // size in bytes of underlying device
     long long m_unused;       // free space in bytes
@@ -44,7 +43,6 @@ class PhysVol
     QString getUuid();
     VolGroup* getVolGroup(); 
     bool isAllocateable();
-    bool isExported();
     void setActive(bool active);
     bool isActive();
     long long getSize();            // size of the physical volume in bytes    
