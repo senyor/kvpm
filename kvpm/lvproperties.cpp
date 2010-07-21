@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2009 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -208,7 +208,7 @@ LVProperties::LVProperties(LogVol *logicalVolume, int segment, QWidget *parent):
     layout->addWidget(uuid_info_frame);
 
 
-    temp_label = new QLabel("<b>Logical volume uuid</b>");
+    temp_label = new QLabel("<b>Logical volume UUID</b>");
     temp_label->setAlignment(Qt::AlignCenter);
     uuid_info_layout->addWidget( temp_label );
 

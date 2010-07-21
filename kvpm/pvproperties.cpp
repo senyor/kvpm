@@ -137,7 +137,7 @@ PVProperties::PVProperties(PhysVol *physicalVolume, QWidget *parent):QWidget(par
     separator->setMaximumHeight(2);
     layout->addWidget(separator, row, 0, 1, -1 );
  
-    temp_label = new QLabel( "Physical volume UUID" );
+    temp_label = new QLabel( "<b>Physical volume UUID</b>" );
     temp_label->setAlignment( Qt::AlignCenter );
     layout->addWidget(temp_label, row + 1, 0, 1, -1 );
 
