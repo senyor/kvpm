@@ -101,9 +101,15 @@ void MasterList::scanLogicalVolumes()
     QStringList lv_output;
     QStringList seg_data;
     QStringList arguments;
+    QStringList vg_names;
     int lv_count;
     int vg_count;
     int lv_segments;   //number of segments in the logical volume
+
+    for(int x = 0; x < m_volume_groups.size(); x++){
+        if( ! m_volume_groups[x]->isExported() )
+            vg_names << m_volume_groups[x]->getName();
+    }
 
     MountInformationList mount_info_list;
     
@@ -112,7 +118,7 @@ void MasterList::scanLogicalVolumes()
 	      << "--noheadings" << "--separator" 
 	      << "|" << "--nosuffix" 
 	      << "--units" << "b" 
-	      << "--partial"; 
+	      << "--partial" << vg_names;
     
     ProcessProgress lvscan(arguments, i18n("Scanning logical volumes...") );
     lv_output = lvscan.programOutput();
