@@ -259,11 +259,11 @@ void TopWindow::setupMenus()
 	m_vg = NULL;
 
     // only enable group removal if the tab is
-    // a volume group with no active logical volumes
+    // a volume group with no logical volumes
 
     if(m_vg){                                     
 
-	if( has_active || m_vg->isPartial() || m_vg->isExported() ){             
+	if( lvs.size() || m_vg->isPartial() || m_vg->isExported() ){             
 	    remove_vg_action->setEnabled(false);
         }   
 	else{
