@@ -112,43 +112,44 @@ void MasterList::scanLogicalVolumes()
     }
 
     MountInformationList mount_info_list;
-    
-    arguments << "lvs" << "--all" << "-o" 
-	      << "lv_name,vg_name,lv_attr,lv_size,origin,snap_percent,move_pv,mirror_log,copy_percent,chunksize,seg_count,stripes,stripesize,seg_size,devices,lv_kernel_major,lv_kernel_minor,lv_minor,lv_uuid"  
-	      << "--noheadings" << "--separator" 
-	      << "|" << "--nosuffix" 
-	      << "--units" << "b" 
-	      << "--partial" << vg_names;
-    
-    ProcessProgress lvscan(arguments, i18n("Scanning logical volumes...") );
-    lv_output = lvscan.programOutput();
-    
-    for(int i = 0; i < lv_output.size(); ) {
-	seg_data.clear();
-	lv_segments = (lv_output[i].section('|',10,10)).toInt();
 
-	for(int x = 0 ; x < lv_segments ; x++){
-	    seg_data << lv_output[i++];
-	}
-
-	logical_volumes.append(new LogVol(seg_data, &mount_info_list));
-
-    } 
-
-    /* put pointers to the lvs in their associated vgs */
+    if( !vg_names.empty() ){    
+        arguments << "lvs" << "--all" << "-o" 
+                  << "lv_name,vg_name,lv_attr,lv_size,origin,snap_percent,move_pv,mirror_log,copy_percent,chunksize,seg_count,stripes,stripesize,seg_size,devices,lv_kernel_major,lv_kernel_minor,lv_minor,lv_uuid"  
+                  << "--noheadings" << "--separator" 
+                  << "|" << "--nosuffix" 
+                  << "--units" << "b" 
+                  << "--partial" << vg_names;
     
-    lv_count = logical_volumes.size();
-    vg_count = m_volume_groups.size();
+        ProcessProgress lvscan(arguments, i18n("Scanning logical volumes...") );
+        lv_output = lvscan.programOutput();
     
-    for(int vg = 0; vg < vg_count; vg++){
-	for(int lv = 0; lv < lv_count; lv++){
-	    if(logical_volumes[lv]->getVolumeGroupName() == m_volume_groups[vg]->getName()){
-		m_volume_groups[vg]->addLogicalVolume(logical_volumes[lv]);
-	    }
-	}    
+        for(int i = 0; i < lv_output.size(); ) {
+            seg_data.clear();
+            lv_segments = (lv_output[i].section('|',10,10)).toInt();
+            
+            for(int x = 0 ; x < lv_segments ; x++){
+                seg_data << lv_output[i++];
+            }
+
+            logical_volumes.append(new LogVol(seg_data, &mount_info_list));
+
+        } 
+
+        /* put pointers to the lvs in their associated vgs */
+    
+        lv_count = logical_volumes.size();
+        vg_count = m_volume_groups.size();
+    
+        for(int vg = 0; vg < vg_count; vg++){
+            for(int lv = 0; lv < lv_count; lv++){
+                if(logical_volumes[lv]->getVolumeGroupName() == m_volume_groups[vg]->getName()){
+                    m_volume_groups[vg]->addLogicalVolume(logical_volumes[lv]);
+                }
+            }    
+        }
     }
 }
-
 void MasterList::scanLogicalVolumes(VolGroup *VolumeGroup)
 {
     LogVol *logical_volume;

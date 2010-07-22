@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2009 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -77,8 +77,7 @@ void LVSizeChart::populateChart()
 	}
     }
 
-    if( free_extents ){ // only create a free space widget if we have some
-
+    if( free_extents && !m_vg->isExported() ){ // only create a free space widget if we have some
 	seg_ratio = free_extents / (double) total_extents;
 	usage = "freespace" ;
 	widget = new LVChartSeg(m_vg, 0, usage, this);
@@ -95,7 +94,6 @@ void LVSizeChart::populateChart()
 	
 	m_layout->addWidget(widget);
 	m_ratios.append( 1.0 );
-
     }
     
     max_segment_width = (int) ( width() * m_ratios[0] ); 
