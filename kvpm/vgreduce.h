@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008 2010 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -30,7 +30,7 @@ class VGReduceDialog : public KDialog
 {
 Q_OBJECT
 
-    QString m_vg_name;
+    VolGroup *m_vg;
     QList<NoMungeCheck *> m_pv_check_boxes;
     bool m_unremovable_pvs_present;
     
@@ -40,7 +40,7 @@ Q_OBJECT
     
  private slots:
     void excludeOneVolume(bool);  // one pv must remain in the vg
- 
+    void commitChanges();
 };
 
 #endif
