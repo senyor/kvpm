@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -31,30 +31,13 @@ bool reduce_vg(VolGroup *volumeGroup)
     VGReduceDialog dialog(volumeGroup);
     dialog.exec();
 
-    if(dialog.result() == QDialog::Accepted){
-
-        QStringList pvs = dialog.arguments();  // pvs to remove by name
-        int error_number;
-        lvm_t  lvm = lvm_init(NULL);
-
-        vg_t vg_dm = lvm_vg_open(lvm, volumeGroup->getName().toAscii().data(), "w", NULL);
-
-        for(int x = 0; x < pvs.size(); x++){
-            error_number = lvm_vg_reduce(vg_dm, pvs[x].toAscii().data());
-            qDebug("Reducing VG %d", error_number);
-        }
-        error_number = lvm_vg_write(vg_dm);
-        qDebug("Writing VG %d", error_number);
-        lvm_vg_close(vg_dm);
-        lvm_quit(lvm);
-
+    if(dialog.result() == QDialog::Accepted)
         return true;
-    }
-
-    return false;
+    else
+        return false;
 }
 
-VGReduceDialog::VGReduceDialog(VolGroup *volumeGroup, QWidget *parent) : KDialog(parent)
+VGReduceDialog::VGReduceDialog(VolGroup *volumeGroup, QWidget *parent) : KDialog(parent), m_vg(volumeGroup)
 {
     setWindowTitle( i18n("Reduce Volume Group") );
     QWidget *dialog_body = new QWidget(this);
@@ -63,10 +46,10 @@ VGReduceDialog::VGReduceDialog(VolGroup *volumeGroup, QWidget *parent) : KDialog
     dialog_body->setLayout(layout);
 
     m_unremovable_pvs_present = false;
-    m_vg_name = volumeGroup->getName();
+    QString vg_name = m_vg->getName();
 
     QLabel *label = new QLabel( i18n( "Select any of the following physical volumes to "
-				      "remove them from volume group <b>%1</b>").arg(m_vg_name));
+				      "remove them from volume group <b>%1</b>").arg(vg_name));
 
     label->setWordWrap(true);
     layout->addWidget(label);
@@ -80,8 +63,8 @@ VGReduceDialog::VGReduceDialog(VolGroup *volumeGroup, QWidget *parent) : KDialog
     QVBoxLayout *pv_used_layout = new QVBoxLayout;
     pv_used_box->setLayout(pv_used_layout);
 
-    QList<PhysVol *> member_pvs = volumeGroup->getPhysicalVolumes();
-    int pv_count = volumeGroup->getPhysVolCount(); 
+    QList<PhysVol *> member_pvs = m_vg->getPhysicalVolumes();
+    int pv_count = m_vg->getPhysVolCount(); 
     NoMungeCheck *pv_check = NULL;
     
     for(int x = 0; x < pv_count; x++){
@@ -105,22 +88,44 @@ VGReduceDialog::VGReduceDialog(VolGroup *volumeGroup, QWidget *parent) : KDialog
 	layout->addWidget(pv_used_box);
     }
 
+    connect(this, SIGNAL(okClicked()), 
+            this, SLOT(commitChanges()));
+
     enableButtonOk(false);
 }
 
-QStringList VGReduceDialog::arguments()
+void VGReduceDialog::commitChanges()
 {
-    QStringList args;
-    int check_box_count = m_pv_check_boxes.size();
+    QStringList pvs;
+    lvm_t  lvm = NULL;
+    vg_t vg_dm = NULL;
 
-    args << m_vg_name;
+    QStringList pv_list; // pvs to remove by name
+    int check_box_count = m_pv_check_boxes.size();
 
     for(int x = 0; x < check_box_count; x++){
 	if(m_pv_check_boxes[x]->isChecked())
-	    args << m_pv_check_boxes[x]->getUnmungedText();
+	    pv_list << m_pv_check_boxes[x]->getUnmungedText();
     }
     
-    return args;
+    if( (lvm = lvm_init(NULL)) ){
+        if( (vg_dm = lvm_vg_open(lvm, m_vg->getName().toAscii().data(), "w", NULL)) ){
+            for(int x = 0; x < pv_list.size(); x++){
+                if( lvm_vg_reduce(vg_dm, pv_list[x].toAscii().data()) )
+                    KMessageBox::error(0, QString(lvm_errmsg(lvm)));
+            }
+            if( lvm_vg_write(vg_dm) )
+                KMessageBox::error(0, QString(lvm_errmsg(lvm)));
+            lvm_vg_close(vg_dm);
+        }
+        else
+            KMessageBox::error(0, QString(lvm_errmsg(lvm)));
+        lvm_quit(lvm);
+    }
+    else
+        KMessageBox::error(0, QString(lvm_errmsg(lvm)));
+
+    return;
 }
 
 void VGReduceDialog::excludeOneVolume(bool)
