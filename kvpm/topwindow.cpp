@@ -59,12 +59,12 @@ TopWindow::TopWindow(QWidget *parent):KMainWindow(parent)
     KAboutData *about_data = new KAboutData( QByteArray("kvpm"),
 					     QByteArray(""),
 					     ki18n("kvpm"),
-					     QByteArray("0.6.2"),
+					     QByteArray("0.7.0"),
 					     ki18n("Linux volume and partition manager for KDE.\n"
 						   "This program is still under development,\n"
 						   "bug reports and any comments are welcomed.\n"),
 					     KAboutData::License_GPL_V3, 
-					     ki18n("(c) 2008, 2009, Benjamin Scott"),
+					     ki18n("(c) 2008, 2009, 2010 Benjamin Scott"),
 					     ki18n(""),
 					     QByteArray("http://sourceforge.net/projects/kvpm/"),
 					     QByteArray("benscott@nwlink.com") );
@@ -86,7 +86,7 @@ TopWindow::TopWindow(QWidget *parent):KMainWindow(parent)
     rescan_action     = new KAction( KIcon("view-refresh"), i18n("Rescan System"), this);
     restart_pvmove_action  = new KAction( KIcon("system-restart"), i18n("Restart interrupted pvmove"), this);
     stop_pvmove_action     = new KAction( KIcon("process-stop"), i18n("Abort pvmove"), this);
-    remove_missing_action  = new KAction( i18n("Remove Missing Volumes..."), this);
+    remove_missing_action  = new KAction( i18n("Remove Missing Physcial Volumes..."), this);
     export_vg_action       = new KAction( i18n("Export Volume Group..."), this);
     import_vg_action       = new KAction( i18n("Import Volume Group..."), this);
     m_vgchange_menu           = new KMenu( i18n("Change Volume Group Attributes"), this);
@@ -111,12 +111,11 @@ TopWindow::TopWindow(QWidget *parent):KMainWindow(parent)
     tool_menu->addSeparator();
     tool_menu->addAction(restart_pvmove_action);
     tool_menu->addAction(stop_pvmove_action);
-    tool_menu->addSeparator();
-    tool_menu->addAction(remove_missing_action);
 
     groups_menu->addAction(create_vg_action);
     groups_menu->addSeparator();
     groups_menu->addAction(remove_vg_action);
+    groups_menu->addAction(remove_missing_action);
     groups_menu->addAction(reduce_vg_action);
     groups_menu->addAction(rename_vg_action);
     groups_menu->addAction(export_vg_action);
@@ -244,31 +243,58 @@ void TopWindow::reRun()
 void TopWindow::setupMenus()
 {
     int index = m_tab_widget->getCurrentIndex();
+    bool has_active = false;
+    QList<LogVol *> lvs;
 
-    if(index)
-        m_vg  = master_list->getVolGroupByName( m_tab_widget->getUnmungedText(index) );
+    if(index){
+        m_vg = master_list->getVolGroupByName( m_tab_widget->getUnmungedText(index) );
+        lvs = m_vg->getLogicalVolumes();
+        
+        for( int x = 0; x < lvs.size(); x++ ){
+            if( lvs[x]->isActive() )
+                has_active = true;
+        }
+    }
     else 
 	m_vg = NULL;
 
-    if(m_vg){                                     // only enable group removal if the tab is
-	if( !m_vg->getLogVolCount() )             // a volume group with no logical volumes
+    // only enable group removal if the tab is
+    // a volume group with no active logical volumes
+
+    if(m_vg){                                     
+
+	if( has_active || m_vg->isPartial() || m_vg->isExported() ){             
+	    remove_vg_action->setEnabled(false);
+        }   
+	else{
 	    remove_vg_action->setEnabled(true);   
-	else
-	    remove_vg_action->setEnabled(false);   
+        }
 
 	if( m_vg->isPartial() )
 	    remove_missing_action->setEnabled(true);
+        else
+	    remove_missing_action->setEnabled(false);
 
 	if( m_vg->isExported() ){
 	    import_vg_action->setEnabled(true);
 	    export_vg_action->setEnabled(false);
+            reduce_vg_action->setEnabled(false);
 	}
-	else{
+	else if( !m_vg->isPartial() ){
 	    import_vg_action->setEnabled(false);
-	    export_vg_action->setEnabled(true);
+            reduce_vg_action->setEnabled(true);
+
+            if(has_active)
+                export_vg_action->setEnabled(false);
+            else
+                export_vg_action->setEnabled(true);
 	}
+        else{
+	    import_vg_action->setEnabled(false);
+	    export_vg_action->setEnabled(false);
+            reduce_vg_action->setEnabled(false);
+        }
 	
-	reduce_vg_action->setEnabled(true);      // almost any group may be reduced
 	rename_vg_action->setEnabled(true);      
 	m_vgchange_menu->setEnabled(true);
     }
