@@ -14,6 +14,7 @@
 
 
 #include <sys/mount.h>
+#include <linux/fs.h>
 #include <errno.h>
 #include <string.h>
 
@@ -158,7 +159,6 @@ QWidget* MountDialog::optionsTab()
 
     sync_check     = new QCheckBox("sync");
     dirsync_check  = new QCheckBox("dirsync");
-    dirsync_check->setEnabled(false);
     rw_check       = new QCheckBox("rw");
     suid_check     = new QCheckBox("suid");
     dev_check      = new QCheckBox("dev");
@@ -212,11 +212,10 @@ QWidget* MountDialog::optionsTab()
     options_atime_layout->addWidget(m_filesystem_journal_box);
 
     atime_button      = new QRadioButton("atime");
-    atime_button->setChecked(true);
     noatime_button    = new QRadioButton("noatime");
     nodiratime_button = new QRadioButton("nodiratime");
     relatime_button   = new QRadioButton("relatime");
-    relatime_button->setEnabled(false);
+    relatime_button->setChecked(true);
     atime_layout->addWidget(atime_button);
     atime_layout->addWidget(noatime_button);
     atime_layout->addWidget(nodiratime_button);
@@ -354,10 +353,10 @@ void MountDialog::mountFilesystem()
 	standard_options.append("sync");
 	options |= MS_SYNCHRONOUS;
     }
-//    if( dirsync_check->isChecked() ){
-//	standard_options.append("dirsync");
-//	options |= MS_DIRSYNC;
-//  }
+    if( dirsync_check->isChecked() ){
+	standard_options.append("dirsync");
+	options |= MS_DIRSYNC;
+    }
     if( rw_check->isChecked() ){
 	standard_options.append("rw");
     }
@@ -383,7 +382,11 @@ void MountDialog::mountFilesystem()
 	options |= MS_MANDLOCK;
     }
 
-    if( noatime_button->isChecked() ){
+    if( atime_button->isChecked() ){
+	standard_options.append("atime");
+	options |= MS_STRICTATIME;
+    }
+    else if( noatime_button->isChecked() ){
 	standard_options.append("noatime");
 	options |= MS_NOATIME;
     }
@@ -391,10 +394,10 @@ void MountDialog::mountFilesystem()
 	standard_options.append("nodiratime");
 	options |= MS_NODIRATIME;
     }
-//    else if( relatime_button->isChecked() ){
-//	standard_options.append("nodiratime");
-//	options |= MS_RELATIME;
-//  }
+    else if( relatime_button->isChecked() ){
+	standard_options.append("relatime");
+	options |= MS_RELATIME;
+    }
 
 /* "data=ordered" is the default so we ignore that button */
 
@@ -406,7 +409,7 @@ void MountDialog::mountFilesystem()
     }
 
     if( acl_check->isChecked() )
-	additional_options.append("data=journal");
+	additional_options.append("acl");
 
     if( user_xattr_check->isChecked() )
 	additional_options.append("user_xattr");
