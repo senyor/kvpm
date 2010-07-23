@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -15,10 +15,27 @@
 #ifndef REMOVEMISSING_H
 #define REMOVEMISSING_H
 
+#include <KDialog>
+#include <QRadioButton>
 #include <QStringList>
 
 class VolGroup;
 
 bool remove_missing_pv(VolGroup *volumeGroup);
+
+class RemoveMissingDialog : public KDialog
+{
+Q_OBJECT
+
+    VolGroup *m_vg;
+
+    QRadioButton *m_empty_button, 
+                 *m_all_button;
+    
+ public:
+    RemoveMissingDialog(VolGroup *volumeGroup, QWidget *parent = 0);
+    QStringList arguments();
+    
+};
 
 #endif
