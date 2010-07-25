@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -24,19 +24,15 @@
 
 
 /* This dialog changes the available status of
-   the volume group */
+   the logical volumes in the volume group */
 
 
 bool change_vg_available(VolGroup *volumeGroup)
 {
-    QStringList args;
-    QString vg_name, message;
-    int result;
+    QString message;
     bool has_mounted = false;
     QList<LogVol *> lv_list = volumeGroup->getLogicalVolumes();
     
-    vg_name = volumeGroup->getName();
-
     for(int x = 0; x < lv_list.size(); x++){
 	if( lv_list[x]->isMounted() )
 	    has_mounted = true;
@@ -47,33 +43,53 @@ bool change_vg_available(VolGroup *volumeGroup)
 		       "may not be made unavailable");
 
 	KMessageBox::error( 0, message);
-	
-	return false;
     }
     else{
-	
-	message = i18n("Make volume group: <b>%1</b> "
-		       "available for use?").arg(vg_name);
-
-	result = KMessageBox::questionYesNo( 0, message);
+        VGChangeAvailableDialog dialog(volumeGroup);
+        dialog.exec();
     
-	if( result == 3){      // 3 = "yes" button
-	    args << "vgchange" 
-		 << "--available" << "y"
-		 << vg_name;
-	}
-	else if( result == 4){ // 4 = "no" button
-	    args << "vgchange" 
-		 << "--available" << "n"
-		 << vg_name;
-	}
-	else{                  // do nothing and return
-	    return false;
-	}
-
-	ProcessProgress resize(args, i18n("Changing volume group availability..."));
-
-	return true;
+        if(dialog.result() == QDialog::Accepted){
+            ProcessProgress available(dialog.args(), i18n("Changing volume group availability..."));
+            return true;
+        }
     }
-    
+    return false;
+}
+
+VGChangeAvailableDialog::VGChangeAvailableDialog(VolGroup *volumeGroup, QWidget *parent) : 
+    KDialog(parent), m_vg(volumeGroup)
+{
+    setWindowTitle( i18n("Volume group availability") );
+
+    QWidget *dialog_body = new QWidget(this);
+    setMainWidget(dialog_body);
+    QVBoxLayout *layout = new QVBoxLayout();
+    dialog_body->setLayout(layout);
+
+    QLabel *name_label = new QLabel( i18n("Volume group: <b>%1</b>").arg(m_vg->getName() ) );
+    name_label->setAlignment(Qt::AlignCenter);
+    layout->addWidget(name_label);
+
+    QGroupBox *group_box = new QGroupBox("Set volume group availabilty");
+    layout->addWidget(group_box);
+    QVBoxLayout *group_layout = new QVBoxLayout();
+    group_box->setLayout(group_layout);
+
+    m_available = new QRadioButton("Make all logical volumes available");
+    m_available->setChecked(true);
+    m_unavailable = new QRadioButton("Make all logical volumes unavailable");
+    group_layout->addWidget(m_available);
+    group_layout->addWidget(m_unavailable);
+}
+
+QStringList VGChangeAvailableDialog::args()
+{
+    QStringList args;
+
+    if( m_available->isChecked() )
+        args << "vgchange" << "--available" << "y" << m_vg->getName();
+    else
+        args << "vgchange" << "--available" << "n" << m_vg->getName();
+
+    return args;
 }
