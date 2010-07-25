@@ -36,7 +36,7 @@ class VolGroup
                                       // may not be allocateable
     QString m_vg_name;                // this volume group name
     QString m_allocation_policy;
-    QString m_lvm_fmt;                // lvm1 or lvm2
+    QString m_lvm_format;                // lvm1 or lvm2
     QList<LogVol *>  m_member_lvs;    // lvs that belong to this group
     QList<PhysVol *> m_member_pvs;    // pvs that belong to this group
     bool m_resizable;

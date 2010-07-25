@@ -36,7 +36,7 @@ void VolGroup::rescan(lvm_t lvm)
     bool existing_pv;
     bool deleted_pv;
 
-    m_lvm_fmt   = QString("????");       // Fix Me!!!
+    //    m_lvm_format   = QString("????");       // Set this from liblvm when available, see logvol->getLVMFormat()
     m_writable  = true; // Fix me!!!
     m_resizable = true; // Fix me!!!
     m_allocation_policy    = "normal";  // Fix me!!!
@@ -175,6 +175,7 @@ void VolGroup::addLogicalVolume(LogVol *logicalVolume)
 
     logicalVolume->setVolumeGroup(this);
     m_member_lvs.append(logicalVolume);
+    m_lvm_format = logicalVolume->getLVMFormat();
 
     for(int z = 0; z < m_member_pvs.size(); z++){
         last_extent = 0;
@@ -270,7 +271,7 @@ QString VolGroup::getPolicy()
 
 QString VolGroup::getFormat()
 {
-    return m_lvm_fmt;
+    return m_lvm_format;
 }
 
 QStringList VolGroup::getLogVolNames()
