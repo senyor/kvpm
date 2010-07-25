@@ -32,14 +32,15 @@ class LogVol
     QString m_lv_full_name;  // volume_group/logical_volume
     QString m_lv_name;       // name of this logical volume
     QString m_lv_fs;         // Filesystem on volume or "unknown"
-    QString m_lvm_format;        // lvm1 or lvm2
+    QString m_lvm_format;    // lvm1 or lvm2
+    QString m_vg_attr;       // vgs vg_attr string
     QString m_origin;        // the origin if this is a snapshot or 
                              // the parent mirror volume to a mirror leg
 
     QString m_type;          // the type of volume
     QString m_policy;        // the allocation policy
     QString m_state;         // the lv state
-    QString m_vg_name;           // associated volume group name
+    QString m_vg_name;       // associated volume group name
 
     QString m_uuid;
     QStringList m_mount_points;  // empty if not mounted
@@ -84,6 +85,7 @@ class LogVol
     QString getOrigin();        // The name of the parent volume to a snapshot or mirror leg
     QString getUuid();
     QString getLVMFormat();
+    QString getVGAttr();
     int getSegmentCount();
     int getSegmentStripes(int segment);
     int getSegmentStripeSize(int segment);

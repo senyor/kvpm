@@ -250,6 +250,7 @@ LogVol::LogVol(QStringList lvDataList, MountInformationList *mountInformationLis
 
     m_uuid  = lvdata.section('|',18,18);
     m_lvm_format = lvdata.section('|',19,19);
+    m_vg_attr = lvdata.section('|',20,20);
 
     if( m_lv_name.contains("_mlog", Qt::CaseSensitive) )
         m_lv_fs = "mirror log";
@@ -522,6 +523,11 @@ QString LogVol::getType()
 QString LogVol::getLVMFormat()
 {
     return m_lvm_format;
+}
+
+QString LogVol::getVGAttr()
+{
+    return m_vg_attr;
 }
 
 QString LogVol::getOrigin()
