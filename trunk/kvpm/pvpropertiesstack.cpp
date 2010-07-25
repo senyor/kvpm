@@ -39,7 +39,6 @@ PVPropertiesStack::PVPropertiesStack(VolGroup *volumeGroup, QWidget *parent)
     for(int x = 0; x < devices.size(); x++){
         pv_props = new PVProperties(devices[x]);
         m_stack_widget->addWidget( pv_props );
-        qDebug("Minimum size: %d   %d", pv_props->baseSize().height(), pv_props->baseSize().width());
     }
 
     
