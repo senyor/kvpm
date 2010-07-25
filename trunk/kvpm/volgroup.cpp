@@ -61,7 +61,7 @@ void VolGroup::rescan(lvm_t lvm)
         dm_list_iterate_items(pv_list, pv_dm_list){ // rescan() existing PhysVols 
             existing_pv = false;
             for(int x = 0; x < m_member_pvs.size(); x++){
-                if( QString( lvm_pv_get_name( pv_list->pv ) ).trimmed() == m_member_pvs[x]->getDeviceName() ){
+                if( QString( lvm_pv_get_uuid( pv_list->pv ) ).trimmed() == m_member_pvs[x]->getUuid() ){
                     existing_pv = true;
                     m_member_pvs[x]->rescan( pv_list->pv );
                 }
@@ -73,7 +73,7 @@ void VolGroup::rescan(lvm_t lvm)
         for(int x = m_member_pvs.size() - 1; x >= 0; x--){ // delete PhysVolGroup if the pv is gone
             deleted_pv = true;
             dm_list_iterate_items(pv_list, pv_dm_list){ 
-                if( QString( lvm_pv_get_name( pv_list->pv ) ).trimmed() == m_member_pvs[x]->getDeviceName() )
+                if( QString( lvm_pv_get_uuid( pv_list->pv ) ).trimmed() == m_member_pvs[x]->getUuid() )
                     deleted_pv = false;
             }
             if(deleted_pv){
@@ -158,7 +158,7 @@ LogVol* VolGroup::getLogVolByName(QString shortName)
 PhysVol* VolGroup::getPhysVolByName(QString name)
 {
     for(int x = 0; x < m_member_pvs.size(); x++){
-	if(name.trimmed() == m_member_pvs[x]->getDeviceName())
+	if(name.trimmed() == m_member_pvs[x]->getDeviceName() && !name.contains("unknown device"))
 	    return m_member_pvs[x];
     }
 
