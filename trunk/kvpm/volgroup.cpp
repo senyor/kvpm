@@ -36,10 +36,10 @@ void VolGroup::rescan(lvm_t lvm)
     bool existing_pv;
     bool deleted_pv;
 
-    //    m_lvm_format   = QString("????");       // Set this from liblvm when available, see logvol->getLVMFormat()
-    m_writable  = true; // Fix me!!!
-    m_resizable = true; // Fix me!!!
-    m_allocation_policy    = "normal";  // Fix me!!!
+    //    m_lvm_format   = QString("????"); // Set this from liblvm when available, see logvol->getLVMFormat()
+    //    m_writable  = true; // ditto
+    //    m_resizable = true; // ditto
+    //    m_allocation_policy = // ditto again
     m_allocateable_extents = 0;
 
     m_pv_max       = lvm_vg_get_max_pv(lvm_vg); 
@@ -171,7 +171,7 @@ void VolGroup::addLogicalVolume(LogVol *logicalVolume)
     PhysVol *pv;
     QList<long long> starting_extent;
     QStringList pv_name_list;
-    QString pv_name;
+    QString pv_name, vg_attr;
     long long last_extent, last_used_extent;
 
     logicalVolume->setVolumeGroup(this);
@@ -186,6 +186,27 @@ void VolGroup::addLogicalVolume(LogVol *logicalVolume)
         }
         pv_name_list.clear();
     }
+
+    vg_attr = logicalVolume->getVGAttr();
+
+    if(vg_attr.at(0) == 'w')
+        m_writable = true;
+    else 
+        m_writable = false;
+
+    if(vg_attr.at(1) == 'z')
+        m_resizable = true;
+    else
+        m_resizable = false;
+
+    if(vg_attr.at(4) == 'c')
+        m_allocation_policy = "contiguous";
+    else if(vg_attr.at(4) == 'l')
+        m_allocation_policy = "cling";
+    else if(vg_attr.at(4) == 'n')
+        m_allocation_policy = "normal";
+    else if(vg_attr.at(4) == 'a')
+        m_allocation_policy = "anywhere";
 
     for(int z = 0; z < m_member_pvs.size(); z++){
         last_extent = 0;
