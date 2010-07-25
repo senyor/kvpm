@@ -28,8 +28,6 @@ void PhysVol::rescan(pv_t pv)
     m_last_used_extent = 0;
 
     m_device   = QString( lvm_pv_get_name(pv) );
-    m_format   = "????"; // Set these when lvm2apps ready!!!
-
     m_allocatable = true; // Set these when lvm2apps ready!!!
 
     // pv is active if any associated lvs are active
@@ -51,11 +49,6 @@ VolGroup* PhysVol::getVolGroup()
 QString PhysVol::getDeviceName()
 {
     return m_device.trimmed();
-}
-
-QString PhysVol::getFormat()
-{
-    return m_format;
 }
 
 QString PhysVol::getUuid()
