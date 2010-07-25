@@ -28,10 +28,10 @@ void PhysVol::rescan(pv_t pv)
     m_last_used_extent = 0;
 
     m_device   = QString( lvm_pv_get_name(pv) );
-    m_allocatable = true; // Set these when lvm2apps ready!!!
+    m_allocatable = true; // Set this correctly when lvm2apps ready!!!
 
     // pv is active if any associated lvs are active
-    m_active   = true;    // Set these when lvm2apps ready!!!
+    m_active = false;
     
     m_device_size   = lvm_pv_get_dev_size(pv); 
     m_unused        = lvm_pv_get_free(pv);
@@ -66,9 +66,9 @@ bool PhysVol::isActive()
     return m_active;
 }
 
-void PhysVol::setActive(bool active)
+void PhysVol::setActive()
 {
-    m_active = active;
+    m_active = true;
 }
 
 long long PhysVol::getSize()

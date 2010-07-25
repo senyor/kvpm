@@ -168,6 +168,7 @@ PhysVol* VolGroup::getPhysVolByName(QString name)
 void VolGroup::addLogicalVolume(LogVol *logicalVolume)
 {
     LogVol *lv;
+    PhysVol *pv;
     QList<long long> starting_extent;
     QStringList pv_name_list;
     QString pv_name;
@@ -176,6 +177,15 @@ void VolGroup::addLogicalVolume(LogVol *logicalVolume)
     logicalVolume->setVolumeGroup(this);
     m_member_lvs.append(logicalVolume);
     m_lvm_format = logicalVolume->getLVMFormat();
+
+    if( logicalVolume->isActive() ){
+        pv_name_list = logicalVolume->getDevicePathAll();
+        for(int x = 0; x < pv_name_list.size(); x++){
+            if( (pv = getPhysVolByName(pv_name_list[x])) )
+                pv->setActive();
+        }
+        pv_name_list.clear();
+    }
 
     for(int z = 0; z < m_member_pvs.size(); z++){
         last_extent = 0;
