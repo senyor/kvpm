@@ -42,7 +42,7 @@ class PhysVol
     QString getUuid();
     VolGroup* getVolGroup(); 
     bool isAllocateable();
-    void setActive(bool active);
+    void setActive();               // If any lv is active on the pv, the pv is active
     bool isActive();
     long long getSize();            // size of the physical volume in bytes    
     long long getDeviceSize();      // the physical volume might not take up all the device!    
