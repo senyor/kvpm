@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -32,7 +32,7 @@ class LogVol
     QString m_lv_full_name;  // volume_group/logical_volume
     QString m_lv_name;       // name of this logical volume
     QString m_lv_fs;         // Filesystem on volume or "unknown"
-
+    QString m_lvm_format;        // lvm1 or lvm2
     QString m_origin;        // the origin if this is a snapshot or 
                              // the parent mirror volume to a mirror leg
 
@@ -83,6 +83,7 @@ class LogVol
     QString getType();
     QString getOrigin();        // The name of the parent volume to a snapshot or mirror leg
     QString getUuid();
+    QString getLVMFormat();
     int getSegmentCount();
     int getSegmentStripes(int segment);
     int getSegmentStripeSize(int segment);

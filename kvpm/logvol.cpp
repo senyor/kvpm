@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -249,6 +249,7 @@ LogVol::LogVol(QStringList lvDataList, MountInformationList *mountInformationLis
 	m_persistant = false;
 
     m_uuid  = lvdata.section('|',18,18);
+    m_lvm_format = lvdata.section('|',19,19);
 
     if( m_lv_name.contains("_mlog", Qt::CaseSensitive) )
         m_lv_fs = "mirror log";
@@ -516,6 +517,11 @@ QString LogVol::getState()
 QString LogVol::getType()
 {
     return m_type;
+}
+
+QString LogVol::getLVMFormat()
+{
+    return m_lvm_format;
 }
 
 QString LogVol::getOrigin()
