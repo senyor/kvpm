@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2009 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -134,6 +134,7 @@ DeviceProperties::DeviceProperties( StoragePartition *Partition, QWidget *parent
             temp_label = new QLabel( "active" );
         else
             temp_label = new QLabel( "inactive" );
+
 	pv_info_layout->addWidget( temp_label );
 
 	temp_label =  new QLabel( "<b>UUID</b>" );
