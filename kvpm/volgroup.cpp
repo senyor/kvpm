@@ -189,11 +189,6 @@ void VolGroup::addLogicalVolume(LogVol *logicalVolume)
 
     vg_attr = logicalVolume->getVGAttr();
 
-    if(vg_attr.at(0) == 'w')
-        m_writable = true;
-    else 
-        m_writable = false;
-
     if(vg_attr.at(1) == 'z')
         m_resizable = true;
     else
@@ -312,11 +307,6 @@ QStringList VolGroup::getLogVolNames()
         names << (m_member_lvs[x])->getName();
 
     return names;
-}
-
-bool VolGroup::isWritable()
-{
-    return m_writable;
 }
 
 bool VolGroup::isResizable()

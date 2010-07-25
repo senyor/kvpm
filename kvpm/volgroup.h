@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -41,7 +41,6 @@ class VolGroup
     QList<PhysVol *> m_member_pvs;    // pvs that belong to this group
     bool m_resizable;
     bool m_clustered;
-    bool m_writable;
     bool m_exported;
     bool m_partial;        // some physical volumes may be missing
     
@@ -71,7 +70,6 @@ public:
     QString getFormat();
     QStringList getLogVolNames();
     bool isResizable();
-    bool isWritable();
     bool isClustered();
     bool isPartial();
     bool isExported();

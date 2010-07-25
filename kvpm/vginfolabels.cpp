@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -26,13 +26,12 @@ VGInfoLabels::VGInfoLabels(VolGroup *volumeGroup, QWidget *parent) : QFrame(pare
     QLabel *extent_size_label, *size_label, *used_label, 
 	   *free_label, *lvm_fmt_label, *resizable_label, 
 	   *clustered_label, *allocateable_label,
-	   *max_lv_label, *max_pv_label, *policy_label,
-	   *vg_write_mode;
+           *max_lv_label, *max_pv_label, *policy_label;
 
     setFrameStyle(QFrame::Sunken | QFrame::StyledPanel);
     setLineWidth(2);
 
-    QString clustered, resizable, write_mode;
+    QString clustered, resizable;
     QVBoxLayout *upper_layout = new QVBoxLayout();
     QHBoxLayout *hlayout1 = new QHBoxLayout();
     QHBoxLayout *hlayout2 = new QHBoxLayout();
@@ -88,11 +87,6 @@ VGInfoLabels::VGInfoLabels(VolGroup *volumeGroup, QWidget *parent) : QFrame(pare
     else    
 	clustered = "No";
 
-    if(volumeGroup->isWritable())
-	write_mode = "r/w";
-    else
-	write_mode = "r/o";
-    
     if(volumeGroup->isPartial())
     {
         hlayout2->addWidget( new QLabel( i18n("<b>*** Warning: Partial Volume Group ***</b>") ) );
@@ -109,7 +103,6 @@ VGInfoLabels::VGInfoLabels(VolGroup *volumeGroup, QWidget *parent) : QFrame(pare
     policy_label    = new QLabel( i18n("Policy: %1").arg(volumeGroup->getPolicy()) );
     resizable_label = new QLabel( i18n("Resizable: %1").arg(resizable) );
     clustered_label = new QLabel( i18n("Clustered: %1").arg(clustered) );
-    vg_write_mode   = new QLabel( i18n("Access: %1").arg(write_mode) );
     allocateable_label = new QLabel( i18n("Allocateable: %1").arg(sizeToString(volumeGroup->getAllocateableSpace())) );
     extent_size_label  = new QLabel( i18n("Extent size: %1").arg(sizeToString(volumeGroup->getExtentSize())) );
 
@@ -122,7 +115,7 @@ VGInfoLabels::VGInfoLabels(VolGroup *volumeGroup, QWidget *parent) : QFrame(pare
     vlayout4->addWidget(extent_size_label);
     vlayout4->addWidget(policy_label);
     vlayout5->addWidget(resizable_label);
-    vlayout5->addWidget(vg_write_mode);
+    //    vlayout5->addWidget(vg_write_mode); // put something else here
     
     hlayout1->addWidget(label_widget1);
     hlayout1->addWidget(label_widget2);
