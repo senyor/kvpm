@@ -29,7 +29,7 @@ void PhysVol::rescan(pv_t pv)
 
     m_device   = QString( lvm_pv_get_name(pv) );
     m_allocatable = true; // Set this correctly when lvm2apps ready!!!
-
+    qDebug() << "PV Name:  " << m_device;
     // pv is active if any associated lvs are active
     m_active = false;
     
@@ -53,7 +53,7 @@ QString PhysVol::getDeviceName()
 
 QString PhysVol::getUuid()
 {
-    return m_uuid;
+    return m_uuid.trimmed();
 }
 
 bool PhysVol::isAllocateable()

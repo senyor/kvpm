@@ -290,6 +290,7 @@ Segment* LogVol::processSegments(QString segmentData)
     raw_paths = (segmentData.section('|',14,14)).trimmed();
 
     if( raw_paths.size() ){
+        qDebug() << "Starts:  " << raw_paths;
 	devices_and_starts = raw_paths.split(",");
 
 	for(int x = 0; x < devices_and_starts.size(); x++){

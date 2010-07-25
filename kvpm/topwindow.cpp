@@ -199,6 +199,9 @@ void TopWindow::reRun()
     else
         master_list->rescan();
 
+    disconnect(m_tab_widget, SIGNAL(currentIndexChanged()), 
+	    this, SLOT(setupMenus()));
+
     //    m_device_tab->setDevices( master_list->getStorageDevices() );
     m_device_tab->rescan( master_list->getStorageDevices() );
 
@@ -232,7 +235,6 @@ void TopWindow::reRun()
     for(int x = 0; x < (m_tab_widget->getCount() - 1); x++)
         m_tab_widget->getVolumeGroupTab(x)->rescan();
 
-
     setupMenus();
 
     connect(m_tab_widget, SIGNAL(currentIndexChanged()), 
@@ -248,11 +250,12 @@ void TopWindow::setupMenus()
 
     if(index){
         m_vg = master_list->getVolGroupByName( m_tab_widget->getUnmungedText(index) );
-        lvs = m_vg->getLogicalVolumes();
-        
-        for( int x = 0; x < lvs.size(); x++ ){
-            if( lvs[x]->isActive() )
-                has_active = true;
+        if( m_vg != NULL ){
+            lvs = m_vg->getLogicalVolumes();
+            for( int x = 0; x < lvs.size(); x++ ){
+                if( lvs[x]->isActive() )
+                    has_active = true;
+            }
         }
     }
     else 
