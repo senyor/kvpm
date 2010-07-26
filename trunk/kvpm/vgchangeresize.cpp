@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -22,39 +22,57 @@
 #include "volgroup.h"
 
 
-/* This dialog simply toggles the resizable property of
-   the volume group and off */
-
-bool change_vg_resize(VolGroup *VolumeGroup)
+bool change_vg_resize(VolGroup *volumeGroup)
 {
-    QStringList args;
-    QString vg_name, message;
-
-    vg_name = VolumeGroup->getName();
+    VGChangeResizeDialog dialog(volumeGroup);
+    dialog.exec();
     
-    if( VolumeGroup->isResizable() ){
-	message = i18n("Volume group: <b>%1</b> is currently resizeable. "
-		       "Do you wish to change it to <b>not</b> be "
-		       "resizeable?").arg(vg_name);
-    }
-    else{
-	message =i18n("Volume group: <b>%1</b> is currently <b>not</b> resizeable. "
-		      "Do you wish to change it to be resizeable?").arg(vg_name);
-    }
-
-    if(KMessageBox::questionYesNo( 0, message) == 3){      // 3 = "yes" button
-
-	args << "vgchange";
-
-	if( VolumeGroup->isResizable() )
-	    args << "--resizeable" << "n";
-	else
-	    args << "--resizeable" << "y";
-	
-	args << vg_name;
-        ProcessProgress resize(args, i18n("Changing vg resize...") );
+    if(dialog.result() == QDialog::Accepted){
+        ProcessProgress resize(dialog.args(), i18n("Changing volume group resizability..."));
         return true;
     }
+    return false;
+}
+
+VGChangeResizeDialog::VGChangeResizeDialog(VolGroup *volumeGroup, QWidget *parent) : 
+    KDialog(parent), m_vg(volumeGroup)
+{
+    setWindowTitle( i18n("Volume group resizability") );
+
+    QWidget *dialog_body = new QWidget(this);
+    setMainWidget(dialog_body);
+    QVBoxLayout *layout = new QVBoxLayout();
+    dialog_body->setLayout(layout);
+
+    QLabel *name_label = new QLabel( i18n("Volume group: <b>%1</b>").arg(m_vg->getName() ) );
+    name_label->setAlignment(Qt::AlignCenter);
+    layout->addWidget(name_label);
+
+    QGroupBox *group_box = new QGroupBox("Set volume group resizability");
+    layout->addWidget(group_box);
+    QVBoxLayout *group_layout = new QVBoxLayout();
+    group_box->setLayout(group_layout);
+
+    m_resize = new QRadioButton("Allow physical volume addition and removal");
+    m_no_resize = new QRadioButton("Prevent physical volume addition and removal");
+
+    if( m_vg->isResizable() )
+        m_resize->setChecked(true);
     else
-        return false;
+        m_no_resize->setChecked(true);
+
+    group_layout->addWidget(m_resize);
+    group_layout->addWidget(m_no_resize);
+}
+
+QStringList VGChangeResizeDialog::args()
+{
+    QStringList args;
+
+    if( m_resize->isChecked() )
+        args << "vgchange" << "--resizeable" << "y" << m_vg->getName();
+    else
+        args << "vgchange" << "--resizeable" << "n" << m_vg->getName();
+
+    return args;
 }
