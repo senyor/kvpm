@@ -35,6 +35,7 @@ void VolGroup::rescan(lvm_t lvm)
     vg_t lvm_vg = lvm_vg_open(lvm, m_vg_name.toAscii().data(), "r", NULL);
     bool existing_pv;
     bool deleted_pv;
+    m_mda_count = 0;
 
     //    m_lvm_format   = QString("????"); // Set this from liblvm when available, see logvol->getLVMFormat()
     //    m_writable  = true; // ditto
@@ -81,9 +82,12 @@ void VolGroup::rescan(lvm_t lvm)
             }
         }
         
-        for(int x = 0; x < m_member_pvs.size(); x++)
-            m_allocateable_extents += m_member_pvs.last()->getUnused() / (long long) m_extent_size;
-        
+        for(int x = 0; x < m_member_pvs.size(); x++){
+            if( m_member_pvs[x]->isAllocateable() )
+                m_allocateable_extents += m_member_pvs[x]->getUnused() / (long long) m_extent_size;
+            m_mda_count += m_member_pvs[x]->getMDACount();
+        }
+
         lvm_vg_close(lvm_vg);
         
         for(int x = m_member_lvs.size() - 1; x >= 0; x--) 
@@ -283,6 +287,11 @@ int VolGroup::getPhysVolCount()
 int VolGroup::getPhysVolMax()
 {
     return m_pv_max;
+}
+
+int VolGroup::getMDACount()
+{
+    return m_mda_count;
 }
 
 QString VolGroup::getName()
