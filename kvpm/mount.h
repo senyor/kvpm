@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -53,20 +53,21 @@ Q_OBJECT
 	      *m_fs_specific_edit;   // Additional options such as acl and data=ordered
 
     QGroupBox *m_filesystem_journal_box;
-    
+    bool m_is_writable;
+
     QWidget* filesystemBox();
     QWidget* optionsTab();
     QWidget* mountPointBox();
     
  public:
-    MountDialog(QString deviceToMount, QString filesystemType, QWidget *parent = 0);
+    MountDialog(QString deviceToMount, QString filesystemType, bool writable, QWidget *parent = 0);
     
  private slots:
-     void selectMountPoint(bool);
-     void mountFilesystem();
-     void toggleOKButton(const QString);
-     void toggleOKButton(bool);
-     void toggleAdditionalOptions(bool);
+    void selectMountPoint(bool);
+    void mountFilesystem();
+    void toggleOKButton(const QString);
+    void toggleOKButton(bool);
+    void toggleAdditionalOptions(bool);
      
 };
 
