@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -20,6 +20,5 @@
 class LogVol;
 
 bool remove_lv(LogVol *logicalVolume);
-bool remove_lv(QString fullName);
 
 #endif

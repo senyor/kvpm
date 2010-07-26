@@ -378,7 +378,7 @@ void VGTree::mkfsLogicalVolume()
 
 void VGTree::removeLogicalVolume()
 {
-    if( remove_lv(m_vg_name + "/" + m_lv_name) )
+    if( remove_lv(m_lv) )
 	MainWindow->reRun();
 }
 
