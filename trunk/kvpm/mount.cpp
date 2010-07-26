@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -35,10 +35,11 @@
 const int BUFF_LEN = 2000;   // Enough?
 
 
-MountDialog::MountDialog(QString deviceToMount, QString filesystemType, QWidget *parent) : 
+MountDialog::MountDialog(QString deviceToMount, QString filesystemType, bool writable, QWidget *parent) : 
 KDialog(parent),
 m_device_to_mount(deviceToMount),
-m_filesystem_type(filesystemType)
+m_filesystem_type(filesystemType),
+m_is_writable(writable)
 {
 
     KTabWidget *dialog_body = new KTabWidget(this);
@@ -167,7 +168,13 @@ QWidget* MountDialog::optionsTab()
     acl_check      = new QCheckBox("acl");
     user_xattr_check = new QCheckBox("user xattr");
     
-    rw_check->setChecked(true);
+    if(m_is_writable)
+        rw_check->setChecked(true);
+    else{
+        rw_check->setChecked(false);
+        rw_check->setEnabled(false);
+    }
+
     suid_check->setChecked(true);
     dev_check->setChecked(true);
     exec_check->setChecked(true);
@@ -484,7 +491,7 @@ bool mount_filesystem(LogVol *volumeToMount)
     const QString lv_name = volumeToMount->getName();
     const QString vg_name = volumeToMount->getVolumeGroupName();
 
-    MountDialog dialog(prefix + vg_name + "-" + lv_name, volumeToMount->getFilesystem());
+    MountDialog dialog(prefix + vg_name + "-" + lv_name, volumeToMount->getFilesystem(), volumeToMount->isWritable());
     dialog.exec();
 
     if (dialog.result() == QDialog::Accepted)
@@ -497,8 +504,9 @@ bool mount_filesystem(StoragePartition *partition)
 {
     QString device = partition->getName();
     QString filesystem = partition->getFileSystem();
-    
-    MountDialog dialog(device, filesystem);
+    bool writable = true; //  Fix me ... set this correctly in storeage device / partition
+
+    MountDialog dialog(device, filesystem, writable);
     dialog.exec();
 
     if (dialog.result() == QDialog::Accepted)
