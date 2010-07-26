@@ -115,7 +115,7 @@ void MasterList::scanLogicalVolumes()
 
     if( !vg_names.empty() ){    
         arguments << "lvs" << "--all" << "-o" 
-                  << "lv_name,vg_name,lv_attr,lv_size,origin,snap_percent,move_pv,mirror_log,copy_percent,chunksize,seg_count,stripes,stripesize,seg_size,devices,lv_kernel_major,lv_kernel_minor,lv_minor,lv_uuid,vg_fmt,vg_attr"  
+                  << "lv_name,vg_name,lv_attr,lv_size,origin,snap_percent,move_pv,mirror_log,copy_percent,chunksize,seg_count,stripes,stripesize,seg_size,devices,lv_kernel_major,lv_kernel_minor,lv_minor,lv_uuid,vg_fmt,vg_attr,lv_tags"  
                   << "--noheadings" << "--separator" 
                   << "|" << "--nosuffix" 
                   << "--units" << "b" 
