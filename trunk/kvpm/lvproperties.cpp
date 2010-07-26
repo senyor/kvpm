@@ -200,18 +200,33 @@ LVProperties::LVProperties(LogVol *logicalVolume, int segment, QWidget *parent):
 
     }
 
+    QFrame *tags_info_frame = new QFrame();
+    QVBoxLayout *tags_info_layout = new QVBoxLayout();
+    tags_info_frame->setLayout(tags_info_layout);
+    tags_info_frame->setFrameStyle( QFrame::Sunken | QFrame::StyledPanel );
+    tags_info_frame->setLineWidth(2);
+    layout->addWidget(tags_info_frame);
+    temp_label = new QLabel("<b>Tags</b>");
+    temp_label->setAlignment(Qt::AlignCenter);
+    tags_info_layout->addWidget(temp_label);
+    QStringList tags = logicalVolume->getTags();
+
+    for(int x =0; x < tags.size(); x++){
+        temp_label = new QLabel(tags[x]);
+        temp_label->setToolTip(tags[x]);
+        temp_label->setWordWrap(true);
+        tags_info_layout->addWidget(temp_label);
+    }
+
     QFrame *uuid_info_frame = new QFrame();
     QVBoxLayout *uuid_info_layout = new QVBoxLayout();
     uuid_info_frame->setLayout(uuid_info_layout);
     uuid_info_frame->setFrameStyle( QFrame::Sunken | QFrame::StyledPanel );
     uuid_info_frame->setLineWidth(2);
     layout->addWidget(uuid_info_frame);
-
-
     temp_label = new QLabel("<b>Logical volume UUID</b>");
     temp_label->setAlignment(Qt::AlignCenter);
     uuid_info_layout->addWidget( temp_label );
-
     temp_label = new QLabel( logicalVolume->getUuid() );
     temp_label->setToolTip( logicalVolume->getUuid() );
     temp_label->setWordWrap(true);

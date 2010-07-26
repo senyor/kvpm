@@ -43,6 +43,7 @@ class LogVol
     QString m_vg_name;       // associated volume group name
 
     QString m_uuid;
+    QStringList m_tags;
     QStringList m_mount_points;  // empty if not mounted
     QList<int> m_mount_position; // if mountpoint has multiple mounts 
                                  // position 1 is the most recently mounted one.
@@ -95,6 +96,7 @@ class LogVol
     QStringList getDevicePath(int segment);     
     QStringList getDevicePathAll();         // full path of physical volumes for all segments
     QStringList getMountPoints();
+    QStringList getTags();
     QList<int>  getMountPosition();
     long long getSpaceOnPhysicalVolume(QString physicalVolume);
     long long getExtents();

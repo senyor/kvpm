@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2009 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -332,6 +332,14 @@ void LVActionsMenu::setup(LogVol *lv)
 	    remove_mirror_leg_action->setEnabled(false);
 	    filesystem_menu->setEnabled(true);
 	}
+
+        if( !lv->isActive() ){
+            lv_mkfs_action->setEnabled(false);
+            unmount_filesystem_action->setEnabled(false);
+            mount_filesystem_action->setEnabled(false);
+            filesystem_menu->setEnabled(false);
+            snap_create_action->setEnabled(false);
+        }
     }
     else{
 	lv_mkfs_action->setEnabled(false);
