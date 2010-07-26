@@ -88,8 +88,6 @@ void VolGroup::rescan(lvm_t lvm)
             m_mda_count += m_member_pvs[x]->getMDACount();
         }
 
-        lvm_vg_close(lvm_vg);
-        
         for(int x = m_member_lvs.size() - 1; x >= 0; x--) 
             delete m_member_lvs.takeAt(x);
 
@@ -97,6 +95,8 @@ void VolGroup::rescan(lvm_t lvm)
     else
         qDebug() << " Empty pv_dm_list?";
 
+    lvm_vg_close(lvm_vg);
+        
     return;
 }
 

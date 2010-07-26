@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -60,11 +60,10 @@ Q_OBJECT
 	         *anywhere_button, *inherited_button,  // the allocation policy
 	         *cling_button;
 
-    QRadioButton *core_log, 
-                 *disk_log;
+    QRadioButton *m_core_log_button, *m_mirror_log_button, *m_disk_log_button;
 
     bool m_mirror_has_log;             // True if the volume is a mirror with an
-                                       // existing mirror log.
+                                       // existing log.
     
     QList<NoMungeCheck *> m_pv_leg_checks;
     QList<long long> m_pv_leg_size;
