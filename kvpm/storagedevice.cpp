@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2009 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -44,9 +44,9 @@ StorageDevice::StorageDevice( PedDevice *pedDevice,
     m_device_path = QString("%1").arg(pedDevice->path);
 
     if( pedDevice->read_only )
-      m_readonly = true;
+      m_writable = false;
     else
-      m_readonly = false;
+      m_writable = true;
 
     m_busy = ped_device_is_busy(pedDevice);
 
@@ -132,9 +132,9 @@ long long StorageDevice::getPhysicalSectorSize()
     return m_physical_sector_size;
 }
 
-bool StorageDevice::isReadOnly()
+bool StorageDevice::isWritable()
 {
-    return m_readonly;
+    return m_writable;
 }
 
 bool StorageDevice::isBusy()

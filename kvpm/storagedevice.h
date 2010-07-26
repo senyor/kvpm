@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2009 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -34,7 +34,7 @@ class StorageDevice : public QObject
     QString   m_hardware;
     long long m_sector_size;
     long long m_physical_sector_size;
-    bool      m_readonly;
+    bool      m_writable;
     bool      m_busy;
     bool      m_physical_volume;
     PhysVol  *m_pv;
@@ -56,7 +56,7 @@ class StorageDevice : public QObject
     long long getSize();
     long long getSectorSize();
     long long getPhysicalSectorSize();
-    bool isReadOnly();
+    bool isWritable();
     bool isBusy();
     bool isPhysicalVolume();
     PhysVol *getPhysicalVolume();

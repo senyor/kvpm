@@ -504,7 +504,7 @@ bool mount_filesystem(StoragePartition *partition)
 {
     QString device = partition->getName();
     QString filesystem = partition->getFileSystem();
-    bool writable = true; //  Fix me ... set this correctly in storeage device / partition
+    bool writable = partition->isWritable();
 
     MountDialog dialog(device, filesystem, writable);
     dialog.exec();

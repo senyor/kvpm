@@ -49,7 +49,7 @@ DeviceProperties::DeviceProperties( StorageDevice *Device, QWidget *parent) : QW
     basic_info_layout->addWidget( new QLabel( i18n("Logical sector size: %1").arg( Device->getSectorSize() ) ) );
     basic_info_layout->addWidget( new QLabel( i18n("Physical sector size: %1").arg( Device->getPhysicalSectorSize() ) ) );
  
-    if( Device->isReadOnly() )
+    if( !Device->isWritable() )
         basic_info_layout->addWidget( new QLabel( i18n("Read only") ) );
     else
         basic_info_layout->addWidget( new QLabel( i18n("Read/write") ) );

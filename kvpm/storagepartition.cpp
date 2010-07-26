@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2009 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -36,6 +36,7 @@ StoragePartition::StoragePartition(PedPartition *part,
     m_last_sector    = (ped_geometry).end;
     m_partition_size = (ped_geometry.length) * sector_size; // in bytes
     m_ped_type = m_ped_partition->type;
+    m_is_writable = !ped_device->read_only;
     m_is_pv    = false;
     m_is_normal  = false;
     m_is_logical = false;
@@ -197,6 +198,11 @@ bool StoragePartition::isMounted()
 bool StoragePartition::isEmpty()
 {
     return m_is_empty;
+}
+
+bool StoragePartition::isWritable()
+{
+    return m_is_writable;
 }
 
 bool StoragePartition::isNormal()
