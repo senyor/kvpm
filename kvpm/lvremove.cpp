@@ -21,30 +21,29 @@
 #include "logvol.h"
 #include "processprogress.h"
 
+
 bool remove_lv(LogVol *logicalVolume)
 {
-    return (remove_lv( logicalVolume->getFullName() ));
-}
-
-bool remove_lv(QString fullName)
-{
+    QString full_name = logicalVolume->getFullName();
     QStringList args;
     
     QString message = i18n("Are you certain you want to delete the logical volume named: %1 "
-			   "Any data on it will be lost.").arg("<b>" + fullName + "</b>");
+			   "Any data on it will be lost.").arg("<b>" + full_name + "</b>");
 
     if( KMessageBox::warningYesNo( 0, message) == 3){  // 3 = yes button
-    
-	args << "lvchange" 
-	     << "-an" 
-	     << fullName;
+        
+        if( logicalVolume->isActive() && !logicalVolume->isSnap() && !logicalVolume->isOrigin() ){
+            args << "lvchange" 
+                 << "-an" 
+                 << full_name;
 
 	ProcessProgress deactive( args, i18n("Deactivating volume..."), false);
-
+        }
+        
         args.clear();
 	args << "lvremove" 
 	     << "--force" 
-	     << fullName;
+	     << full_name;
 
 	ProcessProgress remove( args, i18n("Removing volume..."), false);
 
