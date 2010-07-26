@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -111,9 +111,12 @@ void LVChangeDialog::buildGeneralTab()
     layout->addWidget(ro_check);
     layout->addWidget(refresh_check);
 
-    if(m_lv->getState() != "Unavailable")
+    if( m_lv->isActive() )
 	available_check->setChecked(true);
-    
+
+    if( m_lv->isMounted() )    
+        available_check->setEnabled(false);
+
     if(m_lv->getPolicy() == "Contiguous")
 	contig_check->setChecked(true);
 
