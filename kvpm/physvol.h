@@ -30,6 +30,7 @@ class PhysVol
     VolGroup *m_vg;        // all pvs now must be in a vg
     bool m_active;
     bool m_allocatable;
+    uint64_t  m_mda_count;    // number of metadata areas
     long long m_size;         // size in bytes of physical volume
     long long m_device_size;  // size in bytes of underlying device
     long long m_unused;       // free space in bytes
@@ -50,7 +51,7 @@ class PhysVol
     long long getLastUsedExtent();  // needed for minimum shrink size determination
     void setLastUsedExtent(long long last);
     int getPercentUsed();           // 0 - 100
-    
+    long long getMDACount();    
 };
 
 #endif

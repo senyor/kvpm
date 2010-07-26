@@ -26,7 +26,7 @@ VGInfoLabels::VGInfoLabels(VolGroup *volumeGroup, QWidget *parent) : QFrame(pare
     QLabel *extent_size_label, *size_label, *used_label, 
 	   *free_label, *lvm_fmt_label, *resizable_label, 
 	   *clustered_label, *allocateable_label,
-           *max_lv_label, *max_pv_label, *policy_label;
+           *max_lv_label, *max_pv_label, *policy_label, *mda_label;
 
     setFrameStyle(QFrame::Sunken | QFrame::StyledPanel);
     setLineWidth(2);
@@ -105,6 +105,7 @@ VGInfoLabels::VGInfoLabels(VolGroup *volumeGroup, QWidget *parent) : QFrame(pare
     clustered_label = new QLabel( i18n("Clustered: %1").arg(clustered) );
     allocateable_label = new QLabel( i18n("Allocateable: %1").arg(sizeToString(volumeGroup->getAllocateableSpace())) );
     extent_size_label  = new QLabel( i18n("Extent size: %1").arg(sizeToString(volumeGroup->getExtentSize())) );
+    mda_label          = new QLabel( i18n("MDA count: %1").arg( volumeGroup->getMDACount() ) );
 
     vlayout1->addWidget(size_label);
     vlayout1->addWidget(allocateable_label);
@@ -115,7 +116,7 @@ VGInfoLabels::VGInfoLabels(VolGroup *volumeGroup, QWidget *parent) : QFrame(pare
     vlayout4->addWidget(extent_size_label);
     vlayout4->addWidget(policy_label);
     vlayout5->addWidget(resizable_label);
-    //    vlayout5->addWidget(vg_write_mode); // put something else here
+    vlayout5->addWidget(mda_label);
     
     hlayout1->addWidget(label_widget1);
     hlayout1->addWidget(label_widget2);

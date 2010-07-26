@@ -37,7 +37,7 @@ void PhysVol::rescan(pv_t pv)
     m_unused        = lvm_pv_get_free(pv);
     m_size          = lvm_pv_get_size(pv);
     m_uuid          = QString( lvm_pv_get_uuid(pv) );
-
+    m_mda_count     = lvm_pv_get_mda_count(pv);
     return;
 }
 
@@ -69,6 +69,11 @@ bool PhysVol::isActive()
 void PhysVol::setActive()
 {
     m_active = true;
+}
+
+long long PhysVol::getMDACount()
+{
+    return m_mda_count;
 }
 
 long long PhysVol::getSize()
