@@ -38,6 +38,7 @@ class StoragePartition
     long long m_partition_size;
     long long m_first_sector;
     long long m_last_sector;
+    bool m_is_writable;
     bool m_is_pv;
     bool m_is_mounted;
     bool m_is_empty;
@@ -66,6 +67,7 @@ public:
     long long getSize();
     long long getFirstSector();
     long long getLastSector();
+    bool isWritable();
     bool isPV();
     bool isMounted();
     bool isEmpty();
