@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2009 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -35,9 +35,8 @@ bool add_mirror(LogVol *logicalVolume)
     ProcessProgress add_mirror(dialog.arguments(), i18n("Changing Mirror..."), true);
     return true;
   }
-  else{
-    return false;
-  }
+
+  return false;
 }
 
 
@@ -136,16 +135,18 @@ void AddMirrorDialog::setupPhysicalTab()
 
   QGroupBox *log_box = new QGroupBox( i18n("Mirror logging") );
   QVBoxLayout *log_box_layout = new QVBoxLayout;
-  core_log = new QRadioButton( i18n("Memory based log") );
-  disk_log = new QRadioButton( i18n("Disk based log") );
-  disk_log->setChecked(true);
-  log_box_layout->addWidget(disk_log);
-  log_box_layout->addWidget(core_log);
+  m_core_log_button = new QRadioButton( i18n("Memory based log") );
+  m_disk_log_button = new QRadioButton( i18n("Disk based log") );
+  m_mirror_log_button = new QRadioButton( i18n("Mirrored disk based log") );
+  m_disk_log_button->setChecked(true);
+  log_box_layout->addWidget(m_core_log_button);
+  log_box_layout->addWidget(m_disk_log_button);
+  log_box_layout->addWidget(m_mirror_log_button);
   log_box->setLayout(log_box_layout);
   m_physical_layout->addWidget(log_box);
   m_physical_layout->addStretch();
 
-  connect(disk_log, SIGNAL(toggled(bool)),
+  connect(m_disk_log_button, SIGNAL(toggled(bool)),
 	  this, SLOT(comparePvsNeededPvsAvailable(bool)));
 
   m_mirror_group = new QGroupBox( i18n("Manually select physical volumes") );
@@ -275,8 +276,12 @@ QStringList AddMirrorDialog::arguments()
 
     args << "lvconvert";
     
-    if(core_log->isChecked())
-	args << "--corelog";
+    if(m_core_log_button->isChecked())
+	args << "--mirrorlog" << "core";
+    else if(m_mirror_log_button->isChecked())
+        args << "--mirrorlog" << "mirrored";
+    else
+        args << "--mirrorlog" << "disk";
 
     args << "--mirrors" 
 	 << mirror_count_arg
@@ -328,7 +333,7 @@ void AddMirrorDialog::comparePvsNeededPvsAvailable()
     }
   }
 
-  if( !m_mirror_has_log && disk_log->isChecked() ){
+  if( !m_mirror_has_log && m_disk_log_button->isChecked() ){
     leg_pvs_needed_size += (m_lv->getVolumeGroup())->getExtentSize(); // logs take 1 extent 
 
     if( leg_pvs_checked_size >= leg_pvs_needed_size &&
