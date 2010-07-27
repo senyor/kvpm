@@ -245,7 +245,7 @@ void VGTree::insertMirrorLegItems(LogVol *mirrorVolume, QTreeWidgetItem *item)
 	      leg_volume->isMirrorLeg() ||
 	      leg_volume->isVirtual() ||
 	      leg_volume->isMirror() ) ){
-	    
+
 	    leg_data.clear();
 
 	    if( leg_volume->getSegmentCount() == 1 ) {	    
@@ -277,9 +277,9 @@ void VGTree::insertMirrorLegItems(LogVol *mirrorVolume, QTreeWidgetItem *item)
 
 		leg_item->setData(1, Qt::UserRole, 0);  
 
-		if( leg_volume->isMirror() ) 
-		    insertMirrorLegItems(leg_volume, leg_item);    
-	    }
+		if( leg_volume->isMirror() )
+                    insertMirrorLegItems(leg_volume, leg_item);    
+            }
 	    else {
 
 		leg_data << leg_volume->getName() 
