@@ -51,12 +51,6 @@ VGTree::VGTree(VolGroup *VolumeGroup) : QTreeWidget(),
 		  << "Snap/Move" << "State" << "Access" ;
 
     setHeaderLabels(header_labels);
-
-    connect(this, SIGNAL(itemExpanded(QTreeWidgetItem *)), 
-	    this, SLOT(adjustColumnWidth(QTreeWidgetItem *)));
-
-    connect(this, SIGNAL(itemCollapsed(QTreeWidgetItem *)), 
-	    this, SLOT(adjustColumnWidth(QTreeWidgetItem *)));
 }
 
 void VGTree::loadData()
@@ -68,6 +62,12 @@ void VGTree::loadData()
     bool current_is_expanded = false;              // Is that current item expanded
     QStringList lv_data;
     QString current_lv_name;
+
+    disconnect(this, SIGNAL(itemExpanded(QTreeWidgetItem *)), 
+	    this, SLOT(adjustColumnWidth(QTreeWidgetItem *)));
+
+    disconnect(this, SIGNAL(itemCollapsed(QTreeWidgetItem *)), 
+	    this, SLOT(adjustColumnWidth(QTreeWidgetItem *)));
 
     // Get the currently selected item so it can be reselected
     // after the tree is cleared and all the new data is loaded.
@@ -164,8 +164,6 @@ void VGTree::loadData()
         }
     }
     insertTopLevelItems(0, m_lv_tree_items);
-    resizeColumnToContents(0);
-    setHiddenColumns();
 
     if( m_lv_tree_items.size() ){
         if( !current_item )
@@ -176,6 +174,14 @@ void VGTree::loadData()
         }
     }
 
+    connect(this, SIGNAL(itemExpanded(QTreeWidgetItem *)), 
+	    this, SLOT(adjustColumnWidth(QTreeWidgetItem *)));
+
+    connect(this, SIGNAL(itemCollapsed(QTreeWidgetItem *)), 
+	    this, SLOT(adjustColumnWidth(QTreeWidgetItem *)));
+
+    setHiddenColumns();
+    resizeColumnToContents(0);
     return;
 }
 
@@ -457,5 +463,5 @@ void VGTree::unmountFilesystem()
 
 void VGTree::adjustColumnWidth(QTreeWidgetItem *)
 {
-    resizeColumnToContents ( 0 );
+    resizeColumnToContents (0);
 }
