@@ -241,11 +241,12 @@ void LVActionsMenu::setup(LogVol *lv)
 	    remove_mirror_action->setEnabled(false);
 	    lv_rename_action->setEnabled(false);
 
-	    if( lv->isMirrorLeg() )
+	    if( !lv->isMirrorLog() )
 		remove_mirror_leg_action->setEnabled(true);
-	    else
+	    else{
 		remove_mirror_leg_action->setEnabled(false);
-
+                mirror_menu->setEnabled(false);
+            }
 	    snap_create_action->setEnabled(false);
 	    filesystem_menu->setEnabled(false);
 	}
