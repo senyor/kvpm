@@ -367,9 +367,11 @@ QWidget* LVCreateDialog::createPhysicalTab()
     m_mirror_box->setChecked(false);
     m_mirror_box->setLayout(mirror_layout);
 
+    m_mirrored_log = new QRadioButton( i18n("Mirrored disk based log") );
     m_disk_log = new QRadioButton( i18n("Disk based log") );
     m_core_log = new QRadioButton( i18n("Memory based log") );
     m_disk_log->setChecked(true);
+    mirror_layout->addWidget(m_mirrored_log);
     mirror_layout->addWidget(m_disk_log);
     mirror_layout->addWidget(m_core_log);
 
@@ -875,7 +877,9 @@ QStringList LVCreateDialog::argumentsLV()
 	    if( m_mirror_box->isChecked() ){
 		args << "--mirrors" << QString("%1").arg( getMirrorCount() - 1 );
 
-		if( m_disk_log->isChecked() )
+		if( m_mirrored_log->isChecked() )
+		    args << "--mirrorlog" << "mirrored";
+		else if( m_disk_log->isChecked() )
 		    args << "--mirrorlog" << "disk";
 		else
 		    args << "--mirrorlog" << "core";
