@@ -81,7 +81,7 @@ LogVol::LogVol(QStringList lvDataList, MountInformationList *mountInformationLis
 	m_type = "mirror log";
 	m_mirror_log = true;
 	break;
-    case 'M':
+    case 'M':                // mirror logs can be mirrors themselves -- see below
 	m_type = "mirror";
 	m_mirror = true;
 	break;
@@ -202,27 +202,41 @@ LogVol::LogVol(QStringList lvDataList, MountInformationList *mountInformationLis
 	m_open = false;
     }
 
+    if( m_lv_name.contains("_mlog", Qt::CaseSensitive) ){
+        m_mirror_log = true;    // this needs to be here in case it is a mirrored mirror log
+        m_lv_fs = "mirror log";
+    }
+    else
+        m_lv_fs = fsprobe_getfstype2( "/dev/mapper/" + m_vg_name + "-" + m_lv_name );
+
     m_size         = (lvdata.section('|',3,3)).toLongLong();
 
     if(m_snap){
 	m_origin       =  lvdata.section('|',4,4);
 	m_snap_percent = (lvdata.section('|',5,5)).toDouble();
     }
-    else if(m_mirror_leg){
+    else if(m_mirror_leg && !m_mirror_log){
 	m_origin = m_lv_name;
 	m_origin.remove(0,1);
 	m_origin.truncate( m_origin.indexOf("_mimage_") );
 	m_snap_percent = 0.0;
     }
-    else if(m_mirror_log){
+    else if(m_mirror_log && !m_mirror_leg){
 	m_origin = m_lv_name;
 	m_origin.remove(0,1);
 	m_origin.truncate( m_origin.indexOf("_mlog]") );
 	m_snap_percent = 0.0;
     }
+    else if(m_mirror_log && m_mirror_leg){
+
+	m_origin = m_lv_name;
+	m_origin.truncate( m_origin.indexOf("_mimage_") );
+        m_origin.append("]");
+	m_snap_percent = 0.0;
+
+    }
     else if( m_mirror || m_virtual ){
-	if( m_lv_name.contains("_mimagetmp_") )
-	{
+	if( m_lv_name.contains("_mimagetmp_") ){
 	    m_origin = m_lv_name;
 	    m_origin.remove(0,1);
 	    m_origin.truncate( m_origin.indexOf("_mimagetmp_") );
@@ -253,11 +267,6 @@ LogVol::LogVol(QStringList lvDataList, MountInformationList *mountInformationLis
     m_vg_attr = lvdata.section('|',20,20);
     m_tags    = lvdata.section('|',21,21).split(',', QString::SkipEmptyParts);
 
-    if( m_lv_name.contains("_mlog", Qt::CaseSensitive) )
-        m_lv_fs = "mirror log";
-    else
-        m_lv_fs = fsprobe_getfstype2( "/dev/mapper/" + m_vg_name + "-" + m_lv_name );
-
     m_mount_info_list = mountInformationList->getMountInformation( "/dev/mapper/" + 
 							 m_vg_name + "-" + m_lv_name );
 
@@ -274,7 +283,7 @@ LogVol::LogVol(QStringList lvDataList, MountInformationList *mountInformationLis
     
     for(int x = 0; x < m_seg_total ; x++)
 	m_segments.append(processSegments(lvDataList[x]));
-    
+
 }
 
 Segment* LogVol::processSegments(QString segmentData)
