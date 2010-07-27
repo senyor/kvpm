@@ -76,8 +76,12 @@ VolumeGroupTab::VolumeGroupTab(VolGroup *volumeGroup, QWidget *parent) : QWidget
 
 void VolumeGroupTab::rescan()
 {
-    disconnect(m_vg_tree, 0, m_lv_properties_stack, 0);
-    disconnect(m_pv_tree, 0, m_pv_properties_stack, 0);
+    disconnect(m_vg_tree, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)), 
+	    m_lv_properties_stack, SLOT(changeLVStackIndex(QTreeWidgetItem*, QTreeWidgetItem*)));
+
+    disconnect(m_pv_tree, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)), 
+	    m_pv_properties_stack, SLOT(changePVStackIndex(QTreeWidgetItem*, QTreeWidgetItem*)));
+
 
     if(m_vg_info_labels){
         m_layout->removeWidget(m_vg_info_labels);
