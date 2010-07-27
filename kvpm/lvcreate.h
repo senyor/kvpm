@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -95,8 +95,7 @@ Q_OBJECT
 	          *anywhere_button, *inherited_button,  // the allocation policy
 	          *cling_button;
 
-     QRadioButton *m_disk_log,      // if this is a mirror, which kind of log
-	          *m_core_log;      // do we want
+     QRadioButton *m_mirrored_log, *m_disk_log, *m_core_log;
      
      QWidget* createGeneralTab();
      QWidget* createAdvancedTab();
