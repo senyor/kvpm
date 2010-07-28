@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -54,7 +54,6 @@ bool move_pv(LogVol *logicalVolume)
 
 bool restart_pvmove()
 {
-
     QStringList args;
     QString message = i18n("Do you wish to restart all interupted physical volume moves?");
 
@@ -196,7 +195,6 @@ void PVMoveDialog::buildDialog()
     QRadioButton *radio_button;
     NoMungeCheck *check_box;
     long long pv_free_space;
-    long long pv_used_space;
     
     setWindowTitle( i18n("Move Physical Volume Extents") );
     QWidget *dialog_body = new QWidget(this);
@@ -230,11 +228,11 @@ void PVMoveDialog::buildDialog()
 	    radio_buttons.append(radio_button);
 
 	    if(move_lv)
-	        pv_used_space = m_lv->getSpaceOnPhysicalVolume(m_source_pvs[x]->getDeviceName());
+	        m_pv_used_space = m_lv->getSpaceOnPhysicalVolume(m_source_pvs[x]->getDeviceName());
 	    else
-	        pv_used_space = m_source_pvs[x]->getSize() - m_source_pvs[x]->getUnused();
+	        m_pv_used_space = m_source_pvs[x]->getSize() - m_source_pvs[x]->getUnused();
 
-	    label = new QLabel( i18n("Used space: %1").arg(sizeToString( pv_used_space ) ));
+	    label = new QLabel( i18n("Used space: %1").arg(sizeToString( m_pv_used_space ) ));
 	    radio_label_layout->addWidget(label);
 	    
 	    connect(radio_button, SIGNAL(toggled(bool)), 
@@ -246,11 +244,11 @@ void PVMoveDialog::buildDialog()
  	radio_button_layout->addWidget( new QLabel( m_source_pvs[0]->getDeviceName() ) );
 
 	if(move_lv)
-	    pv_used_space = m_lv->getSpaceOnPhysicalVolume(m_source_pvs[0]->getDeviceName());
+	    m_pv_used_space = m_lv->getSpaceOnPhysicalVolume(m_source_pvs[0]->getDeviceName());
 	else
-	    pv_used_space = m_source_pvs[0]->getSize() - m_source_pvs[0]->getUnused();
+	    m_pv_used_space = m_source_pvs[0]->getSize() - m_source_pvs[0]->getUnused();
     
-	label = new QLabel("Used space: " + sizeToString( pv_used_space ) );
+	label = new QLabel("Used space: " + sizeToString( m_pv_used_space ) );
 	radio_label_layout->addWidget(label);
     }
 
@@ -322,6 +320,8 @@ void PVMoveDialog::calculateSpace(bool)
 	    needed_space_total = m_lv->getSpaceOnPhysicalVolume( device_name );
 	}
     }
+    else
+        needed_space_total = m_pv_used_space; 
 	    
     if(free_space_total < needed_space_total)
 	enableButtonOk(false);
