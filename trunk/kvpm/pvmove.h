@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -40,6 +40,7 @@ Q_OBJECT
     QLabel *free_space_total_label;
     
     LogVol   *m_lv;
+    long long m_pv_used_space;
 
     QList<PhysVol *> m_source_pvs;         // source physical volumes
     QList<PhysVol *> m_destination_pvs;    // destination physical volumes
