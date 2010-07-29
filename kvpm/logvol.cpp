@@ -321,7 +321,7 @@ int LogVol::getSegmentCount()
     return m_seg_total;
 }
 
-int LogVol::getSegmentStripes(int segment)
+int LogVol::getSegmentStripes(int segment)  // number of mirrors if this is a mirror
 {
     return m_segments[segment]->m_stripes;
 }

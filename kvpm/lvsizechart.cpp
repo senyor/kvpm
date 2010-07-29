@@ -68,7 +68,7 @@ void LVSizeChart::populateChart()
 	    if( m_lv->isUnderConversion() )
 	        seg_ratio *= ( m_lv->getSegmentStripes(0) + 1);
 	    else if( m_lv->isMirror() )
-	        seg_ratio *= m_lv->getSegmentStripes(0);
+	        seg_ratio *= m_lv->getSegmentStripes(0); // number of mirror legs
 
 	    m_ratios.append(seg_ratio);
 	    widget = new LVChartSeg(m_vg, m_lv, usage, this);
@@ -78,7 +78,7 @@ void LVSizeChart::populateChart()
     }
 
     if( free_extents && !m_vg->isExported() ){ // only create a free space widget if we have some
-	seg_ratio = free_extents / (double) total_extents;
+	seg_ratio = (free_extents / (double) total_extents) + 0.02; // allow a little "stretch" 0.02
 	usage = "freespace" ;
 	widget = new LVChartSeg(m_vg, 0, usage, this);
 	m_widgets.append(widget);
