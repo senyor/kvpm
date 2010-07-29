@@ -185,8 +185,11 @@ void LVActionsMenu::setup(LogVol *lv)
 		lv_reduce_action->setEnabled(false);
                 pv_move_action->setEnabled(false);
 
-                if( lv->isSnap() )
+                if( lv->isSnap() ){
                     snap_create_action->setEnabled(false);
+                    lv_extend_action->setEnabled(true);
+                    lv_reduce_action->setEnabled(true);
+                }
                 else
                     snap_create_action->setEnabled(true);
 
@@ -195,10 +198,9 @@ void LVActionsMenu::setup(LogVol *lv)
             else if( lv->isMirror() ){
                 add_mirror_action->setEnabled(true);
 		remove_mirror_action->setEnabled(true);
-                lv_extend_action->setEnabled(false);
-		lv_reduce_action->setEnabled(false);
+                lv_extend_action->setEnabled(true);
+                lv_reduce_action->setEnabled(true);
                 pv_move_action->setEnabled(false);
-                snap_create_action->setEnabled(false);
             }
 	    else{
                 add_mirror_action->setEnabled(true);
