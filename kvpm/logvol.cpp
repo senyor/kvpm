@@ -284,6 +284,11 @@ LogVol::LogVol(QStringList lvDataList, MountInformationList *mountInformationLis
     for(int x = 0; x < m_seg_total ; x++)
 	m_segments.append(processSegments(lvDataList[x]));
 
+    QStringList pvs = getDevicePathAll();
+    for(int x =0; x < pvs.size(); x++){
+        if( pvs[x].contains("_mimage_") )
+            m_mirror = true;
+    }
 }
 
 Segment* LogVol::processSegments(QString segmentData)
