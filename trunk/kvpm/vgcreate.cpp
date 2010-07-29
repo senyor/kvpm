@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2009 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -50,7 +50,12 @@ bool create_vg()
             }
         }
     }
-    
+
+    for(int x = device_names.size() - 1; x >= 0 ; x--){
+        if( device_names[x].contains("/dev/mapper/") )
+            device_names.removeAt(x);
+    }
+
     if( device_names.size() > 0 ){
         VGCreateDialog dialog( device_names );
         dialog.exec();
