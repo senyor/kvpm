@@ -36,7 +36,7 @@ bool lv_create(VolGroup *volumeGroup)
     LVCreateDialog dialog(volumeGroup);
     dialog.exec();
     if(dialog.result() == QDialog::Accepted){
-        ProcessProgress create_lv(dialog.argumentsLV(), i18n("Creating volume..."), false);
+        ProcessProgress create_lv(dialog.argumentsLV(), i18n("Creating volume..."), true);
 	return true;
     }
     else
@@ -48,7 +48,7 @@ bool snapshot_create(LogVol *logicalVolume)
     LVCreateDialog dialog(logicalVolume, true);
     dialog.exec();
     if(dialog.result() == QDialog::Accepted){
-        ProcessProgress create_lv(dialog.argumentsLV(), i18n("Creating snapshot..."), false);
+        ProcessProgress create_lv(dialog.argumentsLV(), i18n("Creating snapshot..."), true);
 	return true;
     }
     else
