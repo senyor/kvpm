@@ -34,6 +34,14 @@ MasterList::MasterList() : QObject()
 
 void MasterList::rescan()
 {
+
+    QEventLoop *m_loop = new QEventLoop(this);
+    KProgressDialog *m_progress_dialog = new KProgressDialog(NULL, i18n("progress"), i18n("scanning volumes"));
+    m_progress_dialog->setAllowCancel(false);
+    m_progress_dialog->setMinimumDuration( 250 ); 
+    QProgressBar *progress_bar = m_progress_dialog->progressBar();
+    progress_bar->setRange(0,0);
+
     lvm_t lvm = lvm_init(NULL);
     lvm_scan(lvm);
     scanVolumeGroups(lvm);
@@ -41,6 +49,9 @@ void MasterList::rescan()
 
     scanLogicalVolumes();
     scanStorageDevices();
+        
+    m_loop->exit();
+    m_progress_dialog->close();
 
     return;
 }
