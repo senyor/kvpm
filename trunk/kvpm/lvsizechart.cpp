@@ -63,7 +63,12 @@ void LVSizeChart::populateChart()
 
 	    usage = m_lv->getFilesystem();
 
-	    seg_ratio = m_lv->getExtents() / (double) total_extents;
+            // account for space taken by log. TODO... really check for a log
+            // and see if it is mirrored (+2)
+            if( m_lv->isMirror() ) 
+                seg_ratio = (m_lv->getExtents() + 1) / (double) total_extents;
+            else
+                seg_ratio = m_lv->getExtents() / (double) total_extents;
 
 	    if( m_lv->isUnderConversion() )
 	        seg_ratio *= ( m_lv->getSegmentStripes(0) + 1);
@@ -104,7 +109,7 @@ void LVSizeChart::populateChart()
     m_widgets[0]->setMaximumWidth(max_segment_width); 
 
     for(int x =  m_widgets.size() - 1; x >= 1 ; x--){
-	max_segment_width = (int) ( (width() * m_ratios[x]) - 2 );
+	max_segment_width = qRound( ( (double)width() * m_ratios[x]) );
 	
 	if( max_segment_width < 1 )
 	    max_segment_width = 1;
@@ -124,7 +129,7 @@ void LVSizeChart::resizeEvent(QResizeEvent *event)
     m_widgets[0]->setMaximumWidth(max_segment_width); 
     
     for(int x =  m_widgets.size() - 1; x >= 1 ; x--){
-	max_segment_width = (int) ( (width() * m_ratios[x]) - 2 );
+	max_segment_width = qRound( ( (double)width() * m_ratios[x]) );
 
 	if( max_segment_width < 1 )
 	    max_segment_width = 1;
