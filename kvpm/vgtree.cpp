@@ -91,9 +91,8 @@ void VGTree::loadData()
 	lv = logical_volumes[x];
 	lv_data.clear();
 
-	if( ( !lv->isMirrorLeg() ) && 
-	    ( !lv->isMirrorLog() ) &&
-	    ( !lv->isVirtual() ) &&
+	if( ( !lv->isMirrorLeg() ) && ( !lv->isMirrorLog() ) &&
+	    ( !(lv->isVirtual() && ( !lv->isOrphan() )) ) &&
 	    ( !(lv->isMirror() && lv->getOrigin() != "" ) ) ){
 	    
 	    if( lv->getSegmentCount() == 1 ) {

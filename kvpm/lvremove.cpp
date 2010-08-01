@@ -30,6 +30,8 @@ bool remove_lv(LogVol *logicalVolume)
     QString message = i18n("Are you certain you want to delete the logical volume named: %1 "
 			   "Any data on it will be lost.").arg("<b>" + full_name + "</b>");
 
+    full_name.remove('[').remove(']');
+
     if( KMessageBox::warningYesNo( 0, message) == 3){  // 3 = yes button
         
         if( logicalVolume->isActive() && !logicalVolume->isSnap() && !logicalVolume->isOrigin() ){
