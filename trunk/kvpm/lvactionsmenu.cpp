@@ -214,6 +214,22 @@ void LVActionsMenu::setup(LogVol *lv)
 	    remove_mirror_leg_action->setEnabled(false);
 	    filesystem_menu->setEnabled(true);
 	}
+        else if( lv->isOrphan() ){
+	    lv_mkfs_action->setEnabled(false);
+	    lv_remove_action->setEnabled(true);
+	    unmount_filesystem_action->setEnabled(false);
+	    mount_filesystem_action->setEnabled(false);
+	    add_mirror_action->setEnabled(false);
+	    lv_change_action->setEnabled(false);
+	    lv_extend_action->setEnabled(false);
+	    lv_reduce_action->setEnabled(false);
+	    lv_rename_action->setEnabled(false);
+	    pv_move_action->setEnabled(false);
+	    remove_mirror_action->setEnabled(false);
+	    remove_mirror_leg_action->setEnabled(false);
+	    snap_create_action->setEnabled(false);
+	    filesystem_menu->setEnabled(false);
+        }
 	else if( lv->isPvmove() ){
 	    lv_mkfs_action->setEnabled(false);
 	    lv_remove_action->setEnabled(false);
