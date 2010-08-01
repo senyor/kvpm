@@ -227,6 +227,19 @@ void VolGroup::addLogicalVolume(LogVol *logicalVolume)
         }
         m_member_pvs[z]->setLastUsedExtent(last_used_extent);
     }
+
+    // We are assuming mirrored logs only come in twos.
+
+    LogVol *origin;
+    if( logicalVolume->isMirrorLog() && !logicalVolume->isMirrorLeg() ){
+        origin = getLogVolByName( logicalVolume->getOrigin() ); 
+        if(origin){
+            if( logicalVolume->isMirror() )
+                origin->setLogCount(2);
+            else
+                origin->setLogCount(1);
+        }
+    }
 }
 
 long VolGroup::getExtentSize()

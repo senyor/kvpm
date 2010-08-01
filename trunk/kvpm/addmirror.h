@@ -26,7 +26,7 @@
 #include <QVBoxLayout>
 
 class KIntSpinBox;
-
+class KComboBox;
 class LogVol;
 class NoMungeCheck;
 class VolGroup;
@@ -43,12 +43,14 @@ Q_OBJECT
 
     KTabWidget *m_tab_widget;
     KIntSpinBox *m_add_mirrors_spin;
-
+    KIntSpinBox *m_stripes_number_spin;
     QVBoxLayout *m_general_layout;
     QVBoxLayout *m_physical_layout;
 
-    QGroupBox *m_mirror_group;
+    QGroupBox *m_pv_box;
     QGroupBox *m_add_mirror_box;
+    QGroupBox *m_stripe_box;
+    KComboBox *m_stripe_size_combo;
 
     QString m_logical_volume_name;
     LogVol *m_lv;                      // The volume we are adding a mirror to. 
@@ -60,10 +62,9 @@ Q_OBJECT
 	         *anywhere_button, *inherited_button,  // the allocation policy
 	         *cling_button;
 
-    QRadioButton *m_core_log_button, *m_mirror_log_button, *m_disk_log_button;
+    QRadioButton *m_core_log_button, *m_mirrored_log_button, *m_disk_log_button;
 
-    bool m_mirror_has_log;             // True if the volume is a mirror with an
-                                       // existing log.
+    bool m_log_count;             // Number of disk logs the mirror already has
     
     QList<NoMungeCheck *> m_pv_leg_checks;
     QList<long long> m_pv_leg_size;

@@ -55,6 +55,7 @@ class LogVol
     int m_seg_total;             // total number of segments in logical volume
     int m_major_device;          // Unix device major number, if set
     int m_minor_device;          // Unix device minor number, if set
+    int m_log_count;             // if a mirror -- how many logs
     bool m_virtual;              // virtual volume
     bool m_under_conversion;     // Is going to be a mirrored volume
     bool m_mirror;               // Is a mirrored volume
@@ -67,6 +68,7 @@ class LogVol
     bool m_active;
     bool m_mounted;              // has a mounted filesystem
     bool m_open;                 // device is open
+    bool m_orphan;               // virtual device with no pvs
     bool m_pvmove;               // is a pvmove temporary volume
     bool m_snap;                 // is a snapshot volume
     bool m_writable;
@@ -107,6 +109,8 @@ class LogVol
     double getCopyPercent();
     int getMinorDevice();
     int getMajorDevice();
+    int getLogCount();
+    void setLogCount(int count);
     bool isActive();
     bool isFixed();
     bool isLocked();
@@ -116,6 +120,7 @@ class LogVol
     bool isMounted();
     bool isOpen();
     bool isOrigin();
+    bool isOrphan();
     bool isPersistant();
     bool isPvmove();
     bool isSnap();

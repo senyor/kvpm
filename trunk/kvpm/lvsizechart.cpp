@@ -56,17 +56,15 @@ void LVSizeChart::populateChart()
     for(int x = 0; x < lv_count; x++){
 	m_lv = logical_volumes[x];
 
-	if( !m_lv->isMirrorLeg() && 
+ 	if( !m_lv->isMirrorLeg() && 
 	    !m_lv->isMirrorLog() &&
 	    !m_lv->isVirtual() &&
 	    !(m_lv->isMirror() && m_lv->getOrigin() != "" ) ){
 
 	    usage = m_lv->getFilesystem();
 
-            // account for space taken by log. TODO... really check for a log
-            // and see if it is mirrored (+2)
             if( m_lv->isMirror() ) 
-                seg_ratio = (m_lv->getExtents() + 1) / (double) total_extents;
+                seg_ratio = ( m_lv->getExtents() + m_lv->getLogCount() ) / (double) total_extents;
             else
                 seg_ratio = m_lv->getExtents() / (double) total_extents;
 

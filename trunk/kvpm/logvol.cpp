@@ -45,6 +45,7 @@ LogVol::LogVol(QStringList lvDataList, MountInformationList *mountInformationLis
     QString lvdata = lvDataList[0].trimmed();
     QByteArray flags;
 
+    m_log_count = 0;
     m_seg_total = lvDataList.size();
     m_lv_name   = lvdata.section('|',0,0);
     m_lv_name   = m_lv_name.trimmed();
@@ -62,7 +63,8 @@ LogVol::LogVol(QStringList lvDataList, MountInformationList *mountInformationLis
     m_snap       = false;
     m_pvmove     = false;
     m_virtual    = false;
-    
+    m_orphan     = false;
+
     switch( flags[0] ){
     case 'c':
 	m_type = "under conversion";
@@ -304,6 +306,11 @@ Segment* LogVol::processSegments(QString segmentData)
     
     raw_paths = (segmentData.section('|',14,14)).trimmed();
 
+    if(m_virtual){
+        if(raw_paths == "")
+            m_orphan = true;
+    }
+
     if( raw_paths.size() ){
 	devices_and_starts = raw_paths.split(",");
 
@@ -444,6 +451,17 @@ int LogVol::getMajorDevice()
     return m_major_device;
 }
 
+int LogVol::getLogCount()
+{
+    return m_log_count;
+}
+
+void LogVol::setLogCount(int logCount)
+{
+    m_log_count = logCount;
+    return;
+}
+
 bool LogVol::isMounted()
 {
     return m_mounted;
@@ -512,6 +530,11 @@ bool LogVol::isPvmove()
 bool LogVol::isOrigin()
 {
     return m_type.contains("origin", Qt::CaseInsensitive);
+}
+
+bool LogVol::isOrphan()
+{
+    return m_orphan;
 }
 
 bool LogVol::isFixed()
