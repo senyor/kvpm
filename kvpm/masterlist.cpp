@@ -15,6 +15,8 @@
 #include <parted/parted.h>
 
 #include <KLocale>
+#include <KProgressDialog>
+
 #include <QtGui>
 
 #include "fsprobe.h"
@@ -35,10 +37,9 @@ MasterList::MasterList() : QObject()
 void MasterList::rescan()
 {
 
-    QEventLoop *m_loop = new QEventLoop(this);
     KProgressDialog *m_progress_dialog = new KProgressDialog(NULL, i18n("progress"), i18n("scanning volumes"));
     m_progress_dialog->setAllowCancel(false);
-    m_progress_dialog->setMinimumDuration( 250 ); 
+    m_progress_dialog->setMinimumDuration(250); 
     QProgressBar *progress_bar = m_progress_dialog->progressBar();
     progress_bar->setRange(0,0);
 
@@ -50,8 +51,8 @@ void MasterList::rescan()
     scanLogicalVolumes();
     scanStorageDevices();
         
-    m_loop->exit();
     m_progress_dialog->close();
+    m_progress_dialog->delayedDestruct();
 
     return;
 }

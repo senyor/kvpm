@@ -158,7 +158,7 @@ void LVActionsMenu::setup(LogVol *lv)
     filesystem_menu->addAction(lv_mkfs_action);
 
     if( lv ){
-	if(  lv->isWritable()  && !lv->isLocked() && 
+	if(  lv->isWritable()  && !lv->isLocked() && !lv->isVirtual() && 
 	    !lv->isMirrorLeg() && !lv->isMirrorLog() ){
 
 	    if( lv->isMounted() ){
