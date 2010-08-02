@@ -226,17 +226,17 @@ void AddMirrorDialog::setupPhysicalTab()
     m_core_log_button = new QRadioButton( i18n("Memory based log") );
     m_disk_log_button = new QRadioButton( i18n("Disk based log") );
     m_mirrored_log_button = new QRadioButton( i18n("Mirrored disk based log") );
-    m_log_count = m_lv->getLogCount();
+    
     if(m_lv->isMirror()){
-        if(m_log_count == 0)
+        if(m_lv->getLogCount() == 0)
             m_core_log_button->setChecked(true);
-        else if(m_log_count == 1)
+        else if(m_lv->getLogCount() == 1)
             m_disk_log_button->setChecked(true);
         else
             m_mirrored_log_button->setChecked(true);
     }
     else
-            m_disk_log_button->setChecked(true);
+        m_disk_log_button->setChecked(true);
     log_box_layout->addWidget(m_core_log_button);
     log_box_layout->addWidget(m_disk_log_button);
     log_box_layout->addWidget(m_mirrored_log_button);
@@ -405,7 +405,7 @@ void AddMirrorDialog::comparePvsNeededPvsAvailable()
 
     qSort(available_pv_bytes);
 
-    for(int x = m_log_count; x < new_log_count; x++){
+    for(int x = m_lv->getLogCount(); x < new_log_count; x++){
         if( available_pv_bytes.size() )
             available_pv_bytes.removeFirst();
         else{
