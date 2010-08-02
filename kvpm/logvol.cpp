@@ -212,46 +212,38 @@ LogVol::LogVol(QStringList lvDataList, MountInformationList *mountInformationLis
         m_lv_fs = fsprobe_getfstype2( "/dev/mapper/" + m_vg_name + "-" + m_lv_name );
 
     m_size         = (lvdata.section('|',3,3)).toLongLong();
+    m_snap_percent = 0.0;
 
     if(m_snap){
-	m_origin       =  lvdata.section('|',4,4);
+        m_origin       =  lvdata.section('|',4,4);
 	m_snap_percent = (lvdata.section('|',5,5)).toDouble();
     }
     else if(m_mirror_leg && !m_mirror_log){
-	m_origin = m_lv_name;
-	m_origin.remove(0,1);
-	m_origin.truncate( m_origin.indexOf("_mimage_") );
-	m_snap_percent = 0.0;
+        m_origin = m_lv_name;
+        m_origin.remove(0,1);
+        m_origin.truncate( m_origin.indexOf("_mimage_") );
     }
     else if(m_mirror_log && !m_mirror_leg){
-	m_origin = m_lv_name;
-	m_origin.remove(0,1);
-	m_origin.truncate( m_origin.indexOf("_mlog]") );
-	m_snap_percent = 0.0;
+        m_origin = m_lv_name;
+        m_origin.remove(0,1);
+        m_origin.truncate( m_origin.indexOf("_mlog]") );
     }
     else if(m_mirror_log && m_mirror_leg){
-	m_origin = m_lv_name;
-	m_origin.truncate( m_origin.indexOf("_mimage_") );
+        m_origin = m_lv_name;
+        m_origin.truncate( m_origin.indexOf("_mimage_") );
         m_origin.append("]");
-	m_snap_percent = 0.0;
     }
     else if( m_mirror || m_virtual ){
 	if( m_lv_name.contains("_mimagetmp_") ){
-	    m_origin = m_lv_name;
+            m_origin = m_lv_name;
 	    m_origin.remove(0,1);
 	    m_origin.truncate( m_origin.indexOf("_mimagetmp_") );
-	    m_snap_percent = 0.0;
 	}
-	else{
+	else
 	    m_origin = "";
-	    m_snap_percent = 0.0;
-	}
     }
-    else{
-	m_origin = "";
-	m_snap_percent = 0.0;
-    }
-    
+    else
+        m_origin = "";
 
     m_copy_percent = (lvdata.section('|',8,8)).toDouble();
     m_major_device = (lvdata.section('|',15,15)).toInt();
@@ -289,15 +281,6 @@ LogVol::LogVol(QStringList lvDataList, MountInformationList *mountInformationLis
         if( pvs[x].contains("_mimage_") )
             m_mirror = true;
     }
-
-    qDebug() << getName();
-    if( m_mirror )
-        qDebug() << "Mirror";
-    if( m_mirror_log )
-        qDebug() << "Mirror Log";
-    if( m_mirror_leg )
-        qDebug() << "Mirror Leg";
-    qDebug();
 }
 
 Segment* LogVol::processSegments(QString segmentData)
@@ -582,6 +565,12 @@ QString LogVol::getVGAttr()
 QString LogVol::getOrigin()
 {
     return  m_origin;
+}
+
+void LogVol::setOrigin(QString origin)
+{
+    m_origin = origin;
+    return;
 }
 
 /* TO DO: Merge these next two lists in a single

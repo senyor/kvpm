@@ -86,6 +86,7 @@ class LogVol
     QString getState();
     QString getType();
     QString getOrigin();        // The name of the parent volume to a snapshot or mirror leg
+    void setOrigin(QString origin);
     QString getUuid();
     QString getLVMFormat();
     QString getVGAttr();
