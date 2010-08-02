@@ -219,7 +219,8 @@ void MasterList::scanStorageDevices()
     MountInformationList *mount_info_list = new MountInformationList();
 
     while( ( dev = ped_device_get_next(dev) ) ){
-	m_storage_devices.append( new StorageDevice(dev, physical_volumes, mount_info_list ) );
+        if( !QString("%1").arg(dev->path).contains("/dev/mapper") )
+            m_storage_devices.append( new StorageDevice(dev, physical_volumes, mount_info_list ) );
     }
 }
 
