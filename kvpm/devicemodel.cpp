@@ -203,78 +203,76 @@ void StorageDeviceModel::setupModelData(QList<StorageDevice *> devices, StorageD
 	data.clear();
 	dataAlternate.clear();
 	dev = devices[x];
-	if(!QString(dev->getDevicePath()).startsWith("/dev/mapper/"))
-	{
-            dev_variant.setValue( (void *) dev);
-	    if(dev->isPhysicalVolume()){
-		pv = dev->getPhysicalVolume();
-		data << dev->getDevicePath() << "" << sizeToString(dev->getSize());
-		data << QString("%1 ( %2% ) ").arg( sizeToString( (pv->getSize()) - (pv->getUnused()) ))
-		                              .arg(pv->getPercentUsed() );
-		
+        dev_variant.setValue( (void *) dev);
+        if(dev->isPhysicalVolume()){
+            pv = dev->getPhysicalVolume();
+            data << dev->getDevicePath() << "" << sizeToString(dev->getSize());
+            data << QString("%1 ( %2% ) ").arg( sizeToString( (pv->getSize()) - (pv->getUnused()) ))
+                .arg(pv->getPercentUsed() );
+            
 
-		data  << "physical volume" << pv->getVolGroup()->getName();
-		dataAlternate << "" << dev_variant;
-	    }
-	    else{
-		data << dev->getDevicePath() << "" << sizeToString(dev->getSize());
-		dataAlternate << "" << dev_variant;
-	    }
-	    
-	    StorageDeviceItem *item = new StorageDeviceItem(data, dataAlternate, parent);
-	    parent->appendChild(item);
-	    for(int y = 0; y < dev->getPartitionCount(); y++){
-		data.clear();
-		dataAlternate.clear();
-		part = dev->getStoragePartitions()[y];
-		type = part->getType();
+            data  << "physical volume" << pv->getVolGroup()->getName();
+            dataAlternate << "" << dev_variant;
+        }
+        else{
+            data << dev->getDevicePath() << "" << sizeToString(dev->getSize());
+            dataAlternate << "" << dev_variant;
+        }
+	
+        StorageDeviceItem *item = new StorageDeviceItem(data, dataAlternate, parent);
+        parent->appendChild(item);
+        for(int y = 0; y < dev->getPartitionCount(); y++){
+            data.clear();
+            dataAlternate.clear();
+            part = dev->getStoragePartitions()[y];
+            type = part->getType();
+            
+            data << part->getName() << type
+                 << sizeToString(part->getSize());
+            
+            part_variant.setValue( (void *) part);
+            
+            dataAlternate << part_variant << dev_variant;
+            
+            if(part->isPV()){
+                pv = part->getPhysicalVolume();
+                data << QString("%1 ( %2% ) ").arg( sizeToString( (pv->getSize()) - (pv->getUnused())))
+                    .arg(pv->getPercentUsed() )
+                    
+                     << "physical volume"
+                     << pv->getVolGroup()->getName()
+                     << (part->getFlags()).join(", ") 
+                     << "";
+            }
+            else{
+                data << "" << part->getFileSystem();
+                
+                data << "" << (part->getFlags()).join(", ");
+                
+                if(part->isMounted())
+                    data << (part->getMountPoints())[0];
+                else if( part->isBusy() && ( part->getFileSystem() == "swap" ) )
+                    data << "swapping";
+                else
+                    data << "";
+            }
+            
+            if(type == "extended"){
+                extended = new StorageDeviceItem(data, dataAlternate, item);
+                item->appendChild(extended);
+            }
+            else if( !( (type == "logical") || (type == "freespace (logical)") ) ){
+                child = new StorageDeviceItem(data, dataAlternate, item);
+                item->appendChild(child);
+            }
+            else if(extended){
+                child = new StorageDeviceItem(data, dataAlternate, extended);
+                extended->appendChild(child);
+            }
+            else
+                qDebug() << "devicemodel.cpp How did we get here?";
+        }
 
-		data << part->getName() << type
-		     << sizeToString(part->getSize());
-		
-		part_variant.setValue( (void *) part);
-		
-                dataAlternate << part_variant << dev_variant;
-		 
-		if(part->isPV()){
-		    pv = part->getPhysicalVolume();
-		    data << QString("%1 ( %2% ) ").arg( sizeToString( (pv->getSize()) - (pv->getUnused())))
-			                     .arg(pv->getPercentUsed() )
-
-			 << "physical volume"
-			 << pv->getVolGroup()->getName()
-                         << (part->getFlags()).join(", ") 
-                         << "";
-		}
-		else{
-		    data << "" << part->getFileSystem();
-
-		    data << "" << (part->getFlags()).join(", ");
-
-		    if(part->isMounted())
-		        data << (part->getMountPoints())[0];
-		    else if( part->isBusy() && ( part->getFileSystem() == "swap" ) )
-		        data << "swapping";
-		    else
-		        data << "";
-		}
-		
-		if(type == "extended"){
-		    extended = new StorageDeviceItem(data, dataAlternate, item);
-		    item->appendChild(extended);
-		}
-		else if( !( (type == "logical") || (type == "freespace (logical)") ) ){
-		    child = new StorageDeviceItem(data, dataAlternate, item);
-		    item->appendChild(child);
-		}
-		else if(extended){
-		    child = new StorageDeviceItem(data, dataAlternate, extended);
-		    extended->appendChild(child);
-		}
-		else
-		    qDebug() << "devicemodel.cpp How did we get here?";
-	    }
-	}
     }
 }
 
