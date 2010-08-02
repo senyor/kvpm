@@ -64,8 +64,6 @@ Q_OBJECT
 
     QRadioButton *m_core_log_button, *m_mirrored_log_button, *m_disk_log_button;
 
-    bool m_log_count;             // Number of disk logs the mirror already has
-    
     QList<NoMungeCheck *> m_pv_leg_checks;
     QList<long long> m_pv_leg_size;
 
