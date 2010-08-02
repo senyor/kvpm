@@ -96,13 +96,13 @@ void VGTree::loadData()
 	    ( !(lv->isMirror() && lv->getOrigin() != "" ) ) ){
 	    
 	    if( lv->getSegmentCount() == 1 ) {
-		lv_data << lv->getName() 
-			<< sizeToString(lv->getSize()) 
-			<< lv->getFilesystem()
-			<< lv->getType() 
-			<< QString("%1").arg(lv->getSegmentStripes(0)) 
-			<< sizeToString(lv->getSegmentStripeSize(0));
-		
+		lv_data << lv->getName() << sizeToString(lv->getSize()) << lv->getFilesystem() << lv->getType(); 
+
+                if(lv->isMirror() && !lv->isMirrorLeg())
+                    lv_data << "" << "";
+		else
+                    lv_data << QString("%1").arg(lv->getSegmentStripes(0)) << sizeToString(lv->getSegmentStripeSize(0));
+
 		if( lv->isSnap() )
 		    lv_data    << QString("%%1").arg(lv->getSnapPercent());
 		else if( lv->isPvmove() )
