@@ -230,12 +230,10 @@ LogVol::LogVol(QStringList lvDataList, MountInformationList *mountInformationLis
 	m_snap_percent = 0.0;
     }
     else if(m_mirror_log && m_mirror_leg){
-
 	m_origin = m_lv_name;
 	m_origin.truncate( m_origin.indexOf("_mimage_") );
         m_origin.append("]");
 	m_snap_percent = 0.0;
-
     }
     else if( m_mirror || m_virtual ){
 	if( m_lv_name.contains("_mimagetmp_") ){
@@ -291,6 +289,15 @@ LogVol::LogVol(QStringList lvDataList, MountInformationList *mountInformationLis
         if( pvs[x].contains("_mimage_") )
             m_mirror = true;
     }
+
+    qDebug() << getName();
+    if( m_mirror )
+        qDebug() << "Mirror";
+    if( m_mirror_log )
+        qDebug() << "Mirror Log";
+    if( m_mirror_leg )
+        qDebug() << "Mirror Leg";
+    qDebug();
 }
 
 Segment* LogVol::processSegments(QString segmentData)

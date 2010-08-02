@@ -98,7 +98,7 @@ void VGTree::loadData()
 	    if( lv->getSegmentCount() == 1 ) {
 		lv_data << lv->getName() << sizeToString(lv->getSize()) << lv->getFilesystem() << lv->getType(); 
 
-                if(lv->isMirror() && !lv->isMirrorLeg())
+                if( lv->isMirror() )
                     lv_data << "" << "";
 		else
                     lv_data << QString("%1").arg(lv->getSegmentStripes(0)) << sizeToString(lv->getSegmentStripeSize(0));
@@ -258,10 +258,16 @@ void VGTree::insertMirrorLegItems(LogVol *mirrorVolume, QTreeWidgetItem *item)
 		leg_data << leg_volume->getName() 
 			 << sizeToString(leg_volume->getSize()) 
 			 << leg_volume->getFilesystem()
-			 << leg_volume->getType() 
-			 << QString("%1").arg( leg_volume->getSegmentStripes(0) ) 
-			 << sizeToString( leg_volume->getSegmentStripeSize(0) );
-	    
+			 << leg_volume->getType();
+ 
+                if( !leg_volume->isMirror() ){
+                    leg_data << QString("%1").arg( leg_volume->getSegmentStripes(0) ) 
+                             << sizeToString( leg_volume->getSegmentStripeSize(0) );
+                }
+                else
+                    leg_data << "" << "";
+
+
 		if( leg_volume->isPvmove() )
 		    leg_data    << QString("%%1").arg(leg_volume->getCopyPercent());
 		else
