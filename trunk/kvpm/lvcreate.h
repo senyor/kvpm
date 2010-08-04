@@ -54,12 +54,10 @@ Q_OBJECT
 	     *m_physical_tab,  // The physical tab 
 	     *m_advanced_tab;  // Adevanced options tab
      
-     KLineEdit *m_minor_number_edit, 
-	       *m_major_number_edit,
-	       *m_name_edit, 
-	       *m_size_edit;
+     KLineEdit *m_minor_number_edit, *m_major_number_edit,
+               *m_name_edit, *m_size_edit, *m_tag_edit;
 
-     QRegExpValidator *m_name_validator;
+     QRegExpValidator *m_name_validator, *m_tag_validator;
 
      QCheckBox *m_zero_check, 
                *m_readonly_check;
@@ -100,8 +98,7 @@ Q_OBJECT
      QWidget* createGeneralTab();
      QWidget* createAdvancedTab();
      QWidget* createPhysicalTab();
-     long long getLargestVolume(int stripes); 
-     long long getLargestMirror(int mirrors, bool disk_log);
+     long long getLargestVolume(); 
      int getStripeCount();
      int getMirrorCount();
      void resetOkButton();
@@ -114,8 +111,6 @@ Q_OBJECT
 
  private slots:
      void adjustSizeCombo(int index);
-     void enableStripeBox(bool toggle_state);
-     void enableMirrorBox(bool toggle_state);
      void setMaxSize(bool toggle_state);
      void setMaxSize(int stripes);
      void adjustSizeEdit(int percentage);
