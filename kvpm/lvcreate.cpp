@@ -147,11 +147,11 @@ LVCreateDialog::LVCreateDialog(LogVol *logicalVolume, bool snapshot, QWidget *pa
 
 QWidget* LVCreateDialog::createGeneralTab()
 {
+     m_tag_edit = NULL;
 
      QWidget *general_tab = new QWidget(this);
      QVBoxLayout *layout = new QVBoxLayout;
      general_tab->setLayout(layout);
-     
      QVBoxLayout *upper_layout = new QVBoxLayout();
      QHBoxLayout *lower_layout = new QHBoxLayout();
      layout->addStretch();
@@ -172,29 +172,41 @@ QWidget* LVCreateDialog::createGeneralTab()
 	 upper_layout->insertLayout(0, name_layout);
 	 m_name_is_valid = true;
 
+	 QHBoxLayout *tag_layout = new QHBoxLayout();
+	 m_tag_edit = new KLineEdit();
+
+	 QRegExp rx2("[0-9a-zA-Z_\\.+-]*");
+	 m_tag_validator = new QRegExpValidator( rx2, m_tag_edit );
+	 m_tag_edit->setValidator(m_tag_validator);
+
+	 tag_layout->addWidget( new QLabel( i18n("Optional tag: ") ) );
+	 tag_layout->addWidget(m_tag_edit);
+	 upper_layout->insertLayout(1, tag_layout);
+
 	 connect(m_name_edit, SIGNAL(textEdited(QString)), 
 		 this, SLOT(validateVolumeName(QString)));
 
      }
      else {
-         upper_layout->addWidget( new QLabel( i18n("Extending volume: %1").arg(m_lv->getName())));
+         QLabel *extend_label = new QLabel( i18n("<b>Extending volume: %1</b>").arg(m_lv->getName()));
+         extend_label->setAlignment(Qt::AlignCenter);
+         upper_layout->addWidget( extend_label ); 
 	 m_name_is_valid = true;
      }
-     
-     QHBoxLayout *size_layout = new QHBoxLayout();
 
-     if( ! m_extend )
-         size_layout->addWidget(new QLabel( i18n("Volume size: ") ));
-     else
-         size_layout->addWidget(new QLabel( i18n("Extend by: ") ));
+     QGroupBox *volume_size_box = new QGroupBox( i18n("Volume size") );
+     QHBoxLayout *size_layout = new QHBoxLayout();
+     volume_size_box->setLayout(size_layout);
+
+     if( m_extend )
+         volume_size_box->setTitle( i18n("Extend volume by:") );
 
      m_size_edit = new KLineEdit();
      size_layout->addWidget(m_size_edit);
      m_size_validator = new QDoubleValidator(m_size_edit); 
      m_size_edit->setValidator(m_size_validator);
      m_size_validator->setBottom(0);
-     
-     m_volume_extents = getLargestVolume( getStripeCount() ) / m_vg->getExtentSize();
+     m_volume_extents = getLargestVolume() / (long long)m_vg->getExtentSize();
      m_size_edit->setText(QString("%1").arg(m_volume_extents));
      size_combo = new KComboBox();
      size_combo->insertItem(0,"Extents");
@@ -204,13 +216,13 @@ QWidget* LVCreateDialog::createGeneralTab()
      size_combo->setInsertPolicy(KComboBox::NoInsert);
      size_combo->setCurrentIndex(2);
      size_layout->addWidget(size_combo);
-
-     upper_layout->addLayout(size_layout);
      m_size_spin = new QSpinBox();
      m_size_spin->setRange(0, 100);
      m_size_spin->setSuffix("%");
      m_size_spin->setValue(100);
-     upper_layout->addWidget(m_size_spin);
+     size_layout->addWidget(m_size_spin);
+     upper_layout->addWidget(volume_size_box);
+
      QGroupBox *volume_limit_box = new QGroupBox( i18n("Volume size limit") );
      QVBoxLayout *volume_limit_layout = new QVBoxLayout();
      volume_limit_box->setLayout(volume_limit_layout);
@@ -280,6 +292,10 @@ QWidget* LVCreateDialog::createPhysicalTab()
     m_physical_tab->setLayout(layout);
     
     m_physical_volumes = m_vg->getPhysicalVolumes();
+    for(int x = m_physical_volumes.size() - 1; x >= 0; x--){
+        if( m_physical_volumes[x]->getUnused() < 1 )  // remove pvs with no free space
+            m_physical_volumes.removeAt(x);
+    }
     
     QGroupBox *physical_group = new QGroupBox( i18n("Available physical volumes") );
     QVBoxLayout *physical_layout = new QVBoxLayout();
@@ -404,11 +420,14 @@ QWidget* LVCreateDialog::createPhysicalTab()
     connect(m_mirror_box, SIGNAL(toggled(bool)), 
 	    this, SLOT(setMaxSize(bool)));
 
-    connect(m_stripe_box, SIGNAL(toggled(bool)), 
-	    this, SLOT(enableMirrorBox(bool)));
+    connect(m_mirrored_log, SIGNAL(toggled(bool)), 
+	    this, SLOT(setMaxSize(bool)));
 
-    connect(m_mirror_box, SIGNAL(toggled(bool)), 
-	    this, SLOT(enableStripeBox(bool)));
+    connect(m_disk_log, SIGNAL(toggled(bool)), 
+	    this, SLOT(setMaxSize(bool)));
+
+    connect(m_core_log, SIGNAL(toggled(bool)), 
+	    this, SLOT(setMaxSize(bool)));
 
     return m_physical_tab;
 }
@@ -482,87 +501,33 @@ void LVCreateDialog::setMaxSize(bool)
 {
     int stripe_count = getStripeCount();
     int mirror_count = getMirrorCount();
-
-    long long free_extents, 
-	      free_space;
-
     int old_combo_index = size_combo->currentIndex();
-
-    if( m_stripe_box->isChecked() ){
-	free_space   = getLargestVolume(stripe_count);
-	free_extents = free_space / m_vg->getExtentSize();
-
-	m_max_size_label->setText( i18n("Maximum size: %1").arg(sizeToString(free_space)) );
-	m_max_extents_label->setText( i18n("Maximum extents: %1").arg(free_extents) );
-
-	m_stripes_count_label->setText( i18n("(with %1 stripes)").arg(stripe_count) );
+    long long free_extents = getLargestVolume() / m_vg->getExtentSize(); 
     
-	size_combo->setCurrentIndex(0);
-	size_combo->setCurrentIndex(old_combo_index);
-    }
-    else if( m_mirror_box->isChecked() ){
-	free_space   = getLargestMirror( mirror_count, m_disk_log->isChecked() );
-	free_extents = free_space / m_vg->getExtentSize();
+    m_max_size_label->setText( i18n("Maximum size: %1").arg(sizeToString( getLargestVolume() )));
+    m_max_extents_label->setText( i18n("Maximum extents: %1").arg(free_extents) );
 
-	m_max_size_label->setText( i18n("Maximum size: %1").arg(sizeToString(free_space)) );
-	m_max_extents_label->setText( i18n("Maximum extents: %1").arg(free_extents) );
-	m_stripes_count_label->setText( i18n("(with %1 mirror legs)").arg(mirror_count) );
+    if( m_mirror_box->isChecked() && !m_stripe_box->isChecked() )
+        m_stripes_count_label->setText( i18n("(with %1 mirror legs)").arg(mirror_count) );
+    else if( !m_mirror_box->isChecked() && m_stripe_box->isChecked() )
+        m_stripes_count_label->setText( i18n("(with %1 stripes)").arg(stripe_count) );
+    else if( m_mirror_box->isChecked() && m_stripe_box->isChecked() )
+        m_stripes_count_label->setText( i18n("(with %1 mirrors and %2 stripes)").arg(mirror_count).arg(stripe_count) );
+    else
+        m_stripes_count_label->setText( i18n("(linear volume)") );
     
-	size_combo->setCurrentIndex(0);
-	size_combo->setCurrentIndex(old_combo_index);
-    }
-    else{
-	free_space   = getLargestVolume(1);
-	free_extents = free_space / m_vg->getExtentSize();
-
-	m_max_size_label->setText( i18n("Maximum size: %1").arg(sizeToString(free_space)) );
-	m_max_extents_label->setText( i18n("Maximum extents: %1").arg(free_extents) );
-	m_stripes_count_label->setText( i18n("(linear volume)") );
-    
-	size_combo->setCurrentIndex(0);
-	size_combo->setCurrentIndex(old_combo_index);
-    }
+    size_combo->setCurrentIndex(0);
+    size_combo->setCurrentIndex(old_combo_index);
 
     resetOkButton();
 }
-
-void LVCreateDialog::enableStripeBox(bool toggle_state)
-{
-    if(toggle_state){
-	m_stripe_box->setChecked(false);
-	m_stripe_box->setEnabled(false);
-    }
-    else
-	m_stripe_box->setEnabled(true);
-}
-
-
-void LVCreateDialog::enableMirrorBox(bool toggle_state)
-{
-    if(toggle_state){
-	m_mirror_box->setChecked(false);
-	m_mirror_box->setEnabled(false);
-    }
-    else
-	m_mirror_box->setEnabled(true);
-}
-
 
 /* This adjusts the line edit according to the spin box */ 
 
 void LVCreateDialog::adjustSizeEdit(int percentage)
 {
-    long long free_extents;
-	      
-    if( m_stripe_box->isChecked() )
-	free_extents = getLargestVolume( getStripeCount() );
-    else if( m_mirror_box->isChecked() )
-	free_extents = getLargestMirror( getMirrorCount(), m_disk_log->isChecked() );
-    else
-	free_extents = getLargestVolume(1);
+    long long free_extents = getLargestVolume() / (long long)m_vg->getExtentSize();
     
-    free_extents /= m_vg->getExtentSize();
-
     if(percentage == 100)
 	m_volume_extents = free_extents;
     else if(percentage == 0)
@@ -600,44 +565,22 @@ void LVCreateDialog::validateVolumeName(QString name)
 {
     int pos = 0;
 
-    if( m_name_validator->validate(name, pos) == QValidator::Acceptable &&
-        name != "." &&
-        name != ".." )
-    {
+    if( m_name_validator->validate(name, pos) == QValidator::Acceptable && name != "." && name != ".." )
 	m_name_is_valid = true;
-    }
-    else{
+    else
 	m_name_is_valid = false;
-    }
     
     resetOkButton();
 }
 
 void LVCreateDialog::resetOkButton()
 {
-    long long max_extents;
-	      
-    if( m_stripe_box->isChecked() ){    
-	max_extents = getLargestVolume( getStripeCount() ) / m_vg->getExtentSize();
-    }
-    else if( m_mirror_box->isChecked() ){
-	max_extents = getLargestMirror( m_mirrors_number_spin->value(), 
-					m_disk_log->isChecked() ) / m_vg->getExtentSize();
-    }
-    else{
-	max_extents = getLargestVolume(1) / m_vg->getExtentSize();
-    }
+    long long max_extents = getLargestVolume() / m_vg->getExtentSize();
     
-    if( (m_volume_extents <= max_extents) && 
-	(m_volume_extents > 0) &&
-	 m_name_is_valid ){
-	
+    if( (m_volume_extents <= max_extents) && (m_volume_extents > 0) && m_name_is_valid )
 	enableButtonOk(true);
-    }
-    else{
+    else
 	enableButtonOk(false);
-    }
-    
 }
 
 void LVCreateDialog::adjustSizeCombo(int index)
@@ -718,90 +661,52 @@ void LVCreateDialog::calculateSpace(bool)
     }
     
     m_allocateable_space_label->setText( i18n("Allocateable space: %1").arg(sizeToString(m_allocateable_space)) );
-
     m_allocateable_extents_label->setText( i18n("Allocateable extents: %1").arg(m_allocateable_extents) );
-
 }
 
-/* Determine just how big a stripe set or linear volume we can create */
-
-long long LVCreateDialog::getLargestVolume(int stripes)
+long long LVCreateDialog::getLargestVolume() 
 {
-    QList<long long> free_list;
-    long long max_size = 0;
-    long long free_space;
-    int list_end;
-    
-    for(int x = m_physical_volumes.size() - 1 ; x >= 0 ; x--){
+    QList <long long> available_pv_bytes;  
+    QList <long long> stripe_pv_bytes;  
+    int total_stripes = getStripeCount() * getMirrorCount();
+    int log_count;
 
-	if( ( m_physical_volumes[x]->getUnused() > 0 ) && 
-	    ( m_pv_checks[x]->isChecked() ) )
-	{
-	    free_list.append( m_physical_volumes[x]->getUnused() );
-	}
-
+    for(int x = 0; x < m_physical_volumes.size(); x++){
+	if( m_pv_checks[x]->isChecked() )
+	    available_pv_bytes.append( m_physical_volumes[x]->getUnused() );
     }
 
-    if( stripes < 1 ){
-	max_size = 0;
+    for(int x = 0; x < total_stripes; x++)
+        stripe_pv_bytes.append(0);
+
+    if( m_mirror_box->isChecked() ){
+        if( m_disk_log->isChecked() )
+            log_count = 1;
+        else if(m_mirrored_log->isChecked() )
+            log_count = 2;
+        else
+            log_count = 0;
     }
-    else if( stripes == 1 ){
-	for(int x = free_list.size() - 1 ; x >= 0 ; x--)
-	    max_size += free_list[x];
+    else
+        log_count = 0;
+
+    qSort(available_pv_bytes);
+
+    for(int x = 0; x < log_count; x++){
+        if( available_pv_bytes.size() )
+            available_pv_bytes.removeFirst();
+        else
+            return 0;
     }
-    else{
-	while( stripes <= free_list.size() ){
 
-	    qSort(free_list.begin(), free_list.end());
-
-	    list_end = free_list.size() - 1;
-
-	    for(int x = list_end; x > list_end - stripes; x--){
-		free_space = free_list[ (list_end - stripes) + 1];
-		max_size += free_space;
-		free_list[x] -= free_space;
-	    }
-
-	    for(int x = free_list.size() - 1 ; x >= 0 ; x--)
-		if( free_list[x] <= 0)
-		    free_list.removeAt(x);
-	}
+    while( available_pv_bytes.size() ){
+        qSort(stripe_pv_bytes);
+        stripe_pv_bytes[0] += available_pv_bytes.takeLast();
     }
-    
-    return max_size;
+    qSort(stripe_pv_bytes);
+
+    return stripe_pv_bytes[0] * getStripeCount();
 }
-
-/* Determine just how big a mirror set we can create 
-   with a given number of legs and a log, or no log */
-
-long long LVCreateDialog::getLargestMirror(int mirrors, bool disk_log)
-{
-    QList<long long> free_list;
-    long long max_size = 0;
-
-    for(int x = m_physical_volumes.size() - 1 ; x >= 0 ; x--){
-	if( ( m_physical_volumes[x]->getUnused() > 0 ) && ( m_pv_checks[x]->isChecked() ) )    
-	    free_list.append( m_physical_volumes[x]->getUnused() );
-    }
-
-    qSort(free_list.begin(), free_list.end());
-
-    if( !disk_log){
-	if( mirrors > free_list.size() )
-	    max_size = 0;
-	else
-	    max_size = free_list[ free_list.size() - mirrors ];
-    }
-    else{
-	if( (mirrors + 1) > free_list.size() )
-	    max_size = 0;
-	else
-	    max_size = free_list[ free_list.size() - mirrors ];
-    }
-    
-    return max_size;
-}
-
 
 int LVCreateDialog::getStripeCount()
 {
@@ -848,6 +753,11 @@ QStringList LVCreateDialog::argumentsLV()
     QString program_to_run;
     QStringList args;
     QVariant stripe_size;
+
+    if(m_tag_edit){
+        if( m_tag_edit->text() != "" )
+            args << "--addtag" << m_tag_edit->text();
+    } 
 
     if(m_persistent_box->isChecked()){
 	args << "--persistent" << "y";
@@ -898,7 +808,7 @@ QStringList LVCreateDialog::argumentsLV()
         else
             args << "normal" ;
     }
-    
+
     args << "--extents" << QString("+%1").arg(m_volume_extents);
     
     if( !m_extend && !m_snapshot ){                           // create a standard volume
