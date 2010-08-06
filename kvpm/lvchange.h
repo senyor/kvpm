@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -18,10 +18,12 @@
 #include <KDialog>
 #include <KTabWidget>
 #include <KLineEdit>
+#include <KComboBox>
 
 #include <QStringList>
 #include <QGroupBox>
 #include <QCheckBox>
+#include <QRadioButton>
 
 class LogVol;
 
@@ -38,18 +40,27 @@ Q_OBJECT
 	      *contig_check,      // allocate contiguous extents
 	      *ro_check,          // make the volume read only
 	      *refresh_check,     // refresh the metadata
-	      *resync_check,      // re-sync mirrors
-	      *monitor_check;     // dmeventd monitoring
+              *resync_check,      // re-sync mirrors
+              *m_udevsync_check;  // sync with udev
 
-    QGroupBox *m_persistant_box, *m_mirror_box;
+    QRadioButton *m_monitor_button,  *m_nomonitor_button, *m_ignore_button, // dmeventd monitoring
+                 *m_poll_button, *m_nopoll_button;
+
+
+    QGroupBox *m_persistant_box, *m_dmeventd_box, *m_polling_box, *m_udevsync_box, *m_tag_group;
 
     KLineEdit *minor_edit,  // User entered device minor number 
-              *major_edit;  // User entered device major number 
+              *major_edit,  // User entered device major number 
+              *m_tag_edit;  // new tag
+
+    KComboBox *m_deltag_combo;
 
     QWidget *m_general_tab;
     QWidget *m_advanced_tab;
-    
+    QWidget *m_mirror_tab;
+
     void buildGeneralTab();
+    void buildMirrorTab();
     void buildAdvancedTab();
     
 public:
