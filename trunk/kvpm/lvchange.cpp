@@ -65,11 +65,6 @@ QStringList LVChangeDialog::arguments()
     else if( ( ! available_check->isChecked() ) && ( m_lv->getState() == "Active" ) )
 	args << "--available" << "n";
 
-    if( contig_check->isChecked() && ( m_lv->getPolicy() != "Contiguous" ) )
-	args << "--contiguous" << "y";
-    else if( ( ! contig_check->isChecked() ) && ( m_lv->getPolicy() == "Contiguous" ) )
-	args << "--contiguous" << "n";
-
     if( ro_check->isChecked() && m_lv->isWritable() )
 	args << "--permission" << "r";
     else if( ( ! ro_check->isChecked() ) && ( ! m_lv->isWritable() ) )
@@ -120,6 +115,18 @@ QStringList LVChangeDialog::arguments()
             args << "--addtag" << m_tag_edit->text();
     }
 
+    if( m_alloc_box->isChecked() ){
+        args << "--alloc";
+        if( m_contiguous_button->isChecked() )
+            args << "contiguous";
+        else if( m_anywhere_button->isChecked() )
+            args << "anywhere";
+        else if( m_cling_button->isChecked() )
+            args << "cling";
+        else
+            args << "normal";
+    }
+
     args << m_lv->getFullName();
     return args;
 }
@@ -141,11 +148,9 @@ void LVChangeDialog::buildGeneralTab()
     layout->addWidget(general_group);
 
     available_check  = new QCheckBox( i18n("Make volume available for use") );
-    contig_check     = new QCheckBox( i18n("Allocate contiguous extents")  );
     ro_check         = new QCheckBox( i18n("Make volume read only") );
     refresh_check    = new QCheckBox( i18n("Refresh volume metadata") );
     general_layout->addWidget(available_check);
-    general_layout->addWidget(contig_check);
     general_layout->addWidget(ro_check);
     general_layout->addWidget(refresh_check);
 
@@ -154,9 +159,6 @@ void LVChangeDialog::buildGeneralTab()
 
     if( m_lv->isMounted() )    
         available_check->setEnabled(false);
-
-    if(m_lv->getPolicy() == "Contiguous")
-	contig_check->setChecked(true);
 
     if( !(m_lv->isWritable()) )
 	ro_check->setChecked(true);
@@ -186,6 +188,53 @@ void LVChangeDialog::buildGeneralTab()
     m_deltag_combo->insertItem(0, QString(""));
     m_deltag_combo->setCurrentIndex(0);
     del_tag_layout->addWidget(m_deltag_combo);
+
+    m_alloc_box = new QGroupBox( i18n("Allocation Policy") );
+    m_alloc_box->setCheckable(true);
+    m_alloc_box->setChecked(false);
+    QVBoxLayout *alloc_box_layout = new QVBoxLayout;
+    m_normal_button     = new QRadioButton( i18n("Normal") );
+    m_contiguous_button = new QRadioButton( i18n("Contiguous") );
+    m_anywhere_button   = new QRadioButton( i18n("Anywhere") );
+    m_cling_button      = new QRadioButton( i18n("Cling") );
+    QRadioButton *inherited_button = new QRadioButton( i18n("Inherited") ); // this can't be passed the lvchange
+    inherited_button->setEnabled(false);
+    inherited_button->setChecked(false);
+
+    QString policy = m_lv->getPolicy(); 
+
+    if( policy == "Contiguous" ){
+        m_contiguous_button->setEnabled(false);
+        m_contiguous_button->setText("Contiguous (current)");
+        m_normal_button->setChecked(true);
+    }
+    else if( policy == "Inherited"){
+        inherited_button->setText("Inherited (current)");
+        m_normal_button->setChecked(true);
+        alloc_box_layout->addWidget(inherited_button);
+    }
+    else if( policy == "Anywhere" ){
+        m_anywhere_button->setEnabled(false);
+        m_anywhere_button->setText("Anywhere (current)");
+        m_normal_button->setChecked(true);
+    }
+    else if( policy == "Cling" ){
+        m_cling_button->setEnabled(false);
+        m_cling_button->setText("Cling (current)");
+        m_normal_button->setChecked(true);
+    }
+    else{
+        m_normal_button->setEnabled(false);
+        m_normal_button->setText("Normal (current)");
+        m_cling_button->setChecked(true);
+    }
+
+    alloc_box_layout->addWidget(m_normal_button);
+    alloc_box_layout->addWidget(m_contiguous_button);
+    alloc_box_layout->addWidget(m_anywhere_button);
+    alloc_box_layout->addWidget(m_cling_button);
+    m_alloc_box->setLayout(alloc_box_layout);
+    layout->addWidget(m_alloc_box);
 }
 
 void LVChangeDialog::buildMirrorTab()
