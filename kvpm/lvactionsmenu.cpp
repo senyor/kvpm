@@ -128,7 +128,7 @@ void LVActionsMenu::setup(LogVol *lv)
     snap_create_action = new KAction( i18n("Create snapshot..."), this);
     lv_extend_action   = new KAction( i18n("Extend logical volume..."), this);
     pv_move_action     = new KAction( i18n("Move physical extents..."), this);
-    lv_change_action   = new KAction( i18n("Change logical volume attributes..."), this);
+    lv_change_action   = new KAction( i18n("Change attributes or tags..."), this);
     add_mirror_action  = new KAction( i18n("Add leg or change mirror..."), this);
     mount_filesystem_action   = new KAction( i18n("Mount filesystem..."), this);
     unmount_filesystem_action = new KAction( i18n("Unmount filesystem..."), this);
