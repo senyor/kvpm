@@ -56,6 +56,7 @@ class LogVol
     int m_major_device;          // Unix device major number, if set
     int m_minor_device;          // Unix device minor number, if set
     int m_log_count;             // if a mirror -- how many logs
+    int m_mirror_count;          // if mirror -- how many legs
     bool m_virtual;              // virtual volume
     bool m_under_conversion;     // Is going to be a mirrored volume
     bool m_mirror;               // Is a mirrored volume
@@ -111,6 +112,7 @@ class LogVol
     int getMinorDevice();
     int getMajorDevice();
     int getLogCount();
+    int getMirrorCount();
     void setLogCount(int count);
     bool isActive();
     bool isFixed();
