@@ -276,10 +276,14 @@ LogVol::LogVol(QStringList lvDataList, MountInformationList *mountInformationLis
     for(int x = 0; x < m_seg_total ; x++)
 	m_segments.append(processSegments(lvDataList[x]));
 
+    m_mirror_count = 0;
     QStringList pvs = getDevicePathAll();
     for(int x =0; x < pvs.size(); x++){
-        if( pvs[x].contains("_mimage_") )
+        if( pvs[x].contains("_mimage_") ){
             m_mirror = true;
+            if( !pvs[x].contains("_mlog_") )
+                m_mirror_count++;
+        }
     }
 }
 
@@ -444,6 +448,11 @@ int LogVol::getMajorDevice()
 int LogVol::getLogCount()
 {
     return m_log_count;
+}
+
+int LogVol::getMirrorCount()
+{
+    return m_mirror_count;
 }
 
 void LogVol::setLogCount(int logCount)
