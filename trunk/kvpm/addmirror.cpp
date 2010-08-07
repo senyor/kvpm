@@ -346,8 +346,6 @@ QStringList AddMirrorDialog::arguments()
 	 << m_logical_volume_name
 	 << physical_volumes;
 
-    qDebug() << args;
-
     return args;
 }
 

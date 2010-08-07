@@ -670,7 +670,7 @@ long long LVCreateDialog::getLargestVolume()
     QList <long long> stripe_pv_bytes;  
     int total_stripes = getStripeCount() * getMirrorCount();
     int log_count;
-    qDebug("Mirrors: %d    Total stripes: %d", getMirrorCount(),  total_stripes);
+
     for(int x = 0; x < m_physical_volumes.size(); x++){
 	if( m_pv_checks[x]->isChecked() )
 	    available_pv_bytes.append( m_physical_volumes[x]->getUnused() );
