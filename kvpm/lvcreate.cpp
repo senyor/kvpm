@@ -420,6 +420,9 @@ QWidget* LVCreateDialog::createPhysicalTab()
     connect(m_mirror_box, SIGNAL(toggled(bool)), 
 	    this, SLOT(setMaxSize(bool)));
 
+    connect(m_mirror_box, SIGNAL(toggled(bool)), 
+	    this, SLOT(enableMonitoring(bool)));
+
     connect(m_mirrored_log, SIGNAL(toggled(bool)), 
 	    this, SLOT(setMaxSize(bool)));
 
@@ -464,7 +467,18 @@ QWidget* LVCreateDialog::createAdvancedTab()
 	m_zero_check = NULL;
 	m_readonly_check->setEnabled(true);
     }
-    
+
+    m_monitor_check = new QCheckBox( i18n("Monitor with dmeventd") );
+    layout->addWidget(m_monitor_check);
+    if(m_snapshot){
+        m_monitor_check->setChecked(true);
+        m_monitor_check->setEnabled(true);
+    }
+    else{
+        m_monitor_check->setChecked(false);
+        m_monitor_check->setEnabled(false);
+    }
+
     QVBoxLayout *persistent_layout   = new QVBoxLayout;
     QHBoxLayout *minor_number_layout = new QHBoxLayout;
     QHBoxLayout *major_number_layout = new QHBoxLayout;
@@ -581,6 +595,18 @@ void LVCreateDialog::resetOkButton()
 	enableButtonOk(true);
     else
 	enableButtonOk(false);
+}
+
+void LVCreateDialog::enableMonitoring(bool checked)
+{
+    if(checked){
+        m_monitor_check->setChecked(true);
+        m_monitor_check->setEnabled(true);
+    }
+    else if(!m_snapshot){
+        m_monitor_check->setChecked(false);
+        m_monitor_check->setEnabled(false);
+    }
 }
 
 void LVCreateDialog::adjustSizeCombo(int index)
@@ -801,6 +827,14 @@ QStringList LVCreateDialog::argumentsLV()
 		    args << "--mirrorlog" << "core";
 	    }
 	}
+    }
+
+    if( m_monitor_check->isEnabled() ){ 
+        args << "--monitor"; 
+        if( m_monitor_check->isChecked() )
+            args << "y";
+        else
+            args << "n";
     }
 
     if ( !inherited_button->isChecked() ){        // "inherited" is what we get if

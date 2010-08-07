@@ -60,7 +60,8 @@ Q_OBJECT
      QRegExpValidator *m_name_validator, *m_tag_validator;
 
      QCheckBox *m_zero_check, 
-               *m_readonly_check;
+               *m_readonly_check,
+               *m_monitor_check;   // monitor with dmeventd
 
      QGroupBox *m_persistent_box,
 	       *m_mirror_box,
@@ -119,6 +120,7 @@ Q_OBJECT
      long long convertSizeToExtents(int index, double size);
      void calculateSpace(bool checked);
      void zeroReadonlyCheck(int state);
+     void enableMonitoring(bool checked);
 };
 
 #endif
