@@ -203,6 +203,7 @@ void MasterList::scanLogicalVolumes(VolGroup *VolumeGroup)
 void MasterList::scanStorageDevices()
 {
     PedDevice *dev = NULL;
+    PedDevice *old_dev = NULL;
     QList<PhysVol *>  physical_volumes;
 
     for(int x = 0; x < m_volume_groups.size(); x++)
@@ -213,15 +214,19 @@ void MasterList::scanStorageDevices()
 
     m_storage_devices.clear();
 
-    ped_device_free_all();
     ped_device_probe_all();
 
     MountInformationList *mount_info_list = new MountInformationList();
 
-    while( ( dev = ped_device_get_next(dev) ) ){
+    while( ( dev = ped_device_get_next(old_dev) ) ){
+        if(old_dev)
+            ped_device_destroy(old_dev);
         if( !QString("%1").arg(dev->path).contains("/dev/mapper") )
             m_storage_devices.append( new StorageDevice(dev, physical_volumes, mount_info_list ) );
+        old_dev = dev;
     }
+
+    ped_device_free_all();
 }
 
 int MasterList::getVolGroupCount()
