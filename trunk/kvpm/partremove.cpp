@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2009 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -26,9 +26,7 @@ bool remove_partition( StoragePartition *partition )
     QStringList args;
     PedPartition *ped_partition;
 
-    QString message = i18n("Remove partition: <b>%1</b>? "
-			   "Any data on that partition will be lost!",
-			   partition->getName() );
+    QString message = i18n("Remove partition: <b>%1</b>? any data on that partition will be lost!", partition->getName() );
 
     ped_partition = partition->getPedPartition();
 

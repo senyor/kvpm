@@ -86,8 +86,6 @@ StorageDevice::StorageDevice( PedDevice *pedDevice,
     else
 	m_disk_label = "unknown";
 
-    if(disk)
-        ped_disk_destroy(disk);
 }
 
 QString StorageDevice::getDevicePath()
