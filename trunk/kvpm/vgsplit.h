@@ -37,10 +37,15 @@ Q_OBJECT
     QList<NoMungeCheck *> m_pv_checks;
     QList<LogVol *> m_lvs;
     QStringList m_busy_pvs;    // all pvs under busy logical volumes
+    QStringList m_lvs_moving;  // names of lvs to be moved to new vg 
     QTableWidget *m_pv_table;
     KLineEdit *m_new_vg_name;
     QRegExpValidator *m_validator;
     VolGroup *m_vg;
+
+    // TODO: following function should be in LogVol
+    // lv->getDevicePathAll() returns hidden lvs for mirrors. We want the real pvs here.
+    QStringList getUnderlyingDevices(LogVol *lv); 
     
  public:
     VGSplitDialog(VolGroup *volumeGroup, QWidget *parent = 0);
@@ -50,6 +55,7 @@ Q_OBJECT
     void validateOK();
     void validateName(QString);
     void adjustTable(bool);
+    void deactivate();     // active lvs must be deactivated before moving
 
 };
 

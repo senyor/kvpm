@@ -78,9 +78,12 @@ VGSplitDialog::VGSplitDialog(VolGroup *volumeGroup, QWidget *parent) : KDialog(p
     connect(m_new_vg_name, SIGNAL(textEdited(QString)), 
             this, SLOT(validateName(QString)));
 
+    connect(this, SIGNAL(okClicked()), 
+            this, SLOT(deactivate()));
+
     for(int x = 0; x < m_lvs.size(); x++){
-        if(m_lvs[x]->isOpen())
-            m_busy_pvs << m_lvs[x]->getDevicePathAll();
+        if(m_lvs[x]->isOpen() && !(m_lvs[x]->isMirrorLog() || m_lvs[x]->isMirrorLeg()) ) // logs and legs are always open
+            m_busy_pvs << getUnderlyingDevices(m_lvs[x]);
     }
     m_busy_pvs.removeDuplicates();
 
@@ -115,6 +118,8 @@ void VGSplitDialog::adjustTable(bool)
     bool original_vg = false;
     bool new_vg = false;
 
+    m_lvs_moving.clear();
+
     for(int x = 0; x < m_pv_checks.size(); x++){
         if( m_pv_checks[x]->isChecked() )
             new_vg_pv_names.append( m_pv_checks[x]->getUnmungedText() );
@@ -132,7 +137,7 @@ void VGSplitDialog::adjustTable(bool)
         original_vg = false;
         new_vg = false;
 
-        lv_pv_names = m_lvs[x]->getDevicePathAll();
+        lv_pv_names = getUnderlyingDevices(m_lvs[x]);
         for(int y = 0; y < lv_pv_names.size(); y++){
 
             if( original_vg_pv_names.contains(lv_pv_names[y]) )
@@ -149,6 +154,7 @@ void VGSplitDialog::adjustTable(bool)
         }
         else if(new_vg && !original_vg){
             newItem = new QTableWidgetItem( m_lvs[x]->getName() );
+            m_lvs_moving.append( m_lvs[x]->getName() );
             newItem->setFlags( Qt::ItemIsEnabled );
             m_pv_table->setItem(x, 2, newItem);
         }
@@ -210,4 +216,66 @@ QStringList VGSplitDialog::arguments()
     }
 
     return args;
+}
+
+void VGSplitDialog::deactivate()
+{
+    lvm_t  lvm;
+    vg_t vg_dm;
+    dm_list *lv_dm_list;
+    lvm_lv_list *lv_list;
+    QList<lv_t> lvs_to_deactivate;
+
+    if( (lvm = lvm_init(NULL)) ){
+        if( (vg_dm = lvm_vg_open(lvm, m_vg->getName().toAscii().data(), "w", NULL)) ){
+
+            for(int x = 0; x < m_lvs_moving.size(); x++){
+                lv_dm_list = lvm_vg_list_lvs(vg_dm);
+                dm_list_iterate_items(lv_list, lv_dm_list){ 
+                    if( QString( lvm_lv_get_name( lv_list->lv ) ).trimmed() == m_lvs_moving[x])
+                        lvs_to_deactivate.append( lv_list->lv );
+                }
+            }
+        
+            for(int x = 0; x < lvs_to_deactivate.size(); x++){
+                if( lvm_lv_is_active(lvs_to_deactivate[x]) )
+                    if( ! lvm_lv_deactivate(lvs_to_deactivate[x]) )
+                        KMessageBox::error(0, QString(lvm_errmsg(lvm))); 
+            }
+            lvm_vg_close(vg_dm);
+            lvm_quit(lvm);
+            return;
+        }
+        else{
+            KMessageBox::error(0, QString(lvm_errmsg(lvm))); 
+            lvm_quit(lvm);
+            return;
+        }
+    }
+
+    KMessageBox::error(0, QString(lvm_errmsg(lvm))); 
+    return;
+}
+
+QStringList VGSplitDialog::getUnderlyingDevices(LogVol *lv)
+{
+    QStringList devices;
+    QList<LogVol *> legsAndLogs;
+
+    if( lv->isMirror() ){
+        for(int x = 0; x < m_lvs.size(); x++){
+            if( (lv->getName() == m_lvs[x]->getOrigin()) && !m_lvs[x]->isSnap() )
+                legsAndLogs.append(m_lvs[x]);
+        }
+        for(int x = 0; x < legsAndLogs.size(); x++){
+            if(legsAndLogs[x]->isMirror())
+                devices << getUnderlyingDevices(legsAndLogs[x]);
+            else
+                devices << legsAndLogs[x]->getDevicePathAll();
+        }
+    }
+    else
+        devices = lv->getDevicePathAll();
+    qDebug() << lv->getName() << "  " << devices;
+    return devices;
 }
