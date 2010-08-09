@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -87,7 +87,7 @@ ProcessProgress::ProcessProgress(QStringList arguments,
             }
         }
         else{
-            KMessageBox::error(this, i18n("Executable %1 not found").arg(executable));
+            KMessageBox::error(this, i18n("Executable: '%1' not found").arg(executable));
             close();
         }
     }
