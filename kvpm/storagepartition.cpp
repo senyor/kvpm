@@ -132,8 +132,6 @@ StoragePartition::StoragePartition(PedPartition *part,
     }
     else
         m_is_empty = false;
-
-    ped_disk_destroy(temp_disk); 
 }
 
 StoragePartition::~StoragePartition()
