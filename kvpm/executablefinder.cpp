@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2009 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -58,9 +58,8 @@ ExecutableFinder::ExecutableFinder(QObject *parent) : QObject(parent)
 	   << "vgremove"
 	   << "vgrename"
 	   << "vgs" 
+           << "vgsplit" 
 	   << "xfs_growfs";
-    
-
 
     m_default_search_paths << "/sbin/" 
 			   << "/usr/sbin/" 
@@ -78,7 +77,7 @@ QString ExecutableFinder::getExecutablePath(QString name)
     QString path = m_path_map.value(name);
 
     if(path == "")
-	qDebug() << "Excutable Finder: error " << name << " does not map to any path";
+	qDebug() << "Excutable Finder: error " << name  << " does not map to any path";
     
     return path;
 }

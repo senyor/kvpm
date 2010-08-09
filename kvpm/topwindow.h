@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2009 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -45,7 +45,8 @@ Q_OBJECT
     KAction *restart_pvmove_action,
 	    *stop_pvmove_action,
 	    *export_vg_action,
-	    *import_vg_action;
+            *import_vg_action,
+	    *split_vg_action;
     
     KMenu *m_vgchange_menu;
 
@@ -73,6 +74,7 @@ Q_OBJECT
     void reduceVolumeGroup();
     void exportVolumeGroup();
     void importVolumeGroup();
+    void splitVolumeGroup();
     void restartPhysicalVolumeMove();
     void stopPhysicalVolumeMove();
     void configKvpm();

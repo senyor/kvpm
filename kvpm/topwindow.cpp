@@ -41,6 +41,7 @@
 #include "vgremove.h"
 #include "vgrename.h"
 #include "vgreduce.h"
+#include "vgsplit.h"
 #include "volgroup.h"
 #include "volumegrouptab.h"
 
@@ -89,6 +90,7 @@ TopWindow::TopWindow(QWidget *parent):KMainWindow(parent)
     remove_missing_action  = new KAction( i18n("Remove Missing Physcial Volumes..."), this);
     export_vg_action       = new KAction( i18n("Export Volume Group..."), this);
     import_vg_action       = new KAction( i18n("Import Volume Group..."), this);
+    split_vg_action        = new KAction( i18n("Split Volume Group..."), this);
     m_vgchange_menu           = new KMenu( i18n("Change Volume Group Attributes"), this);
     create_vg_action          = new KAction( i18n("Create Volume Group..."), this);
     vgchange_available_action = new KAction( i18n("Volume Group Availability..."), this);
@@ -120,6 +122,7 @@ TopWindow::TopWindow(QWidget *parent):KMainWindow(parent)
     groups_menu->addAction(rename_vg_action);
     groups_menu->addAction(export_vg_action);
     groups_menu->addAction(import_vg_action);
+    groups_menu->addAction(split_vg_action);
     groups_menu->addMenu(m_vgchange_menu);
 
     settings_menu->addAction(config_kvpm_action);
@@ -159,6 +162,9 @@ TopWindow::TopWindow(QWidget *parent):KMainWindow(parent)
 
     connect(import_vg_action,       SIGNAL(triggered()), 
 	    this, SLOT(importVolumeGroup()));
+
+    connect(split_vg_action,       SIGNAL(triggered()), 
+	    this, SLOT(splitVolumeGroup()));
 
     connect(remove_missing_action,  SIGNAL(triggered()), 
 	    this, SLOT(removeMissingVolumes()));
@@ -279,6 +285,7 @@ void TopWindow::setupMenus()
 	    remove_missing_action->setEnabled(false);
 
 	if( m_vg->isExported() ){
+            split_vg_action->setEnabled(false);	
 	    import_vg_action->setEnabled(true);
 	    export_vg_action->setEnabled(false);
             reduce_vg_action->setEnabled(false);
@@ -286,6 +293,7 @@ void TopWindow::setupMenus()
 	else if( !m_vg->isPartial() ){
 	    import_vg_action->setEnabled(false);
             reduce_vg_action->setEnabled(true);
+            split_vg_action->setEnabled(true);	
 
             if(has_active)
                 export_vg_action->setEnabled(false);
@@ -293,11 +301,12 @@ void TopWindow::setupMenus()
                 export_vg_action->setEnabled(true);
 	}
         else{
+            split_vg_action->setEnabled(false);	
 	    import_vg_action->setEnabled(false);
 	    export_vg_action->setEnabled(false);
             reduce_vg_action->setEnabled(false);
         }
-	
+
 	rename_vg_action->setEnabled(true);      
 	m_vgchange_menu->setEnabled(true);
     }
@@ -308,6 +317,7 @@ void TopWindow::setupMenus()
 	remove_missing_action->setEnabled(false);
 	m_vgchange_menu->setEnabled(false);
 	import_vg_action->setEnabled(false);
+	split_vg_action->setEnabled(false);
 	export_vg_action->setEnabled(false);
     }
 }
@@ -386,6 +396,12 @@ void TopWindow::exportVolumeGroup()
 void TopWindow::importVolumeGroup()
 {
     if( import_vg(m_vg) )
+        MainWindow->reRun();
+}
+
+void TopWindow::splitVolumeGroup()
+{
+    if( split_vg(m_vg) )
         MainWindow->reRun();
 }
 
