@@ -91,12 +91,18 @@ VGSplitDialog::VGSplitDialog(VolGroup *volumeGroup, QWidget *parent) : KDialog(p
     layout->addWidget(pv_box);
     QGridLayout *pv_box_layout = new QGridLayout();
     pv_box->setLayout(pv_box_layout);
-    for(int x = 0; x < m_pv_checks.size(); x++){
+    int pv_check_count = m_pv_checks.size();
+    for(int x = 0; x < pv_check_count; x++){
         for(int y = 0; y < m_busy_pvs.size(); y++){
             if(m_busy_pvs[y] == m_pv_checks[x]->getUnmungedText())
                 m_pv_checks[x]->setEnabled(false);
         }
-        pv_box_layout->addWidget(m_pv_checks[x], x, 0);
+        if(pv_check_count < 11 )
+            pv_box_layout->addWidget(m_pv_checks[x], x % 5, x / 5);
+        else if (pv_check_count % 3 == 0)
+            pv_box_layout->addWidget(m_pv_checks[x], x % (pv_check_count / 3), x / (pv_check_count / 3));
+        else
+            pv_box_layout->addWidget(m_pv_checks[x], x % ( (pv_check_count + 2) / 3), x / ( (pv_check_count + 2) / 3));
     }
 
     QLabel *unmovable_label = new QLabel( i18n("<b>Volumes that are in use can't be moved</b>") );
@@ -276,6 +282,6 @@ QStringList VGSplitDialog::getUnderlyingDevices(LogVol *lv)
     }
     else
         devices = lv->getDevicePathAll();
-    qDebug() << lv->getName() << "  " << devices;
+
     return devices;
 }
