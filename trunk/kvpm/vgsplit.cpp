@@ -144,6 +144,8 @@ void VGSplitDialog::adjustTable(bool)
         new_vg = false;
 
         lv_pv_names = getUnderlyingDevices(m_lvs[x]);
+        if(m_lvs[x]->isSnap())
+            lv_pv_names << getUnderlyingDevices(m_vg->getLogVolByName( m_lvs[x]->getOrigin() ));
         for(int y = 0; y < lv_pv_names.size(); y++){
 
             if( original_vg_pv_names.contains(lv_pv_names[y]) )
