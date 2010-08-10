@@ -60,7 +60,6 @@ VGSplitDialog::VGSplitDialog(VolGroup *volumeGroup, QWidget *parent) : KDialog(p
     setMainWidget(dialog_body);
     QVBoxLayout *layout = new QVBoxLayout();
     dialog_body->setLayout(layout);
-
     QLabel *name_label = new QLabel( i18n("Volume Group To Split: <b>%1</b>").arg(m_vg->getName() ) );
     name_label->setAlignment(Qt::AlignCenter);
     layout->addWidget(name_label);
@@ -115,6 +114,7 @@ VGSplitDialog::VGSplitDialog(VolGroup *volumeGroup, QWidget *parent) : KDialog(p
     m_pv_table->setColumnCount(3);
     layout->addWidget(m_pv_table);
     adjustTable(true);
+    setMinimumWidth(400);
 }
 
 void VGSplitDialog::adjustTable(bool)
