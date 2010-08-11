@@ -134,6 +134,7 @@ void VGSplitDialog::adjustTable(bool)
     }
 
     m_pv_table->clear();
+    m_pv_table->setDragDropMode(QAbstractItemView::InternalMove);
     QStringList headers;
     headers << "Original Group" << "Split Between Groups"<< "New Group";
     m_pv_table->setHorizontalHeaderLabels(headers);
@@ -157,18 +158,18 @@ void VGSplitDialog::adjustTable(bool)
 
         if(original_vg && !new_vg){
             newItem = new QTableWidgetItem( m_lvs[x]->getName() );
-            newItem->setFlags( Qt::ItemIsEnabled );
+            newItem->setFlags(Qt::ItemIsEnabled);
             m_pv_table->setItem(x, 0, newItem);
         }
         else if(new_vg && !original_vg){
             newItem = new QTableWidgetItem( m_lvs[x]->getName() );
             m_lvs_moving.append( m_lvs[x]->getName() );
-            newItem->setFlags( Qt::ItemIsEnabled );
+            newItem->setFlags(Qt::ItemIsEnabled);
             m_pv_table->setItem(x, 2, newItem);
         }
         else{
             newItem = new QTableWidgetItem( m_lvs[x]->getName() );
-            newItem->setFlags( Qt::ItemIsEnabled );
+            newItem->setFlags(Qt::ItemIsEnabled);
             m_pv_table->setItem(x, 1, newItem);
         }
     }

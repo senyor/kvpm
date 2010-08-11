@@ -38,15 +38,13 @@ Q_OBJECT
 
     KAction *quit_action,            *remove_vg_action,       *rename_vg_action, 
             *reduce_vg_action,       *rescan_action,          *create_vg_action,
-	    *vgchange_alloc_action,  *vgchange_pv_action, 
+	    *vgchange_alloc_action,  *vgchange_pv_action,     
 	    *vgchange_lv_action,     *vgchange_resize_action, *vgchange_available_action, 
 	    *vgchange_extent_action, *remove_missing_action,  *config_kvpm_action;
 
-    KAction *restart_pvmove_action,
-	    *stop_pvmove_action,
-	    *export_vg_action,
-            *import_vg_action,
-	    *split_vg_action;
+    KAction *restart_pvmove_action, *stop_pvmove_action,
+	    *export_vg_action,      *import_vg_action,
+            *split_vg_action,       *merge_vg_action;
     
     KMenu *m_vgchange_menu;
 
@@ -75,6 +73,7 @@ Q_OBJECT
     void exportVolumeGroup();
     void importVolumeGroup();
     void splitVolumeGroup();
+    void mergeVolumeGroup();
     void restartPhysicalVolumeMove();
     void stopPhysicalVolumeMove();
     void configKvpm();
