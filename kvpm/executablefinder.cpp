@@ -54,6 +54,7 @@ ExecutableFinder::ExecutableFinder(QObject *parent) : QObject(parent)
 	   << "vgexport"
 	   << "vgextend"
 	   << "vgimport"
+	   << "vgmerge"
 	   << "vgreduce"
 	   << "vgremove"
 	   << "vgrename"
