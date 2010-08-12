@@ -56,7 +56,7 @@ VGChangeExtentDialog::VGChangeExtentDialog(VolGroup *volumeGroup, QWidget *paren
     message->setWordWrap(true);
     layout->addWidget(message);
 
-    m_extent_size = new QComboBox();
+    m_extent_size = new KComboBox();
     m_extent_size->insertItem(0,"1");
     m_extent_size->insertItem(1,"2");
     m_extent_size->insertItem(2,"4");
@@ -70,7 +70,7 @@ VGChangeExtentDialog::VGChangeExtentDialog(VolGroup *volumeGroup, QWidget *paren
     m_extent_size->setInsertPolicy(QComboBox::NoInsert);
     m_extent_size->setCurrentIndex(2);
 
-    m_extent_suffix = new QComboBox();
+    m_extent_suffix = new KComboBox();
     m_extent_suffix->insertItem(0,"KiB");
     m_extent_suffix->insertItem(1,"MiB");
     m_extent_suffix->insertItem(2,"GiB");
