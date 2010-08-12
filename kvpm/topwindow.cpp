@@ -37,6 +37,7 @@
 #include "vgchangepv.h"
 #include "vgchangeresize.h"
 #include "vgexport.h"
+#include "vgextend.h"
 #include "vgimport.h"
 #include "vgmerge.h"
 #include "vgremove.h"
@@ -92,6 +93,7 @@ TopWindow::TopWindow(QWidget *parent):KMainWindow(parent)
     export_vg_action       = new KAction( i18n("Export Volume Group..."), this);
     import_vg_action       = new KAction( i18n("Import Volume Group..."), this);
     merge_vg_action        = new KAction( i18n("Merge Volume Group..."), this);
+    extend_vg_action       = new KAction( i18n("Extend Volume Group..."), this);
     split_vg_action        = new KAction( i18n("Split Volume Group..."), this);
     m_vgchange_menu           = new KMenu( i18n("Change Volume Group Attributes"), this);
     create_vg_action          = new KAction( i18n("Create Volume Group..."), this);
@@ -123,6 +125,7 @@ TopWindow::TopWindow(QWidget *parent):KMainWindow(parent)
     groups_menu->addAction(reduce_vg_action);
     groups_menu->addAction(rename_vg_action);
     groups_menu->addAction(export_vg_action);
+    groups_menu->addAction(extend_vg_action);
     groups_menu->addAction(import_vg_action);
     groups_menu->addAction(split_vg_action);
     groups_menu->addAction(merge_vg_action);
@@ -162,6 +165,9 @@ TopWindow::TopWindow(QWidget *parent):KMainWindow(parent)
 
     connect(export_vg_action,       SIGNAL(triggered()), 
 	    this, SLOT(exportVolumeGroup()));
+
+    connect(extend_vg_action,       SIGNAL(triggered()), 
+	    this, SLOT(extendVolumeGroup()));
 
     connect(import_vg_action,       SIGNAL(triggered()), 
 	    this, SLOT(importVolumeGroup()));
@@ -296,12 +302,14 @@ void TopWindow::setupMenus()
 	    import_vg_action->setEnabled(true);
 	    export_vg_action->setEnabled(false);
             reduce_vg_action->setEnabled(false);
+            extend_vg_action->setEnabled(false);	
 	}
 	else if( !m_vg->isPartial() ){
 	    import_vg_action->setEnabled(false);
             reduce_vg_action->setEnabled(true);
             split_vg_action->setEnabled(true);	
             merge_vg_action->setEnabled(true);	
+            extend_vg_action->setEnabled(true);	
 
             if(has_active)
                 export_vg_action->setEnabled(false);
@@ -314,6 +322,7 @@ void TopWindow::setupMenus()
 	    import_vg_action->setEnabled(false);
 	    export_vg_action->setEnabled(false);
             reduce_vg_action->setEnabled(false);
+            extend_vg_action->setEnabled(false);	
         }
 
 	rename_vg_action->setEnabled(true);      
@@ -329,6 +338,7 @@ void TopWindow::setupMenus()
 	split_vg_action->setEnabled(false);
 	merge_vg_action->setEnabled(false);
 	export_vg_action->setEnabled(false);
+	extend_vg_action->setEnabled(false);
     }
 }
 
@@ -400,6 +410,12 @@ void TopWindow::reduceVolumeGroup()
 void TopWindow::exportVolumeGroup()
 {
     if( export_vg(m_vg) )
+        MainWindow->reRun();
+}
+
+void TopWindow::extendVolumeGroup()
+{
+    if( extend_vg(m_vg) )
         MainWindow->reRun();
 }
 
