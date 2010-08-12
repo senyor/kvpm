@@ -125,17 +125,25 @@ VGCreateDialog::VGCreateDialog(QStringList physicalVolumePathList, QWidget *pare
     m_extent_suffix->setInsertPolicy(QComboBox::NoInsert);
     m_extent_suffix->setCurrentIndex(1);
 
-    QGroupBox *available_pv_box = new QGroupBox( i18n("Available potential physical volumes") ); 
-    QVBoxLayout *available_pv_box_layout = new QVBoxLayout();
-    available_pv_box->setLayout(available_pv_box_layout);
+    QGroupBox *new_pv_box = new QGroupBox( i18n("Available potential physical volumes") ); 
+    QGridLayout *new_pv_box_layout = new QGridLayout();
+    new_pv_box->setLayout(new_pv_box_layout);
     NoMungeCheck *temp_check;
-    if(m_pv_paths.size() < 2)
-        available_pv_box_layout->addWidget( new QLabel(m_pv_paths[0] ) );
+    int pv_check_count = m_pv_paths.size();
+
+    if(pv_check_count < 2)
+        new_pv_box_layout->addWidget( new QLabel(m_pv_paths[0] ) );
     else{
-        for(int x = 0; x < m_pv_paths.size(); x++){
+        for(int x = 0; x < pv_check_count; x++){
 	    temp_check = new NoMungeCheck(m_pv_paths[x]);
-	    available_pv_box_layout->addWidget(temp_check);
 	    m_pv_checks.append(temp_check);
+
+            if(pv_check_count < 11 )
+                new_pv_box_layout->addWidget(m_pv_checks[x], x % 5, x / 5);
+            else if (pv_check_count % 3 == 0)
+                new_pv_box_layout->addWidget(m_pv_checks[x], x % (pv_check_count / 3), x / (pv_check_count / 3));
+            else
+                new_pv_box_layout->addWidget(m_pv_checks[x], x % ( (pv_check_count + 2) / 3), x / ( (pv_check_count + 2) / 3));
 
 	    connect(temp_check, SIGNAL(toggled(bool)), 
 		    this, SLOT(validateOK()));
@@ -187,7 +195,7 @@ VGCreateDialog::VGCreateDialog(QStringList physicalVolumePathList, QWidget *pare
 
     layout->addLayout(name_layout);
     layout->addLayout(extent_layout);
-    layout->addWidget(available_pv_box);
+    layout->addWidget(new_pv_box);
     layout->addWidget(lv_box);
     layout->addWidget(pv_box);
     layout->addWidget(m_clustered);
