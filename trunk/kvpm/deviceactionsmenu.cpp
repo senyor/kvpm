@@ -22,6 +22,7 @@
 #include "mkfs.h"
 #include "mount.h"
 #include "unmount.h"
+#include "masterlist.h"
 #include "partremove.h"
 #include "partadd.h"
 #include "physvol.h"
