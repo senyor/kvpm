@@ -119,16 +119,17 @@ TopWindow::TopWindow(QWidget *parent):KMainWindow(parent)
     tool_menu->addAction(stop_pvmove_action);
 
     groups_menu->addAction(create_vg_action);
-    groups_menu->addSeparator();
     groups_menu->addAction(remove_vg_action);
-    groups_menu->addAction(remove_missing_action);
-    groups_menu->addAction(reduce_vg_action);
     groups_menu->addAction(rename_vg_action);
-    groups_menu->addAction(export_vg_action);
+    groups_menu->addSeparator();
+    groups_menu->addAction(remove_missing_action);
     groups_menu->addAction(extend_vg_action);
-    groups_menu->addAction(import_vg_action);
+    groups_menu->addAction(reduce_vg_action);
     groups_menu->addAction(split_vg_action);
     groups_menu->addAction(merge_vg_action);
+    groups_menu->addSeparator();
+    groups_menu->addAction(export_vg_action);
+    groups_menu->addAction(import_vg_action);
     groups_menu->addMenu(m_vgchange_menu);
 
     settings_menu->addAction(config_kvpm_action);
