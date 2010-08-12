@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -15,8 +15,32 @@
 #ifndef VGEXTEND_H
 #define VGEXTEND_H
 
-#include <QString>
+#include <QStringList>
+#include <KDialog>
+#include <QCheckBox>
+
+#include "nomungecheck.h"
+#include "volgroup.h"
 
 bool extend_vg(QString volumeGroupName, QString physicalVolumeName);
+
+bool extend_vg(VolGroup *volumeGroup);
+
+class VGExtendDialog : public KDialog
+{
+Q_OBJECT
+
+    QList<NoMungeCheck *> m_pv_checks;
+    QStringList m_pv_names;
+    VolGroup *m_vg;
+
+ public:
+    VGExtendDialog(VolGroup *volumeGroup, QStringList physcialVolumeNames, QWidget *parent = 0);
+    
+ private slots:
+    void commitChanges();
+    void validateOK();
+    
+};
 
 #endif
