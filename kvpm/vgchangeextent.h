@@ -16,9 +16,9 @@
 #define VGCHANGEEXTENT_H
 
 #include <KDialog>
+#include <KComboBox>
 
 #include <QStringList>
-#include <QComboBox>
 
 class VolGroup;
 
@@ -29,7 +29,7 @@ class VGChangeExtentDialog : public KDialog
 Q_OBJECT
     QString m_vg_name;
 
-    QComboBox *m_extent_size, 
+    KComboBox *m_extent_size, 
 	      *m_extent_suffix;
 
 public:
