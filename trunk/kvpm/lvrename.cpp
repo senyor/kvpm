@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -38,7 +38,7 @@ bool rename_lv(LogVol *logicalVolume)
 }
 
 LVRenameDialog::LVRenameDialog(LogVol *logicalVolume, QWidget *parent) : 
-    KDialog(parent)
+    KDialog(parent), m_lv(logicalVolume)
 {
 
     setWindowTitle( i18n("Rename logical volume") );
@@ -48,8 +48,8 @@ LVRenameDialog::LVRenameDialog(LogVol *logicalVolume, QWidget *parent) :
     QVBoxLayout *layout = new QVBoxLayout();
     dialog_body->setLayout(layout);
 
-    m_vg_name  = logicalVolume->getVolumeGroupName();
-    m_old_name = logicalVolume->getName();
+    m_vg_name  = m_lv->getVolumeGroupName();
+    m_old_name = m_lv->getName();
 
     QLabel *old_name_label = new QLabel( i18n("Old logical volume name: %1").arg(m_old_name) );
     layout->addWidget(old_name_label);
@@ -106,7 +106,6 @@ void LVRenameDialog::validateName(QString name)
 
 void LVRenameDialog::renameMountEntries()
 {
-    rename_mount_entries("/dev/mapper/" + m_vg_name + "-" + m_old_name, 
-			 "/dev/mapper/" + m_vg_name + "-" + m_new_name->text());
+    rename_mount_entries(m_lv->getMapperPath(), "/dev/" + m_vg_name + "/" + m_new_name->text());
 }
 

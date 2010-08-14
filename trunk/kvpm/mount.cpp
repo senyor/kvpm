@@ -487,11 +487,7 @@ void MountDialog::toggleAdditionalOptions(bool)
 
 bool mount_filesystem(LogVol *volumeToMount)
 {
-    const QString prefix = "/dev/mapper/";
-    const QString lv_name = volumeToMount->getName();
-    const QString vg_name = volumeToMount->getVolumeGroupName();
-
-    MountDialog dialog(prefix + vg_name + "-" + lv_name, volumeToMount->getFilesystem(), volumeToMount->isWritable());
+    MountDialog dialog(volumeToMount->getMapperPath(), volumeToMount->getFilesystem(), volumeToMount->isWritable());
     dialog.exec();
 
     if (dialog.result() == QDialog::Accepted)
