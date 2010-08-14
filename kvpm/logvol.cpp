@@ -209,7 +209,7 @@ LogVol::LogVol(QStringList lvDataList, MountInformationList *mountInformationLis
         m_lv_fs = "mirror log";
     }
     else
-        m_lv_fs = fsprobe_getfstype2( "/dev/mapper/" + m_vg_name + "-" + m_lv_name );
+        m_lv_fs = fsprobe_getfstype2( "/dev/" + m_vg_name + "/" + m_lv_name );
 
     m_size         = (lvdata.section('|',3,3)).toLongLong();
     m_snap_percent = 0.0;
@@ -259,8 +259,7 @@ LogVol::LogVol(QStringList lvDataList, MountInformationList *mountInformationLis
     m_vg_attr = lvdata.section('|',20,20);
     m_tags    = lvdata.section('|',21,21).split(',', QString::SkipEmptyParts);
 
-    m_mount_info_list = mountInformationList->getMountInformation( "/dev/mapper/" + 
-							 m_vg_name + "-" + m_lv_name );
+    m_mount_info_list = mountInformationList->getMountInformation( "/dev/" + m_vg_name + "/" + m_lv_name );
 
 /* To Do: get all the rest of the mount info, not just mount points */
 
@@ -401,7 +400,7 @@ QString LogVol::getMapperPath()
 {
     QString path;
 
-    path = "/dev/mapper/" + m_vg_name + "-" + m_lv_name;
+    path = "/dev/" + m_vg_name + "/" + m_lv_name;
     
     return path;
 }

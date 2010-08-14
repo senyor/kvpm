@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -143,7 +143,7 @@ bool unmount_filesystem(LogVol *logicalVolume)
 	    }
         }
         else{
-	    UnmountDialog dialog("/dev/mapper/" + vg_name + "-" + name  ,mount_points, mount_position);
+	    UnmountDialog dialog(logicalVolume->getMapperPath()  ,mount_points, mount_position);
 	    if( dialog.exec() )
 	      return true;
 	    else
