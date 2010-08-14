@@ -72,13 +72,13 @@ bool lv_extend(LogVol *logicalVolume)
         dialog.exec();
 
         if( dialog.result() == QDialog::Accepted ){
-            ProcessProgress extend_lv(dialog.argumentsLV(), 
-                                      i18n("Extending volume..."), 
-                                      true);
+            ProcessProgress extend_lv(dialog.argumentsLV(), i18n("Extending volume..."), true);
             if( !extend_lv.exitCode() )
-                return fs_extend( logicalVolume->getMapperPath(), fs, true );		    
+                fs_extend( logicalVolume->getMapperPath(), fs, true );		    
+	    return true;
         }
-        return false;
+	else
+	  return false;
     }
     else{
         if(KMessageBox::warningContinueCancel(0, warning_message) == KMessageBox::Continue){
