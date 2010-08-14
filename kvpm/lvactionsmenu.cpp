@@ -181,7 +181,12 @@ void LVActionsMenu::setup(LogVol *lv)
             if( lv->isSnap() || lv->isOrigin() ){
                 add_mirror_action->setEnabled(false);
 		remove_mirror_action->setEnabled(false);
-                lv_extend_action->setEnabled(false);
+
+		if( lv->isOrigin() && lv->isActive() )
+		  lv_extend_action->setEnabled(false);
+		else
+		  lv_extend_action->setEnabled(true);
+
 		lv_reduce_action->setEnabled(false);
                 pv_move_action->setEnabled(false);
 

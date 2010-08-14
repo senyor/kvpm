@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -53,17 +53,13 @@ bool lv_reduce(LogVol *logicalVolume)
 		return false;
 	}
     }
-    else if( logicalVolume->isMirror() ){
-        KMessageBox::error(0, i18n("Resizing mirrors is not supported yet") );
-	return false;
-    }
-    else if( logicalVolume->isOrigin() ){
-        KMessageBox::error(0, i18n("Resizing snapshot origin is not supported yet") );
-	return false;
-    }
+    //    else if( logicalVolume->isOrigin() ){
+    //        KMessageBox::error(0, i18n("Resizing snapshot origin is not supported yet") );
+    //	return false;
+    //}
     else if( logicalVolume->isMounted() ){
-        KMessageBox::error(0, i18n("The filesystem must be unmounted first") );
-	return false;
+      KMessageBox::error(0, i18n("The filesystem must be unmounted first") );
+      return false;
     }
     else if( (fs != "ext2") && (fs != "ext3") && (fs != "ext4") ){
 	if(KMessageBox::warningContinueCancel(0, warning_message) != KMessageBox::Continue)
