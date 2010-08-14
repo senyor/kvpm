@@ -150,8 +150,14 @@ QWidget* LVCreateDialog::createGeneralTab()
      m_tag_edit = NULL;
 
      QWidget *general_tab = new QWidget(this);
+     QHBoxLayout *general_layout = new QHBoxLayout;
+     general_tab->setLayout(general_layout);
+     QGroupBox *volume_box = new QGroupBox( i18n("Create new logical volume") );
      QVBoxLayout *layout = new QVBoxLayout;
-     general_tab->setLayout(layout);
+     volume_box->setLayout(layout);
+     general_layout->addStretch();
+     general_layout->addWidget(volume_box);
+     general_layout->addStretch();
      QVBoxLayout *upper_layout = new QVBoxLayout();
      QHBoxLayout *lower_layout = new QHBoxLayout();
      layout->addStretch();
@@ -188,9 +194,7 @@ QWidget* LVCreateDialog::createGeneralTab()
 
      }
      else {
-         QLabel *extend_label = new QLabel( i18n("<b>Extending volume: %1</b>").arg(m_lv->getName()));
-         extend_label->setAlignment(Qt::AlignCenter);
-         upper_layout->addWidget( extend_label ); 
+         volume_box->setTitle( i18n("Extending volume: %1").arg(m_lv->getName()) );
 	 m_name_is_valid = true;
      }
 
@@ -298,13 +302,16 @@ QWidget* LVCreateDialog::createPhysicalTab()
     }
     
     QGroupBox *physical_group = new QGroupBox( i18n("Available physical volumes") );
-    QVBoxLayout *physical_layout = new QVBoxLayout();
+    QGridLayout *physical_layout = new QGridLayout();
     physical_group->setLayout(physical_layout);
     layout->addWidget(physical_group);
-    
-    for(int x = 0; x < m_physical_volumes.size(); x++){
+
+    int pv_check_count = m_physical_volumes.size();
+
+    for(int x = 0; x < pv_check_count; x++){
 	pv = m_physical_volumes[x];
 	temp_check = new QCheckBox();
+	m_pv_checks.append(temp_check);
 
 	if(pv->isAllocateable()){
 	    temp_check->setEnabled(true);
@@ -316,10 +323,14 @@ QWidget* LVCreateDialog::createPhysicalTab()
 	    temp_check->setChecked(false);
 	    temp_check->setText( i18n("%1 not allocateable").arg(pv->getDeviceName()) );
 	}
-	
-	m_pv_checks.append(temp_check);
-	physical_layout->addWidget(temp_check);
 
+        if(pv_check_count < 11 )
+            physical_layout->addWidget(temp_check, x % 5, x / 5);
+        else if (pv_check_count % 3 == 0)
+            physical_layout->addWidget(temp_check, x % (pv_check_count / 3), x / (pv_check_count / 3));
+        else
+            physical_layout->addWidget(temp_check, x % ( (pv_check_count + 2) / 3), x / ( (pv_check_count + 2) / 3));
+	
 	connect(temp_check, SIGNAL(toggled(bool)), 
 		this, SLOT(calculateSpace(bool)));
 
@@ -330,8 +341,8 @@ QWidget* LVCreateDialog::createPhysicalTab()
     m_allocateable_space_label = new QLabel();
     m_allocateable_extents_label = new QLabel();
     calculateSpace(true);
-    physical_layout->addWidget(m_allocateable_space_label);
-    physical_layout->addWidget(m_allocateable_extents_label);
+    physical_layout->addWidget(m_allocateable_space_label, physical_layout->rowCount(), 0 , 1, -1, Qt::AlignCenter);
+    physical_layout->addWidget(m_allocateable_extents_label, physical_layout->rowCount(), 0, 1, -1, Qt::AlignCenter);
     QVBoxLayout *striped_layout = new QVBoxLayout;
     QHBoxLayout *stripe_size_layout = new QHBoxLayout;
     QHBoxLayout *stripes_number_layout = new QHBoxLayout;
@@ -400,11 +411,18 @@ QWidget* LVCreateDialog::createPhysicalTab()
     mirrors_spin_layout->addWidget(mirrors_number_label);
     mirrors_spin_layout->addWidget(m_mirrors_number_spin);
     mirror_layout->addLayout(mirrors_spin_layout);
-    
-    layout->addWidget(m_stripe_box);
+
+    QHBoxLayout *lower_h_layout = new QHBoxLayout;
+    QVBoxLayout *lower_v_layout = new QVBoxLayout;
+    layout->addLayout(lower_h_layout);
+    lower_h_layout->addStretch();
+    lower_h_layout->addLayout(lower_v_layout);
+    lower_h_layout->addStretch();
+
+    lower_v_layout->addWidget(m_stripe_box);
 
     if( (!m_extend) && (!m_snapshot) )
-	layout->addWidget(m_mirror_box);
+	lower_v_layout->addWidget(m_mirror_box);
     else
 	m_mirror_box->setEnabled(false);
 
@@ -438,9 +456,15 @@ QWidget* LVCreateDialog::createPhysicalTab()
 QWidget* LVCreateDialog::createAdvancedTab()
 {
 
-    QVBoxLayout *layout = new QVBoxLayout;
+    QHBoxLayout *advanced_layout = new QHBoxLayout;
     m_advanced_tab = new QWidget(this);
-    m_advanced_tab->setLayout(layout);
+    m_advanced_tab->setLayout(advanced_layout);
+    QGroupBox *advanced_box = new QGroupBox();
+    QVBoxLayout *layout = new QVBoxLayout;
+    advanced_box->setLayout(layout);
+    advanced_layout->addStretch();
+    advanced_layout->addWidget(advanced_box);
+    advanced_layout->addStretch();
     
     m_persistent_box = new QGroupBox( i18n("Device numbering") );
     m_persistent_box->setCheckable(true);
