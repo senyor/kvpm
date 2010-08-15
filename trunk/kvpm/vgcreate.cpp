@@ -153,8 +153,8 @@ VGCreateDialog::VGCreateDialog(QStringList physicalVolumePathList, QWidget *pare
     }
     QHBoxLayout *button_layout = new QHBoxLayout();
     new_pv_box_layout->addLayout(button_layout, new_pv_box_layout->rowCount(),0, 1, -1);
-    KPushButton *all_button = new KPushButton("Select all");
-    KPushButton *none_button = new KPushButton("Select none");
+    KPushButton *all_button = new KPushButton( i18n("Select all") );
+    KPushButton *none_button = new KPushButton( i18n("Select none") );
 
     connect(all_button, SIGNAL(clicked(bool)), 
             this, SLOT(selectAll()));
