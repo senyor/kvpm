@@ -66,14 +66,14 @@ bool lv_extend(LogVol *logicalVolume)
 				   "extended separately!");
 
     if( fs == "xfs"  || fs == "jfs"  || fs == "reiserfs" || 
-        fs == "ext2" || fs == "ext3" || fs == "ext4" ){
+        fs == "ext2" || fs == "ext3" || fs == "ext4" || logicalVolume->isSnap() ){
 
         LVCreateDialog dialog(logicalVolume, false);
         dialog.exec();
 
         if( dialog.result() == QDialog::Accepted ){
             ProcessProgress extend_lv(dialog.argumentsLV(), i18n("Extending volume..."), true);
-            if( !extend_lv.exitCode() )
+            if( !extend_lv.exitCode() && !logicalVolume->isSnap() )
                 fs_extend( logicalVolume->getMapperPath(), fs, true );		    
 	    return true;
         }
@@ -142,7 +142,6 @@ LVCreateDialog::LVCreateDialog(LogVol *logicalVolume, bool snapshot, QWidget *pa
     m_tab_widget->addTab(m_advanced_tab, i18n("Advanced") );
 
     setMainWidget(m_tab_widget);
-
 }
 
 QWidget* LVCreateDialog::createGeneralTab()
@@ -474,13 +473,12 @@ QWidget* LVCreateDialog::createAdvancedTab()
     m_readonly_check->setText( i18n("Set read only") );
     m_readonly_check->setCheckState(Qt::Unchecked);
     layout->addWidget(m_readonly_check);
+    m_zero_check = new QCheckBox();
+    m_zero_check->setText( i18n("Write zeros at volume start") );
+    layout->addWidget(m_zero_check);
 
-    if( !m_snapshot ){
-	m_zero_check = new QCheckBox();
-	m_zero_check->setText( i18n("Write zeros at volume start") );
-	layout->addWidget(m_zero_check);
+    if( !m_snapshot && !m_extend ){
 	m_zero_check->setCheckState(Qt::Checked);
-	m_readonly_check->setEnabled(false);
     
 	connect(m_zero_check, SIGNAL(stateChanged(int)), 
 		this ,SLOT(zeroReadonlyCheck(int)));
@@ -488,8 +486,10 @@ QWidget* LVCreateDialog::createAdvancedTab()
 		this ,SLOT(zeroReadonlyCheck(int)));
     }
     else{
-	m_zero_check = NULL;
-	m_readonly_check->setEnabled(true);
+	m_zero_check->setChecked(false);
+	m_zero_check->setEnabled(false);
+	m_readonly_check->setChecked(false);
+	m_readonly_check->setEnabled(false);
     }
 
     m_monitor_check = new QCheckBox( i18n("Monitor with dmeventd") );
@@ -782,7 +782,7 @@ int LVCreateDialog::getMirrorCount()
 
 void LVCreateDialog::zeroReadonlyCheck(int)
 {
-    if( !m_snapshot ){             // m_zero_check = NULL if this is a snapshot
+    if( !m_snapshot && !m_extend){  
 	if (m_zero_check->isChecked()){
 	    m_readonly_check->setChecked(false);
 	    m_readonly_check->setEnabled(false);
@@ -834,7 +834,7 @@ QStringList LVCreateDialog::argumentsLV()
 	else 
 	    args << "--permission" << "rw" ;
 
-	if( !m_snapshot ){
+	if( !m_snapshot && !m_extend ){
 	    if( m_zero_check->isChecked() )
 		args << "--zero" << "y";
 	    else
