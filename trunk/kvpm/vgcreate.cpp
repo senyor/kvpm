@@ -16,6 +16,8 @@
 
 #include <KLocale>
 #include <KMessageBox>
+#include <KProgressDialog>
+#include <KPushButton>
 #include <QtGui>
 
 #include "storagedevice.h"
@@ -91,8 +93,8 @@ VGCreateDialog::VGCreateDialog(QStringList physicalVolumePathList, QWidget *pare
 
     QWidget *dialog_body = new QWidget(this);
     setMainWidget(dialog_body);
-    QVBoxLayout *layout = new QVBoxLayout();
-    dialog_body->setLayout(layout);
+    m_layout = new QVBoxLayout();
+    dialog_body->setLayout(m_layout);
 
     QLabel *name_label = new QLabel( i18n("Volume Group Name: ") );
     m_vg_name = new KLineEdit();
@@ -149,7 +151,20 @@ VGCreateDialog::VGCreateDialog(QStringList physicalVolumePathList, QWidget *pare
 		    this, SLOT(validateOK()));
 	}
     }
-    
+    QHBoxLayout *button_layout = new QHBoxLayout();
+    new_pv_box_layout->addLayout(button_layout, new_pv_box_layout->rowCount(),0, 1, -1);
+    KPushButton *all_button = new KPushButton("Select all");
+    KPushButton *none_button = new KPushButton("Select none");
+
+    connect(all_button, SIGNAL(clicked(bool)), 
+            this, SLOT(selectAll()));
+    connect(none_button, SIGNAL(clicked(bool)), 
+            this, SLOT(selectNone()));
+
+
+    button_layout->addWidget(all_button);
+    button_layout->addWidget(none_button);
+
     QHBoxLayout *extent_layout = new QHBoxLayout();
     extent_layout->addWidget(extent_label);
     extent_layout->addWidget(m_extent_size);
@@ -193,13 +208,13 @@ VGCreateDialog::VGCreateDialog(QStringList physicalVolumePathList, QWidget *pare
     m_auto_backup = new QCheckBox( i18n("Automatic Backup") );
     m_auto_backup->setCheckState(Qt::Checked);
 
-    layout->addLayout(name_layout);
-    layout->addLayout(extent_layout);
-    layout->addWidget(new_pv_box);
-    layout->addWidget(lv_box);
-    layout->addWidget(pv_box);
-    layout->addWidget(m_clustered);
-    layout->addWidget(m_auto_backup);
+    m_layout->addLayout(name_layout);
+    m_layout->addLayout(extent_layout);
+    m_layout->addWidget(new_pv_box);
+    m_layout->addWidget(lv_box);
+    m_layout->addWidget(pv_box);
+    m_layout->addWidget(m_clustered);
+    m_layout->addWidget(m_auto_backup);
 
     enableButtonOk(false);
 
@@ -265,7 +280,13 @@ void VGCreateDialog::commitChanges()
 	        m_pv_paths.append( m_pv_checks[x]->getUnmungedText() );
 	}
     }
-    
+
+    QEventLoop *loop = new QEventLoop(this);
+    QProgressBar *progress_bar = new QProgressBar();
+    progress_bar->setRange(0, m_pv_paths.size());
+    m_layout->addWidget(progress_bar);
+    loop->processEvents();
+
     if( (lvm = lvm_init(NULL)) ){
         if( (vg_dm = lvm_vg_create(lvm, m_vg_name->text().toAscii().data())) ){
 
@@ -273,6 +294,8 @@ void VGCreateDialog::commitChanges()
                 KMessageBox::error(0, QString(lvm_errmsg(lvm)));
 
             for(int x = 0; x < m_pv_paths.size(); x++){
+                progress_bar->setValue(x);
+                loop->processEvents();
                 if( lvm_vg_extend(vg_dm, m_pv_paths[x].toAscii().data()) )
                     KMessageBox::error(0, QString(lvm_errmsg(lvm)));
             }
@@ -289,8 +312,8 @@ void VGCreateDialog::commitChanges()
             lvm_quit(lvm);
             return;
         }
-        KMessageBox::error(0, QString(lvm_errmsg(lvm))); 
         lvm_quit(lvm);
+        KMessageBox::error(0, QString(lvm_errmsg(lvm))); 
         return;
     }
     KMessageBox::error(0, QString(lvm_errmsg(lvm))); 
@@ -338,4 +361,16 @@ void VGCreateDialog::limitPhysicalVolumes(int boxstate)
 	m_max_pvs->setEnabled(true);
     else
 	m_max_pvs->setEnabled(false);
+}
+
+void VGCreateDialog::selectAll()
+{
+    for(int x = 0; x < m_pv_checks.size(); x++)
+        m_pv_checks[x]->setChecked(true);
+}
+
+void VGCreateDialog::selectNone()
+{
+    for(int x = 0; x < m_pv_checks.size(); x++)
+        m_pv_checks[x]->setChecked(false);
 }

@@ -37,6 +37,7 @@ Q_OBJECT
 
     QStringList  m_pv_paths;
     QList<NoMungeCheck *> m_pv_checks;
+    QVBoxLayout *m_layout;
 
     KLineEdit *m_vg_name, 
               *m_max_lvs, 
@@ -61,7 +62,8 @@ Q_OBJECT
     void validateOK();
     void commitChanges();
     void limitExtentSize(int);
-    
+    void selectAll();
+    void selectNone();    
 };
 
 #endif
