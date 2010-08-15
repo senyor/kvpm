@@ -29,8 +29,7 @@ bool lv_reduce(LogVol *logicalVolume)
     QString fs, state;
     QStringList fs_args, lv_args;
     
-    fs    = logicalVolume->getFilesystem();
-    state = logicalVolume->getState();
+    fs = logicalVolume->getFilesystem();
 
     QString warning_message = i18n("Currently only the ext2, ext3 and ext4  file systems "
 				   "are supported for file system reduction. If this " 
@@ -40,7 +39,7 @@ bool lv_reduce(LogVol *logicalVolume)
     QString warning_message2 = i18n("If this <b>Inactive</b> logical volume is reduced "
 				    "any data it contains will be lost!");
 
-    if( state != "Active" ){
+    if( !logicalVolume->isActive() && !logicalVolume->isSnap() ){
 	if(KMessageBox::warningContinueCancel(0, warning_message2) != KMessageBox::Continue)
 	    return false;
 	else{
@@ -53,15 +52,11 @@ bool lv_reduce(LogVol *logicalVolume)
 		return false;
 	}
     }
-    //    else if( logicalVolume->isOrigin() ){
-    //        KMessageBox::error(0, i18n("Resizing snapshot origin is not supported yet") );
-    //	return false;
-    //}
     else if( logicalVolume->isMounted() ){
       KMessageBox::error(0, i18n("The filesystem must be unmounted first") );
       return false;
     }
-    else if( (fs != "ext2") && (fs != "ext3") && (fs != "ext4") ){
+    else if( (fs != "ext2") && (fs != "ext3") && (fs != "ext4") && ( !logicalVolume->isSnap() ) ){
 	if(KMessageBox::warningContinueCancel(0, warning_message) != KMessageBox::Continue)
 	    return false;
 	else{
@@ -100,7 +95,10 @@ LVReduceDialog::LVReduceDialog(LogVol *logicalVolume, QWidget *parent) :
 
     m_current_lv_size = m_lv->getSize();
 
-    m_min_lv_size = get_min_fs_size( m_lv->getMapperPath(), m_lv->getFilesystem() );
+    if( !m_lv->isSnap() )
+        m_min_lv_size = get_min_fs_size( m_lv->getMapperPath(), m_lv->getFilesystem() );
+    else
+        m_min_lv_size = m_vg->getExtentSize();
 
     QLabel *ext_size_label = new QLabel( i18n("Extent size: %1").arg(sizeToString(m_vg->getExtentSize())) );
 
@@ -110,7 +108,8 @@ LVReduceDialog::LVReduceDialog(LogVol *logicalVolume, QWidget *parent) :
 
     layout->addWidget(ext_size_label);
     layout->addWidget(current_lv_size_label);
-    layout->addWidget(min_lv_size_label);
+    if( !m_lv->isSnap() )
+        layout->addWidget(min_lv_size_label);
     QHBoxLayout *size_layout = new QHBoxLayout();
     size_layout->addWidget(new QLabel( i18n("New size: ") ));
     
@@ -239,8 +238,8 @@ void LVReduceDialog::doShrink()
     long long new_size = getSizeEditExtents(m_size_combo->currentIndex()) * m_vg->getExtentSize();
 
     hide();
-
-    new_size = fs_reduce( m_lv->getMapperPath(), new_size, m_lv->getFilesystem() );
+    if( !m_lv->isSnap() )  // never reduce the fs of a snap!
+        new_size = fs_reduce( m_lv->getMapperPath(), new_size, m_lv->getFilesystem() );
 
     if( new_size ){
 
@@ -248,7 +247,7 @@ void LVReduceDialog::doShrink()
                      << "--force" 
                      << "--size" 
                      << QString("%1K").arg( new_size / 1024 )
-                     << m_vg->getName() + "/" + m_lv->getName();
+                     << m_lv->getMapperPath();
     
         ProcessProgress reduce_lv( lv_arguments, i18n("Reducing volume..."), true);
 
