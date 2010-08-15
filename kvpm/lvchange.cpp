@@ -59,11 +59,13 @@ QStringList LVChangeDialog::arguments()
     QStringList args, temp;
 
     args << "lvchange";
-    
-    if( available_check->isChecked() && ( m_lv->getState() == "Unavailable" ) )
-	args << "--available" << "y";
-    else if( ( ! available_check->isChecked() ) && ( m_lv->getState() == "Active" ) )
-	args << "--available" << "n";
+
+    if( !m_lv->isSnap() ){    
+        if( available_check->isChecked() && ( !m_lv->isActive() ))
+	    args << "--available" << "y";
+	else if( ( ! available_check->isChecked() ) && ( m_lv->isActive() ))
+	    args << "--available" << "n";
+    }
 
     if( ro_check->isChecked() && m_lv->isWritable() )
 	args << "--permission" << "r";
@@ -157,10 +159,10 @@ void LVChangeDialog::buildGeneralTab()
     if( m_lv->isActive() )
 	available_check->setChecked(true);
 
-    if( m_lv->isMounted() )    
+    if( m_lv->isMounted() || m_lv->isSnap() )    
         available_check->setEnabled(false);
 
-    if( !(m_lv->isWritable()) )
+    if( !m_lv->isWritable() )
 	ro_check->setChecked(true);
 
     m_tag_group = new QGroupBox( i18n("Change volume tags"));
