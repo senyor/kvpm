@@ -247,9 +247,10 @@ void VGSplitDialog::deactivate()
             }
         
             for(int x = 0; x < lvs_to_deactivate.size(); x++){
-                if( lvm_lv_is_active(lvs_to_deactivate[x]) )
-                    if( ! lvm_lv_deactivate(lvs_to_deactivate[x]) )
+                if( lvm_lv_is_active(lvs_to_deactivate[x]) ){
+                    if( lvm_lv_deactivate(lvs_to_deactivate[x]) )
                         KMessageBox::error(0, QString(lvm_errmsg(lvm))); 
+                }
             }
             lvm_vg_close(vg_dm);
             lvm_quit(lvm);
