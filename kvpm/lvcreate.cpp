@@ -471,14 +471,14 @@ QWidget* LVCreateDialog::createAdvancedTab()
     
     m_readonly_check = new QCheckBox();
     m_readonly_check->setText( i18n("Set read only") );
-    m_readonly_check->setCheckState(Qt::Unchecked);
     layout->addWidget(m_readonly_check);
     m_zero_check = new QCheckBox();
     m_zero_check->setText( i18n("Write zeros at volume start") );
     layout->addWidget(m_zero_check);
 
     if( !m_snapshot && !m_extend ){
-	m_zero_check->setCheckState(Qt::Checked);
+        m_zero_check->setChecked(true);
+	m_readonly_check->setChecked(false);
     
 	connect(m_zero_check, SIGNAL(stateChanged(int)), 
 		this ,SLOT(zeroReadonlyCheck(int)));
@@ -493,14 +493,19 @@ QWidget* LVCreateDialog::createAdvancedTab()
     }
 
     m_monitor_check = new QCheckBox( i18n("Monitor with dmeventd") );
-    layout->addWidget(m_monitor_check);
     if(m_snapshot){
         m_monitor_check->setChecked(true);
         m_monitor_check->setEnabled(true);
+	layout->addWidget(m_monitor_check);
+    }
+    else if(m_extend){
+        m_monitor_check->setChecked(false);
+        m_monitor_check->setEnabled(false);
     }
     else{
         m_monitor_check->setChecked(false);
         m_monitor_check->setEnabled(false);
+	layout->addWidget(m_monitor_check);
     }
 
     QVBoxLayout *persistent_layout   = new QVBoxLayout;
