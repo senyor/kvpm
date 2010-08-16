@@ -46,9 +46,8 @@ VGTree::VGTree(VolGroup *VolumeGroup) : QTreeWidget(),
     m_vg_name = m_vg->getName();
     setColumnCount(9);
 
-    header_labels << "Volume" << "Size" << "Filesystem" << "type"
-		  << "Stripes" << "Stripe size" 
-		  << "Snap/Move" << "State" << "Access" ;
+    header_labels << "Volume" << "Size" << "Filesystem" << "type" << "Stripes" << "Stripe size" 
+		  << "Snap/Move" << "State" << "Access" << "Tags" << "Mount points";
 
     setHeaderLabels(header_labels);
 }
@@ -117,6 +116,8 @@ void VGTree::loadData()
 		else
 		    lv_data << "r/o";
 
+		lv_data << lv->getTags().join(",") << lv->getMountPoints().join(",");
+
 		lv_item = new QTreeWidgetItem((QTreeWidgetItem *)0, lv_data);
 		m_lv_tree_items.append(lv_item);
 		lv_item->setData(0, Qt::UserRole, lv->getName());
@@ -149,7 +150,9 @@ void VGTree::loadData()
 		    lv_data << "r/w";
 		else
 		    lv_data << "r/o";
-		
+
+		lv_data << lv->getTags().join(",") << lv->getMountPoints().join(",");
+	
 		lv_item = new QTreeWidgetItem((QTreeWidgetItem *)0, lv_data);
 		lv_item->setData(0, Qt::UserRole, lv->getName());
 		lv_item->setData(1, Qt::UserRole, -1);            // -1 means not segment data
