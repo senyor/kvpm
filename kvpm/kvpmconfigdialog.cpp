@@ -185,6 +185,7 @@ void KvpmConfigDialog::buildColorsPage()
     m_skeleton->addItemColor("ext2",   m_ext2_color);
     m_skeleton->addItemColor("ext3",   m_ext3_color);
     m_skeleton->addItemColor("ext4",   m_ext4_color);
+    m_skeleton->addItemColor("btrfs",   m_btrfs_color);
     m_skeleton->addItemColor("reiser",  m_reiser_color);
     m_skeleton->addItemColor("reiser4", m_reiser4_color);
     m_skeleton->addItemColor("msdos", m_msdos_color);
@@ -210,6 +211,11 @@ void KvpmConfigDialog::buildColorsPage()
     selection_layout->addWidget(ext4_label, 2, 0, Qt::AlignRight);
     m_ext4_button = new KColorButton( m_ext4_color );
     selection_layout->addWidget(m_ext4_button, 2, 1, Qt::AlignLeft);
+
+    QLabel *btrfs_label = new QLabel("btrfs");
+    selection_layout->addWidget(btrfs_label, 3, 0, Qt::AlignRight);
+    m_btrfs_button = new KColorButton( m_btrfs_color );
+    selection_layout->addWidget(m_btrfs_button, 3, 1, Qt::AlignLeft);
 
     QLabel *reiser_label = new QLabel("reiser");
     selection_layout->addWidget(reiser_label, 0, 3, Qt::AlignRight);
@@ -241,15 +247,15 @@ void KvpmConfigDialog::buildColorsPage()
     m_swap_button = new KColorButton( m_swap_color );
     selection_layout->addWidget(m_swap_button, 2, 7, Qt::AlignLeft);
 
-    QLabel *free_label = new QLabel("free space");
-    selection_layout->addWidget(free_label, 3, 0, Qt::AlignRight);
-    m_free_button = new KColorButton( m_free_color );
-    selection_layout->addWidget(m_free_button, 3, 1, Qt::AlignLeft);
-
     QLabel *none_label = new QLabel("none");
     selection_layout->addWidget(none_label, 3, 3,  Qt::AlignRight);
     m_none_button = new KColorButton( m_none_color );
     selection_layout->addWidget(m_none_button, 3, 4, Qt::AlignLeft);
+
+    QLabel *free_label = new QLabel("free space");
+    selection_layout->addWidget(free_label, 4, 3, Qt::AlignRight);
+    m_free_button = new KColorButton( m_free_color );
+    selection_layout->addWidget(m_free_button, 4, 4, Qt::AlignLeft);
 
     QLabel *hfs_label = new QLabel("hfs");
     selection_layout->addWidget(hfs_label, 3, 6,  Qt::AlignRight);
@@ -306,6 +312,7 @@ void KvpmConfigDialog::updateSettings()
     m_ext2_color  = m_ext2_button->color();
     m_ext3_color  = m_ext3_button->color();
     m_ext4_color  = m_ext4_button->color();
+    m_btrfs_color = m_btrfs_button->color();
     m_xfs_color   = m_xfs_button->color();
     m_jfs_color   = m_jfs_button->color();
     m_hfs_color   = m_hfs_button->color();
@@ -360,13 +367,14 @@ void KvpmConfigDialog::updateWidgetsDefault()
     m_ext2_button->setColor(Qt::blue);
     m_ext3_button->setColor(Qt::darkBlue);
     m_ext4_button->setColor(Qt::cyan);
+    m_btrfs_button->setColor(Qt::yellow);
     m_swap_button->setColor(Qt::lightGray);
     m_none_button->setColor(Qt::black);
     m_free_button->setColor(Qt::green);
     m_xfs_button->setColor(Qt::darkCyan);
     m_hfs_button->setColor(Qt::darkMagenta);
     m_jfs_button->setColor(Qt::magenta);
-    m_msdos_button->setColor(Qt::yellow);
+    m_msdos_button->setColor(Qt::darkYellow);
     m_reiser_button->setColor(Qt::red);
     m_reiser4_button->setColor(Qt::darkRed);
     m_physical_button->setColor(Qt::darkGreen);

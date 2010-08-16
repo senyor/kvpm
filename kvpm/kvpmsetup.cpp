@@ -32,7 +32,6 @@ bool isconfigured_kvpm()
         return true;
     else
         return false;
-
 }
 
 
@@ -44,7 +43,7 @@ bool setup_kvpm()
          volume, size, type, filesystem, stripes, stripesize, state, access,
          tags, mountpoints;
 
-    QColor ext2, ext3, ext4, reiser, reiser4, physvol, msdos,
+    QColor ext2, ext3, ext4, btrfs, reiser, reiser4, physvol, msdos,
            jfs, xfs, hfs, none, free, swap;
 
     QStringList default_entries;
@@ -99,6 +98,7 @@ bool setup_kvpm()
     skeleton->addItemColor("ext2",    ext2);
     skeleton->addItemColor("ext3",    ext3);
     skeleton->addItemColor("ext4",    ext4);
+    skeleton->addItemColor("btrfs",   btrfs);
     skeleton->addItemColor("reiser",  reiser);
     skeleton->addItemColor("reiser4", reiser4);
     skeleton->addItemColor("physvol", physvol);
@@ -113,10 +113,11 @@ bool setup_kvpm()
     ext2 = Qt::blue;
     ext3 = Qt::darkBlue;
     ext4 = Qt::cyan;
+    btrfs   = Qt::yellow;
     reiser  = Qt::red;
     reiser4 = Qt::darkRed;
     physvol = Qt::darkGreen;
-    msdos   = Qt::yellow;
+    msdos   = Qt::darkYellow;
     jfs     = Qt::magenta;
     xfs     = Qt::darkCyan;
     hfs     = Qt::darkMagenta;
