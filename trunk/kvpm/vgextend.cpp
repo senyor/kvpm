@@ -16,6 +16,7 @@
 
 #include <KMessageBox>
 #include <KLocale>
+#include <KPushButton>
 #include <QtGui>
 
 #include "vgextend.h"
@@ -114,12 +115,12 @@ VGExtendDialog::VGExtendDialog(VolGroup *volumeGroup, QStringList physicalVolume
 
     QWidget *dialog_body = new QWidget(this);
     setMainWidget(dialog_body);
-    QVBoxLayout *layout = new QVBoxLayout();
-    dialog_body->setLayout(layout);
+    m_layout = new QVBoxLayout();
+    dialog_body->setLayout(m_layout);
 
     QLabel *name_label = new QLabel( i18n("Extending Volume Group <b>%1</b>").arg(m_vg->getName()) );
     name_label->setAlignment(Qt::AlignCenter);
-    layout->addWidget(name_label);
+    m_layout->addWidget(name_label);
 
     QGroupBox *pv_box = new QGroupBox( i18n("Available potential physical volumes") ); 
     QGridLayout *pv_box_layout = new QGridLayout();
@@ -149,7 +150,21 @@ VGExtendDialog::VGExtendDialog(VolGroup *volumeGroup, QStringList physicalVolume
         enableButtonOk(false);
     }    
 
-    layout->addWidget(pv_box);
+    QHBoxLayout *button_layout = new QHBoxLayout();
+    pv_box_layout->addLayout(button_layout, pv_box_layout->rowCount(),0, 1, -1);
+    KPushButton *all_button = new KPushButton( i18n("Select all") );
+    KPushButton *none_button = new KPushButton( i18n("Select none") );
+
+    connect(all_button, SIGNAL(clicked(bool)), 
+            this, SLOT(selectAll()));
+    connect(none_button, SIGNAL(clicked(bool)), 
+            this, SLOT(selectNone()));
+
+
+    button_layout->addWidget(all_button);
+    button_layout->addWidget(none_button);
+
+    m_layout->addWidget(pv_box);
 
     connect(this, SIGNAL(okClicked()), 
 	    this, SLOT(commitChanges()));
@@ -167,11 +182,19 @@ void VGExtendDialog::commitChanges()
 	        m_pv_names.append( m_pv_checks[x]->getUnmungedText() );
 	}
     }
-    
+
+    QEventLoop *loop = new QEventLoop(this);
+    QProgressBar *progress_bar = new QProgressBar();
+    progress_bar->setRange(0, m_pv_names.size());
+    m_layout->addWidget(progress_bar);
+    loop->processEvents();
+
     if( (lvm = lvm_init(NULL)) ){
         if( (vg_dm = lvm_vg_open(lvm, m_vg->getName().toAscii().data(), "w", NULL )) ){
 
             for(int x = 0; x < m_pv_names.size(); x++){
+	        progress_bar->setValue(x);
+	        loop->processEvents();
                 if( lvm_vg_extend(vg_dm, m_pv_names[x].toAscii().data()) )
                     KMessageBox::error(0, QString(lvm_errmsg(lvm)));
             }
@@ -199,4 +222,16 @@ void VGExtendDialog::validateOK()
             break;
         }
     }
+}
+
+void VGExtendDialog::selectAll()
+{
+  for(int x = 0; x < m_pv_checks.size(); x++)
+    m_pv_checks[x]->setChecked(true);
+}
+
+void VGExtendDialog::selectNone()
+{
+  for(int x = 0; x < m_pv_checks.size(); x++)
+    m_pv_checks[x]->setChecked(false);
 }
