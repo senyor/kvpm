@@ -30,6 +30,7 @@ class VGExtendDialog : public KDialog
 {
 Q_OBJECT
 
+    QVBoxLayout *m_layout;
     QList<NoMungeCheck *> m_pv_checks;
     QStringList m_pv_names;
     VolGroup *m_vg;
@@ -40,6 +41,8 @@ Q_OBJECT
  private slots:
     void commitChanges();
     void validateOK();
+    void selectAll();
+    void selectNone();
     
 };
 
