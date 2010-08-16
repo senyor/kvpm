@@ -37,22 +37,47 @@ MasterList::MasterList() : QObject()
 void MasterList::rescan()
 {
 
-    KProgressDialog *m_progress_dialog = new KProgressDialog(NULL, i18n("progress"), i18n("scanning volumes"));
-    m_progress_dialog->setAllowCancel(false);
-    m_progress_dialog->setMinimumDuration(250); 
-    QProgressBar *progress_bar = m_progress_dialog->progressBar();
-    progress_bar->setRange(0,0);
+    KProgressDialog *progress_dialog = new KProgressDialog(NULL, i18n("progress"), i18n("scanning LVM"));
+    progress_dialog->setAllowCancel(false);
+    progress_dialog->setMinimumDuration(250); 
+    QProgressBar *progress_bar = progress_dialog->progressBar();
+    progress_bar->setRange(0,4);
+    progress_dialog->show();
+    progress_dialog->ensurePolished();
+    qApp->processEvents();
 
     lvm_t lvm = lvm_init(NULL);
     lvm_scan(lvm);
+
+    progress_bar->setValue(1);
+    progress_dialog->setLabelText( i18n("scanning volume groups") );
+    progress_dialog->ensurePolished();
+    qApp->processEvents();
+    qApp->processEvents();
+    qApp->processEvents();
     scanVolumeGroups(lvm);
     lvm_quit(lvm);
 
+    progress_bar->setValue(2);
+    progress_dialog->setLabelText( i18n("scanning logical volumes") );
+    progress_dialog->ensurePolished();
+    qApp->processEvents();
+    qApp->processEvents();
+    qApp->processEvents();
+    qApp->processEvents();
     scanLogicalVolumes();
+
+    progress_bar->setValue(3);
+    progress_dialog->setLabelText( i18n("scanning storage devices") );
+    progress_dialog->ensurePolished();
+    qApp->processEvents();
+    qApp->processEvents();
+    qApp->processEvents();
     scanStorageDevices();
         
-    m_progress_dialog->close();
-    m_progress_dialog->delayedDestruct();
+    qApp->processEvents();
+    progress_dialog->close();
+    progress_dialog->delayedDestruct();
 
     return;
 }
