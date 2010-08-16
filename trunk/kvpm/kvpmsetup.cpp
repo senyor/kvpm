@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2009 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2009, 2010 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -38,11 +38,11 @@ bool isconfigured_kvpm()
 
 bool setup_kvpm()
 {
-
     KConfigSkeleton *skeleton = new KConfigSkeleton();
 
     bool configured, device, partition, capacity, used, usage, group, flags, mount,
-         volume, size, type, filesystem, stripes, stripesize, state, access;
+         volume, size, type, filesystem, stripes, stripesize, state, access,
+         tags, mountpoints;
 
     QColor ext2, ext3, ext4, reiser, reiser4, physvol, msdos,
            jfs, xfs, hfs, none, free, swap;
@@ -81,15 +81,19 @@ bool setup_kvpm()
     skeleton->addItemBool( "stripesize", stripesize );
     skeleton->addItemBool( "state",      state );
     skeleton->addItemBool( "access",     access );
+    skeleton->addItemBool( "tags",       tags );
+    skeleton->addItemBool( "mountpoints", mountpoints );
 
     volume = true;
     size = true;
     type = true;
     filesystem = true;
-    stripes = true;
+    stripes = false;
     stripesize = false;
     state = true;
-    access = true;
+    access = false;
+    tags = true;
+    mountpoints = true;
 
     skeleton->setCurrentGroup("FilesystemColors");
     skeleton->addItemColor("ext2",    ext2);
@@ -131,13 +135,11 @@ bool setup_kvpm()
                     << "/usr/local/bin/"
                     << "/usr/local/sbin/";
 
-
     skeleton->writeConfig();
 
     delete skeleton;
 
     return true;
-
 }
 
 

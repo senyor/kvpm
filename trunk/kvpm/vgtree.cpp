@@ -351,26 +351,25 @@ void VGTree::setHiddenColumns()
 {
     KConfigSkeleton skeleton;
 
-    bool volume,
-         size,
-         filesystem,
-         type,
-         stripes,
-         stripesize,
-         snapmove,
-         state,
-         access;
+    bool volume,      size,
+         filesystem,  type,
+         stripes,     stripesize,
+         snapmove,    state,
+         access,      tags,
+         mountpoints;
 
     skeleton.setCurrentGroup("VolumeTreeColumns");
-    skeleton.addItemBool( "volume",     volume );
-    skeleton.addItemBool( "size",       size );
-    skeleton.addItemBool( "filesystem", filesystem );
-    skeleton.addItemBool( "type",       type );
-    skeleton.addItemBool( "stripes",    stripes );
-    skeleton.addItemBool( "stripesize", stripesize );
-    skeleton.addItemBool( "snapmove",   snapmove );
-    skeleton.addItemBool( "state",      state );
-    skeleton.addItemBool( "access",     access );
+    skeleton.addItemBool( "volume",      volume );
+    skeleton.addItemBool( "size",        size );
+    skeleton.addItemBool( "filesystem",  filesystem );
+    skeleton.addItemBool( "type",        type );
+    skeleton.addItemBool( "stripes",     stripes );
+    skeleton.addItemBool( "stripesize",  stripesize );
+    skeleton.addItemBool( "snapmove",    snapmove );
+    skeleton.addItemBool( "state",       state );
+    skeleton.addItemBool( "access",      access );
+    skeleton.addItemBool( "tags",        tags );
+    skeleton.addItemBool( "mountpoints", mountpoints );
 
     setColumnHidden( 0, !volume );
     setColumnHidden( 1, !size );
@@ -381,8 +380,9 @@ void VGTree::setHiddenColumns()
     setColumnHidden( 6, !snapmove );
     setColumnHidden( 7, !state );
     setColumnHidden( 8, !access );
+    setColumnHidden( 9, !tags );
+    setColumnHidden( 10, !mountpoints );
 }
-
 
 void VGTree::mkfsLogicalVolume()
 {
@@ -419,7 +419,6 @@ void VGTree::extendLogicalVolume()
     if( lv_extend(m_lv) )
 	MainWindow->reRun();
 }
-
 
 void VGTree::reduceLogicalVolume()
 {

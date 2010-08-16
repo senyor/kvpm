@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2009 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2009, 2010 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -35,28 +35,23 @@ extern ExecutableFinder *g_executable_finder;
 
 bool config_kvpm()
 {
-
   KConfigSkeleton *skeleton = new KConfigSkeleton();
-
-  KvpmConfigDialog *dialog = new KvpmConfigDialog( NULL, "settings", skeleton );
+  KvpmConfigDialog *dialog  = new KvpmConfigDialog( NULL, "settings", skeleton );
 
   dialog->exec();
 
   return false;
-
 }
  
 
 KvpmConfigDialog::KvpmConfigDialog( QWidget *parent, QString name, KConfigSkeleton *skeleton ) 
   : KConfigDialog(  parent, name, skeleton), m_skeleton(skeleton) 
 {
-
     setFaceType(KPageDialog::List);
 
     buildGeneralPage();
     buildColorsPage();
     buildProgramsPage();
-
 }
 
 KvpmConfigDialog::~KvpmConfigDialog()
@@ -117,33 +112,38 @@ void KvpmConfigDialog::buildGeneralPage()
     device_layout->addWidget(m_mount_check);
 
     m_skeleton->setCurrentGroup("VolumeTreeColumns");
-    m_skeleton->addItemBool( "volume",     m_volume_column );
-    m_skeleton->addItemBool( "size",       m_size_column );
-    m_skeleton->addItemBool( "type",       m_type_column );
-    m_skeleton->addItemBool( "filesystem", m_filesystem_column );
-    m_skeleton->addItemBool( "stripes",    m_stripes_column );
-    m_skeleton->addItemBool( "stripesize", m_stripesize_column );
-    m_skeleton->addItemBool( "state",      m_state_column );
-    m_skeleton->addItemBool( "access",     m_access_column );
+    m_skeleton->addItemBool( "volume",      m_volume_column );
+    m_skeleton->addItemBool( "size",        m_size_column );
+    m_skeleton->addItemBool( "type",        m_type_column );
+    m_skeleton->addItemBool( "filesystem",  m_filesystem_column );
+    m_skeleton->addItemBool( "stripes",     m_stripes_column );
+    m_skeleton->addItemBool( "stripesize",  m_stripesize_column );
+    m_skeleton->addItemBool( "state",       m_state_column );
+    m_skeleton->addItemBool( "access",      m_access_column );
+    m_skeleton->addItemBool( "tags",        m_tags_column );
+    m_skeleton->addItemBool( "mountpoints", m_mountpoints_column );
 
-    m_volume_check     = new QCheckBox("Volume name");
-    m_size_check       = new QCheckBox("Size");
-    m_type_check       = new QCheckBox("Volume type");
-    m_filesystem_check = new QCheckBox("Filesystem type");
-    m_stripes_check    = new QCheckBox("Stripe count");
-    m_stripesize_check = new QCheckBox("Stripe size");
-    m_state_check      = new QCheckBox("Volume state");
-    m_access_check     = new QCheckBox("Volume access");
+    m_volume_check      = new QCheckBox("Volume name");
+    m_size_check        = new QCheckBox("Size");
+    m_type_check        = new QCheckBox("Volume type");
+    m_filesystem_check  = new QCheckBox("Filesystem type");
+    m_stripes_check     = new QCheckBox("Stripe count");
+    m_stripesize_check  = new QCheckBox("Stripe size");
+    m_state_check       = new QCheckBox("Volume state");
+    m_access_check      = new QCheckBox("Volume access");
+    m_tags_check        = new QCheckBox("Tags");
+    m_mountpoints_check = new QCheckBox("Mount points");
 
     m_volume_check->setChecked(m_volume_column);
     m_size_check->setChecked(m_size_column);
     m_type_check->setChecked(m_type_column);
-
     m_filesystem_check->setChecked(m_filesystem_column);
     m_stripes_check->setChecked(m_stripes_column);
     m_stripesize_check->setChecked(m_stripesize_column);
     m_state_check->setChecked(m_state_column);
     m_access_check->setChecked(m_access_column);
+    m_tags_check->setChecked(m_tags_column);
+    m_mountpoints_check->setChecked(m_mountpoints_column);
 
     volume_layout->addWidget(m_volume_check);
     volume_layout->addWidget(m_size_check);
@@ -153,7 +153,8 @@ void KvpmConfigDialog::buildGeneralPage()
     volume_layout->addWidget(m_stripesize_check);
     volume_layout->addWidget(m_state_check);
     volume_layout->addWidget(m_access_check);
-
+    volume_layout->addWidget(m_tags_check);
+    volume_layout->addWidget(m_mountpoints_check);
 
     KPageWidgetItem  *page_widget_item =  addPage( general, "General"); 
     page_widget_item->setIcon( KIcon("configure") );
@@ -194,7 +195,6 @@ void KvpmConfigDialog::buildColorsPage()
     m_skeleton->addItemColor("free",  m_free_color);
     m_skeleton->addItemColor("swap",  m_swap_color);
     m_skeleton->addItemColor("physvol",  m_physical_color);
-
 
     QLabel *ext2_label = new QLabel("ext2");
     selection_layout->addWidget(ext2_label, 0, 0, Qt::AlignRight);
@@ -293,11 +293,7 @@ void KvpmConfigDialog::buildProgramsPage()
 
     KPageWidgetItem  *page_widget_item =  addPage( programs, "Programs"); 
     page_widget_item->setIcon( KIcon("applications-system") );
-
-    //    connect( m_edit_list  , SIGNAL(changed()), this, SLOT(updateConfig()));
-
 } 
-
 
 void KvpmConfigDialog::updateSettings()
 {
@@ -330,14 +326,16 @@ void KvpmConfigDialog::updateSettings()
     m_flags_column     = m_flags_check->isChecked();
     m_mount_column     = m_mount_check->isChecked();
 
-    m_volume_column     = m_volume_check->isChecked();
-    m_size_column       = m_size_check->isChecked();
-    m_type_column       = m_type_check->isChecked();
-    m_filesystem_column = m_filesystem_check->isChecked();
-    m_stripes_column    = m_stripes_check->isChecked();
-    m_stripesize_column = m_stripesize_check->isChecked();
-    m_state_column      = m_state_check->isChecked();
-    m_access_column     = m_access_check->isChecked();
+    m_volume_column      = m_volume_check->isChecked();
+    m_size_column        = m_size_check->isChecked();
+    m_type_column        = m_type_check->isChecked();
+    m_filesystem_column  = m_filesystem_check->isChecked();
+    m_stripes_column     = m_stripes_check->isChecked();
+    m_stripesize_column  = m_stripesize_check->isChecked();
+    m_state_column       = m_state_check->isChecked();
+    m_access_column      = m_access_check->isChecked();
+    m_tags_column        = m_tags_check->isChecked();
+    m_mountpoints_column = m_mountpoints_check->isChecked();
 
     m_skeleton->writeConfig();
 
@@ -386,16 +384,16 @@ void KvpmConfigDialog::updateWidgetsDefault()
     m_size_check->setChecked(true);
     m_type_check->setChecked(true);
     m_filesystem_check->setChecked(true);
-    m_stripes_check->setChecked(true);
+    m_stripes_check->setChecked(false);
     m_stripesize_check->setChecked(false);
     m_state_check->setChecked(true);
-    m_access_check->setChecked(true);
-
+    m_access_check->setChecked(false);
+    m_tags_check->setChecked(true);
+    m_mountpoints_check->setChecked(true);
 }
 
 void KvpmConfigDialog::fillExecutablesTable()
 {
-
     QTableWidgetItem *table_widget_item = NULL;
 
     QStringList all_names = g_executable_finder->getAllNames();
@@ -431,12 +429,10 @@ void KvpmConfigDialog::fillExecutablesTable()
     m_executables_table->verticalHeader()->hide();
 }
 
-
 bool KvpmConfigDialog::isDefault()
 {
     return false;    // This keeps the "defaults" button enabled
 }
-
 
 bool KvpmConfigDialog::hasChanged()
 {
