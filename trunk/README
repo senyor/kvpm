@@ -6,21 +6,21 @@ delete partitions. Moving and resizing partitions or logical volumes is
 now supported too.
 
 
-This program is currently being developed on lvm version:
+This program is currently being developed on lvm version (with library lvm2app):
 
-#lvs --version
-
-  LVM version:     2.02.44 (2009-01-26)
-  Library version: 1.02.30 (2009-01-26)
-  Driver version:  4.14.0
+lvs --version
+  LVM version:     2.02.73(2)-cvs (2010-07-28)
+  Library version: 1.02.54-cvs (2010-07-28)
+  Driver version:  4.15.0
 
 
 Because kvpm relies on the exact format of the lvm program
-output it may not work correctly with earlier versions.
+output it won't work correctly with earlier versions.
 
 The following development headers need to be 
 installed for compilation: 
 
+lvm2app.h
 libparted version 1.8
 libblkid
 kdelibs version 4

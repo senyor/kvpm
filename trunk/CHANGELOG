@@ -1,3 +1,10 @@
+version 0.7.0
+Many internal fixes. LVM now supports resizing mirrors
+so that was added along with mirrored mirror logs and multi
+segment mirrors. library lvm2app is now used and required.
+Btrfs is supported along with volume group splitting and 
+merging.
+
 version 0.6.2
 Shrinking and growing physical volumes is now supported.
 Filesystems can be removed from partitions now. Removed the
