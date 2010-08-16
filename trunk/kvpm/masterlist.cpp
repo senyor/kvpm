@@ -53,8 +53,6 @@ void MasterList::rescan()
     progress_dialog->setLabelText( i18n("scanning volume groups") );
     progress_dialog->ensurePolished();
     qApp->processEvents();
-    qApp->processEvents();
-    qApp->processEvents();
     scanVolumeGroups(lvm);
     lvm_quit(lvm);
 
@@ -62,16 +60,11 @@ void MasterList::rescan()
     progress_dialog->setLabelText( i18n("scanning logical volumes") );
     progress_dialog->ensurePolished();
     qApp->processEvents();
-    qApp->processEvents();
-    qApp->processEvents();
-    qApp->processEvents();
     scanLogicalVolumes();
 
     progress_bar->setValue(3);
     progress_dialog->setLabelText( i18n("scanning storage devices") );
     progress_dialog->ensurePolished();
-    qApp->processEvents();
-    qApp->processEvents();
     qApp->processEvents();
     scanStorageDevices();
         
