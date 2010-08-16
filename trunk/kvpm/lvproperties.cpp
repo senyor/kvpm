@@ -97,6 +97,8 @@ LVProperties::LVProperties(LogVol *logicalVolume, int segment, QWidget *parent):
 	}
 	if( !(logicalVolume->isMirrorLeg() || logicalVolume->isMirrorLog() )){
 
+            basic_info_layout->addWidget(new QLabel( i18n("Filesystem: %1").arg(logicalVolume->getFilesystem()) ));
+
 	    if(logicalVolume->isWritable())
 	        basic_info_layout->addWidget(new QLabel( i18n("Access: r/w") ));
 	    else
@@ -114,6 +116,8 @@ LVProperties::LVProperties(LogVol *logicalVolume, int segment, QWidget *parent):
 	basic_info_layout->addWidget(new QLabel( i18n("Extents: %1").arg(extents) ));
 
 	if( !( logicalVolume->isMirrorLeg() || logicalVolume->isMirrorLog() )){
+
+            basic_info_layout->addWidget(new QLabel( i18n("Filesystem %1").arg(logicalVolume->getFilesystem()) ));
 
 	    if(logicalVolume->isWritable())
 	        basic_info_layout->addWidget(new QLabel( i18n("Access: r/w") ));
