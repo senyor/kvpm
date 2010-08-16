@@ -121,23 +121,16 @@ void MkfsDialog::buildDialog()
     setCaption( i18n("Write filesystem") );
 
     QVBoxLayout *layout = new QVBoxLayout;
-    QHBoxLayout *radio_layout = new QHBoxLayout;
-    QVBoxLayout *radio_left_layout   = new QVBoxLayout;
-    QVBoxLayout *radio_center_layout = new QVBoxLayout;
-    QVBoxLayout *radio_right_layout  = new QVBoxLayout;
-    radio_layout->addLayout(radio_left_layout);
-    radio_layout->addLayout(radio_center_layout);
-    radio_layout->addLayout(radio_right_layout);
     dialog_body->setLayout(layout);
 
-    QLabel *label = new QLabel( i18n("Write filesystem on:") );
-    label->setAlignment(Qt::AlignCenter);
-    layout->addWidget(label);
-    label = new QLabel(m_path);
+    QLabel *label = new QLabel( i18n("<b>Write filesystem on: %1</b>").arg(m_path) );
     label->setAlignment(Qt::AlignCenter);
     layout->addWidget(label);
 
     radio_box = new QGroupBox( i18n("Filesystem") );
+    QGridLayout *radio_layout = new QGridLayout;
+    radio_box->setLayout(radio_layout);
+    layout->addWidget(radio_box);
     ext2    = new QRadioButton("Ext2", this);
     ext3    = new QRadioButton("Ext3", this);
     ext4    = new QRadioButton("Ext4", this);
@@ -148,20 +141,17 @@ void MkfsDialog::buildDialog()
     xfs     = new QRadioButton("xfs", this);
     swap    = new QRadioButton( i18n("Linux swap"), this);
     vfat    = new QRadioButton("ms-dos", this);
-    radio_left_layout->addWidget(ext2);
-    radio_left_layout->addWidget(ext3);
-    radio_left_layout->addWidget(ext4);
-    radio_left_layout->addWidget(btrfs);
-    radio_center_layout->addWidget(reiser);
-    radio_center_layout->addWidget(reiser4);
-    radio_center_layout->addWidget(swap);
-    radio_right_layout->addWidget(jfs);
-    radio_right_layout->addWidget(xfs);
-    radio_right_layout->addWidget(vfat);
-    ext3->setChecked(true);
-    
-    radio_box->setLayout(radio_layout);
-    layout->addWidget(radio_box);
+    radio_layout->addWidget(ext2, 1, 0);
+    radio_layout->addWidget(ext3, 2, 0);
+    radio_layout->addWidget(ext4, 3, 0);
+    radio_layout->addWidget(btrfs, 4, 0);
+    radio_layout->addWidget(reiser, 1, 1);
+    radio_layout->addWidget(reiser4, 2, 1);
+    radio_layout->addWidget(swap, 3, 1);
+    radio_layout->addWidget(jfs, 1, 2);
+    radio_layout->addWidget(xfs, 2, 2);
+    radio_layout->addWidget(vfat, 3, 2);
+    ext4->setChecked(true);
 
     QVBoxLayout *advanced_layout = new QVBoxLayout;
     QHBoxLayout *block_layout  = new QHBoxLayout;
