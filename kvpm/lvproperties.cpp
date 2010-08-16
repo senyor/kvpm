@@ -12,7 +12,6 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
-
 #include <KLocale>
 #include <QtGui>
 
@@ -97,6 +96,12 @@ LVProperties::LVProperties(LogVol *logicalVolume, int segment, QWidget *parent):
 
 	}
 	if( !(logicalVolume->isMirrorLeg() || logicalVolume->isMirrorLog() )){
+
+	    if(logicalVolume->isWritable())
+	        basic_info_layout->addWidget(new QLabel( i18n("Access: r/w") ));
+	    else
+	        basic_info_layout->addWidget(new QLabel( i18n("Access: r/o") ));
+
 	    basic_info_layout->addWidget(new QLabel( i18n("Allocation policy: %1").arg(logicalVolume->getPolicy())));
 	}
     }
@@ -107,7 +112,14 @@ LVProperties::LVProperties(LogVol *logicalVolume, int segment, QWidget *parent):
 
 	extents = logicalVolume->getExtents();
 	basic_info_layout->addWidget(new QLabel( i18n("Extents: %1").arg(extents) ));
+
 	if( !( logicalVolume->isMirrorLeg() || logicalVolume->isMirrorLog() )){
+
+	    if(logicalVolume->isWritable())
+	        basic_info_layout->addWidget(new QLabel( i18n("Access: r/w") ));
+	    else
+	        basic_info_layout->addWidget(new QLabel( i18n("Access: r/o") ));
+
 	    basic_info_layout->addWidget(new QLabel( i18n("Allocation policy: %1").arg(logicalVolume->getPolicy())));
 	}
     }
@@ -199,7 +211,7 @@ LVProperties::LVProperties(LogVol *logicalVolume, int segment, QWidget *parent):
 	}
 
     }
-
+    /*
     QFrame *tags_info_frame = new QFrame();
     QVBoxLayout *tags_info_layout = new QVBoxLayout();
     tags_info_frame->setLayout(tags_info_layout);
@@ -217,6 +229,7 @@ LVProperties::LVProperties(LogVol *logicalVolume, int segment, QWidget *parent):
         temp_label->setWordWrap(true);
         tags_info_layout->addWidget(temp_label);
     }
+    */
 
     QFrame *uuid_info_frame = new QFrame();
     QVBoxLayout *uuid_info_layout = new QVBoxLayout();
