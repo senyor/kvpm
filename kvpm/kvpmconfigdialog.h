@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2009 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2009, 2010 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -73,8 +73,8 @@ Q_OBJECT
               *m_group_check,       *m_stripesize_check,
               *m_flags_check,       *m_snapmove_check,
               *m_mount_check,       *m_state_check,
-                                    *m_access_check;
-
+              *m_tags_check,        *m_access_check,
+              *m_mountpoints_check;
 
     bool m_device_column,      m_volume_column,
          m_partition_column,   m_size_column,
@@ -84,12 +84,12 @@ Q_OBJECT
          m_group_column,       m_stripesize_column,
          m_flags_column,       m_snapmove_column,
          m_mount_column,       m_state_column,
-                               m_access_column;
+         m_tags_column,        m_access_column,
+         m_mountpoints_column;
 
     void buildGeneralPage();
     void buildColorsPage();
     void buildProgramsPage();
-
 
 public:
 
@@ -99,7 +99,6 @@ public:
 public slots:
     void updateSettings();
     void updateWidgetsDefault();
-    //    void updateConfig();
     void fillExecutablesTable();
     bool isDefault();
     bool hasChanged();
