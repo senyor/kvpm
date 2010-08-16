@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2009 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -66,13 +66,15 @@ LVChartSeg::LVChartSeg(VolGroup *volumeGroup, LogVol *logicalVolume,
     QColor  ext2_color,   ext3_color,    ext4_color,
             reiser_color, reiser4_color, msdos_color,
             jfs_color,    xfs_color,     none_color,
-            free_color,   swap_color,    hfs_color;
+            free_color,   swap_color,    hfs_color,
+            btrfs_color;
 
     skeleton.setCurrentGroup("FilesystemColors");
     skeleton.addItemColor("ext2",   ext2_color);
     skeleton.addItemColor("ext3",   ext3_color);
     skeleton.addItemColor("ext4",   ext4_color);
-    skeleton.addItemColor("reiser",  reiser_color);
+    skeleton.addItemColor("btrfs",  btrfs_color);
+    skeleton.addItemColor("reiser", reiser_color);
     skeleton.addItemColor("reiser4", reiser4_color);
     skeleton.addItemColor("msdos", msdos_color);
     skeleton.addItemColor("jfs",   jfs_color);
@@ -89,6 +91,8 @@ LVChartSeg::LVChartSeg(VolGroup *volumeGroup, LogVol *logicalVolume,
 	colorset->setColor(QPalette::Window, ext3_color);
     else if(use == "ext4")
 	colorset->setColor(QPalette::Window, ext4_color);
+    else if(use == "btrfs")
+	colorset->setColor(QPalette::Window, btrfs_color);
     else if(use == "reiserfs")
 	colorset->setColor(QPalette::Window, reiser_color);
     else if(use == "reiser4")

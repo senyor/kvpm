@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2009 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -82,7 +82,6 @@ bool make_fs(StoragePartition *partition)
             }
         }
     }
-
     return false;
 }
 
@@ -142,6 +141,7 @@ void MkfsDialog::buildDialog()
     ext2    = new QRadioButton("Ext2", this);
     ext3    = new QRadioButton("Ext3", this);
     ext4    = new QRadioButton("Ext4", this);
+    btrfs   = new QRadioButton("Btrfs", this);
     reiser  = new QRadioButton("Reiser", this);
     reiser4 = new QRadioButton("Reiser4", this);
     jfs     = new QRadioButton("jfs", this);
@@ -151,6 +151,7 @@ void MkfsDialog::buildDialog()
     radio_left_layout->addWidget(ext2);
     radio_left_layout->addWidget(ext3);
     radio_left_layout->addWidget(ext4);
+    radio_left_layout->addWidget(btrfs);
     radio_center_layout->addWidget(reiser);
     radio_center_layout->addWidget(reiser4);
     radio_center_layout->addWidget(swap);
@@ -212,7 +213,6 @@ void MkfsDialog::buildDialog()
     count_layout->addStretch();
     stripe_layout->addLayout(count_layout);
 
-
     connect(ext2,  SIGNAL(toggled(bool)), 
             this, SLOT(setAdvancedTab(bool)));
 
@@ -221,7 +221,6 @@ void MkfsDialog::buildDialog()
 
     connect(ext4,  SIGNAL(toggled(bool)), 
             this, SLOT(setAdvancedTab(bool)));
-
 }
 
 void MkfsDialog::setAdvancedTab(bool)
@@ -246,6 +245,9 @@ QStringList MkfsDialog::arguments()
     }
     else if(ext4->isChecked()){
 	type = "ext4";
+    }
+    else if(btrfs->isChecked()){
+	type = "btrfs";
     }
     else if(reiser->isChecked()){
 	mkfs_options << "-q";
