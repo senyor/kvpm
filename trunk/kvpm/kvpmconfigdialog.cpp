@@ -118,6 +118,7 @@ void KvpmConfigDialog::buildGeneralPage()
     m_skeleton->addItemBool( "filesystem",  m_filesystem_column );
     m_skeleton->addItemBool( "stripes",     m_stripes_column );
     m_skeleton->addItemBool( "stripesize",  m_stripesize_column );
+    m_skeleton->addItemBool( "snapmove",    m_snapmove_column );
     m_skeleton->addItemBool( "state",       m_state_column );
     m_skeleton->addItemBool( "access",      m_access_column );
     m_skeleton->addItemBool( "tags",        m_tags_column );
@@ -129,6 +130,7 @@ void KvpmConfigDialog::buildGeneralPage()
     m_filesystem_check  = new QCheckBox("Filesystem type");
     m_stripes_check     = new QCheckBox("Stripe count");
     m_stripesize_check  = new QCheckBox("Stripe size");
+    m_snapmove_check    = new QCheckBox("(\%)Snap/PV move");
     m_state_check       = new QCheckBox("Volume state");
     m_access_check      = new QCheckBox("Volume access");
     m_tags_check        = new QCheckBox("Tags");
@@ -140,6 +142,7 @@ void KvpmConfigDialog::buildGeneralPage()
     m_filesystem_check->setChecked(m_filesystem_column);
     m_stripes_check->setChecked(m_stripes_column);
     m_stripesize_check->setChecked(m_stripesize_column);
+    m_snapmove_check->setChecked(m_snapmove_column);
     m_state_check->setChecked(m_state_column);
     m_access_check->setChecked(m_access_column);
     m_tags_check->setChecked(m_tags_column);
@@ -151,6 +154,7 @@ void KvpmConfigDialog::buildGeneralPage()
     volume_layout->addWidget(m_filesystem_check);
     volume_layout->addWidget(m_stripes_check);
     volume_layout->addWidget(m_stripesize_check);
+    volume_layout->addWidget(m_snapmove_check);
     volume_layout->addWidget(m_state_check);
     volume_layout->addWidget(m_access_check);
     volume_layout->addWidget(m_tags_check);
@@ -339,6 +343,7 @@ void KvpmConfigDialog::updateSettings()
     m_filesystem_column  = m_filesystem_check->isChecked();
     m_stripes_column     = m_stripes_check->isChecked();
     m_stripesize_column  = m_stripesize_check->isChecked();
+    m_snapmove_column    = m_snapmove_check->isChecked();
     m_state_column       = m_state_check->isChecked();
     m_access_column      = m_access_check->isChecked();
     m_tags_column        = m_tags_check->isChecked();
@@ -394,6 +399,7 @@ void KvpmConfigDialog::updateWidgetsDefault()
     m_filesystem_check->setChecked(true);
     m_stripes_check->setChecked(false);
     m_stripesize_check->setChecked(false);
+    m_snapmove_check->setChecked(true);
     m_state_check->setChecked(true);
     m_access_check->setChecked(false);
     m_tags_check->setChecked(true);
