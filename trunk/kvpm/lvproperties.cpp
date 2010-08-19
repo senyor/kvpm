@@ -17,6 +17,8 @@
 
 #include "logvol.h"
 #include "lvproperties.h"
+#include "sizetostring.h"
+#include "volgroup.h"
 
 
 /* if segment = -1 we have a multi segement logical volume but
@@ -25,11 +27,10 @@
 
 LVProperties::LVProperties(LogVol *logicalVolume, int segment, QWidget *parent):QWidget(parent)
 {
-    long long extents;
+    long long extents, extent_size, total_size;
     int stripes;
     int stripe_size;
     int segment_count = logicalVolume->getSegmentCount();
-    
     QStringList pv_list;
     QLabel *temp_label;
     
@@ -59,19 +60,6 @@ LVProperties::LVProperties(LogVol *logicalVolume, int segment, QWidget *parent):
 	stripe_size = logicalVolume->getSegmentStripeSize(segment);
 
 	basic_info_layout->addWidget(new QLabel( i18n("Extents: %1").arg(extents) ));
-
-	if( !logicalVolume->isMirror() ){
-
-	    if( stripes != 1 ){
-		basic_info_layout->addWidget(new QLabel( i18n("Stripes: %1").arg(stripes) ));
-		basic_info_layout->addWidget(new QLabel( i18n("Stripe size: %1").arg(stripe_size) ));
-	    }
-	    else{
-		basic_info_layout->addWidget(new QLabel( i18n("Stripes: none") ));
-		basic_info_layout->addWidget(new QLabel( i18n("Stripe size: n/a") ));
-	    }
-
-	}
     }
     else if((segment >= 0) && (segment_count == 1)){
 	temp_label = new QLabel( "<b> " + logicalVolume->getName() + "</b>" );
@@ -94,6 +82,11 @@ LVProperties::LVProperties(LogVol *logicalVolume, int segment, QWidget *parent):
 		basic_info_layout->addWidget(new QLabel( i18n("Stripe size: n/a") ));
 	    }
 
+	}
+	else if( !logicalVolume->isMirrorLog() ){
+	    extent_size = logicalVolume->getVolumeGroup()->getExtentSize();
+	    total_size = (extent_size * logicalVolume->getLogCount())+(logicalVolume->getMirrorCount() * logicalVolume->getSize());  
+	    basic_info_layout->addWidget(new QLabel( i18n("Total size: %1").arg( sizeToString(total_size)) ));
 	}
 	if( !(logicalVolume->isMirrorLeg() || logicalVolume->isMirrorLog() )){
 
