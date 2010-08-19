@@ -62,7 +62,7 @@ int main(int argc, char **argv)
     g_executable_finder = new ExecutableFinder();
     
     MainWindow = new TopWindow(NULL);
-    MainWindow->setGeometry(0,0,900,700);
+    MainWindow->setAutoSaveSettings();
     MainWindow->show();
     return kvpm.exec();
 }
