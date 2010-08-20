@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -12,12 +12,18 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
-#ifndef NOMUNGECHECK_H
-#define NOMUNGECHECK_H
+#ifndef MISC_H
+#define MISC_H
 
 #include <QString>
 #include <QCheckBox>
 
+QString sizeToString(long long bytes);
+
+struct AvailableDevice {
+    QString name;
+    long long size;
+};
 
 class NoMungeCheck : public QCheckBox
 {

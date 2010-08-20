@@ -22,7 +22,7 @@
 #include "processprogress.h"
 #include "physvol.h"
 #include "pvmove.h"
-#include "sizetostring.h"
+#include "misc.h"
 #include "volgroup.h"
 
 extern MasterList *master_list;

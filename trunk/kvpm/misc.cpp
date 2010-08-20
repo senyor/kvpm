@@ -1,9 +1,9 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
  *
- * This file is part of the Kvpm project.
+ * This file is part of the kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License,  version 3, as 
@@ -14,6 +14,30 @@
 
 
 #include <QtGui>
+
+#include "misc.h"
+
+
+NoMungeCheck::NoMungeCheck(const QString text, QWidget *parent) : QCheckBox(text, parent)
+{
+    m_unmunged_text = text;
+}
+
+QString NoMungeCheck::getAlternateText()
+{
+    return m_alternate_text;
+}
+
+QString NoMungeCheck::getUnmungedText()
+{
+    return m_unmunged_text;
+}
+
+void NoMungeCheck::setAlternateText(QString alternateText)
+{
+    m_alternate_text = alternateText;
+}
+
 
 /* The idea here is to not have numbers over three digits long
    before the decimal point. This will need to be worked on

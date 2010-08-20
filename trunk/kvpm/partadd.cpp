@@ -19,7 +19,7 @@
 
 #include "partadd.h"
 #include "partaddgraphic.h"
-#include "sizetostring.h"
+#include "misc.h"
 
 /* 
    The "partition" we get here is usually a ped pointer to a the freespace 

@@ -20,10 +20,9 @@
 
 #include "addmirror.h"
 #include "logvol.h"
-#include "nomungecheck.h"
+#include "misc.h"
 #include "physvol.h"
 #include "processprogress.h"
-#include "sizetostring.h"
 #include "volgroup.h"
 
 

@@ -19,25 +19,26 @@
 #include <KLineEdit>
 #include <KComboBox>
 
+#include <QLabel>
+#include <QProgressBar>
 #include <QStringList>
 #include <QCheckBox>
 #include <QRegExpValidator>
 
-#include "nomungecheck.h"
-
+#include "misc.h"
 
 bool create_vg(QString physicalVolumePath);
 
 bool create_vg();
 
-
 class VGCreateDialog : public KDialog
 {
 Q_OBJECT
 
-    QStringList  m_pv_paths;
+    QLabel *m_pv_label, *m_total_label;
     QList<NoMungeCheck *> m_pv_checks;
     QVBoxLayout *m_layout;
+    QList<AvailableDevice *> m_available_devices;
 
     KLineEdit *m_vg_name, 
               *m_max_lvs, 
@@ -52,9 +53,10 @@ Q_OBJECT
               *m_extent_suffix;
 
     QRegExpValidator *m_validator;
+    QProgressBar *m_progress_bar;
     
  public:
-    VGCreateDialog(QStringList physicalVolumePathList, QWidget *parent = 0);
+    VGCreateDialog(QList<AvailableDevice *> devices, QWidget *parent = 0);
     
  private slots:
     void limitLogicalVolumes(int boxstate);

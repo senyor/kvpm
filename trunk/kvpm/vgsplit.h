@@ -23,7 +23,7 @@
 #include <QRegExpValidator>
 #include <QTableWidget>
 
-#include "nomungecheck.h"
+#include "misc.h"
 
 class VolGroup;
 class LogVol;

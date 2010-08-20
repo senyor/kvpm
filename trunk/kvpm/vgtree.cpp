@@ -29,7 +29,7 @@
 #include "pvmove.h"
 #include "removemirror.h"
 #include "removemirrorleg.h"
-#include "sizetostring.h"
+#include "misc.h"
 #include "topwindow.h"
 #include "unmount.h"
 #include "vgtree.h"

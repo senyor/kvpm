@@ -35,7 +35,7 @@
 #include "physvol.h"
 #include "pvextend.h"
 #include "pvreduce.h"
-#include "sizetostring.h"
+#include "misc.h"
 #include "fsextend.h"
 #include "fsreduce.h"
 #include "volgroup.h"
