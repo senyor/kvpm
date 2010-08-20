@@ -19,7 +19,7 @@
 #include <QtGui>
 
 #include "masterlist.h"
-#include "nomungecheck.h"
+#include "misc.h"
 #include "vgreduce.h"
 #include "volgroup.h"
 #include "physvol.h"

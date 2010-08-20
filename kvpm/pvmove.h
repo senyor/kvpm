@@ -21,7 +21,7 @@
 #include <QGroupBox>
 #include <QLabel>
 
-#include "nomungecheck.h"
+#include "misc.h"
 
 class PhysVol;
 class LogVol;

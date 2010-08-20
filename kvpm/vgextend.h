@@ -19,7 +19,7 @@
 #include <KDialog>
 #include <QCheckBox>
 
-#include "nomungecheck.h"
+#include "misc.h"
 #include "volgroup.h"
 
 bool extend_vg(QString volumeGroupName, QString physicalVolumeName);

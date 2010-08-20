@@ -16,7 +16,7 @@
 #include <KLocale>
 #include <QtGui>
 
-#include "sizetostring.h"
+#include "misc.h"
 #include "vginfolabels.h"
 #include "volgroup.h"
 

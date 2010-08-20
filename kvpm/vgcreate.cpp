@@ -18,6 +18,7 @@
 #include <KMessageBox>
 #include <KProgressDialog>
 #include <KPushButton>
+#include <KSeparator>
 #include <QtGui>
 
 #include "storagedevice.h"
@@ -30,36 +31,36 @@ extern MasterList *master_list;
 bool create_vg()
 {
     QList<StorageDevice *> storage_devices = master_list->getStorageDevices();   
-    QStringList device_names;
     QList<StoragePartition *> storage_partitions;
+    QList<AvailableDevice *> devices;
+    AvailableDevice *temp_device;
 
     for(int x = 0; x < storage_devices.size(); x++){
         if( (storage_devices[x]->getRealPartitionCount() == 0) && 
             (! storage_devices[x]->isBusy()) && 
             (! storage_devices[x]->isPhysicalVolume() )){
-            device_names.append( storage_devices[x]->getDevicePath() );
+            temp_device = new AvailableDevice;
+            temp_device->name = storage_devices[x]->getDevicePath();
+            temp_device->size = storage_devices[x]->getSize();
+            devices.append( temp_device );
         }
         else if( storage_devices[x]->getRealPartitionCount() > 0 ){
             storage_partitions = storage_devices[x]->getStoragePartitions();
-            for(int y = 0; y <storage_partitions.size(); y++){
-                if( (! storage_partitions[y]->isBusy() ) &&
-                    (! storage_partitions[y]->isPV() ) &&
-                    (( storage_partitions[y]->isNormal() ) ||  
-                     ( storage_partitions[y]->isLogical() )))  
+            for(int y = 0; y < storage_partitions.size(); y++){
+                if( (! storage_partitions[y]->isBusy() ) && (! storage_partitions[y]->isPV() ) &&
+                    (( storage_partitions[y]->isNormal() ) || ( storage_partitions[y]->isLogical() )))  
                 {
-                    device_names.append( storage_partitions[y]->getName() );
+                    temp_device = new AvailableDevice;
+                    temp_device->name = storage_partitions[y]->getName();
+                    temp_device->size = storage_partitions[y]->getSize();
+                    devices.append( temp_device );
                 }
             }
         }
     }
 
-    for(int x = device_names.size() - 1; x >= 0 ; x--){
-        if( device_names[x].contains("/dev/mapper/") )
-            device_names.removeAt(x);
-    }
-
-    if( device_names.size() > 0 ){
-        VGCreateDialog dialog( device_names );
+    if( devices.size() > 0 ){
+        VGCreateDialog dialog( devices );
         dialog.exec();
         if(dialog.result() == QDialog::Accepted)
             return true;
@@ -74,19 +75,25 @@ bool create_vg()
 
 bool create_vg(QString physicalVolumePath){
 
-    QStringList physicalVolumePathList(physicalVolumePath);
+    QList<AvailableDevice *> devices;
+    AvailableDevice *temp_device = new AvailableDevice;
+    temp_device->name = physicalVolumePath;
+    temp_device->size = 0;
+    devices.append(temp_device);
 
-    VGCreateDialog dialog(physicalVolumePathList);
+    VGCreateDialog dialog(devices);
     dialog.exec();
     
     if(dialog.result() == QDialog::Accepted)
         return true;
     else
         return false;
+
+    return true;
 }
 
-VGCreateDialog::VGCreateDialog(QStringList physicalVolumePathList, QWidget *parent) : 
-  KDialog(parent), m_pv_paths(physicalVolumePathList)
+VGCreateDialog::VGCreateDialog(QList<AvailableDevice *> devices, QWidget *parent) : 
+    KDialog(parent), m_available_devices(devices)
 {
 
     setWindowTitle( i18n("Create Volume Group") );
@@ -131,13 +138,19 @@ VGCreateDialog::VGCreateDialog(QStringList physicalVolumePathList, QWidget *pare
     QGridLayout *new_pv_box_layout = new QGridLayout();
     new_pv_box->setLayout(new_pv_box_layout);
     NoMungeCheck *temp_check;
-    int pv_check_count = m_pv_paths.size();
+    int pv_check_count = m_available_devices.size();
+    QHBoxLayout *button_layout = new QHBoxLayout();
+    KPushButton *all_button = new KPushButton( i18n("Select all") );
+    KPushButton *none_button = new KPushButton( i18n("Select none") );
 
-    if(pv_check_count < 2)
-        new_pv_box_layout->addWidget( new QLabel(m_pv_paths[0] ) );
+    if(pv_check_count < 2){
+        m_pv_label = new QLabel(m_available_devices[0]->name);
+        new_pv_box_layout->addWidget(m_pv_label);
+    }
     else{
         for(int x = 0; x < pv_check_count; x++){
-	    temp_check = new NoMungeCheck(m_pv_paths[x]);
+	    temp_check = new NoMungeCheck(m_available_devices[x]->name + "  " + sizeToString(m_available_devices[x]->size));
+	    temp_check->setAlternateText( m_available_devices[x]->name );
 	    m_pv_checks.append(temp_check);
 
             if(pv_check_count < 11 )
@@ -150,20 +163,17 @@ VGCreateDialog::VGCreateDialog(QStringList physicalVolumePathList, QWidget *pare
 	    connect(temp_check, SIGNAL(toggled(bool)), 
 		    this, SLOT(validateOK()));
 	}
+        connect(all_button, SIGNAL(clicked(bool)), 
+                this, SLOT(selectAll()));
+        connect(none_button, SIGNAL(clicked(bool)), 
+                this, SLOT(selectNone()));
+
+        m_total_label = new QLabel( i18n("Total: 0") );
+        new_pv_box_layout->addWidget(m_total_label, new_pv_box_layout->rowCount(),0, 1, -1);
+        new_pv_box_layout->addLayout(button_layout, new_pv_box_layout->rowCount(),0, 1, -1);
+        button_layout->addWidget(all_button);
+        button_layout->addWidget(none_button);
     }
-    QHBoxLayout *button_layout = new QHBoxLayout();
-    new_pv_box_layout->addLayout(button_layout, new_pv_box_layout->rowCount(),0, 1, -1);
-    KPushButton *all_button = new KPushButton( i18n("Select all") );
-    KPushButton *none_button = new KPushButton( i18n("Select none") );
-
-    connect(all_button, SIGNAL(clicked(bool)), 
-            this, SLOT(selectAll()));
-    connect(none_button, SIGNAL(clicked(bool)), 
-            this, SLOT(selectNone()));
-
-
-    button_layout->addWidget(all_button);
-    button_layout->addWidget(none_button);
 
     QHBoxLayout *extent_layout = new QHBoxLayout();
     extent_layout->addWidget(extent_label);
@@ -215,6 +225,9 @@ VGCreateDialog::VGCreateDialog(QStringList physicalVolumePathList, QWidget *pare
     m_layout->addWidget(pv_box);
     m_layout->addWidget(m_clustered);
     m_layout->addWidget(m_auto_backup);
+    m_layout->addWidget(new KSeparator);
+    m_progress_bar = new QProgressBar();
+    m_layout->addWidget(m_progress_bar, Qt::AlignCenter);
 
     enableButtonOk(false);
 
@@ -266,6 +279,7 @@ void VGCreateDialog::commitChanges()
     lvm_t  lvm;
     vg_t vg_dm;
     uint32_t new_extent_size = m_extent_size->currentText().toULong();
+    QStringList pv_paths;
 
     new_extent_size *= 1024;
     if( m_extent_suffix->currentIndex() > 0 )
@@ -274,17 +288,16 @@ void VGCreateDialog::commitChanges()
         new_extent_size *= 1024;
 
     if( m_pv_checks.size() > 1 ){
-        m_pv_paths.clear();	
         for(int x = 0; x < m_pv_checks.size(); x++){
 	    if( m_pv_checks[x]->isChecked() )
-	        m_pv_paths.append( m_pv_checks[x]->getUnmungedText() );
+	        pv_paths.append( m_pv_checks[x]->getAlternateText() );
 	}
     }
+    else
+        pv_paths << m_pv_label->text();
 
     QEventLoop *loop = new QEventLoop(this);
-    QProgressBar *progress_bar = new QProgressBar();
-    progress_bar->setRange(0, m_pv_paths.size());
-    m_layout->addWidget(progress_bar);
+    m_progress_bar->setRange(0, pv_paths.size());
     loop->processEvents();
 
     if( (lvm = lvm_init(NULL)) ){
@@ -293,10 +306,10 @@ void VGCreateDialog::commitChanges()
             if( (lvm_vg_set_extent_size(vg_dm, new_extent_size)) )
                 KMessageBox::error(0, QString(lvm_errmsg(lvm)));
 
-            for(int x = 0; x < m_pv_paths.size(); x++){
-                progress_bar->setValue(x);
+            for(int x = 0; x < pv_paths.size(); x++){
+                m_progress_bar->setValue(x);
                 loop->processEvents();
-                if( lvm_vg_extend(vg_dm, m_pv_paths[x].toAscii().data()) )
+                if( lvm_vg_extend(vg_dm, pv_paths[x].toAscii().data()) )
                     KMessageBox::error(0, QString(lvm_errmsg(lvm)));
             }
 
@@ -329,9 +342,15 @@ void VGCreateDialog::validateOK()
 {
     QString name = m_vg_name->text();
     int pos = 0;
+    long long total = 0;
 
     enableButtonOk(false);
 
+    for(int x = 0; (x < m_available_devices.size()) && (x < m_pv_checks.size()); x++){
+        if(m_pv_checks[x]->isChecked())
+            total += m_available_devices[x]->size;
+    }
+    m_total_label->setText( i18n("Total: %1").arg(sizeToString(total)) );
     if(m_validator->validate(name, pos) == QValidator::Acceptable && name != "." && name != ".."){
 
         if( ! m_pv_checks.size() )        // if there is only one pv possible, there is no list

@@ -17,7 +17,7 @@
 #include <QtGui>
 
 #include "logvol.h"
-#include "nomungecheck.h"
+#include "misc.h"
 #include "processprogress.h"
 #include "removemirror.h"
 #include "volgroup.h"

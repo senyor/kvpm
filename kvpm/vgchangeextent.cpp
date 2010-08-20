@@ -18,7 +18,7 @@
 #include <QtGui>
 #include <KMessageBox>
 
-#include "sizetostring.h"
+#include "misc.h"
 #include "vgchangeextent.h"
 #include "volgroup.h"
 

@@ -20,7 +20,7 @@
 #include "lvreduce.h"
 #include "processprogress.h"
 #include "fsreduce.h"
-#include "sizetostring.h"
+#include "misc.h"
 #include "volgroup.h"
 
 

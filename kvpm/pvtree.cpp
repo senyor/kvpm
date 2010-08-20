@@ -23,7 +23,7 @@
 #include "pvmove.h"
 #include "pvchange.h"
 #include "physvol.h"
-#include "sizetostring.h"
+#include "misc.h"
 #include "topwindow.h"
 #include "vgreduce.h"
 #include "vgreduceone.h"
