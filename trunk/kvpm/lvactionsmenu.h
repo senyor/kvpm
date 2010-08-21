@@ -20,6 +20,7 @@
 
 #include <QPoint>
 
+class VolGroup;
 class LogVol;
 class LVChartSeg;
 class VGTree;
@@ -34,12 +35,26 @@ Q_OBJECT
             *mount_filesystem_action, *unmount_filesystem_action, *lv_mkfs_action;
     
     KMenu *filesystem_menu;
+    VolGroup *m_vg;
+    LogVol *m_lv;
 
-    void setup(LogVol *lv);
-    
  public:
-    LVActionsMenu(LogVol *logicalVolume, VGTree *volumeGroupTree, QWidget *parent);
-    LVActionsMenu(LogVol *logicalVolume, LVChartSeg *chartSeg, QWidget *parent);
+    LVActionsMenu(LogVol *logicalVolume, VolGroup *volumeGroup, QWidget *parent);
+
+ private slots:
+    void createLogicalVolume();
+    void extendLogicalVolume();
+    void changeLogicalVolume();
+    void reduceLogicalVolume();
+    void removeLogicalVolume();
+    void renameLogicalVolume();
+    void addMirror();
+    void removeMirror();
+    void createSnapshot();
+    void mkfsLogicalVolume();
+    void movePhysicalExtents();
+    void mountFilesystem();
+    void unmountFilesystem();
 
 };
 

@@ -64,20 +64,6 @@ public:
 private slots:    
     void popupContextMenu(QPoint point);
     void adjustColumnWidth(QTreeWidgetItem *);
-    void mkfsLogicalVolume();
-    void removeLogicalVolume();
-    void renameLogicalVolume();
-    void reduceLogicalVolume();
-    void createLogicalVolume();
-    void createSnapshot();
-    void extendLogicalVolume();
-    void movePhysicalExtents();
-    void changeLogicalVolume();
-    void addMirror();
-    void removeMirror();
-    void removeMirrorLeg();
-    void mountFilesystem();
-    void unmountFilesystem();
 
 };
 

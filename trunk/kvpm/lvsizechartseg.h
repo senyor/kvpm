@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -38,19 +38,6 @@ Q_OBJECT
 
  private slots:
      void popupContextMenu(QPoint);
-     void extendLogicalVolume();
-     void createLogicalVolume();
-     void changeLogicalVolume();
-     void reduceLogicalVolume();
-     void removeLogicalVolume();
-     void renameLogicalVolume();
-     void addMirror();
-     void removeMirror();
-     void createSnapshot();
-     void mkfsLogicalVolume();
-     void movePhysicalExtents();
-     void mountFilesystem();
-     void unmountFilesystem();
 
 };
 

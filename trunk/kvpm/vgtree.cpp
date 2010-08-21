@@ -15,31 +15,18 @@
 
 #include <QtGui>
 
-#include "addmirror.h"
 #include "lvactionsmenu.h"
-#include "lvchange.h"
-#include "lvcreate.h"
-#include "lvreduce.h"
-#include "lvremove.h"
-#include "lvrename.h"
 #include "logvol.h"
 #include "masterlist.h"
-#include "mkfs.h"
-#include "mount.h"
-#include "pvmove.h"
-#include "removemirror.h"
-#include "removemirrorleg.h"
 #include "misc.h"
 #include "topwindow.h"
-#include "unmount.h"
 #include "vgtree.h"
 #include "volgroup.h"
 
 extern MasterList *master_list;
 
 
-VGTree::VGTree(VolGroup *VolumeGroup) : QTreeWidget(),
-					m_vg(VolumeGroup)
+VGTree::VGTree(VolGroup *VolumeGroup) : QTreeWidget(), m_vg(VolumeGroup)
 {
     QStringList header_labels;
 
@@ -338,11 +325,11 @@ void VGTree::popupContextMenu(QPoint point)
 	m_pv_name = QVariant(item->data(10,0)).toString();
 	m_lv = m_vg->getLogVolByName(m_lv_name);
 
-	context_menu = new LVActionsMenu(m_lv, this, this);
+	context_menu = new LVActionsMenu(m_lv, m_vg, this);
 	context_menu->exec(QCursor::pos());
     }
     else{
-	context_menu = new LVActionsMenu(NULL, this, this);
+	context_menu = new LVActionsMenu(NULL, m_vg, this);
 	context_menu->exec(QCursor::pos());
     }
 }
@@ -384,91 +371,7 @@ void VGTree::setHiddenColumns()
     setColumnHidden( 10, !mountpoints );
 }
 
-void VGTree::mkfsLogicalVolume()
-{
-    if( make_fs(m_lv) )
-	MainWindow->reRun();
-}
-
-void VGTree::removeLogicalVolume()
-{
-    if( remove_lv(m_lv) )
-	MainWindow->reRun();
-}
-
-void VGTree::renameLogicalVolume()
-{
-    if( rename_lv(m_lv) )
-	MainWindow->reRun();
-}
-
-void VGTree::createLogicalVolume()
-{
-    if( lv_create(m_vg) )
-	MainWindow->reRun();
-}
-
-void VGTree::createSnapshot()
-{
-    if( snapshot_create(m_lv) )
-	MainWindow->reRun();
-}
-
-void VGTree::extendLogicalVolume()
-{
-    if( lv_extend(m_lv) )
-	MainWindow->reRun();
-}
-
-void VGTree::reduceLogicalVolume()
-{
-    if( lv_reduce(m_lv) )
-	MainWindow->reRun();
-}
-
-void VGTree::movePhysicalExtents()
-{
-    if( move_pv(m_lv) )
-	MainWindow->reRun();
-}
-
-void VGTree::changeLogicalVolume()
-{
-    if( change_lv(m_lv) )
-	MainWindow->reRun();
-}
-
-void VGTree::addMirror()
-{
-    if( add_mirror(m_lv) )
-	MainWindow->reRun();
-}
-
-void VGTree::removeMirror()
-{
-    if( remove_mirror(m_lv) )
-	MainWindow->reRun();
-}
-
-void VGTree::removeMirrorLeg()
-{
-    if( remove_mirror_leg(m_lv) )
-	MainWindow->reRun();
-}
-
-void VGTree::mountFilesystem()
-{
-    if( mount_filesystem(m_lv) )
-	MainWindow->reRun();
-}
-
-void VGTree::unmountFilesystem()
-{
-    if( unmount_filesystem(m_lv) ) 
-	MainWindow->reRun();
-}
-
 void VGTree::adjustColumnWidth(QTreeWidgetItem *)
 {
-    resizeColumnToContents (0);
+    resizeColumnToContents(0);
 }
