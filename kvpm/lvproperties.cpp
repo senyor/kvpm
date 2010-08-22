@@ -60,6 +60,19 @@ LVProperties::LVProperties(LogVol *logicalVolume, int segment, QWidget *parent):
 	stripe_size = logicalVolume->getSegmentStripeSize(segment);
 
 	basic_info_layout->addWidget(new QLabel( i18n("Extents: %1").arg(extents) ));
+
+	if( !logicalVolume->isMirror() ){
+
+	    if( stripes != 1 ){
+		basic_info_layout->addWidget(new QLabel( i18n("Stripes: %1").arg(stripes) ));
+		 basic_info_layout->addWidget(new QLabel( i18n("Stripe size: %1").arg(stripe_size) ));
+	    }
+	    else{
+		basic_info_layout->addWidget(new QLabel( i18n("Stripes: none") ));
+		basic_info_layout->addWidget(new QLabel( i18n("Stripe size: n/a") ));
+	    }
+
+	}
     }
     else if((segment >= 0) && (segment_count == 1)){
 	temp_label = new QLabel( "<b> " + logicalVolume->getName() + "</b>" );
