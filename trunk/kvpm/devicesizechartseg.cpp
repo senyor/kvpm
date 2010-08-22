@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2009 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -20,26 +20,8 @@
 #include "devicemodel.h"
 #include "devicesizechartseg.h"
 #include "deviceactionsmenu.h"
-#include "masterlist.h"
-#include "mkfs.h"
-#include "mount.h"
-#include "partadd.h"
-#include "partremove.h"
-#include "partmoveresize.h"
-#include "physvol.h"
-#include "processprogress.h"
-#include "removefs.h"
 #include "storagepartition.h"
-#include "topwindow.h"
-#include "unmount.h"
-#include "volgroup.h"
-#include "vgcreate.h"
-#include "vgextend.h"
-#include "vgreduce.h"
-#include "vgreduceone.h"
 
-
-extern MasterList *master_list;
 
 DeviceChartSeg::DeviceChartSeg(StorageDeviceItem *storageDeviceItem, QWidget *parent) : 
     QFrame(parent),
@@ -146,76 +128,11 @@ void DeviceChartSeg::popupContextMenu(QPoint point)
         m_partition = (StoragePartition *) (( m_item->dataAlternate(0)).value<void *>() );
 
     if(m_item){  // m_item = 0 if there is no item a that point
-        context_menu = new DeviceActionsMenu(m_item, this, this);
+        context_menu = new DeviceActionsMenu(m_item, this);
         context_menu->exec(QCursor::pos());
     }
     else{
-        context_menu = new DeviceActionsMenu(NULL, this, this);
+        context_menu = new DeviceActionsMenu(NULL, this);
         context_menu->exec(QCursor::pos());
     }
-}
-
-void DeviceChartSeg::mkfsPartition()
-{
-    if( make_fs(m_partition) )
-        MainWindow->reRun();
-}
-
-void DeviceChartSeg::removefsPartition()
-{
-    if( remove_fs(m_partition) )
-	MainWindow->reRun();
-}
-
-void DeviceChartSeg::vgcreatePartition()
-{
-    if( create_vg(m_partition->getName()) )
-	MainWindow->reRun();
-}
-
-void DeviceChartSeg::vgreducePartition()
-{
-    PhysVol  *pv = m_partition->getPhysicalVolume();
-    VolGroup *vg = pv->getVolGroup();
-    if( reduce_vg_one( vg->getName(), m_partition->getName() ) )
-	MainWindow->reRun();
-}
-
-void DeviceChartSeg::vgextendPartition(QAction *action)
-{
-    QString group = action->text();
-    group.remove(QChar('&'));
-
-    if( extend_vg(group, m_partition->getName()) )
-	MainWindow->reRun();
-}
-
-void DeviceChartSeg::mountPartition()
-{
-    if( mount_filesystem(m_partition) )
-        MainWindow->reRun();
-}
-
-void DeviceChartSeg::unmountPartition()
-{
-    if( unmount_filesystem(m_partition) )
-        MainWindow->reRun();
-}
-
-void DeviceChartSeg::removePartition()
-{
-  if( remove_partition(m_partition) )
-        MainWindow->reRun();
-}
-
-void DeviceChartSeg::moveresizePartition()
-{
-  if( moveresize_partition(m_partition) )
-        MainWindow->reRun();
-}
-
-void DeviceChartSeg::addPartition()
-{
-        if( add_partition(m_partition) )
-        MainWindow->reRun();
 }

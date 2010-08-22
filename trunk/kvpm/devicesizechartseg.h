@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -35,16 +35,6 @@ public:
 
 public slots:
     void popupContextMenu(QPoint point);
-    void addPartition();
-    void mkfsPartition();
-    void mountPartition();
-    void removePartition();
-    void removefsPartition();
-    void moveresizePartition();
-    void vgcreatePartition();
-    void vgreducePartition();
-    void vgextendPartition(QAction *action);
-    void unmountPartition();
 
 };
 	

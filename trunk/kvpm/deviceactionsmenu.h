@@ -20,10 +20,12 @@
 
 #include <QTreeView>
 #include <QAbstractItemModel>
+#include <QString>
 
 #include "devicemodel.h"
 
 class StoragePartition;
+class StorageDevice;
 class DeviceTreeView;
 class DeviceChartSeg;
 
@@ -45,18 +47,28 @@ Q_OBJECT
             *m_unmount_action;
 
     QList<QAction *> vgextend_actions;
+    StoragePartition *m_part;
+    StorageDevice *m_dev;
+    QString m_vg_name;
 
     void setup(StorageDeviceItem *item);
     
-public:
-    DeviceActionsMenu( StorageDeviceItem *item,
-		       DeviceTreeView *view,
-		       QWidget *parent = 0);
+ public:
+    DeviceActionsMenu( StorageDeviceItem *item, QWidget *parent = 0);
 
-    DeviceActionsMenu( StorageDeviceItem *item,
-		       DeviceChartSeg *segment,
-		       QWidget *parent = 0);
-
+ private slots:
+    void mkfsPartition();
+    void addPartition();
+    void moveresizePartition();
+    void removePartition();
+    void removefsPartition();
+    void vgcreatePartition();
+    void tablecreatePartition();
+    void vgreducePartition();
+    void vgextendPartition(QAction *action);
+    void mountPartition();
+    void unmountPartition();
+    
 
 };
 
