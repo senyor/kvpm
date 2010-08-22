@@ -58,7 +58,7 @@ QStringList LVChangeDialog::arguments()
 {
     QStringList args, temp;
 
-    args << "lvchange";
+    args << "lvchange" << "--yes"; // answer yes to any question
 
     if( !m_lv->isSnap() ){    
         if( available_check->isChecked() && ( !m_lv->isActive() ))
