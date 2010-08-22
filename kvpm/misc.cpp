@@ -38,6 +38,16 @@ void NoMungeCheck::setAlternateText(QString alternateText)
     m_alternate_text = alternateText;
 }
 
+void NoMungeCheck::setData(QVariant data)
+{
+    m_data = data;
+}
+
+QVariant NoMungeCheck::getData()
+{
+    return m_data;
+}
+
 
 /* The idea here is to not have numbers over three digits long
    before the decimal point. This will need to be worked on
