@@ -93,7 +93,7 @@ bool create_vg(QString physicalVolumePath){
 }
 
 VGCreateDialog::VGCreateDialog(QList<AvailableDevice *> devices, QWidget *parent) : 
-    KDialog(parent), m_available_devices(devices)
+    KDialog(parent) 
 {
 
     setWindowTitle( i18n("Create Volume Group") );
@@ -138,19 +138,20 @@ VGCreateDialog::VGCreateDialog(QList<AvailableDevice *> devices, QWidget *parent
     QGridLayout *new_pv_box_layout = new QGridLayout();
     new_pv_box->setLayout(new_pv_box_layout);
     NoMungeCheck *temp_check;
-    int pv_check_count = m_available_devices.size();
+    int pv_check_count = devices.size();
     QHBoxLayout *button_layout = new QHBoxLayout();
     KPushButton *all_button = new KPushButton( i18n("Select all") );
     KPushButton *none_button = new KPushButton( i18n("Select none") );
 
     if(pv_check_count < 2){
-        m_pv_label = new QLabel(m_available_devices[0]->name);
+        m_pv_label = new QLabel(devices[0]->name);
         new_pv_box_layout->addWidget(m_pv_label);
     }
     else{
         for(int x = 0; x < pv_check_count; x++){
-	    temp_check = new NoMungeCheck(m_available_devices[x]->name + "  " + sizeToString(m_available_devices[x]->size));
-	    temp_check->setAlternateText( m_available_devices[x]->name );
+	    temp_check = new NoMungeCheck(devices[x]->name + "  " + sizeToString(devices[x]->size));
+	    temp_check->setAlternateText( devices[x]->name );
+	    temp_check->setData( QVariant(devices[x]->size) );
 	    m_pv_checks.append(temp_check);
 
             if(pv_check_count < 11 )
@@ -346,9 +347,9 @@ void VGCreateDialog::validateOK()
 
     enableButtonOk(false);
 
-    for(int x = 0; (x < m_available_devices.size()) && (x < m_pv_checks.size()); x++){
+    for(int x = 0; x < m_pv_checks.size(); x++){
         if(m_pv_checks[x]->isChecked())
-            total += m_available_devices[x]->size;
+            total += (m_pv_checks[x]->getData()).toLongLong();
     }
     m_total_label->setText( i18n("Total: %1").arg(sizeToString(total)) );
     if(m_validator->validate(name, pos) == QValidator::Acceptable && name != "." && name != ".."){

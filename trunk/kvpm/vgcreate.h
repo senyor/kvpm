@@ -38,7 +38,6 @@ Q_OBJECT
     QLabel *m_pv_label, *m_total_label;
     QList<NoMungeCheck *> m_pv_checks;
     QVBoxLayout *m_layout;
-    QList<AvailableDevice *> m_available_devices;
 
     KLineEdit *m_vg_name, 
               *m_max_lvs, 
