@@ -247,13 +247,18 @@ void DeviceActionsMenu::moveresizePartition()
 void DeviceActionsMenu::vgcreatePartition()
 {
     QString name;
+    long long size;
 
-    if(m_part)
+    if(m_part){
+        size = m_part->getSize();
         name = m_part->getName();
-    else
+    }
+    else{
+        size = m_dev->getSize();
         name = m_dev->getDevicePath();
+    }
 
-    if( create_vg(name) )
+    if( create_vg(name, size) )
         MainWindow->reRun();
 }
 
