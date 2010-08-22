@@ -73,12 +73,12 @@ bool create_vg()
     return false;
 }
 
-bool create_vg(QString physicalVolumePath){
+bool create_vg(QString physicalVolumePath, long long size){
 
     QList<AvailableDevice *> devices;
     AvailableDevice *temp_device = new AvailableDevice;
     temp_device->name = physicalVolumePath;
-    temp_device->size = 0;
+    temp_device->size = size;
     devices.append(temp_device);
 
     VGCreateDialog dialog(devices);
@@ -95,8 +95,6 @@ bool create_vg(QString physicalVolumePath){
 VGCreateDialog::VGCreateDialog(QList<AvailableDevice *> devices, QWidget *parent) : 
     KDialog(parent) 
 {
-    qDebug() << devices[0]->name << "  "   << sizeToString(devices[0]->size);
-
     setWindowTitle( i18n("Create Volume Group") );
 
     QWidget *dialog_body = new QWidget(this);
@@ -167,7 +165,6 @@ VGCreateDialog::VGCreateDialog(QList<AvailableDevice *> devices, QWidget *parent
 	}
     }
 
-    qDebug() << devices[0]->name << "  "   << sizeToString(devices[0]->size);
     m_total_label = new QLabel( i18n("Total: %1").arg( sizeToString(devices[0]->size) ) );
     new_pv_box_layout->addWidget(m_total_label, new_pv_box_layout->rowCount(),0, 1, -1);
 
@@ -351,9 +348,6 @@ void VGCreateDialog::validateOK()
     long long total = 0;
 
     enableButtonOk(false);
-
-    qDebug() << "Got here....";
-    qDebug("Checks: %d", m_pv_checks.size());
 
     if( m_pv_checks.size() ){
         for(int x = 0; x < m_pv_checks.size(); x++){

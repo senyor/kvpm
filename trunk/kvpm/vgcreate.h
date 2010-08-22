@@ -27,7 +27,7 @@
 
 #include "misc.h"
 
-bool create_vg(QString physicalVolumePath);
+bool create_vg(QString physicalVolumePath, long long size);
 
 bool create_vg();
 
