@@ -95,6 +95,7 @@ bool create_vg(QString physicalVolumePath){
 VGCreateDialog::VGCreateDialog(QList<AvailableDevice *> devices, QWidget *parent) : 
     KDialog(parent) 
 {
+    qDebug() << devices[0]->name << "  "   << sizeToString(devices[0]->size);
 
     setWindowTitle( i18n("Create Volume Group") );
 
@@ -164,16 +165,20 @@ VGCreateDialog::VGCreateDialog(QList<AvailableDevice *> devices, QWidget *parent
 	    connect(temp_check, SIGNAL(toggled(bool)), 
 		    this, SLOT(validateOK()));
 	}
-        connect(all_button, SIGNAL(clicked(bool)), 
-                this, SLOT(selectAll()));
-        connect(none_button, SIGNAL(clicked(bool)), 
-                this, SLOT(selectNone()));
+    }
 
+    qDebug() << devices[0]->name << "  "   << sizeToString(devices[0]->size);
+    m_total_label = new QLabel( i18n("Total: %1").arg( sizeToString(devices[0]->size) ) );
+    new_pv_box_layout->addWidget(m_total_label, new_pv_box_layout->rowCount(),0, 1, -1);
+
+    if(pv_check_count > 1){
         m_total_label = new QLabel( i18n("Total: 0") );
         new_pv_box_layout->addWidget(m_total_label, new_pv_box_layout->rowCount(),0, 1, -1);
         new_pv_box_layout->addLayout(button_layout, new_pv_box_layout->rowCount(),0, 1, -1);
         button_layout->addWidget(all_button);
         button_layout->addWidget(none_button);
+        connect(all_button,  SIGNAL(clicked(bool)), this, SLOT(selectAll()));
+        connect(none_button, SIGNAL(clicked(bool)), this, SLOT(selectNone()));
     }
 
     QHBoxLayout *extent_layout = new QHBoxLayout();
@@ -347,14 +352,20 @@ void VGCreateDialog::validateOK()
 
     enableButtonOk(false);
 
-    for(int x = 0; x < m_pv_checks.size(); x++){
-        if(m_pv_checks[x]->isChecked())
-            total += (m_pv_checks[x]->getData()).toLongLong();
+    qDebug() << "Got here....";
+    qDebug("Checks: %d", m_pv_checks.size());
+
+    if( m_pv_checks.size() ){
+        for(int x = 0; x < m_pv_checks.size(); x++){
+            if(m_pv_checks[x]->isChecked())
+                total += (m_pv_checks[x]->getData()).toLongLong();
+        }
+        m_total_label->setText( i18n("Total: %1").arg( sizeToString(total) ) );
     }
-    m_total_label->setText( i18n("Total: %1").arg(sizeToString(total)) );
+
     if(m_validator->validate(name, pos) == QValidator::Acceptable && name != "." && name != ".."){
 
-        if( ! m_pv_checks.size() )        // if there is only one pv possible, there is no list
+        if( !m_pv_checks.size() )        // if there is only one pv possible, there is no list
 	        enableButtonOk(true);
 	else{
 	    for(int x = 0; x < m_pv_checks.size(); x++){

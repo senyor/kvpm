@@ -40,19 +40,6 @@ public:
 public slots:
     void popupContextMenu(QPoint point);
 
-private slots:
-    void mkfsPartition();
-    void addPartition();
-    void moveresizePartition();
-    void removePartition();
-    void removefsPartition();
-    void vgcreatePartition();
-    void tablecreatePartition();
-    void vgreducePartition();
-    void vgextendPartition(QAction *action);
-    void mountPartition();
-    void unmountPartition();
-    
 };
 
 #endif

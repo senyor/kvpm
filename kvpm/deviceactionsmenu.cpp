@@ -25,69 +25,41 @@
 #include "masterlist.h"
 #include "partremove.h"
 #include "partadd.h"
+#include "partmoveresize.h"
 #include "physvol.h"
 #include "storagedevice.h"
+#include "storagepartition.h"
 #include "tablecreate.h"
+#include "topwindow.h"
 #include "removefs.h"
 #include "vgreduce.h"
 #include "vgreduceone.h"
 #include "vgcreate.h"
 #include "vgextend.h"
 
-
 extern MasterList *master_list;
 
 
-DeviceActionsMenu::DeviceActionsMenu( StorageDeviceItem *item,
-				      DeviceTreeView *view,
-				      QWidget *parent) : KMenu(parent)
+DeviceActionsMenu::DeviceActionsMenu( StorageDeviceItem *item, QWidget *parent) : KMenu(parent)
 {
-
     setup(item);
 
-    connect(m_mkfs_action,       SIGNAL(triggered()), view, SLOT(mkfsPartition()));
-    connect(m_partremove_action, SIGNAL(triggered()), view, SLOT(removePartition()));
-    connect(m_partadd_action,    SIGNAL(triggered()), view, SLOT(addPartition()));
-    connect(m_partmoveresize_action, SIGNAL(triggered()), view, SLOT(moveresizePartition()));
-    connect(m_removefs_action,   SIGNAL(triggered()), view, SLOT(removefsPartition()));
-    connect(m_tablecreate_action,SIGNAL(triggered()), view, SLOT(tablecreatePartition()));
-    connect(m_vgcreate_action,   SIGNAL(triggered()), view, SLOT(vgcreatePartition()));
-    connect(m_vgreduce_action,   SIGNAL(triggered()), view, SLOT(vgreducePartition()));
-    connect(m_mount_action,      SIGNAL(triggered()), view, SLOT(mountPartition()));
-    connect(m_unmount_action,    SIGNAL(triggered()), view, SLOT(unmountPartition()));
+    connect(m_mkfs_action,       SIGNAL(triggered()), this, SLOT(mkfsPartition()));
+    connect(m_partremove_action, SIGNAL(triggered()), this, SLOT(removePartition()));
+    connect(m_partadd_action,    SIGNAL(triggered()), this, SLOT(addPartition()));
+    connect(m_partmoveresize_action, SIGNAL(triggered()), this, SLOT(moveresizePartition()));
+    connect(m_removefs_action,   SIGNAL(triggered()), this, SLOT(removefsPartition()));
+    connect(m_vgcreate_action,   SIGNAL(triggered()), this, SLOT(vgcreatePartition()));
+    connect(m_tablecreate_action,SIGNAL(triggered()), this, SLOT(tablecreatePartition()));
+    connect(m_vgreduce_action,   SIGNAL(triggered()), this, SLOT(vgreducePartition()));
+    connect(m_mount_action,      SIGNAL(triggered()), this, SLOT(mountPartition()));
+    connect(m_unmount_action,    SIGNAL(triggered()), this, SLOT(unmountPartition()));
 
-    connect(m_vgextend_menu, SIGNAL(triggered(QAction*)), 
-	    view, SLOT(vgextendPartition(QAction*)));
-
-}
-
-DeviceActionsMenu::DeviceActionsMenu( StorageDeviceItem *item,
-				      DeviceChartSeg *segment,
-				      QWidget *parent) : KMenu(parent)
-{
-
-    setup(item);
-
-    connect(m_mkfs_action,       SIGNAL(triggered()), segment, SLOT(mkfsPartition()));
-    connect(m_partremove_action, SIGNAL(triggered()), segment, SLOT(removePartition()));
-    connect(m_partadd_action,    SIGNAL(triggered()), segment, SLOT(addPartition()));
-    connect(m_partmoveresize_action, SIGNAL(triggered()), segment, SLOT(moveresizePartition()));
-    connect(m_removefs_action,   SIGNAL(triggered()), segment, SLOT(removefsPartition()));
-    connect(m_vgcreate_action,   SIGNAL(triggered()), segment, SLOT(vgcreatePartition()));
-    //    connect(m_tablecreate_action,SIGNAL(triggered()), segment, SLOT(tablecreatePartition()));
-    connect(m_vgreduce_action,   SIGNAL(triggered()), segment, SLOT(vgreducePartition()));
-    connect(m_mount_action,      SIGNAL(triggered()), segment, SLOT(mountPartition()));
-    connect(m_unmount_action,    SIGNAL(triggered()), segment, SLOT(unmountPartition()));
-
-    connect(m_vgextend_menu, SIGNAL(triggered(QAction*)), 
-	    segment, SLOT(vgextendPartition(QAction*)));
-
+    connect(m_vgextend_menu, SIGNAL(triggered(QAction*)), this, SLOT(vgextendPartition(QAction*)));
 }
 
 void DeviceActionsMenu::setup(StorageDeviceItem *item)
 {
-    StoragePartition* partition = NULL;
-    StorageDevice* device = NULL;
     QStringList group_names;
     KMenu *filesystem_ops = new KMenu( i18n("Filesystem operations"), this);
     m_vgextend_menu       = new KMenu( i18n("Extend volume group"), this);
@@ -118,6 +90,8 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
     filesystem_ops->addAction(m_mkfs_action);
     filesystem_ops->addAction(m_removefs_action);
 
+    m_vg_name  = item->data(5).toString(); // only set if this is a pv in a vg
+
     group_names = master_list->getVolumeGroupNames();
     for(int x = 0; x < group_names.size(); x++){
         vgextend_actions.append(new QAction(group_names[x], this));
@@ -127,15 +101,15 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
     if(item){
 
         setEnabled(true);
-        device = (StorageDevice *) (( item->dataAlternate(1)).value<void *>() );
+        m_dev = (StorageDevice *) (( item->dataAlternate(1)).value<void *>() );
 
         if( ( item->dataAlternate(0)).canConvert<void *>() ){  // its a partition
-            partition = (StoragePartition *) (( item->dataAlternate(0)).value<void *>() );
+            m_part = (StoragePartition *) (( item->dataAlternate(0)).value<void *>() );
             m_tablecreate_action->setEnabled(false);
-	    m_mount_action->setEnabled( partition->isMountable() );
-            m_unmount_action->setEnabled( partition->isMounted() );
+	    m_mount_action->setEnabled( m_part->isMountable() );
+            m_unmount_action->setEnabled( m_part->isMounted() );
 
-            if( partition->getPedType() & 0x04 ){    // freespace
+            if( m_part->getPedType() & 0x04 ){    // freespace
                 m_mkfs_action->setEnabled(false);
                 m_partremove_action->setEnabled(false);
                 m_partmoveresize_action->setEnabled(false);
@@ -145,9 +119,9 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
                 m_vgextend_menu->setEnabled(false);
                 m_vgreduce_action->setEnabled(false);
             }
-            else if( partition->getPedType() & 0x02 ){  // extended partition
+            else if( m_part->getPedType() & 0x02 ){  // extended partition
                 m_mkfs_action->setEnabled(false);
-                if( partition->isEmpty() )
+                if( m_part->isEmpty() )
                     m_partadd_action->setEnabled(true);
                 else
                     m_partadd_action->setEnabled(false);
@@ -156,15 +130,15 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
                 m_vgcreate_action->setEnabled(false);
                 m_vgextend_menu->setEnabled(false);
                 m_vgreduce_action->setEnabled(false);
-                if( partition->isEmpty() )
+                if( m_part->isEmpty() )
                     m_partremove_action->setEnabled(true);
                 else
                     m_partremove_action->setEnabled(false);
             }
-            else if( partition->isPV() ){
+            else if( m_part->isPV() ){
                 m_mkfs_action->setEnabled(false);
                 m_partremove_action->setEnabled(false);
-                if( partition->isBusy() )        
+                if( m_part->isBusy() )        
                     m_partmoveresize_action->setEnabled(false);
                 else
                     m_partmoveresize_action->setEnabled(true);
@@ -172,13 +146,13 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
                 m_removefs_action->setEnabled(false);
                 m_vgcreate_action->setEnabled(false);
                 m_vgextend_menu->setEnabled(false);
-                if( partition->getPhysicalVolume()->getPercentUsed() == 0 )
+                if( m_part->getPhysicalVolume()->getPercentUsed() == 0 )
                     m_vgreduce_action->setEnabled(true);
                 else
                     m_vgreduce_action->setEnabled(false);
             }
-            else if( partition->isNormal() || partition->isLogical() ){
-                if( partition->isMounted() || partition->isBusy() ){ 
+            else if( m_part->isNormal() || m_part->isLogical() ){
+                if( m_part->isMounted() || m_part->isBusy() ){ 
                     m_partremove_action->setEnabled(false);
                     m_partmoveresize_action->setEnabled(false);
                     m_mkfs_action->setEnabled(false);
@@ -202,10 +176,11 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
             }
         }
         else { // its a whole device
+            m_part = NULL;
             m_mount_action->setEnabled(false);
             m_unmount_action->setEnabled(false);
 
-            if( device->isPhysicalVolume() ){
+            if( m_dev->isPhysicalVolume() ){
                 m_tablecreate_action->setEnabled(false);
                 m_mkfs_action->setEnabled(false);
                 m_partremove_action->setEnabled(false);
@@ -214,7 +189,7 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
                 m_removefs_action->setEnabled(false);
                 m_vgcreate_action->setEnabled(false);
                 m_vgextend_menu->setEnabled(false);
-                if( device->getPhysicalVolume()->getPercentUsed() == 0 )   
+                if( m_dev->getPhysicalVolume()->getPercentUsed() == 0 )   
                     m_vgreduce_action->setEnabled(true);
                 else
                     m_vgreduce_action->setEnabled(false);
@@ -227,7 +202,7 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
                 m_removefs_action->setEnabled(false);
                 m_vgreduce_action->setEnabled(false);
 
-                if( device->isBusy() || device->getRealPartitionCount() != 0 ){
+                if( m_dev->isBusy() || m_dev->getRealPartitionCount() != 0 ){
                     m_tablecreate_action->setEnabled(false);
                     m_vgcreate_action->setEnabled(false);
                     m_vgextend_menu->setEnabled(false);
@@ -244,3 +219,93 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
     else
 	setEnabled(false);  // if item points to NULL, do nothing
 }
+
+void DeviceActionsMenu::mkfsPartition()
+{
+    if( make_fs(m_part) )
+	    MainWindow->reRun();
+}
+
+void DeviceActionsMenu::removePartition()
+{
+  if( remove_partition(m_part) )
+	MainWindow->reRun();
+}
+
+void DeviceActionsMenu::addPartition()
+{
+  if( add_partition(m_part) )
+	MainWindow->reRun();
+}
+
+void DeviceActionsMenu::moveresizePartition()
+{
+  if( moveresize_partition(m_part) )
+	MainWindow->reRun();
+}
+
+void DeviceActionsMenu::vgcreatePartition()
+{
+    QString name;
+
+    if(m_part)
+        name = m_part->getName();
+    else
+        name = m_dev->getDevicePath();
+
+    if( create_vg(name) )
+        MainWindow->reRun();
+}
+
+void DeviceActionsMenu::tablecreatePartition()
+{
+    if( create_table( m_dev->getDevicePath() ) )
+        MainWindow->reRun();
+}
+
+void DeviceActionsMenu::vgreducePartition() // pvs can also be whole devices
+{
+    QString name;
+
+    if(m_part)
+        name = m_part->getName();
+    else
+        name = m_dev->getDevicePath();
+
+    if( reduce_vg_one(m_vg_name, name) )
+	MainWindow->reRun();
+}
+
+void DeviceActionsMenu::vgextendPartition(QAction *action)
+{
+    QString group = action->text();
+    group.remove(QChar('&'));
+    QString name;
+
+    if(m_part)
+        name = m_part->getName();
+    else
+        name = m_dev->getDevicePath();
+
+    if( extend_vg(group, name) )
+	MainWindow->reRun();
+}
+
+void DeviceActionsMenu::mountPartition()
+{
+    if( mount_filesystem(m_part) )
+	MainWindow->reRun();
+}
+
+void DeviceActionsMenu::removefsPartition()
+{
+    if( remove_fs(m_part) )
+	MainWindow->reRun();
+}
+
+void DeviceActionsMenu::unmountPartition()
+{
+    if( unmount_filesystem(m_part) )
+	MainWindow->reRun();
+}
+
