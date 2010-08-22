@@ -173,6 +173,7 @@ PartitionAddDialog::PartitionAddDialog(StoragePartition *partition,
     size_group_layout->addWidget(m_size_combo,0,1);
     size_group_layout->addWidget(m_total_size_spin,1,0);
     m_align64_check = new QCheckBox("Align to 64 KiB");
+    m_align64_check->setChecked(true);
     size_group_layout->addWidget(m_align64_check, 3, 0, 1, 2, Qt::AlignHCenter );
 
     m_preceding_label = new QLabel();
