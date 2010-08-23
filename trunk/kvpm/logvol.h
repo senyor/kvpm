@@ -52,6 +52,10 @@ class LogVol
     double  m_copy_percent;      // the percentage of extents moved, if pvmove underway
     long long m_size;            // size in bytes
     long long m_extents;         // size in extents
+    long long m_block_size;      // block size of fs
+    long long m_fs_size;         // fs size in bytes 
+    long long m_fs_used;         // bytes used up in fs
+
     int m_seg_total;             // total number of segments in logical volume
     int m_major_device;          // Unix device major number, if set
     int m_minor_device;          // Unix device minor number, if set
@@ -105,6 +109,9 @@ class LogVol
     long long getSpaceOnPhysicalVolume(QString physicalVolume);
     long long getExtents();
     long long getSize();
+    long long getFilesystemSize();
+    long long getFilesystemUsed();
+    long long getFilesystemBlockSize();
     VolGroup* getVolumeGroup();
     void setVolumeGroup(VolGroup *volumeGroup);
     double getSnapPercent();

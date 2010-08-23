@@ -14,7 +14,9 @@
 
 #include <QtGui>
 
+#include "fsdata.h"
 #include "fsprobe.h"
+#include "misc.h"
 #include "mountentry.h"
 #include "mountinfo.h"
 #include "physvol.h"
@@ -111,6 +113,19 @@ StoragePartition::StoragePartition(PedPartition *part,
             m_is_mountable = true;
     }
 
+    if(m_fs_type == "ext2" || m_fs_type == "ext3" || m_fs_type == "ext4" ){
+        FSData *fs_data = get_fs_data( m_partition_path );
+        m_block_size = fs_data->block_size;
+        m_fs_size = fs_data->size;
+        m_fs_used = fs_data->used;
+        delete fs_data;
+    }
+    else{
+        m_block_size = -1;
+        m_fs_size = -1;
+        m_fs_used = -1;
+    }
+
     if (m_is_pv)
         m_is_busy = m_pv->isActive();
     else
@@ -183,6 +198,37 @@ long long StoragePartition::getFirstSector()
 long long StoragePartition::getLastSector()
 {
     return m_last_sector;
+}
+
+long long StoragePartition::getFilesystemSize()
+{
+    return m_fs_size;
+}
+
+long long StoragePartition::getFilesystemUsed()
+{
+    return m_fs_used;
+}
+
+long long StoragePartition::getFilesystemBlockSize()
+{
+    return m_block_size;
+}
+
+int StoragePartition::getPercentUsed()
+{
+    int percent;
+
+    if( m_fs_used == 0 )
+        return 0;
+    else if( m_fs_used == m_fs_size )
+        return 100;
+    else if( m_fs_size == 0 )
+        return 0;
+    else
+        percent = qRound( 100 - ( ( ( m_fs_size - m_fs_used ) * 100.0 ) / m_fs_size ) );
+
+    return percent;
 }
 
 bool StoragePartition::isMounted()

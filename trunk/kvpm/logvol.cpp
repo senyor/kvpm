@@ -15,6 +15,7 @@
 
 #include <QtGui>
 
+#include "fsdata.h"
 #include "fsprobe.h"
 #include "logvol.h"
 #include "mountentry.h"
@@ -210,6 +211,19 @@ LogVol::LogVol(QStringList lvDataList, MountInformationList *mountInformationLis
     }
     else
         m_lv_fs = fsprobe_getfstype2( "/dev/" + m_vg_name + "/" + m_lv_name );
+ 
+    if(m_lv_fs == "ext2" || m_lv_fs == "ext3" || m_lv_fs == "ext4" ){
+        FSData *fs_data = get_fs_data( "/dev/" + m_vg_name + "/" + m_lv_name );
+        m_block_size = fs_data->block_size;
+        m_fs_size = fs_data->size;
+        m_fs_used = fs_data->used;
+        delete fs_data;
+    }
+    else{
+        m_block_size = -1;
+        m_fs_size = -1;
+        m_fs_used = -1;
+    }
 
     m_size         = (lvdata.section('|',3,3)).toLongLong();
     m_snap_percent = 0.0;
@@ -432,6 +446,21 @@ long long LogVol::getSize()
 QString LogVol::getFilesystem()
 {
   return m_lv_fs;
+}
+
+long long LogVol::getFilesystemSize()
+{
+    return m_fs_size;
+}
+
+long long LogVol::getFilesystemUsed()
+{
+    return m_fs_used;
+}
+
+long long LogVol::getFilesystemBlockSize()
+{
+    return m_block_size;
 }
 
 int LogVol::getMinorDevice()

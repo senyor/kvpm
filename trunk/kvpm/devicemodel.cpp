@@ -84,7 +84,7 @@ StorageDeviceItem *StorageDeviceItem::parent() {
 StorageDeviceModel::StorageDeviceModel(QList<StorageDevice *> devices, QObject *parent) : QAbstractItemModel(parent)
 {
     QList<QVariant> rootData;
-    rootData << "Device" << "Type" << "Capacity" << "Used" << "Usage" 
+    rootData << "Device" << "Type" << "Capacity" << "Remaining" << "Usage" 
 	     << "Group" << "Flags" << "Mount point" ;
     
     rootItem = new StorageDeviceItem(rootData, rootData);
@@ -227,8 +227,7 @@ void StorageDeviceModel::setupModelData(QList<StorageDevice *> devices, StorageD
             part = dev->getStoragePartitions()[y];
             type = part->getType();
             
-            data << part->getName() << type
-                 << sizeToString(part->getSize());
+            data << part->getName() << type << sizeToString(part->getSize());
             
             part_variant.setValue( (void *) part);
             
@@ -236,8 +235,7 @@ void StorageDeviceModel::setupModelData(QList<StorageDevice *> devices, StorageD
             
             if(part->isPV()){
                 pv = part->getPhysicalVolume();
-                data << QString("%1 ( %2% ) ").arg( sizeToString( (pv->getSize()) - (pv->getUnused())))
-                    .arg(pv->getPercentUsed() )
+                data << QString("%1 (%%2) ").arg( sizeToString( (pv->getUnused()))).arg(100 - pv->getPercentUsed() )
                     
                      << "physical volume"
                      << pv->getVolGroup()->getName()
@@ -245,9 +243,12 @@ void StorageDeviceModel::setupModelData(QList<StorageDevice *> devices, StorageD
                      << "";
             }
             else{
-                data << "" << part->getFileSystem();
-                
-                data << "" << (part->getFlags()).join(", ");
+                if(part->getFilesystemSize() > -1 && part->getFilesystemUsed() > -1)
+                    data << QString("%1 (%%2) ").arg(sizeToString(part->getFilesystemSize() - part->getFilesystemUsed())).arg(100 - part->getPercentUsed() ); 
+                else
+                    data << "";
+ 
+                data << part->getFileSystem() << "" << (part->getFlags()).join(", ");
                 
                 if(part->isMounted())
                     data << (part->getMountPoints())[0];

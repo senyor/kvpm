@@ -7,7 +7,7 @@ include_directories( ${KDE4_INCLUDES} ${QT4_INCLUDES} )
 set(kvpm_SRCS addmirror.cpp kvpmconfigdialog.cpp devicemodel.cpp deviceproperties.cpp 
               devicepropertiesstack.cpp devicesizechart.cpp devicesizechartseg.cpp 
 	      devicetab.cpp executablefinder.cpp deviceactionsmenu.cpp fsck.cpp
-	      fsblocksize.cpp fsextend.cpp
+	      fsblocksize.cpp fsdata.cpp fsextend.cpp
 	      fsprobe.cpp fsreduce.cpp  kvpmsetup.cpp
 	      logvol.cpp lvactionsmenu.cpp lvchange.cpp lvrename.cpp
 	      lvcreate.cpp lvproperties.cpp lvpropertiesstack.cpp lvreduce.cpp 
