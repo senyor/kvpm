@@ -33,8 +33,8 @@ VGTree::VGTree(VolGroup *VolumeGroup) : QTreeWidget(), m_vg(VolumeGroup)
     m_vg_name = m_vg->getName();
     setColumnCount(9);
 
-    header_labels << "Volume" << "Size" << "Filesystem" << "type" << "Stripes" << "Stripe size" 
-		  << "Snap/Move" << "State" << "Access" << "Tags" << "Mount points" << "Remaining";
+    header_labels << "Volume" << "Size" << "Remaining" << "Filesystem" << "type" << "Stripes" << "Stripe size" 
+		  << "Snap/Move" << "State" << "Access" << "Tags" << "Mount points";
 
     setHeaderLabels(header_labels);
 }
@@ -84,7 +84,17 @@ void VGTree::loadData()
 	    ( !(lv->isMirror() && lv->getOrigin() != "" ) ) ){
 	    
 	    if( lv->getSegmentCount() == 1 ) {
-		lv_data << lv->getName() << sizeToString(lv->getSize()) << lv->getFilesystem() << lv->getType(); 
+		lv_data << lv->getName() << sizeToString(lv->getSize());
+
+                if( lv->getFilesystemSize() > -1 &&  lv->getFilesystemUsed() > -1 ){
+                    fs_remaining = lv->getFilesystemSize() - lv->getFilesystemUsed();
+                    fs_percent = qRound( ((double)fs_remaining / (double)lv->getFilesystemSize()) * 100 );
+                    lv_data << QString(sizeToString(fs_remaining) + " (%%1)").arg(fs_percent);
+                }
+                else
+                    lv_data << "";
+
+                lv_data << lv->getFilesystem() << lv->getType(); 
 
                 if( lv->isMirror() )
                     lv_data << "" << "";
@@ -106,13 +116,6 @@ void VGTree::loadData()
 		    lv_data << "r/o";
 
 		lv_data << lv->getTags().join(",") << lv->getMountPoints().join(",");
-                if( lv->getFilesystemSize() > -1 &&  lv->getFilesystemUsed() > -1 ){
-                    fs_remaining = lv->getFilesystemSize() - lv->getFilesystemUsed();
-                    fs_percent = qRound( ((double)fs_remaining / (double)lv->getFilesystemSize()) * 100 );
-                    lv_data << QString(sizeToString(fs_remaining) + " (%%1)").arg(fs_percent);
-                }
-                else
-                    lv_data << "";
 
 		lv_item = new QTreeWidgetItem((QTreeWidgetItem *)0, lv_data);
 		m_lv_tree_items.append(lv_item);
@@ -127,11 +130,17 @@ void VGTree::loadData()
 		}
 	    }
 	    else {
-		lv_data << lv->getName() 
-			<< sizeToString(lv->getSize()) 
-			<< lv->getFilesystem()
-			<< lv->getType() 
-			<< "" << "";
+		lv_data << lv->getName() << sizeToString(lv->getSize());
+
+                if( lv->getFilesystemSize() > -1 &&  lv->getFilesystemUsed() > -1 ){
+                    fs_remaining = lv->getFilesystemSize() - lv->getFilesystemUsed();
+                    fs_percent = qRound( ((double)fs_remaining / (double)lv->getFilesystemSize()) * 100 );
+                    lv_data << QString(sizeToString(fs_remaining) + " (%%1)").arg(fs_percent);
+                }
+                else
+                    lv_data << "";
+
+                lv_data << lv->getFilesystem() << lv->getType() << "" << "";
 		
 		if( lv->isSnap() )
 		    lv_data    << QString("%%1").arg(lv->getSnapPercent());
@@ -213,7 +222,7 @@ void VGTree::insertSegmentItems(LogVol *logicalVolume, QTreeWidgetItem *item)
 	
 	segment_data << QString("Seg# %1").arg(x) 
 		     << sizeToString(logicalVolume->getSegmentSize(x)) 
-		     << "" << "" 
+		     << "" << "" << "" 
 		     << QString("%1").arg(logicalVolume->getSegmentStripes(x))
 		     << sizeToString(logicalVolume->getSegmentStripeSize(x)) 
 		     << "" << "" << "" << "" ;
@@ -255,7 +264,7 @@ void VGTree::insertMirrorLegItems(LogVol *mirrorVolume, QTreeWidgetItem *item)
 	    if( leg_volume->getSegmentCount() == 1 ) {	    
 
 		leg_data << leg_volume->getName() 
-			 << sizeToString(leg_volume->getSize()) 
+			 << sizeToString(leg_volume->getSize()) << "" 
 			 << leg_volume->getFilesystem()
 			 << leg_volume->getType();
  
@@ -293,7 +302,7 @@ void VGTree::insertMirrorLegItems(LogVol *mirrorVolume, QTreeWidgetItem *item)
 	    else {
 
 		leg_data << leg_volume->getName() 
-			 << sizeToString(leg_volume->getSize()) 
+			 << sizeToString(leg_volume->getSize()) << "" 
 			 << leg_volume->getFilesystem()
 			 << leg_volume->getType() 
 			 << "" << "";
@@ -347,7 +356,7 @@ void VGTree::setHiddenColumns()
 {
     KConfigSkeleton skeleton;
 
-    bool volume,      size,
+    bool volume,      size,      remaining,
          filesystem,  type,
          stripes,     stripesize,
          snapmove,    state,
@@ -357,6 +366,7 @@ void VGTree::setHiddenColumns()
     skeleton.setCurrentGroup("VolumeTreeColumns");
     skeleton.addItemBool( "volume",      volume );
     skeleton.addItemBool( "size",        size );
+    skeleton.addItemBool( "remaining",   remaining );
     skeleton.addItemBool( "filesystem",  filesystem );
     skeleton.addItemBool( "type",        type );
     skeleton.addItemBool( "stripes",     stripes );
@@ -369,15 +379,16 @@ void VGTree::setHiddenColumns()
 
     setColumnHidden( 0, !volume );
     setColumnHidden( 1, !size );
-    setColumnHidden( 2, !filesystem );
-    setColumnHidden( 3, !type );
-    setColumnHidden( 4, !stripes );
-    setColumnHidden( 5, !stripesize );
-    setColumnHidden( 6, !snapmove );
-    setColumnHidden( 7, !state );
-    setColumnHidden( 8, !access );
-    setColumnHidden( 9, !tags );
-    setColumnHidden( 10, !mountpoints );
+    setColumnHidden( 2, !remaining );
+    setColumnHidden( 3, !filesystem );
+    setColumnHidden( 4, !type );
+    setColumnHidden( 5, !stripes );
+    setColumnHidden( 6, !stripesize );
+    setColumnHidden( 7, !snapmove );
+    setColumnHidden( 8, !state );
+    setColumnHidden( 9, !access );
+    setColumnHidden( 10, !tags );
+    setColumnHidden( 11, !mountpoints );
 }
 
 void VGTree::adjustColumnWidth(QTreeWidgetItem *)
