@@ -36,10 +36,10 @@ const int BUFF_LEN = 2000;   // Enough?
 
 
 MountDialog::MountDialog(QString deviceToMount, QString filesystemType, bool writable, QWidget *parent) : 
-KDialog(parent),
-m_device_to_mount(deviceToMount),
-m_filesystem_type(filesystemType),
-m_is_writable(writable)
+    KDialog(parent),
+    m_device_to_mount(deviceToMount),
+    m_filesystem_type(filesystemType),
+    m_is_writable(writable)
 {
 
     KTabWidget *dialog_body = new KTabWidget(this);
@@ -238,7 +238,7 @@ QWidget* MountDialog::optionsTab()
     options_atime_layout->addWidget(atime_box);
 
     QGroupBox *filesystem_options_box = new QGroupBox( i18n("Filesystem specific  mount options") );
-    m_filesystem_edit = new KLineEdit();
+    m_fs_specific_edit = new KLineEdit();
     QLabel *additional_options_label = new QLabel( i18n("comma separated list of additional mount options") );
     
     options_layout->addWidget(filesystem_options_box);
@@ -246,7 +246,7 @@ QWidget* MountDialog::optionsTab()
     
     filesystem_options_box->setLayout(filesystem_options_box_layout);
     filesystem_options_box_layout->addWidget(additional_options_label);
-    filesystem_options_box_layout->addWidget(m_filesystem_edit);
+    filesystem_options_box_layout->addWidget(m_fs_specific_edit);
 
     toggleAdditionalOptions(true);
 
@@ -421,8 +421,8 @@ void MountDialog::mountFilesystem()
     if( user_xattr_check->isChecked() )
 	additional_options.append("user_xattr");
 
-    if( m_filesystem_edit->text().trimmed() != "" )
-	additional_options.append( (m_filesystem_edit->text()).trimmed() );
+    if( m_fs_specific_edit->text().trimmed() != "" )
+	additional_options.append( (m_fs_specific_edit->text()).trimmed() );
     
     all_options = standard_options.join(",");
 
@@ -444,24 +444,22 @@ void MountDialog::mountFilesystem()
 
 }
 
-void MountDialog::toggleOKButton(const QString)
+void MountDialog::toggleOKButton()
 {
-    if ( (specify_button->isChecked() && m_filesystem_edit->text() == "" ) ||
-	 m_mount_point_edit->text() == "")
-
+    if ( (specify_button->isChecked() && m_filesystem_edit->text() == "" ) || m_mount_point_edit->text() == "")
     	(button(KDialog::Ok))->setEnabled(false);
     else
     	(button(KDialog::Ok))->setEnabled(true);
 }
 
+void MountDialog::toggleOKButton(const QString)
+{
+    toggleOKButton();
+}
+
 void MountDialog::toggleOKButton(bool)
 {
-    if ( (specify_button->isChecked() && m_filesystem_edit->text() == "" ) ||
-	 m_mount_point_edit->text() == "")
-
-    	(button(KDialog::Ok))->setEnabled(false);
-    else
-    	(button(KDialog::Ok))->setEnabled(true);
+    toggleOKButton();
 }
 
 void MountDialog::toggleAdditionalOptions(bool)
