@@ -113,8 +113,10 @@ StoragePartition::StoragePartition(PedPartition *part,
             m_is_mountable = true;
     }
 
-    if(m_fs_type == "ext2" || m_fs_type == "ext3" || m_fs_type == "ext4" ){
-        FSData *fs_data = get_fs_data( m_partition_path );
+    QString mp;
+    if(m_is_mounted){
+        mp = m_device_mount_info_list[0]->getMountPoint();
+        FSData *fs_data = get_fs_data(mp);
         m_block_size = fs_data->block_size;
         m_fs_size = fs_data->size;
         m_fs_used = fs_data->used;

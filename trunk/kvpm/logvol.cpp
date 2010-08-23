@@ -212,19 +212,6 @@ LogVol::LogVol(QStringList lvDataList, MountInformationList *mountInformationLis
     else
         m_lv_fs = fsprobe_getfstype2( "/dev/" + m_vg_name + "/" + m_lv_name );
  
-    if(m_lv_fs == "ext2" || m_lv_fs == "ext3" || m_lv_fs == "ext4" ){
-        FSData *fs_data = get_fs_data( "/dev/" + m_vg_name + "/" + m_lv_name );
-        m_block_size = fs_data->block_size;
-        m_fs_size = fs_data->size;
-        m_fs_used = fs_data->used;
-        delete fs_data;
-    }
-    else{
-        m_block_size = -1;
-        m_fs_size = -1;
-        m_fs_used = -1;
-    }
-
     m_size         = (lvdata.section('|',3,3)).toLongLong();
     m_snap_percent = 0.0;
 
@@ -285,6 +272,21 @@ LogVol::LogVol(QStringList lvDataList, MountInformationList *mountInformationLis
     m_mount_info_list.clear();
 
     m_mounted = !m_mount_points.isEmpty();
+
+    if(m_mounted){
+        FSData *fs_data = get_fs_data(m_mount_points[0]);
+        m_block_size = fs_data->block_size;
+        m_fs_size = fs_data->size;
+        m_fs_used = fs_data->used;
+        delete fs_data;
+    }
+    else{
+        m_block_size = -1;
+        m_fs_size = -1;
+        m_fs_used = -1;
+    }
+
+
     
     for(int x = 0; x < m_seg_total ; x++)
 	m_segments.append(processSegments(lvDataList[x]));
