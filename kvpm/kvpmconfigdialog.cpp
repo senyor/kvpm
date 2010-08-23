@@ -114,6 +114,7 @@ void KvpmConfigDialog::buildGeneralPage()
     m_skeleton->setCurrentGroup("VolumeTreeColumns");
     m_skeleton->addItemBool( "volume",      m_volume_column );
     m_skeleton->addItemBool( "size",        m_size_column );
+    m_skeleton->addItemBool( "remaining",   m_remaining_column );
     m_skeleton->addItemBool( "type",        m_type_column );
     m_skeleton->addItemBool( "filesystem",  m_filesystem_column );
     m_skeleton->addItemBool( "stripes",     m_stripes_column );
@@ -126,6 +127,7 @@ void KvpmConfigDialog::buildGeneralPage()
 
     m_volume_check      = new QCheckBox("Volume name");
     m_size_check        = new QCheckBox("Size");
+    m_remaining_check   = new QCheckBox("Remaining space");
     m_type_check        = new QCheckBox("Volume type");
     m_filesystem_check  = new QCheckBox("Filesystem type");
     m_stripes_check     = new QCheckBox("Stripe count");
@@ -138,6 +140,7 @@ void KvpmConfigDialog::buildGeneralPage()
 
     m_volume_check->setChecked(m_volume_column);
     m_size_check->setChecked(m_size_column);
+    m_remaining_check->setChecked(m_remaining_column);
     m_type_check->setChecked(m_type_column);
     m_filesystem_check->setChecked(m_filesystem_column);
     m_stripes_check->setChecked(m_stripes_column);
@@ -150,6 +153,7 @@ void KvpmConfigDialog::buildGeneralPage()
 
     volume_layout->addWidget(m_volume_check);
     volume_layout->addWidget(m_size_check);
+    volume_layout->addWidget(m_remaining_check);
     volume_layout->addWidget(m_type_check);
     volume_layout->addWidget(m_filesystem_check);
     volume_layout->addWidget(m_stripes_check);
@@ -339,6 +343,7 @@ void KvpmConfigDialog::updateSettings()
 
     m_volume_column      = m_volume_check->isChecked();
     m_size_column        = m_size_check->isChecked();
+    m_remaining_column   = m_remaining_check->isChecked();
     m_type_column        = m_type_check->isChecked();
     m_filesystem_column  = m_filesystem_check->isChecked();
     m_stripes_column     = m_stripes_check->isChecked();
@@ -395,6 +400,7 @@ void KvpmConfigDialog::updateWidgetsDefault()
 
     m_volume_check->setChecked(true);
     m_size_check->setChecked(true);
+    m_remaining_check->setChecked(true);
     m_type_check->setChecked(true);
     m_filesystem_check->setChecked(true);
     m_stripes_check->setChecked(false);

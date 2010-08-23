@@ -69,14 +69,14 @@ Q_OBJECT
 
     QCheckBox *m_device_check,      *m_volume_check,
               *m_partition_check,   *m_size_check,
-              *m_capacity_check,    *m_type_check,
+              *m_capacity_check,    *m_remaining_check,
               *m_used_check,        *m_filesystem_check,
               *m_usage_check,       *m_stripes_check,
               *m_group_check,       *m_stripesize_check,
               *m_flags_check,       *m_snapmove_check,
               *m_mount_check,       *m_state_check,
               *m_tags_check,        *m_access_check,
-              *m_mountpoints_check;
+              *m_mountpoints_check, *m_type_check;
 
     bool m_device_column,      m_volume_column,
          m_partition_column,   m_size_column,
@@ -87,7 +87,7 @@ Q_OBJECT
          m_flags_column,       m_snapmove_column,
          m_mount_column,       m_state_column,
          m_tags_column,        m_access_column,
-         m_mountpoints_column;
+         m_mountpoints_column, m_remaining_column;
 
     void buildGeneralPage();
     void buildColorsPage();
