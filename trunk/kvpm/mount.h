@@ -38,7 +38,7 @@ Q_OBJECT
             m_device_to_mount,            // The complete device path
             m_filesystem_type;            // ext3, reiserfs, vfat etc.
  
-    QRadioButton *ext2_button,      *ext3_button,    *ext4_button,       *reiserfs3_button, 
+    QRadioButton *ext2_button,      *ext3_button,    *ext4_button,       *reiserfs3_button, *btrfs_button,
                  *reiserfs4_button, *xfs_button,     *jfs_button,        *vfat_button, 
 	         *specify_button,   *udf_button,     *iso9660_button,    *hfs_button,
 	         *atime_button,     *noatime_button, *nodiratime_button, *relatime_button,
