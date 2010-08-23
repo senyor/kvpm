@@ -67,6 +67,7 @@ Q_OBJECT
     void mountFilesystem();
     void toggleOKButton(const QString);
     void toggleOKButton(bool);
+    void toggleOKButton();
     void toggleAdditionalOptions(bool);
      
 };
