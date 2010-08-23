@@ -24,10 +24,11 @@
 #include "storagepartition.h"
 #include "vgcreate.h"
 #include "masterlist.h"
+#include "misc.h"
 
 extern MasterList *master_list;
 
-bool extend_vg(QString volumeGroupName, QString physicalVolumeName)
+bool extend_vg(QString volumeGroupName, QString physicalVolumeName, long long size)
 {
     QString message;
     QStringList args;
@@ -35,7 +36,7 @@ bool extend_vg(QString volumeGroupName, QString physicalVolumeName)
     vg_t vg_dm;
     
     message = i18n("Do you want to extend volume group: <b>%1</b> with "
-		   "physical volume: <b>%2</b>").arg(volumeGroupName).arg(physicalVolumeName);
+		   "physical volume: <b>%2</b> (size: %3)").arg(volumeGroupName).arg(physicalVolumeName).arg(sizeToString(size));
 
     if( KMessageBox::questionYesNo(0, message) == 3 ){     // 3 is the "yes" button
         if( (lvm = lvm_init(NULL)) ){

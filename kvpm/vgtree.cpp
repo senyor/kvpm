@@ -34,7 +34,7 @@ VGTree::VGTree(VolGroup *VolumeGroup) : QTreeWidget(), m_vg(VolumeGroup)
     setColumnCount(9);
 
     header_labels << "Volume" << "Size" << "Filesystem" << "type" << "Stripes" << "Stripe size" 
-		  << "Snap/Move" << "State" << "Access" << "Tags" << "Mount points";
+		  << "Snap/Move" << "State" << "Access" << "Tags" << "Mount points" << "Remaining";
 
     setHeaderLabels(header_labels);
 }
@@ -104,6 +104,10 @@ void VGTree::loadData()
 		    lv_data << "r/o";
 
 		lv_data << lv->getTags().join(",") << lv->getMountPoints().join(",");
+                if( lv->getFilesystemSize() > -1 &&  lv->getFilesystemUsed() > -1 )
+                    lv_data << sizeToString(lv->getFilesystemSize() - lv->getFilesystemUsed());
+                else
+                    lv_data << "";
 
 		lv_item = new QTreeWidgetItem((QTreeWidgetItem *)0, lv_data);
 		m_lv_tree_items.append(lv_item);

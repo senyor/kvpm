@@ -22,7 +22,7 @@
 #include "misc.h"
 #include "volgroup.h"
 
-bool extend_vg(QString volumeGroupName, QString physicalVolumeName);
+bool extend_vg(QString volumeGroupName, QString physicalVolumeName, long long size);
 
 bool extend_vg(VolGroup *volumeGroup);
 
