@@ -48,6 +48,8 @@ void VGTree::loadData()
     bool current_is_expanded = false;              // Is that current item expanded
     QStringList lv_data;
     QString current_lv_name;
+    long long fs_remaining;       // remaining space on fs -- if known
+    int fs_percent;               // percentage of space remaining
 
     disconnect(this, SIGNAL(itemExpanded(QTreeWidgetItem *)), 
 	    this, SLOT(adjustColumnWidth(QTreeWidgetItem *)));
@@ -104,8 +106,11 @@ void VGTree::loadData()
 		    lv_data << "r/o";
 
 		lv_data << lv->getTags().join(",") << lv->getMountPoints().join(",");
-                if( lv->getFilesystemSize() > -1 &&  lv->getFilesystemUsed() > -1 )
-                    lv_data << sizeToString(lv->getFilesystemSize() - lv->getFilesystemUsed());
+                if( lv->getFilesystemSize() > -1 &&  lv->getFilesystemUsed() > -1 ){
+                    fs_remaining = lv->getFilesystemSize() - lv->getFilesystemUsed();
+                    fs_percent = qRound( ((double)fs_remaining / (double)lv->getFilesystemSize()) * 100 );
+                    lv_data << QString(sizeToString(fs_remaining) + " (%%1)").arg(fs_percent);
+                }
                 else
                     lv_data << "";
 
