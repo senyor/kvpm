@@ -78,11 +78,12 @@ QWidget* MountDialog::filesystemBox()
     ext2_button      = new QRadioButton("Ext2", this);
     ext3_button      = new QRadioButton("Ext3", this);
     ext4_button      = new QRadioButton("Ext4", this);
+    btrfs_button     = new QRadioButton("Btrfs",this);
     reiserfs3_button = new QRadioButton("Reiserfs Ver. 3", this);
     reiserfs4_button = new QRadioButton("Reiserfs Ver. 4", this);
     xfs_button       = new QRadioButton("Xfs", this);
     jfs_button       = new QRadioButton("Jfs", this);
-    vfat_button      = new QRadioButton("vfat", this);
+    vfat_button      = new QRadioButton("vfat",this);
     udf_button       = new QRadioButton("udf", this);
     iso9660_button   = new QRadioButton("iso9660", this);
     hfs_button       = new QRadioButton("hfs", this);
@@ -95,6 +96,8 @@ QWidget* MountDialog::filesystemBox()
 	ext3_button->setChecked(true);
     else if( m_filesystem_type == "ext4" )
 	ext4_button->setChecked(true);
+    else if( m_filesystem_type == "btrfs" )
+	btrfs_button->setChecked(true);
     else if( m_filesystem_type == "reiserfs" )
 	reiserfs3_button->setChecked(true);
     else if( m_filesystem_type == "reiser4" )
@@ -122,7 +125,7 @@ QWidget* MountDialog::filesystemBox()
     layout_left->addWidget(ext2_button);
     layout_left->addWidget(ext3_button);
     layout_left->addWidget(ext4_button);
-    layout_left->addWidget(vfat_button);
+    layout_left->addWidget(btrfs_button);
     layout_center->addWidget(reiserfs3_button);
     layout_center->addWidget(reiserfs4_button);
     layout_center->addWidget(xfs_button);
@@ -130,6 +133,7 @@ QWidget* MountDialog::filesystemBox()
     layout_right->addWidget(udf_button);
     layout_right->addWidget(iso9660_button);
     layout_right->addWidget(hfs_button);
+    layout_right->addWidget(vfat_button);
     
     lower_layout->addWidget(specify_button);
     lower_layout->addWidget(m_filesystem_edit);
@@ -338,6 +342,8 @@ void MountDialog::mountFilesystem()
 	m_filesystem_type = "ext3";
     else if( ext4_button->isChecked() )
 	m_filesystem_type = "ext4";
+    else if( btrfs_button->isChecked() )
+	m_filesystem_type = "btrfs";
     else if( reiserfs3_button->isChecked() )
 	m_filesystem_type = "reiserfs";
     else if( reiserfs4_button->isChecked() )
