@@ -276,8 +276,8 @@ LogVol::LogVol(QStringList lvDataList, MountInformationList *mountInformationLis
     if(m_mounted){
         FSData *fs_data = get_fs_data(m_mount_points[0]);
         m_block_size = fs_data->block_size;
-        m_fs_size = fs_data->size;
-        m_fs_used = fs_data->used;
+        m_fs_size = (long long)fs_data->size * m_block_size;
+        m_fs_used = (long long)fs_data->used * m_block_size;
         delete fs_data;
     }
     else{
@@ -286,8 +286,6 @@ LogVol::LogVol(QStringList lvDataList, MountInformationList *mountInformationLis
         m_fs_used = -1;
     }
 
-
-    
     for(int x = 0; x < m_seg_total ; x++)
 	m_segments.append(processSegments(lvDataList[x]));
 
