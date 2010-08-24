@@ -90,7 +90,7 @@ MkfsDialog::MkfsDialog(LogVol *logicalVolume, QWidget *parent) : KDialog(parent)
 {
     m_path = QString( "/dev/" + logicalVolume->getFullName() );
 
-    m_stride_size = logicalVolume->getSegmentStripeSize( 0 );   // 0 if not striped
+    m_stride_size = 1; // logicalVolume->getSegmentStripeSize( 0 ); <-- must convert to blocks!
     m_stride_count = logicalVolume->getSegmentStripes( 0 );
 
     buildDialog();
@@ -100,7 +100,7 @@ MkfsDialog::MkfsDialog(LogVol *logicalVolume, QWidget *parent) : KDialog(parent)
 MkfsDialog::MkfsDialog(StoragePartition *partition, QWidget *parent) : KDialog(parent)
 {
     m_path = partition->getName();
-    m_stride_size = 0;
+    m_stride_size = 1;
     m_stride_count = 1;
 
     buildDialog();
@@ -154,11 +154,22 @@ void MkfsDialog::buildDialog()
     ext4->setChecked(true);
 
     QVBoxLayout *advanced_layout = new QVBoxLayout;
+    QHBoxLayout *reserved_layout = new QHBoxLayout;
     QHBoxLayout *block_layout  = new QHBoxLayout;
     QHBoxLayout *name_layout   = new QHBoxLayout;
     QHBoxLayout *stride_layout = new QHBoxLayout;
     QHBoxLayout *count_layout  = new QHBoxLayout;
+    QHBoxLayout *inode_layout  = new QHBoxLayout;
     advanced_options->setLayout(advanced_layout);
+
+    reserved_layout->addWidget( new QLabel( i18n("Reserved space: ") ) );
+    m_reserved_spin = new QSpinBox;
+    m_reserved_spin->setRange(0, 100);
+    m_reserved_spin->setValue(5);
+    m_reserved_spin->setPrefix("%");
+    reserved_layout->addWidget(m_reserved_spin);
+    reserved_layout->addStretch();
+    advanced_layout->addLayout(reserved_layout);
 
     block_layout->addWidget( new QLabel( i18n("Block size: ") ) );
     m_block_combo = new KComboBox();
@@ -177,6 +188,15 @@ void MkfsDialog::buildDialog()
     name_layout->addWidget(m_volume_edit);
     name_layout->addStretch();
     advanced_layout->addLayout(name_layout);
+
+    m_inode_box = new QGroupBox( i18n("Inodes") );
+    m_inode_box->setCheckable(true);
+    m_inode_box->setChecked(false);
+    inode_layout->addWidget( new QLabel( i18n("Bytes / inode: ") ) );
+    m_inode_edit = new KLineEdit();
+    inode_layout->addWidget(m_inode_edit);
+    m_inode_box->setLayout(inode_layout);
+    advanced_layout->addWidget(m_inode_box);
 
     m_stripe_box = new QGroupBox( i18n("Striping") );
     m_stripe_box->setCheckable(true);
@@ -266,6 +286,28 @@ QStringList MkfsDialog::arguments()
 	qDebug() << "Reached the default else in mkfs.cpp. How did that happen?";
     }
     
+    if( (type == "ext2") || (type == "ext3") || (type == "ext4") ){
+        mkfs_options << "-m" << QString("%1").arg(m_reserved_spin->value());
+        if(m_block_combo->currentIndex() > 0){
+
+            if(m_block_combo->currentIndex() == 1)
+                mkfs_options << "-b" << "1024";
+            else if(m_block_combo->currentIndex() == 2)
+                mkfs_options << "-b" << "2048";
+            else
+                mkfs_options << "-b" << "4096";
+        } 
+
+        if(m_inode_box->isChecked())
+            mkfs_options << "-i" << m_inode_edit->text();
+
+        if(m_stripe_box->isChecked())
+            mkfs_options << "-E" << QString("stride=" + m_stride_edit->text() + ",stripe-width=" + m_count_edit->text());
+
+        if(m_volume_edit->text() != "")
+            mkfs_options << "-L" << m_volume_edit->text();
+    }
+
     if(type != "swap"){
 
 	arguments << "mkfs";
@@ -286,7 +328,6 @@ QStringList MkfsDialog::arguments()
 	arguments << "mkswap" 
 		  << m_path;
     }
-    
     return arguments;
 }
 
