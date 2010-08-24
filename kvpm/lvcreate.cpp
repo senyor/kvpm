@@ -550,15 +550,27 @@ void LVCreateDialog::setMaxSize(bool)
     m_max_size_label->setText( i18n("Maximum size: %1").arg(sizeToString( getLargestVolume() )));
     m_max_extents_label->setText( i18n("Maximum extents: %1").arg(free_extents) );
 
-    if( m_mirror_box->isChecked() && !m_stripe_box->isChecked() )
-        m_stripes_count_label->setText( i18n("(with %1 mirror legs)").arg(mirror_count) );
-    else if( !m_mirror_box->isChecked() && m_stripe_box->isChecked() )
-        m_stripes_count_label->setText( i18n("(with %1 stripes)").arg(stripe_count) );
-    else if( m_mirror_box->isChecked() && m_stripe_box->isChecked() )
-        m_stripes_count_label->setText( i18n("(with %1 mirrors and %2 stripes)").arg(mirror_count).arg(stripe_count) );
-    else
-        m_stripes_count_label->setText( i18n("(linear volume)") );
-    
+    if(!m_extend){
+        if( m_mirror_box->isChecked() && !m_stripe_box->isChecked() )
+            m_stripes_count_label->setText( i18n("(with %1 mirror legs)").arg(mirror_count) );
+        else if( !m_mirror_box->isChecked() && m_stripe_box->isChecked() )
+            m_stripes_count_label->setText( i18n("(with %1 stripes)").arg(stripe_count) );
+        else if( m_mirror_box->isChecked() && m_stripe_box->isChecked()  )
+            m_stripes_count_label->setText( i18n("(with %1 mirrors and %2 stripes)").arg(mirror_count).arg(stripe_count) );
+        else
+            m_stripes_count_label->setText( i18n("(linear volume)") );
+    }
+    else{
+        if( mirror_count > 1 && !m_stripe_box->isChecked() )
+            m_stripes_count_label->setText( i18n("(with %1 mirror legs)").arg(mirror_count) );
+        else if( mirror_count < 2 && m_stripe_box->isChecked() )
+            m_stripes_count_label->setText( i18n("(with %1 stripes)").arg(stripe_count) );
+        else if( mirror_count > 1 && m_stripe_box->isChecked() )
+            m_stripes_count_label->setText( i18n("(with %1 mirrors and %2 stripes)").arg(mirror_count).arg(stripe_count) );
+        else
+            m_stripes_count_label->setText( i18n("(linear volume)") );
+    }
+
     size_combo->setCurrentIndex(0);
     size_combo->setCurrentIndex(old_combo_index);
 
