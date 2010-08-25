@@ -87,7 +87,7 @@ Q_OBJECT
     bool movePartition();
     void resetDisplayGraphic();
     void setSizeLabels();
-    bool waitPartitionTableReload();
+    bool pedCommitAndWait(PedDisk *disk);
 
 public:
     PartitionMoveResizeDialog(StoragePartition *partition, QWidget *parent = 0);
