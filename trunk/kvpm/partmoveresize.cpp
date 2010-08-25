@@ -783,7 +783,7 @@ bool PartitionMoveResizeDialog::shrinkPartition(){
         return false;
     }
     else {
-        waitPartitionTableReload();
+        pedCommitAndWait(m_ped_disk);
 
         // This test only matters if we are also going to move the partition after shrinking
 
@@ -847,7 +847,7 @@ bool PartitionMoveResizeDialog::growPartition(){
         // Here we wait for linux and udev to re-read the partition table before doing anything else.
         // Otherwise the resize program will fail.
          
-        waitPartitionTableReload();
+        pedCommitAndWait(m_ped_disk);
 
         if( is_pv ){            
            if( pv_extend( ped_partition_get_path(m_current_part) ) )
@@ -992,7 +992,7 @@ bool PartitionMoveResizeDialog::movePartition(){
             return false;
         }
         else{
-            waitPartitionTableReload();
+            pedCommitAndWait(m_ped_disk);
             return true;
         }
     }
@@ -1002,9 +1002,14 @@ bool PartitionMoveResizeDialog::movePartition(){
    updated and waits until it has been. It quits after 30 seconds if nothing is
    happening. It won't work without udev. */
 
-bool PartitionMoveResizeDialog::waitPartitionTableReload(){
+bool PartitionMoveResizeDialog::pedCommitAndWait(PedDisk *disk){
 
     QStringList args;
+
+    if( ! ped_disk_commit(disk) ){
+        KMessageBox::error( 0, "Could not commit partition");
+        return false;
+    }
 
     args << "udevadm" << "settle";
     ProcessProgress wait_settle( args, i18n("Wating for udev..."), true);
