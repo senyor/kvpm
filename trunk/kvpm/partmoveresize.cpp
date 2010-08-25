@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2009 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2009, 2010 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -33,6 +33,7 @@
 #include "partmoveresize.h"
 #include "partaddgraphic.h"
 #include "physvol.h"
+#include "processprogress.h"
 #include "pvextend.h"
 #include "pvreduce.h"
 #include "misc.h"
@@ -269,7 +270,6 @@ PartitionMoveResizeDialog::PartitionMoveResizeDialog(StoragePartition *partition
 
 void PartitionMoveResizeDialog::commitPartition()
 {
-
     hide();
 
     bool grow   = false;
@@ -292,16 +292,22 @@ void PartitionMoveResizeDialog::commitPartition()
         }
     }
 
+    qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
+
     if( grow && move ){
-        if( movePartition() )
+        if( movePartition() ){
+            qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
             growPartition();
+        }
     }
     else if( grow ){
         growPartition();
     }
     else if( shrink && move ){
-        if( shrinkPartition() )
+        if( shrinkPartition() ){
+            qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
             movePartition();
+        }
     }
     else if( shrink ){
         shrinkPartition();
@@ -309,6 +315,8 @@ void PartitionMoveResizeDialog::commitPartition()
     else if( move ){
         movePartition();
     }
+
+    qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
 }
 
 void PartitionMoveResizeDialog::adjustSizeEdit(int percentage){
@@ -331,9 +339,7 @@ void PartitionMoveResizeDialog::adjustSizeEdit(int percentage){
         m_new_part_size = current_size;
 
     adjustSizeCombo( m_size_combo->currentIndex() );
-
 }
-
 
 void PartitionMoveResizeDialog::adjustSizeCombo(int index){
 
@@ -369,7 +375,6 @@ void PartitionMoveResizeDialog::adjustSizeCombo(int index){
     resetDisplayGraphic();
     resetOkButton();
 }
-
 
 void PartitionMoveResizeDialog::validateVolumeSize(QString size){
 
@@ -504,11 +509,9 @@ void PartitionMoveResizeDialog::adjustOffsetCombo(int index){
     }
 
     m_offset_validator->setTop( (double)valid_topd );
-
 }
 
 void PartitionMoveResizeDialog::validateOffsetSize(QString size){
-
     int x = 0;
     m_new_part_start = m_max_part_start;
         
@@ -517,8 +520,7 @@ void PartitionMoveResizeDialog::validateOffsetSize(QString size){
         if(! m_offset_combo->currentIndex() )
             m_new_part_start += size.toLongLong();
         else
-            m_new_part_start += convertSizeToSectors( m_offset_combo->currentIndex(), 
-                                                      size.toDouble() );
+            m_new_part_start += convertSizeToSectors( m_offset_combo->currentIndex(), size.toDouble() );
     }
     else
         m_new_part_start = m_current_part->geom.start;
@@ -555,10 +557,8 @@ void PartitionMoveResizeDialog::resetSizeGroup(bool on){
 }
 
 void PartitionMoveResizeDialog::resetPartition(){
-
     resetOffsetGroup(false);
     resetSizeGroup(false);
-
 }
 
 void PartitionMoveResizeDialog::setup(){
@@ -571,20 +571,21 @@ void PartitionMoveResizeDialog::setup(){
     PedDevice   *ped_device = m_ped_disk->dev;
     PedGeometry *ped_max_geometry  = NULL;
 
-    m_new_part_start  = (m_current_part->geom).start;
-    m_new_part_size   = (m_current_part->geom).length;
+    m_new_part_start = (m_current_part->geom).start;
+    m_new_part_size  = (m_current_part->geom).length;
 
     /* how big can it grow? */
-
     PedConstraint *constraint = ped_device_get_constraint(ped_device);
 
-    ped_max_geometry = ped_disk_get_max_partition_geometry( m_ped_disk, 
-                                                            m_current_part, 
-                                                            constraint );
+    ped_max_geometry = ped_disk_get_max_partition_geometry( m_ped_disk, m_current_part, constraint );
 
     m_max_part_start  = ped_max_geometry->start;
     m_max_part_end    = ped_max_geometry->end;
     m_ped_sector_size = ped_device->sector_size;
+
+    // ped_max_geometry may return a partition *smaller* than the one already existing!
+    if(m_max_part_start > (m_current_part->geom).start)
+        m_max_part_start = (m_current_part->geom).start;
 
     if( m_current_part->type & PED_PARTITION_LOGICAL )
         m_logical = true;
@@ -621,59 +622,81 @@ bool PartitionMoveResizeDialog::movefs(long long from_start,
 
     ped_device_open( device );
 
-    KProgressDialog *progress_dialog = new KProgressDialog(this, 
-                                                           i18n("progress"),
-                                                           i18n("moving filesystem...") );
+    KProgressDialog *progress_dialog = new KProgressDialog(this, i18n("progress"), i18n("moving filesystem...") );
     progress_dialog->setAllowCancel(false);
     progress_dialog->show();
     QProgressBar *progress_bar = progress_dialog->progressBar();
     progress_bar->setRange(0, blockcount);
+    int event_timer = 0;
+    qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
 
     if( to_start < from_start ){                       // moving left
         for( long long x = 0; x < blockcount  ; x++){
+            event_timer++;
+            if(event_timer > 5){
+                qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
+                event_timer = 0;
+            }
             if( ! ped_device_read( device, buff, from_start + (x * blocksize), blocksize) ){
+                progress_dialog->close();
                 KMessageBox::error( 0, "Move failed: could not read from device");
                 return false;
             }
             if( ! ped_device_write(device, buff, to_start   + (x * blocksize), blocksize) ){
+                progress_dialog->close();
                 KMessageBox::error( 0, "Move failed: could not write to device");
                 return false;
             }
             progress_bar->setValue( x );
         }
         if( ! ped_device_read(device,  buff, from_start + (blockcount * blocksize), extra) ){
+            progress_dialog->close();
             KMessageBox::error( 0, "Move failed: could not read from device");
             return false;
         }
         if( ! ped_device_write(device, buff, to_start   + (blockcount * blocksize), extra) ){
+            progress_dialog->close();
             KMessageBox::error( 0, "Move failed: could not write to device");
             return false;
         }
     }
     else{                                              // moving right
         if( ! ped_device_read(device,  buff, from_start + (blockcount * blocksize), extra) ){
+            progress_dialog->close();
             KMessageBox::error( 0, "Move failed: could not read from device");
             return false;
         }
         if( ! ped_device_write(device, buff, to_start   + (blockcount * blocksize), extra) ){
+            progress_dialog->close();
             KMessageBox::error( 0, "Move failed: could not write to device");
             return false;
         }
         for( long long x = blockcount - 1; x >= 0 ; x--){
+            event_timer++;
+            if(event_timer > 5){
+                qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
+                event_timer = 0;
+            }
             if( ! ped_device_read( device, buff, from_start + (x * blocksize), blocksize) ){
+                progress_dialog->close();
                 KMessageBox::error( 0, "Move failed: could not read from device");
                 return false;
             }
             if( ! ped_device_write(device, buff, to_start   + (x * blocksize), blocksize) ){
+                progress_dialog->close();
                 KMessageBox::error( 0, "Move failed: could not write to device");
                 return false;
             }
             progress_bar->setValue( blockcount - x );
         }
     }
+    progress_dialog->close();
 
+    qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
     ped_device_sync( device );
+    qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
     ped_device_close( device );
+    qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
 
     return true;
 }
@@ -760,7 +783,7 @@ bool PartitionMoveResizeDialog::shrinkPartition(){
         return false;
     }
     else {
-        waitPartitionTableReload( ped_partition_get_path(m_current_part), m_ped_disk);
+        waitPartitionTableReload();
 
         // This test only matters if we are also going to move the partition after shrinking
 
@@ -821,10 +844,10 @@ bool PartitionMoveResizeDialog::growPartition(){
         return false;
     }
     else {
-        // Here we wait for linux to re-read the partition table before doing anything else.
+        // Here we wait for linux and udev to re-read the partition table before doing anything else.
         // Otherwise the resize program will fail.
-            
-        waitPartitionTableReload( ped_partition_get_path(m_current_part), m_ped_disk);
+         
+        waitPartitionTableReload();
 
         if( is_pv ){            
            if( pv_extend( ped_partition_get_path(m_current_part) ) )
@@ -965,46 +988,28 @@ bool PartitionMoveResizeDialog::movePartition(){
         return false;
     }
     else {
-        if( ! movefs( old_start, current_start, old_size) ){
+        if( !movefs( old_start, current_start, old_size) ){
             return false;
         }
         else{
-            waitPartitionTableReload( ped_partition_get_path(m_current_part), m_ped_disk);
+            waitPartitionTableReload();
             return true;
         }
     }
 }
 
 /* This function polls the /dev directory to see if the partition table has been 
-   updated and waits until it has been. It quits after 10 seconds if nothing is
-   happening. It won't work without devfs. */
+   updated and waits until it has been. It quits after 30 seconds if nothing is
+   happening. It won't work without udev. */
 
-bool PartitionMoveResizeDialog::waitPartitionTableReload(char *partitionPath, PedDisk *disk){
+bool PartitionMoveResizeDialog::waitPartitionTableReload(){
 
-    struct stat status;
-    struct timespec request = {0, 100000000};  // 1 tenth of a second
+    QStringList args;
 
-    if( stat(partitionPath, &status) )
-        return false;
+    args << "udevadm" << "settle";
+    ProcessProgress wait_settle( args, i18n("Wating for udev..."), true);
 
-    time_t old_ctime = status.st_ctime;
-
-    if( ! ped_disk_commit(disk) ){
-        KMessageBox::error( 0, "Could not commit partition");
-        return false;
-    }
-
-    for( int x = 1 ; x < 100 ; x++ ){  // ten seconds max waiting
-
-        nanosleep(&request, NULL);
-
-        if( ! stat(partitionPath, &status) ){
-            if( old_ctime < status.st_ctime )
-                return true;
-        }
-    } 
-
-    return false;
+    return true;
 }
 
 

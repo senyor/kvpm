@@ -49,6 +49,7 @@ ExecutableFinder::ExecutableFinder(QObject *parent) : QObject(parent)
 	   << "pvs"
 	   << "resize2fs" 
 	   << "resize_reiserfs"
+           << "udevadm"
 	   << "vgchange"
 	   << "vgcreate"
 	   << "vgexport"
