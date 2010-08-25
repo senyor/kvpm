@@ -12,14 +12,6 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
-#include <sys/time.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/mount.h>
-#include <unistd.h>
-#include <errno.h>
-#include <string.h>
-#include <fcntl.h>
 
 #include <KLocale>
 #include <KMessageBox>
@@ -388,7 +380,6 @@ void PartitionMoveResizeDialog::validateVolumeSize(QString size){
             m_new_part_size = size.toLongLong();
         else
             m_new_part_size = convertSizeToSectors( size_combo_index, size.toDouble() );
-
     }
     else{
         m_new_part_size = 0;
@@ -526,7 +517,6 @@ void PartitionMoveResizeDialog::validateOffsetSize(QString size){
         m_new_part_start = m_current_part->geom.start;
 
     adjustSizeCombo( m_size_combo->currentIndex() );
-
 }
 
 /* if the offset group is unchecked then reset to original value */
@@ -549,7 +539,7 @@ void PartitionMoveResizeDialog::resetSizeGroup(bool on){
     const PedSector max_size     = 1 + m_max_part_end - m_max_part_start; 
     const PedSector current_size = m_current_part->geom.length;
 
-    if( ! on ){
+    if( !on ){
         m_size_spin->setValue( 100 * (long double)current_size / max_size ); 
         m_new_part_size = current_size;
         adjustSizeCombo( m_size_combo->currentIndex() );
@@ -563,7 +553,7 @@ void PartitionMoveResizeDialog::resetPartition(){
 
 void PartitionMoveResizeDialog::setup(){
 
-    QString fs =  m_old_storage_part->getFileSystem();
+    QString fs = m_old_storage_part->getFileSystem();
 
     m_current_part = m_old_storage_part->getPedPartition();
     m_ped_disk = m_current_part->disk;   
@@ -604,7 +594,6 @@ void PartitionMoveResizeDialog::setup(){
 
     if( m_min_shrink_size == 0 )                 // 0 means we can't shrink it 
         m_min_shrink_size = m_new_part_size;
-
 }
 
 bool PartitionMoveResizeDialog::movefs(long long from_start, 
@@ -779,7 +768,6 @@ bool PartitionMoveResizeDialog::shrinkPartition(){
                                                m_max_part_end );
 
     if( ! success ){  
-        KMessageBox::error( 0, "Could not shrink partition");
         return false;
     }
     else {
@@ -840,7 +828,6 @@ bool PartitionMoveResizeDialog::growPartition(){
                                            m_max_part_end );
 
     if( ! success ){  
-        KMessageBox::error( 0, "Could not grow partition");
         return false;
     }
     else {
@@ -864,7 +851,6 @@ bool PartitionMoveResizeDialog::growPartition(){
     }
 }
 
-
 void PartitionMoveResizeDialog::resetDisplayGraphic(){
    
     PedSector preceding_sectors = m_new_part_start - m_max_part_start;
@@ -876,19 +862,17 @@ void PartitionMoveResizeDialog::resetDisplayGraphic(){
     m_display_graphic->repaint();
 }
 
-
 void PartitionMoveResizeDialog::setOffsetSpinMinMax(){
 
     const PedSector max_sectors = 1 + m_max_part_end - m_max_part_start;
     int max;
 
-    if( ! m_size_group->isChecked() )
+    if( !m_size_group->isChecked() )
         max = qRound( (1.0 - ( (double)m_current_part->geom.length / max_sectors ) ) * 100);
     else
         max = qRound( (1.0 - ( (double)m_new_part_size / max_sectors ) ) * 100);
-    //        max = qRound( (1.0 - ( (double)m_min_shrink_size / max_sectors ) ) * 100);
 
-    m_offset_spin->setMaximum( max );
+    m_offset_spin->setMaximum(max);
     m_offset_spin->setMinimum(0);
 }
 
@@ -983,12 +967,11 @@ bool PartitionMoveResizeDialog::movePartition(){
 
     current_start = m_current_part->geom.start;
 
-    if( ! success ){  
-        KMessageBox::error( 0, "Could not move partition");
+    if( !success ){  
         return false;
     }
     else {
-        if( !movefs( old_start, current_start, old_size) ){
+        if( !movefs(old_start, current_start, old_size) ){
             return false;
         }
         else{
@@ -998,18 +981,14 @@ bool PartitionMoveResizeDialog::movePartition(){
     }
 }
 
-/* This function polls the /dev directory to see if the partition table has been 
-   updated and waits until it has been. It quits after 30 seconds if nothing is
-   happening. It won't work without udev. */
+/* The following function waits for udev to acknowledge the partion changes before exiting */
 
 bool PartitionMoveResizeDialog::pedCommitAndWait(PedDisk *disk){
 
     QStringList args;
 
-    if( ! ped_disk_commit(disk) ){
-        KMessageBox::error( 0, "Could not commit partition");
+    if( !ped_disk_commit(disk) )
         return false;
-    }
 
     args << "udevadm" << "settle";
     ProcessProgress wait_settle( args, i18n("Wating for udev..."), true);

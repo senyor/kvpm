@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2009 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2009, 2010 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -291,22 +291,14 @@ void PartitionAddDialog::commitPartition()
     else
         type = PED_PARTITION_LOGICAL ;
 
-
     PedPartition *ped_new_partition = ped_partition_new(m_ped_disk, 
 							type, 
 							0, 
 							first_sector, 
 							(first_sector + length) -1);
-    int error;  // error = 0 on failure
 
-    error = ped_disk_add_partition(m_ped_disk, ped_new_partition, m_ped_constraints);
-
-    if( error )
-        error = ped_disk_commit(m_ped_disk);
-
-    if( ! error )  
-        KMessageBox::error( 0, "Creation of partition failed");
-
+    if( ped_disk_add_partition(m_ped_disk, ped_new_partition, m_ped_constraints) )
+        ped_disk_commit(m_ped_disk);
 }
 
 void PartitionAddDialog::adjustSizeCombo(int index){
@@ -493,8 +485,6 @@ void PartitionAddDialog::adjustSizeEdit(int percentage){
 
 }
 
-
-
 /* if the excluded group is unchecked then zero the excluded sectors */
 
 void PartitionAddDialog::clearExcludedGroup(bool on){
@@ -529,5 +519,3 @@ void PartitionAddDialog::updatePartition(){
     m_display_graphic->repaint();
 
 }
-
-

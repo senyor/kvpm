@@ -12,10 +12,12 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
+
 #include <parted/parted.h>
 
 #include <KLocale>
 #include <KProgressDialog>
+#include <KMessageBox>
 
 #include <QtGui>
 
@@ -24,13 +26,17 @@
 #include "masterlist.h"
 #include "mountentry.h"
 #include "mountinfo.h"
+#include "pedexceptions.h"
 #include "physvol.h"
 #include "processprogress.h"
 #include "storagedevice.h"
 #include "volgroup.h"
 
+
 MasterList::MasterList() : QObject()
 {
+    ped_exception_set_handler(my_handler);
+
     rescan();
 }
 
