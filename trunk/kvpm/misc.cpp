@@ -48,6 +48,36 @@ QVariant NoMungeCheck::getData()
     return m_data;
 }
 
+NoMungeRadioButton::NoMungeRadioButton(const QString text, QWidget *parent) : QRadioButton(text, parent)
+{
+    m_unmunged_text = text;
+}
+
+QString NoMungeRadioButton::getAlternateText()
+{
+    return m_alternate_text;
+}
+
+QString NoMungeRadioButton::getUnmungedText()
+{
+    return m_unmunged_text;
+}
+
+void NoMungeRadioButton::setAlternateText(QString alternateText)
+{
+    m_alternate_text = alternateText;
+}
+
+void NoMungeRadioButton::setData(QVariant data)
+{
+    m_data = data;
+}
+
+QVariant NoMungeRadioButton::getData()
+{
+    return m_data;
+}
+
 
 /* The idea here is to not have numbers over three digits long
    before the decimal point. This will need to be worked on
