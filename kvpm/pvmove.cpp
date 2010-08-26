@@ -12,7 +12,7 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
-
+#include <KPushButton>
 #include <KMessageBox>
 #include <KLocale>
 #include <QtGui>
@@ -92,14 +92,14 @@ PVMoveDialog::PVMoveDialog(PhysVol *physicalVolume, QWidget *parent) : KDialog(p
 
     PhysVol  *pv = physicalVolume;
     VolGroup *vg = pv->getVolGroup();
-    m_destination_pvs = vg->getPhysicalVolumes();
+    m_target_pvs = vg->getPhysicalVolumes();
     
     move_lv = false;
     m_source_pvs.append(pv);
 
-    for(int x = m_destination_pvs.size() - 1 ; x >= 0; x--)
-	if(m_destination_pvs[x]->getDeviceName() == m_source_pvs[0]->getDeviceName())
-	    m_destination_pvs.removeAt(x);
+    for(int x = m_target_pvs.size() - 1 ; x >= 0; x--)
+	if(m_target_pvs[x]->getDeviceName() == m_source_pvs[0]->getDeviceName())
+	    m_target_pvs.removeAt(x);
 
     buildDialog();
 }
@@ -115,7 +115,7 @@ PVMoveDialog::PVMoveDialog(LogVol *logicalVolume, QWidget *parent) :
     int lv_count;
 
     move_lv = true;
-    m_destination_pvs = m_lv->getVolumeGroup()->getPhysicalVolumes();
+    m_target_pvs = m_lv->getVolumeGroup()->getPhysicalVolumes();
 
     // Turns out mirrors don't work with pv move so the following isn't needed yet.
 
@@ -147,7 +147,6 @@ PVMoveDialog::PVMoveDialog(LogVol *logicalVolume, QWidget *parent) :
                         physical_volume_paths.removeAt(x);
                 } 
             }
-
         }
 
         for(int x = 0; x < physical_volume_paths.size(); x++)
@@ -164,7 +163,7 @@ PVMoveDialog::PVMoveDialog(LogVol *logicalVolume, QWidget *parent) :
 /* If there is only on physical volume in the group then
    a pv move will hve no place to go */
 
-    if(m_destination_pvs.size() < 2){
+    if(m_target_pvs.size() < 2){
 	KMessageBox::error(this, 
 			   i18n("Only one physical volume is "
 				"assigned to this volume group. "
@@ -180,9 +179,9 @@ PVMoveDialog::PVMoveDialog(LogVol *logicalVolume, QWidget *parent) :
    then we eliminate it from the possible destinations pv list completely. */
 
     if(m_source_pvs.size() == 1){
-	for(int x = (m_destination_pvs.size() - 1); x >= 0; x--){
-	    if( m_destination_pvs[x] == m_source_pvs[0] )
-		m_destination_pvs.removeAt(x);
+	for(int x = (m_target_pvs.size() - 1); x >= 0; x--){
+	    if( m_target_pvs[x] == m_source_pvs[0] )
+		m_target_pvs.removeAt(x);
 	}
     }
 
@@ -192,9 +191,8 @@ PVMoveDialog::PVMoveDialog(LogVol *logicalVolume, QWidget *parent) :
 void PVMoveDialog::buildDialog()
 {
     QLabel *label;
-    QRadioButton *radio_button;
+    NoMungeRadioButton *radio_button;
     NoMungeCheck *check_box;
-    long long pv_free_space;
     
     setWindowTitle( i18n("Move Physical Volume Extents") );
     QWidget *dialog_body = new QWidget(this);
@@ -207,33 +205,32 @@ void PVMoveDialog::buildDialog()
 	layout->addWidget( new QLabel("<b>" + m_lv->getFullName() + "</b>") );
     }
 
-    QGroupBox *radio_group = new QGroupBox( i18n("Source Physical Volume") );
-    QHBoxLayout *radio_group_layout = new QHBoxLayout();
-    radio_group->setLayout(radio_group_layout);
+    QGroupBox *radio_group = new QGroupBox( i18n("Source Physical Volumes") );
+    QGridLayout *radio_layout = new QGridLayout();
+    radio_group->setLayout(radio_layout);
     layout->addWidget(radio_group);
-    QVBoxLayout *radio_button_layout = new QVBoxLayout();
-    QVBoxLayout *radio_label_layout  = new QVBoxLayout();
-    radio_group_layout->addLayout(radio_button_layout);
-    radio_group_layout->addLayout(radio_label_layout);
-
-    if( m_source_pvs.size() > 1){
+    int radio_count = m_source_pvs.size();
+    if( radio_count > 1){
 	for(int x = 0; x < m_source_pvs.size(); x++){
-
-	    radio_button = new QRadioButton( m_source_pvs[x]->getDeviceName() );
-
-	    if( !x )
-		radio_button->setChecked(true);
-
-	    radio_button_layout->addWidget(radio_button);
-	    radio_buttons.append(radio_button);
 
 	    if(move_lv)
 	        m_pv_used_space = m_lv->getSpaceOnPhysicalVolume(m_source_pvs[x]->getDeviceName());
 	    else
 	        m_pv_used_space = m_source_pvs[x]->getSize() - m_source_pvs[x]->getUnused();
 
-	    label = new QLabel( i18n("Used space: %1").arg(sizeToString( m_pv_used_space ) ));
-	    radio_label_layout->addWidget(label);
+	    radio_button = new NoMungeRadioButton( m_source_pvs[x]->getDeviceName() + "  " + sizeToString(m_pv_used_space));
+            radio_button->setAlternateText( m_source_pvs[x]->getDeviceName() );
+	    if( !x )
+		radio_button->setChecked(true);
+
+            if(radio_count < 11 )
+                radio_layout->addWidget(radio_button, x % 5, x / 5);
+            else if (radio_count % 3 == 0)
+                radio_layout->addWidget(radio_button, x % (radio_count / 3), x / (radio_count / 3));
+            else
+                radio_layout->addWidget(radio_button, x % ( (radio_count + 2) / 3), x / ( (radio_count + 2) / 3));
+
+	    m_radio_buttons.append(radio_button);
 	    
 	    connect(radio_button, SIGNAL(toggled(bool)), 
 		    this, SLOT(disableDestination(bool)));
@@ -241,7 +238,7 @@ void PVMoveDialog::buildDialog()
     }
     else{
 
- 	radio_button_layout->addWidget( new QLabel( m_source_pvs[0]->getDeviceName() ) );
+ 	radio_layout->addWidget( new QLabel( m_source_pvs[0]->getDeviceName() ) );
 
 	if(move_lv)
 	    m_pv_used_space = m_lv->getSpaceOnPhysicalVolume(m_source_pvs[0]->getDeviceName());
@@ -249,48 +246,47 @@ void PVMoveDialog::buildDialog()
 	    m_pv_used_space = m_source_pvs[0]->getSize() - m_source_pvs[0]->getUnused();
     
 	label = new QLabel("Used space: " + sizeToString( m_pv_used_space ) );
-	radio_label_layout->addWidget(label);
+	radio_layout->addWidget(label);
     }
 
     QGroupBox *check_group = new QGroupBox( i18n("Destination Physical Volumes") );
-    QVBoxLayout *check_layout = new QVBoxLayout();
+    QGridLayout *check_layout = new QGridLayout();
     check_group->setLayout(check_layout);
     layout->addWidget(check_group);
-    check_box_any = new QCheckBox( i18n("Any available volume") );
-    check_layout->addWidget(check_box_any);
-    check_layout->addSpacing(5);
 
-    QHBoxLayout *check_layout_lower = new QHBoxLayout();
-    check_layout->addLayout(check_layout_lower);
+    int check_count = m_target_pvs.size();
+    for (int x = 0; x < check_count; x++){
 
-    QVBoxLayout *check_layout_left  = new QVBoxLayout();
-    QVBoxLayout *check_layout_right = new QVBoxLayout();
-    check_layout_lower->addLayout(check_layout_left);
-    check_layout_lower->addLayout(check_layout_right);
-
-    int destination_pv_count = m_destination_pvs.size();
-    for (int x = 0; x < destination_pv_count; x++){
-
-	check_box = new NoMungeCheck( m_destination_pvs[x]->getDeviceName() );
+	check_box = new NoMungeCheck( m_target_pvs[x]->getDeviceName() + "  " + sizeToString(m_target_pvs[x]->getUnused()));
 	check_box->setEnabled(false);
-	check_layout_left->addWidget(check_box);
-	pv_free_space = m_destination_pvs[x]->getUnused();
-	check_layout_right->addWidget(new QLabel( i18n("Free space: %1").arg(sizeToString( pv_free_space ))));
+        check_box->setAlternateText( m_target_pvs[x]->getDeviceName() );
 
-	check_boxes.append(check_box);
+        if(check_count < 11 )
+            check_layout->addWidget(check_box, x % 5, x / 5);
+        else if (check_count % 3 == 0)
+            check_layout->addWidget(check_box, x % (check_count / 3), x / (check_count / 3));
+        else
+            check_layout->addWidget(check_box, x % ( (check_count + 2) / 3), x / ( (check_count + 2) / 3));
+
+	m_check_boxes.append(check_box);
 
 	connect(check_box, SIGNAL(toggled(bool)), 
 		this, SLOT(calculateSpace(bool)));
     }
 
-    check_layout->addSpacing(5);
+    QHBoxLayout *button_layout = new QHBoxLayout();
+    KPushButton *all_button = new KPushButton( i18n("Select all") );
+    KPushButton *none_button = new KPushButton( i18n("Select none") );
     free_space_total_label = new QLabel();
-    check_layout->addWidget(free_space_total_label);
+    check_layout->addWidget(free_space_total_label, check_layout->rowCount(),0, 1, -1);
+    check_layout->addLayout(button_layout, check_layout->rowCount(),0, 1, -1);
+    button_layout->addWidget(all_button);
+    button_layout->addWidget(none_button);
+    connect(all_button,  SIGNAL(clicked(bool)), this, SLOT(selectAll()));
+    connect(none_button, SIGNAL(clicked(bool)), this, SLOT(selectNone()));
 
-    connect(check_box_any, SIGNAL(toggled(bool)), 
-	    this, SLOT(checkBoxEnable(bool)));
-
-    check_box_any->setChecked(true);
+    disableDestination(true);
+    selectAll();
 }
 
 void PVMoveDialog::calculateSpace(bool)
@@ -299,17 +295,17 @@ void PVMoveDialog::calculateSpace(bool)
     long long needed_space_total = 0;
     QString device_name;
     
-    for(int x = 0; x < check_boxes.size(); x++){
-	if(check_boxes[x]->isChecked())
-	    free_space_total += m_destination_pvs[x]->getUnused();
+    for(int x = 0; x < m_check_boxes.size(); x++){
+	if(m_check_boxes[x]->isChecked())
+	    free_space_total += m_target_pvs[x]->getUnused();
     }
     
     free_space_total_label->setText( i18n("Selected space total: %1").arg(sizeToString(free_space_total)));
 
     if(move_lv){
-	if(radio_buttons.size() > 1){
-	    for(int x = 0; x < radio_buttons.size(); x++){
-		if(radio_buttons[x]->isChecked()){
+	if(m_radio_buttons.size() > 1){
+	    for(int x = 0; x < m_radio_buttons.size(); x++){
+		if(m_radio_buttons[x]->isChecked()){
 		    device_name = m_source_pvs[x]->getDeviceName();
 		    needed_space_total = m_lv->getSpaceOnPhysicalVolume( device_name );
 		}
@@ -332,46 +328,52 @@ void PVMoveDialog::calculateSpace(bool)
 void PVMoveDialog::checkBoxEnable(bool checked)
 {
     if(checked){
-	for(int x = 0; x < check_boxes.size(); x++){
-	    check_boxes[x]->setChecked(true);
-	    check_boxes[x]->setEnabled(false);
+	for(int x = 0; x < m_check_boxes.size(); x++){
+	    m_check_boxes[x]->setChecked(true);
+	    m_check_boxes[x]->setEnabled(false);
 	}
     }
     else{
-	for(int x = 0; x < check_boxes.size(); x++)
-	    check_boxes[x]->setEnabled(true);
+	for(int x = 0; x < m_check_boxes.size(); x++)
+	    m_check_boxes[x]->setEnabled(true);
     }
     
     disableDestination(true);
+}
+
+void PVMoveDialog::selectAll()
+{
+    for(int x = 0; x < m_check_boxes.size(); x++){
+        if(m_check_boxes[x]->isEnabled())
+            m_check_boxes[x]->setChecked(true);
+    }
+}
+
+void PVMoveDialog::selectNone()
+{
+    for(int x = 0; x < m_check_boxes.size(); x++){
+        if(m_check_boxes[x]->isEnabled())
+            m_check_boxes[x]->setChecked(false);
+    }
 }
 
 void PVMoveDialog::disableDestination(bool)
 {
     QString source_pv;
     
-    for(int x = 0; x < radio_buttons.size(); x++){
-	if(radio_buttons[x]->isChecked())
+    for(int x = 0; x < m_radio_buttons.size(); x++){
+	if(m_radio_buttons[x]->isChecked())
 	    source_pv = m_source_pvs[x]->getDeviceName();
     }
 
-    if(check_box_any->isChecked()){
-	for(int x = 0; x < check_boxes.size(); x++){
-	    check_boxes[x]->setEnabled(false);
-	    check_boxes[x]->setChecked(true);
-	    if( source_pv == m_destination_pvs[x]->getDeviceName() )
-		check_boxes[x]->setChecked(false);
-	}
+    for(int x = 0; x < m_check_boxes.size(); x++){
+        m_check_boxes[x]->setEnabled(true);
+        if( source_pv == m_target_pvs[x]->getDeviceName() ){
+            m_check_boxes[x]->setChecked(false);
+            m_check_boxes[x]->setEnabled(false);
+        }
     }
-    else{
-	for(int x = 0; x < check_boxes.size(); x++){
-	    check_boxes[x]->setEnabled(true);
-	    if( source_pv == m_destination_pvs[x]->getDeviceName() ){
-		check_boxes[x]->setChecked(false);
-		check_boxes[x]->setEnabled(false);
-	    }
-	}
-    }
-    
+
     calculateSpace(true);
 }
 
@@ -388,8 +390,8 @@ QStringList PVMoveDialog::arguments()
     }
 
     if(m_source_pvs.size() > 1){
-	for(int x = 0; x < radio_buttons.size(); x++){
-	    if(radio_buttons[x]->isChecked())
+	for(int x = 0; x < m_radio_buttons.size(); x++){
+	    if(m_radio_buttons[x]->isChecked())
 		source = m_source_pvs[x]->getDeviceName();
 	}
     }
@@ -399,12 +401,10 @@ QStringList PVMoveDialog::arguments()
     
     args << source;
 
-    if(!check_box_any->isChecked()){
-	for(int x = 0; x < check_boxes.size(); x++){
-	    if(check_boxes[x]->isChecked())
-		args << check_boxes[x]->getUnmungedText();
-	}
+    for(int x = 0; x < m_check_boxes.size(); x++){
+        if(m_check_boxes[x]->isChecked())
+            args << m_check_boxes[x]->getAlternateText();
     }
-    
+
     return args;
 }
