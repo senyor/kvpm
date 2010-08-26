@@ -51,6 +51,7 @@ Q_OBJECT
     bool move_lv;
 
     void buildDialog();
+    void removeEmptyTargets();
     
 public:
     PVMoveDialog(PhysVol *physicalVolume, QWidget *parent = 0);

@@ -101,6 +101,7 @@ PVMoveDialog::PVMoveDialog(PhysVol *physicalVolume, QWidget *parent) : KDialog(p
 	if(m_target_pvs[x]->getDeviceName() == m_source_pvs[0]->getDeviceName())
 	    m_target_pvs.removeAt(x);
 
+    removeEmptyTargets();
     buildDialog();
 }
 
@@ -160,23 +161,8 @@ PVMoveDialog::PVMoveDialog(LogVol *logicalVolume, QWidget *parent) :
             m_source_pvs.append(m_lv->getVolumeGroup()->getPhysVolByName( physical_volume_paths[x] ));
     }
 
-/* If there is only on physical volume in the group then
-   a pv move will hve no place to go */
-
-    if(m_target_pvs.size() < 2){
-	KMessageBox::error(this, 
-			   i18n("Only one physical volume is "
-				"assigned to this volume group. "
-				"At least two are required to move extents:\n"
-				"One source and one or more destination"), 
-			   i18n("Too few physical volumes") );
-	QEventLoop loop(this);
-	loop.exec();
-	reject();
-    }
-    
 /* if there is only one source physical volumes possible on this logical volume
-   then we eliminate it from the possible destinations pv list completely. */
+   then we eliminate it from the possible target pv list completely. */
 
     if(m_source_pvs.size() == 1){
 	for(int x = (m_target_pvs.size() - 1); x >= 0; x--){
@@ -185,7 +171,26 @@ PVMoveDialog::PVMoveDialog(LogVol *logicalVolume, QWidget *parent) :
 	}
     }
 
+    removeEmptyTargets();
     buildDialog();
+}
+
+void PVMoveDialog::removeEmptyTargets(){
+
+  for(int x = (m_target_pvs.size() - 1); x >= 0; x--){
+    if( m_target_pvs[x]->getUnused() <= 0 )
+      m_target_pvs.removeAt(x);
+  }
+
+/* If there is only one physical volume in the group or they are 
+   all full then a pv move will have no place to go */
+
+    if(m_target_pvs.size() < 1){
+	KMessageBox::error(this, i18n("There are no available physical volumes with space to move too"));
+	QEventLoop loop(this);
+	loop.exec();
+	reject();
+    }
 }
 
 void PVMoveDialog::buildDialog()
