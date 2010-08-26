@@ -11,6 +11,8 @@
  * 
  * See the file "COPYING" for the exact licensing terms.
  */
+
+
 #ifndef PVMOVE_H
 #define PVMOVE_H
 
@@ -42,11 +44,10 @@ Q_OBJECT
     LogVol   *m_lv;
     long long m_pv_used_space;
 
-    QList<PhysVol *> m_source_pvs;         // source physical volumes
-    QList<PhysVol *> m_destination_pvs;    // destination physical volumes
-    QList<NoMungeCheck *> check_boxes;     // user can select multiple destination pv's
-    QList<QRadioButton *> radio_buttons;   // user can select one source pv
-    QCheckBox *check_box_any;              // use any destination pv
+    QList<PhysVol *> m_source_pvs;    // source physical volumes
+    QList<PhysVol *> m_target_pvs;    // destination physical volumes
+    QList<NoMungeCheck *> m_check_boxes;         // user can select multiple destination pv's
+    QList<NoMungeRadioButton *> m_radio_buttons; // user can select one source pv
     bool move_lv;
 
     void buildDialog();
@@ -60,6 +61,9 @@ private slots:
     void calculateSpace(bool checked);
     void disableDestination(bool checked);
     void checkBoxEnable(bool checked);
+    void selectAll();
+    void selectNone();
+
 };
 
 #endif
