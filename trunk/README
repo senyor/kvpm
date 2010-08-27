@@ -14,21 +14,29 @@ lvs --version
   Driver version:  4.15.0
 
 
-Because kvpm relies on the exact format of the lvm program
-output it won't work correctly with earlier versions.
+Because kvpm relies on the exact format of the lvm program output and 
+the presence of the new library "lvm2app" it won't work correctly with 
+earlier versions. As of August 2010 this lvm version is only available 
+by cvs download but newer revisions should turn up pre-compiled in Linux 
+distributions soon.
 
 The following development headers need to be 
 installed for compilation: 
 
 lvm2app.h
+libdevmapper.h
 libparted version 1.8
 libblkid
 kdelibs version 4
 <sys/mount.h>
 
+NOTE: libparted also links to libdevmapper and may need to recompiled for
+the new version. I have been using parted v2.3 
 
 To compile the source just "cd" into the source directory then run
 "cmake -i" and answer the questions. Next run "make" and if all goes
 well you will have a working executable.
 
 
+
+ LocalWords:  distobutions
