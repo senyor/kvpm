@@ -17,10 +17,8 @@
 #define VGTREE_H
 
 #include <KMenu>
-#include <KAction>
 
 #include <QPoint>
-#include <QMenu>
 #include <QList>
 #include <QStringList>
 #include <QTreeWidget>
@@ -39,14 +37,6 @@ Q_OBJECT
     VolGroup *m_vg;
     LogVol   *m_lv;
 
-    KMenu *filesystem_menu;
-
-    KAction *lv_remove_action,   *lv_create_action, *pv_move_action,
-	    *lv_reduce_action,   *lv_extend_action, *lv_change_action,
-	    *add_mirror_action,  *remove_mirror_action, 
-	    *snap_create_action, *mount_filesystem_action, 
-	    *unmount_filesystem_action, *lv_mkfs_action;
-    
     QList<QTreeWidgetItem *> m_lv_tree_items;
     QString m_vg_name;
     QString m_lv_name;
