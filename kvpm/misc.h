@@ -15,12 +15,13 @@
 #ifndef MISC_H
 #define MISC_H
 
-#include <QString>
+#include <QStringList>
 #include <QCheckBox>
 #include <QRadioButton>
 #include <QVariant>
 
 QString sizeToString(long long bytes);
+
 
 struct AvailableDevice {
     QString name;
@@ -34,7 +35,7 @@ class NoMungeCheck : public QCheckBox
     QVariant m_data;
 
  public:
-    NoMungeCheck(const QString text, QWidget *parent = 0);
+    NoMungeCheck(const QString text, QWidget *parent = NULL);
     QString getAlternateText();
     QString getUnmungedText();
     void setAlternateText(QString alternateText);
@@ -49,12 +50,13 @@ class NoMungeRadioButton : public QRadioButton
     QVariant m_data;
 
  public:
-    NoMungeRadioButton(const QString text, QWidget *parent = 0);
+    NoMungeRadioButton(const QString text, QWidget *parent = NULL);
     QString getAlternateText();
     QString getUnmungedText();
     void setAlternateText(QString alternateText);
     void setData(QVariant data);
     QVariant getData();    
+
 };
 
 #endif

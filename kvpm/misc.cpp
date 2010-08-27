@@ -12,6 +12,7 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
+#include <KPushButton>
 
 #include <QtGui>
 
@@ -103,3 +104,5 @@ QString sizeToString(long long bytes)
 
     return QString("%1 TB").arg(size, 0, 'g', 3);
 }
+
+
