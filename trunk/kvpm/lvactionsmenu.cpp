@@ -41,19 +41,23 @@
 LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, VolGroup *volumeGroup, QWidget *parent) : 
     KMenu(parent), m_vg(volumeGroup), m_lv(logicalVolume)
 {
-
     KActionCollection *lv_actions = new KActionCollection(this);
     lv_actions->addAssociatedWidget(this);
     lv_create_action = lv_actions->addAction( "lvcreate", this, SLOT(createLogicalVolume()));
     lv_create_action->setText( i18n("Create logical volume...") );
-    lv_reduce_action = lv_actions->addAction( "lvreduce", this, SLOT(reduceLogicalVolume()));
-    lv_reduce_action->setText( i18n("Reduce logical volume...") );
+    lv_create_action->setIcon( KIcon("document-new") );
     lv_remove_action = lv_actions->addAction("lvremove", this, SLOT(removeLogicalVolume()));
     lv_remove_action->setText( i18n("Remove logical volume...") );
+    lv_remove_action->setIcon( KIcon("edit-delete") );
+    addSeparator();
     lv_rename_action = lv_actions->addAction("lvrename", this, SLOT(renameLogicalVolume()));
     lv_rename_action->setText( i18n("Rename logical volume..."));
+    lv_rename_action->setIcon( KIcon("edit-rename") );
     snap_create_action = lv_actions->addAction("snapcreate", this, SLOT(createSnapshot()));
     snap_create_action->setText( i18n("Create snapshot...") );
+    snap_create_action->setIcon( KIcon("camera-photo") );
+    lv_reduce_action = lv_actions->addAction( "lvreduce", this, SLOT(reduceLogicalVolume()));
+    lv_reduce_action->setText( i18n("Reduce logical volume...") );
     lv_extend_action = lv_actions->addAction( "lvextend", this, SLOT(extendLogicalVolume()));
     lv_extend_action->setText( i18n("Extend logical volume...") );
     pv_move_action = lv_actions->addAction("pvmove", this, SLOT(movePhysicalExtents()));
