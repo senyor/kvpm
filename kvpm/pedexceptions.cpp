@@ -23,10 +23,15 @@
 
 PedExceptionOption my_handler(PedException *exception)
 {
+    QString error_message;
+
     if (exception->type == PED_EXCEPTION_INFORMATION)
         KMessageBox::information( 0, exception->message );
-    else
-        KMessageBox::error( 0, exception->message );
+    else{
+        error_message = QString( exception->message );
+        if( !error_message.contains( "unrecognised disk label") )
+            KMessageBox::error( 0, exception->message );
+    }
 
     return PED_EXCEPTION_UNHANDLED;
 }
