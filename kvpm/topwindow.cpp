@@ -68,7 +68,7 @@ TopWindow::TopWindow(QWidget *parent):KMainWindow(parent)
 						   "bug reports and any comments are welcomed.\n"),
 					     KAboutData::License_GPL_V3, 
 					     ki18n("(c) 2008, 2009, 2010 Benjamin Scott"),
-					     ki18n(""),
+					     ki18n(" "),
 					     QByteArray("http://sourceforge.net/projects/kvpm/"),
 					     QByteArray("benscott@nwlink.com") );
 
