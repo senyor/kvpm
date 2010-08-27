@@ -26,6 +26,7 @@
 #include "lvcreate.h"
 #include "mountentry.h"
 #include "physvol.h"
+#include "pvcheckbox.h"
 #include "processprogress.h"
 #include "misc.h"
 #include "volgroup.h"
@@ -285,63 +286,23 @@ QWidget* LVCreateDialog::createGeneralTab()
 
 QWidget* LVCreateDialog::createPhysicalTab()
 {
-    QCheckBox *temp_check;
     QString message;
-    PhysVol *pv;
     int stripe_index;
+    QList<PhysVol *> physical_volumes;
 
     QVBoxLayout *layout = new QVBoxLayout;
     m_physical_tab = new QWidget(this);
     m_physical_tab->setLayout(layout);
     
-    m_physical_volumes = m_vg->getPhysicalVolumes();
-    for(int x = m_physical_volumes.size() - 1; x >= 0; x--){
-        if( m_physical_volumes[x]->getUnused() < 1 )  // remove pvs with no free space
-            m_physical_volumes.removeAt(x);
-    }
-    
-    QGroupBox *physical_group = new QGroupBox( i18n("Available physical volumes") );
-    QGridLayout *physical_layout = new QGridLayout();
-    physical_group->setLayout(physical_layout);
-    layout->addWidget(physical_group);
-
-    int pv_check_count = m_physical_volumes.size();
-
-    for(int x = 0; x < pv_check_count; x++){
-	pv = m_physical_volumes[x];
-	temp_check = new QCheckBox();
-	m_pv_checks.append(temp_check);
-
-	if(pv->isAllocateable()){
-	    temp_check->setEnabled(true);
-	    temp_check->setChecked(true);
-	    temp_check->setText(pv->getDeviceName() + " " + sizeToString(pv->getUnused()));
-	}
-	else{
-	    temp_check->setEnabled(false);
-	    temp_check->setChecked(false);
-	    temp_check->setText( i18n("%1 not allocateable").arg(pv->getDeviceName()) );
-	}
-
-        if(pv_check_count < 11 )
-            physical_layout->addWidget(temp_check, x % 5, x / 5);
-        else if (pv_check_count % 3 == 0)
-            physical_layout->addWidget(temp_check, x % (pv_check_count / 3), x / (pv_check_count / 3));
-        else
-            physical_layout->addWidget(temp_check, x % ( (pv_check_count + 2) / 3), x / ( (pv_check_count + 2) / 3));
-	
-	connect(temp_check, SIGNAL(toggled(bool)), 
-		this, SLOT(calculateSpace(bool)));
-
-	connect(temp_check, SIGNAL(toggled(bool)), 
-		this, SLOT(setMaxSize(bool)));
+    physical_volumes = m_vg->getPhysicalVolumes();
+    for(int x = physical_volumes.size() - 1; x >= 0; x--){
+        if( physical_volumes[x]->getUnused() < 1 )  // remove pvs with no free space
+            physical_volumes.removeAt(x);
     }
 
-    m_allocateable_space_label = new QLabel();
-    m_allocateable_extents_label = new QLabel();
-    calculateSpace(true);
-    physical_layout->addWidget(m_allocateable_space_label, physical_layout->rowCount(), 0 , 1, -1, Qt::AlignCenter);
-    physical_layout->addWidget(m_allocateable_extents_label, physical_layout->rowCount(), 0, 1, -1, Qt::AlignCenter);
+    m_pv_checkbox = new PVCheckBox(physical_volumes, m_vg->getExtentSize());
+    layout->addWidget(m_pv_checkbox);
+
     QVBoxLayout *striped_layout = new QVBoxLayout;
     QHBoxLayout *stripe_size_layout = new QHBoxLayout;
     QHBoxLayout *stripes_number_layout = new QHBoxLayout;
@@ -424,6 +385,9 @@ QWidget* LVCreateDialog::createPhysicalTab()
 	lower_v_layout->addWidget(m_mirror_box);
     else
 	m_mirror_box->setEnabled(false);
+
+    connect(m_pv_checkbox, SIGNAL(stateChanged()), 
+            this, SLOT(setAvailableSpace()));
 
     connect(m_stripes_number_spin, SIGNAL(valueChanged(int)), 
 	    this, SLOT(setMaxSize(int)));
@@ -694,54 +658,12 @@ long long LVCreateDialog::convertSizeToExtents(int index, double size)
     return qRound64(lv_size);
 }
 
-void LVCreateDialog::calculateSpace(bool)
-{
-    m_allocateable_space = 0;
-    m_allocateable_extents = 0;
-    PhysVol *pv;
-    int checked_count = 0;  // number of selected physical volumes
-    
-    for(int x = 0; x < m_pv_checks.size(); x++){
-	if (m_pv_checks[x]->isChecked()){
-	    checked_count++;
-	    pv = m_physical_volumes[x];
-	    m_allocateable_space += pv->getUnused();
-	    m_allocateable_extents += (pv->getUnused()) / m_vg->getExtentSize();
-	}
-    }
-
-/* at least one pv must always be selected */
-
-    if (checked_count == 1){   
-	for(int x = 0; x < m_pv_checks.size(); x++){
-	    if (m_pv_checks[x]->isChecked())
-		m_pv_checks[x]->setEnabled(false);
-	}
-    }
-    else{
-	for(int x = 0; x < m_pv_checks.size(); x++){
-	    if(m_physical_volumes[x]->isAllocateable())
-		m_pv_checks[x]->setEnabled(true);
-	    else
-		m_pv_checks[x]->setEnabled(false);
-	}
-    }
-    
-    m_allocateable_space_label->setText( i18n("Allocateable space: %1").arg(sizeToString(m_allocateable_space)) );
-    m_allocateable_extents_label->setText( i18n("Allocateable extents: %1").arg(m_allocateable_extents) );
-}
-
 long long LVCreateDialog::getLargestVolume() 
 {
-    QList <long long> available_pv_bytes;  
+    QList <long long> available_pv_bytes = m_pv_checkbox->getUnusedSpaceList();  
     QList <long long> stripe_pv_bytes;  
     int total_stripes = getStripeCount() * getMirrorCount();
     int log_count;
-
-    for(int x = 0; x < m_physical_volumes.size(); x++){
-	if( m_pv_checks[x]->isChecked() )
-	    available_pv_bytes.append( m_physical_volumes[x]->getUnused() );
-    }
 
     for(int x = 0; x < total_stripes; x++)
         stripe_pv_bytes.append(0);
@@ -795,6 +717,14 @@ int LVCreateDialog::getMirrorCount()
 	return m_mirrors_number_spin->value();
     else
 	return 1;
+}
+
+void LVCreateDialog::setAvailableSpace()
+{
+    m_allocateable_space = m_pv_checkbox->getUnusedSpace(); 
+    m_allocateable_extents = m_allocateable_space / m_vg->getExtentSize();
+
+    resetOkButton();
 }
 
 void LVCreateDialog::zeroReadonlyCheck(int)
@@ -914,11 +844,8 @@ QStringList LVCreateDialog::argumentsLV()
 	args <<	m_lv->getFullName();
     }
 
-    for(int x = 0; x < m_pv_checks.size(); x++){
-	if ( m_pv_checks[x]->isChecked() )
-	    args << m_physical_volumes[x]->getDeviceName();
-    }
-
+    args << m_pv_checkbox->getNames();
+    
     args.prepend(program_to_run);
     return args;
 }

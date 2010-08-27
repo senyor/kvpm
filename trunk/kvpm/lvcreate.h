@@ -33,6 +33,7 @@ class VolGroup;
 class PhysVol;
 class QRegExpValidator;
 class QDoubleValidator;
+class PVCheckBox;
 
 bool lv_create(VolGroup *volumeGroup);
 bool lv_extend(LogVol *logicalVolume);
@@ -66,11 +67,10 @@ Q_OBJECT
      QGroupBox *m_persistent_box,
 	       *m_mirror_box,
 	       *m_stripe_box;
+
+     PVCheckBox *m_pv_checkbox;
  
      KTabWidget *m_tab_widget;
-
-     QList<QCheckBox *> m_pv_checks;        // these 2 lists are the same size and order
-     QList<PhysVol *> m_physical_volumes;   // with each pv associated with a check box
 
      long long m_volume_extents,               // proposed logical volume size in extents
 	       m_allocateable_space, 
@@ -86,9 +86,7 @@ Q_OBJECT
 
      QLabel *m_stripes_count_label,
 	    *m_max_size_label, 
-            *m_max_extents_label,
-            *m_allocateable_space_label, 
-	    *m_allocateable_extents_label;
+            *m_max_extents_label;
      
      QRadioButton *contiguous_button, *normal_button,   //Radio button to chose 
 	          *anywhere_button, *inherited_button,  // the allocation policy
@@ -118,7 +116,7 @@ Q_OBJECT
      void validateVolumeSize(QString size);
      void validateVolumeName(QString name);
      long long convertSizeToExtents(int index, double size);
-     void calculateSpace(bool checked);
+     void setAvailableSpace();
      void zeroReadonlyCheck(int state);
      void enableMonitoring(bool checked);
 };
