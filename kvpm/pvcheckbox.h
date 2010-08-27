@@ -37,9 +37,9 @@ Q_OBJECT
 
  public:
     PVCheckBox(QList<PhysVol *> physicalVolumes, long long extentSize, QWidget *parent = NULL); 
-    QStringList getNames();
-    long long getUnusedSpace();
-    QList<long long> getUnusedSpaceList();
+    QStringList getNames();       // names of *selected* pvs
+    long long getUnusedSpace();   // total unused space on selected pvs
+    QList<long long> getUnusedSpaceList();  // ditto
 
  signals:
     void stateChanged();

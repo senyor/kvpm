@@ -24,11 +24,13 @@
 #include <QRadioButton>
 #include <QGroupBox>
 #include <QVBoxLayout>
+#include <QHBoxLayout>
 
 class KIntSpinBox;
 class KComboBox;
 class LogVol;
 class NoMungeCheck;
+class PVCheckBox;
 class VolGroup;
 
 bool add_mirror(LogVol *logicalVolume);
@@ -44,15 +46,14 @@ Q_OBJECT
     KTabWidget *m_tab_widget;
     KIntSpinBox *m_add_mirrors_spin;
     KIntSpinBox *m_stripes_number_spin;
-    QVBoxLayout *m_general_layout;
+    QHBoxLayout *m_general_layout;
     QVBoxLayout *m_physical_layout;
 
-    QGroupBox *m_pv_box;
-    QGroupBox *m_add_mirror_box;
-    QGroupBox *m_stripe_box;
-    KComboBox *m_stripe_size_combo;
+    PVCheckBox *m_pv_box;
+    QGroupBox  *m_add_mirror_box;
+    QGroupBox  *m_stripe_box;
+    KComboBox  *m_stripe_size_combo;
 
-    QString m_logical_volume_name;
     LogVol *m_lv;                      // The volume we are adding a mirror to. 
     
     int m_current_leg_count;           // How many mirror legs do we already have?
@@ -64,8 +65,8 @@ Q_OBJECT
 
     QRadioButton *m_core_log_button, *m_mirrored_log_button, *m_disk_log_button;
 
-    QList<NoMungeCheck *> m_pv_leg_checks;
-    QList<long long> m_pv_leg_size;
+    //    QList<NoMungeCheck *> m_pv_leg_checks;
+    //    QList<long long> m_pv_leg_size;
 
     void setupGeneralTab();
     void setupPhysicalTab();
@@ -76,11 +77,7 @@ public:
     QStringList arguments();
 
 private slots:
-
-    void comparePvsNeededPvsAvailable(int);
-    void comparePvsNeededPvsAvailable(bool);
     void comparePvsNeededPvsAvailable();
-    void clearCheckedPvs(bool checked);
     
 };
 
