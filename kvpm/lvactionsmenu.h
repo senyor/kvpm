@@ -50,6 +50,7 @@ Q_OBJECT
     void renameLogicalVolume();
     void addMirror();
     void removeMirror();
+    void removeMirrorLeg();
     void createSnapshot();
     void mkfsLogicalVolume();
     void movePhysicalExtents();

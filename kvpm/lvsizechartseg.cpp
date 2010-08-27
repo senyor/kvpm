@@ -15,7 +15,6 @@
 
 #include <KConfigSkeleton>
 #include <KMenu>
-#include <KAction>
 #include <KLocale>
 #include <QtGui>
 

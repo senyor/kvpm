@@ -34,6 +34,7 @@
 #include "mount.h"
 #include "pvmove.h"
 #include "removemirror.h"
+#include "removemirrorleg.h"
 #include "unmount.h"
 #include "volgroup.h"
 
@@ -86,6 +87,9 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, VolGroup *volumeGroup, QWidg
 
     connect(remove_mirror_action, SIGNAL(triggered()), 
 	    this, SLOT(removeMirror()));
+
+    connect(remove_mirror_leg_action, SIGNAL(triggered()), 
+	    this, SLOT(removeMirrorLeg()));
 
     KMenu *mirror_menu = new KMenu( i18n("Mirror operations"), this);
     addMenu(mirror_menu);
@@ -355,6 +359,12 @@ void LVActionsMenu::addMirror()
 void LVActionsMenu::removeMirror()
 {
     if( remove_mirror(m_lv) )
+	MainWindow->reRun();
+}
+
+void LVActionsMenu::removeMirrorLeg()
+{
+    if( remove_mirror_leg(m_lv) )
 	MainWindow->reRun();
 }
 
