@@ -127,9 +127,6 @@ QList<long long> PVCheckBox::getUnusedSpaceList(){
     else if(m_pvs.size()){
         space.append( m_pvs[0]->getUnused() );
     }
-    else{
-        space.append(0);
-    }
 
     return space;
 }
