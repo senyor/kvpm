@@ -100,12 +100,15 @@ LVReduceDialog::LVReduceDialog(LogVol *logicalVolume, QWidget *parent) :
     else
         m_min_lv_size = m_vg->getExtentSize();
 
+    QLabel *lv_name_label  = new QLabel( i18n("<b>Volume: %1</b>").arg( m_lv->getName() ));
+    lv_name_label->setAlignment(Qt::AlignCenter);
     QLabel *ext_size_label = new QLabel( i18n("Extent size: %1").arg(sizeToString(m_vg->getExtentSize())) );
 
     QLabel *current_lv_size_label = new QLabel( i18n("Current size: %1").arg(sizeToString(m_current_lv_size)) );
 
     QLabel *min_lv_size_label = new QLabel( i18n("Minimum size: %1").arg(sizeToString(m_min_lv_size)) );
 
+    layout->addWidget(lv_name_label);
     layout->addWidget(ext_size_label);
     layout->addWidget(current_lv_size_label);
     if( !m_lv->isSnap() )
