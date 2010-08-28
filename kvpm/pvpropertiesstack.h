@@ -20,6 +20,7 @@
 #include <QList>
  
 class PhysVol;
+class VolGroup;
 
 class PVPropertiesStack : public QWidget
 {
