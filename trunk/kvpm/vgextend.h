@@ -18,6 +18,7 @@
 #include <QStringList>
 #include <KDialog>
 #include <QCheckBox>
+#include <QVBoxLayout>
 
 #include "misc.h"
 #include "volgroup.h"

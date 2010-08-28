@@ -24,6 +24,7 @@
 #include <QStringList>
 #include <QCheckBox>
 #include <QRegExpValidator>
+#include <QVBoxLayout>
 
 #include "misc.h"
 
