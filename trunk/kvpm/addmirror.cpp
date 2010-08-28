@@ -73,9 +73,11 @@ AddMirrorDialog::AddMirrorDialog(LogVol *logicalVolume, QWidget *parent):
 
 void AddMirrorDialog::setupGeneralTab()
 {
+    QLabel *lv_name_label = new QLabel("<b>Volume: " + m_lv->getName() + "</b>");
     QLabel *current_mirrors_label = new QLabel();
     QVBoxLayout *layout = new QVBoxLayout;
-
+    lv_name_label->setAlignment(Qt::AlignCenter);
+    layout->addWidget(lv_name_label);
     m_general_layout->addStretch();
     m_general_layout->addLayout(layout);
     m_general_layout->addStretch();
