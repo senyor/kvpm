@@ -19,6 +19,7 @@
 #include <KLineEdit>
 
 #include <QStringList>
+#include <QRegExpValidator>
 
 class LogVol;
 
