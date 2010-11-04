@@ -42,6 +42,9 @@
 LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, VolGroup *volumeGroup, QWidget *parent) : 
     KMenu(parent), m_vg(volumeGroup), m_lv(logicalVolume)
 {
+    if(m_vg->getSize() == 0)
+        setEnabled(false);
+
     KActionCollection *lv_actions = new KActionCollection(this);
     lv_actions->addAssociatedWidget(this);
     lv_create_action = lv_actions->addAction( "lvcreate", this, SLOT(createLogicalVolume()));
