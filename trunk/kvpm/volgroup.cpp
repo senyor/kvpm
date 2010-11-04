@@ -32,71 +32,90 @@ VolGroup::~VolGroup()
 
 void VolGroup::rescan(lvm_t lvm)
 {
-    vg_t lvm_vg = lvm_vg_open(lvm, m_vg_name.toAscii().data(), "r", NULL);
     bool existing_pv;
     bool deleted_pv;
     m_mda_count = 0;
+    vg_t lvm_vg;
 
-    //    m_lvm_format   = QString("????"); // Set this from liblvm when available, see logvol->getLVMFormat()
-    //    m_writable  = true; // ditto
-    //    m_resizable = true; // ditto
-    //    m_allocation_policy = // ditto again
     m_allocateable_extents = 0;
+    m_pv_max       = 0;
+    m_extent_size  = 0;
+    m_extents      = 0;
+    m_lv_max       = 0;
+    m_size         = 0;
+    m_free         = 0;
+    m_free_extents = 0;
+    m_exported     = false;
+    m_partial      = false;
+    m_clustered    = false;
 
-    m_pv_max       = lvm_vg_get_max_pv(lvm_vg); 
-    m_extent_size  = lvm_vg_get_extent_size(lvm_vg);
-    m_extents      = lvm_vg_get_extent_count(lvm_vg);
-    m_lv_max       = lvm_vg_get_max_lv(lvm_vg);
-    m_size         = lvm_vg_get_size(lvm_vg);
-    m_free         = lvm_vg_get_free_size(lvm_vg);
-    m_free_extents = lvm_vg_get_free_extent_count(lvm_vg);
-    m_exported     = (bool)lvm_vg_is_exported(lvm_vg); 
-    m_partial      = (bool)lvm_vg_is_partial(lvm_vg); 
-    m_clustered    = (bool)lvm_vg_is_clustered(lvm_vg);
+    // clustered volumes can't be opened when clvmd isn't running 
+    if( (lvm_vg = lvm_vg_open(lvm, m_vg_name.toAscii().data(), "r", NULL)) ){
 
-    dm_list* pv_dm_list = lvm_vg_list_pvs(lvm_vg);
-    lvm_pv_list *pv_list;
+        //    m_lvm_format   = QString("????"); // Set this from liblvm when available, see logvol->getLVMFormat()
+        //    m_writable  = true; // ditto
+        //    m_resizable = true; // ditto
+        //    m_allocation_policy = // ditto again
 
-    if(pv_dm_list){  // This should never be empty
-
-        dm_list_iterate_items(pv_list, pv_dm_list){ // rescan() existing PhysVols 
-            existing_pv = false;
-            for(int x = 0; x < m_member_pvs.size(); x++){
-                if( QString( lvm_pv_get_uuid( pv_list->pv ) ).trimmed() == m_member_pvs[x]->getUuid() ){
-                    existing_pv = true;
-                    m_member_pvs[x]->rescan( pv_list->pv );
-                }
-            }
-            if( !existing_pv )
-                m_member_pvs.append( new PhysVol( pv_list->pv, this ) );
-        }
-    
-        for(int x = m_member_pvs.size() - 1; x >= 0; x--){ // delete PhysVolGroup if the pv is gone
-            deleted_pv = true;
-            dm_list_iterate_items(pv_list, pv_dm_list){ 
-                if( QString( lvm_pv_get_uuid( pv_list->pv ) ).trimmed() == m_member_pvs[x]->getUuid() )
-                    deleted_pv = false;
-            }
-            if(deleted_pv){
-                delete m_member_pvs.takeAt(x);
-            }
-        }
+	m_pv_max       = lvm_vg_get_max_pv(lvm_vg); 
+	m_extent_size  = lvm_vg_get_extent_size(lvm_vg);
+	m_extents      = lvm_vg_get_extent_count(lvm_vg);
+	m_lv_max       = lvm_vg_get_max_lv(lvm_vg);
+	m_size         = lvm_vg_get_size(lvm_vg);
+	m_free         = lvm_vg_get_free_size(lvm_vg);
+	m_free_extents = lvm_vg_get_free_extent_count(lvm_vg);
+	m_exported     = (bool)lvm_vg_is_exported(lvm_vg); 
+	m_partial      = (bool)lvm_vg_is_partial(lvm_vg); 
+	m_clustered    = (bool)lvm_vg_is_clustered(lvm_vg);
+	
+	dm_list* pv_dm_list = lvm_vg_list_pvs(lvm_vg);
+	lvm_pv_list *pv_list;
+	
+	if(pv_dm_list){  // This should never be empty
+	
+	    dm_list_iterate_items(pv_list, pv_dm_list){ // rescan() existing PhysVols 
+	        existing_pv = false;
+		for(int x = 0; x < m_member_pvs.size(); x++){
+		    if( QString( lvm_pv_get_uuid( pv_list->pv ) ).trimmed() == m_member_pvs[x]->getUuid() ){
+		      existing_pv = true;
+		      m_member_pvs[x]->rescan( pv_list->pv );
+		    }
+		}
+		if( !existing_pv )
+		    m_member_pvs.append( new PhysVol( pv_list->pv, this ) );
+	    }
+	  
+	    for(int x = m_member_pvs.size() - 1; x >= 0; x--){ // delete PhysVolGroup if the pv is gone
+	        deleted_pv = true;
+		dm_list_iterate_items(pv_list, pv_dm_list){ 
+		    if( QString( lvm_pv_get_uuid( pv_list->pv ) ).trimmed() == m_member_pvs[x]->getUuid() )
+		      deleted_pv = false;
+		}
+		if(deleted_pv){
+		    delete m_member_pvs.takeAt(x);
+		}
+	    }
         
-        for(int x = 0; x < m_member_pvs.size(); x++){
-            if( m_member_pvs[x]->isAllocateable() )
-                m_allocateable_extents += m_member_pvs[x]->getUnused() / (long long) m_extent_size;
-            m_mda_count += m_member_pvs[x]->getMDACount();
-        }
-
-        for(int x = m_member_lvs.size() - 1; x >= 0; x--) 
-            delete m_member_lvs.takeAt(x);
-
+	    for(int x = 0; x < m_member_pvs.size(); x++){
+	        if( m_member_pvs[x]->isAllocateable() )
+		    m_allocateable_extents += m_member_pvs[x]->getUnused() / (long long) m_extent_size;
+		m_mda_count += m_member_pvs[x]->getMDACount();
+	    }
+	    
+	    for(int x = m_member_lvs.size() - 1; x >= 0; x--) 
+	        delete m_member_lvs.takeAt(x);
+		
+	}
+	else
+	    qDebug() << " Empty pv_dm_list?";
+	
+	lvm_vg_close(lvm_vg);
     }
-    else
-        qDebug() << " Empty pv_dm_list?";
+    else{
+        m_member_pvs.clear();
+        m_member_lvs.clear();
+    }
 
-    lvm_vg_close(lvm_vg);
-        
     return;
 }
 

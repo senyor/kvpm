@@ -106,7 +106,6 @@ void MasterList::scanVolumeGroups(lvm_t lvm)
     lvm_str_list *strl;
     
     vgnames = lvm_list_vg_names(lvm);
-
     dm_list_iterate_items(strl, vgnames){ // rescan() existing VolGroup, don't create a new one
         existing_vg = false;
         for(int x = 0; x < m_volume_groups.size(); x++){
@@ -118,7 +117,6 @@ void MasterList::scanVolumeGroups(lvm_t lvm)
         if( !existing_vg )
             m_volume_groups.append( new VolGroup(lvm, strl->str) );
     }
-
     for(int x = m_volume_groups.size() - 1; x >= 0; x--){ // delete VolGroup if the vg is gone
         deleted_vg = true;
         dm_list_iterate_items(strl, vgnames){ 
