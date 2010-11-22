@@ -15,6 +15,8 @@
 #ifndef LOGVOL_H
 #define LOGVOL_H
 
+#include <lvm2app.h>
+
 #include <QWidget>
 #include <QStringList>
 
@@ -25,7 +27,7 @@ class Segment;
 
 class LogVol
 {
-    VolGroup *m_group;
+    VolGroup *m_vg;
     QList<Segment *> m_segments;
     QList<MountInformation *> m_mount_info_list;
     
@@ -78,10 +80,11 @@ class LogVol
     bool m_snap;                 // is a snapshot volume
     bool m_writable;
 
-    Segment* processSegments(QString segmentData);
+    Segment* processSegments(lvseg_t lvm_lvseg);
     
  public:
-    LogVol(QStringList lvDataList, MountInformationList *mountInformationList);
+    LogVol(lv_t lvm_lv, VolGroup *vg);
+    void rescan(lv_t lvm_lv);
     QString getVolumeGroupName();
     QString getName();
     QString getFullName();
@@ -93,8 +96,14 @@ class LogVol
     QString getOrigin();        // The name of the parent volume to a snapshot or mirror leg
     void setOrigin(QString origin);
     QString getUuid();
+
+    // GET RID OF THIS !!!!!!
+
     QString getLVMFormat();
     QString getVGAttr();
+
+    // NOT NEEDED !!!!!!
+
     int getSegmentCount();
     int getSegmentStripes(int segment);
     int getSegmentStripeSize(int segment);
@@ -113,7 +122,6 @@ class LogVol
     long long getFilesystemUsed();
     long long getFilesystemBlockSize();
     VolGroup* getVolumeGroup();
-    void setVolumeGroup(VolGroup *volumeGroup);
     double getSnapPercent();
     double getCopyPercent();
     int getMinorDevice();

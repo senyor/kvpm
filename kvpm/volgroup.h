@@ -40,16 +40,16 @@ class VolGroup
     QString m_lvm_format;                // lvm1 or lvm2
     QList<LogVol *>  m_member_lvs;    // lvs that belong to this group
     QList<PhysVol *> m_member_pvs;    // pvs that belong to this group
+    bool m_writable;
     bool m_resizable;
     bool m_clustered;
     bool m_exported;
     bool m_partial;        // some physical volumes may be missing
-    
+
 public:
     VolGroup(lvm_t lvm, const char *vgname);
     ~VolGroup();
     void rescan(lvm_t lvm);
-    void addLogicalVolume(LogVol *logicalVolume);
     const QList<LogVol *>  getLogicalVolumes();
     const QList<PhysVol *> getPhysicalVolumes();
     LogVol* getLogVolByName(QString shortName);  // lv name without the vg name and "/"
@@ -71,6 +71,7 @@ public:
     QString getPolicy();
     QString getFormat();
     QStringList getLogVolNames();
+    bool isWritable();
     bool isResizable();
     bool isClustered();
     bool isPartial();

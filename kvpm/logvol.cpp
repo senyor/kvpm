@@ -41,21 +41,31 @@ struct Segment
 /* the logical volume data is in a list because lvs outputs one
    line for each segment  */
 
-LogVol::LogVol(QStringList lvDataList, MountInformationList *mountInformationList)
+LogVol::LogVol(lv_t lvm_lv, VolGroup *vg)
 {
-    QString lvdata = lvDataList[0].trimmed();
+    m_vg = vg;
+    rescan(lvm_lv);
+}
+
+void LogVol::rescan(lv_t lvm_lv)
+{
     QByteArray flags;
+    lvm_property_value value;
 
+    //      char *prop_name = "seg_count";
+ 
     m_log_count = 0;
-    m_seg_total = lvDataList.size();
-    m_lv_name   = lvdata.section('|',0,0);
-    m_lv_name   = m_lv_name.trimmed();
 
-    m_vg_name   = lvdata.section('|',1,1);
+    value = lvm_lv_get_property(lvm_lv, "seg_count");
+    m_seg_total = value.value.integer;
+    value = lvm_lv_get_property(lvm_lv, "lv_name");
+    m_lv_name   = QString(value.value.string).trimmed();
+
+    m_vg_name   = m_vg->getName();
     m_lv_full_name = m_vg_name + "/" + m_lv_name;
 
-    QString attr = lvdata.section('|',2,2);
-    flags.append(attr);
+    value = lvm_lv_get_property(lvm_lv, "lv_attr");
+    flags.append(value.value.string);
 	
     m_under_conversion = false;
     m_mirror     = false;
@@ -212,12 +222,15 @@ LogVol::LogVol(QStringList lvDataList, MountInformationList *mountInformationLis
     else
         m_lv_fs = fsprobe_getfstype2( "/dev/" + m_vg_name + "/" + m_lv_name );
  
-    m_size         = (lvdata.section('|',3,3)).toLongLong();
-    m_snap_percent = 0.0;
+    value = lvm_lv_get_property(lvm_lv, "lv_size");
+    m_size = value.value.integer;
 
     if(m_snap){
-        m_origin       =  lvdata.section('|',4,4);
-	m_snap_percent = (lvdata.section('|',5,5)).toDouble();
+        value = lvm_lv_get_property(lvm_lv, "origin");
+        m_origin = value.value.string;
+
+	value = lvm_lv_get_property(lvm_lv, "snap_percent");
+        m_snap_percent = value.value.integer;
     }
     else if(m_mirror_leg && !m_mirror_log){
         m_origin = m_lv_name;
@@ -246,19 +259,37 @@ LogVol::LogVol(QStringList lvDataList, MountInformationList *mountInformationLis
     else
         m_origin = "";
 
-    m_copy_percent = (lvdata.section('|',8,8)).toDouble();
-    m_major_device = (lvdata.section('|',15,15)).toInt();
-    m_minor_device = (lvdata.section('|',16,16)).toInt();
+    value = lvm_lv_get_property(lvm_lv, "copy_percent");
+    m_copy_percent = value.value.integer;
 
-    if( (lvdata.section('|',17,17)).toInt() != -1)
+    value = lvm_lv_get_property(lvm_lv, "lv_kernel_major");
+    m_major_device = value.value.integer;
+
+    value = lvm_lv_get_property(lvm_lv, "lv_kernel_minor");
+    m_minor_device = value.value.integer;
+
+    /*  FIX ME!!!!
+    value = lvm_lv_get_property(lvm_lv, "lv_minor");
+    if(value.value.integer != -1)
 	m_persistant = true;
     else
 	m_persistant = false;
+    */
 
-    m_uuid  = lvdata.section('|',18,18);
-    m_lvm_format = lvdata.section('|',19,19);
-    m_vg_attr = lvdata.section('|',20,20);
-    m_tags    = lvdata.section('|',21,21).split(',', QString::SkipEmptyParts);
+    value = lvm_lv_get_property(lvm_lv, "lv_uuid");
+    m_uuid  = value.value.string;
+    value = lvm_lv_get_property(lvm_lv, "vg_fmt");
+    m_lvm_format = value.value.string;
+
+    value = lvm_lv_get_property(lvm_lv, "vg_attr");
+    m_vg_attr = value.value.string;
+
+    value = lvm_lv_get_property(lvm_lv, "lv_tags");
+    QString tag = value.value.string;
+    m_tags = tag.split(',', QString::SkipEmptyParts);
+
+    MountInformationList *mountInformationList = new MountInformationList();
+    // delete this later!!
 
     m_mount_info_list = mountInformationList->getMountInformation( "/dev/" + m_vg_name + "/" + m_lv_name );
 
@@ -286,8 +317,18 @@ LogVol::LogVol(QStringList lvDataList, MountInformationList *mountInformationLis
         m_fs_used = -1;
     }
 
-    for(int x = 0; x < m_seg_total ; x++)
-	m_segments.append(processSegments(lvDataList[x]));
+    m_segments.clear();
+
+    dm_list* lvseg_dm_list = lvm_lv_list_lvsegs(lvm_lv);  
+    lvm_lvseg_list *lvseg_list;
+
+    if(lvseg_dm_list){
+        dm_list_iterate_items(lvseg_list, lvseg_dm_list){ 
+	    m_segments.append(processSegments(lvseg_list->lvseg));
+	}
+    }
+    else
+      qDebug() << "No lv seg list?";
 
     m_mirror_count = 0;
     QStringList pvs = getDevicePathAll();
@@ -300,18 +341,25 @@ LogVol::LogVol(QStringList lvDataList, MountInformationList *mountInformationLis
     }
 }
 
-Segment* LogVol::processSegments(QString segmentData)
+Segment* LogVol::processSegments(lvseg_t lvm_lvseg)
 {
     Segment *segment = new Segment();
     
     QStringList devices_and_starts, temp;
     QString raw_paths;
+    lvm_property_value value;
+
+    value = lvm_lvseg_get_property(lvm_lvseg, "stripes");
+    segment->m_stripes = value.value.integer; 
+
+    value = lvm_lvseg_get_property(lvm_lvseg, "stripesize");
+    segment->m_stripe_size = value.value.integer;
+
+    value = lvm_lvseg_get_property(lvm_lvseg, "segsize");
+    segment->m_size = value.value.integer;
     
-    segment->m_stripes     = (segmentData.section('|',11,11)).toInt();
-    segment->m_stripe_size = (segmentData.section('|',12,12)).toInt();
-    segment->m_size        = (segmentData.section('|',13,13)).toLongLong();
-    
-    raw_paths = (segmentData.section('|',14,14)).trimmed();
+    value = lvm_lvseg_get_property(lvm_lvseg, "devices");
+    raw_paths = value.value.string;
 
     if(m_virtual){
         if(raw_paths == "")
@@ -352,7 +400,7 @@ long long LogVol::getSegmentSize(int segment)
 
 long long LogVol::getSegmentExtents(int segment)
 {
-    return (m_segments[segment]->m_size / m_group->getExtentSize());
+    return (m_segments[segment]->m_size / m_vg->getExtentSize());
 }
 
 QList<long long> LogVol::getSegmentStartingExtent(int segment)
@@ -384,15 +432,9 @@ QStringList LogVol::getDevicePathAll()
     return devices;
 }
 
-void LogVol::setVolumeGroup(VolGroup *volumeGroup)
-{
-    m_group = volumeGroup;
-    m_extents = m_size / m_group->getExtentSize();
-}
-
 VolGroup* LogVol::getVolumeGroup()
 {
-    return m_group;
+    return m_vg;
 }
 
 QString LogVol::getVolumeGroupName()

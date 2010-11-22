@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2009 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -36,8 +36,6 @@ class MasterList : public QObject
     QList<StorageDevice *> m_storage_devices;
     
     void scanVolumeGroups(lvm_t lvm);
-    void scanLogicalVolumes(VolGroup *VolumeGroup);
-    void scanLogicalVolumes();
     void scanStorageDevices();
     bool determinePVState(PhysVol *pv, VolGroup *vg); 
 
