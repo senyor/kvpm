@@ -32,8 +32,8 @@ VolGroup::~VolGroup()
 
 void VolGroup::rescan(lvm_t lvm)
 {
-    bool existing_pv;
-    bool deleted_pv;
+    bool existing_pv, deleted_pv;
+    bool existing_lv, deleted_lv;
     m_mda_count = 0;
     vg_t lvm_vg;
 
@@ -102,19 +102,148 @@ void VolGroup::rescan(lvm_t lvm)
 		m_mda_count += m_member_pvs[x]->getMDACount();
 	    }
 	    
-	    for(int x = m_member_lvs.size() - 1; x >= 0; x--) 
-	        delete m_member_lvs.takeAt(x);
-		
 	}
 	else
 	    qDebug() << " Empty pv_dm_list?";
+
+
+	//START
+
+	dm_list* lv_dm_list = lvm_vg_list_lvs(lvm_vg);
+	lvm_lv_list *lv_list;
 	
+	if(lv_dm_list){
+	
+	    dm_list_iterate_items(lv_list, lv_dm_list){ // rescan() existing LogVols 
+	        existing_lv = false;
+		for(int x = 0; x < m_member_lvs.size(); x++){
+		    if( QString( lvm_lv_get_uuid( lv_list->lv ) ).trimmed() == m_member_lvs[x]->getUuid() ){
+		      existing_lv = true;
+		      m_member_lvs[x]->rescan( lv_list->lv );
+		    }
+		}
+		if( !existing_lv )
+		    m_member_lvs.append( new LogVol( lv_list->lv, this ) );
+	    }
+	  
+	    for(int x = m_member_lvs.size() - 1; x >= 0; x--){ // delete LogVol if the lv is gone
+	        deleted_lv = true;
+		dm_list_iterate_items(lv_list, lv_dm_list){ 
+		    if( QString( lvm_lv_get_uuid( lv_list->lv ) ).trimmed() == m_member_lvs[x]->getUuid() )
+		      deleted_lv = false;
+		}
+		if(deleted_lv){
+		    delete m_member_lvs.takeAt(x);
+		}
+	    }
+        
+	}
+	else
+	    qDebug() << " Empty lv_dm_list?";
+
+
+	//  END
+
 	lvm_vg_close(lvm_vg);
     }
     else{
+        for(int x = m_member_pvs.size() - 1; x >= 0; x--) 
+	    delete m_member_pvs.takeAt(x);
+		
+        for(int x = m_member_lvs.size() - 1; x >= 0; x--) 
+	    delete m_member_lvs.takeAt(x);
+		
         m_member_pvs.clear();
         m_member_lvs.clear();
     }
+
+    QStringList pv_name_list;
+    PhysVol *pv;
+
+    for(int x = 0; x < m_member_lvs.size(); x++){
+        if( m_member_lvs[x]->isActive() ){
+	    pv_name_list = m_member_lvs[x]->getDevicePathAll();
+	    for(int x = 0; x < pv_name_list.size(); x++){
+	        if( (pv = getPhysVolByName(pv_name_list[x])) )
+		    pv->setActive();
+	    }
+	    pv_name_list.clear();
+	}
+    }
+
+    lvm_property_value value;
+    QString vg_attr;
+
+    value = lvm_vg_get_property(lvm_vg, "vg_attr");
+    vg_attr = QString(value.value.string);
+
+    if(vg_attr.at(1) == 'z')
+        m_resizable = true;
+    else
+        m_resizable = false;
+
+    if(vg_attr.at(4) == 'c')
+        m_allocation_policy = "contiguous";
+    else if(vg_attr.at(4) == 'l')
+        m_allocation_policy = "cling";
+    else if(vg_attr.at(4) == 'n')
+        m_allocation_policy = "normal";
+    else if(vg_attr.at(4) == 'a')
+        m_allocation_policy = "anywhere";
+
+    long long last_extent, last_used_extent;
+    LogVol *lv;
+    QString pv_name;
+    QList<long long> starting_extent;
+
+    for(int z = 0; z < m_member_pvs.size(); z++){
+        last_extent = 0;
+        last_used_extent = 0;
+        pv_name = m_member_pvs[z]->getDeviceName();
+        for(int x = 0; x < m_member_lvs.size() ; x++){
+            lv = m_member_lvs[x];
+            for(int segment = 0; segment < lv->getSegmentCount(); segment++){
+                pv_name_list = lv->getDevicePath(segment);
+                starting_extent = lv->getSegmentStartingExtent(segment);
+                for(int y = 0; y < pv_name_list.size() ; y++){
+                    if( pv_name == pv_name_list[y] ){
+                        last_extent = starting_extent[y] - 1 + (lv->getSegmentExtents(segment) / (lv->getSegmentStripes(segment)));
+                        if( last_extent > last_used_extent )
+                            last_used_extent = last_extent;
+                    }
+                }
+            }
+        }
+        m_member_pvs[z]->setLastUsedExtent(last_used_extent);
+    }
+
+    LogVol *origin;
+
+    for(int x = 0; x < m_member_lvs.size(); x++){
+        if( m_member_lvs[x]->isMirrorLog() && !m_member_lvs[x]->isMirrorLeg() ){
+            origin = getLogVolByName( m_member_lvs[x]->getOrigin() ); 
+	    if(origin){
+	        if( m_member_lvs[x]->isMirror() )
+		    origin->setLogCount(2);
+		else
+		    origin->setLogCount(1);
+	    }
+	}
+    }
+
+    QStringList devices;
+    for(int x = 0; x < m_member_lvs.size(); x++){
+        for(int y = 0; y < m_member_lvs.size(); y++){
+
+            devices = m_member_lvs[y]->getDevicePathAll();
+
+            for(int z = 0; z < devices.size(); z++){
+                if( m_member_lvs[x]->getName().remove("[").remove("]") == devices[z])
+                    m_member_lvs[x]->setOrigin( m_member_lvs[y]->getName() );
+            }
+        }
+    }
+
 
     return;
 }
@@ -187,7 +316,7 @@ PhysVol* VolGroup::getPhysVolByName(QString name)
 
     return NULL;
 }
-
+/*
 void VolGroup::addLogicalVolume(LogVol *logicalVolume)
 {
     LogVol *lv;
@@ -274,6 +403,7 @@ void VolGroup::addLogicalVolume(LogVol *logicalVolume)
     }
     return;
 }
+*/
 
 long VolGroup::getExtentSize()
 {

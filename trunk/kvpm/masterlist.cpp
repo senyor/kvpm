@@ -66,7 +66,6 @@ void MasterList::rescan()
     progress_dialog->setLabelText( i18n("scanning logical volumes") );
     progress_dialog->ensurePolished();
     qApp->processEvents();
-    scanLogicalVolumes();
 
     progress_bar->setValue(3);
     progress_dialog->setLabelText( i18n("scanning storage devices") );
@@ -127,99 +126,6 @@ void MasterList::scanVolumeGroups(lvm_t lvm)
             delete m_volume_groups.takeAt(x);
         }
     }
-}
-
-void MasterList::scanLogicalVolumes()
-{
-    QList<LogVol *>  logical_volumes;
-    QStringList lv_output;
-    QStringList seg_data;
-    QStringList arguments;
-    QStringList vg_names;
-    int lv_count;
-    int vg_count;
-    int lv_segments;   //number of segments in the logical volume
-
-    for(int x = 0; x < m_volume_groups.size(); x++){
-        if( ! m_volume_groups[x]->isExported() )
-            vg_names << m_volume_groups[x]->getName();
-    }
-
-    MountInformationList mount_info_list;
-
-    if( !vg_names.empty() ){    
-        arguments << "lvs" << "--all" << "-o" 
-                  << "lv_name,vg_name,lv_attr,lv_size,origin,snap_percent,move_pv,mirror_log,copy_percent,chunksize,seg_count,stripes,stripesize,seg_size,devices,lv_kernel_major,lv_kernel_minor,lv_minor,lv_uuid,vg_fmt,vg_attr,lv_tags"  
-                  << "--noheadings" << "--separator" 
-                  << "|" << "--nosuffix" 
-                  << "--units" << "b" 
-                  << "--partial" << vg_names;
-    
-        ProcessProgress lvscan(arguments, i18n("Scanning logical volumes...") );
-        lv_output = lvscan.programOutput();
-    
-        for(int i = 0; i < lv_output.size(); ) {
-            seg_data.clear();
-            lv_segments = (lv_output[i].section('|',10,10)).toInt();
-            
-            for(int x = 0 ; x < lv_segments ; x++){
-                seg_data << lv_output[i++];
-            }
-
-            logical_volumes.append(new LogVol(seg_data, &mount_info_list));
-
-        } 
-
-        /* put pointers to the lvs in their associated vgs */
-    
-        lv_count = logical_volumes.size();
-        vg_count = m_volume_groups.size();
-    
-        for(int vg = 0; vg < vg_count; vg++){
-            for(int lv = 0; lv < lv_count; lv++){
-                if(logical_volumes[lv]->getVolumeGroupName() == m_volume_groups[vg]->getName()){
-                    m_volume_groups[vg]->addLogicalVolume(logical_volumes[lv]);
-                }
-            }    
-        }
-    }
-}
-void MasterList::scanLogicalVolumes(VolGroup *VolumeGroup)
-{
-    LogVol *logical_volume;
-    QString group_name;
-    QStringList lv_output;
-    QStringList seg_data;
-    QStringList arguments;
-    int lv_segments;   //number of segments in the logical volume
-    
-    group_name = VolumeGroup->getName();
-
-    MountInformationList mount_info_list;
-
-    arguments << "lvs" << "--all" << "-o" 
-	      << "lv_name,vg_name,lv_attr,lv_size,origin,snap_percent,move_pv,mirror_log,copy_percent,chunksize,seg_count,stripes,stripesize,seg_size,devices,lv_kernel_major,lv_kernel_minor,lv_minor,lv_uuid"  
-	      << "--noheadings" << "--separator" 
-	      << "|" << "--nosuffix" 
-	      << "--units" << "b" 
-	      << "--partial" << group_name; 
-    
-    ProcessProgress lvscan(arguments, i18n("Scanning logical volumes...") );
-    lv_output = lvscan.programOutput();
-
-    for(int i = 0; i < lv_output.size(); ) {
-	seg_data.clear();
-	lv_segments = (lv_output[i].section('|',10,10)).toInt();
-	
-	for(int x = 0 ; x < lv_segments ; x++){
-	    seg_data << lv_output[i++];
-	}
-
-	logical_volume = new LogVol(seg_data, &mount_info_list);
-	VolumeGroup->addLogicalVolume(logical_volume);
-	logical_volume->setVolumeGroup(VolumeGroup);
-    } 
-
 }
 
 void MasterList::scanStorageDevices()
