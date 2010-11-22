@@ -34,8 +34,6 @@ class LogVol
     QString m_lv_full_name;  // volume_group/logical_volume
     QString m_lv_name;       // name of this logical volume
     QString m_lv_fs;         // Filesystem on volume or "unknown"
-    QString m_lvm_format;    // lvm1 or lvm2
-    QString m_vg_attr;       // vgs vg_attr string
     QString m_origin;        // the origin if this is a snapshot or 
                              // the parent mirror volume to a mirror leg
 
@@ -96,14 +94,6 @@ class LogVol
     QString getOrigin();        // The name of the parent volume to a snapshot or mirror leg
     void setOrigin(QString origin);
     QString getUuid();
-
-    // GET RID OF THIS !!!!!!
-
-    QString getLVMFormat();
-    QString getVGAttr();
-
-    // NOT NEEDED !!!!!!
-
     int getSegmentCount();
     int getSegmentStripes(int segment);
     int getSegmentStripeSize(int segment);

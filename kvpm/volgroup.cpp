@@ -28,16 +28,21 @@ VolGroup::~VolGroup()
 {
     for(int x = m_member_lvs.size() - 1; x >= 0; x--) 
         delete m_member_lvs.takeAt(x);
+
+    for(int x = m_member_pvs.size() - 1; x >= 0; x--) 
+        delete m_member_pvs.takeAt(x);
 }
 
 void VolGroup::rescan(lvm_t lvm)
 {
     bool existing_pv, deleted_pv;
     bool existing_lv, deleted_lv;
-    m_mda_count = 0;
     vg_t lvm_vg;
+    lvm_property_value value;
+    QString vg_attr;
 
     m_allocateable_extents = 0;
+    m_mda_count    = 0;
     m_pv_max       = 0;
     m_extent_size  = 0;
     m_extents      = 0;
@@ -52,11 +57,6 @@ void VolGroup::rescan(lvm_t lvm)
     // clustered volumes can't be opened when clvmd isn't running 
     if( (lvm_vg = lvm_vg_open(lvm, m_vg_name.toAscii().data(), "r", NULL)) ){
 
-        //    m_lvm_format   = QString("????"); // Set this from liblvm when available, see logvol->getLVMFormat()
-        //    m_writable  = true; // ditto
-        //    m_resizable = true; // ditto
-        //    m_allocation_policy = // ditto again
-
 	m_pv_max       = lvm_vg_get_max_pv(lvm_vg); 
 	m_extent_size  = lvm_vg_get_extent_size(lvm_vg);
 	m_extents      = lvm_vg_get_extent_count(lvm_vg);
@@ -67,7 +67,32 @@ void VolGroup::rescan(lvm_t lvm)
 	m_exported     = (bool)lvm_vg_is_exported(lvm_vg); 
 	m_partial      = (bool)lvm_vg_is_partial(lvm_vg); 
 	m_clustered    = (bool)lvm_vg_is_clustered(lvm_vg);
-	
+
+        value = lvm_vg_get_property(lvm_vg, "vg_fmt");
+        m_lvm_format = QString(value.value.string);
+
+        value = lvm_vg_get_property(lvm_vg, "vg_attr");
+        vg_attr = QString(value.value.string);
+
+        if(vg_attr.at(0) == 'w')
+            m_writable = true;
+        else
+            m_writable = false;
+
+        if(vg_attr.at(1) == 'z')
+            m_resizable = true;
+        else
+            m_resizable = false;
+
+        if(vg_attr.at(4) == 'c')
+            m_allocation_policy = "contiguous";
+        else if(vg_attr.at(4) == 'l')
+            m_allocation_policy = "cling";
+        else if(vg_attr.at(4) == 'n')
+            m_allocation_policy = "normal";
+        else if(vg_attr.at(4) == 'a')
+            m_allocation_policy = "anywhere";
+        
 	dm_list* pv_dm_list = lvm_vg_list_pvs(lvm_vg);
 	lvm_pv_list *pv_list;
 	
@@ -106,9 +131,6 @@ void VolGroup::rescan(lvm_t lvm)
 	else
 	    qDebug() << " Empty pv_dm_list?";
 
-
-	//START
-
 	dm_list* lv_dm_list = lvm_vg_list_lvs(lvm_vg);
 	lvm_lv_list *lv_list;
 	
@@ -138,11 +160,10 @@ void VolGroup::rescan(lvm_t lvm)
 	    }
         
 	}
-	else
-	    qDebug() << " Empty lv_dm_list?";
-
-
-	//  END
+        else{      // lv_dm_list is empty so clean up member lvs 
+            for(int x = m_member_lvs.size() - 1; x >= 0; x--) 
+                delete m_member_lvs.takeAt(x);
+        }
 
 	lvm_vg_close(lvm_vg);
     }
@@ -170,26 +191,6 @@ void VolGroup::rescan(lvm_t lvm)
 	    pv_name_list.clear();
 	}
     }
-
-    lvm_property_value value;
-    QString vg_attr;
-
-    value = lvm_vg_get_property(lvm_vg, "vg_attr");
-    vg_attr = QString(value.value.string);
-
-    if(vg_attr.at(1) == 'z')
-        m_resizable = true;
-    else
-        m_resizable = false;
-
-    if(vg_attr.at(4) == 'c')
-        m_allocation_policy = "contiguous";
-    else if(vg_attr.at(4) == 'l')
-        m_allocation_policy = "cling";
-    else if(vg_attr.at(4) == 'n')
-        m_allocation_policy = "normal";
-    else if(vg_attr.at(4) == 'a')
-        m_allocation_policy = "anywhere";
 
     long long last_extent, last_used_extent;
     LogVol *lv;
@@ -243,7 +244,6 @@ void VolGroup::rescan(lvm_t lvm)
             }
         }
     }
-
 
     return;
 }
@@ -316,94 +316,6 @@ PhysVol* VolGroup::getPhysVolByName(QString name)
 
     return NULL;
 }
-/*
-void VolGroup::addLogicalVolume(LogVol *logicalVolume)
-{
-    LogVol *lv;
-    PhysVol *pv;
-    QList<long long> starting_extent;
-    QStringList pv_name_list;
-    QString pv_name, vg_attr;
-    long long last_extent, last_used_extent;
-
-    logicalVolume->setVolumeGroup(this);
-    m_member_lvs.append(logicalVolume);
-    m_lvm_format = logicalVolume->getLVMFormat();
-
-    if( logicalVolume->isActive() ){
-        pv_name_list = logicalVolume->getDevicePathAll();
-        for(int x = 0; x < pv_name_list.size(); x++){
-            if( (pv = getPhysVolByName(pv_name_list[x])) )
-                pv->setActive();
-        }
-        pv_name_list.clear();
-    }
-
-    vg_attr = logicalVolume->getVGAttr();
-
-    if(vg_attr.at(1) == 'z')
-        m_resizable = true;
-    else
-        m_resizable = false;
-
-    if(vg_attr.at(4) == 'c')
-        m_allocation_policy = "contiguous";
-    else if(vg_attr.at(4) == 'l')
-        m_allocation_policy = "cling";
-    else if(vg_attr.at(4) == 'n')
-        m_allocation_policy = "normal";
-    else if(vg_attr.at(4) == 'a')
-        m_allocation_policy = "anywhere";
-
-    for(int z = 0; z < m_member_pvs.size(); z++){
-        last_extent = 0;
-        last_used_extent = 0;
-        pv_name = m_member_pvs[z]->getDeviceName();
-        for(int x = 0; x < m_member_lvs.size() ; x++){
-            lv = m_member_lvs[x];
-            for(int segment = 0; segment < lv->getSegmentCount(); segment++){
-                pv_name_list = lv->getDevicePath(segment);
-                starting_extent = lv->getSegmentStartingExtent(segment);
-                for(int y = 0; y < pv_name_list.size() ; y++){
-                    if( pv_name == pv_name_list[y] ){
-                        last_extent = starting_extent[y] - 1 + (lv->getSegmentExtents(segment) / (lv->getSegmentStripes(segment)));
-                        if( last_extent > last_used_extent )
-                            last_used_extent = last_extent;
-                    }
-                }
-            }
-        }
-        m_member_pvs[z]->setLastUsedExtent(last_used_extent);
-    }
-
-    // We are assuming mirrored logs only come in twos.
-
-    LogVol *origin;
-    if( logicalVolume->isMirrorLog() && !logicalVolume->isMirrorLeg() ){
-        origin = getLogVolByName( logicalVolume->getOrigin() ); 
-        if(origin){
-            if( logicalVolume->isMirror() )
-                origin->setLogCount(2);
-            else
-                origin->setLogCount(1);
-        }
-    }
-
-    QStringList devices;
-    for(int x = 0; x < m_member_lvs.size(); x++){
-        for(int y = 0; y < m_member_lvs.size(); y++){
-
-            devices = m_member_lvs[y]->getDevicePathAll();
-
-            for(int z = 0; z < devices.size(); z++){
-                if( m_member_lvs[x]->getName().remove("[").remove("]") == devices[z])
-                    m_member_lvs[x]->setOrigin( m_member_lvs[y]->getName() );
-            }
-        }
-    }
-    return;
-}
-*/
 
 long VolGroup::getExtentSize()
 {
