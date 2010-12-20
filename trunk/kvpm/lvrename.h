@@ -17,7 +17,6 @@
 
 #include <KDialog>
 #include <KLineEdit>
-#include <QRegExpValidator>
 #include <QStringList>
 #include <QRegExpValidator>
 
