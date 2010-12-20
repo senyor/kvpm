@@ -19,46 +19,56 @@
 #include <KPushButton>
 #include <QtGui>
 
-#include "vgextend.h"
+#include "masterlist.h"
+#include "misc.h"
 #include "storagedevice.h"
 #include "storagepartition.h"
 #include "vgcreate.h"
-#include "masterlist.h"
-#include "misc.h"
+#include "vgextend.h"
+#include "volgroup.h"
 
 extern MasterList *master_list;
 
 bool extend_vg(QString volumeGroupName, QString physicalVolumeName, long long size)
 {
-    QString message;
+    QString message, error_message;
     QStringList args;
     lvm_t  lvm;
     vg_t vg_dm;
-    
-    message = i18n("Do you want to extend volume group: <b>%1</b> with "
-		   "physical volume: <b>%2</b> (size: %3)").arg(volumeGroupName).arg(physicalVolumeName).arg(sizeToString(size));
+    VolGroup *vg =  master_list->getVolGroupByName(volumeGroupName);
+    long long extent_size = vg->getExtentSize();
 
-    if( KMessageBox::questionYesNo(0, message) == 3 ){     // 3 is the "yes" button
-        if( (lvm = lvm_init(NULL)) ){
-            if( (vg_dm = lvm_vg_open(lvm, volumeGroupName.toAscii().data(), "w", NULL)) ){
-                if( ! lvm_vg_extend(vg_dm, physicalVolumeName.toAscii().data()) ){
-                    if( lvm_vg_write(vg_dm) )
-                        KMessageBox::error(0, QString(lvm_errmsg(lvm)));;
+    error_message = i18n("This physical volume <b>%1</b> is smaller than the extent size").arg(physicalVolumeName);
+
+    if(extent_size > size){
+        KMessageBox::error(0, error_message);
+    }
+    else{
+        message = i18n("Do you want to extend volume group: <b>%1</b> with "
+                       "physical volume: <b>%2</b> (size: %3)").arg(volumeGroupName).arg(physicalVolumeName).arg(sizeToString(size));
+
+        if( KMessageBox::questionYesNo(0, message) == 3 ){     // 3 is the "yes" button
+            if( (lvm = lvm_init(NULL)) ){
+                if( (vg_dm = lvm_vg_open(lvm, volumeGroupName.toAscii().data(), "w", NULL)) ){
+                    if( ! lvm_vg_extend(vg_dm, physicalVolumeName.toAscii().data()) ){
+                        if( lvm_vg_write(vg_dm) )
+                            KMessageBox::error(0, QString(lvm_errmsg(lvm)));;
+                        lvm_vg_close(vg_dm);
+                        lvm_quit(lvm);
+                        return true;
+                    }
+                    KMessageBox::error(0, QString(lvm_errmsg(lvm))); 
                     lvm_vg_close(vg_dm);
                     lvm_quit(lvm);
                     return true;
                 }
                 KMessageBox::error(0, QString(lvm_errmsg(lvm))); 
-                lvm_vg_close(vg_dm);
                 lvm_quit(lvm);
                 return true;
             }
-            KMessageBox::error(0, QString(lvm_errmsg(lvm))); 
-            lvm_quit(lvm);
+            KMessageBox::error(0, QString(lvm_errmsg(lvm)));
             return true;
         }
-        KMessageBox::error(0, QString(lvm_errmsg(lvm)));
-        return true;
     }
     return false;  // do nothing
 }
