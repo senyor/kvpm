@@ -47,9 +47,11 @@ Q_OBJECT
     void stateChanged();
 
  private slots:
+    void calculateSpace();
+
+ public slots:
     void selectAll();
     void selectNone();
-    void calculateSpace();
 
 };
 
