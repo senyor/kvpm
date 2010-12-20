@@ -87,9 +87,8 @@ QStringList LVChangeDialog::arguments()
         else if(m_ignore_button->isChecked())
 	    args << "--ignoremonitoring";
     }
-
-    //    else if( refresh_check->isChecked() )
-    args << "--refresh"; // give lvchange something to do or it may complain
+    else
+        args << "--refresh"; // give lvchange something to do or it may complain
        
     if(m_persistant_box->isChecked()){
 	args << "--force" << "-My";
