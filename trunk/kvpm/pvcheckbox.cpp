@@ -153,6 +153,7 @@ void PVCheckBox::selectAll(){
         for(int x = 0; x < m_pv_checks.size(); x++)
             m_pv_checks[x]->setChecked(true);
     }
+    emit stateChanged();
 
     return;
 }
@@ -163,6 +164,7 @@ void PVCheckBox::selectNone(){
         for(int x = 0; x < m_pv_checks.size(); x++)
             m_pv_checks[x]->setChecked(false);
     }
+    emit stateChanged();
 
     return;
 }
