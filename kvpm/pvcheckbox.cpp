@@ -18,6 +18,7 @@
 
 #include "pvcheckbox.h"
 #include "physvol.h"
+#include "misc.h"
 
 PVCheckBox::PVCheckBox(QList<PhysVol *> physicalVolumes, long long extentSize, QWidget *parent):
     QGroupBox(parent), m_pvs(physicalVolumes), m_extent_size(extentSize)
@@ -86,6 +87,21 @@ QStringList PVCheckBox::getNames(){
         for(int x = 0; x < m_pv_checks.size(); x++){
             if(m_pv_checks[x]->isChecked())
                 names << m_pv_checks[x]->getAlternateText();
+        }
+    }
+    else if(m_pvs.size())
+        names << m_pvs[0]->getDeviceName();
+
+    return names;
+}
+
+QStringList PVCheckBox::getAllNames(){
+
+    QStringList names;
+
+    if(m_pv_checks.size()){
+        for(int x = 0; x < m_pv_checks.size(); x++){
+            names << m_pv_checks[x]->getAlternateText();
         }
     }
     else if(m_pvs.size())

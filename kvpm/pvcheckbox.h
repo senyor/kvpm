@@ -25,6 +25,7 @@
 #include "misc.h"
 
 class PhysVol;
+class NoMungeCheck;
 
 class PVCheckBox: public QGroupBox
 {
@@ -37,6 +38,7 @@ Q_OBJECT
 
  public:
     PVCheckBox(QList<PhysVol *> physicalVolumes, long long extentSize, QWidget *parent = NULL); 
+    QStringList getAllNames();    // names of all pvs displayed in the box
     QStringList getNames();       // names of *selected* pvs
     long long getUnusedSpace();   // total unused space on selected pvs
     QList<long long> getUnusedSpaceList();  // ditto
