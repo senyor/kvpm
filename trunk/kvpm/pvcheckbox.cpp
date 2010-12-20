@@ -28,7 +28,7 @@ PVCheckBox::PVCheckBox(QList<PhysVol *> physicalVolumes, long long extentSize, Q
     setLayout(layout);
     QHBoxLayout *button_layout = new QHBoxLayout();
     KPushButton *all_button = new KPushButton( i18n("Select all") );
-    KPushButton *none_button = new KPushButton( i18n("Select none") );
+    KPushButton *none_button = new KPushButton( i18n("Clear all") );
     NoMungeCheck *temp_check;
     int pv_check_count = m_pvs.size();
     m_space_label   = new QLabel;
