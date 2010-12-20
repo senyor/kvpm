@@ -21,7 +21,7 @@
 
 
 class VolGroup;
-class NoMungeCheck;
+class PVCheckBox;
 
 bool reduce_vg(VolGroup *volumeGroup);
 
@@ -31,15 +31,15 @@ class VGReduceDialog : public KDialog
 Q_OBJECT
 
     VolGroup *m_vg;
-    QList<NoMungeCheck *> m_pv_check_boxes;
+    PVCheckBox *m_pv_checkbox; 
     bool m_unremovable_pvs_present;
-    
+
  public:
     VGReduceDialog(VolGroup *volumeGroup, QWidget *parent = 0);
     QStringList arguments();
     
  private slots:
-    void excludeOneVolume(bool);  // one pv must remain in the vg
+    void excludeOneVolume();  // one pv must remain in the vg
     void commitChanges();
 };
 
