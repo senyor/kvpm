@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -129,7 +129,7 @@ void VGChangeExtentDialog::commitChanges()
         new_extent_size *= 1024;
 
     if( (lvm = lvm_init(NULL)) ){
-        if( (vg_dm = lvm_vg_open( lvm, m_vg_name.toAscii().data(), "w", NULL )) ){
+        if( (vg_dm = lvm_vg_open( lvm, m_vg_name.toAscii().data(), "w", 0 )) ){
 
             if( (lvm_vg_set_extent_size(vg_dm, new_extent_size)) )
                 KMessageBox::error(0, QString(lvm_errmsg(lvm)));
