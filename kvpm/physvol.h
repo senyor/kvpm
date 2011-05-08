@@ -37,7 +37,7 @@ class PhysVol
     long long m_last_used_extent;
 
  public:
-    PhysVol(pv_t pv, VolGroup *vg);
+    PhysVol(pv_t lvm_pv, VolGroup *vg);
     void rescan(pv_t pv);
     QString getDeviceName();       // eg: /dev/hde4
     QString getUuid();

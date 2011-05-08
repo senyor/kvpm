@@ -117,7 +117,6 @@ LVProperties::LVProperties(LogVol *logicalVolume, int segment, QWidget *parent):
 	temp_label = new QLabel( "<b> " + logicalVolume->getName() + "</b>" );
 	temp_label->setAlignment(Qt::AlignCenter);
 	basic_info_layout->addWidget(temp_label);
-
 	extents = logicalVolume->getExtents();
 	basic_info_layout->addWidget(new QLabel( i18n("Extents: %1").arg(extents) ));
 

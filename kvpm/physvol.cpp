@@ -23,21 +23,51 @@ PhysVol::PhysVol(pv_t pv, VolGroup *vg)
     rescan(pv);
 }
 
-void PhysVol::rescan(pv_t pv)
+void PhysVol::rescan(pv_t lvm_pv)
 {
+    QByteArray flags;
+    lvm_property_value value;
+
+    value = lvm_pv_get_property(lvm_pv, "pv_attr");
+    flags.append(value.value.string);
+
+    if(flags[0] == 'a')
+        m_allocatable = true;
+    else
+        m_allocatable = false;
+
     m_last_used_extent = 0;
+    m_active        = false;     // pv is active if any associated lvs are active
+    m_device        = QString( lvm_pv_get_name(lvm_pv) );
+    m_device_size   = lvm_pv_get_dev_size(lvm_pv); 
+    m_unused        = lvm_pv_get_free(lvm_pv);
+    m_size          = lvm_pv_get_size(lvm_pv);
+    m_uuid          = QString( lvm_pv_get_uuid(lvm_pv) );
+    m_mda_count     = lvm_pv_get_mda_count(lvm_pv);
 
-    m_device   = QString( lvm_pv_get_name(pv) );
-    m_allocatable = true; // Set this correctly when lvm2apps ready!!!
+    // The following wil be used to to calculate the last used
+    // segement once the "lv_name" property gets implemented
+    dm_list* pvseg_dm_list = lvm_pv_list_pvsegs(lvm_pv);  
+    lvm_pvseg_list *pvseg_list;
 
-    // pv is active if any associated lvs are active
-    m_active = false;
-    
-    m_device_size   = lvm_pv_get_dev_size(pv); 
-    m_unused        = lvm_pv_get_free(pv);
-    m_size          = lvm_pv_get_size(pv);
-    m_uuid          = QString( lvm_pv_get_uuid(pv) );
-    m_mda_count     = lvm_pv_get_mda_count(pv);
+    if(pvseg_dm_list){
+        dm_list_iterate_items(pvseg_list, pvseg_dm_list){ 
+	    
+            //            value = lvm_pvseg_get_property( pvseg_list->pvseg , "lv_name");
+            value = lvm_pvseg_get_property( pvseg_list->pvseg , "pvseg_start");
+            if(value.is_valid)
+                qDebug() << "Seg start: " << value.value.integer;
+            else
+                qDebug() << "Not valid";
+
+            value = lvm_pvseg_get_property( pvseg_list->pvseg , "pvseg_size");
+            if(value.is_valid)
+                qDebug() << "Seg size:  " << value.value.integer;
+            else
+                qDebug() << "Not valid";
+	}
+    }
+
     return;
 }
 
