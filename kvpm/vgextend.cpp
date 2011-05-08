@@ -49,7 +49,7 @@ bool extend_vg(QString volumeGroupName, QString physicalVolumeName, long long si
 
         if( KMessageBox::questionYesNo(0, message) == 3 ){     // 3 is the "yes" button
             if( (lvm = lvm_init(NULL)) ){
-                if( (vg_dm = lvm_vg_open(lvm, volumeGroupName.toAscii().data(), "w", NULL)) ){
+                if( (vg_dm = lvm_vg_open(lvm, volumeGroupName.toAscii().data(), "w", 0)) ){
                     if( ! lvm_vg_extend(vg_dm, physicalVolumeName.toAscii().data()) ){
                         if( lvm_vg_write(vg_dm) )
                             KMessageBox::error(0, QString(lvm_errmsg(lvm)));;
@@ -201,7 +201,7 @@ void VGExtendDialog::commitChanges()
     loop->processEvents();
 
     if( (lvm = lvm_init(NULL)) ){
-        if( (vg_dm = lvm_vg_open(lvm, m_vg->getName().toAscii().data(), "w", NULL )) ){
+        if( (vg_dm = lvm_vg_open(lvm, m_vg->getName().toAscii().data(), "w", 0 )) ){
 
             for(int x = 0; x < m_pv_names.size(); x++){
 	        progress_bar->setValue(x);
