@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -94,7 +94,7 @@ void VGReduceDialog::commitChanges()
     pv_list << m_pv_checkbox->getNames();
 
     if( (lvm = lvm_init(NULL)) ){
-        if( (vg_dm = lvm_vg_open(lvm, m_vg->getName().toAscii().data(), "w", NULL)) ){
+        if( (vg_dm = lvm_vg_open(lvm, m_vg->getName().toAscii().data(), "w", 0)) ){
             for(int x = 0; x < pv_list.size(); x++){
                 if( lvm_vg_reduce(vg_dm, pv_list[x].toAscii().data()) )
                     KMessageBox::error(0, QString(lvm_errmsg(lvm)));

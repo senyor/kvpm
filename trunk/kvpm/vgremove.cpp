@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -46,7 +46,7 @@ bool remove_vg(VolGroup *volumeGroup)
         if( (lvm = lvm_init(NULL)) ){
             progress_bar->setValue(2);
             qApp->processEvents();
-            if( (vg_dm = lvm_vg_open(lvm, volumeGroup->getName().toAscii().data(), "w", NULL)) ){
+            if( (vg_dm = lvm_vg_open(lvm, volumeGroup->getName().toAscii().data(), "w", 0)) ){
                 progress_bar->setValue(2);
                 qApp->processEvents();
                 if( lvm_vg_remove(vg_dm) ) 
