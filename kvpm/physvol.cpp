@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
