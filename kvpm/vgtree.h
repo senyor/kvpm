@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2009, 2010 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -37,7 +37,7 @@ Q_OBJECT
     VolGroup *m_vg;
     LogVol   *m_lv;
 
-    QList<QTreeWidgetItem *> m_lv_tree_items;
+    QList<QTreeWidgetItem *> m_lv_tree_items, m_old_lv_tree_items;
     QString m_vg_name;
     QString m_lv_name;
     QString m_pv_name;
@@ -46,7 +46,8 @@ Q_OBJECT
     void insertSegmentItems(LogVol *logicalVolume, QTreeWidgetItem *item);
     void insertMirrorLegItems(LogVol *mirrorVolume, QTreeWidgetItem *item);
     void setHiddenColumns();
-    
+    void walkTreeExpandedItems(QTreeWidgetItem *old_item, QTreeWidgetItem *new_item);
+
 public:
     VGTree(VolGroup *VolumeGroup);
     void loadData();
