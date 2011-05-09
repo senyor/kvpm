@@ -397,10 +397,6 @@ long long LogVol::getSegmentSize(int segment)
 
 long long LogVol::getSegmentExtents(int segment)
 {
-
-    qDebug() << "Seg size: " << m_segments[segment]->m_size;
-
-    qDebug() << "Seg Exts: " << m_segments[segment]->m_size / m_vg->getExtentSize();
     return (m_segments[segment]->m_size / m_vg->getExtentSize());
 }
 
