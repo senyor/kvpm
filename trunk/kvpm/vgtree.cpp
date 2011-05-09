@@ -44,10 +44,8 @@ void VGTree::loadData()
     QList<LogVol *> logical_volumes = m_vg->getLogicalVolumes();
     LogVol *lv = NULL;   
     QTreeWidgetItem *lv_item = NULL;
-    QTreeWidgetItem *current_item = currentItem(); // The current item in the tree we are about to clear
-    bool current_is_expanded = false;              // Is that current item expanded
     QStringList lv_data;
-    QString current_lv_name;
+    QString old_name, new_name;
     long long fs_remaining;       // remaining space on fs -- if known
     int fs_percent;               // percentage of space remaining
 
@@ -59,21 +57,8 @@ void VGTree::loadData()
 
     setSortingEnabled(false);
 
-    // Get the currently selected item so it can be reselected
-    // after the tree is cleared and all the new data is loaded.
-
-    if( m_lv_tree_items.size() && current_item ){
-        current_is_expanded = current_item->isExpanded();
-        current_lv_name   = ( current_item->data(0, Qt::UserRole) ).toString();
-    }
-    else{
-        current_is_expanded = false;
-        current_lv_name = "";
-    }
-
-    clear();
+    m_old_lv_tree_items = m_lv_tree_items;
     m_lv_tree_items.clear();
-    current_item = NULL;
     setupContextMenu();
 
     for(int x = 0; x < m_vg->getLogVolCount(); x++){
@@ -167,19 +152,20 @@ void VGTree::loadData()
 
 		insertSegmentItems(lv, lv_item);
 	    }
-            if(lv->getName() == current_lv_name){
-                current_item = lv_item;
-            }        
         }
     }
     insertTopLevelItems(0, m_lv_tree_items);
 
-    if( m_lv_tree_items.size() ){
-        if( !current_item )
-            setCurrentItem(m_lv_tree_items[0]);
-        else{
-            setCurrentItem(current_item); 	
-            current_item->setExpanded(current_is_expanded);
+    if( m_old_lv_tree_items.size() ){
+        for(int x = 0; x < m_old_lv_tree_items.size(); x++){
+            old_name = ( m_old_lv_tree_items[x]->data(0, Qt::UserRole) ).toString();
+            for(int y = 0; y < m_lv_tree_items.size(); y++){
+                new_name = ( m_lv_tree_items[y]->data(0, Qt::UserRole) ).toString();
+                if(new_name == old_name){
+                    walkTreeExpandedItems( m_old_lv_tree_items[x], m_lv_tree_items[y] ); 
+                }
+            }
+            delete( takeTopLevelItem( indexOfTopLevelItem( m_old_lv_tree_items[x] ) ) );
         }
     }
 
@@ -399,4 +385,25 @@ void VGTree::setHiddenColumns()
 void VGTree::adjustColumnWidth(QTreeWidgetItem *)
 {
     resizeColumnToContents(0);
+}
+
+void VGTree::walkTreeExpandedItems(QTreeWidgetItem *old_item, QTreeWidgetItem *new_item)
+{
+    QTreeWidgetItem *old_child, *new_child;
+    QString old_child_name, new_child_name;
+
+    new_item->setExpanded( old_item->isExpanded() );  
+
+    if( old_item->childCount() && new_item->childCount() ){
+        for(int x = 0; x < old_item->childCount(); x++){
+            old_child = old_item->child(x);
+            old_child_name = ( old_child->data(0, Qt::UserRole) ).toString();
+            for(int y = 0; y < new_item->childCount(); y++){
+                new_child = new_item->child(y);
+                new_child_name = ( new_child->data(0, Qt::UserRole) ).toString();
+                if(new_child_name == old_child_name) 
+                    walkTreeExpandedItems(old_child, new_child);
+            }
+        }
+    }
 }
