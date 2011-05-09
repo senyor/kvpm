@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2009, 2010 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  * * This program is free software; you can redistribute it and/or modify
@@ -56,6 +56,8 @@ void VGTree::loadData()
 
     disconnect(this, SIGNAL(itemCollapsed(QTreeWidgetItem *)), 
 	    this, SLOT(adjustColumnWidth(QTreeWidgetItem *)));
+
+    setSortingEnabled(false);
 
     // Get the currently selected item so it can be reselected
     // after the tree is cleared and all the new data is loaded.
@@ -189,6 +191,9 @@ void VGTree::loadData()
 
     setHiddenColumns();
     resizeColumnToContents(0);
+    setSortingEnabled(true);
+    sortByColumn(0, Qt::AscendingOrder);
+
     return;
 }
 
