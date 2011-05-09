@@ -45,6 +45,7 @@ void PhysVol::rescan(pv_t lvm_pv)
     m_uuid          = QString( lvm_pv_get_uuid(lvm_pv) );
     m_mda_count     = lvm_pv_get_mda_count(lvm_pv);
 
+    /*
     // The following wil be used to to calculate the last used
     // segement once the "lv_name" property gets implemented
     dm_list* pvseg_dm_list = lvm_pv_list_pvsegs(lvm_pv);  
@@ -67,7 +68,7 @@ void PhysVol::rescan(pv_t lvm_pv)
                 qDebug() << "Not valid";
 	}
     }
-
+    */
     return;
 }
 
