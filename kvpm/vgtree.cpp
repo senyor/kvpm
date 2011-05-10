@@ -235,7 +235,6 @@ void VGTree::insertMirrorLegItems(LogVol *mirrorVolume, QTreeWidgetItem *item)
     QTreeWidgetItem *leg_item;
 
     LogVol *leg_volume;
-
     VolGroup *volume_group = mirrorVolume->getVolumeGroup();    
     int lv_count = volume_group->getLogVolCount();
     QList<LogVol *>  logical_volume_list = volume_group->getLogicalVolumes();
