@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2009, 2010 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -333,11 +333,31 @@ QWidget* LVCreateDialog::createPhysicalTab()
 /* If we are extending a volume we try to match the striping
    of the last segment of that volume, if it was striped */
 
-    if(m_extend && !(m_lv->isMirror() ) ){
-	const int seg_count = m_lv->getSegmentCount();
-	const int seg_stripe_count = m_lv->getSegmentStripes(seg_count - 1);
-	const int seg_stripe_size = m_lv->getSegmentStripeSize(seg_count - 1);
-	
+    if(m_extend){
+	int seg_count = 1;
+	int seg_stripe_count = 1;
+	int seg_stripe_size = 4;
+        QList<LogVol *>  logvols;
+
+        if( m_lv->isMirror() ){
+            logvols = m_vg->getLogicalVolumes();
+            for(int x = 0; x < logvols.size(); x++){
+                if(logvols[x]->isMirrorLeg() && !(logvols[x]->isMirrorLog()) ){
+                    if(logvols[x]->getOrigin() == m_lv->getName()){
+                        seg_count = logvols[x]->getSegmentCount();
+                        seg_stripe_count = logvols[x]->getSegmentStripes(seg_count - 1);
+                        seg_stripe_size = logvols[x]->getSegmentStripeSize(seg_count - 1);
+                        break;
+                    }
+                }
+            }
+        }
+        else{
+            seg_count = m_lv->getSegmentCount();
+            seg_stripe_count = m_lv->getSegmentStripes(seg_count - 1);
+            seg_stripe_size = m_lv->getSegmentStripeSize(seg_count - 1);
+	}
+
 	if(seg_stripe_count > 1){
 	    m_stripes_number_spin->setValue(seg_stripe_count);
 	    m_stripe_box->setChecked(true);
