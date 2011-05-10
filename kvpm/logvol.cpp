@@ -239,7 +239,6 @@ void LogVol::rescan(lv_t lvm_lv)
     else if(m_mirror_log && m_mirror_leg){
         m_origin = m_lv_name;
         m_origin.truncate( m_origin.indexOf("_mimage_") );
-        m_origin.append("]");
     }
     else if( m_mirror || m_virtual ){
 	if( m_lv_name.contains("_mimagetmp_") ){
