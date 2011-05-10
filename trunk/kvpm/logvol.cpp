@@ -225,19 +225,16 @@ void LogVol::rescan(lv_t lvm_lv)
     if(m_snap){
         value = lvm_lv_get_property(lvm_lv, "origin");
         m_origin = value.value.string;
-
 	value = lvm_lv_get_property(lvm_lv, "snap_percent");
         m_snap_percent = value.value.integer;
     }
     else if(m_mirror_leg && !m_mirror_log){
         m_origin = m_lv_name;
-        m_origin.remove(0,1);
         m_origin.truncate( m_origin.indexOf("_mimage_") );
     }
     else if(m_mirror_log && !m_mirror_leg){
         m_origin = m_lv_name;
-        m_origin.remove(0,1);
-        m_origin.truncate( m_origin.indexOf("_mlog]") );
+        m_origin.truncate( m_origin.indexOf("_mlog") );
     }
     else if(m_mirror_log && m_mirror_leg){
         m_origin = m_lv_name;
@@ -631,12 +628,6 @@ QStringList LogVol::getTags()
 QString LogVol::getOrigin()
 {
     return  m_origin;
-}
-
-void LogVol::setOrigin(QString origin)
-{
-    m_origin = origin;
-    return;
 }
 
 /* TO DO: Merge these next two lists in a single

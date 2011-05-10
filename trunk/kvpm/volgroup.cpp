@@ -232,19 +232,6 @@ void VolGroup::rescan(lvm_t lvm)
 	}
     }
 
-    QStringList devices;
-    for(int x = 0; x < m_member_lvs.size(); x++){
-        for(int y = 0; y < m_member_lvs.size(); y++){
-
-            devices = m_member_lvs[y]->getDevicePathAll();
-
-            for(int z = 0; z < devices.size(); z++){
-                if( m_member_lvs[x]->getName().remove("[").remove("]") == devices[z])
-                    m_member_lvs[x]->setOrigin( m_member_lvs[y]->getName() );
-            }
-        }
-    }
-
     return;
 }
 
