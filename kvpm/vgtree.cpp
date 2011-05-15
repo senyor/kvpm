@@ -89,9 +89,9 @@ void VGTree::loadData()
                     lv_data << QString("%1").arg(lv->getSegmentStripes(0)) << sizeToString(lv->getSegmentStripeSize(0));
 
 		if( lv->isSnap() )
-		    lv_data    << QString("%%1").arg(lv->getSnapPercent());
+		    lv_data    << QString("%%1").arg(lv->getSnapPercent(), 1, 'f', 2);
 		else if( lv->isPvmove() )
-		    lv_data    << QString("%%1").arg(lv->getCopyPercent());
+		    lv_data    << QString("%%1").arg(lv->getCopyPercent(), 1, 'f', 2);
 		else
 		    lv_data << " ";
 		
