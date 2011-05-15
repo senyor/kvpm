@@ -226,7 +226,7 @@ void LogVol::rescan(lv_t lvm_lv)
         value = lvm_lv_get_property(lvm_lv, "origin");
         m_origin = value.value.string;
 	value = lvm_lv_get_property(lvm_lv, "snap_percent");
-        m_snap_percent = value.value.integer;
+        m_snap_percent = (double)value.value.integer / 1.0e+6;
     }
     else if(m_mirror_leg && !m_mirror_log){
         m_origin = m_lv_name;
@@ -254,7 +254,7 @@ void LogVol::rescan(lv_t lvm_lv)
 
     value = lvm_lv_get_property(lvm_lv, "copy_percent");
     if(value.is_valid)
-        m_copy_percent = value.value.integer;
+        m_copy_percent = (double)value.value.integer / 1.0e+6;
     else
         m_copy_percent = 0;
 
