@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -38,13 +38,30 @@ PVTree::PVTree(VolGroup *volumeGroup, QWidget *parent) : QTreeWidget(parent), m_
     QStringList header_labels;
     m_context_menu = NULL;
     setColumnCount(6);
+    QTreeWidgetItem * item;
 
     header_labels << i18n("Name") << i18n("Size") 
 		  << i18n("Free") << i18n("Used")
-		  << i18n("Allocatable") << i18n("Tag") 
+		  << i18n("Allocatable") 
+                  << i18n("MDA Count") << i18n("MDA Size") 
+                  << i18n("Tag") 
 		  << i18n("Logical volumes");
 
-    setHeaderLabels(header_labels);
+    item = new QTreeWidgetItem((QTreeWidgetItem *)0, header_labels);
+
+    for(int column = 0; column < 8; column++)
+        item->setTextAlignment(column, Qt::AlignCenter);
+
+    item->setToolTip(0, i18n("Physical volume device"));
+    item->setToolTip(1, i18n("Total size of physical volume"));
+    item->setToolTip(2, i18n("Free space on physical volume"));
+    item->setToolTip(3, i18n("Space used on physical volume"));
+    item->setToolTip(4, i18n("If physical volume allows more extents to be allocated"));
+    item->setToolTip(5, i18n("Number of metadata areas on physical volume"));
+    item->setToolTip(6, i18n("Size of meta data areas on physical volume"));
+    item->setToolTip(7, i18n("Optional tags for physical volume"));
+
+    setHeaderItem(item);
 }
 
 void PVTree::loadData()
@@ -79,6 +96,9 @@ void PVTree::loadData()
 	else
 	    pv_data << "No";
 
+        pv_data << QString("%1").arg(pv->getMDACount());
+        pv_data << sizeToString(pv->getMDASize());
+
         pv_data << "   "; // replace with pv->getTag();
 
 /* here we get the names of logical volumes associated
@@ -106,6 +126,10 @@ void PVTree::loadData()
 	item->setData(1, Qt::UserRole, pv->getSize());
 	item->setData(2, Qt::UserRole, pv->getUnused());
 	item->setData(3, Qt::UserRole, (pv->getSize() - pv->getUnused()));
+
+        for(int column = 1; column < 7; column++)
+            item->setTextAlignment(column, Qt::AlignRight);
+
 	pv_tree_items.append(item);
     }
     insertTopLevelItems(0, pv_tree_items);
@@ -113,7 +137,7 @@ void PVTree::loadData()
     if( pv_tree_items.size() )
 	setCurrentItem( pv_tree_items[0] );
 
-    setColumnHidden(6, true);
+    setColumnHidden(8, true);
     return;
 }
 

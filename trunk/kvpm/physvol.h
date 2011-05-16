@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -31,6 +31,7 @@ class PhysVol
     bool m_active;
     bool m_allocatable;
     uint64_t  m_mda_count;    // number of metadata areas
+    uint64_t  m_mda_size;    
     long long m_size;         // size in bytes of physical volume
     long long m_device_size;  // size in bytes of underlying device
     long long m_unused;       // free space in bytes
@@ -52,6 +53,7 @@ class PhysVol
     void setLastUsedExtent(long long last);
     int getPercentUsed();           // 0 - 100
     long long getMDACount();    
+    long long getMDASize();    
 };
 
 #endif

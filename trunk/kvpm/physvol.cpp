@@ -45,6 +45,9 @@ void PhysVol::rescan(pv_t lvm_pv)
     m_uuid          = QString( lvm_pv_get_uuid(lvm_pv) );
     m_mda_count     = lvm_pv_get_mda_count(lvm_pv);
 
+    value = lvm_pv_get_property(lvm_pv, "pv_mda_size");
+    m_mda_size = value.value.integer;
+
     /*
     // The following wil be used to to calculate the last used
     // segement once the "lv_name" property gets implemented
@@ -105,6 +108,11 @@ void PhysVol::setActive()
 long long PhysVol::getMDACount()
 {
     return m_mda_count;
+}
+
+long long PhysVol::getMDASize()
+{
+    return m_mda_size;
 }
 
 long long PhysVol::getSize()
