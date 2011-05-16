@@ -216,7 +216,8 @@ VGCreateDialog::VGCreateDialog(QList<AvailableDevice *> devices, QWidget *parent
     pv_layout_h->addWidget(m_max_pvs);
 
     m_clustered = new QCheckBox( i18n("Cluster Aware") );
-    
+    m_clustered->setEnabled(false);
+
     m_auto_backup = new QCheckBox( i18n("Automatic Backup") );
     m_auto_backup->setCheckState(Qt::Checked);
 
