@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2009, 2010 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -30,12 +30,7 @@
 #include "removemissing.h"
 #include "topwindow.h"
 #include "vgcreate.h"
-#include "vgchangealloc.h"
-#include "vgchangeavailable.h"
-#include "vgchangeextent.h"
-#include "vgchangelv.h"
-#include "vgchangepv.h"
-#include "vgchangeresize.h"
+#include "vgchange.h"
 #include "vgexport.h"
 #include "vgextend.h"
 #include "vgimport.h"
@@ -95,22 +90,9 @@ TopWindow::TopWindow(QWidget *parent):KMainWindow(parent)
     merge_vg_action        = new KAction( KIcon("merge"), i18n("Merge Volume Group..."), this);
     extend_vg_action       = new KAction( i18n("Extend Volume Group..."), this);
     split_vg_action        = new KAction( KIcon("split"), i18n("Split Volume Group..."), this);
-    m_vgchange_menu           = new KMenu( i18n("Change Volume Group Attributes"), this);
-    create_vg_action          = new KAction( KIcon("document-new"), i18n("Create Volume Group..."), this);
-    vgchange_available_action = new KAction( i18n("Volume Group Availability..."), this);
-    vgchange_alloc_action  = new KAction( i18n("Allocation Policy..."), this);
-    vgchange_extent_action = new KAction( i18n("Extent Size..."), this);
-    vgchange_lv_action     = new KAction( i18n("Logical Volume Limits..."), this);
-    vgchange_pv_action     = new KAction( i18n("Physical Volume Limits..."), this);
-    vgchange_resize_action = new KAction( i18n("Volume Group Resizability..."), this);
-    m_vgchange_menu->addAction(vgchange_available_action);
-    m_vgchange_menu->addAction(vgchange_alloc_action);
-    m_vgchange_menu->addAction(vgchange_extent_action);
-    m_vgchange_menu->addAction(vgchange_lv_action);
-    m_vgchange_menu->addAction(vgchange_pv_action);
-    m_vgchange_menu->addAction(vgchange_resize_action);
-
-    config_kvpm_action = new KAction( KIcon("configure"), i18n("Configure kvpm..."), this);
+    change_vg_action       = new KAction( i18n("Change Volume Group Attributes..."), this);
+    create_vg_action       = new KAction( KIcon("document-new"), i18n("Create Volume Group..."), this);
+    config_kvpm_action     = new KAction( KIcon("configure"), i18n("Configure kvpm..."), this);
 
     file_menu->addAction(quit_action);
     tool_menu->addAction(rescan_action);
@@ -130,30 +112,15 @@ TopWindow::TopWindow(QWidget *parent):KMainWindow(parent)
     groups_menu->addSeparator();
     groups_menu->addAction(export_vg_action);
     groups_menu->addAction(import_vg_action);
-    groups_menu->addMenu(m_vgchange_menu);
+    groups_menu->addAction(change_vg_action);
 
     settings_menu->addAction(config_kvpm_action);
     
     master_list = NULL;
     m_tab_widget = NULL;
 
-    connect(vgchange_alloc_action,  SIGNAL(triggered()), 
-	    this, SLOT(changeAllocation()));
-
-    connect(vgchange_available_action,  SIGNAL(triggered()), 
-	    this, SLOT(changeAvailable()));
-
-    connect(vgchange_extent_action, SIGNAL(triggered()), 
-	    this, SLOT(changeExtentSize()));
-
-    connect(vgchange_lv_action,     SIGNAL(triggered()), 
-	    this, SLOT(limitLogicalVolumes()));
-
-    connect(vgchange_pv_action,     SIGNAL(triggered()), 
-	    this, SLOT(limitPhysicalVolumes()));
-
-    connect(vgchange_resize_action, SIGNAL(triggered()), 
-	    this, SLOT(changeResize()));
+    connect(change_vg_action,  SIGNAL(triggered()), 
+	    this, SLOT(changeVolumeGroup()));
 
     connect(create_vg_action,       SIGNAL(triggered()), 
 	    this, SLOT(createVolumeGroup()));
@@ -327,14 +294,14 @@ void TopWindow::setupMenus()
         }
 
 	rename_vg_action->setEnabled(true);      
-	m_vgchange_menu->setEnabled(true);
+	change_vg_action->setEnabled(true);
     }
     else{
 	reduce_vg_action->setEnabled(false);
 	rename_vg_action->setEnabled(false);      
 	remove_vg_action->setEnabled(false);
 	remove_missing_action->setEnabled(false);
-	m_vgchange_menu->setEnabled(false);
+	change_vg_action->setEnabled(false);
 	import_vg_action->setEnabled(false);
 	split_vg_action->setEnabled(false);
 	merge_vg_action->setEnabled(false);
@@ -343,44 +310,9 @@ void TopWindow::setupMenus()
     }
 }
 
-void TopWindow::changeAllocation()
+void TopWindow::changeVolumeGroup()
 {
-    VGChangeAllocDialog dialog( m_vg->getName() );
-    dialog.exec();
-
-    if(dialog.result() == QDialog::Accepted){
-        ProcessProgress change_vg(dialog.arguments(), "", false);
-	MainWindow->reRun();
-    }
-}
-
-void TopWindow::changeAvailable()
-{
-    if( change_vg_available(m_vg) )
-	MainWindow->reRun();
-}
-
-void TopWindow::changeExtentSize()
-{
-    if( change_vg_extent(m_vg) )
-	MainWindow->reRun();
-}
-
-void TopWindow::limitLogicalVolumes()
-{
-    if( change_vg_lv(m_vg) )
-	MainWindow->reRun();
-}
-
-void TopWindow::limitPhysicalVolumes()
-{
-    if( change_vg_pv(m_vg) )
-	MainWindow->reRun();
-}
-
-void TopWindow::changeResize()
-{
-    if( change_vg_resize(m_vg) )
+    if( change_vg(m_vg) )
 	MainWindow->reRun();
 }
 
