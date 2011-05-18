@@ -1,3 +1,14 @@
+Compressed all the seperate vgchange dialogs into one. Changed 
+the volume group tree widget to keep the same trees expanded
+or collapsed when the widget gets updated. Added a column
+to show the metadata areas on the physical volumes and their
+size.
+
+version 0.7.1
+Replaced missing include in "lvrename.h" and fixed
+the "remaining" column in the first tab. It was reporting
+blocks and not bytes.
+
 version 0.7.0
 Many internal fixes. LVM now supports resizing mirrors
 so that was added along with mirrored mirror logs and multi
@@ -8,7 +19,7 @@ merging.
 version 0.6.2
 Shrinking and growing physical volumes is now supported.
 Filesystems can be removed from partitions now. Removed the
-menu item for rescanning only on volume group. It was causing
+menu item for rescanning only one volume group. It was causing
 crashes but may be added back when I have time to do it 
 right.
 

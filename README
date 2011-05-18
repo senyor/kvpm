@@ -30,6 +30,8 @@ libparted version 1.8
 libblkid
 kdelibs version 4
 <sys/mount.h>
+<linux/fs.h>
+
 
 NOTE: libparted also links to libdevmapper and may need to recompiled for
 the new version. I have been using parted v2.3 
