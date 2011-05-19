@@ -111,6 +111,22 @@ VGChangeDialog::VGChangeDialog(VolGroup *volumeGroup, QWidget *parent) :
     m_extent_suffix_combo->setInsertPolicy(QComboBox::NoInsert);
     m_extent_suffix_combo->setCurrentIndex(1);
 
+    long current_extent_size = m_vg->getExtentSize() / 1024;
+
+    if(current_extent_size <= 512)
+        m_extent_suffix_combo->setCurrentIndex(0);
+    else if( ((current_extent_size /= 1024)) <= 512)
+        m_extent_suffix_combo->setCurrentIndex(1);
+    else{
+        m_extent_suffix_combo->setCurrentIndex(2);
+        current_extent_size /= 1024;
+    }
+
+    for(int x = 0; x < 10; x++){
+        if( current_extent_size == m_extent_size_combo->itemText(x).toLong() )
+            m_extent_size_combo->setCurrentIndex(x);
+    }
+
     QHBoxLayout *combo_layout = new QHBoxLayout();
     extent_layout->addLayout(combo_layout);
     extent_layout->addStretch();
@@ -195,11 +211,17 @@ VGChangeDialog::VGChangeDialog(VolGroup *volumeGroup, QWidget *parent) :
     m_max_lvs_spin = new QSpinBox();
 
     if(m_vg->getFormat() == "lvm1"){
+        m_limit_pv_yes->setChecked(true);
+        m_limit_lv_yes->setChecked(true);
+        m_limit_pv_yes->setEnabled(false);
+        m_limit_lv_yes->setEnabled(false);
 	m_max_lvs_spin->setEnabled(true);
 	m_max_lvs_spin->setRange(lv_count, 255);
 	m_max_lvs_spin->setValue(255);
     }
     else{
+        m_limit_pv_no->setChecked(true);
+        m_limit_lv_no->setChecked(true);
 	m_limit_box->setCheckable(true);
 	m_limit_box->setChecked(false);
 	m_limit_box->setEnabled(true);
@@ -240,13 +262,38 @@ VGChangeDialog::VGChangeDialog(VolGroup *volumeGroup, QWidget *parent) :
 
     limit_groupbox_layout->addWidget(m_lvlimit_box);
     limit_groupbox_layout->addWidget(m_pvlimit_box);
-
     layout->addWidget(m_limit_box);
+
+    connect(m_normal,     SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    connect(m_cling,      SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    connect(m_anywhere,   SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    connect(m_contiguous, SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    connect(m_available_yes, SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    connect(m_available_no,  SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    connect(m_polling_yes,   SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    connect(m_polling_no,    SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    connect(m_limit_pv_yes,  SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    connect(m_limit_lv_yes,  SIGNAL(clicked()), this, SLOT(resetOkButton())); 
+    connect(m_limit_pv_no,   SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    connect(m_limit_lv_no,   SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    connect(m_limit_box,     SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    connect(m_lvlimit_box,   SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    connect(m_pvlimit_box,   SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    connect(m_available_box, SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    connect(m_polling_box,   SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    connect(m_resize,        SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    connect(m_clustered,     SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    connect(m_refresh,       SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    connect(m_uuid,          SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    connect(m_extent_size_combo,   SIGNAL(currentIndexChanged(int)), this, SLOT(resetOkButton()));
+    connect(m_extent_suffix_combo, SIGNAL(currentIndexChanged(int)), this, SLOT(resetOkButton()));
+   
+    enableButtonOk(false);
+
 }
 
 QStringList VGChangeDialog::args()
 {
-
     QString new_policy;
     QStringList args;
 
@@ -272,15 +319,15 @@ QStringList VGChangeDialog::args()
     }
 
     if(m_limit_box->isChecked()) {
-        if(m_max_lvs_spin->isEnabled())
+        if( m_limit_lv_yes->isChecked() )
             args << "--logicalvolume" << QString( "%1" ).arg( m_max_lvs_spin->value() );
         else
             args << "--logicalvolume" << QString( "%1" ).arg( 0 );           // unlimited
 
-        if(m_max_pvs_spin->isEnabled())
+        if( m_limit_pv_yes->isChecked() )
             args << "--maxphysicalvolumes" << QString( "%1" ).arg( m_max_pvs_spin->value() );
         else
-            args << "--maxphysicalvolumes" << QString( "%1" ).arg( 0 );           // unlimited
+            args << "--maxphysicalvolumes" << QString( "%1" ).arg( 0 );      // unlimited
     }
 
     if( m_resize->isChecked() != m_vg->isResizable() ){
@@ -323,8 +370,16 @@ QStringList VGChangeDialog::args()
     }
 
     args << m_vg->getName();
-    qDebug() << args;
+
     return args;
+}
+
+void VGChangeDialog::resetOkButton(){
+
+    if( args().size() > 2 )
+        enableButtonOk(true);
+    else
+        enableButtonOk(false);
 }
 
 void VGChangeDialog::limitExtentSize(int index){
