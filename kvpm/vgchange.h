@@ -47,7 +47,7 @@ public:
 
 private slots:
     void limitExtentSize(int index);
-    
+    void resetOkButton();    
 };
 
 #endif
