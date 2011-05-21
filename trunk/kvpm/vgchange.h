@@ -43,7 +43,7 @@ Q_OBJECT
 
 public:
     VGChangeDialog(VolGroup *volumeGroup, QWidget *parent = 0);
-    QStringList args();
+    QStringList arguments();
 
 private slots:
     void limitExtentSize(int index);
