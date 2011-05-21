@@ -12,7 +12,7 @@
  */
 
 #include <KConfigSkeleton>
-
+#include <KLocale>
 #include <QtGui>
 
 #include "lvactionsmenu.h"
@@ -31,12 +31,29 @@ VGTree::VGTree(VolGroup *VolumeGroup) : QTreeWidget(), m_vg(VolumeGroup)
     QStringList header_labels;
 
     m_vg_name = m_vg->getName();
-    setColumnCount(9);
 
     header_labels << "Volume" << "Size" << "Remaining" << "Filesystem" << "type" << "Stripes" << "Stripe size" 
 		  << "Snap/Move" << "State" << "Access" << "Tags" << "Mount points";
 
-    setHeaderLabels(header_labels);
+    QTreeWidgetItem *item = new QTreeWidgetItem((QTreeWidgetItem *)0, header_labels);
+
+    for(int column = 0; column < item->columnCount() ; column++)
+        item->setTextAlignment(column, Qt::AlignCenter);
+
+    item->setToolTip(0, i18n("Logical volume name"));
+    item->setToolTip(1, i18n("Total size of the logical volume"));
+    item->setToolTip(2, i18n("Free space on logical volume"));
+    item->setToolTip(3, i18n("Filesystem type on logical volume, if any"));
+    item->setToolTip(4, i18n("Type of logical volume"));
+    item->setToolTip(5, i18n("Number of stripes if the volume is striped"));
+    item->setToolTip(6, i18n("Size of stripes if the volume is striped"));
+    item->setToolTip(7, i18n("Percentage of pvmove completed or percentage of snapshot used up"));
+    item->setToolTip(8, i18n("Logical volume state"));
+    item->setToolTip(9, i18n("Read and write or Read Only"));
+    item->setToolTip(10, i18n("Optional tags for physical volume"));
+    item->setToolTip(11, i18n("Filesystem mount points, if mounted"));
+
+    setHeaderItem(item);
 }
 
 void VGTree::loadData()
@@ -152,6 +169,9 @@ void VGTree::loadData()
 
 		insertSegmentItems(lv, lv_item);
 	    }
+            
+            for(int column = 0; column < lv_item->columnCount() ; column++)
+                lv_item->setTextAlignment(column, Qt::AlignRight);
         }
     }
     insertTopLevelItems(0, m_lv_tree_items);
@@ -221,6 +241,9 @@ void VGTree::insertSegmentItems(LogVol *logicalVolume, QTreeWidgetItem *item)
 	lv_seg_item = new QTreeWidgetItem( item, segment_data );
 	lv_seg_item->setData(0, Qt::UserRole, logicalVolume->getName());
 	lv_seg_item->setData(1, Qt::UserRole, x);
+    
+        for(int column = 0; column < lv_seg_item->columnCount() ; column++)
+            lv_seg_item->setTextAlignment(column, Qt::AlignRight);
     }
 }
 
@@ -318,6 +341,10 @@ void VGTree::insertMirrorLegItems(LogVol *mirrorVolume, QTreeWidgetItem *item)
 		leg_item->setData(1, Qt::UserRole, -1);        
 		insertSegmentItems(leg_volume, leg_item);
 	    }
+
+            for(int column = 0; column < leg_item->columnCount() ; column++)
+                leg_item->setTextAlignment(column, Qt::AlignRight);
+            
 	}
     }
 }
