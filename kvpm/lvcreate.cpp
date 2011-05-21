@@ -530,9 +530,15 @@ void LVCreateDialog::setMaxSize(bool)
     int mirror_count = getMirrorCount();
     int old_combo_index = size_combo->currentIndex();
     long long free_extents = getLargestVolume() / m_vg->getExtentSize(); 
-    
-    m_max_size_label->setText( i18n("Maximum size: %1").arg(sizeToString( getLargestVolume() )));
-    m_max_extents_label->setText( i18n("Maximum extents: %1").arg(free_extents) );
+
+    if(m_extend){    
+        m_max_size_label->setText( i18n("Maximum size: %1").arg(sizeToString(getLargestVolume() + m_lv->getSize())));
+        m_max_extents_label->setText( i18n("Maximum extents: %1").arg(free_extents + m_lv->getExtents()) );
+    }
+    else{
+        m_max_size_label->setText( i18n("Maximum size: %1").arg(sizeToString( getLargestVolume() )) );
+        m_max_extents_label->setText( i18n("Maximum extents: %1").arg(free_extents) );
+    }
 
     if(!m_extend){
         if( m_mirror_box->isChecked() && !m_stripe_box->isChecked() )
