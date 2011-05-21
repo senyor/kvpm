@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -29,6 +29,11 @@ QString NoMungeCheck::getAlternateText()
     return m_alternate_text;
 }
 
+QStringList NoMungeCheck::getAlternateTextList()
+{
+    return m_alternate_text_list;
+}
+
 QString NoMungeCheck::getUnmungedText()
 {
     return m_unmunged_text;
@@ -37,6 +42,11 @@ QString NoMungeCheck::getUnmungedText()
 void NoMungeCheck::setAlternateText(QString alternateText)
 {
     m_alternate_text = alternateText;
+}
+
+void NoMungeCheck::setAlternateTextList(QStringList alternateTextList)
+{
+    m_alternate_text_list = alternateTextList;
 }
 
 void NoMungeCheck::setData(QVariant data)
