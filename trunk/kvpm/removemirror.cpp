@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2011  Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -60,8 +60,8 @@ RemoveMirrorDialog::RemoveMirrorDialog(LogVol *logicalVolume, QWidget *parent):
 	if( lvs[x]->isMirrorLeg() && (lvs[x]->getOrigin() == m_lv->getName()) ){
 
 	    temp_check = new NoMungeCheck( lvs[x]->getName() );
-	    pv_names = lvs[x]->getDevicePathAll();  // mirror legs have only one pv
-	    temp_check->setAlternateText( pv_names[0] );
+	    pv_names = lvs[x]->getDevicePathAll();
+	    temp_check->setAlternateTextList( pv_names );
 	    m_mirror_leg_checks.append(temp_check);
 	    layout->addWidget(temp_check);
 	    
@@ -71,7 +71,8 @@ RemoveMirrorDialog::RemoveMirrorDialog(LogVol *logicalVolume, QWidget *parent):
     }
 }
 
-/* Here we create a string based on all
+/* 
+   Here we create a string based on all
    the options that the user chose in the
    dialog and feed that to "lvconvert"     
 */
@@ -84,7 +85,7 @@ QStringList RemoveMirrorDialog::arguments()
     
     for(int x = 0; x < m_mirror_leg_checks.size(); x++){
 	if( m_mirror_leg_checks[x]->isChecked() ){
-	    legs << m_mirror_leg_checks[x]->getAlternateText();
+	    legs << m_mirror_leg_checks[x]->getAlternateTextList();
 	    mirror_count--;
 	}
     }
@@ -94,7 +95,7 @@ QStringList RemoveMirrorDialog::arguments()
 	 << QString("%1").arg(mirror_count - 1)
 	 << m_lv->getFullName()
 	 << legs;
-    
+
     return args;
 }
 
