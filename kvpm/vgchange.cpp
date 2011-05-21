@@ -29,7 +29,7 @@ bool change_vg(VolGroup *volumeGroup)
     dialog.exec();
 
     if(dialog.result() == QDialog::Accepted){
-        ProcessProgress vgchange(dialog.args(), i18n("Changing volume group attributes..."));
+        ProcessProgress vgchange(dialog.arguments(), i18n("Changing volume group attributes..."));
         return true;
     }
     else
@@ -292,7 +292,7 @@ VGChangeDialog::VGChangeDialog(VolGroup *volumeGroup, QWidget *parent) :
 
 }
 
-QStringList VGChangeDialog::args()
+QStringList VGChangeDialog::arguments()
 {
     QString new_policy;
     QStringList args;
@@ -376,7 +376,7 @@ QStringList VGChangeDialog::args()
 
 void VGChangeDialog::resetOkButton(){
 
-    if( args().size() > 2 )
+    if( arguments().size() > 2 )
         enableButtonOk(true);
     else
         enableButtonOk(false);
