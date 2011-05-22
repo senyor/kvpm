@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2009, 2010 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2009, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -89,14 +89,14 @@ bool setup_kvpm()
     size = true;
     remaining = true;
     type = true;
-    filesystem = true;
+    filesystem = false;
     stripes = false;
     stripesize = false;
     snapmove = true;
     state = true;
     access = false;
     tags = true;
-    mountpoints = true;
+    mountpoints = false;
 
     skeleton->setCurrentGroup("FilesystemColors");
     skeleton->addItemColor("ext2",    ext2);

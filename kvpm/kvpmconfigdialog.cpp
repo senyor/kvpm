@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2009, 2010 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2009, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -402,14 +402,14 @@ void KvpmConfigDialog::updateWidgetsDefault()
     m_size_check->setChecked(true);
     m_remaining_check->setChecked(true);
     m_type_check->setChecked(true);
-    m_filesystem_check->setChecked(true);
+    m_filesystem_check->setChecked(false);
     m_stripes_check->setChecked(false);
     m_stripesize_check->setChecked(false);
     m_snapmove_check->setChecked(true);
     m_state_check->setChecked(true);
     m_access_check->setChecked(false);
     m_tags_check->setChecked(true);
-    m_mountpoints_check->setChecked(true);
+    m_mountpoints_check->setChecked(false);
 }
 
 void KvpmConfigDialog::fillExecutablesTable()
