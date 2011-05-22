@@ -44,7 +44,7 @@ PVTree::PVTree(VolGroup *volumeGroup, QWidget *parent) : QTreeWidget(parent), m_
 		  << i18n("Free") << i18n("Used")
 		  << i18n("Allocatable") 
                   << i18n("MDA Count") << i18n("MDA Size") 
-                  << i18n("Tag") 
+                  << i18n("Tags") 
 		  << i18n("Logical volumes");
 
     item = new QTreeWidgetItem((QTreeWidgetItem *)0, header_labels);
