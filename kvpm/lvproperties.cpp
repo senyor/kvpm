@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2009, 2010 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -145,8 +145,8 @@ LVProperties::LVProperties(LogVol *logicalVolume, int segment, QWidget *parent):
     QStringList mount_points = logicalVolume->getMountPoints();
     QList<int>  mount_position = logicalVolume->getMountPosition();
 
-    if( !logicalVolume->isMirrorLeg() && 
-	!logicalVolume->isMirrorLog() &&
+    if( !logicalVolume->isMirrorLeg() && !logicalVolume->isMirrorLog() &&
+	!logicalVolume->isPvmove()    && !logicalVolume->isVirtual() &&
 	( (segment_count == 1) ||
 	  (segment == -1) ) )
     {
@@ -220,25 +220,6 @@ LVProperties::LVProperties(LogVol *logicalVolume, int segment, QWidget *parent):
 	}
 
     }
-    /*
-    QFrame *tags_info_frame = new QFrame();
-    QVBoxLayout *tags_info_layout = new QVBoxLayout();
-    tags_info_frame->setLayout(tags_info_layout);
-    tags_info_frame->setFrameStyle( QFrame::Sunken | QFrame::StyledPanel );
-    tags_info_frame->setLineWidth(2);
-    layout->addWidget(tags_info_frame);
-    temp_label = new QLabel("<b>Tags</b>");
-    temp_label->setAlignment(Qt::AlignCenter);
-    tags_info_layout->addWidget(temp_label);
-    QStringList tags = logicalVolume->getTags();
-
-    for(int x =0; x < tags.size(); x++){
-        temp_label = new QLabel(tags[x]);
-        temp_label->setToolTip(tags[x]);
-        temp_label->setWordWrap(true);
-        tags_info_layout->addWidget(temp_label);
-    }
-    */
 
     QFrame *uuid_info_frame = new QFrame();
     QVBoxLayout *uuid_info_layout = new QVBoxLayout();
