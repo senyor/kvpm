@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2009, 2010 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -42,8 +42,19 @@
 LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, VolGroup *volumeGroup, QWidget *parent) : 
     KMenu(parent), m_vg(volumeGroup), m_lv(logicalVolume)
 {
-    if(m_vg->getSize() == 0)
+    if( m_vg->getSize() == 0 )
         setEnabled(false);
+
+    m_mirror_origin = NULL;
+    if( m_lv ){
+        if( m_lv->isMirrorLeg() || m_lv->isMirrorLog() ){  // legs and logs may be nested 
+            m_mirror_origin = m_vg->getLogVolByName( m_lv->getOrigin() );
+            if( m_mirror_origin ){
+                if( m_mirror_origin->isMirrorLeg() || m_mirror_origin->isMirrorLog()  )
+                    m_mirror_origin = m_vg->getLogVolByName( m_mirror_origin->getOrigin() );
+            }
+        }
+    }
 
     KActionCollection *lv_actions = new KActionCollection(this);
     lv_actions->addAssociatedWidget(this);
@@ -202,17 +213,22 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, VolGroup *volumeGroup, QWidg
 	    filesystem_menu->setEnabled(false);
 	}
 	else if( m_lv->isMirrorLeg() || m_lv->isMirrorLog() ){
-	    lv_mkfs_action->setEnabled(false);
-	    lv_remove_action->setEnabled(false);
-	    unmount_filesystem_action->setEnabled(false);
-	    mount_filesystem_action->setEnabled(false);
+	    lv_mkfs_action->setEnabled(true);
+	    lv_remove_action->setEnabled(true);
+
+	    if( m_lv->isMounted() )
+		unmount_filesystem_action->setEnabled(true);
+	    else
+		unmount_filesystem_action->setEnabled(false);
+
+	    mount_filesystem_action->setEnabled(true);
 	    add_mirror_action->setEnabled(false);
-	    lv_change_action->setEnabled(false);
-	    lv_extend_action->setEnabled(false);
-	    lv_reduce_action->setEnabled(false);
+	    lv_change_action->setEnabled(true);
+	    lv_extend_action->setEnabled(true);
+	    lv_reduce_action->setEnabled(true);
 	    pv_move_action->setEnabled(false);
 	    remove_mirror_action->setEnabled(false);
-	    lv_rename_action->setEnabled(false);
+	    lv_rename_action->setEnabled(true);
 
 	    if( !m_lv->isMirrorLog() )
 		remove_mirror_leg_action->setEnabled(true);
@@ -220,8 +236,8 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, VolGroup *volumeGroup, QWidg
 		remove_mirror_leg_action->setEnabled(false);
                 mirror_menu->setEnabled(false);
             }
-	    snap_create_action->setEnabled(false);
-	    filesystem_menu->setEnabled(false);
+	    snap_create_action->setEnabled(true);
+	    filesystem_menu->setEnabled(true);
 	}
 	else if( !(m_lv->isWritable()) && m_lv->isLocked() ){
 
@@ -343,12 +359,18 @@ void LVActionsMenu::createLogicalVolume()
 
 void LVActionsMenu::reduceLogicalVolume()
 {
+    if( m_mirror_origin )
+        m_lv = m_mirror_origin;
+
     if(lv_reduce(m_lv))
 	MainWindow->reRun();
 }
 
 void LVActionsMenu::extendLogicalVolume()
 {
+    if( m_mirror_origin )
+        m_lv = m_mirror_origin;
+
     if(lv_extend(m_lv))
 	MainWindow->reRun();
 }
@@ -373,18 +395,27 @@ void LVActionsMenu::removeMirrorLeg()
 
 void LVActionsMenu::mkfsLogicalVolume()
 {
+    if( m_mirror_origin )
+        m_lv = m_mirror_origin;
+
     if( make_fs(m_lv) )
 	MainWindow->reRun();
 }
 
 void LVActionsMenu::removeLogicalVolume()
 {
+    if( m_mirror_origin )
+        m_lv = m_mirror_origin;
+
     if( remove_lv(m_lv) )
 	MainWindow->reRun();
 }
 
 void LVActionsMenu::renameLogicalVolume()
 {
+    if( m_mirror_origin )
+        m_lv = m_mirror_origin;
+
     if( rename_lv(m_lv) )
 	MainWindow->reRun();
 }
@@ -397,18 +428,27 @@ void LVActionsMenu::createSnapshot()
 
 void LVActionsMenu::changeLogicalVolume()
 {
+    if( m_mirror_origin )
+        m_lv = m_mirror_origin;
+
     if( change_lv(m_lv) )
 	MainWindow->reRun();
 }
 
 void LVActionsMenu::mountFilesystem()
 {
+    if( m_mirror_origin )
+        m_lv = m_mirror_origin;
+
     if( mount_filesystem(m_lv) )
 	MainWindow->reRun();
 }
 
 void LVActionsMenu::unmountFilesystem()
 {
+    if( m_mirror_origin )
+        m_lv = m_mirror_origin;
+
     if( unmount_filesystem(m_lv) )
 	MainWindow->reRun();
 }
