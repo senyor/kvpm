@@ -45,7 +45,7 @@ Q_OBJECT
 
      bool m_snapshot;        // TRUE if a snapshot
      bool m_extend;          // TRUE if extending a volume
-     bool m_name_is_valid;   // TRUE if the new new is acceptable
+     bool m_name_is_valid;   // TRUE if the new name is acceptable
 
      VolGroup *m_vg;
      LogVol *m_lv;      // origin for snap or lv to extend
