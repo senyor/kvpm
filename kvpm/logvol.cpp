@@ -118,7 +118,7 @@ void LogVol::rescan(lv_t lvm_lv)
 	m_virtual = true;
 	break;
     default:
-	m_type = "standard";
+	m_type = "linear";
     break;
     }
 
