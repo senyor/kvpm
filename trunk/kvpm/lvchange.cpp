@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -52,84 +52,6 @@ LVChangeDialog::LVChangeDialog(LogVol *logicalVolume, QWidget *parent) :
     if( m_lv->isSnap() || m_lv->isMirror() )
         tab_widget->addTab(m_mirror_tab,   i18n("Mirror/Snapshot") );
     tab_widget->addTab(m_advanced_tab, i18n("Advanced") );
-}
-
-QStringList LVChangeDialog::arguments()
-{
-    QStringList args, temp;
-
-    args << "lvchange" << "--yes"; // answer yes to any question
-
-    if( !m_lv->isSnap() ){    
-        if( available_check->isChecked() && ( !m_lv->isActive() ))
-	    args << "--available" << "y";
-	else if( ( ! available_check->isChecked() ) && ( m_lv->isActive() ))
-	    args << "--available" << "n";
-    }
-
-    if( ro_check->isChecked() && m_lv->isWritable() )
-	args << "--permission" << "r";
-    else if( ( ! ro_check->isChecked() ) && ( ! m_lv->isWritable() ) )
-	args << "--permission" << "rw";
-
-    if(resync_check->isChecked())
-        args << "--resync";
-    
-    if(m_dmeventd_box->isEnabled()){
-
-	if(refresh_check->isChecked() && !m_ignore_button->isChecked())
-	    args << "--refresh";
-
-        if(m_monitor_button->isChecked())
-	    args << "--monitor" << "y";
-        else if(m_nomonitor_button->isChecked())
-	    args << "--monitor" << "n";
-        else if(m_ignore_button->isChecked())
-	    args << "--ignoremonitoring";
-    }
-    else
-        args << "--refresh"; // give lvchange something to do or it may complain
-       
-    if(m_persistant_box->isChecked()){
-	args << "--force" << "-My";
-	args << "--major" << major_edit->text();
-	args << "--minor" << minor_edit->text();
-    }
-    else if( ( ! m_persistant_box->isChecked() ) && ( m_lv->isPersistant() ) ){
-	args << "--force" << "-Mn";
-    }
-
-    if(m_polling_box->isChecked()){
-        if(m_poll_button->isChecked())
-            args << "--poll" << "y";
-        else
-            args << "--poll" << "y";
-    }
-    
-    if(!m_udevsync_check->isChecked())
-        args << "--noudevsync";
-
-    if( m_tag_group->isChecked() ){
-        if( m_deltag_combo->currentIndex() )
-            args << "--deltag" << m_deltag_combo->currentText();
-        if(m_tag_edit->text() != "")
-            args << "--addtag" << m_tag_edit->text();
-    }
-
-    if( m_alloc_box->isChecked() ){
-        args << "--alloc";
-        if( m_contiguous_button->isChecked() )
-            args << "contiguous";
-        else if( m_anywhere_button->isChecked() )
-            args << "anywhere";
-        else if( m_cling_button->isChecked() )
-            args << "cling";
-        else
-            args << "normal";
-    }
-
-    args << m_lv->getFullName();
-    return args;
 }
 
 void LVChangeDialog::buildGeneralTab()
@@ -257,9 +179,9 @@ void LVChangeDialog::buildMirrorTab()
     m_dmeventd_box->setChecked(false);
     QVBoxLayout *mirror_layout = new QVBoxLayout();
     m_dmeventd_box->setLayout(mirror_layout);
-    m_monitor_button   = new QRadioButton( i18n("Monitor with dmeventd") );
-    m_nomonitor_button = new QRadioButton( i18n("Don't monitor") );
-    m_ignore_button    = new QRadioButton( i18n("Ignore dmeventd") );
+    m_monitor_button = new QRadioButton( i18n("Monitor with dmeventd") );
+    m_nomonitor_button = new QRadioButton( i18n("Do not monitor") );
+    m_ignore_button  = new QRadioButton( i18n("Ignore dmeventd") );
     m_monitor_button->setChecked(true);
     mirror_layout->addWidget(m_monitor_button);
     mirror_layout->addWidget(m_nomonitor_button);
@@ -293,14 +215,16 @@ void LVChangeDialog::buildAdvancedTab()
     m_udevsync_check->setChecked(true);
     sync_layout->addWidget(m_udevsync_check);
     
-    m_persistant_box = new QGroupBox( i18n("Persistant device numbers") );
-    m_persistant_box->setCheckable(true);
-    QVBoxLayout *persistant_layout = new QVBoxLayout();
-    m_persistant_box->setLayout(persistant_layout);
+    m_devnum_box = new QGroupBox( i18n("Set kernel device numbers") );
+    m_devnum_box->setCheckable(true);
+    QVBoxLayout *devnum_layout = new QVBoxLayout();
+    m_devnum_box->setLayout(devnum_layout);
     QHBoxLayout *major_layout = new QHBoxLayout();
     QHBoxLayout *minor_layout = new QHBoxLayout();
-    persistant_layout->addLayout(major_layout);
-    persistant_layout->addLayout(minor_layout);
+    m_persistant_check = new QCheckBox( i18n("Use persistant device numbers") );
+    devnum_layout->addWidget(m_persistant_check); 
+    devnum_layout->addLayout(major_layout);
+    devnum_layout->addLayout(minor_layout);
 
     major_edit = new KLineEdit(QString("%1").arg(m_lv->getMajorDevice()));
     major_layout->addWidget( new QLabel( i18n("Major number: ") ) );
@@ -308,13 +232,128 @@ void LVChangeDialog::buildAdvancedTab()
     minor_edit = new KLineEdit(QString("%1").arg(m_lv->getMinorDevice()));
     minor_layout->addWidget( new QLabel( i18n("Minor number: ") ) );
     minor_layout->addWidget(minor_edit);
-    layout->addWidget(m_persistant_box);
+    layout->addWidget(m_devnum_box);
+    m_persistant_check->setChecked( m_lv->isPersistant() );
+    m_devnum_box->setChecked(false);
 
-    if( !m_lv->isMirror() )
-	m_dmeventd_box->setEnabled(false);
+    m_dmeventd_box->setEnabled( m_lv->isMirror() );
 
-    if( m_lv->isPersistant() )
-	m_persistant_box->setChecked(true);
-    else
-	m_persistant_box->setChecked(false);
+    connect(available_check,     SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    connect(ro_check,            SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    connect(refresh_check,       SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    connect(resync_check,        SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    connect(m_udevsync_check,    SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    connect(m_persistant_check,  SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    connect(m_monitor_button,    SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    connect(m_nomonitor_button,  SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    connect(m_ignore_button,     SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    connect(m_poll_button,       SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    connect(m_nopoll_button,     SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    connect(m_normal_button,     SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    connect(m_contiguous_button, SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    connect(m_anywhere_button,   SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    connect(m_cling_button,      SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    connect(m_devnum_box,        SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    connect(m_dmeventd_box,      SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    connect(m_polling_box,       SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    connect(m_udevsync_box,      SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    connect(m_tag_group,         SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    connect(m_alloc_box,         SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    connect(m_deltag_combo, SIGNAL(currentIndexChanged(int)), this, SLOT(resetOkButton()));
+    connect(m_tag_edit, SIGNAL(userTextChanged(QString)), this, SLOT(resetOkButton()));
+
+    enableButtonOk(false);
 }
+
+QStringList LVChangeDialog::arguments()
+{
+    QStringList args, temp;
+
+    args << "lvchange" << "--yes"; // answer yes to any question
+
+    if( !m_lv->isSnap() ){    
+        if( available_check->isChecked() && ( !m_lv->isActive() ))
+	    args << "--available" << "y";
+	else if( ( ! available_check->isChecked() ) && ( m_lv->isActive() ))
+	    args << "--available" << "n";
+    }
+
+    if( ro_check->isChecked() && m_lv->isWritable() )
+	args << "--permission" << "r";
+    else if( ( ! ro_check->isChecked() ) && ( ! m_lv->isWritable() ) )
+	args << "--permission" << "rw";
+
+    if( resync_check->isChecked() )
+        args << "--resync";
+
+    if( refresh_check->isChecked() )
+        args << "--refresh";
+    
+    if( m_dmeventd_box->isChecked() ){
+        if( m_monitor_button->isChecked() )
+	    args << "--monitor" << "y";
+        else if( m_nomonitor_button->isChecked() )
+	    args << "--monitor" << "n";
+        else
+	    args << "--ignoremonitoring";
+    }
+
+    if( m_devnum_box->isChecked() ){
+        if( m_persistant_check->isChecked() ){
+            args << "--force" << "--persistent" << "y";
+            args << "--major" << major_edit->text();
+            args << "--minor" << minor_edit->text();
+        }
+        else{
+            args << "--force" << "--persistent" << "n";
+            args << "--major" << major_edit->text();
+            args << "--minor" << minor_edit->text();
+        }
+    }
+
+    if(m_polling_box->isChecked()){
+        if(m_poll_button->isChecked())
+            args << "--poll" << "y";
+        else
+            args << "--poll" << "y";
+    }
+    
+    if(!m_udevsync_check->isChecked())
+        args << "--noudevsync";
+
+    if( m_tag_group->isChecked() ){
+        if( m_deltag_combo->currentIndex() )
+            args << "--deltag" << m_deltag_combo->currentText();
+        if(m_tag_edit->text() != "")
+            args << "--addtag" << m_tag_edit->text();
+    }
+
+    if( m_alloc_box->isChecked() ){
+        args << "--alloc";
+        if( m_contiguous_button->isChecked() )
+            args << "contiguous";
+        else if( m_anywhere_button->isChecked() )
+            args << "anywhere";
+        else if( m_cling_button->isChecked() )
+            args << "cling";
+        else
+            args << "normal";
+    }
+
+    args << m_lv->getFullName();
+
+    return args;
+}
+
+void LVChangeDialog::resetOkButton(){
+
+    QStringList args = arguments();
+
+    args.removeAt( args.indexOf( QString("--ignoremonitoring") ) );
+
+    if( args.size() > 3 )
+        enableButtonOk(true);
+    else
+        enableButtonOk(false);
+}
+

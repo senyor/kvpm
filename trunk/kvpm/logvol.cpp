@@ -260,12 +260,12 @@ void LogVol::rescan(lv_t lvm_lv)
 
     value = lvm_lv_get_property(lvm_lv, "lv_kernel_major");
     m_major_device = value.value.integer;
-
     value = lvm_lv_get_property(lvm_lv, "lv_kernel_minor");
     m_minor_device = value.value.integer;
 
-    /*  FIX ME!!!!
-    value = lvm_lv_get_property(lvm_lv, "lv_minor");
+    /* 
+    value = lvm_lv_get_property(lvm_lv, "lv_major");
+
     if(value.value.integer != -1)
 	m_persistant = true;
     else
@@ -498,12 +498,12 @@ long long LogVol::getFilesystemBlockSize()
     return m_block_size;
 }
 
-int LogVol::getMinorDevice()
+unsigned long LogVol::getMinorDevice()
 {
     return m_minor_device;
 }
 
-int LogVol::getMajorDevice()
+unsigned long LogVol::getMajorDevice()
 {
     return m_major_device;
 }

@@ -57,8 +57,8 @@ class LogVol
     long long m_fs_used;         // bytes used up in fs
 
     int m_seg_total;             // total number of segments in logical volume
-    int m_major_device;          // Unix device major number, if set
-    int m_minor_device;          // Unix device minor number, if set
+    unsigned long m_major_device; // Unix device major number, if set
+    unsigned long m_minor_device; // Unix device minor number, if set
     int m_log_count;             // if a mirror -- how many logs
     int m_mirror_count;          // if mirror -- how many legs
     bool m_virtual;              // virtual volume
@@ -113,8 +113,8 @@ class LogVol
     VolGroup* getVolumeGroup();
     double getSnapPercent();
     double getCopyPercent();
-    int getMinorDevice();
-    int getMajorDevice();
+    unsigned long getMinorDevice();
+    unsigned long getMajorDevice();
     int getLogCount();
     int getMirrorCount();
     void setLogCount(int count);
