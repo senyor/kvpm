@@ -47,6 +47,7 @@ Q_OBJECT
     void insertMirrorLegItems(LogVol *mirrorVolume, QTreeWidgetItem *item);
     void setHiddenColumns();
     void walkTreeExpandedItems(QTreeWidgetItem *old_item, QTreeWidgetItem *new_item);
+    bool walkTreeCurrentItem(QTreeWidgetItem *current_item, QTreeWidgetItem *new_item);
 
 public:
     VGTree(VolGroup *VolumeGroup);

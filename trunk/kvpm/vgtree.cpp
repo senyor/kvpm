@@ -175,6 +175,11 @@ void VGTree::loadData()
         }
     }
     insertTopLevelItems(0, m_lv_tree_items);
+    
+    if( currentItem() != NULL ){   // set the current item to the coresponding named new item
+        for(int x = 0; x < m_lv_tree_items.size(); x++)
+            walkTreeCurrentItem( currentItem(), m_lv_tree_items[x] );
+    }
 
     if( m_old_lv_tree_items.size() ){
         for(int x = 0; x < m_old_lv_tree_items.size(); x++){
@@ -432,4 +437,41 @@ void VGTree::walkTreeExpandedItems(QTreeWidgetItem *old_item, QTreeWidgetItem *n
             }
         }
     }
+}
+
+
+bool VGTree::walkTreeCurrentItem(QTreeWidgetItem *current_item, QTreeWidgetItem *new_item)
+{
+
+    QString current_item_user_role,       // The name of the lv, mirror leg etc.
+            current_item_display_role,    // For segment data this is different than above
+            new_item_user_role,
+            new_item_display_role;
+
+    current_item_user_role    = (current_item->data(0, Qt::UserRole)).toString();
+    current_item_display_role = (current_item->data(0, Qt::DisplayRole)).toString();
+    new_item_user_role        = (new_item->data(0, Qt::UserRole)).toString();
+    new_item_display_role     = (new_item->data(0, Qt::DisplayRole)).toString();
+
+    if( current_item_user_role == new_item_user_role ) { // right name but it may not be the correct segment
+                                                         // now look for the correct segment item
+        if( current_item_display_role != new_item_display_role ) {
+            for(int x = 0; x < new_item->childCount(); x++){ 
+                if( walkTreeCurrentItem( current_item, new_item->child(x) ) )
+                    return true;
+            }
+        }
+        else{
+            setCurrentItem( new_item );
+            return true;
+        }
+    }
+    else{
+        for(int x = 0; x < new_item->childCount(); x++){ 
+            if( walkTreeCurrentItem( current_item, new_item->child(x) ) )
+                return true;
+        }
+    }
+
+    return false;
 }
