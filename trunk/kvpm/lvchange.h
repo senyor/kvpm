@@ -43,7 +43,11 @@ Q_OBJECT
               *m_udevsync_check,   // sync with udev
               *m_persistant_check; // Set persistant kernel device numbers  
 
-    QRadioButton *m_normal_button, *m_contiguous_button, *m_anywhere_button, *m_cling_button; // allocation policy
+    QRadioButton *m_normal_button,      // allocation policy 
+                 *m_contiguous_button, 
+                 *m_inherit_button,
+                 *m_anywhere_button, 
+                 *m_cling_button;
 
     QRadioButton *m_poll_button, 
                  *m_nopoll_button,

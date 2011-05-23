@@ -120,9 +120,7 @@ void LVChangeDialog::buildGeneralTab()
     m_contiguous_button = new QRadioButton( i18n("Contiguous") );
     m_anywhere_button   = new QRadioButton( i18n("Anywhere") );
     m_cling_button      = new QRadioButton( i18n("Cling") );
-    QRadioButton *inherited_button = new QRadioButton( i18n("Inherited") ); // this can't be passed the lvchange
-    inherited_button->setEnabled(false);
-    inherited_button->setChecked(false);
+    m_inherit_button    = new QRadioButton( i18n("Inherited") );
 
     QString policy = m_lv->getPolicy(); 
 
@@ -132,9 +130,9 @@ void LVChangeDialog::buildGeneralTab()
         m_normal_button->setChecked(true);
     }
     else if( policy == "Inherited"){
-        inherited_button->setText("Inherited (current)");
+        m_inherit_button->setEnabled(false);
+        m_inherit_button->setText("Inherited (current)");
         m_normal_button->setChecked(true);
-        alloc_box_layout->addWidget(inherited_button);
     }
     else if( policy == "Anywhere" ){
         m_anywhere_button->setEnabled(false);
@@ -156,6 +154,7 @@ void LVChangeDialog::buildGeneralTab()
     alloc_box_layout->addWidget(m_contiguous_button);
     alloc_box_layout->addWidget(m_anywhere_button);
     alloc_box_layout->addWidget(m_cling_button);
+    alloc_box_layout->addWidget(m_inherit_button);
     m_alloc_box->setLayout(alloc_box_layout);
     layout->addWidget(m_alloc_box);
 }
@@ -253,6 +252,7 @@ void LVChangeDialog::buildAdvancedTab()
     connect(m_contiguous_button, SIGNAL(clicked()), this, SLOT(resetOkButton()));
     connect(m_anywhere_button,   SIGNAL(clicked()), this, SLOT(resetOkButton()));
     connect(m_cling_button,      SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    connect(m_inherit_button,    SIGNAL(clicked()), this, SLOT(resetOkButton()));
     connect(m_devnum_box,        SIGNAL(clicked()), this, SLOT(resetOkButton()));
     connect(m_dmeventd_box,      SIGNAL(clicked()), this, SLOT(resetOkButton()));
     connect(m_polling_box,       SIGNAL(clicked()), this, SLOT(resetOkButton()));
@@ -336,6 +336,8 @@ QStringList LVChangeDialog::arguments()
             args << "anywhere";
         else if( m_cling_button->isChecked() )
             args << "cling";
+        else if( m_inherit_button->isChecked() )
+            args << "inherit";
         else
             args << "normal";
     }
