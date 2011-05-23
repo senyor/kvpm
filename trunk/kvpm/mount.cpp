@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -48,7 +48,9 @@ MountDialog::MountDialog(QString deviceToMount, QString filesystemType, bool wri
     QWidget *main_tab    = new QWidget(this);
     QVBoxLayout *main_layout = new QVBoxLayout();
     main_tab->setLayout(main_layout);
-    
+    QLabel *device_label = new QLabel( "<b>" + deviceToMount + "</b>");
+    device_label->setAlignment(Qt::AlignCenter);    
+    main_layout->addWidget( device_label );
     main_layout->addWidget( filesystemBox() );
     main_layout->addWidget( mountPointBox() );
 
