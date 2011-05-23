@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -36,18 +36,22 @@ Q_OBJECT
 
     LogVol *m_lv;
     
-    QCheckBox *available_check,   // Make the volume available 
-	      *ro_check,          // make the volume read only
-	      *refresh_check,     // refresh the metadata
-              *resync_check,      // re-sync mirrors
-              *m_udevsync_check;  // sync with udev
+    QCheckBox *available_check,    // Make the volume available 
+	      *ro_check,           // make the volume read only
+	      *refresh_check,      // refresh the metadata
+              *resync_check,       // re-sync mirrors
+              *m_udevsync_check,   // sync with udev
+              *m_persistant_check; // Set persistant kernel device numbers  
 
     QRadioButton *m_normal_button, *m_contiguous_button, *m_anywhere_button, *m_cling_button; // allocation policy
 
-    QRadioButton *m_monitor_button,  *m_nomonitor_button, *m_ignore_button, // dmeventd monitoring
-                 *m_poll_button, *m_nopoll_button;
+    QRadioButton *m_poll_button, 
+                 *m_nopoll_button,
+                 *m_monitor_button,    // dmeventd monitoring 
+                 *m_nomonitor_button,  
+                 *m_ignore_button;     // ignore dmeventd monitoring 
 
-    QGroupBox *m_persistant_box, *m_dmeventd_box, *m_polling_box, *m_udevsync_box, *m_tag_group, *m_alloc_box;
+    QGroupBox *m_devnum_box, *m_dmeventd_box, *m_polling_box, *m_udevsync_box, *m_tag_group, *m_alloc_box;
 
     KLineEdit *minor_edit,  // User entered device minor number 
               *major_edit,  // User entered device major number 
@@ -66,6 +70,9 @@ Q_OBJECT
 public:
     LVChangeDialog(LogVol *logicalVolume, QWidget *parent = 0);
     QStringList arguments();
+
+private slots:
+    void resetOkButton();
     
 };
 
