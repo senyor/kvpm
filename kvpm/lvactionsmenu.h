@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -36,7 +36,7 @@ Q_OBJECT
     
     KMenu *filesystem_menu;
     VolGroup *m_vg;
-    LogVol *m_lv;
+    LogVol *m_lv, *m_mirror_origin;
 
  public:
     LVActionsMenu(LogVol *logicalVolume, VolGroup *volumeGroup, QWidget *parent);
