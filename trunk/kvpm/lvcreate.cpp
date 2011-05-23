@@ -152,7 +152,7 @@ QWidget* LVCreateDialog::createGeneralTab()
      QWidget *general_tab = new QWidget(this);
      QHBoxLayout *general_layout = new QHBoxLayout;
      general_tab->setLayout(general_layout);
-     QGroupBox *volume_box = new QGroupBox( i18n("Create new logical volume") );
+     QGroupBox *volume_box = new QGroupBox(); 
      QVBoxLayout *layout = new QVBoxLayout;
      volume_box->setLayout(layout);
      general_layout->addStretch();
@@ -165,7 +165,18 @@ QWidget* LVCreateDialog::createGeneralTab()
      layout->addStretch();
      layout->addLayout(lower_layout);
 
-     if( !m_extend ){
+     m_name_is_valid = true;
+
+     if(m_extend){
+         volume_box->setTitle( i18n("Extending volume: %1").arg(m_lv->getName()) );
+     }
+     else{
+
+         if(m_snapshot)
+             volume_box->setTitle( i18n("Creating snapshot of: %1").arg(m_lv->getName()) );
+         else
+             volume_box->setTitle( i18n("Create new logical volume") );
+
 	 QHBoxLayout *name_layout = new QHBoxLayout();
 	 m_name_edit = new KLineEdit();
 
@@ -176,7 +187,6 @@ QWidget* LVCreateDialog::createGeneralTab()
 	 name_layout->addWidget( new QLabel( i18n("Volume name: ") ) );
 	 name_layout->addWidget(m_name_edit);
 	 upper_layout->insertLayout(0, name_layout);
-	 m_name_is_valid = true;
 
 	 QHBoxLayout *tag_layout = new QHBoxLayout();
 	 m_tag_edit = new KLineEdit();
@@ -193,10 +203,7 @@ QWidget* LVCreateDialog::createGeneralTab()
 		 this, SLOT(validateVolumeName(QString)));
 
      }
-     else {
-         volume_box->setTitle( i18n("Extending volume: %1").arg(m_lv->getName()) );
-	 m_name_is_valid = true;
-     }
+
 
      QGroupBox *volume_size_box = new QGroupBox( i18n("Volume size") );
      QHBoxLayout *size_layout = new QHBoxLayout();
