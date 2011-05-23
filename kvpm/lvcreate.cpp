@@ -619,6 +619,8 @@ void LVCreateDialog::validateVolumeName(QString name)
 
     if( m_name_validator->validate(name, pos) == QValidator::Acceptable && name != "." && name != ".." )
 	m_name_is_valid = true;
+    else if( name == "" )
+	m_name_is_valid = true;
     else
 	m_name_is_valid = false;
     
