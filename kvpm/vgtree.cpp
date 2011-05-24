@@ -61,6 +61,7 @@ void VGTree::loadData()
     QList<LogVol *> logical_volumes = m_vg->getLogicalVolumes();
     LogVol *lv = NULL;   
     QTreeWidgetItem *lv_item = NULL;
+    QTreeWidgetItem *origin_item = NULL;
     QStringList lv_data;
     QString old_name, new_name;
     long long fs_remaining;       // remaining space on fs -- if known
@@ -83,11 +84,10 @@ void VGTree::loadData()
 	lv = logical_volumes[x];
 	lv_data.clear();
 
-	if( ( !lv->isMirrorLeg() ) && ( !lv->isMirrorLog() ) &&
-	    ( !(lv->isVirtual() && ( !lv->isOrphan() )) ) &&
-	    ( !(lv->isMirror() && lv->getOrigin() != "" ) ) ){
-	    
+        if( lv->getOrigin() == "" && !( (lv->getName()).startsWith("snapshot") ) ){
+
 	    if( lv->getSegmentCount() == 1 ) {
+
 		lv_data << lv->getName() << sizeToString(lv->getSize());
 
                 if( lv->getFilesystemSize() > -1 &&  lv->getFilesystemUsed() > -1 ){
@@ -105,9 +105,7 @@ void VGTree::loadData()
 		else
                     lv_data << QString("%1").arg(lv->getSegmentStripes(0)) << sizeToString(lv->getSegmentStripeSize(0));
 
-		if( lv->isSnap() )
-		    lv_data    << QString("%%1").arg(lv->getSnapPercent(), 1, 'f', 2);
-		else if( lv->isPvmove() )
+		if( lv->isPvmove() )
 		    lv_data    << QString("%%1").arg(lv->getCopyPercent(), 1, 'f', 2);
 		else
 		    lv_data << " ";
@@ -126,12 +124,34 @@ void VGTree::loadData()
 		lv_item->setData(0, Qt::UserRole, lv->getName());
 		lv_item->setData(1, Qt::UserRole, 0);            // 0 means segment 0 data present
 
-		if((lv->isMirror() && lv->getOrigin() == "" ) || 
-		   (lv->isVirtual() && lv->getOrigin() == "" ) || 
-		    lv->isUnderConversion() ){
+                if( insertSnapshotItems(lv, lv_item) ){
+                    if( lv->isMirror() || lv->isVirtual() || lv->isUnderConversion() ){
 
-		    insertMirrorLegItems(lv, lv_item);
-		}
+                        if( lv->isUnderConversion() )
+                            lv_data = lv_data.replaceInStrings("origin", "under conversion");
+                        else if( lv->isVirtual() )
+                            lv_data = lv_data.replaceInStrings("origin", "virtual");
+                        else if( lv->isMirror() )
+                            lv_data = lv_data.replaceInStrings("origin", "mirror");
+
+                        origin_item = new QTreeWidgetItem( lv_item, lv_data );
+                        for(int column = 1; column < origin_item->columnCount() ; column++)
+                            origin_item->setTextAlignment(column, Qt::AlignRight);
+                        insertMirrorLegItems(lv, origin_item );
+                    }
+                }     
+                else{
+                    if( lv->isMirror() || lv->isVirtual() || lv->isUnderConversion() ){
+                        if( lv->isUnderConversion() )
+                            lv_data = lv_data.replaceInStrings("origin", "under conversion");
+                        else if( lv->isVirtual() )
+                            lv_data = lv_data.replaceInStrings("origin", "virtual");
+                        else if( lv->isMirror() )
+                            lv_data = lv_data.replaceInStrings("origin", "mirror");
+
+                        insertMirrorLegItems(lv, lv_item);
+                    }
+                }
 	    }
 	    else {
 		lv_data << lv->getName() << sizeToString(lv->getSize());
@@ -146,9 +166,7 @@ void VGTree::loadData()
 
                 lv_data << lv->getFilesystem() << lv->getType() << "" << "";
 		
-		if( lv->isSnap() )
-		    lv_data    << QString("%%1").arg(lv->getSnapPercent());
-		else if( lv->isPvmove() )
+		if( lv->isPvmove() )
 		    lv_data    << QString("%%1").arg(lv->getCopyPercent());
 		else
 		    lv_data << " ";
@@ -166,11 +184,24 @@ void VGTree::loadData()
 		lv_item->setData(0, Qt::UserRole, lv->getName());
 		lv_item->setData(1, Qt::UserRole, -1);            // -1 means not segment data
 		m_lv_tree_items.append(lv_item);
+                
+                if( insertSnapshotItems(lv, lv_item) ){
 
-		insertSegmentItems(lv, lv_item);
+                    if( lv->isPvmove() )
+                        lv_data = lv_data.replaceInStrings("origin", "pvmove");
+                    else
+                        lv_data = lv_data.replaceInStrings("origin", "linear");
+
+                    origin_item = new QTreeWidgetItem( lv_item, lv_data );
+                    for(int column = 1; column < origin_item->columnCount() ; column++)
+                        origin_item->setTextAlignment(column, Qt::AlignRight);
+                    insertSegmentItems(lv, origin_item );
+                }
+                else
+                    insertSegmentItems(lv, lv_item);
 	    }
             
-            for(int column = 0; column < lv_item->columnCount() ; column++)
+            for(int column = 1; column < lv_item->columnCount() ; column++)
                 lv_item->setTextAlignment(column, Qt::AlignRight);
         }
     }
@@ -247,10 +278,102 @@ void VGTree::insertSegmentItems(LogVol *logicalVolume, QTreeWidgetItem *item)
 	lv_seg_item->setData(0, Qt::UserRole, logicalVolume->getName());
 	lv_seg_item->setData(1, Qt::UserRole, x);
     
-        for(int column = 0; column < lv_seg_item->columnCount() ; column++)
+        for(int column = 1; column < lv_seg_item->columnCount() ; column++)
             lv_seg_item->setTextAlignment(column, Qt::AlignRight);
     }
 }
+
+bool VGTree::insertSnapshotItems(LogVol *originVolume, QTreeWidgetItem *item)
+{
+    QStringList snap_data;
+    QTreeWidgetItem *snap_item;
+    bool items_inserted = false;
+    LogVol *snap_volume;
+    VolGroup *volume_group = originVolume->getVolumeGroup();    
+    int lv_count = volume_group->getLogVolCount();
+    QList<LogVol *>  logical_volume_list = volume_group->getLogicalVolumes();
+
+    for(int x = 0; x < lv_count; x++){
+	
+	snap_volume = logical_volume_list[x];
+
+	if( ( snap_volume->getOrigin() == originVolume->getName() ) && snap_volume->isSnap() ){
+
+	    snap_data.clear();
+            items_inserted = true;
+
+	    if( snap_volume->getSegmentCount() == 1 ) {	    
+
+		snap_data << snap_volume->getName() 
+                          << sizeToString(snap_volume->getSize()) << "" 
+                          << snap_volume->getFilesystem()
+                          << snap_volume->getType();
+ 
+                if( !snap_volume->isMirror() ){
+                    snap_data << QString("%1").arg( snap_volume->getSegmentStripes(0) ) 
+                             << sizeToString( snap_volume->getSegmentStripeSize(0) );
+                }
+                else
+                    snap_data << "" << "";
+
+                snap_data << QString("%%1").arg(snap_volume->getSnapPercent(), 1, 'f', 2);
+		snap_data << snap_volume->getState();
+		
+		if(snap_volume->isWritable())
+		    snap_data << "r/w";
+		else
+		    snap_data << "r/o";
+	    
+		snap_item = new QTreeWidgetItem( item, snap_data );
+		snap_item->setData(0, Qt::UserRole, snap_volume->getName());
+
+// In the following "setData()" 0 means segment 0 (the only segment) 
+// data is present on the same line as the rest of the lv data.
+
+		snap_item->setData(1, Qt::UserRole, 0);  
+
+		if( snap_volume->isMirror() )
+                    insertMirrorLegItems(snap_volume, snap_item);    
+            }
+	    else {
+
+		snap_data << snap_volume->getName() 
+			 << sizeToString(snap_volume->getSize()) << "" 
+			 << snap_volume->getFilesystem()
+			 << snap_volume->getType() 
+			 << "" << "";
+		
+		if( snap_volume->isPvmove() )
+		    snap_data    << QString("%%1").arg(snap_volume->getCopyPercent());
+		else
+		    snap_data << " ";
+		
+		snap_data << snap_volume->getState();
+		
+		if(snap_volume->isWritable())
+		    snap_data << "r/w";
+		else
+		    snap_data << "r/o";
+
+		snap_item = new QTreeWidgetItem( item, snap_data );
+		snap_item->setData(0, Qt::UserRole, snap_volume->getName());
+
+// -1 means this item has no segment data. The segment data will be on 
+// the following lines, one line per segement
+
+		snap_item->setData(1, Qt::UserRole, -1);        
+		insertSegmentItems(snap_volume, snap_item);
+	    }
+
+            for(int column = 1; column < snap_item->columnCount() ; column++)
+                snap_item->setTextAlignment(column, Qt::AlignRight);
+            
+        }
+
+    }
+    return items_inserted;
+}
+
 
 /* Here we start with the mirror logical volume and locate its mirror
    legs. Then the legs are checked for segment data just like any other
@@ -324,7 +447,7 @@ void VGTree::insertMirrorLegItems(LogVol *mirrorVolume, QTreeWidgetItem *item)
 			 << leg_volume->getFilesystem()
 			 << leg_volume->getType() 
 			 << "" << "";
-		
+
 		if( leg_volume->isPvmove() )
 		    leg_data    << QString("%%1").arg(leg_volume->getCopyPercent());
 		else
@@ -347,7 +470,7 @@ void VGTree::insertMirrorLegItems(LogVol *mirrorVolume, QTreeWidgetItem *item)
 		insertSegmentItems(leg_volume, leg_item);
 	    }
 
-            for(int column = 0; column < leg_item->columnCount() ; column++)
+            for(int column = 1; column < leg_item->columnCount() ; column++)
                 leg_item->setTextAlignment(column, Qt::AlignRight);
             
 	}
