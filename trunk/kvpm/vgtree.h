@@ -45,6 +45,7 @@ Q_OBJECT
     void setupContextMenu();
     void insertSegmentItems(LogVol *logicalVolume, QTreeWidgetItem *item);
     void insertMirrorLegItems(LogVol *mirrorVolume, QTreeWidgetItem *item);
+    bool insertSnapshotItems(LogVol *originVolume, QTreeWidgetItem *item);
     void setHiddenColumns();
     void walkTreeExpandedItems(QTreeWidgetItem *old_item, QTreeWidgetItem *new_item);
     bool walkTreeCurrentItem(QTreeWidgetItem *current_item, QTreeWidgetItem *new_item);
