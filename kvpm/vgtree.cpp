@@ -346,8 +346,8 @@ bool VGTree::insertSnapshotItems(LogVol *originVolume, QTreeWidgetItem *item)
 		if( snap_volume->isPvmove() )
 		    snap_data    << QString("%%1").arg(snap_volume->getCopyPercent());
 		else
-		    snap_data << " ";
-		
+                    snap_data << QString("%%1").arg(snap_volume->getSnapPercent(), 1, 'f', 2);
+
 		snap_data << snap_volume->getState();
 		
 		if(snap_volume->isWritable())

@@ -57,12 +57,12 @@ TopWindow::TopWindow(QWidget *parent):KMainWindow(parent)
     KAboutData *about_data = new KAboutData( QByteArray("kvpm"),
 					     QByteArray(""),
 					     ki18n("kvpm"),
-					     QByteArray("0.7.1"),
+					     QByteArray("0.7.2"),
 					     ki18n("Linux volume and partition manager for KDE.\n"
 						   "This program is still under development,\n"
 						   "bug reports and any comments are welcomed.\n"),
 					     KAboutData::License_GPL_V3, 
-					     ki18n("(c) 2008, 2009, 2010 Benjamin Scott"),
+					     ki18n("(c) 2008, 2009, 2010, 2011 Benjamin Scott"),
 					     ki18n(" "),
 					     QByteArray("http://sourceforge.net/projects/kvpm/"),
 					     QByteArray("benscott@nwlink.com") );

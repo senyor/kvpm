@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2009, 2010 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -39,10 +39,10 @@ int main(int argc, char **argv)
 {
     
     KAboutData aboutData( "kvpm", 0,
-			  ki18n("kvpm"), "0.7.1",
+			  ki18n("kvpm"), "0.7.2",
 			  ki18n( "Linux volume and partition manager for KDE"),
 			  KAboutData::License_GPL_V3,
-			  ki18n("Copyright (c) 2008, 2009, 2010 Benjamin Scott") );
+			  ki18n("Copyright (c) 2008, 2009, 2010, 2011 Benjamin Scott") );
 
     KCmdLineArgs::init( argc, argv, &aboutData);
 
