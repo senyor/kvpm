@@ -171,6 +171,7 @@ void LVChangeDialog::buildMirrorTab()
     QVBoxLayout *resync_layout = new QVBoxLayout();
     resync_box->setLayout(resync_layout);
     resync_check = new QCheckBox( i18n("Re-synchronize mirrors") );
+    resync_check->setEnabled( !m_lv->isMounted() );
     resync_layout->addWidget(resync_check);
 
     m_dmeventd_box = new QGroupBox( i18n("dmeventd monitoring") );

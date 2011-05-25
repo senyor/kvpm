@@ -1,3 +1,5 @@
+version 0.7.2
+Snapshots now are nested in the tree like mirror legs. 
 Compressed all the seperate vgchange dialogs into one. Changed 
 the volume group tree widget to keep the same trees expanded
 or collapsed when the widget gets updated. Added a column
