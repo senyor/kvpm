@@ -348,7 +348,8 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, VolGroup *volumeGroup, QWidg
 	filesystem_menu->setEnabled(false);
     }
 
-
+    if(!add_mirror_action->isEnabled() && !remove_mirror_action->isEnabled() && !remove_mirror_leg_action->isEnabled())
+        mirror_menu->setEnabled(false);
 }
 
 void LVActionsMenu::createLogicalVolume()
