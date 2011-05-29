@@ -165,12 +165,16 @@ VGCreateDialog::VGCreateDialog(QList<AvailableDevice *> devices, QWidget *parent
 	}
     }
 
-    m_total_label = new QLabel( i18n("Total: %1").arg( sizeToString(devices[0]->size) ) );
-    new_pv_box_layout->addWidget(m_total_label, new_pv_box_layout->rowCount(),0, 1, -1);
+    long long total_space_available = 0;
+    for(int x = 0; x < devices.size(); x++)
+        total_space_available += devices[x]->size; 
+
+    m_total_available_label = new QLabel( i18n("Total available: %1").arg( sizeToString( total_space_available ) ) );
+    new_pv_box_layout->addWidget(m_total_available_label, new_pv_box_layout->rowCount(),0, 1, -1);
 
     if(pv_check_count > 1){
-        m_total_label = new QLabel( i18n("Total: 0") );
-        new_pv_box_layout->addWidget(m_total_label, new_pv_box_layout->rowCount(),0, 1, -1);
+        m_total_selected_label = new QLabel( i18n("Total selected: 0") );
+        new_pv_box_layout->addWidget(m_total_selected_label, new_pv_box_layout->rowCount(),0, 1, -1);
         new_pv_box_layout->addLayout(button_layout, new_pv_box_layout->rowCount(),0, 1, -1);
         button_layout->addWidget(all_button);
         button_layout->addWidget(none_button);
@@ -354,7 +358,7 @@ void VGCreateDialog::validateOK()
             if(m_pv_checks[x]->isChecked())
                 total += (m_pv_checks[x]->getData()).toLongLong();
         }
-        m_total_label->setText( i18n("Total: %1").arg( sizeToString(total) ) );
+        m_total_selected_label->setText( i18n("Total selected: %1").arg( sizeToString(total) ) );
     }
 
     if(m_validator->validate(name, pos) == QValidator::Acceptable && name != "." && name != ".."){
