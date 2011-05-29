@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -36,7 +36,7 @@ class VGCreateDialog : public KDialog
 {
 Q_OBJECT
 
-    QLabel *m_pv_label, *m_total_label;
+    QLabel *m_pv_label, *m_total_available_label, *m_total_selected_label;
     QList<NoMungeCheck *> m_pv_checks;
     QVBoxLayout *m_layout;
 
