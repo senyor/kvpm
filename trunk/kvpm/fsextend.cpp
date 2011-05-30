@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2009 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2009, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -51,9 +51,8 @@ bool fs_extend(QString path, QString fs, bool isLV){
         return false;
     }
 
-    QString error_message = i18n("It appears that the partition or volume was extented but "
-                                 "the filesystem was not. It will need to be extended before "
-                                 "the additional space can be used.");
+    QString error_message = i18n("It appears that the filesystem was not extended. "
+                                 "It will need to be extended before the additional space can be used.");
 
     if( fs == "ext2" || fs == "ext3" || fs == "ext4" ){
 
