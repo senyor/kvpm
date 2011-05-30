@@ -57,7 +57,7 @@ TopWindow::TopWindow(QWidget *parent):KMainWindow(parent)
     KAboutData *about_data = new KAboutData( QByteArray("kvpm"),
 					     QByteArray(""),
 					     ki18n("kvpm"),
-					     QByteArray("0.7.2"),
+					     QByteArray("0.7.3"),
 					     ki18n("Linux volume and partition manager for KDE.\n"
 						   "This program is still under development,\n"
 						   "bug reports and any comments are welcomed.\n"),
