@@ -1,5 +1,7 @@
 version 0.7.3
 Added a small docbook handbook and some icons. More bugfixes.
+The filesystem operations menu now has a dialog for extending
+a filesystem to fill its underlying volume.
 
 version 0.7.2
 Snapshots now are nested in the tree like mirror legs. 

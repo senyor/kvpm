@@ -32,7 +32,7 @@ Q_OBJECT
     KAction *lv_remove_action, *lv_create_action, *pv_move_action, *lv_rename_action,
 	    *lv_reduce_action, *lv_extend_action, *lv_change_action, *add_mirror_action, 
             *remove_mirror_action, *remove_mirror_leg_action, *snap_create_action,
-            *mount_filesystem_action, *unmount_filesystem_action, *lv_mkfs_action;
+            *mount_filesystem_action, *unmount_filesystem_action, *lv_mkfs_action, *lv_maxfs_action;
     
     KMenu *filesystem_menu;
     VolGroup *m_vg;
@@ -53,6 +53,7 @@ Q_OBJECT
     void removeMirrorLeg();
     void createSnapshot();
     void mkfsLogicalVolume();
+    void maxfsLogicalVolume();
     void movePhysicalExtents();
     void mountFilesystem();
     void unmountFilesystem();
