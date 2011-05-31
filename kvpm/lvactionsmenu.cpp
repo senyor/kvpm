@@ -34,6 +34,7 @@
 #include "maxfs.h"
 #include "mount.h"
 #include "pvmove.h"
+#include "removefs.h"
 #include "removemirror.h"
 #include "removemirrorleg.h"
 #include "unmount.h"
@@ -81,8 +82,9 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, VolGroup *volumeGroup, QWidg
     lv_change_action = lv_actions->addAction("lvchange", this, SLOT(changeLogicalVolume()));
     lv_change_action->setText( i18n("Change attributes or tags...")); 
 
-    lv_mkfs_action    = new KAction( i18n("Make filesystem..."), this);
-    lv_maxfs_action   = new KAction( i18n("Extend filesystem to fill volume..."), this);
+    lv_mkfs_action      = new KAction( i18n("Make filesystem..."), this);
+    lv_removefs_action  = new KAction( i18n("Remove filesystem..."), this);
+    lv_maxfs_action     = new KAction( i18n("Extend filesystem to fill volume..."), this);
     mount_filesystem_action   = new KAction( i18n("Mount filesystem..."), this);
     unmount_filesystem_action = new KAction( i18n("Unmount filesystem..."), this);
     add_mirror_action  = new KAction( i18n("Add leg or change mirror..."), this);
@@ -91,6 +93,9 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, VolGroup *volumeGroup, QWidg
 
     connect(lv_mkfs_action, SIGNAL(triggered()), 
 	    this, SLOT(mkfsLogicalVolume()));
+
+    connect(lv_removefs_action, SIGNAL(triggered()), 
+	    this, SLOT(removefsLogicalVolume()));
 
     connect(lv_maxfs_action, SIGNAL(triggered()), 
 	    this, SLOT(maxfsLogicalVolume()));
@@ -121,17 +126,16 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, VolGroup *volumeGroup, QWidg
     filesystem_menu->addAction(mount_filesystem_action);
     filesystem_menu->addAction(unmount_filesystem_action);
     filesystem_menu->addSeparator();
-    filesystem_menu->addAction(lv_mkfs_action);
     filesystem_menu->addAction(lv_maxfs_action);
+    filesystem_menu->addAction(lv_mkfs_action);
+    filesystem_menu->addAction(lv_removefs_action);
     filesystem_menu->setEnabled(false);
 
     if( m_lv ){
 
-        qDebug() << "One --> "<<m_lv->getName();
-
 	if(  m_lv->isWritable()  && !m_lv->isLocked() && !m_lv->isVirtual() && 
 	    !m_lv->isMirrorLeg() && !m_lv->isMirrorLog() ){
-            qDebug() << "Two--> " << m_lv->getName();
+
 	    if( m_lv->isMounted() ){
 		lv_mkfs_action->setEnabled(false);
 		lv_reduce_action->setEnabled(false);
@@ -406,6 +410,12 @@ void LVActionsMenu::removeMirrorLeg()
 void LVActionsMenu::mkfsLogicalVolume()
 {
     if( make_fs(m_lv) )
+	MainWindow->reRun();
+}
+
+void LVActionsMenu::removefsLogicalVolume()
+{
+    if( remove_fs(m_lv) )
 	MainWindow->reRun();
 }
 

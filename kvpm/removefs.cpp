@@ -21,9 +21,10 @@
 #include <QtGui>
 
 #include "removefs.h"
+#include "storagepartition.h"
+#include "logvol.h"
 
-
-// Removes all traces of any filesystem on a partition
+// Removes all traces of any filesystem on a partition or volume
 
 
 bool remove_fs(StoragePartition *partition)
@@ -44,4 +45,31 @@ bool remove_fs(StoragePartition *partition)
     else
         return false;
 
+}
+
+bool remove_fs(LogVol *logicalVolume)
+{
+
+    QString message = i18n("Are you sure you want delete this filesystem? "
+                           "Any data on it will be lost!");
+
+    QByteArray zero_array( 128 * 1024, '\0');
+    QString path = logicalVolume->getMapperPath();
+    QFile *device;
+
+    if(KMessageBox::warningContinueCancel(0, message) == KMessageBox::Continue){
+
+        device = new QFile(path);
+
+        if( device->open(QIODevice::ReadWrite) ){
+            if( device->write(zero_array) != -1 ){
+                device->flush();
+                device->close();
+
+                return(true);
+            }
+        }
+    }
+        
+    return(false);
 }

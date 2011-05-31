@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2009 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2009, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -16,10 +16,10 @@
 #define REMOVEFS_H
 
 
-#include <QString>
-
-#include "storagepartition.h"
+class StoragePartition;
+class LogVol;
 
 bool remove_fs(StoragePartition *partition);
+bool remove_fs(LogVol *logicalVolume);
 
 #endif
