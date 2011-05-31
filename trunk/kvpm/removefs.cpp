@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2009 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2009, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -53,7 +53,7 @@ bool remove_fs(LogVol *logicalVolume)
     QString message = i18n("Are you sure you want delete this filesystem? "
                            "Any data on it will be lost!");
 
-    QByteArray zero_array( 128 * 1024, '\0');
+    QByteArray zero_array(128 * 1024, '\0');
     QString path = logicalVolume->getMapperPath();
     QFile *device;
 
@@ -62,12 +62,11 @@ bool remove_fs(LogVol *logicalVolume)
         device = new QFile(path);
 
         if( device->open(QIODevice::ReadWrite) ){
-            if( device->write(zero_array) != -1 ){
-                device->flush();
-                device->close();
+            device->write(zero_array);
+            device->flush();
+            device->close();
 
-                return(true);
-            }
+            return(true);
         }
     }
         
