@@ -50,7 +50,7 @@ bool max_fs(StoragePartition *partition)
 {
 
     QString path = partition->getName();
-    QString fs = partition->getFileSystem();
+    QString fs = partition->getFilesystem();
 
     QString message = i18n("Extend the filesystem on: %1 to fill the entire partition?").arg("<b>"+path+"</b>");
     QString error_message = i18n("Extending is only supported for ext2/3/4, jfs, xfs and Reiserfs. ");
