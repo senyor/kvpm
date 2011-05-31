@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2009, 2010 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -207,9 +207,7 @@ void StorageDeviceModel::setupModelData(QList<StorageDevice *> devices, StorageD
         if(dev->isPhysicalVolume()){
             pv = dev->getPhysicalVolume();
             data << dev->getDevicePath() << "" << sizeToString(dev->getSize());
-            data << QString("%1 ( %2% ) ").arg( sizeToString( (pv->getSize()) - (pv->getUnused()) ))
-                .arg(pv->getPercentUsed() );
-            
+            data << QString("%1 ( %%2 ) ").arg( sizeToString( pv->getUnused() )).arg( 100 - pv->getPercentUsed() );
 
             data  << "physical volume" << pv->getVolGroup()->getName();
             dataAlternate << "" << dev_variant;
