@@ -1,3 +1,7 @@
+version 0.7.4
+Added a menu option for removing the filesystem from a logical
+volume just as it was already possible to do with a partition.
+
 version 0.7.3
 Added a small docbook handbook and some icons. More bugfixes.
 The filesystem operations menu now has a dialog for extending
