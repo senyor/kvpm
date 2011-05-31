@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -36,6 +36,7 @@ Q_OBJECT
     KMenu *m_vgextend_menu;
 
     KAction *m_mkfs_action,
+            *m_maxfs_action,
             *m_partremove_action,
             *m_partadd_action,
             *m_partmoveresize_action,
@@ -58,6 +59,7 @@ Q_OBJECT
 
  private slots:
     void mkfsPartition();
+    void maxfsPartition();
     void addPartition();
     void moveresizePartition();
     void removePartition();

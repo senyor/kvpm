@@ -21,7 +21,7 @@
 #include "fsextend.h"
 #include "logvol.h"
 #include "processprogress.h"
-
+#include "storagepartition.h"
 
 bool max_fs(LogVol *logicalVolume)
 {
@@ -44,4 +44,26 @@ bool max_fs(LogVol *logicalVolume)
     }
     else
         return false;
+}
+
+bool max_fs(StoragePartition *partition)
+{
+
+    QString path = partition->getName();
+    QString fs = partition->getFileSystem();
+
+    QString message = i18n("Extend the filesystem on: %1 to fill the entire partition?").arg("<b>"+path+"</b>");
+    QString error_message = i18n("Extending is only supported for ext2/3/4, jfs, xfs and Reiserfs. ");
+
+    if( ! ( fs == "ext2" || fs == "ext3" || fs == "ext4" || fs == "reiserfs" || fs == "xfs"  || fs == "jfs" ) ){
+        KMessageBox::error(0, error_message );
+        return false;
+    }
+
+    if(KMessageBox::warningYesNo( 0, message) == 3){  // 3 = yes button
+        return fs_extend( path, fs, true); 
+    }
+    else
+        return false;
+
 }

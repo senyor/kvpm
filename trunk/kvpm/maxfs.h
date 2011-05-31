@@ -16,7 +16,9 @@
 #define MAXFS_H
 
 class LogVol;
+class StoragePartition;
 
+bool max_fs(StoragePartition *partition);
 bool max_fs(LogVol *logicalVolume);
 
 #endif

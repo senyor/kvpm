@@ -135,6 +135,7 @@ void VGTree::loadData()
                             lv_data = lv_data.replaceInStrings("origin", "mirror");
 
                         origin_item = new QTreeWidgetItem( lv_item, lv_data );
+                        origin_item->setData(0, Qt::UserRole, lv->getName());
                         for(int column = 1; column < origin_item->columnCount() ; column++)
                             origin_item->setTextAlignment(column, Qt::AlignRight);
                         insertMirrorLegItems(lv, origin_item );
@@ -487,7 +488,6 @@ void VGTree::popupContextMenu(QPoint point)
 	m_lv_name = QVariant(item->data(0, Qt::UserRole)).toString();
 	m_pv_name = QVariant(item->data(10,0)).toString();
 	m_lv = m_vg->getLogVolByName(m_lv_name);
-
 	context_menu = new LVActionsMenu(m_lv, m_vg, this);
 	context_menu->exec(QCursor::pos());
     }

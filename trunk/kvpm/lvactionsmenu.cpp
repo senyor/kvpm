@@ -82,7 +82,7 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, VolGroup *volumeGroup, QWidg
     lv_change_action->setText( i18n("Change attributes or tags...")); 
 
     lv_mkfs_action    = new KAction( i18n("Make filesystem..."), this);
-    lv_maxfs_action   = new KAction( i18n("Extend filesystem to maximum size..."), this);
+    lv_maxfs_action   = new KAction( i18n("Extend filesystem to fill volume..."), this);
     mount_filesystem_action   = new KAction( i18n("Mount filesystem..."), this);
     unmount_filesystem_action = new KAction( i18n("Unmount filesystem..."), this);
     add_mirror_action  = new KAction( i18n("Add leg or change mirror..."), this);
@@ -123,11 +123,15 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, VolGroup *volumeGroup, QWidg
     filesystem_menu->addSeparator();
     filesystem_menu->addAction(lv_mkfs_action);
     filesystem_menu->addAction(lv_maxfs_action);
+    filesystem_menu->setEnabled(false);
 
     if( m_lv ){
+
+        qDebug() << "One --> "<<m_lv->getName();
+
 	if(  m_lv->isWritable()  && !m_lv->isLocked() && !m_lv->isVirtual() && 
 	    !m_lv->isMirrorLeg() && !m_lv->isMirrorLog() ){
-
+            qDebug() << "Two--> " << m_lv->getName();
 	    if( m_lv->isMounted() ){
 		lv_mkfs_action->setEnabled(false);
 		lv_reduce_action->setEnabled(false);
@@ -184,10 +188,13 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, VolGroup *volumeGroup, QWidg
 	    lv_change_action->setEnabled(true);
 	    lv_rename_action->setEnabled(true);
 	    remove_mirror_leg_action->setEnabled(false);
-	    filesystem_menu->setEnabled(true);
+            filesystem_menu->setEnabled(true);
+            lv_maxfs_action->setEnabled(true);
+
 	}
         else if( m_lv->isOrphan() ){
 	    lv_mkfs_action->setEnabled(false);
+	    lv_maxfs_action->setEnabled(false);
 	    lv_remove_action->setEnabled(true);
 	    unmount_filesystem_action->setEnabled(false);
 	    mount_filesystem_action->setEnabled(false);
@@ -204,6 +211,7 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, VolGroup *volumeGroup, QWidg
         }
 	else if( m_lv->isPvmove() ){
 	    lv_mkfs_action->setEnabled(false);
+	    lv_maxfs_action->setEnabled(false);
 	    lv_remove_action->setEnabled(false);
 	    unmount_filesystem_action->setEnabled(false);
 	    mount_filesystem_action->setEnabled(false);
@@ -219,22 +227,21 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, VolGroup *volumeGroup, QWidg
 	    filesystem_menu->setEnabled(false);
 	}
 	else if( m_lv->isMirrorLeg() || m_lv->isMirrorLog() ){
-	    lv_mkfs_action->setEnabled(true);
-	    lv_remove_action->setEnabled(true);
 
-	    if( m_lv->isMounted() )
-		unmount_filesystem_action->setEnabled(true);
-	    else
-		unmount_filesystem_action->setEnabled(false);
-
-	    mount_filesystem_action->setEnabled(true);
+	    lv_mkfs_action->setEnabled(false);
+	    lv_maxfs_action->setEnabled(false);
+	    lv_remove_action->setEnabled(false);
+            unmount_filesystem_action->setEnabled(false);
+	    mount_filesystem_action->setEnabled(false);
 	    add_mirror_action->setEnabled(false);
-	    lv_change_action->setEnabled(true);
-	    lv_extend_action->setEnabled(true);
-	    lv_reduce_action->setEnabled(true);
+	    lv_change_action->setEnabled(false);
+	    lv_extend_action->setEnabled(false);
+	    lv_reduce_action->setEnabled(false);
 	    pv_move_action->setEnabled(false);
 	    remove_mirror_action->setEnabled(false);
-	    lv_rename_action->setEnabled(true);
+	    lv_rename_action->setEnabled(false);
+	    snap_create_action->setEnabled(false);
+	    filesystem_menu->setEnabled(false);
 
 	    if( !m_lv->isMirrorLog() )
 		remove_mirror_leg_action->setEnabled(true);
@@ -242,8 +249,6 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, VolGroup *volumeGroup, QWidg
 		remove_mirror_leg_action->setEnabled(false);
                 mirror_menu->setEnabled(false);
             }
-	    snap_create_action->setEnabled(true);
-	    filesystem_menu->setEnabled(true);
 	}
 	else if( !(m_lv->isWritable()) && m_lv->isLocked() ){
 
@@ -254,6 +259,7 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, VolGroup *volumeGroup, QWidg
 
             mount_filesystem_action->setEnabled(true);
 	    lv_mkfs_action->setEnabled(false);
+	    lv_maxfs_action->setEnabled(false);
 	    lv_remove_action->setEnabled(false);
 	    add_mirror_action->setEnabled(false);
 	    lv_change_action->setEnabled(true);
@@ -286,6 +292,7 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, VolGroup *volumeGroup, QWidg
 	    filesystem_menu->setEnabled(true);
 	}
 	else{
+
 	    if( m_lv->isMounted() ){
 		lv_remove_action->setEnabled(false);
 		unmount_filesystem_action->setEnabled(true);
@@ -322,6 +329,7 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, VolGroup *volumeGroup, QWidg
 
             mount_filesystem_action->setEnabled(true);
 	    lv_mkfs_action->setEnabled(false);
+	    lv_maxfs_action->setEnabled(false);
 	    lv_reduce_action->setEnabled(false);
 	    lv_change_action->setEnabled(true);
 	    lv_extend_action->setEnabled(false);
@@ -338,6 +346,7 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, VolGroup *volumeGroup, QWidg
         }
     }
     else{
+	lv_maxfs_action->setEnabled(false);
 	lv_mkfs_action->setEnabled(false);
 	lv_remove_action->setEnabled(false);
 	unmount_filesystem_action->setEnabled(false);
@@ -366,18 +375,12 @@ void LVActionsMenu::createLogicalVolume()
 
 void LVActionsMenu::reduceLogicalVolume()
 {
-    if( m_mirror_origin )
-        m_lv = m_mirror_origin;
-
     if(lv_reduce(m_lv))
 	MainWindow->reRun();
 }
 
 void LVActionsMenu::extendLogicalVolume()
 {
-    if( m_mirror_origin )
-        m_lv = m_mirror_origin;
-
     if(lv_extend(m_lv))
 	MainWindow->reRun();
 }
@@ -402,36 +405,24 @@ void LVActionsMenu::removeMirrorLeg()
 
 void LVActionsMenu::mkfsLogicalVolume()
 {
-    if( m_mirror_origin )
-        m_lv = m_mirror_origin;
-
     if( make_fs(m_lv) )
 	MainWindow->reRun();
 }
 
 void LVActionsMenu::maxfsLogicalVolume()
 {
-    if( m_mirror_origin )
-        m_lv = m_mirror_origin;
-
     if( max_fs(m_lv) )
 	MainWindow->reRun();
 }
 
 void LVActionsMenu::removeLogicalVolume()
 {
-    if( m_mirror_origin )
-        m_lv = m_mirror_origin;
-
     if( remove_lv(m_lv) )
 	MainWindow->reRun();
 }
 
 void LVActionsMenu::renameLogicalVolume()
 {
-    if( m_mirror_origin )
-        m_lv = m_mirror_origin;
-
     if( rename_lv(m_lv) )
 	MainWindow->reRun();
 }
@@ -444,27 +435,18 @@ void LVActionsMenu::createSnapshot()
 
 void LVActionsMenu::changeLogicalVolume()
 {
-    if( m_mirror_origin )
-        m_lv = m_mirror_origin;
-
     if( change_lv(m_lv) )
 	MainWindow->reRun();
 }
 
 void LVActionsMenu::mountFilesystem()
 {
-    if( m_mirror_origin )
-        m_lv = m_mirror_origin;
-
     if( mount_filesystem(m_lv) )
 	MainWindow->reRun();
 }
 
 void LVActionsMenu::unmountFilesystem()
 {
-    if( m_mirror_origin )
-        m_lv = m_mirror_origin;
-
     if( unmount_filesystem(m_lv) )
 	MainWindow->reRun();
 }
