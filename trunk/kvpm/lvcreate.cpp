@@ -320,9 +320,11 @@ QWidget* LVCreateDialog::createPhysicalTab()
     m_stripe_box->setLayout(striped_layout);
 
     stripe_size_combo = new KComboBox();    
+    m_stripe_box->setEnabled(false);
     for(int n = 2; (pow(2, n) * 1024) <= m_vg->getExtentSize() ; n++){
-	stripe_size_combo->addItem(QString("%1").arg(pow(2, n)) + " KB");
+	stripe_size_combo->addItem(QString("%1").arg(pow(2, n)) + " KiB");
 	stripe_size_combo->setItemData(n - 2, QVariant( (int) pow(2, n) ), Qt::UserRole );
+        m_stripe_box->setEnabled(true);   // only enabled if the combo box has at least one entry!
     }
     
     QLabel *stripe_size = new QLabel( i18n("Stripe Size: ") );
