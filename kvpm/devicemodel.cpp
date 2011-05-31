@@ -246,11 +246,11 @@ void StorageDeviceModel::setupModelData(QList<StorageDevice *> devices, StorageD
                 else
                     data << "";
  
-                data << part->getFileSystem() << "" << (part->getFlags()).join(", ");
+                data << part->getFilesystem() << "" << (part->getFlags()).join(", ");
                 
                 if(part->isMounted())
                     data << (part->getMountPoints())[0];
-                else if( part->isBusy() && ( part->getFileSystem() == "swap" ) )
+                else if( part->isBusy() && ( part->getFilesystem() == "swap" ) )
                     data << "swapping";
                 else
                     data << "";

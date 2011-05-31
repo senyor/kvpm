@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2009, 2010 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2009, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -36,7 +36,7 @@
 bool moveresize_partition(StoragePartition *partition)
 {
     PartitionMoveResizeDialog dialog(partition);
-    QString fs = partition->getFileSystem();
+    QString fs = partition->getFilesystem();
 
     QString message = i18n("Currently only the ext2/3/4 file systems "
                            "are supported for file system shrinking. "
@@ -105,7 +105,7 @@ PartitionMoveResizeDialog::PartitionMoveResizeDialog(StoragePartition *partition
 
     info_group_layout->addWidget( new QLabel( i18n("Maximum size: %1", sizeToString( max_size * m_ped_sector_size ) ))); 
 
-    QString filesystem = partition->getFileSystem();
+    QString filesystem = partition->getFilesystem();
     m_size_group = new QGroupBox( i18n("Modify partition size") );
     m_size_group->setCheckable(true);
     if ( ! (filesystem == "ext2" || filesystem == "ext3" || 
@@ -553,7 +553,7 @@ void PartitionMoveResizeDialog::resetPartition(){
 
 void PartitionMoveResizeDialog::setup(){
 
-    QString fs = m_old_storage_part->getFileSystem();
+    QString fs = m_old_storage_part->getFilesystem();
 
     m_current_part = m_old_storage_part->getPedPartition();
     m_ped_disk = m_current_part->disk;   
@@ -698,7 +698,7 @@ bool PartitionMoveResizeDialog::shrinkPartition(){
 
     PedSector new_size;
 
-    const QString fs = m_old_storage_part->getFileSystem();
+    const QString fs = m_old_storage_part->getFilesystem();
     const bool is_pv = m_old_storage_part->isPV();
 
     if( m_new_part_size >= m_current_part->geom.length ){
@@ -786,7 +786,7 @@ bool PartitionMoveResizeDialog::growPartition(){
 
     PedDevice  *device = m_ped_disk->dev;
 
-    const QString fs = m_old_storage_part->getFileSystem();
+    const QString fs = m_old_storage_part->getFilesystem();
     const bool is_pv = m_old_storage_part->isPV();
 
     int success;
