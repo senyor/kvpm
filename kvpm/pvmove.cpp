@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -254,10 +254,12 @@ void PVMoveDialog::buildDialog()
 	radio_layout->addWidget(label);
     }
 
+    QHBoxLayout *lower_layout = new QHBoxLayout;
+    layout->addLayout(lower_layout);
     QGroupBox *check_group = new QGroupBox( i18n("Destination Physical Volumes") );
     QGridLayout *check_layout = new QGridLayout();
     check_group->setLayout(check_layout);
-    layout->addWidget(check_group);
+    lower_layout->addWidget(check_group);
 
     int check_count = m_target_pvs.size();
     for (int x = 0; x < check_count; x++){
@@ -292,6 +294,24 @@ void PVMoveDialog::buildDialog()
 
     disableDestination(true);
     selectAll();
+
+    QGroupBox *alloc_box = new QGroupBox( i18n("Allocation Policy") );
+    QVBoxLayout *alloc_box_layout = new QVBoxLayout;
+    m_normal_button     = new QRadioButton( i18n("Normal") );
+    m_contiguous_button = new QRadioButton( i18n("Contiguous") );
+    m_anywhere_button   = new QRadioButton( i18n("Anywhere") );
+    m_inherited_button  = new QRadioButton( i18n("Inherited") );
+    m_inherited_button->setChecked(true);
+    m_cling_button      = new QRadioButton( i18n("Cling") );
+    alloc_box_layout->addWidget(m_normal_button);
+    alloc_box_layout->addWidget(m_contiguous_button);
+    alloc_box_layout->addWidget(m_anywhere_button);
+    alloc_box_layout->addWidget(m_inherited_button);
+    alloc_box_layout->addWidget(m_cling_button);
+    alloc_box_layout->addStretch();
+    alloc_box->setLayout(alloc_box_layout);
+    lower_layout->addWidget(alloc_box);
+
 }
 
 void PVMoveDialog::calculateSpace(bool)
@@ -392,6 +412,18 @@ QStringList PVMoveDialog::arguments()
     if(move_lv){
 	args << "--name";
 	args << m_lv->getFullName();
+    }
+
+    if ( !m_inherited_button->isChecked() ){        // "inherited" is what we get if 
+        args << "--alloc";                          // we don't pass "--alloc" at all
+        if ( m_contiguous_button->isChecked() )     // passing "--alloc" "inherited"  
+            args << "contiguous" ;                  // doesn't work                        
+        else if ( m_anywhere_button->isChecked() )
+            args << "anywhere" ;
+        else if ( m_cling_button->isChecked() )
+            args << "cling" ;
+        else
+            args << "normal" ;
     }
 
     if(m_source_pvs.size() > 1){

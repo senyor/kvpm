@@ -63,7 +63,7 @@ DeviceActionsMenu::DeviceActionsMenu( StorageDeviceItem *item, QWidget *parent) 
 void DeviceActionsMenu::setup(StorageDeviceItem *item)
 {
     QStringList group_names;
-    KMenu *filesystem_ops = new KMenu( i18n("Filesystem operations"), this);
+    KMenu *filesystem_menu = new KMenu( i18n("Filesystem operations"), this);
     m_vgextend_menu       = new KMenu( i18n("Extend volume group"), this);
     m_maxfs_action      = new KAction( i18n("Extend filesystem to fill partition"), this);
     m_mkfs_action       = new KAction( i18n("Make filesystem"), this);
@@ -86,13 +86,13 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
     addAction(m_vgreduce_action);
     addMenu(m_vgextend_menu);
     addSeparator();
-    addMenu(filesystem_ops);
-    filesystem_ops->addAction(m_mount_action);
-    filesystem_ops->addAction(m_unmount_action);
-    filesystem_ops->addSeparator();
-    filesystem_ops->addAction(m_maxfs_action);
-    filesystem_ops->addAction(m_mkfs_action);
-    filesystem_ops->addAction(m_removefs_action);
+    addMenu(filesystem_menu);
+    filesystem_menu->addAction(m_mount_action);
+    filesystem_menu->addAction(m_unmount_action);
+    filesystem_menu->addSeparator();
+    filesystem_menu->addAction(m_maxfs_action);
+    filesystem_menu->addAction(m_mkfs_action);
+    filesystem_menu->addAction(m_removefs_action);
 
     m_vg_name  = item->data(5).toString(); // only set if this is a pv in a vg
 
@@ -106,7 +106,7 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
 
         setEnabled(true);
         m_dev = (StorageDevice *) (( item->dataAlternate(1)).value<void *>() );
-        filesystem_ops->setEnabled(false);
+        filesystem_menu->setEnabled(false);
 
         if( ( item->dataAlternate(0)).canConvert<void *>() ){  // its a partition
             m_part = (StoragePartition *) (( item->dataAlternate(0)).value<void *>() );
@@ -160,7 +160,7 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
                     m_vgreduce_action->setEnabled(false);
             }
             else if( m_part->isNormal() || m_part->isLogical() ){
-                filesystem_ops->setEnabled(true);
+                filesystem_menu->setEnabled(true);
 
                 if( m_part->isMounted() || m_part->isBusy() ){ 
                     m_partremove_action->setEnabled(false);

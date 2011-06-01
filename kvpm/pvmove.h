@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -49,6 +49,10 @@ Q_OBJECT
     QList<NoMungeCheck *> m_check_boxes;         // user can select multiple destination pv's
     QList<NoMungeRadioButton *> m_radio_buttons; // user can select one source pv
     bool move_lv;
+
+    QRadioButton *m_contiguous_button, *m_normal_button,   //Radio button to chose
+                 *m_anywhere_button, *m_inherited_button,  // the allocation policy
+                 *m_cling_button;
 
     void buildDialog();
     void removeEmptyTargets();
