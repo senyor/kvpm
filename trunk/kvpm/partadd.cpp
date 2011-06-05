@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2009, 2010 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2009, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -19,6 +19,7 @@
 
 #include "partadd.h"
 #include "partaddgraphic.h"
+#include "pedexceptions.h"
 #include "misc.h"
 
 /* 
@@ -162,19 +163,15 @@ PartitionAddDialog::PartitionAddDialog(StoragePartition *partition,
     m_size_validator->setBottom(0);
 
     m_size_combo = new KComboBox();
-    m_size_combo->insertItem(0,"Sectors");
-    m_size_combo->insertItem(1,"MiB");
-    m_size_combo->insertItem(2,"GiB");
-    m_size_combo->insertItem(3,"TiB");
+    m_size_combo->insertItem(0,"MiB");
+    m_size_combo->insertItem(1,"GiB");
+    m_size_combo->insertItem(2,"TiB");
     m_size_combo->setInsertPolicy(KComboBox::NoInsert);
-    m_size_combo->setCurrentIndex(2);
+    m_size_combo->setCurrentIndex(1);
 
     size_group_layout->addWidget(m_size_edit,0,0);
     size_group_layout->addWidget(m_size_combo,0,1);
     size_group_layout->addWidget(m_total_size_spin,1,0);
-    m_align64_check = new QCheckBox("Align to 64 KiB");
-    m_align64_check->setChecked(true);
-    size_group_layout->addWidget(m_align64_check, 3, 0, 1, 2, Qt::AlignHCenter );
 
     m_preceding_label = new QLabel();
     size_group_layout->addWidget( m_preceding_label, 5, 0, 1, 2, Qt::AlignHCenter );
@@ -190,12 +187,11 @@ PartitionAddDialog::PartitionAddDialog(StoragePartition *partition,
     layout->addWidget(m_excluded_group);
 
     m_excluded_combo = new KComboBox();
-    m_excluded_combo->insertItem(0,"Sectors");
-    m_excluded_combo->insertItem(1,"MiB");
-    m_excluded_combo->insertItem(2,"GiB");
-    m_excluded_combo->insertItem(3,"TiB");
+    m_excluded_combo->insertItem(0,"MiB");
+    m_excluded_combo->insertItem(1,"GiB");
+    m_excluded_combo->insertItem(2,"TiB");
     m_excluded_combo->setInsertPolicy(KComboBox::NoInsert);
-    m_excluded_combo->setCurrentIndex(2);
+    m_excluded_combo->setCurrentIndex(1);
 
     m_excluded_spin = new QSpinBox();
     m_excluded_spin->setRange(0,100);
@@ -252,7 +248,9 @@ void PartitionAddDialog::commitPartition()
 
     PedPartitionType type;
     PedSector first_sector = m_ped_start_sector;
-    int sectors64kib;
+    int sectors4KiB;
+    int sectors64KiB;
+    int sectors1MiB;
 
     if( m_excluded_group->isChecked() )
         first_sector = m_ped_start_sector + m_excluded_sectors;
@@ -262,27 +260,55 @@ void PartitionAddDialog::commitPartition()
         last_sector = m_ped_end_sector;
     PedSector length  = (last_sector - first_sector) + 1;
 
-    if( ( (int)(0x10000 / m_ped_sector_size) ) > 0 )
-        sectors64kib = 0x10000 / m_ped_sector_size;
+    if( ( (int)(0x1000 / m_ped_sector_size) ) > 0 )
+        sectors4KiB = 0x1000 / m_ped_sector_size;
     else
-        sectors64kib = 1;
+        sectors4KiB = 1;
 
-    PedAlignment *ped_start_alignment = ped_alignment_new(0, sectors64kib);
+    if( ( (int)(0x10000 / m_ped_sector_size) ) > 0 )
+        sectors64KiB = 0x10000 / m_ped_sector_size;
+    else
+        sectors64KiB = 1;
+
+    if( ( (int)(0x100000 / m_ped_sector_size) ) > 0 )
+        sectors1MiB = 0x100000 / m_ped_sector_size;
+    else
+        sectors1MiB = 1;
+
+    PedAlignment *ped_start_alignment4KiB  = ped_alignment_new(0, sectors4KiB);
+    PedAlignment *ped_start_alignment64KiB = ped_alignment_new(0, sectors64KiB);
+    PedAlignment *ped_start_alignment1MiB  = ped_alignment_new(0, sectors1MiB);
     PedAlignment *ped_end_alignment   = ped_alignment_new(0, 1);
 
-    PedGeometry *start_geom = ped_geometry_new(m_ped_disk->dev, first_sector, (2 * sectors64kib) - 1);
+    PedGeometry *start_geom4KiB  = ped_geometry_new(m_ped_disk->dev, first_sector, (2 * sectors4KiB) - 1);
+    PedGeometry *start_geom64KiB = ped_geometry_new(m_ped_disk->dev, first_sector, (2 * sectors64KiB) - 1);
+    PedGeometry *start_geom1MiB  = ped_geometry_new(m_ped_disk->dev, first_sector, (2 * sectors1MiB) - 1);
     PedGeometry *end_geom   = ped_geometry_new(m_ped_disk->dev, first_sector, length);
 
+    PedConstraint *ped_constraint4KiB = ped_constraint_new(ped_start_alignment4KiB,
+                                                           ped_end_alignment, 
+                                                           start_geom4KiB, 
+                                                           end_geom, 
+                                                           (2 * sectors4KiB) - 1, 
+                                                           length);
 
-    PedConstraint *ped_constraint64 = ped_constraint_new(ped_start_alignment,
-							 ped_end_alignment, 
-							 start_geom, 
-							 end_geom, 
-							 (2 * sectors64kib) - 1, 
-							 length);
-    if( m_align64_check->isChecked() )
-	m_ped_constraints = ped_constraint_intersect(ped_constraint64, m_ped_constraints);
+    PedConstraint *ped_constraint64KiB = ped_constraint_new(ped_start_alignment64KiB,
+                                                            ped_end_alignment, 
+                                                            start_geom64KiB, 
+                                                            end_geom, 
+                                                            (2 * sectors64KiB) - 1, 
+                                                            length);
 
+    PedConstraint *ped_constraint1MiB = ped_constraint_new(ped_start_alignment1MiB,
+                                                           ped_end_alignment, 
+                                                           start_geom1MiB, 
+                                                           end_geom, 
+                                                           (2 * sectors1MiB) - 1, 
+                                                           length);
+
+    ped_constraint4KiB  = ped_constraint_intersect(ped_constraint4KiB,  m_ped_constraints);
+    ped_constraint64KiB = ped_constraint_intersect(ped_constraint64KiB, m_ped_constraints);
+    ped_constraint1MiB  = ped_constraint_intersect(ped_constraint1MiB,  m_ped_constraints);
 
     if(m_type_combo->currentIndex() == 0)
         type = PED_PARTITION_NORMAL ;
@@ -297,29 +323,39 @@ void PartitionAddDialog::commitPartition()
 							first_sector, 
 							(first_sector + length) -1);
 
-    if( ped_disk_add_partition(m_ped_disk, ped_new_partition, m_ped_constraints) )
+    ped_exception_set_handler(my_constraint_handler);
+
+    if( ped_disk_add_partition(m_ped_disk, ped_new_partition, ped_constraint1MiB) ){
+        ped_exception_set_handler(my_handler);
         ped_disk_commit(m_ped_disk);
+    }
+    else if( ped_disk_add_partition(m_ped_disk, ped_new_partition, ped_constraint64KiB) ){
+        ped_exception_set_handler(my_handler);
+        ped_disk_commit(m_ped_disk);
+    }
+    else{
+        ped_exception_set_handler(my_handler);
+        ped_disk_add_partition(m_ped_disk, ped_new_partition, ped_constraint4KiB);
+        ped_disk_commit(m_ped_disk);
+    }
 }
 
 void PartitionAddDialog::adjustSizeCombo(int index){
 
     long double sized;
 
-    if(index){
-        sized = ((long double)m_partition_sectors * m_ped_sector_size);
-        if(index == 1)
-            sized /= (long double)0x100000;
-        if(index == 2)
-            sized /= (long double)0x40000000;
-        if(index == 3){
-            sized /= (long double)(0x100000);
-            sized /= (long double)(0x100000);
-        }
-        m_size_edit->setText(QString("%1").arg((double)sized));
-    }
-    else
-        m_size_edit->setText(QString("%1").arg(m_partition_sectors));
+    sized = ((long double)m_partition_sectors * m_ped_sector_size);
 
+    if(index == 0)
+        sized /= (long double)0x100000;
+    else if(index == 1)
+        sized /= (long double)0x40000000;
+    else{
+        sized /= (long double)(0x100000);
+        sized /= (long double)(0x100000);
+    }
+
+    m_size_edit->setText( QString("%1").arg( (double)sized ) );
 }
 
 
@@ -328,18 +364,12 @@ bool PartitionAddDialog::validatePartitionSize(QString size){
     long long free_sectors = m_ped_sector_length - m_excluded_sectors;
     int x = 0;
 
-    const int size_combo_index = m_size_combo->currentIndex();
-
     if(m_size_validator->validate(size, x) == QValidator::Acceptable){
 
-        if(!size_combo_index)
-            m_partition_sectors = size.toLongLong();
-        else{
-            m_partition_sectors = convertSizeToSectors( size_combo_index, size.toDouble() );
+        m_partition_sectors = convertSizeToSectors( m_size_combo->currentIndex(), size.toDouble() );
 
-            if( m_partition_sectors > free_sectors )
-                m_partition_sectors = free_sectors;
-        }
+        if( m_partition_sectors > free_sectors )
+            m_partition_sectors = free_sectors;
         return true;
     }
     else{
@@ -354,11 +384,11 @@ long long PartitionAddDialog::convertSizeToSectors(int index, double size)
 {
     long double partition_size = size;
 
-    if(index == 1)
+    if(index == 0)
         partition_size *= (long double)0x100000;
-    if(index == 2)
+    else if(index == 1)
         partition_size *= (long double)0x40000000;
-    if(index == 3){
+    else{
         partition_size *= (long double)0x100000;
         partition_size *= (long double)0x100000;
     }
@@ -387,58 +417,43 @@ void PartitionAddDialog::adjustExcludedEdit(int percentage){
 
 }
 
-
 void PartitionAddDialog::adjustExcludedCombo(int index){
 
     long double sized;
     long double valid_topd = ((long double)m_ped_sector_length * m_ped_sector_size);
 
-    if(index){
- 
-        sized = ((long double)m_excluded_sectors * m_ped_sector_size);
+    sized = ((long double)m_excluded_sectors * m_ped_sector_size);
 
-        if(index == 1){
-            sized /= (long double)0x100000;
-	    valid_topd /= (long double)0x100000;
-	}
-        if(index == 2){
-            sized /= (long double)0x40000000;
-	    valid_topd /= (long double)0x40000000;
-	}
-        if(index == 3){
-            sized /= (long double)(0x100000);
-            sized /= (long double)(0x100000);
-	    valid_topd /= (long double)0x100000;
-	    valid_topd /= (long double)0x100000;
-        }
-        m_excluded_edit->setText(QString("%1").arg((double)sized));
+    if(index == 0){
+        sized /= (long double)0x100000;
+        valid_topd /= (long double)0x100000;
+    }
+    else if(index == 1){
+        sized /= (long double)0x40000000;
+        valid_topd /= (long double)0x40000000;
     }
     else{
-        m_excluded_edit->setText(QString("%1").arg(m_excluded_sectors));
+        sized /= (long double)(0x100000);
+        sized /= (long double)(0x100000);
+        valid_topd /= (long double)0x100000;
+        valid_topd /= (long double)0x100000;
     }
+    m_excluded_edit->setText(QString("%1").arg((double)sized));
 
     m_excluded_validator->setTop((double)valid_topd);
 }
-
 
 bool PartitionAddDialog::validateExcludedSize(QString size){
 
     int x = 0;
 
-    const int excluded_combo_index = m_excluded_combo->currentIndex();
-
     if(m_excluded_validator->validate(size, x) == QValidator::Acceptable){
 
-        if( ! excluded_combo_index)
-            m_excluded_sectors = size.toLongLong();
-        else
-            m_excluded_sectors = convertSizeToSectors( excluded_combo_index, size.toDouble() );
-
+        m_excluded_sectors = convertSizeToSectors( m_excluded_combo->currentIndex(), size.toDouble() );
         return true;
     }
-    else{
-        return false;
-    }
+
+    return false;
 }
 
 
