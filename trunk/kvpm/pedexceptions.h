@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2010 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -18,5 +18,6 @@
 #include <parted/parted.h>
 
 PedExceptionOption my_handler(PedException *exception);
+PedExceptionOption my_constraint_handler(PedException *exception);
 
 #endif
