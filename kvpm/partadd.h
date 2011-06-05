@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2009 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2009, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -67,8 +67,6 @@ Q_OBJECT
 
     QGroupBox *m_size_group,
               *m_excluded_group;
-
-    QCheckBox *m_align64_check;
 
     QLabel    *m_unexcluded_label,  // Space left for new partition
               *m_remaining_label,
