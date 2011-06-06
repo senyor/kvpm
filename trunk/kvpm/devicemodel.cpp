@@ -76,10 +76,10 @@ QVariant StorageDeviceItem::dataAlternate(int column) const
     return itemDataAlternate.value(column);
 }
 
-StorageDeviceItem *StorageDeviceItem::parent() {
+StorageDeviceItem *StorageDeviceItem::parent() 
+{
     return parentItem;
 }
-
 
 StorageDeviceModel::StorageDeviceModel(QList<StorageDevice *> devices, QObject *parent) : QAbstractItemModel(parent)
 {
@@ -154,7 +154,10 @@ QVariant StorageDeviceModel::data(const QModelIndex &index, int role) const
 {
     if (!index.isValid())
 	return QVariant();
-    
+
+    if( (role == Qt::TextAlignmentRole) && (index.column() > 0 && index.column() < 7) )
+        return QVariant(Qt::AlignRight);
+
     if ((role != Qt::DisplayRole) && (role != Qt::UserRole))
 	return QVariant();
 
@@ -162,7 +165,6 @@ QVariant StorageDeviceModel::data(const QModelIndex &index, int role) const
 
     if (role == Qt::UserRole)
 	return item->dataAlternate(index.column());
-
 
     return item->data(index.column());
 }
@@ -180,6 +182,10 @@ QVariant StorageDeviceModel::headerData(int section, Qt::Orientation orientation
     if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
 	return rootItem->data(section);
 
+    if( role == Qt::TextAlignmentRole )
+        return QVariant(Qt::AlignCenter);
+
+
     return QVariant();
 }
 
@@ -194,7 +200,8 @@ void StorageDeviceModel::setupModelData(QList<StorageDevice *> devices, StorageD
     QVariant dev_variant;
     PhysVol *pv;
     
-    /* dataAlternate
+    /* 
+       dataAlternate
        0:  pointer to storagepartition if partition, else "" 
        1:  pointer to storagedevice
     */
@@ -207,7 +214,7 @@ void StorageDeviceModel::setupModelData(QList<StorageDevice *> devices, StorageD
         if(dev->isPhysicalVolume()){
             pv = dev->getPhysicalVolume();
             data << dev->getDevicePath() << "" << sizeToString(dev->getSize());
-            data << QString("%1 ( %%2 ) ").arg( sizeToString( pv->getUnused() )).arg( 100 - pv->getPercentUsed() );
+            data << QString("%1 (%%2) ").arg( sizeToString( pv->getUnused() )).arg( 100 - pv->getPercentUsed() );
 
             data  << "physical volume" << pv->getVolGroup()->getName();
             dataAlternate << "" << dev_variant;
@@ -218,6 +225,7 @@ void StorageDeviceModel::setupModelData(QList<StorageDevice *> devices, StorageD
         }
 	
         StorageDeviceItem *item = new StorageDeviceItem(data, dataAlternate, parent);
+
         parent->appendChild(item);
         for(int y = 0; y < dev->getPartitionCount(); y++){
             data.clear();
