@@ -131,12 +131,11 @@ PartitionMoveResizeDialog::PartitionMoveResizeDialog(StoragePartition *partition
     m_size_validator->setBottom(0);
 
     m_size_combo = new KComboBox();
-    m_size_combo->insertItem(0,"Sectors");
-    m_size_combo->insertItem(1,"MiB");
-    m_size_combo->insertItem(2,"GiB");
-    m_size_combo->insertItem(3,"TiB");
+    m_size_combo->insertItem(0,"MiB");
+    m_size_combo->insertItem(1,"GiB");
+    m_size_combo->insertItem(2,"TiB");
     m_size_combo->setInsertPolicy(KComboBox::NoInsert);
-    m_size_combo->setCurrentIndex(2);
+    m_size_combo->setCurrentIndex(1);
 
     size_group_layout->addWidget(m_size_edit,0,0);
     size_group_layout->addWidget(m_size_combo,0,1);
@@ -171,12 +170,11 @@ PartitionMoveResizeDialog::PartitionMoveResizeDialog(StoragePartition *partition
     layout->addWidget(m_offset_group);
 
     m_offset_combo = new KComboBox();
-    m_offset_combo->insertItem(0,"Sectors");
-    m_offset_combo->insertItem(1,"MiB");
-    m_offset_combo->insertItem(2,"GiB");
-    m_offset_combo->insertItem(3,"TiB");
+    m_offset_combo->insertItem(0,"MiB");
+    m_offset_combo->insertItem(1,"GiB");
+    m_offset_combo->insertItem(2,"TiB");
     m_offset_combo->setInsertPolicy(KComboBox::NoInsert);
-    m_offset_combo->setCurrentIndex(2);
+    m_offset_combo->setCurrentIndex(1);
 
     m_offset_spin = new QSpinBox();
     m_offset_spin->setRange(0,100);
@@ -338,27 +336,24 @@ void PartitionMoveResizeDialog::adjustSizeCombo(int index){
     long double sized;
     long double valid_topd = (((long double)m_max_part_end - m_new_part_start + 1) * m_ped_sector_size);
 
-    if(index){
-        sized = ((long double)m_new_part_size * m_ped_sector_size);
-        if(index == 1){
-            sized /= (long double)0x100000;
-	    valid_topd /= (long double)0x100000;
-        }
-        if(index == 2){
+    sized = ((long double)m_new_part_size * m_ped_sector_size);
+
+    if(index == 0){
+        sized /= (long double)0x100000;
+        valid_topd /= (long double)0x100000;
+    }
+    else if(index == 1){
             sized /= (long double)0x40000000;
 	    valid_topd /= (long double)0x40000000;
-        }
-        if(index == 3){
-            sized /= (long double)(0x100000);
-            sized /= (long double)(0x100000);
-	    valid_topd /= (long double)0x100000;
-	    valid_topd /= (long double)0x100000;
-        }
-        m_size_edit->setText(QString("%1").arg((double)sized));
     }
-    else
-        m_size_edit->setText(QString("%1").arg(m_new_part_size));
+    else{
+        sized /= (long double)(0x100000);
+        sized /= (long double)(0x100000);
+        valid_topd /= (long double)0x100000;
+        valid_topd /= (long double)0x100000;
+    }
 
+    m_size_edit->setText(QString("%1").arg((double)sized));
     m_offset_validator->setTop( (double)valid_topd );
 
     setOffsetSpinMinMax();
@@ -372,18 +367,10 @@ void PartitionMoveResizeDialog::validateVolumeSize(QString size){
 
     int x = 0;
 
-    const int size_combo_index = m_size_combo->currentIndex();
-
-    if(m_size_validator->validate(size, x) == QValidator::Acceptable){
-
-        if(!size_combo_index)
-            m_new_part_size = size.toLongLong();
-        else
-            m_new_part_size = convertSizeToSectors( size_combo_index, size.toDouble() );
-    }
-    else{
+    if(m_size_validator->validate(size, x) == QValidator::Acceptable)
+            m_new_part_size = convertSizeToSectors( m_size_combo->currentIndex(), size.toDouble() );
+    else
         m_new_part_size = 0;
-    }
 
     long long preceding_sectors = m_new_part_start - m_max_part_start;
     PedSector following_sectors = m_max_part_end - ( m_new_part_start + m_new_part_size );
@@ -403,11 +390,11 @@ long long PartitionMoveResizeDialog::convertSizeToSectors(int index, double size
 {
     long double partition_size = size;
 
-    if(index == 1)
+    if(index == 0)
         partition_size *= (long double)0x100000;
-    if(index == 2)
+    else if(index == 1)
         partition_size *= (long double)0x40000000;
-    if(index == 3){
+    else{
         partition_size *= (long double)0x100000;
         partition_size *= (long double)0x100000;
     }
@@ -475,30 +462,24 @@ void PartitionMoveResizeDialog::adjustOffsetCombo(int index){
     long double sized;
     long double valid_topd = (((long double)max_length - m_new_part_size) * m_ped_sector_size);
 
-    if(index){
- 
-        sized = ((long double)(1 + m_new_part_start - m_max_part_start) * m_ped_sector_size);
+    sized = ((long double)(1 + m_new_part_start - m_max_part_start) * m_ped_sector_size);
 
-        if(index == 1){
-            sized /= (long double)0x100000;
-	    valid_topd /= (long double)0x100000;
-	}
-        if(index == 2){
-            sized /= (long double)0x40000000;
-	    valid_topd /= (long double)0x40000000;
-	}
-        if(index == 3){
-            sized /= (long double)(0x100000);
-            sized /= (long double)(0x100000);
-	    valid_topd /= (long double)0x100000;
-	    valid_topd /= (long double)0x100000;
-        }
-        m_offset_edit->setText(QString("%1").arg((double)sized));
+    if(index == 0){
+        sized /= (long double)0x100000;
+        valid_topd /= (long double)0x100000;
+    }
+    else if(index == 1){
+        sized /= (long double)0x40000000;
+        valid_topd /= (long double)0x40000000;
     }
     else{
-        m_offset_edit->setText(QString("%1").arg( m_new_part_start - m_max_part_start ));
+        sized /= (long double)(0x100000);
+        sized /= (long double)(0x100000);
+        valid_topd /= (long double)0x100000;
+        valid_topd /= (long double)0x100000;
     }
-
+    m_offset_edit->setText(QString("%1").arg((double)sized));
+    
     m_offset_validator->setTop( (double)valid_topd );
 }
 
@@ -506,13 +487,8 @@ void PartitionMoveResizeDialog::validateOffsetSize(QString size){
     int x = 0;
     m_new_part_start = m_max_part_start;
         
-    if(m_offset_validator->validate(size, x) == QValidator::Acceptable){
-
-        if(! m_offset_combo->currentIndex() )
-            m_new_part_start += size.toLongLong();
-        else
-            m_new_part_start += convertSizeToSectors( m_offset_combo->currentIndex(), size.toDouble() );
-    }
+    if(m_offset_validator->validate(size, x) == QValidator::Acceptable)
+        m_new_part_start += convertSizeToSectors( m_offset_combo->currentIndex(), size.toDouble() );
     else
         m_new_part_start = m_current_part->geom.start;
 

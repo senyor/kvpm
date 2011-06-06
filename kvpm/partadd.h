@@ -55,6 +55,8 @@ Q_OBJECT
     QSpinBox *m_total_size_spin,
              *m_excluded_spin;
 
+    QCheckBox *m_lock_size_check;
+
     KLineEdit *m_size_edit,
               *m_excluded_edit;
 
@@ -73,19 +75,22 @@ Q_OBJECT
               *m_preceding_label;
 
     bool validatePartitionSize(QString size);
-    bool validateExcludedSize(QString size);
     void updatePartition();
+    bool excludedIsValid();
+    bool sizeIsValid();
     long long convertSizeToSectors(int index, double size);
 
 public:
     PartitionAddDialog(StoragePartition *partition, QWidget *parent = 0);
 
 private slots:
-    void adjustSizeEdit(int percentage);
-    void adjustSizeCombo(int index);
+    void setSizeEditToSpin(int percentage);
+    void setSizeEditToCombo(int index);
+    void setSizeEditMinusExcludedEdit(QString excluded);
     void validate();
-    void adjustExcludedEdit(int percentage);
-    void adjustExcludedCombo(int index);
+    void lockSize(bool checked);
+    void setExcludedEditToSpin(int percentage);
+    void setExcludedEditToCombo(int index);
     void commitPartition();
     void clearExcludedGroup(bool on);
 };
