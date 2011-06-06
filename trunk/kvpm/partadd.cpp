@@ -24,7 +24,7 @@
 
 /* 
    The "partition" we get here is usually a ped pointer to a the freespace 
-   between partitions. It can also be an *empty* extened partition however.
+   between partitions. It can also be an *empty* extended partition however.
 */
 
 bool add_partition(StoragePartition *partition)
@@ -449,6 +449,8 @@ void PartitionAddDialog::setExcludedEditToSpin(int percentage){
         excluded = free;
     else if(percentage == 0)
         excluded = 0;
+    else if(percentage == m_excluded_spin->maximum())
+        excluded = m_ped_sector_length - m_partition_sectors;
     else
         excluded = (long long)(( (double) percentage / 100) * free);
 
@@ -595,11 +597,14 @@ void PartitionAddDialog::clearExcludedGroup(bool on){
 }
 
 void PartitionAddDialog::lockSize(bool checked){
+
+    int percent_free = qRound((100 * ((double)(m_ped_sector_length - m_partition_sectors))) / m_ped_sector_length);
+
     if(checked){
         m_size_edit->setEnabled(false);
         m_total_size_spin->setEnabled(false);
         m_size_combo->setEnabled(false);
-        m_excluded_spin->setMaximum( 100 - m_total_size_spin->value() );
+        m_excluded_spin->setMaximum( percent_free );
     }
     else{
         m_size_edit->setEnabled(true);
