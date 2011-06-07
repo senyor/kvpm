@@ -48,36 +48,35 @@ Q_OBJECT
 
     long long m_ped_sector_size;    // bytes per logical sector
     long long m_partition_sectors;  // proposed size of partition
-    long long m_excluded_sectors;   // proposed excluded sectors of partition
+    long long m_offset_sectors;     // proposed excluded sectors of partition
 
     PartAddGraphic *m_display_graphic; // The color bar that shows the relative
                                        // size of the partition graphically
-    QSpinBox *m_total_size_spin,
-             *m_excluded_spin;
+    QSpinBox *m_size_spin,
+             *m_offset_spin;
 
     QCheckBox *m_lock_size_check;
 
     KLineEdit *m_size_edit,
-              *m_excluded_edit;
+              *m_offset_edit;
 
     QDoubleValidator *m_size_validator,
-                     *m_excluded_validator;
+                     *m_offset_validator;
 
     KComboBox *m_size_combo,
               *m_type_combo,
-              *m_excluded_combo;
+              *m_offset_combo;
 
     QGroupBox *m_size_group,
-              *m_excluded_group;
+              *m_offset_group;
 
     QLabel    *m_unexcluded_label,  // Space left for new partition
               *m_remaining_label,
               *m_preceding_label;
 
-    bool validatePartitionSize(QString size);
+    void validateChange();
     void updatePartition();
-    bool excludedIsValid();
-    bool sizeIsValid();
+    void setSizeEditMinusOffsetEdit();
     long long convertSizeToSectors(int index, double size);
 
 public:
@@ -86,13 +85,13 @@ public:
 private slots:
     void setSizeEditToSpin(int percentage);
     void setSizeEditToCombo(int index);
-    void setSizeEditMinusExcludedEdit(QString excluded);
-    void validate();
+    void setOffsetEditToSpin(int percentage);
+    void setOffsetEditToCombo(int index);
+    void validateSize(QString text);
+    void validateOffset(QString text);
     void lockSize(bool checked);
-    void setExcludedEditToSpin(int percentage);
-    void setExcludedEditToCombo(int index);
     void commitPartition();
-    void clearExcludedGroup(bool on);
+    void clearOffsetGroup(bool on);
 };
 
 #endif
