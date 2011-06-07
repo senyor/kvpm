@@ -58,7 +58,6 @@ PartitionAddDialog::PartitionAddDialog(StoragePartition *partition,
 				       QWidget *parent) : 
   KDialog(parent),
   m_partition(partition)
-  
 {
 
     PedPartition *ped_free_partition = partition->getPedPartition();
@@ -85,7 +84,7 @@ PartitionAddDialog::PartitionAddDialog(StoragePartition *partition,
     m_ped_disk   = ped_free_partition->disk;
     ped_device   = m_ped_disk->dev;
     m_ped_sector_size = ped_device->sector_size;
-    m_excluded_sectors = 0;
+    m_offset_sectors = 0;
 
     /* check to see if partition table supports extended
        partitions and if it already has one */
@@ -154,10 +153,10 @@ PartitionAddDialog::PartitionAddDialog(StoragePartition *partition,
 
     m_lock_size_check = new QCheckBox("Lock partition size");
     size_group_layout->addWidget(m_lock_size_check);
-    m_total_size_spin = new QSpinBox();
-    m_total_size_spin->setRange(0,100);
-    m_total_size_spin->setValue(100);
-    m_total_size_spin->setSuffix("%");
+    m_size_spin = new QSpinBox();
+    m_size_spin->setRange(0,100);
+    m_size_spin->setValue(100);
+    m_size_spin->setSuffix("%");
 
     m_size_edit  = new KLineEdit();
     m_size_validator = new QDoubleValidator(m_size_edit);
@@ -173,7 +172,7 @@ PartitionAddDialog::PartitionAddDialog(StoragePartition *partition,
 
     size_group_layout->addWidget(m_size_edit,1,0);
     size_group_layout->addWidget(m_size_combo,1,1);
-    size_group_layout->addWidget(m_total_size_spin,2,0);
+    size_group_layout->addWidget(m_size_spin,2,0);
 
     m_preceding_label = new QLabel();
     size_group_layout->addWidget( m_preceding_label, 5, 0, 1, 2, Qt::AlignHCenter );
@@ -181,33 +180,33 @@ PartitionAddDialog::PartitionAddDialog(StoragePartition *partition,
     m_remaining_label = new QLabel();
     size_group_layout->addWidget( m_remaining_label, 6, 0, 1, 2, Qt::AlignHCenter );
 
-    m_excluded_group = new QGroupBox("Offset partition start");
+    m_offset_group = new QGroupBox("Offset partition start");
     QGridLayout *excluded_group_layout = new QGridLayout();
-    m_excluded_group->setCheckable(true);
-    m_excluded_group->setChecked(false);
-    m_excluded_group->setLayout(excluded_group_layout);
-    layout->addWidget(m_excluded_group);
+    m_offset_group->setCheckable(true);
+    m_offset_group->setChecked(false);
+    m_offset_group->setLayout(excluded_group_layout);
+    layout->addWidget(m_offset_group);
 
-    m_excluded_combo = new KComboBox();
-    m_excluded_combo->insertItem(0,"MiB");
-    m_excluded_combo->insertItem(1,"GiB");
-    m_excluded_combo->insertItem(2,"TiB");
-    m_excluded_combo->setInsertPolicy(KComboBox::NoInsert);
-    m_excluded_combo->setCurrentIndex(1);
+    m_offset_combo = new KComboBox();
+    m_offset_combo->insertItem(0,"MiB");
+    m_offset_combo->insertItem(1,"GiB");
+    m_offset_combo->insertItem(2,"TiB");
+    m_offset_combo->setInsertPolicy(KComboBox::NoInsert);
+    m_offset_combo->setCurrentIndex(1);
 
-    m_excluded_spin = new QSpinBox();
-    m_excluded_spin->setRange(0,100);
-    m_excluded_spin->setValue(0);
-    m_excluded_spin->setSuffix("%");
+    m_offset_spin = new QSpinBox();
+    m_offset_spin->setRange(0,100);
+    m_offset_spin->setValue(0);
+    m_offset_spin->setSuffix("%");
 
-    m_excluded_edit  = new KLineEdit();
-    m_excluded_validator = new QDoubleValidator(m_excluded_edit);
-    m_excluded_edit->setValidator(m_excluded_validator);
-    m_excluded_validator->setBottom(0);
+    m_offset_edit  = new KLineEdit();
+    m_offset_validator = new QDoubleValidator(m_offset_edit);
+    m_offset_edit->setValidator(m_offset_validator);
+    m_offset_validator->setBottom(0);
 
-    excluded_group_layout->addWidget(m_excluded_edit,0,0);
-    excluded_group_layout->addWidget(m_excluded_combo,0,1);
-    excluded_group_layout->addWidget(m_excluded_spin,1,0);
+    excluded_group_layout->addWidget(m_offset_edit,0,0);
+    excluded_group_layout->addWidget(m_offset_combo,0,1);
+    excluded_group_layout->addWidget(m_offset_spin,1,0);
 
     QString total_bytes = sizeToString( m_ped_sector_length * m_ped_sector_size );
     QLabel *excluded_label = new QLabel( i18n("Maximum size: %1",  total_bytes) );
@@ -217,32 +216,32 @@ PartitionAddDialog::PartitionAddDialog(StoragePartition *partition,
     m_unexcluded_label = new QLabel( i18n("Remaining space: %1", total_bytes) );
     excluded_group_layout->addWidget( m_unexcluded_label, 5, 0, 1, 2, Qt::AlignHCenter );
 
-    setExcludedEditToSpin(0);
+    setOffsetEditToSpin(0);
     setSizeEditToSpin(100);
 
     connect(m_size_combo, SIGNAL(currentIndexChanged(int)),
 	    this , SLOT(setSizeEditToCombo(int)));
 
-    connect(m_total_size_spin, SIGNAL(valueChanged(int)),
+    connect(m_size_spin, SIGNAL(valueChanged(int)),
 	    this, SLOT(setSizeEditToSpin(int)));
 
-    connect(m_size_edit, SIGNAL(textChanged(QString)),
-	    this, SLOT(validate()));
+    connect(m_size_edit, SIGNAL(textEdited(QString)),
+	    this, SLOT(validateSize(QString)));
 
-    connect(m_excluded_combo, SIGNAL(currentIndexChanged(int)),
-	    this , SLOT(setExcludedEditToCombo(int)));
+    connect(m_offset_combo, SIGNAL(currentIndexChanged(int)),
+	    this , SLOT(setOffsetEditToCombo(int)));
 
-    connect(m_excluded_spin, SIGNAL(valueChanged(int)),
-	    this, SLOT(setExcludedEditToSpin(int)));
+    connect(m_offset_spin, SIGNAL(valueChanged(int)),
+	    this, SLOT(setOffsetEditToSpin(int)));
 
-    connect(m_excluded_group, SIGNAL(toggled(bool)),
-	    this, SLOT(clearExcludedGroup(bool)));
+    connect(m_offset_group, SIGNAL(toggled(bool)),
+	    this, SLOT(clearOffsetGroup(bool)));
 
     connect(m_lock_size_check, SIGNAL(toggled(bool)),
 	    this, SLOT(lockSize(bool)));
 
-    connect(m_excluded_edit, SIGNAL(textChanged(QString)),
-	    this, SLOT(setSizeEditMinusExcludedEdit(QString)));
+    connect(m_offset_edit, SIGNAL(textEdited(QString)),
+	    this, SLOT(validateOffset(QString)));
 
     connect(this, SIGNAL(okClicked()),
 	    this, SLOT(commitPartition()));
@@ -257,8 +256,8 @@ void PartitionAddDialog::commitPartition()
     int sectors64KiB;
     int sectors1MiB;
 
-    if( m_excluded_group->isChecked() )
-        first_sector = m_ped_start_sector + m_excluded_sectors;
+    if( m_offset_group->isChecked() )
+        first_sector = m_ped_start_sector + m_offset_sectors;
 
     PedSector last_sector  = first_sector + m_partition_sectors;
     if( last_sector > m_ped_end_sector )
@@ -345,25 +344,28 @@ void PartitionAddDialog::commitPartition()
     }
 }
 
-void PartitionAddDialog::setSizeEditMinusExcludedEdit(QString excluded){
+void PartitionAddDialog::setSizeEditMinusOffsetEdit(){
 
     long long free;
-    long long partition;
     long double sized;
     int index = m_size_combo->currentIndex();
+    QString excluded = m_offset_edit->text();
 
     if( ! m_lock_size_check->isChecked() ){
-        m_excluded_sectors = convertSizeToSectors(m_excluded_combo->currentIndex(), excluded.toDouble());
-        free = m_ped_sector_length - m_excluded_sectors;
+        m_offset_sectors = convertSizeToSectors(m_offset_combo->currentIndex(), excluded.toDouble());
+        free = m_ped_sector_length - m_offset_sectors;
 
-        if( free < 1 )
+        if( free < 1 ){
             free = 0;
+            m_offset_sectors = m_ped_sector_length; 
+        }
 
-        partition = convertSizeToSectors(m_size_combo->currentIndex(), m_size_edit->text().toDouble());
-        if( partition > free )
-            partition = free;
+        if( m_partition_sectors > free )
+            m_partition_sectors = free;
 
-        sized = ((long double)partition * m_ped_sector_size);
+        m_size_spin->setMaximum( qRound( ( (double)free / m_ped_sector_length ) * 100) );
+
+        sized = ((long double)m_partition_sectors * m_ped_sector_size);
 
         if(index == 0)
             sized /= (long double)0x100000;
@@ -376,8 +378,14 @@ void PartitionAddDialog::setSizeEditMinusExcludedEdit(QString excluded){
         
         m_size_edit->setText( QString("%1").arg( (double)sized ) );
     }
+    else{
+        m_offset_sectors = convertSizeToSectors(m_offset_combo->currentIndex(), excluded.toDouble());
+    
+        if(m_offset_sectors > (m_ped_sector_length - m_partition_sectors))
+            m_offset_sectors = m_ped_sector_length - m_partition_sectors;
+    }
 
-    validate();
+    validateChange();
 }
 
 void PartitionAddDialog::setSizeEditToCombo(int index){
@@ -396,27 +404,7 @@ void PartitionAddDialog::setSizeEditToCombo(int index){
     }
 
     m_size_edit->setText( QString("%1").arg( (double)sized ) );
-}
-
-
-bool PartitionAddDialog::validatePartitionSize(QString size){
-
-    long long free_sectors = m_ped_sector_length - m_excluded_sectors;
-    int x = 0;
-
-    if(m_size_validator->validate(size, x) == QValidator::Acceptable){
-
-        m_partition_sectors = convertSizeToSectors( m_size_combo->currentIndex(), size.toDouble() );
-
-        if( m_partition_sectors > free_sectors )
-            m_partition_sectors = free_sectors;
-        return true;
-    }
-    else{
-        m_partition_sectors = 0;
-        return false;
-    }
-
+    validateChange();
 }
 
 long long PartitionAddDialog::convertSizeToSectors(int index, double size)
@@ -440,7 +428,7 @@ long long PartitionAddDialog::convertSizeToSectors(int index, double size)
     return qRound64(partition_size);
 }
 
-void PartitionAddDialog::setExcludedEditToSpin(int percentage){
+void PartitionAddDialog::setOffsetEditToSpin(int percentage){
 
     long long free = m_ped_sector_length;
     long long excluded;
@@ -449,13 +437,13 @@ void PartitionAddDialog::setExcludedEditToSpin(int percentage){
         excluded = free;
     else if(percentage == 0)
         excluded = 0;
-    else if(percentage == m_excluded_spin->maximum())
+    else if(percentage == m_offset_spin->maximum())
         excluded = m_ped_sector_length - m_partition_sectors;
     else
         excluded = (long long)(( (double) percentage / 100) * free);
 
     long double sized;
-    int index = m_excluded_combo->currentIndex();
+    int index = m_offset_combo->currentIndex();
 
     sized = ((long double)excluded * m_ped_sector_size);
 
@@ -468,71 +456,92 @@ void PartitionAddDialog::setExcludedEditToSpin(int percentage){
         sized /= (long double)(0x100000);
     }
 
-    m_excluded_edit->setText(QString("%1").arg((double)sized));
+    m_offset_edit->setText(QString("%1").arg((double)sized));
+    setSizeEditMinusOffsetEdit();
+    validateChange();
+
 }
 
-bool PartitionAddDialog::excludedIsValid(){
+void PartitionAddDialog::validateSize(QString text){
 
-    QString excluded_edit_text = m_excluded_edit->text();
     int x = 0;
-    int index = m_excluded_combo->currentIndex();
+    long long free = m_ped_sector_length - m_offset_sectors;
+    long long partition = convertSizeToSectors( m_size_combo->currentIndex(), text.toDouble() );
 
-    long long free_sectors = m_ped_sector_length;
-    long long partition_sectors;
+    if(( m_size_validator->validate(text, x) == QValidator::Acceptable )){
+            
+        if( partition <= free ){
+            m_partition_sectors = partition;
+            enableButtonOk(true);
+        }
+        else if( partition <= m_ped_sector_length ){
+            m_partition_sectors = partition;
+            enableButtonOk(false);
+        }
+        else
+            enableButtonOk(false);
+    }
+    else
+        enableButtonOk(false);
 
-    if(index == 0)
-        partition_sectors = (long long) (excluded_edit_text.toDouble() * 0x100000);
-    else if(index == 1)
-        partition_sectors = (long long) (excluded_edit_text.toDouble() * 0x40000000);
-    else{
-        partition_sectors = (long long) (excluded_edit_text.toDouble() * 0x100000);
-        partition_sectors *= 0x100000;
+    if(( m_offset_sectors > m_ped_sector_length - m_partition_sectors ) || 
+       ( m_partition_sectors > m_ped_sector_length - m_offset_sectors   ) || 
+       ( m_partition_sectors <= 0 )){
+        enableButtonOk(false);
     }
 
-    partition_sectors /= m_ped_sector_size;
-
-    if(( m_excluded_validator->validate(excluded_edit_text, x) == QValidator::Acceptable ) &&
-       ( partition_sectors <= free_sectors )){
-        return true;
-    }
-
-    return false;
+    updatePartition();
 }
 
-bool PartitionAddDialog::sizeIsValid(){
 
-    QString size_edit_text = m_size_edit->text();
+void PartitionAddDialog::validateOffset(QString text){
+
     int x = 0;
-    int index = m_size_combo->currentIndex();
+    long long free = m_ped_sector_length - m_partition_sectors;
+    long long offset = convertSizeToSectors( m_offset_combo->currentIndex(), text.toDouble() );
 
-    long long free_sectors = m_ped_sector_length - m_excluded_sectors;
-    long long partition_sectors;
+    if( m_offset_validator->validate(text, x) == QValidator::Acceptable ){
 
-    if(index == 0)
-        partition_sectors = (long long) (size_edit_text.toDouble() * 0x100000);
-    else if(index == 1)
-        partition_sectors = (long long) (size_edit_text.toDouble() * 0x40000000);
-    else{
-        partition_sectors = (long long) (size_edit_text.toDouble() * 0x100000);
-        partition_sectors *= 0x100000;
+       if( offset <= free ){
+           m_offset_sectors = offset;
+           enableButtonOk(true);
+       }
+       else if( offset <= m_ped_sector_length ){
+           m_offset_sectors = offset;
+           setSizeEditMinusOffsetEdit();
+           enableButtonOk(true);
+       }
+       else
+           enableButtonOk(false);
     }
+    else
+        enableButtonOk(false);
 
-    partition_sectors /= m_ped_sector_size;
-
-    if(( m_size_validator->validate(size_edit_text, x) == QValidator::Acceptable ) &&
-       ( partition_sectors <= free_sectors ) &&
-       ( partition_sectors > 1 )){
-        return true;
+    if(( m_offset_sectors > m_ped_sector_length - m_partition_sectors ) || 
+       ( m_partition_sectors > m_ped_sector_length - m_offset_sectors   ) || 
+       ( m_partition_sectors <= 0 )){
+        enableButtonOk(false);
     }
-
-    return false;
+    
+    updatePartition();
 }
 
-void PartitionAddDialog::setExcludedEditToCombo(int index){
+void PartitionAddDialog::validateChange(){
 
-    long double sized;
+    if(( m_offset_sectors <= m_ped_sector_length - m_partition_sectors ) && 
+       ( m_partition_sectors <= m_ped_sector_length - m_offset_sectors   ) &&
+       ( m_partition_sectors > 0 )){
+        enableButtonOk(true);
+    }
+    else
+        enableButtonOk(false);
 
-    sized = ((long double)m_excluded_sectors * m_ped_sector_size);
+    updatePartition();
+}
+
+void PartitionAddDialog::setOffsetEditToCombo(int index){
+
+    long double sized = ((long double)m_offset_sectors * m_ped_sector_size);
 
     if(index == 0)
         sized /= (long double)0x100000;
@@ -543,34 +552,16 @@ void PartitionAddDialog::setExcludedEditToCombo(int index){
         sized /= (long double)(0x100000);
     }
 
-    m_excluded_edit->setText(QString("%1").arg((double)sized));
-}
-
-void PartitionAddDialog::validate(){
-
-    QString excluded_edit_text = m_excluded_edit->text();
-    QString size_edit_text = m_size_edit->text();
-    enableButtonOk(false);
-
-    if( excludedIsValid() ){
-        m_excluded_sectors = convertSizeToSectors( m_excluded_combo->currentIndex(), excluded_edit_text.toDouble() );
-        if( sizeIsValid() ){
-            m_partition_sectors = convertSizeToSectors( m_size_combo->currentIndex(), size_edit_text.toDouble() );
-            enableButtonOk(true);
-        }
-    }
-
-    updatePartition();
+    m_offset_edit->setText(QString("%1").arg((double)sized));
+    setSizeEditMinusOffsetEdit();
+    validateChange();
 }
 
 void PartitionAddDialog::setSizeEditToSpin(int percentage){
 
-    long long free_sectors = m_ped_sector_length - m_excluded_sectors;
-    int top = qRound( ( (double)free_sectors / m_ped_sector_length ) * 100);
+    long long free_sectors = m_ped_sector_length - m_offset_sectors;
 
-    m_total_size_spin->setMaximum( top );
-
-    if( percentage == m_total_size_spin->maximum() )
+    if( percentage == m_size_spin->maximum() )
         m_partition_sectors = free_sectors;
     else if(percentage == 0)
         m_partition_sectors = 0;
@@ -581,19 +572,19 @@ void PartitionAddDialog::setSizeEditToSpin(int percentage){
         m_partition_sectors = free_sectors;
 
     setSizeEditToCombo( m_size_combo->currentIndex() );
-
-    updatePartition();
-
 }
 
 /* if the excluded group is unchecked then zero the excluded sectors */
 
-void PartitionAddDialog::clearExcludedGroup(bool on){
+void PartitionAddDialog::clearOffsetGroup(bool on){
 
     if( ! on ){
-	m_excluded_spin->setValue(0);
-        m_excluded_edit->setText("0");
+	m_offset_spin->setValue(0);
+        m_offset_edit->setText("0");
+        setSizeEditMinusOffsetEdit();
     }
+
+    validateChange();
 }
 
 void PartitionAddDialog::lockSize(bool checked){
@@ -602,31 +593,33 @@ void PartitionAddDialog::lockSize(bool checked){
 
     if(checked){
         m_size_edit->setEnabled(false);
-        m_total_size_spin->setEnabled(false);
+        m_size_spin->setEnabled(false);
         m_size_combo->setEnabled(false);
-        m_excluded_spin->setMaximum( percent_free );
+        m_offset_spin->setMaximum(percent_free);
     }
     else{
         m_size_edit->setEnabled(true);
-        m_total_size_spin->setEnabled(true);
+        m_size_spin->setEnabled(true);
         m_size_combo->setEnabled(true);
-        m_excluded_spin->setMaximum(100);
+        m_offset_spin->setMaximum(100);
     }
+
+    validateChange();
 }
 
 void PartitionAddDialog::updatePartition(){
 
-    long long free_sectors = m_ped_sector_length - m_excluded_sectors;
+    long long free_sectors = m_ped_sector_length - m_offset_sectors;
     if(free_sectors < 0)
         free_sectors = 0;
 
     QString total_bytes = sizeToString(m_ped_sector_size * free_sectors);
     m_unexcluded_label->setText( i18n("Available space: %1", total_bytes) );
 
-    QString preceding_bytes_string = sizeToString(m_excluded_sectors * m_ped_sector_size);
+    QString preceding_bytes_string = sizeToString(m_offset_sectors * m_ped_sector_size);
     m_preceding_label->setText( i18n("Preceding space: %1", preceding_bytes_string) );
 
-    PedSector following_sectors = m_ped_sector_length - (m_partition_sectors + m_excluded_sectors);
+    PedSector following_sectors = m_ped_sector_length - (m_partition_sectors + m_offset_sectors);
     if(following_sectors < 0)
         following_sectors = 0;
 
@@ -638,7 +631,7 @@ void PartitionAddDialog::updatePartition(){
     QString following_bytes_string = sizeToString(following_space);
     m_remaining_label->setText( i18n("Following space: %1", following_bytes_string) );
 
-    m_display_graphic->setPrecedingSectors(m_excluded_sectors);
+    m_display_graphic->setPrecedingSectors(m_offset_sectors);
     m_display_graphic->setPartitionSectors(m_partition_sectors);
     m_display_graphic->setFollowingSectors(following_sectors);
     m_display_graphic->repaint();
