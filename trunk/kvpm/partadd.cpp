@@ -380,9 +380,9 @@ void PartitionAddDialog::setSizeEditMinusOffsetEdit(){
     }
     else{
         m_offset_sectors = convertSizeToSectors(m_offset_combo->currentIndex(), excluded.toDouble());
-    
-        if(m_offset_sectors > (m_ped_sector_length - m_partition_sectors))
-            m_offset_sectors = m_ped_sector_length - m_partition_sectors;
+
+        if(m_offset_sectors > m_ped_sector_length)
+            m_offset_sectors = m_ped_sector_length;
     }
 
     validateChange();
@@ -500,29 +500,26 @@ void PartitionAddDialog::validateOffset(QString text){
     long long free = m_ped_sector_length - m_partition_sectors;
     long long offset = convertSizeToSectors( m_offset_combo->currentIndex(), text.toDouble() );
 
+    enableButtonOk(false);
+
     if( m_offset_validator->validate(text, x) == QValidator::Acceptable ){
 
-       if( offset <= free ){
-           m_offset_sectors = offset;
-           enableButtonOk(true);
-       }
-       else if( offset <= m_ped_sector_length ){
-           m_offset_sectors = offset;
-           setSizeEditMinusOffsetEdit();
-           enableButtonOk(true);
-       }
-       else
-           enableButtonOk(false);
-    }
-    else
-        enableButtonOk(false);
+        if( offset <= free ){
+            m_offset_sectors = offset;
+            enableButtonOk(true);
+        }
+        else if( offset <= m_ped_sector_length ){
+            m_offset_sectors = offset;
+            setSizeEditMinusOffsetEdit();
+        }
 
-    if(( m_offset_sectors > m_ped_sector_length - m_partition_sectors ) || 
-       ( m_partition_sectors > m_ped_sector_length - m_offset_sectors   ) || 
-       ( m_partition_sectors <= 0 )){
-        enableButtonOk(false);
+        if(( m_offset_sectors > m_ped_sector_length - m_partition_sectors ) || 
+           ( m_partition_sectors > m_ped_sector_length - m_offset_sectors   ) || 
+           ( m_partition_sectors <= 0 )){
+            enableButtonOk(false);
+        }
+        
     }
-    
     updatePartition();
 }
 
