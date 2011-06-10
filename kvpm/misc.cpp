@@ -98,21 +98,21 @@ QString sizeToString(long long bytes)
 {
     double size = (double)bytes; 
 
-    if(size < 1000)
+    if( qAbs(size) < 1000)
 	return QString("%1").arg(bytes);
 
-    if( (size /= 1024) < 1000)
+    if( ( qAbs(size /= 1024) ) < 1000)
 	return QString("%1 KiB").arg(size, 0,'g', 3);
 
-    if( (size /= 1024) < 1000)
+    if( ( qAbs(size /= 1024) ) < 1000)
 	return QString("%1 MiB").arg(size, 0, 'g', 3);
 
-    if( (size /= 1024) < 1000)
+    if( ( qAbs(size /= 1024) ) < 1000)
 	return QString("%1 GiB").arg(size, 0,'g', 3);
 
     size /= 1024;
 
-    return QString("%1 TB").arg(size, 0, 'g', 3);
+    return QString("%1 TiB").arg(size, 0, 'g', 3);
 }
 
 
