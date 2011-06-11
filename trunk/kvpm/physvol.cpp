@@ -48,6 +48,7 @@ void PhysVol::rescan(pv_t lvm_pv)
     value = lvm_pv_get_property(lvm_pv, "pv_mda_size");
     m_mda_size = value.value.integer;
 
+
     /*
     // The following wil be used to to calculate the last used
     // segement once the "lv_name" property gets implemented
@@ -112,7 +113,7 @@ long long PhysVol::getMDACount()
 
 long long PhysVol::getMDASize()
 {
-    return m_mda_size;
+    return m_mda_size;   // size in bytes
 }
 
 long long PhysVol::getSize()

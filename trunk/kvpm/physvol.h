@@ -53,7 +53,7 @@ class PhysVol
     void setLastUsedExtent(long long last);
     int getPercentUsed();           // 0 - 100
     long long getMDACount();    
-    long long getMDASize();    
+    long long getMDASize();         // Meta Data Area size in bytes    
 };
 
 #endif
