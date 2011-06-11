@@ -38,6 +38,31 @@ SizeSelectorBox::SizeSelectorBox(long long unitSize, long long minSize, long lon
     QVBoxLayout *layout = new QVBoxLayout();
     QHBoxLayout *upper_layout = new QHBoxLayout();
 
+    m_size_slider  = new QSlider(Qt::Horizontal);
+    m_size_slider->setRange(0, 100);
+    m_size_edit    = new KLineEdit();
+    m_size_edit->setAlignment(Qt::AlignRight);
+
+    m_suffix_combo = new KComboBox();
+    m_suffix_combo->insertItem(0,"MiB");
+    m_suffix_combo->insertItem(1,"GiB");
+    m_suffix_combo->insertItem(2,"TiB");
+    if(m_is_volume)
+        m_suffix_combo->insertItem(0, i18n("Extents"));
+    m_suffix_combo->setInsertPolicy(KComboBox::NoInsert);
+    m_suffix_combo->setCurrentIndex(1);
+
+    if(m_is_new){
+        if( ! m_is_offset )
+            m_current_size = m_constrained_max;
+        else
+            m_current_size = 0;
+    }
+
+    m_size_validator = new QDoubleValidator(m_size_edit);
+    m_size_edit->setValidator(m_size_validator);
+    m_size_validator->setBottom(0);
+
     if(m_is_volume){
         setTitle( i18n("Volume size") );
         if( !m_is_new ){
@@ -72,33 +97,6 @@ SizeSelectorBox::SizeSelectorBox(long long unitSize, long long minSize, long lon
                     this, SLOT(unlock(bool)));
         }
     }
-
-    m_size_slider  = new QSlider(Qt::Horizontal);
-    m_size_edit    = new KLineEdit();
-    m_size_edit->setAlignment(Qt::AlignRight);
-    m_suffix_combo = new KComboBox();
-
-    m_size_slider->setRange(0, 100);
-
-    if(m_is_new){
-        if( ! m_is_offset )
-            m_current_size = m_constrained_max;
-        else
-            m_current_size = 0;
-    }
-
-    m_size_validator = new QDoubleValidator(m_size_edit);
-    m_size_edit->setValidator(m_size_validator);
-    m_size_validator->setBottom(0);
-
-    m_suffix_combo = new KComboBox();
-    m_suffix_combo->insertItem(0,"MiB");
-    m_suffix_combo->insertItem(1,"GiB");
-    m_suffix_combo->insertItem(2,"TiB");
-    if(m_is_volume)
-        m_suffix_combo->insertItem(0, i18n("Extents"));
-    m_suffix_combo->setInsertPolicy(KComboBox::NoInsert);
-    m_suffix_combo->setCurrentIndex(1);
 
     upper_layout->addWidget(m_size_edit);
     upper_layout->addWidget(m_suffix_combo);
@@ -146,15 +144,8 @@ void SizeSelectorBox::resetToInitial()
         }
     }
 
-    disconnect(m_size_slider, SIGNAL(sliderMoved(int)),
-               this, SLOT(setToSlider(int)));
-
     updateEdit();
     updateSlider();
-
-    connect(m_size_slider, SIGNAL(sliderMoved(int)),
-            this, SLOT(setToSlider(int)));
-
 }
 
 
@@ -185,16 +176,9 @@ bool SizeSelectorBox::setCurrentSize(long long size)
         return false;
     }
     else{
-        disconnect(m_size_slider, SIGNAL(sliderMoved(int)),
-                   this, SLOT(setToSlider(int)));
-
         m_current_size = size;
         updateEdit();
         updateSlider();
-
-        connect(m_size_slider, SIGNAL(sliderMoved(int)),
-                this, SLOT(setToSlider(int)));
-
         return true;
     }
 }
@@ -207,7 +191,7 @@ void SizeSelectorBox::updateSlider()
 
 void SizeSelectorBox::setConstrainedMax(long long max)
 {
-    if( isLocked() )
+    if( isLocked() || !m_size_edit->isEnabled() )
         return;
 
     if( ( max < 0 ) || ( max > m_max_size ) )
@@ -250,14 +234,27 @@ void SizeSelectorBox::setConstraints(bool unlock)
 {
     if(unlock){
         m_constrained_min = m_min_size;
+        if(m_is_offset){
+            m_size_edit->setEnabled(true);
+            m_size_slider->setEnabled(true);
+            m_suffix_combo->setEnabled(true);
+            m_constrained_max = m_max_size;
+        }
+        updateValidator();
+        updateSlider();
     }
     else{
-        if( !m_is_valid )
+        if( !m_is_valid ){
             m_current_size = m_constrained_min;
+            updateEdit();
+        }
 
         if(m_is_offset){
             m_constrained_max = m_current_size;
             m_constrained_min = m_current_size;
+            m_size_edit->setEnabled(false);
+            m_size_slider->setEnabled(false);
+            m_suffix_combo->setEnabled(false);
         }
         else{
             m_constrained_min = m_current_size;
