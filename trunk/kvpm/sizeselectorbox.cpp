@@ -66,35 +66,44 @@ SizeSelectorBox::SizeSelectorBox(long long unitSize, long long minSize, long lon
     if(m_is_volume){
         setTitle( i18n("Volume size") );
         if( !m_is_new ){
-            m_shrink_box = new QCheckBox( i18n("Allow shrinking") );
+            m_shrink_box = new QCheckBox( i18n("Prevent shrinking") );
             m_shrink_box->setChecked(false);
             layout->addWidget(m_shrink_box);
             setConstraints(false);
 
             connect(m_shrink_box, SIGNAL(toggled(bool)),
-                    this, SLOT(unlock(bool)));
+                    this, SLOT(lockShrink(bool)));
         }
     }
     else if(m_is_offset){
         setTitle( i18n("Partition start") );
-        m_offset_box = new QCheckBox( i18n("Allow change") );
-        m_offset_box->setChecked(true);
-        setConstraints(true);
+        m_offset_box = new QCheckBox( i18n("Lock partition start") );
+        m_offset_box->setChecked(false);
+        setConstraints(false);
         layout->addWidget(m_offset_box);
 
         connect(m_offset_box, SIGNAL(toggled(bool)),
-                this, SLOT(unlock(bool)));
+                this, SLOT(lock(bool)));
     }
     else{
         setTitle( i18n("Partition size") );
         if( !m_is_new ){
-            m_shrink_box = new QCheckBox( i18n("Allow shrinking") );
+            m_shrink_box = new QCheckBox( i18n("Prevent shrinking") );
             m_shrink_box->setChecked(false);
+            m_size_box = new QCheckBox( i18n("Lock partition size") );
+            m_size_box->setChecked(false);
             setConstraints(false);
             layout->addWidget(m_shrink_box);
+            layout->addWidget(m_size_box);
 
             connect(m_shrink_box, SIGNAL(toggled(bool)),
-                    this, SLOT(unlock(bool)));
+                    this, SLOT(lockShrink(bool)));
+
+            connect(m_size_box, SIGNAL(toggled(bool)),
+                    this, SLOT(lock(bool)));
+
+            connect(m_size_box, SIGNAL(toggled(bool)),
+                    this, SLOT(disableLockShrink(bool)));
         }
     }
 
@@ -130,24 +139,21 @@ void SizeSelectorBox::resetToInitial()
     if(m_is_volume){
         if( !m_is_new ){
             m_shrink_box->setChecked(false);
-            setConstraints(false);
         }
     }
     else if(m_is_offset){
-        m_offset_box->setChecked(true);
-        setConstraints(true);
+        m_offset_box->setChecked(false);
     }
     else{
         if( !m_is_new ){
             m_shrink_box->setChecked(false);
-            setConstraints(false);
+            m_size_box->setChecked(false);
         }
     }
 
     updateEdit();
     updateSlider();
 }
-
 
 void SizeSelectorBox::setToSlider(int value)
 {
@@ -224,42 +230,91 @@ long long  SizeSelectorBox::getMinimumSize()
     return m_constrained_min;
 }
 
-void SizeSelectorBox::unlock(bool unlock)
+void SizeSelectorBox::lock(bool lock)
 {
-    setConstraints(unlock);
+    setConstraints(lock);
     emit stateChanged();
 }
 
-void SizeSelectorBox::setConstraints(bool unlock)
+void SizeSelectorBox::disableLockShrink(bool disable)
 {
-    if(unlock){
-        m_constrained_min = m_min_size;
-        if(m_is_offset){
-            m_size_edit->setEnabled(true);
-            m_size_slider->setEnabled(true);
-            m_suffix_combo->setEnabled(true);
-            m_constrained_max = m_max_size;
+    m_shrink_box->setEnabled( !disable );
+}
+
+void SizeSelectorBox::setConstraints(bool lock)
+{
+    if(lock){
+        if( !m_is_valid ){
+            if(m_current_size > m_constrained_max)
+                m_current_size = m_constrained_max;
+            if(m_current_size < m_constrained_min)
+                m_current_size = m_constrained_min;
+            
+            updateEdit();
         }
-        updateValidator();
-        updateSlider();
+        
+        m_constrained_max = m_current_size;
+        m_constrained_min = m_current_size;
+        m_size_edit->setEnabled(false);
+        m_size_slider->setEnabled(false);
+        m_suffix_combo->setEnabled(false);
     }
     else{
         if( !m_is_valid ){
-            m_current_size = m_constrained_min;
+            if(m_current_size > m_constrained_max)
+                m_current_size = m_constrained_max;
+            if(m_current_size < m_constrained_min)
+                m_current_size = m_constrained_min;
+
             updateEdit();
         }
 
-        if(m_is_offset){
-            m_constrained_max = m_current_size;
-            m_constrained_min = m_current_size;
-            m_size_edit->setEnabled(false);
-            m_size_slider->setEnabled(false);
-            m_suffix_combo->setEnabled(false);
+        m_constrained_min = m_min_size;
+        m_size_edit->setEnabled(true);
+        m_size_slider->setEnabled(true);
+        m_suffix_combo->setEnabled(true);
+        m_constrained_max = m_max_size;
+
+        updateValidator();
+        updateSlider();
+    }
+}
+
+void SizeSelectorBox::lockShrink(bool lock)
+{
+    if(lock){
+        if( !m_is_valid ){
+            if(m_current_size > m_constrained_max)
+                m_current_size = m_constrained_max;
+            if(m_current_size < m_constrained_min)
+                m_current_size = m_constrained_min;
+            
+            updateEdit();
         }
-        else{
-            m_constrained_min = m_current_size;
+        
+        m_constrained_min = m_initial_size;
+        if(m_current_size < m_constrained_min){
+            m_current_size = m_constrained_min;
+            updateValidator();
+            updateSlider();
         }
     }
+    else{
+        if( !m_is_valid ){
+            if(m_current_size > m_constrained_max)
+                m_current_size = m_constrained_max;
+            if(m_current_size < m_constrained_min)
+                m_current_size = m_constrained_min;
+
+            updateEdit();
+        }
+
+        m_constrained_min = m_min_size;
+        updateValidator();
+        updateSlider();
+    }
+
+    emit stateChanged();
 }
 
 void SizeSelectorBox::setToEdit(QString size)
@@ -366,7 +421,6 @@ void SizeSelectorBox::updateValidator()
     
     m_size_validator->setTop( (double)valid_topd );
     m_size_validator->setBottom( (double)valid_bottomd );
-    
 }
 
 bool SizeSelectorBox::isValid()
@@ -374,7 +428,7 @@ bool SizeSelectorBox::isValid()
     return m_is_valid;
 }
 
-bool SizeSelectorBox::isLocked()
+bool SizeSelectorBox::isLocked() // this should include the lock button too
 {
     return !isEnabled();
 }

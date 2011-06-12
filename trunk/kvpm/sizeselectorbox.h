@@ -40,7 +40,8 @@ Q_OBJECT
     KLineEdit *m_size_edit;
     QDoubleValidator *m_size_validator;
     QCheckBox *m_shrink_box;    // Allow partition/volume to shrink.
-    QCheckBox *m_offset_box;    // Allow offset to change.
+    QCheckBox *m_size_box;      // Lock size to change
+    QCheckBox *m_offset_box;    // Lock offset to change.
 
     bool m_is_volume;    // Is it a volume or a partition?
     bool m_is_offset;    // Are we selecting the starting point offset of a partition?
@@ -72,7 +73,9 @@ private slots:
     void setToSlider(int value);
     void setToEdit(QString size);
     void updateEdit();
-    void unlock(bool unlock);
+    void lock(bool lock);
+    void lockShrink(bool lock);
+    void disableLockShrink(bool disable);
 };
 
 #endif
