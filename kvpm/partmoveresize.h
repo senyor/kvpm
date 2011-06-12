@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2009 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2009, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -17,24 +17,26 @@
 
 #include <parted/parted.h>
 
+#include <KComboBox>
 #include <KDialog>
 #include <KLineEdit>
-#include <KComboBox>
 
+#include <QDoubleValidator>
+#include <QEventLoop>
 #include <QFrame>
 #include <QGroupBox>
 #include <QCheckBox>
 #include <QLabel>
+#include <QSlider>
 #include <QSpinBox>
-#include <QEventLoop>
 
 #include "storagepartition.h"
 
-class QDoubleValidator;
+
 class PartAddGraphic;
+class SizeSelectorBox;
 
 bool moveresize_partition(StoragePartition *partition);
-
 
 class PartitionMoveResizeDialog : public KDialog
 {
@@ -42,73 +44,46 @@ Q_OBJECT
 
     StoragePartition *m_old_storage_part;    
     PedDisk          *m_ped_disk;
-    PedPartition     *m_current_part; // The partition on the disk now
+    PedPartition     *m_existing_part; // The partition on the disk now
 
     PedSector m_min_shrink_size;     // Minimum size of the fs after shrinking
-    long long m_ped_sector_size;     // bytes per logical sector
-    long long m_new_part_size;       // proposed size of partition
-    long long m_new_part_start;      // start of new partition in sectors
-
+    long long m_sector_size;         // bytes per logical sector
+    long long m_existing_part_size;
+    long long m_existing_part_start;
     long long m_max_part_start;      // start of biggest possible partition
-    long long m_max_part_end;        // end of largest possible partition
+    long long m_max_part_size;       // size of largest possible partition
 
     PartAddGraphic *m_display_graphic; // The color bar that shows the relative
                                        // size of the partition graphically
-    QSpinBox *m_size_spin,
-             *m_offset_spin;
 
-    KLineEdit *m_size_edit,
-              *m_offset_edit;
+    SizeSelectorBox *m_size_selector,
+                    *m_offset_selector;
 
-    QDoubleValidator *m_size_validator,
-                     *m_offset_validator;
+    QLabel *m_change_by_label,  // How much are we growing or shrinking the partition? 
+           *m_preceding_label,  // Free space before the proposed partition
+           *m_following_label;
 
-    KComboBox *m_size_combo,
-              *m_offset_combo;
-
-    QGroupBox *m_size_group,
-              *m_offset_group;
-
-    QCheckBox *m_align64_check;
-
-    QLabel    *m_remaining_label,
-              *m_size_label,
-              *m_preceding_label;
-
-    bool m_logical;      // Are we a primary or logical partition?
+    bool m_logical;      // Are we a logical partition?
 
     void setup();
-    void resetOkButton();
-    long long convertSizeToSectors(int index, double size);
     long long getMinShrinkSize();
     bool movefs(long long from_start, long long to_start, long long length);
     bool shrinkPartition();
     bool growPartition();
     bool movePartition();
-    void resetDisplayGraphic();
-    void setSizeLabels();
+    void updateDisplayGraphic();
+    void updateChangeByLabels();
     bool pedCommitAndWait(PedDisk *disk);
+    void updateAndValidatePartition();
 
 public:
     PartitionMoveResizeDialog(StoragePartition *partition, QWidget *parent = 0);
 
 private slots:
-    void adjustSizeEdit(int percentage);
-    void adjustSizeCombo(int index);
-    void validateVolumeSize(QString size);
-    void adjustOffsetEdit(int percentage);
-    void adjustOffsetCombo(int index);
-    void validateOffsetSize(QString size);
     void commitPartition();
-    void resetOffsetGroup(bool on);
-    void resetSizeGroup(bool on);
-    void resetPartition();
-    void setOffsetSpinMinMax();
-    void setSizeSpinMinMax();
-    void minimizePartition(bool);
-    void maximizePartition(bool);
-    void minimizeOffset(bool);
-    void maximizeOffset(bool);
+    void resetSelectors();
+    void offsetChanged();
+    void sizeChanged();
 
 };
 
