@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-05-31 20:11-0700\n"
+"POT-Creation-Date: 2011-06-11 12:51-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -490,7 +490,7 @@ msgstr ""
 msgid "Optional tag: "
 msgstr ""
 
-#: lvcreate.cpp:208
+#: lvcreate.cpp:208 sizeselectorbox.cpp:67
 msgid "Volume size"
 msgstr ""
 
@@ -530,7 +530,7 @@ msgstr ""
 msgid "Device major number: "
 msgstr ""
 
-#: lvcreate.cpp:544 lvcreate.cpp:548 partadd.cpp:215 partmoveresize.cpp:106
+#: lvcreate.cpp:544 lvcreate.cpp:548 partadd.cpp:212 partmoveresize.cpp:125
 msgid "Maximum size: %1"
 msgstr ""
 
@@ -647,7 +647,7 @@ msgstr ""
 msgid "Current size: %1"
 msgstr ""
 
-#: lvreduce.cpp:109 partmoveresize.cpp:104
+#: lvreduce.cpp:109 partmoveresize.cpp:124
 msgid "Minimum size: %1"
 msgstr ""
 
@@ -717,7 +717,7 @@ msgstr ""
 msgid "Insufficient Privilege"
 msgstr ""
 
-#: masterlist.cpp:46 partmoveresize.cpp:614 processprogress.cpp:55
+#: masterlist.cpp:46 partmoveresize.cpp:360 processprogress.cpp:55
 #: vgremove.cpp:37
 msgid "progress"
 msgstr ""
@@ -916,11 +916,11 @@ msgstr ""
 msgid "Browse"
 msgstr ""
 
-#: partadd.cpp:38
+#: partadd.cpp:39
 msgid "Disk already has %1 primary partitions, the maximum"
 msgstr ""
 
-#: partadd.cpp:42
+#: partadd.cpp:43
 msgid ""
 "This should not happen. Try selecting the freespace and not the partiton "
 "itself"
@@ -930,23 +930,23 @@ msgstr ""
 msgid "Add partition"
 msgstr ""
 
-#: partadd.cpp:219
+#: partadd.cpp:216
 msgid "Remaining space: %1"
 msgstr ""
 
-#: partadd.cpp:502
+#: partadd.cpp:622
 msgid "Available space: %1"
 msgstr ""
 
-#: partadd.cpp:505 partmoveresize.cpp:899
+#: partadd.cpp:625 partmoveresize.cpp:626
 msgid "Preceding space: %1"
 msgstr ""
 
-#: partadd.cpp:514 partmoveresize.cpp:908
+#: partadd.cpp:637 partmoveresize.cpp:634
 msgid "Following space: %1"
 msgstr ""
 
-#: partmoveresize.cpp:41
+#: partmoveresize.cpp:43
 msgid ""
 "Currently only the ext2/3/4 file systems are supported for file system "
 "shrinking. Growing is supported for ext2/3/4, jfs, xfs and Reiserfs. Moving "
@@ -954,23 +954,37 @@ msgid ""
 "grown, shrunk or moved"
 msgstr ""
 
-#: partmoveresize.cpp:73
+#: partmoveresize.cpp:94
 msgid "Move or resize a partition"
 msgstr ""
 
-#: partmoveresize.cpp:109
-msgid "Modify partition size"
-msgstr ""
-
-#: partmoveresize.cpp:614
+#: partmoveresize.cpp:360
 msgid "moving filesystem..."
 msgstr ""
 
-#: partmoveresize.cpp:896
-msgid "Partition size: %1"
+#: partmoveresize.cpp:377 partmoveresize.cpp:389 partmoveresize.cpp:401
+#: partmoveresize.cpp:417
+msgid "Move failed: could not read from device"
 msgstr ""
 
-#: partmoveresize.cpp:994
+#: partmoveresize.cpp:382 partmoveresize.cpp:394 partmoveresize.cpp:406
+#: partmoveresize.cpp:422
+msgid "Move failed: could not write to device"
+msgstr ""
+
+#: partmoveresize.cpp:621
+msgid "<b>Shrink by : %1</b>"
+msgstr ""
+
+#: partmoveresize.cpp:623
+msgid "<b>Grow by : %1</b>"
+msgstr ""
+
+#: partmoveresize.cpp:739
+msgid "Repartitioning failed: data not moved"
+msgstr ""
+
+#: partmoveresize.cpp:763
 msgid "Wating for udev..."
 msgstr ""
 
@@ -1158,16 +1172,6 @@ msgstr ""
 msgid "Changing physical volume..."
 msgstr ""
 
-#: rc.cpp:1 rc.cpp:1
-msgctxt "NAME OF TRANSLATORS"
-msgid "Your names"
-msgstr ""
-
-#: rc.cpp:2 rc.cpp:2
-msgctxt "EMAIL OF TRANSLATORS"
-msgid "Your emails"
-msgstr ""
-
 #: removefs.cpp:35 removefs.cpp:53
 msgid ""
 "Are you sure you want delete this filesystem? Any data on it will be lost!"
@@ -1205,6 +1209,26 @@ msgstr ""
 msgid ""
 "<b>Removing missing physical volumes may result in data loss! Use with "
 "extreme care.</b>"
+msgstr ""
+
+#: sizeselectorbox.cpp:51
+msgid "Extents"
+msgstr ""
+
+#: sizeselectorbox.cpp:69 sizeselectorbox.cpp:91
+msgid "Allow shrinking"
+msgstr ""
+
+#: sizeselectorbox.cpp:79
+msgid "Partition start"
+msgstr ""
+
+#: sizeselectorbox.cpp:80
+msgid "Allow change"
+msgstr ""
+
+#: sizeselectorbox.cpp:89
+msgid "Partition size"
 msgstr ""
 
 #: tablecreate.cpp:30
@@ -1705,4 +1729,14 @@ msgstr ""
 
 #: vgtree.cpp:54
 msgid "Filesystem mount points, if mounted"
+msgstr ""
+
+#: rc.cpp:1
+msgctxt "NAME OF TRANSLATORS"
+msgid "Your names"
+msgstr ""
+
+#: rc.cpp:2
+msgctxt "EMAIL OF TRANSLATORS"
+msgid "Your emails"
 msgstr ""

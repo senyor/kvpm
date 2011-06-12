@@ -586,7 +586,13 @@ void PartitionAddDialog::clearOffsetGroup(bool on){
 
 void PartitionAddDialog::lockSize(bool checked){
 
-    int percent_free = qRound((100 * ((double)(m_ped_sector_length - m_partition_sectors))) / m_ped_sector_length);
+    int percent_free = qRound((100.0 * ((double)(m_ped_sector_length - m_partition_sectors))) / m_ped_sector_length);
+    if (percent_free < 0)
+        percent_free = 0;
+
+    int percent_offset = qRound((100.0 * (double)(m_offset_sectors)) / m_ped_sector_length);
+    if (percent_offset < 0)
+        percent_offset = 0;
 
     if(checked){
         m_size_edit->setEnabled(false);
@@ -595,10 +601,12 @@ void PartitionAddDialog::lockSize(bool checked){
         m_offset_spin->setMaximum(percent_free);
     }
     else{
+        qDebug() << "Got here ..." << percent_free;
         m_size_edit->setEnabled(true);
         m_size_spin->setEnabled(true);
         m_size_combo->setEnabled(true);
         m_offset_spin->setMaximum(100);
+        m_size_spin->setMaximum( 100 - percent_offset );
     }
 
     validateChange();
