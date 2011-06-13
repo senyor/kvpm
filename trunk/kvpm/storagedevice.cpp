@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2009, 2010 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -69,8 +69,7 @@ StorageDevice::StorageDevice( PedDevice *pedDevice,
 	    length = geometry.length * m_sector_size;
 	    part_type = part->type;
 
-	    if( !( (part_type & 0x08) || (  (part_type & 0x04) && (length < (0x800000))))){  // ignore freespace less than 8megs
-
+            if( !( (part_type & 0x08) || (  (part_type & 0x04) && (length < (0x200000))))){  // ignore freespace less than 2 megs
 	        if( part_type & 0x04 )
 		    m_freespace_count++;
 

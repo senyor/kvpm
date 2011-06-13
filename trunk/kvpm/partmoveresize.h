@@ -48,8 +48,6 @@ Q_OBJECT
 
     PedSector m_min_shrink_size;     // Minimum size of the fs after shrinking
     long long m_sector_size;         // bytes per logical sector
-    long long m_existing_part_size;
-    long long m_existing_part_start;
     long long m_max_part_start;      // start of biggest possible partition
     long long m_max_part_size;       // size of largest possible partition
 
@@ -71,8 +69,9 @@ Q_OBJECT
     bool shrinkPartition();
     bool growPartition();
     bool movePartition();
-    void updateDisplayGraphic();
-    void updateChangeByLabels();
+    //    void updateDisplayGraphic();
+    //    void updateChangeByLabels();
+    void updateGraphicAndLabels();
     bool pedCommitAndWait(PedDisk *disk);
     void updateAndValidatePartition();
 
