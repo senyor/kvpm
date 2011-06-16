@@ -24,6 +24,7 @@
 
 #include "fsextend.h"
 #include "fsreduce.h"
+#include "pedexceptions.h"
 #include "partmoveresize.h"
 #include "partaddgraphic.h"
 #include "physvol.h"
@@ -634,8 +635,6 @@ bool PartitionMoveResizeDialog::movePartition()
             new_start = 1 + max_end - ( ( sectors_1MiB / 2) + current_size );
     }
 
-    // !!! put in my constraint handeler !!!
-
     PedAlignment *start_alignment_none  = ped_alignment_new(0, 1); 
     PedAlignment *start_alignment_64KiB = ped_alignment_new(0, sectors_64KiB); 
     PedAlignment *start_alignment_1MiB  = ped_alignment_new(0, sectors_1MiB); 
@@ -647,6 +646,8 @@ bool PartitionMoveResizeDialog::movePartition()
                                                 sectors_1MiB  );
 
     // First try 1 Meg alignment, then 64k if that fails and then none as last resort
+
+    //    ped_exception_set_handler(my_constraint_handler);
 
     PedConstraint *constraint_none  = ped_constraint_new( start_alignment_none, end_alignment,
                                                           start_range, end_range,
@@ -700,6 +701,7 @@ bool PartitionMoveResizeDialog::movePartition()
                                                max_start, max_end );
     }
 
+    ped_exception_set_handler(my_handler);
     current_start = m_existing_part->geom.start;
 
     if( !success ){  
@@ -767,6 +769,10 @@ void PartitionMoveResizeDialog::getMaximumPartition()
             }
             else
                 break;
+        }
+        else if( is_logical && (parts[prev]->type & PED_PARTITION_EXTENDED) ){  // first logical partiton needs 
+            m_max_part_start += 64;                                             // start to be offset for 
+            break;                                                              // alignment to account for EBR
         }
         else{
             break;
