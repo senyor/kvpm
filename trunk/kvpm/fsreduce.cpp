@@ -107,8 +107,6 @@ long long get_min_fs_size(QString path, QString fs){
 
     QString size_string;
 
-    qDebug() << "Filesystem" << fs ; 
-
     if( fs == "ext2" || fs == "ext3" || fs == "ext4" ){
         arguments << "resize2fs" << "-P" << path;
 
