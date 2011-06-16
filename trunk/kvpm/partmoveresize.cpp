@@ -189,7 +189,7 @@ void PartitionMoveResizeDialog::commitPartition()
         grow   = false;
         shrink = false;
     }
-
+    qDebug() << "Grow:" << grow << "Move:" << move << "Shrink:" << shrink;
     qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
 
     if( grow && move ){
@@ -524,7 +524,7 @@ bool PartitionMoveResizeDialog::growPartition()
 
     // Don't grow less than 128 KiB
     if( m_size_selector->getCurrentSize() <= ( current_size + ( 2 * sectors_64KiB ) ) )
-        return false;
+        return true;  // Not worth the trouble, just say we did it
     else if( m_size_selector->getCurrentSize() + current_start > max_end )
         max_new_size = max_end - current_start;
     else
@@ -621,7 +621,7 @@ bool PartitionMoveResizeDialog::movePartition()
     // and check that we have at least 1 meg to spare
 
     if( fabs(current_start - new_start) < sectors_1MiB )
-        return false;
+        return true;  // pretend we moved since it wasn't worth doing
     else if( new_start < current_start ){  // moving left
         if( ( current_start - max_start ) < sectors_1MiB )  
             return false;
