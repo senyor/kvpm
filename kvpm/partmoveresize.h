@@ -69,11 +69,10 @@ Q_OBJECT
     bool shrinkPartition();
     bool growPartition();
     bool movePartition();
-    //    void updateDisplayGraphic();
-    //    void updateChangeByLabels();
     void updateGraphicAndLabels();
     bool pedCommitAndWait(PedDisk *disk);
     void updateAndValidatePartition();
+    void getMaximumPartition();
 
 public:
     PartitionMoveResizeDialog(StoragePartition *partition, QWidget *parent = 0);

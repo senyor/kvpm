@@ -30,6 +30,7 @@
 bool add_partition(StoragePartition *partition)
 {
     PedDisk *disk = partition->getPedPartition()->disk;
+    qDebug() << "DISK" << disk;
     unsigned ped_type = partition->getPedType();
     bool logical_freespace = ( ped_type & PED_PARTITION_FREESPACE ) && ( ped_type & PED_PARTITION_LOGICAL );
     int count = ped_disk_get_primary_partition_count(disk);

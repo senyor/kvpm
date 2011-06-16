@@ -317,30 +317,11 @@ void PartitionMoveResizeDialog::setup()
     ped_max_geometry  = ped_disk_get_max_partition_geometry( m_ped_disk, m_existing_part, constraint );
     m_sector_size     = ped_device->sector_size;
 
-    // libparted reports the end incorrectly so we calculate the end point ourselves
-    PedPartition *loop_part = m_existing_part;
-    PedPartition *next_part = m_existing_part;
-    while( (loop_part = ped_disk_next_partition(m_ped_disk, loop_part)) ){
-        if( (loop_part->type & 0x08) || (loop_part->type & 0x04))
-            next_part = loop_part;
-        else
-            break;
-    }
-
-    // If libparted got the start too far right we try to correct it here
-    if(m_max_part_start > m_existing_part->geom.start)
-        m_max_part_start = m_existing_part->geom.start;
-
-    PedPartition *prev_part = m_existing_part->prev;
-    if(prev_part){
-        if( (m_max_part_start > prev_part->geom.start) && (prev_part->type & 0x04) )
-            m_max_part_start = prev_part->geom.start;
-    }
-
-    ped_max_geometry = ped_geometry_new(ped_device, m_max_part_start, next_part->geom.end - m_max_part_start + 1 );
-
     m_max_part_start  = ped_max_geometry->start;
     m_max_part_size   = ped_max_geometry->length;
+
+    // remove this when possible!!!!
+    getMaximumPartition();
 
     if( m_existing_part->type & PED_PARTITION_LOGICAL )
         m_logical = true;
@@ -484,7 +465,7 @@ bool PartitionMoveResizeDialog::shrinkPartition()
     PedSector reduced_size;
 
     if( is_pv ){
-        reduced_size = 1 + pv_reduce( ped_partition_get_path(m_existing_part) , 
+        reduced_size = 1 + pv_reduce( ped_partition_get_path(m_existing_part) ,
                                       new_size * m_sector_size ) / m_sector_size;
     }
     else{
@@ -496,7 +477,7 @@ bool PartitionMoveResizeDialog::shrinkPartition()
         return false;
 
     // This constraint assures we have a new partition at least as long as the fs can shrink it
-    // We give an extra 64KiB sectors for the end of the partition
+    // We allow an extra 64KiB sectors for the end of the partition
 
     PedAlignment * const start_alignment = ped_alignment_new(0, 1);
     PedAlignment * const end_alignment   = ped_alignment_new(0, 1);
@@ -533,7 +514,8 @@ bool PartitionMoveResizeDialog::growPartition()
     const bool is_pv = m_old_storage_part->isPV();
     const PedSector current_start = m_existing_part->geom.start;
     const PedSector current_size  = m_existing_part->geom.length;
-    const PedSector max_part_end  = m_max_part_start + m_max_part_size - 1;
+    const PedSector max_end   = m_max_part_start + m_max_part_size - 1;
+    const PedSector max_start = m_max_part_start;
 
     int success;
     PedSector min_new_size, 
@@ -542,8 +524,8 @@ bool PartitionMoveResizeDialog::growPartition()
     // Don't grow less than 128 KiB
     if( m_size_selector->getCurrentSize() <= ( current_size + ( 2 * sectors_64KiB ) ) )
         return false;
-    else if( m_size_selector->getCurrentSize() + current_start > max_part_end )
-        max_new_size = max_part_end - current_start;
+    else if( m_size_selector->getCurrentSize() + current_start > max_end )
+        max_new_size = max_end - current_start;
     else
         max_new_size = m_size_selector->getCurrentSize();
 
@@ -562,7 +544,7 @@ bool PartitionMoveResizeDialog::growPartition()
         return false;
     }
 
-    success = ped_disk_set_partition_geom(m_ped_disk, m_existing_part, constraint, m_max_part_start, max_part_end);
+    success = ped_disk_set_partition_geom(m_ped_disk, m_existing_part, constraint, max_start, max_end);
 
     if( ! success ){  
         KMessageBox::error( 0, i18n("Partition extention failed") );
@@ -620,6 +602,7 @@ void PartitionMoveResizeDialog::updateGraphicAndLabels()
 
 bool PartitionMoveResizeDialog::movePartition()
 {
+    hide();
 
     PedDevice *device = m_ped_disk->dev;
 
@@ -705,19 +688,16 @@ bool PartitionMoveResizeDialog::movePartition()
     if(constraint_1MiB){
         success = ped_disk_set_partition_geom( m_ped_disk, m_existing_part, constraint_1MiB, 
                                                max_start, max_end );
-        qDebug() << "Got here ... 1 MiB";
     }
 
     if(constraint_64KiB && (!success) ){
         success = ped_disk_set_partition_geom( m_ped_disk, m_existing_part, constraint_64KiB, 
                                                max_start, max_end );
-        qDebug() << "Got here ... 64KiB";
     }
 
     if(constraint_none && (!success)){
         success = ped_disk_set_partition_geom( m_ped_disk, m_existing_part, constraint_none, 
                                                max_start, max_end );
-        qDebug() << "Got here ... none";
     }
 
     current_start = m_existing_part->geom.start;
@@ -752,4 +732,67 @@ bool PartitionMoveResizeDialog::pedCommitAndWait(PedDisk *disk)
     return true;
 }
 
+void PartitionMoveResizeDialog::getMaximumPartition()
+{
+    QList<PedPartition *> parts;
+    PedPartition *next_part = NULL;
+    bool is_logical;
+    int index, prev, next;
+    long long max_end = m_max_part_start + m_max_part_size - 1;
+    const PedSector sectors_1MiB  = 0x100000 / m_sector_size;   // sectors per megabyte
+
+    while( (next_part = ped_disk_next_partition(m_ped_disk, next_part) ) )
+        parts.append(next_part);
+
+    is_logical = m_existing_part->type & PED_PARTITION_LOGICAL;
+
+    // look for the index of the current part
+    for(index = 0; index < parts.size(); index++){
+        if( parts[index]->geom.start == m_existing_part->geom.start )
+            break;
+    }
+
+    if( index >= parts.size() ) // We couldn't find the current part?
+        return;
+
+    prev = index - 1;
+    next = index + 1; 
+
+    while( prev >= 0 ){
+        if( is_logical == (parts[prev]->type & PED_PARTITION_LOGICAL) ){
+            if( (parts[prev]->type & PED_PARTITION_METADATA) || (parts[prev]->type & PED_PARTITION_FREESPACE) ){
+                if( m_max_part_start > parts[prev]->geom.start ){
+                    m_max_part_start = parts[prev]->geom.start;
+                }
+            }
+            else
+                break;
+        }
+        else{
+            break;
+        }
+        prev--;
+    }
+
+    while( next < parts.size() ){
+        if( is_logical == (parts[next]->type & PED_PARTITION_LOGICAL) ){
+            if( (parts[next]->type & PED_PARTITION_METADATA) || (parts[next]->type & PED_PARTITION_FREESPACE) ){
+                if( max_end < parts[next]->geom.end ){
+                    max_end = parts[next]->geom.end;
+                }
+            }
+            else
+                break;
+        }
+        else{
+            break;
+        }
+        next++;
+    }
+
+    if(m_max_part_start < sectors_1MiB)
+        m_max_part_start = sectors_1MiB;
+
+    m_max_part_size = 1 + max_end - m_max_part_start;
+}
 
