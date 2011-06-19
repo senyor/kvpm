@@ -87,20 +87,21 @@ SizeSelectorBox::SizeSelectorBox(long long unitSize, long long minSize, long lon
     }
     else{
         setTitle( i18n("Partition size") );
+        m_size_box = new QCheckBox( i18n("Lock partition size") );
+        m_size_box->setChecked(false);
+        layout->addWidget(m_size_box);
+
+        connect(m_size_box, SIGNAL(toggled(bool)),
+                this, SLOT(lock(bool)));
+
         if( !m_is_new ){
             m_shrink_box = new QCheckBox( i18n("Prevent shrinking") );
             m_shrink_box->setChecked(false);
-            m_size_box = new QCheckBox( i18n("Lock partition size") );
-            m_size_box->setChecked(false);
             setConstraints(false);
             layout->addWidget(m_shrink_box);
-            layout->addWidget(m_size_box);
 
             connect(m_shrink_box, SIGNAL(toggled(bool)),
                     this, SLOT(lockShrink(bool)));
-
-            connect(m_size_box, SIGNAL(toggled(bool)),
-                    this, SLOT(lock(bool)));
 
             connect(m_size_box, SIGNAL(toggled(bool)),
                     this, SLOT(disableLockShrink(bool)));
@@ -145,9 +146,10 @@ void SizeSelectorBox::resetToInitial()
         m_offset_box->setChecked(false);
     }
     else{
+        m_size_box->setChecked(false);
+
         if( !m_is_new ){
             m_shrink_box->setChecked(false);
-            m_size_box->setChecked(false);
         }
     }
 
@@ -432,3 +434,4 @@ bool SizeSelectorBox::isLocked() // this should include the lock button too
 {
     return !isEnabled();
 }
+

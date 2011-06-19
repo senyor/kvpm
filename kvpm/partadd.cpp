@@ -17,10 +17,12 @@
 
 #include <QtGui>
 
+#include "dualselectorbox.h"
 #include "partadd.h"
 #include "partaddgraphic.h"
 #include "pedexceptions.h"
 #include "misc.h"
+#include "sizeselectorbox.h"
 
 /* 
    The "partition" we get here is usually a ped pointer to a the freespace 
@@ -30,7 +32,7 @@
 bool add_partition(StoragePartition *partition)
 {
     PedDisk *disk = partition->getPedPartition()->disk;
-    qDebug() << "DISK" << disk;
+
     unsigned ped_type = partition->getPedType();
     bool logical_freespace = ( ped_type & PED_PARTITION_FREESPACE ) && ( ped_type & PED_PARTITION_LOGICAL );
     int count = ped_disk_get_primary_partition_count(disk);
@@ -55,8 +57,7 @@ bool add_partition(StoragePartition *partition)
     }
 }
 
-PartitionAddDialog::PartitionAddDialog(StoragePartition *partition, 
-				       QWidget *parent) : 
+PartitionAddDialog::PartitionAddDialog(StoragePartition *partition, QWidget *parent) : 
   KDialog(parent),
   m_partition(partition)
 {
@@ -84,8 +85,8 @@ PartitionAddDialog::PartitionAddDialog(StoragePartition *partition,
     ped_geometry = ped_free_partition->geom;
     m_ped_disk   = ped_free_partition->disk;
     ped_device   = m_ped_disk->dev;
-    m_ped_sector_size = ped_device->sector_size;
-    m_offset_sectors = 0;
+    m_sector_size = ped_device->sector_size;
+
 
     /* check to see if partition table supports extended
        partitions and if it already has one */
@@ -104,9 +105,11 @@ PartitionAddDialog::PartitionAddDialog(StoragePartition *partition,
 
 // The hardware's own constraints, if any
     m_ped_constraints   = ped_device_get_constraint(ped_device); 
-    m_ped_start_sector  = ped_geometry.start;
-    m_ped_end_sector    = ped_geometry.end;
-    m_ped_sector_length = ped_geometry.length;
+    m_max_part_start  = ped_geometry.start;
+    m_max_part_end    = ped_geometry.end;
+    m_max_part_size   = ped_geometry.length;
+
+    getMaximumPartition();
 
     setWindowTitle( i18n("Add partition") );
 
@@ -147,102 +150,28 @@ PartitionAddDialog::PartitionAddDialog(StoragePartition *partition,
 	    m_type_combo->setCurrentIndex(0);
     }
 
-    m_size_group   = new QGroupBox("Specify partition size");
-    QGridLayout *size_group_layout = new QGridLayout();
-    m_size_group->setLayout(size_group_layout);
-    layout->addWidget(m_size_group);
-
-    m_lock_size_check = new QCheckBox("Lock partition size");
-    size_group_layout->addWidget(m_lock_size_check);
-    m_size_spin = new QSpinBox();
-    m_size_spin->setRange(0,100);
-    m_size_spin->setValue(100);
-    m_size_spin->setSuffix("%");
-
-    m_size_edit  = new KLineEdit();
-    m_size_validator = new QDoubleValidator(m_size_edit);
-    m_size_edit->setValidator(m_size_validator);
-    m_size_validator->setBottom(0);
-
-    m_size_combo = new KComboBox();
-    m_size_combo->insertItem(0,"MiB");
-    m_size_combo->insertItem(1,"GiB");
-    m_size_combo->insertItem(2,"TiB");
-    m_size_combo->setInsertPolicy(KComboBox::NoInsert);
-    m_size_combo->setCurrentIndex(1);
-
-    size_group_layout->addWidget(m_size_edit,1,0);
-    size_group_layout->addWidget(m_size_combo,1,1);
-    size_group_layout->addWidget(m_size_spin,2,0);
-
     m_preceding_label = new QLabel();
-    size_group_layout->addWidget( m_preceding_label, 5, 0, 1, 2, Qt::AlignHCenter );
+    layout->addWidget( m_preceding_label );
 
     m_remaining_label = new QLabel();
-    size_group_layout->addWidget( m_remaining_label, 6, 0, 1, 2, Qt::AlignHCenter );
+    layout->addWidget( m_remaining_label );
 
-    m_offset_group = new QGroupBox("Offset partition start");
-    QGridLayout *excluded_group_layout = new QGridLayout();
-    m_offset_group->setCheckable(true);
-    m_offset_group->setChecked(false);
-    m_offset_group->setLayout(excluded_group_layout);
-    layout->addWidget(m_offset_group);
-
-    m_offset_combo = new KComboBox();
-    m_offset_combo->insertItem(0,"MiB");
-    m_offset_combo->insertItem(1,"GiB");
-    m_offset_combo->insertItem(2,"TiB");
-    m_offset_combo->setInsertPolicy(KComboBox::NoInsert);
-    m_offset_combo->setCurrentIndex(1);
-
-    m_offset_spin = new QSpinBox();
-    m_offset_spin->setRange(0,100);
-    m_offset_spin->setValue(0);
-    m_offset_spin->setSuffix("%");
-
-    m_offset_edit  = new KLineEdit();
-    m_offset_validator = new QDoubleValidator(m_offset_edit);
-    m_offset_edit->setValidator(m_offset_validator);
-    m_offset_validator->setBottom(0);
-
-    excluded_group_layout->addWidget(m_offset_edit,0,0);
-    excluded_group_layout->addWidget(m_offset_combo,0,1);
-    excluded_group_layout->addWidget(m_offset_spin,1,0);
-
-    QString total_bytes = sizeToString( m_ped_sector_length * m_ped_sector_size );
+    QString total_bytes = sizeToString( m_max_part_size * m_sector_size );
     QLabel *excluded_label = new QLabel( i18n("Maximum size: %1",  total_bytes) );
-    excluded_group_layout->addWidget( excluded_label, 4, 0, 1, 2, Qt::AlignHCenter );
+    layout->addWidget( excluded_label );
 
-    total_bytes = sizeToString(m_ped_sector_length * m_ped_sector_size);
+    total_bytes = sizeToString(m_max_part_size * m_sector_size);
     m_unexcluded_label = new QLabel( i18n("Remaining space: %1", total_bytes) );
-    excluded_group_layout->addWidget( m_unexcluded_label, 5, 0, 1, 2, Qt::AlignHCenter );
+    layout->addWidget( m_unexcluded_label );
 
-    setOffsetEditToSpin(0);
-    setSizeEditToSpin(100);
+    m_dual_selector = new DualSelectorBox(m_sector_size, 0, m_max_part_size, m_max_part_size, 0, m_max_part_size, 0);
 
-    connect(m_size_combo, SIGNAL(currentIndexChanged(int)),
-	    this , SLOT(setSizeEditToCombo(int)));
+    validateChange();
 
-    connect(m_size_spin, SIGNAL(valueChanged(int)),
-	    this, SLOT(setSizeEditToSpin(int)));
+    layout->addWidget(m_dual_selector);
 
-    connect(m_size_edit, SIGNAL(textEdited(QString)),
-	    this, SLOT(validateSize(QString)));
-
-    connect(m_offset_combo, SIGNAL(currentIndexChanged(int)),
-	    this , SLOT(setOffsetEditToCombo(int)));
-
-    connect(m_offset_spin, SIGNAL(valueChanged(int)),
-	    this, SLOT(setOffsetEditToSpin(int)));
-
-    connect(m_offset_group, SIGNAL(toggled(bool)),
-	    this, SLOT(clearOffsetGroup(bool)));
-
-    connect(m_lock_size_check, SIGNAL(toggled(bool)),
-	    this, SLOT(lockSize(bool)));
-
-    connect(m_offset_edit, SIGNAL(textEdited(QString)),
-	    this, SLOT(validateOffset(QString)));
+    connect(m_dual_selector, SIGNAL(changed()),
+            this, SLOT(validateChange()));
 
     connect(this, SIGNAL(okClicked()),
 	    this, SLOT(commitPartition()));
@@ -251,69 +180,36 @@ PartitionAddDialog::PartitionAddDialog(StoragePartition *partition,
 void PartitionAddDialog::commitPartition()
 {
 
+    PedDevice *device = m_ped_disk->dev;
     PedPartitionType type;
-    PedSector first_sector = m_ped_start_sector;
-    int sectors4KiB;
-    int sectors64KiB;
-    int sectors1MiB;
+    PedSector first_sector = m_max_part_start + m_dual_selector->getCurrentOffset();
+    PedSector last_sector  = first_sector + m_dual_selector->getCurrentSize() - 1;
 
-    if( m_offset_group->isChecked() )
-        first_sector = m_ped_start_sector + m_offset_sectors;
+    const PedSector sectors_1MiB  = 0x100000 / m_sector_size;   // sectors per megabyte
 
-    PedSector last_sector  = first_sector + m_partition_sectors;
-    if( last_sector > m_ped_end_sector )
-        last_sector = m_ped_end_sector;
+    if( first_sector < m_max_part_start )
+        first_sector = m_max_part_start;
+
+    if( last_sector > m_max_part_end )
+        last_sector = m_max_part_end;
+
     PedSector length  = (last_sector - first_sector) + 1;
 
-    if( ( (int)(0x1000 / m_ped_sector_size) ) > 0 )
-        sectors4KiB = 0x1000 / m_ped_sector_size;
-    else
-        sectors4KiB = 1;
+    if( length < sectors_1MiB )
+        return;
 
-    if( ( (int)(0x10000 / m_ped_sector_size) ) > 0 )
-        sectors64KiB = 0x10000 / m_ped_sector_size;
-    else
-        sectors64KiB = 1;
+    PedAlignment *start_align  = ped_alignment_new( 0, sectors_1MiB); 
+    PedAlignment *end_align    = ped_alignment_new(-1, sectors_1MiB);
 
-    if( ( (int)(0x100000 / m_ped_sector_size) ) > 0 )
-        sectors1MiB = 0x100000 / m_ped_sector_size;
-    else
-        sectors1MiB = 1;
+    PedGeometry *start_range = ped_geometry_new(device, first_sector, sectors_1MiB );
+    PedGeometry *end_range   = ped_geometry_new(device, last_sector - ( sectors_1MiB - 1 ), sectors_1MiB  );
 
-    PedAlignment *ped_start_alignment4KiB  = ped_alignment_new(0, sectors4KiB);
-    PedAlignment *ped_start_alignment64KiB = ped_alignment_new(0, sectors64KiB);
-    PedAlignment *ped_start_alignment1MiB  = ped_alignment_new(0, sectors1MiB);
-    PedAlignment *ped_end_alignment   = ped_alignment_new(0, 1);
+    PedConstraint *constraint_1MiB = ped_constraint_new( start_align, end_align,
+                                                         start_range, end_range,
+                                                         length - ( sectors_1MiB - 1 ), length );
 
-    PedGeometry *start_geom4KiB  = ped_geometry_new(m_ped_disk->dev, first_sector, (2 * sectors4KiB) - 1);
-    PedGeometry *start_geom64KiB = ped_geometry_new(m_ped_disk->dev, first_sector, (2 * sectors64KiB) - 1);
-    PedGeometry *start_geom1MiB  = ped_geometry_new(m_ped_disk->dev, first_sector, (2 * sectors1MiB) - 1);
-    PedGeometry *end_geom   = ped_geometry_new(m_ped_disk->dev, first_sector, length);
-
-    PedConstraint *ped_constraint4KiB = ped_constraint_new(ped_start_alignment4KiB,
-                                                           ped_end_alignment, 
-                                                           start_geom4KiB, 
-                                                           end_geom, 
-                                                           (2 * sectors4KiB) - 1, 
-                                                           length);
-
-    PedConstraint *ped_constraint64KiB = ped_constraint_new(ped_start_alignment64KiB,
-                                                            ped_end_alignment, 
-                                                            start_geom64KiB, 
-                                                            end_geom, 
-                                                            (2 * sectors64KiB) - 1, 
-                                                            length);
-
-    PedConstraint *ped_constraint1MiB = ped_constraint_new(ped_start_alignment1MiB,
-                                                           ped_end_alignment, 
-                                                           start_geom1MiB, 
-                                                           end_geom, 
-                                                           (2 * sectors1MiB) - 1, 
-                                                           length);
-
-    ped_constraint4KiB  = ped_constraint_intersect(ped_constraint4KiB,  m_ped_constraints);
-    ped_constraint64KiB = ped_constraint_intersect(ped_constraint64KiB, m_ped_constraints);
-    ped_constraint1MiB  = ped_constraint_intersect(ped_constraint1MiB,  m_ped_constraints);
+    // This constraint assures we don't go past the edges of any
+    // adjoining partitions or the partition table itself
 
     if(m_type_combo->currentIndex() == 0)
         type = PED_PARTITION_NORMAL ;
@@ -322,90 +218,10 @@ void PartitionAddDialog::commitPartition()
     else
         type = PED_PARTITION_LOGICAL ;
 
-    PedPartition *ped_new_partition = ped_partition_new(m_ped_disk, 
-							type, 
-							0, 
-							first_sector, 
-							(first_sector + length) -1);
+    PedPartition *ped_new_partition = ped_partition_new(m_ped_disk, type, 0, first_sector, last_sector);
 
-    ped_exception_set_handler(my_constraint_handler);
-
-    if( ped_disk_add_partition(m_ped_disk, ped_new_partition, ped_constraint1MiB) ){
-        ped_exception_set_handler(my_handler);
+    if( ped_disk_add_partition(m_ped_disk, ped_new_partition, constraint_1MiB) )
         ped_disk_commit(m_ped_disk);
-    }
-    else if( ped_disk_add_partition(m_ped_disk, ped_new_partition, ped_constraint64KiB) ){
-        ped_exception_set_handler(my_handler);
-        ped_disk_commit(m_ped_disk);
-    }
-    else{
-        ped_exception_set_handler(my_handler);
-        ped_disk_add_partition(m_ped_disk, ped_new_partition, ped_constraint4KiB);
-        ped_disk_commit(m_ped_disk);
-    }
-}
-
-void PartitionAddDialog::setSizeEditMinusOffsetEdit(){
-
-    long long free;
-    long double sized;
-    int index = m_size_combo->currentIndex();
-    QString excluded = m_offset_edit->text();
-
-    if( ! m_lock_size_check->isChecked() ){
-        m_offset_sectors = convertSizeToSectors(m_offset_combo->currentIndex(), excluded.toDouble());
-        free = m_ped_sector_length - m_offset_sectors;
-
-        if( free < 1 ){
-            free = 0;
-            m_offset_sectors = m_ped_sector_length; 
-        }
-
-        if( m_partition_sectors > free )
-            m_partition_sectors = free;
-
-        m_size_spin->setMaximum( qRound( ( (double)free / m_ped_sector_length ) * 100) );
-
-        sized = ((long double)m_partition_sectors * m_ped_sector_size);
-
-        if(index == 0)
-            sized /= (long double)0x100000;
-        else if(index == 1)
-            sized /= (long double)0x40000000;
-        else{
-            sized /= (long double)(0x100000);
-            sized /= (long double)(0x100000);
-        }
-        
-        m_size_edit->setText( QString("%1").arg( (double)sized ) );
-    }
-    else{
-        m_offset_sectors = convertSizeToSectors(m_offset_combo->currentIndex(), excluded.toDouble());
-
-        if(m_offset_sectors > m_ped_sector_length)
-            m_offset_sectors = m_ped_sector_length;
-    }
-
-    validateChange();
-}
-
-void PartitionAddDialog::setSizeEditToCombo(int index){
-
-    long double sized;
-
-    sized = ((long double)m_partition_sectors * m_ped_sector_size);
-
-    if(index == 0)
-        sized /= (long double)0x100000;
-    else if(index == 1)
-        sized /= (long double)0x40000000;
-    else{
-        sized /= (long double)(0x100000);
-        sized /= (long double)(0x100000);
-    }
-
-    m_size_edit->setText( QString("%1").arg( (double)sized ) );
-    validateChange();
 }
 
 long long PartitionAddDialog::convertSizeToSectors(int index, double size)
@@ -421,7 +237,7 @@ long long PartitionAddDialog::convertSizeToSectors(int index, double size)
         partition_size *= (long double)0x100000;
     }
 
-    partition_size /= m_ped_sector_size;
+    partition_size /= m_sector_size;
 
     if (partition_size < 0)
         partition_size = 0;
@@ -429,216 +245,135 @@ long long PartitionAddDialog::convertSizeToSectors(int index, double size)
     return qRound64(partition_size);
 }
 
-void PartitionAddDialog::setOffsetEditToSpin(int percentage){
-
-    long long free = m_ped_sector_length;
-    long long excluded;
-
-    if(percentage == 100)
-        excluded = free;
-    else if(percentage == 0)
-        excluded = 0;
-    else if(percentage == m_offset_spin->maximum())
-        excluded = m_ped_sector_length - m_partition_sectors;
-    else
-        excluded = (long long)(( (double) percentage / 100) * free);
-
-    long double sized;
-    int index = m_offset_combo->currentIndex();
-
-    sized = ((long double)excluded * m_ped_sector_size);
-
-    if(index == 0)
-        sized /= (long double)0x100000;
-    else if(index == 1)
-        sized /= (long double)0x40000000;
-    else{
-        sized /= (long double)(0x100000);
-        sized /= (long double)(0x100000);
-    }
-
-    m_offset_edit->setText(QString("%1").arg((double)sized));
-    setSizeEditMinusOffsetEdit();
-    validateChange();
-
-}
-
-void PartitionAddDialog::validateSize(QString text){
-
-    int x = 0;
-    long long free = m_ped_sector_length - m_offset_sectors;
-    long long partition = convertSizeToSectors( m_size_combo->currentIndex(), text.toDouble() );
-
-    if(( m_size_validator->validate(text, x) == QValidator::Acceptable )){
-            
-        if( partition <= free ){
-            m_partition_sectors = partition;
-            enableButtonOk(true);
-        }
-        else if( partition <= m_ped_sector_length ){
-            m_partition_sectors = partition;
-            enableButtonOk(false);
-        }
-        else
-            enableButtonOk(false);
-    }
-    else
-        enableButtonOk(false);
-
-    if(( m_offset_sectors > m_ped_sector_length - m_partition_sectors ) || 
-       ( m_partition_sectors > m_ped_sector_length - m_offset_sectors   ) || 
-       ( m_partition_sectors <= 0 )){
-        enableButtonOk(false);
-    }
-
-    updatePartition();
-}
-
-
-void PartitionAddDialog::validateOffset(QString text){
-
-    int x = 0;
-    long long free = m_ped_sector_length - m_partition_sectors;
-    long long offset = convertSizeToSectors( m_offset_combo->currentIndex(), text.toDouble() );
-
-    enableButtonOk(false);
-
-    if( m_offset_validator->validate(text, x) == QValidator::Acceptable ){
-
-        if( offset <= free ){
-            m_offset_sectors = offset;
-            enableButtonOk(true);
-        }
-        else if( offset <= m_ped_sector_length ){
-            m_offset_sectors = offset;
-            setSizeEditMinusOffsetEdit();
-        }
-
-        if(( m_offset_sectors > m_ped_sector_length - m_partition_sectors ) || 
-           ( m_partition_sectors > m_ped_sector_length - m_offset_sectors   ) || 
-           ( m_partition_sectors <= 0 )){
-            enableButtonOk(false);
-        }
-        
-    }
-    updatePartition();
-}
-
 void PartitionAddDialog::validateChange(){
 
-    if(( m_offset_sectors <= m_ped_sector_length - m_partition_sectors ) && 
-       ( m_partition_sectors <= m_ped_sector_length - m_offset_sectors   ) &&
-       ( m_partition_sectors > 0 )){
-        enableButtonOk(true);
+    const PedSector sectors_1MiB  = 0x100000 / m_sector_size;   // sectors per megabyte
+    const long long offset = m_dual_selector->getCurrentOffset();
+    const long long size   = m_dual_selector->getCurrentSize();
+
+  
+        if(( offset <= m_max_part_size - size ) && ( size <= m_max_part_size - offset  ) && 
+           ( size >= sectors_1MiB ) && ( m_dual_selector->isValid() ) ){
+            enableButtonOk(true);
     }
     else
         enableButtonOk(false);
 
     updatePartition();
-}
-
-void PartitionAddDialog::setOffsetEditToCombo(int index){
-
-    long double sized = ((long double)m_offset_sectors * m_ped_sector_size);
-
-    if(index == 0)
-        sized /= (long double)0x100000;
-    else if(index == 1)
-        sized /= (long double)0x40000000;
-    else{
-        sized /= (long double)(0x100000);
-        sized /= (long double)(0x100000);
-    }
-
-    m_offset_edit->setText(QString("%1").arg((double)sized));
-    setSizeEditMinusOffsetEdit();
-    validateChange();
-}
-
-void PartitionAddDialog::setSizeEditToSpin(int percentage){
-
-    long long free_sectors = m_ped_sector_length - m_offset_sectors;
-
-    if( percentage == m_size_spin->maximum() )
-        m_partition_sectors = free_sectors;
-    else if(percentage == 0)
-        m_partition_sectors = 0;
-    else
-        m_partition_sectors = (long long)(( (double) percentage / 100) * m_ped_sector_length);
-
-    if( m_partition_sectors > free_sectors)
-        m_partition_sectors = free_sectors;
-
-    setSizeEditToCombo( m_size_combo->currentIndex() );
-}
-
-/* if the excluded group is unchecked then zero the excluded sectors */
-
-void PartitionAddDialog::clearOffsetGroup(bool on){
-
-    if( ! on ){
-	m_offset_spin->setValue(0);
-        m_offset_edit->setText("0");
-        setSizeEditMinusOffsetEdit();
-    }
-
-    validateChange();
-}
-
-void PartitionAddDialog::lockSize(bool checked){
-
-    int percent_free = qRound((100.0 * ((double)(m_ped_sector_length - m_partition_sectors))) / m_ped_sector_length);
-    if (percent_free < 0)
-        percent_free = 0;
-
-    int percent_offset = qRound((100.0 * (double)(m_offset_sectors)) / m_ped_sector_length);
-    if (percent_offset < 0)
-        percent_offset = 0;
-
-    if(checked){
-        m_size_edit->setEnabled(false);
-        m_size_spin->setEnabled(false);
-        m_size_combo->setEnabled(false);
-        m_offset_spin->setMaximum(percent_free);
-    }
-    else{
-        qDebug() << "Got here ..." << percent_free;
-        m_size_edit->setEnabled(true);
-        m_size_spin->setEnabled(true);
-        m_size_combo->setEnabled(true);
-        m_offset_spin->setMaximum(100);
-        m_size_spin->setMaximum( 100 - percent_offset );
-    }
-
-    validateChange();
 }
 
 void PartitionAddDialog::updatePartition(){
 
-    long long free_sectors = m_ped_sector_length - m_offset_sectors;
-    if(free_sectors < 0)
-        free_sectors = 0;
+    long long offset = m_dual_selector->getCurrentOffset();
+    long long size = m_dual_selector->getCurrentSize();
+    long long free = m_max_part_size - offset;
+    if(free < 0)
+        free = 0;
 
-    QString total_bytes = sizeToString(m_ped_sector_size * free_sectors);
+    QString total_bytes = sizeToString(m_sector_size * free);
     m_unexcluded_label->setText( i18n("Available space: %1", total_bytes) );
 
-    QString preceding_bytes_string = sizeToString(m_offset_sectors * m_ped_sector_size);
+    QString preceding_bytes_string = sizeToString(offset * m_sector_size);
     m_preceding_label->setText( i18n("Preceding space: %1", preceding_bytes_string) );
 
-    PedSector following_sectors = m_ped_sector_length - (m_partition_sectors + m_offset_sectors);
-    if(following_sectors < 0)
-        following_sectors = 0;
+    PedSector following = m_max_part_size - (size + offset);
+    if(following < 0)
+        following = 0;
 
-    PedSector following_space = following_sectors * m_ped_sector_size;
+    PedSector following_space = following * m_sector_size;
 
-    if( following_space < 32 * m_ped_sector_size )
+    if( following_space < 32 * m_sector_size )
         following_space = 0;
 
     QString following_bytes_string = sizeToString(following_space);
     m_remaining_label->setText( i18n("Following space: %1", following_bytes_string) );
 
-    m_display_graphic->setPrecedingSectors(m_offset_sectors);
-    m_display_graphic->setPartitionSectors(m_partition_sectors);
-    m_display_graphic->setFollowingSectors(following_sectors);
+    m_display_graphic->setPrecedingSectors(offset);
+    m_display_graphic->setPartitionSectors(size);
+    m_display_graphic->setFollowingSectors(following);
     m_display_graphic->repaint();
 }
+
+void PartitionAddDialog::getMaximumPartition()
+{
+    PedPartition *ped_free_part = m_partition->getPedPartition();
+
+    QList<PedPartition *> parts;
+    PedPartition *next_part = NULL;
+    bool is_logical;
+    int index, prev, next;
+    long long max_end = m_max_part_start + m_max_part_size - 1;
+    const PedSector sectors_1MiB  = 0x100000 / m_sector_size;   // sectors per megabyte
+
+    while( (next_part = ped_disk_next_partition(m_ped_disk, next_part) ) )
+        parts.append(next_part);
+
+    is_logical = ped_free_part->type & PED_PARTITION_LOGICAL;
+
+    // look for the index of the current part
+    for(index = 0; index < parts.size(); index++){
+        if( parts[index]->geom.start == ped_free_part->geom.start )
+            break;
+    }
+
+    if( index >= parts.size() ) // We couldn't find the current part?
+        return;
+
+    prev = index - 1;
+    next = index + 1; 
+
+    while( prev >= 0 ){
+        if( is_logical == (parts[prev]->type & PED_PARTITION_LOGICAL) ){
+            if( (parts[prev]->type & PED_PARTITION_METADATA) || (parts[prev]->type & PED_PARTITION_FREESPACE) ){
+                if( m_max_part_start > parts[prev]->geom.start ){
+                    m_max_part_start = parts[prev]->geom.start;
+                }
+            }
+            else
+                break;
+        }
+        else if( is_logical && (parts[prev]->type & PED_PARTITION_EXTENDED) ){  // first logical partiton needs 
+            m_max_part_start += 64;                                             // start to be offset for 
+            break;                                                              // alignment to account for EBR
+        }
+        else{
+            break;
+        }
+        prev--;
+    }
+
+    while( next < parts.size() ){
+        if( is_logical == (parts[next]->type & PED_PARTITION_LOGICAL) ){
+            if( (parts[next]->type & PED_PARTITION_METADATA) || (parts[next]->type & PED_PARTITION_FREESPACE) ){
+                if( max_end < parts[next]->geom.end ){
+                    max_end = parts[next]->geom.end;
+                }
+            }
+            else
+                break;
+        }
+        else{
+            break;
+        }
+        next++;
+    }
+
+    if(m_max_part_start < sectors_1MiB)
+        m_max_part_start = sectors_1MiB;
+
+    m_max_part_end = max_end;
+
+    PedAlignment *align_1MiB = ped_alignment_new(0, sectors_1MiB);
+    PedGeometry *geom_1MiB = ped_geometry_new(ped_free_part->disk->dev, m_max_part_start, m_max_part_size);
+    m_max_part_start = ped_alignment_align_nearest( align_1MiB, geom_1MiB, m_max_part_start);
+
+    PedAlignment *align_end = ped_alignment_new(-1, sectors_1MiB);
+    m_max_part_end = ped_alignment_align_nearest( align_end, geom_1MiB, m_max_part_end);
+
+    m_max_part_size = 1 + max_end - m_max_part_start;
+
+    qDebug() << "Max start" << m_max_part_start;
+    qDebug() << "Max end"   << m_max_part_end;
+    qDebug() << "Max size"  << m_max_part_size;
+}
+

@@ -30,6 +30,7 @@
 
 class QDoubleValidator;
 class PartAddGraphic;
+class DualSelectorBox;
 
 bool add_partition(StoragePartition *partition);
 
@@ -41,57 +42,33 @@ Q_OBJECT
     StoragePartition *m_partition;    
     PedConstraint    *m_ped_constraints;
     PedDisk          *m_ped_disk;
+    DualSelectorBox  *m_dual_selector;
 
-    PedSector m_ped_start_sector,   // first available sector of free space
-              m_ped_end_sector,     // last available sector of free space 
-              m_ped_sector_length;  // sectors available of free space 
+    PedSector m_max_part_start,   // first available sector of free space
+              m_max_part_end,     // last available sector of free space 
+              m_max_part_size;    // sectors available of free space 
 
-    long long m_ped_sector_size;    // bytes per logical sector
-    long long m_partition_sectors;  // proposed size of partition
-    long long m_offset_sectors;     // proposed excluded sectors of partition
+    long long m_sector_size;    // bytes per logical sector
 
     PartAddGraphic *m_display_graphic; // The color bar that shows the relative
                                        // size of the partition graphically
-    QSpinBox *m_size_spin,
-             *m_offset_spin;
-
-    QCheckBox *m_lock_size_check;
-
-    KLineEdit *m_size_edit,
-              *m_offset_edit;
-
-    QDoubleValidator *m_size_validator,
-                     *m_offset_validator;
-
-    KComboBox *m_size_combo,
-              *m_type_combo,
-              *m_offset_combo;
-
-    QGroupBox *m_size_group,
-              *m_offset_group;
 
     QLabel    *m_unexcluded_label,  // Space left for new partition
               *m_remaining_label,
               *m_preceding_label;
 
-    void validateChange();
+    KComboBox *m_type_combo;
+
     void updatePartition();
-    void setSizeEditMinusOffsetEdit();
     long long convertSizeToSectors(int index, double size);
+    void getMaximumPartition();
 
 public:
     PartitionAddDialog(StoragePartition *partition, QWidget *parent = 0);
 
 private slots:
-    void setSizeEditToSpin(int percentage);
-    void setSizeEditToCombo(int index);
-    void setOffsetEditToSpin(int percentage);
-    void setOffsetEditToCombo(int index);
-    void validateSize(QString text);
-    void validateOffset(QString text);
-    void lockSize(bool checked);
     void commitPartition();
-    void clearOffsetGroup(bool on);
+    void validateChange();
 };
 
 #endif
