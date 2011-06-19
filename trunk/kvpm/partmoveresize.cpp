@@ -651,7 +651,7 @@ bool PartitionMoveResizeDialog::movePartition()
 
     PedConstraint *constraint_none  = ped_constraint_new( start_alignment_none, end_alignment,
                                                           start_range, end_range,
-                                                          current_size, ( current_size - 2 ) + sectors_1MiB);
+                                                          current_size, ( current_size - 1 ) + sectors_1MiB);
 
     PedConstraint *constraint_64KiB = ped_constraint_new( start_alignment_64KiB, end_alignment,
                                                           start_range, end_range,
@@ -659,7 +659,7 @@ bool PartitionMoveResizeDialog::movePartition()
 
     PedConstraint *constraint_1MiB = ped_constraint_new( start_alignment_1MiB, end_alignment,
                                                          start_range, end_range,
-                                                         current_size, current_size + sectors_1MiB - 1);
+                                                         current_size, ( current_size - 1 ) + sectors_1MiB);
 
     // This constraint assures we don't go past the edges of any
     // adjoining partitions or the partition table itself
