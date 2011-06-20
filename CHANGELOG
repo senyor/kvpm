@@ -1,3 +1,9 @@
+version 0.7.5 
+Re-worked and debugged add partition dialog. Changed the code for
+selecting the size to a separate object that contains a line edit,
+combo box and slider(replacing the spin box).  Aligned the device tree
+view to right alignment with centered headers like the vgtree.
+
 version 0.7.4
 Added a menu option for removing the filesystem from a logical
 volume just as it was already possible to do with a partition.
