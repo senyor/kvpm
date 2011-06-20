@@ -184,6 +184,7 @@ void PartitionAddDialog::commitPartition()
     PedPartitionType type;
     PedSector first_sector = m_max_part_start + m_dual_selector->getCurrentOffset();
     PedSector last_sector  = first_sector + m_dual_selector->getCurrentSize() - 1;
+    const PedSector length  = (last_sector - first_sector) + 1;
 
     const PedSector sectors_1MiB  = 0x100000 / m_sector_size;   // sectors per megabyte
 
@@ -193,23 +194,24 @@ void PartitionAddDialog::commitPartition()
     if( last_sector > m_max_part_end )
         last_sector = m_max_part_end;
 
-    PedSector length  = (last_sector - first_sector) + 1;
-
     if( length < sectors_1MiB )
         return;
 
     PedAlignment *start_align  = ped_alignment_new( 0, sectors_1MiB); 
     PedAlignment *end_align    = ped_alignment_new(-1, sectors_1MiB);
 
-    PedGeometry *start_range = ped_geometry_new(device, first_sector, sectors_1MiB );
-    PedGeometry *end_range   = ped_geometry_new(device, last_sector - ( sectors_1MiB - 1 ), sectors_1MiB  );
+    PedGeometry *geom_1MiB = ped_geometry_new(device, m_max_part_start, m_max_part_size);
+    first_sector = ped_alignment_align_down(start_align, geom_1MiB, first_sector);
+    last_sector  = first_sector + length - 1;
+    if( last_sector > m_max_part_end )
+        last_sector = m_max_part_end;
 
-    PedConstraint *constraint_1MiB = ped_constraint_new( start_align, end_align,
+    PedGeometry *start_range   = ped_geometry_new(device, first_sector, 1 + m_max_part_end - first_sector);
+    PedGeometry *end_range   = ped_geometry_new(device, first_sector, 1 + m_max_part_end - first_sector);
+ 
+    PedConstraint *constraint = ped_constraint_new( start_align, end_align,
                                                          start_range, end_range,
-                                                         length - ( sectors_1MiB - 1 ), length );
-
-    // This constraint assures we don't go past the edges of any
-    // adjoining partitions or the partition table itself
+                                                         length - sectors_1MiB, length );
 
     if(m_type_combo->currentIndex() == 0)
         type = PED_PARTITION_NORMAL ;
@@ -220,7 +222,7 @@ void PartitionAddDialog::commitPartition()
 
     PedPartition *ped_new_partition = ped_partition_new(m_ped_disk, type, 0, first_sector, last_sector);
 
-    if( ped_disk_add_partition(m_ped_disk, ped_new_partition, constraint_1MiB) )
+    if( ped_disk_add_partition(m_ped_disk, ped_new_partition, constraint) )
         ped_disk_commit(m_ped_disk);
 }
 
@@ -361,7 +363,11 @@ void PartitionAddDialog::getMaximumPartition()
     if(m_max_part_start < sectors_1MiB)
         m_max_part_start = sectors_1MiB;
 
+    if(is_logical)
+        m_max_part_start += 64;
+
     m_max_part_end = max_end;
+    m_max_part_size = 1 + m_max_part_end - m_max_part_start;
 
     PedAlignment *align_1MiB = ped_alignment_new(0, sectors_1MiB);
     PedGeometry *geom_1MiB = ped_geometry_new(ped_free_part->disk->dev, m_max_part_start, m_max_part_size);
@@ -370,10 +376,6 @@ void PartitionAddDialog::getMaximumPartition()
     PedAlignment *align_end = ped_alignment_new(-1, sectors_1MiB);
     m_max_part_end = ped_alignment_align_nearest( align_end, geom_1MiB, m_max_part_end);
 
-    m_max_part_size = 1 + max_end - m_max_part_start;
-
-    qDebug() << "Max start" << m_max_part_start;
-    qDebug() << "Max end"   << m_max_part_end;
-    qDebug() << "Max size"  << m_max_part_size;
+    m_max_part_size = 1 + m_max_part_end - m_max_part_start;
 }
 
