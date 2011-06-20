@@ -194,7 +194,7 @@ void PartitionAddDialog::commitPartition()
     if( last_sector > m_max_part_end )
         last_sector = m_max_part_end;
 
-    if( length < sectors_1MiB )
+    if( length < ( 2 * sectors_1MiB ) )
         return;
 
     PedAlignment *start_align  = ped_alignment_new( 0, sectors_1MiB); 
@@ -210,8 +210,8 @@ void PartitionAddDialog::commitPartition()
     PedGeometry *end_range   = ped_geometry_new(device, first_sector, 1 + m_max_part_end - first_sector);
  
     PedConstraint *constraint = ped_constraint_new( start_align, end_align,
-                                                         start_range, end_range,
-                                                         length - sectors_1MiB, length );
+                                                    start_range, end_range,
+                                                    length - sectors_1MiB, length );
 
     if(m_type_combo->currentIndex() == 0)
         type = PED_PARTITION_NORMAL ;
@@ -255,7 +255,7 @@ void PartitionAddDialog::validateChange(){
 
   
         if(( offset <= m_max_part_size - size ) && ( size <= m_max_part_size - offset  ) && 
-           ( size >= sectors_1MiB ) && ( m_dual_selector->isValid() ) ){
+           ( size >= 2 * sectors_1MiB ) && ( m_dual_selector->isValid() ) ){
             enableButtonOk(true);
     }
     else
