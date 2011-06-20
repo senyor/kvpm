@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2009, 2010 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -14,6 +14,7 @@
 
 
 #include <QtGui>
+#include <KGlobal>
 #include <KLocale>
 #include <KSeparator>
 
@@ -45,10 +46,11 @@ DeviceProperties::DeviceProperties( StorageDevice *Device, QWidget *parent) : QW
     temp_label->setAlignment( Qt::AlignCenter );
     basic_info_layout->addWidget( temp_label );
 
-    basic_info_layout->addWidget( new QLabel( i18n("Partition table: %1").arg( Device->getDiskLabel() ) ) );
-    basic_info_layout->addWidget( new QLabel( i18n("Logical sector size: %1").arg( Device->getSectorSize() ) ) );
-    basic_info_layout->addWidget( new QLabel( i18n("Physical sector size: %1").arg( Device->getPhysicalSectorSize() ) ) );
- 
+    basic_info_layout->addWidget( new QLabel( i18n("Partition table: %1", Device->getDiskLabel() ) ) );
+    basic_info_layout->addWidget( new QLabel( i18n("Logical sector size: %1", Device->getSectorSize() ) ) );
+    basic_info_layout->addWidget( new QLabel( i18n("Physical sector size: %1", Device->getPhysicalSectorSize() ) ) );
+    basic_info_layout->addWidget( new QLabel( i18n("Sectors: %1", Device->getSize() / Device->getSectorSize() ) ) );
+
     if( !Device->isWritable() )
         basic_info_layout->addWidget( new QLabel( i18n("Read only") ) );
     else

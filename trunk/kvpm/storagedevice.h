@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2009, 2010 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -28,7 +28,7 @@ class StoragePartition;
 
 class StorageDevice : public QObject
 {
-    long long m_device_size;
+    long long m_device_size; // Size in bytes
     QString   m_device_path;
     QString   m_disk_label;
     QString   m_hardware;
@@ -53,7 +53,7 @@ class StorageDevice : public QObject
     QList<StoragePartition *> getStoragePartitions();
     int getPartitionCount();
     int getRealPartitionCount();
-    long long getSize();
+    long long getSize();                // Size in bytes
     long long getSectorSize();
     long long getPhysicalSectorSize();
     bool isWritable();
