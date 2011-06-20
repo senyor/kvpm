@@ -189,7 +189,7 @@ void PartitionMoveResizeDialog::commitPartition()
         grow   = false;
         shrink = false;
     }
-    qDebug() << "Grow:" << grow << "Move:" << move << "Shrink:" << shrink;
+
     qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
 
     if( grow && move ){
