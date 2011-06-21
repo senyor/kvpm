@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2009, 2010 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -13,7 +13,7 @@
  */
 
 #include <KSeparator>
-
+#include <KLocale>
 #include <QtGui>
 
 #include "masterlist.h"
@@ -82,19 +82,19 @@ PVProperties::PVProperties(PhysVol *physicalVolume, QWidget *parent):QWidget(par
                         temp_label->setAutoFillBackground(true);
                         layout->addWidget(temp_label,row, 0);
                         
-                        temp_label = new QLabel( QString("%1").arg(first_extent) );
+                        temp_label = new QLabel( i18n("%1", first_extent) );
                         temp_label->setAlignment(Qt::AlignRight | Qt::AlignVCenter );
                         temp_label->setBackgroundRole(QPalette::Base);
                         temp_label->setAutoFillBackground(true);
                         layout->addWidget(temp_label,row, 1);
                         
-                        temp_label = new QLabel( QString("%1").arg(last_extent) );
+                        temp_label = new QLabel( i18n("%1", last_extent) );
                         temp_label->setAlignment(Qt::AlignRight | Qt::AlignVCenter );
                         temp_label->setBackgroundRole(QPalette::Base);
                         temp_label->setAutoFillBackground(true);
                         layout->addWidget(temp_label, row, 2);
                         
-                        temp_label = new QLabel( QString("%1").arg(last_extent - first_extent + 1 ) );
+                        temp_label = new QLabel( i18n("%1", last_extent - first_extent + 1 ) );
                         temp_label->setBackgroundRole(QPalette::Base);
                         temp_label->setAutoFillBackground(true);
                         temp_label->setAlignment(Qt::AlignRight | Qt::AlignVCenter );
@@ -107,19 +107,19 @@ PVProperties::PVProperties(PhysVol *physicalVolume, QWidget *parent):QWidget(par
                         temp_label->setAutoFillBackground(true);
                         layout->addWidget(temp_label,row, 0);
                         
-                        temp_label = new QLabel( QString("%1").arg(first_extent) );
+                        temp_label = new QLabel( i18n("%1", first_extent) );
                         temp_label->setAlignment(Qt::AlignRight | Qt::AlignVCenter );
                         temp_label->setBackgroundRole(QPalette::AlternateBase);
                         temp_label->setAutoFillBackground(true);
                         layout->addWidget(temp_label,row, 1);
                         
-                        temp_label = new QLabel( QString("%1").arg(last_extent) );
+                        temp_label = new QLabel( i18n("%1", last_extent) );
                         temp_label->setAlignment(Qt::AlignRight | Qt::AlignVCenter );
                         temp_label->setBackgroundRole(QPalette::AlternateBase);
                         temp_label->setAutoFillBackground(true);
                         layout->addWidget(temp_label, row, 2);
                         
-                        temp_label = new QLabel( QString("%1").arg(last_extent - first_extent + 1 ) );
+                        temp_label = new QLabel( i18n("%1", last_extent - first_extent + 1 ) );
                         temp_label->setAlignment(Qt::AlignRight | Qt::AlignVCenter );
                         temp_label->setBackgroundRole(QPalette::AlternateBase);
                         temp_label->setAutoFillBackground(true);
@@ -147,5 +147,4 @@ PVProperties::PVProperties(PhysVol *physicalVolume, QWidget *parent):QWidget(par
     layout->addWidget(temp_label, row + 2, 0, 1, -1 );
 
     layout->setRowStretch(row + 3, 10);
-
 } 
