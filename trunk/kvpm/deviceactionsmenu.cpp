@@ -146,9 +146,9 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
                 m_maxfs_action->setEnabled(false);
                 m_mkfs_action->setEnabled(false);
                 m_partremove_action->setEnabled(false);
-                //                if( m_part->isBusy() )        
-                //    m_partmoveresize_action->setEnabled(false);
-                //else
+                if( m_part->isBusy() )        
+                    m_partmoveresize_action->setEnabled(false);
+                else
                     m_partmoveresize_action->setEnabled(true);
                 m_partadd_action->setEnabled(false);
                 m_removefs_action->setEnabled(false);
@@ -166,7 +166,7 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
                     m_partremove_action->setEnabled(false);
                     m_partmoveresize_action->setEnabled(false);
                     m_mkfs_action->setEnabled(false);
-                    m_maxfs_action->setEnabled(true);
+                    m_maxfs_action->setEnabled(false);
                     m_removefs_action->setEnabled(false);
                     m_vgcreate_action->setEnabled(false);
                     m_vgextend_menu->setEnabled(false);
