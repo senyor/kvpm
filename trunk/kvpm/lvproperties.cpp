@@ -59,13 +59,13 @@ LVProperties::LVProperties(LogVol *logicalVolume, int segment, QWidget *parent):
 	stripes = logicalVolume->getSegmentStripes(segment);
 	stripe_size = logicalVolume->getSegmentStripeSize(segment);
 
-	basic_info_layout->addWidget(new QLabel( i18n("Extents: %1").arg(extents) ));
+	basic_info_layout->addWidget(new QLabel( i18n("Extents: %1", extents) ) );
 
 	if( !logicalVolume->isMirror() ){
 
 	    if( stripes != 1 ){
-		basic_info_layout->addWidget(new QLabel( i18n("Stripes: %1").arg(stripes) ));
-		 basic_info_layout->addWidget(new QLabel( i18n("Stripe size: %1").arg(stripe_size) ));
+		basic_info_layout->addWidget(new QLabel( i18n("Stripes: %1", stripes) ));
+                basic_info_layout->addWidget(new QLabel( i18n("Stripe size: %1", stripe_size) ));
 	    }
 	    else{
 		basic_info_layout->addWidget(new QLabel( i18n("Stripes: none") ));
@@ -82,13 +82,13 @@ LVProperties::LVProperties(LogVol *logicalVolume, int segment, QWidget *parent):
 	stripes = logicalVolume->getSegmentStripes(segment);
 	stripe_size = logicalVolume->getSegmentStripeSize(segment);
 
-	basic_info_layout->addWidget(new QLabel( i18n("Extents: %1").arg(extents) ));
+	basic_info_layout->addWidget(new QLabel( i18n("Extents: %1", extents) ));
 
 	if( !logicalVolume->isMirror() ){
 
 	    if( stripes != 1 ){
-		basic_info_layout->addWidget(new QLabel( i18n("Stripes: %1").arg(stripes) ));
-		 basic_info_layout->addWidget(new QLabel( i18n("Stripe size: %1").arg(stripe_size) ));
+		basic_info_layout->addWidget(new QLabel( i18n("Stripes: %1", stripes) ));
+                basic_info_layout->addWidget(new QLabel( i18n("Stripe size: %1", stripe_size) ));
 	    }
 	    else{
 		basic_info_layout->addWidget(new QLabel( i18n("Stripes: none") ));
@@ -99,7 +99,7 @@ LVProperties::LVProperties(LogVol *logicalVolume, int segment, QWidget *parent):
 	else if( !logicalVolume->isMirrorLog() ){
 	    extent_size = logicalVolume->getVolumeGroup()->getExtentSize();
 	    total_size = (extent_size * logicalVolume->getLogCount())+(logicalVolume->getMirrorCount() * logicalVolume->getSize());  
-	    basic_info_layout->addWidget(new QLabel( i18n("Total size: %1").arg( sizeToString(total_size)) ));
+	    basic_info_layout->addWidget(new QLabel( i18n("Total size: %1", sizeToString(total_size)) ));
 	}
 	if( !(logicalVolume->isMirrorLeg() || logicalVolume->isMirrorLog() )){
 
@@ -118,7 +118,7 @@ LVProperties::LVProperties(LogVol *logicalVolume, int segment, QWidget *parent):
 	temp_label->setAlignment(Qt::AlignCenter);
 	basic_info_layout->addWidget(temp_label);
 	extents = logicalVolume->getExtents();
-	basic_info_layout->addWidget(new QLabel( i18n("Extents: %1").arg(extents) ));
+	basic_info_layout->addWidget(new QLabel( i18n("Extents: %1", extents) ));
 
 	if( !( logicalVolume->isMirrorLeg() || logicalVolume->isMirrorLog() )){
 
