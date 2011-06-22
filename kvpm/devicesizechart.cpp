@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2009 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -14,6 +14,7 @@
 
 #include <KSeparator>
 #include <QtGui>
+
 #include "devicesizechart.h"
 #include "storagedevice.h"
 #include "storagepartition.h"
@@ -66,8 +67,15 @@ void DeviceSizeChart::setNewDevice(QModelIndex index)
     device_item = static_cast<StorageDeviceItem*> (index.internalPointer());
 
     if( !device_item->childCount() ){
-	QWidget *empty_widget = new QWidget(this);
-	m_layout->addWidget(empty_widget);
+	device    = (StorageDevice *) (( device_item->dataAlternate(1)).value<void *>() );
+        if( !device->isPhysicalVolume() )
+            usage = "physical volume";
+        else
+            usage = "";
+        segment = new DeviceChartSeg(device_item);	
+        m_segments.append(segment);
+        m_ratios.append(1.0);
+        m_layout->addWidget(segment);
     }
 
     for(int x = 0; x < device_item->childCount(); x++){
