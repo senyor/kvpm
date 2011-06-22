@@ -37,6 +37,7 @@ Q_OBJECT
 
     KAction *m_mkfs_action,
             *m_maxfs_action,
+            *m_maxpv_action,
             *m_partremove_action,
             *m_partadd_action,
             *m_partmoveresize_action,

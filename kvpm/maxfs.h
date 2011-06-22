@@ -17,8 +17,10 @@
 
 class LogVol;
 class StoragePartition;
+class StorageDevice;
 
-bool max_fs(StoragePartition *partition);
 bool max_fs(LogVol *logicalVolume);
+bool max_fs(StoragePartition *partition);
+bool max_fs(StorageDevice *device);
 
 #endif

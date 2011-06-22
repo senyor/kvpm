@@ -46,6 +46,7 @@ DeviceActionsMenu::DeviceActionsMenu( StorageDeviceItem *item, QWidget *parent) 
     setup(item);
 
     connect(m_maxfs_action,      SIGNAL(triggered()), this, SLOT(maxfsPartition()));
+    connect(m_maxpv_action,      SIGNAL(triggered()), this, SLOT(maxfsPartition()));
     connect(m_mkfs_action,       SIGNAL(triggered()), this, SLOT(mkfsPartition()));
     connect(m_partremove_action, SIGNAL(triggered()), this, SLOT(removePartition()));
     connect(m_partadd_action,    SIGNAL(triggered()), this, SLOT(addPartition()));
@@ -66,6 +67,7 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
     KMenu *filesystem_menu = new KMenu( i18n("Filesystem operations"), this);
     m_vgextend_menu       = new KMenu( i18n("Extend volume group"), this);
     m_maxfs_action      = new KAction( i18n("Extend filesystem to fill partition"), this);
+    m_maxpv_action      = new KAction( i18n("Extend physical volume to fill device"), this);
     m_mkfs_action       = new KAction( i18n("Make filesystem"), this);
     m_partadd_action    = new KAction( i18n("Add disk partition"), this);
     m_partmoveresize_action = new KAction( i18n("Move or resize disk partition"), this);
@@ -81,6 +83,7 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
     addAction(m_partremove_action);
     addAction(m_partadd_action);
     addAction(m_partmoveresize_action);
+    addAction(m_maxpv_action);
     addSeparator();
     addAction(m_vgcreate_action);
     addAction(m_vgreduce_action);
@@ -110,12 +113,14 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
 
         if( ( item->dataAlternate(0)).canConvert<void *>() ){  // its a partition
             m_part = (StoragePartition *) (( item->dataAlternate(0)).value<void *>() );
+            m_maxpv_action->setText( i18n("Extend physical volume to fill partition") );
             m_tablecreate_action->setEnabled(false);
 	    m_mount_action->setEnabled( m_part->isMountable() );
             m_unmount_action->setEnabled( m_part->isMounted() );
 
             if( m_part->getPedType() & 0x04 ){    // freespace
                 m_maxfs_action->setEnabled(false);
+                m_maxpv_action->setEnabled(false);
                 m_mkfs_action->setEnabled(false);
                 m_partremove_action->setEnabled(false);
                 m_partmoveresize_action->setEnabled(false);
@@ -127,6 +132,7 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
             }
             else if( m_part->getPedType() & 0x02 ){  // extended partition
                 m_maxfs_action->setEnabled(false);
+                m_maxpv_action->setEnabled(false);
                 m_mkfs_action->setEnabled(false);
                 if( m_part->isEmpty() )
                     m_partadd_action->setEnabled(true);
@@ -146,10 +152,14 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
                 m_maxfs_action->setEnabled(false);
                 m_mkfs_action->setEnabled(false);
                 m_partremove_action->setEnabled(false);
-                if( m_part->isBusy() )        
+                if( m_part->getPhysicalVolume()->isActive() ){        
                     m_partmoveresize_action->setEnabled(false);
-                else
+                    m_maxpv_action->setEnabled(false);
+                }
+                else{
                     m_partmoveresize_action->setEnabled(true);
+                    m_maxpv_action->setEnabled(true);
+                }
                 m_partadd_action->setEnabled(false);
                 m_removefs_action->setEnabled(false);
                 m_vgcreate_action->setEnabled(false);
@@ -161,6 +171,7 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
             }
             else if( m_part->isNormal() || m_part->isLogical() ){
                 filesystem_menu->setEnabled(true);
+                m_maxpv_action->setEnabled(false);
 
                 if( m_part->isMounted() || m_part->isBusy() ){ 
                     m_partremove_action->setEnabled(false);
@@ -196,6 +207,10 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
             if( m_dev->isPhysicalVolume() ){
                 m_tablecreate_action->setEnabled(false);
                 m_mkfs_action->setEnabled(false);
+                if( m_dev->getPhysicalVolume()->isActive() )
+                    m_maxpv_action->setEnabled(false);
+                else
+                    m_maxpv_action->setEnabled(true);
                 m_partremove_action->setEnabled(false);
                 m_partmoveresize_action->setEnabled(false);
                 m_partadd_action->setEnabled(false);
@@ -214,7 +229,7 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
                 m_mkfs_action->setEnabled(false);
                 m_removefs_action->setEnabled(false);
                 m_vgreduce_action->setEnabled(false);
-
+                m_maxpv_action->setEnabled(false);
                 if( m_dev->isBusy() || m_dev->getRealPartitionCount() != 0 ){
                     m_tablecreate_action->setEnabled(false);
                     m_vgcreate_action->setEnabled(false);
@@ -241,8 +256,14 @@ void DeviceActionsMenu::mkfsPartition()
 
 void DeviceActionsMenu::maxfsPartition()
 {
-    if( max_fs(m_part) )
-	    MainWindow->reRun();
+    if(m_part){          // m_part == NULL if not a partition
+        if( max_fs(m_part) )
+            MainWindow->reRun();
+    }
+    else{
+        if( max_fs(m_dev) ) 
+            MainWindow->reRun();
+    }
 }
 
 void DeviceActionsMenu::removePartition()
