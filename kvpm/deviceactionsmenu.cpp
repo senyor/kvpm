@@ -148,7 +148,7 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
                 else
                     m_partremove_action->setEnabled(false);
             }
-            else if( m_part->isPV() ){
+            else if( m_part->isPhysicalVolume() ){
                 m_maxfs_action->setEnabled(false);
                 m_mkfs_action->setEnabled(false);
                 m_partremove_action->setEnabled(false);

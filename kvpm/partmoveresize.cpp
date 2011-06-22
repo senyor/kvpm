@@ -48,7 +48,7 @@ bool moveresize_partition(StoragePartition *partition)
                            "Physical volumes may also be grown, shrunk or moved");
 
     if( ! ( fs == "ext2" || fs == "ext3" || fs == "ext4" || fs == "reiserfs" ||
-            fs == "xfs"  || fs == "jfs"  || partition->isPV() ) ){
+            fs == "xfs"  || fs == "jfs"  || partition->isPhysicalVolume() ) ){
 
         KMessageBox::information(0, message);
     }
@@ -84,7 +84,7 @@ PartitionMoveResizeDialog::PartitionMoveResizeDialog(StoragePartition *partition
 
 
     if( ! ( fs == "ext2" || fs == "ext3" || fs == "ext4" || fs == "reiserfs" || 
-            fs == "xfs"  || fs == "jfs"  || partition->isPV() ) )
+            fs == "xfs"  || fs == "jfs"  || partition->isPhysicalVolume() ) )
         {
             max_size = m_existing_part->geom.length;
         }
@@ -128,7 +128,7 @@ PartitionMoveResizeDialog::PartitionMoveResizeDialog(StoragePartition *partition
     info_group_layout->addStretch();
     info_group_layout->addWidget( m_change_by_label );
 
-    if( m_old_storage_part->isPV() ){
+    if( m_old_storage_part->isPhysicalVolume() ){
         if( m_old_storage_part->getPhysicalVolume()->isActive() ){
             max_size -= existing_offset;
             m_size_selector = new SizeSelectorBox(m_sector_size, m_min_shrink_size, max_size, 
@@ -329,7 +329,7 @@ void PartitionMoveResizeDialog::setup()
     else
         m_logical = false;
 
-    if( m_old_storage_part->isPV() ){
+    if( m_old_storage_part->isPhysicalVolume() ){
 
         PhysVol* const pv = m_old_storage_part->getPhysicalVolume();
         const long mda_count = pv->getMDACount();
@@ -449,7 +449,7 @@ bool PartitionMoveResizeDialog::shrinkPartition()
     const PedSector current_start = m_existing_part->geom.start;
     const PedSector current_size  = m_existing_part->geom.length;
     const QString fs = m_old_storage_part->getFilesystem();
-    const bool is_pv = m_old_storage_part->isPV();
+    const bool is_pv = m_old_storage_part->isPhysicalVolume();
 
     PedSector new_size = m_size_selector->getCurrentSize();
 
@@ -512,7 +512,7 @@ bool PartitionMoveResizeDialog::growPartition()
     const PedSector sectors_64KiB = 0x10000 / m_sector_size;    // sectors per 64 kilobytes
     PedDevice* const device = m_ped_disk->dev;
     const QString fs = m_old_storage_part->getFilesystem();
-    const bool is_pv = m_old_storage_part->isPV();
+    const bool is_pv = m_old_storage_part->isPhysicalVolume();
     const PedSector current_start = m_existing_part->geom.start;
     const PedSector current_size  = m_existing_part->geom.length;
     const PedSector max_end   = m_max_part_start + m_max_part_size - 1;

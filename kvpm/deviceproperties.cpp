@@ -124,7 +124,7 @@ DeviceProperties::DeviceProperties( StoragePartition *Partition, QWidget *parent
     mount_info_frame->setFrameStyle( QFrame::Sunken | QFrame::StyledPanel );
     mount_info_frame->setLineWidth(2);   
 
-    if( Partition->isPV() ){
+    if( Partition->isPhysicalVolume() ){
 
         pv = Partition->getPhysicalVolume();
 
