@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2009, 2010 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -103,8 +103,11 @@ DeviceChartSeg::DeviceChartSeg(StorageDeviceItem *storageDeviceItem, QWidget *pa
         }
     }
     else{  // whole device, not a partition
-            setFrameStyle( QFrame::Sunken | QFrame::Panel );
-            setLineWidth( 2 );
+        setFrameStyle( QFrame::Sunken | QFrame::Panel );
+        setLineWidth( 2 );
+        if(use == "physical volume")
+            colorset->setColor(QPalette::Window, physical_color);
+        else
             colorset->setColor(QPalette::Window, none_color);
     }
 	
