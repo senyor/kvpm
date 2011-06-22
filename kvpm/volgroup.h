@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -36,6 +36,7 @@ class VolGroup
     long long m_allocateable_extents; // extents on some physical volumes
                                       // may not be allocateable
     QString m_vg_name;                // this volume group name
+    QString m_uuid;
     QString m_allocation_policy;
     QString m_lvm_format;                // lvm1 or lvm2
     QList<LogVol *>  m_member_lvs;    // lvs that belong to this group
@@ -68,6 +69,7 @@ public:
     int getPhysVolMax();
     int getMDACount();
     QString getName();
+    QString getUuid();
     QString getPolicy();
     QString getFormat();
     QStringList getLogVolNames();
