@@ -21,6 +21,8 @@
 #include "fsextend.h"
 #include "logvol.h"
 #include "processprogress.h"
+#include "pvextend.h"
+#include "storagedevice.h"
 #include "storagepartition.h"
 
 bool max_fs(LogVol *logicalVolume)
@@ -51,19 +53,45 @@ bool max_fs(StoragePartition *partition)
 
     QString path = partition->getName();
     QString fs = partition->getFilesystem();
+    QString message, error_message;
 
-    QString message = i18n("Extend the filesystem on: %1 to fill the entire partition?").arg("<b>"+path+"</b>");
-    QString error_message = i18n("Extending is only supported for ext2/3/4, jfs, xfs and Reiserfs. ");
+    if( partition->isPV() )
+        message = i18n("Extend the physical volume on: %1 to fill the entire partition?", "<b>"+path+"</b>");
+    else
+        message = i18n("Extend the filesystem on: %1 to fill the entire partition?", "<b>"+path+"</b>");
 
-    if( ! ( fs == "ext2" || fs == "ext3" || fs == "ext4" || fs == "reiserfs" || fs == "xfs"  || fs == "jfs" ) ){
+    error_message = i18n("Extending is only supported for ext2/3/4, jfs, xfs, Reiserfs and physical volumes. ");
+
+    if( ! ( fs == "ext2" || fs == "ext3" || fs == "ext4" || fs == "reiserfs" ||
+            fs == "xfs"  || fs == "jfs"  || partition->isPV() ) ){
+
         KMessageBox::error(0, error_message );
         return false;
     }
 
     if(KMessageBox::warningYesNo( 0, message) == 3){  // 3 = yes button
-        return fs_extend( path, fs, true); 
+        if( partition->isPV() )
+            return pv_extend(path); 
+        else
+            return fs_extend(path, fs, true); 
     }
-    else
+
+    return false;
+}
+
+bool max_fs(StorageDevice *device)
+{
+
+    QString path = device->getDevicePath();
+
+    QString message = i18n("Extend the physical volume on: %1 to fill the entire partition?", "<b>"+path+"</b>");
+
+    if( ! device->isPhysicalVolume() )
         return false;
 
+    if(KMessageBox::warningYesNo( 0, message) == 3){  // 3 = yes button
+        return pv_extend(path); 
+    }
+
+    return false;
 }
