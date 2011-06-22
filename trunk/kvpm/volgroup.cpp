@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -67,6 +67,7 @@ void VolGroup::rescan(lvm_t lvm)
 	m_exported     = (bool)lvm_vg_is_exported(lvm_vg); 
 	m_partial      = (bool)lvm_vg_is_partial(lvm_vg); 
 	m_clustered    = (bool)lvm_vg_is_clustered(lvm_vg);
+        m_uuid         = QString( lvm_vg_get_uuid(lvm_vg) );
 
         value = lvm_vg_get_property(lvm_vg, "vg_fmt");
         m_lvm_format = QString(value.value.string);
@@ -372,6 +373,11 @@ int VolGroup::getMDACount()
 QString VolGroup::getName()
 {
     return m_vg_name;
+}
+
+QString VolGroup::getUuid()
+{
+    return m_uuid;
 }
 
 QString VolGroup::getPolicy()

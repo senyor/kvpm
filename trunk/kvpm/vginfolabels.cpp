@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -26,7 +26,8 @@ VGInfoLabels::VGInfoLabels(VolGroup *volumeGroup, QWidget *parent) : QFrame(pare
     QLabel *extent_size_label, *size_label, *used_label, 
 	   *free_label, *lvm_fmt_label, *resizable_label, 
 	   *clustered_label, *allocateable_label,
-           *max_lv_label, *max_pv_label, *policy_label, *mda_label;
+           *max_lv_label, *max_pv_label, *policy_label, *mda_label,
+           *uuid_label;
 
     setFrameStyle(QFrame::Sunken | QFrame::StyledPanel);
     setLineWidth(2);
@@ -49,6 +50,7 @@ VGInfoLabels::VGInfoLabels(VolGroup *volumeGroup, QWidget *parent) : QFrame(pare
     QVBoxLayout *vlayout4 = new QVBoxLayout();
     QVBoxLayout *vlayout5 = new QVBoxLayout();
     QVBoxLayout *vlayout6 = new QVBoxLayout();
+    QVBoxLayout *vlayout7 = new QVBoxLayout();
 
     QWidget *label_widget1 = new QWidget();
     QWidget *label_widget2 = new QWidget();
@@ -56,6 +58,7 @@ VGInfoLabels::VGInfoLabels(VolGroup *volumeGroup, QWidget *parent) : QFrame(pare
     QWidget *label_widget4 = new QWidget();
     QWidget *label_widget5 = new QWidget();
     QWidget *label_widget6 = new QWidget();
+    QWidget *label_widget7 = new QWidget();
 
     label_widget1->setBackgroundRole(QPalette::Base);
     label_widget1->setAutoFillBackground(true);
@@ -69,6 +72,8 @@ VGInfoLabels::VGInfoLabels(VolGroup *volumeGroup, QWidget *parent) : QFrame(pare
     label_widget5->setAutoFillBackground(true);
     label_widget6->setBackgroundRole(QPalette::AlternateBase);
     label_widget6->setAutoFillBackground(true);
+    label_widget7->setBackgroundRole(QPalette::AlternateBase);
+    label_widget7->setAutoFillBackground(true);
 
     label_widget1->setLayout(vlayout1);
     label_widget2->setLayout(vlayout2);
@@ -76,6 +81,7 @@ VGInfoLabels::VGInfoLabels(VolGroup *volumeGroup, QWidget *parent) : QFrame(pare
     label_widget4->setLayout(vlayout4);
     label_widget5->setLayout(vlayout5);
     label_widget6->setLayout(vlayout6);
+    label_widget7->setLayout(vlayout7);
     
     if(volumeGroup->isResizable())
 	resizable = "Yes";
@@ -88,24 +94,22 @@ VGInfoLabels::VGInfoLabels(VolGroup *volumeGroup, QWidget *parent) : QFrame(pare
 	clustered = "No";
 
     if(volumeGroup->isPartial())
-    {
         hlayout2->addWidget( new QLabel( i18n("<b>*** Warning: Partial Volume Group ***</b>") ) );
-    }
     else if(volumeGroup->isExported())
-    {
         hlayout2->addWidget( new QLabel( i18n("<b>*** Exported Volume Group ***</b>") ) );
-    }
 
-    used_label   = new QLabel( i18n("Used: %1").arg(sizeToString(volumeGroup->getUsedSpace())) );
-    free_label   = new QLabel( i18n("Free: %1").arg(sizeToString(volumeGroup->getFreeSpace())) );
-    size_label   = new QLabel( i18n("Total: %1").arg(sizeToString(volumeGroup->getSize())));
+    used_label   = new QLabel( i18n("Used: %1", sizeToString(volumeGroup->getUsedSpace())) );
+    free_label   = new QLabel( i18n("Free: %1", sizeToString(volumeGroup->getFreeSpace())) );
+    size_label   = new QLabel( i18n("Total: %1", sizeToString(volumeGroup->getSize())));
     lvm_fmt_label   = new QLabel( i18n("Format: %1").arg(volumeGroup->getFormat()) );
     policy_label    = new QLabel( i18n("Policy: %1").arg(volumeGroup->getPolicy()) );
     resizable_label = new QLabel( i18n("Resizable: %1").arg(resizable) );
     clustered_label = new QLabel( i18n("Clustered: %1").arg(clustered) );
-    allocateable_label = new QLabel( i18n("Allocateable: %1").arg(sizeToString(volumeGroup->getAllocateableSpace())) );
-    extent_size_label  = new QLabel( i18n("Extent size: %1").arg(sizeToString(volumeGroup->getExtentSize())) );
-    mda_label          = new QLabel( i18n("MDA count: %1").arg( volumeGroup->getMDACount() ) );
+    allocateable_label = new QLabel( i18n("Allocateable: %1", sizeToString(volumeGroup->getAllocateableSpace())) );
+    extent_size_label  = new QLabel( i18n("Extent size: %1", sizeToString(volumeGroup->getExtentSize())) );
+    mda_label          = new QLabel( i18n("MDA count: %1", volumeGroup->getMDACount() ) );
+    uuid_label         = new QLabel( i18n("UUID: %1", volumeGroup->getUuid()) );
+    uuid_label->setWordWrap(true);
 
     vlayout1->addWidget(size_label);
     vlayout1->addWidget(allocateable_label);
@@ -117,26 +121,30 @@ VGInfoLabels::VGInfoLabels(VolGroup *volumeGroup, QWidget *parent) : QFrame(pare
     vlayout4->addWidget(policy_label);
     vlayout5->addWidget(resizable_label);
     vlayout5->addWidget(mda_label);
+    vlayout6->addWidget(uuid_label);
     
     hlayout1->addWidget(label_widget1);
     hlayout1->addWidget(label_widget2);
     hlayout1->addWidget(label_widget3);
     hlayout1->addWidget(label_widget4);
     hlayout1->addWidget(label_widget5);
+    hlayout1->addWidget(label_widget6);
 
     if( volumeGroup->getLogVolMax() || volumeGroup->getPhysVolMax() ){
+
 	if(volumeGroup->getPhysVolMax())
-	    max_pv_label = new QLabel( i18n("Max pvs: %1").arg(volumeGroup->getPhysVolMax()) );
+	    max_pv_label = new QLabel( i18n("Max pvs: %1", volumeGroup->getPhysVolMax()) );
 	else
 	    max_pv_label = new QLabel( i18n("Max pvs: Unlimited") );
+
 	if(volumeGroup->getLogVolMax())
-	    max_lv_label = new QLabel( i18n("Max lvs: %1").arg(volumeGroup->getLogVolMax()) );
+	    max_lv_label = new QLabel( i18n("Max lvs: %1", volumeGroup->getLogVolMax()) );
 	else
 	    max_lv_label = new QLabel( i18n("Max lvs: Unlimited") );
 
-	vlayout6->addWidget(max_pv_label);
-	vlayout6->addWidget(max_lv_label);
-	hlayout1->addWidget(label_widget6);
+	vlayout7->addWidget(max_pv_label);
+	vlayout7->addWidget(max_lv_label);
+	hlayout1->addWidget(label_widget7);
     }
     
     setLayout(upper_layout);
