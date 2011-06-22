@@ -271,7 +271,7 @@ bool StoragePartition::isMountable()
     return m_is_mountable;
 }
 
-bool StoragePartition::isPV()
+bool StoragePartition::isPhysicalVolume()
 {
     return m_is_pv;
 }

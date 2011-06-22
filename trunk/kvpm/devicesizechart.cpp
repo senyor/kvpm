@@ -88,7 +88,7 @@ void DeviceSizeChart::setNewDevice(QModelIndex index)
 	part_size = partition->getSize();
 	device_size = device->getSize();
 
-	if( partition->isPV() )
+	if( partition->isPhysicalVolume() )
 	    usage = "physical volume";
 	else
 	    usage = (partition_item->data(3)).toString();
@@ -110,7 +110,7 @@ void DeviceSizeChart::setNewDevice(QModelIndex index)
                     part_type = partition->getPedType();
                     part_size = partition->getSize();
                     device_size = device->getSize();
-                    if( partition->isPV() )
+                    if( partition->isPhysicalVolume() )
                         usage = "physical volume";
                     else
                         usage = (extended_item->data(3)).toString();

@@ -239,7 +239,7 @@ void StorageDeviceModel::setupModelData(QList<StorageDevice *> devices, StorageD
             
             dataAlternate << part_variant << dev_variant;
             
-            if(part->isPV()){
+            if(part->isPhysicalVolume()){
                 pv = part->getPhysicalVolume();
                 data << QString("%1 (%%2) ").arg( sizeToString( (pv->getUnused()))).arg(100 - pv->getPercentUsed() )
                     

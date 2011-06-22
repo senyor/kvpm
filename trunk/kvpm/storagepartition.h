@@ -75,7 +75,7 @@ public:
     long long getFilesystemBlockSize();
     int getPercentUsed();
     bool isWritable();
-    bool isPV();
+    bool isPhysicalVolume();
     bool isMounted();
     bool isEmpty();
     bool isBusy();

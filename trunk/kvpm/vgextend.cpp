@@ -89,7 +89,7 @@ bool extend_vg(VolGroup *volumeGroup)
             storage_partitions = storage_devices[x]->getStoragePartitions();
             for(int y = 0; y <storage_partitions.size(); y++){
                 if( (! storage_partitions[y]->isBusy() ) &&
-                    (! storage_partitions[y]->isPV() ) &&
+                    (! storage_partitions[y]->isPhysicalVolume() ) &&
                     (( storage_partitions[y]->isNormal() ) ||  
                      ( storage_partitions[y]->isLogical() )))  
                 {
