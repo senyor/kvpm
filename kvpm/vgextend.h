@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -20,10 +20,12 @@
 #include <QCheckBox>
 #include <QVBoxLayout>
 
-#include "misc.h"
-#include "volgroup.h"
+class PVCheckBox;
+class StorageDevice;
+class StoragePartition;
+class VolGroup;
 
-bool extend_vg(QString volumeGroupName, QString physicalVolumeName, long long size);
+bool extend_vg(QString volumeGroupName, StorageDevice *device, StoragePartition *partition);
 
 bool extend_vg(VolGroup *volumeGroup);
 
@@ -31,19 +33,17 @@ class VGExtendDialog : public KDialog
 {
 Q_OBJECT
 
+    PVCheckBox  *m_pv_checkbox;
+    VolGroup    *m_vg;
     QVBoxLayout *m_layout;
-    QList<NoMungeCheck *> m_pv_checks;
-    QStringList m_pv_names;
-    VolGroup *m_vg;
 
  public:
-    VGExtendDialog(VolGroup *volumeGroup, QStringList physcialVolumeNames, QWidget *parent = 0);
+    VGExtendDialog(VolGroup *volumeGroup, QList<StorageDevice *> devices, 
+                   QList<StoragePartition *> partitions, QWidget *parent = 0);
     
  private slots:
     void commitChanges();
     void validateOK();
-    void selectAll();
-    void selectNone();
     
 };
 

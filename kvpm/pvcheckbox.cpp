@@ -24,7 +24,9 @@
 
 
 PVCheckBox::PVCheckBox(QList<PhysVol *> physicalVolumes, long long extentSize, QWidget *parent):
-    QGroupBox(parent), m_pvs(physicalVolumes), m_extent_size(extentSize)
+    QGroupBox(parent), 
+    m_pvs(physicalVolumes), 
+    m_extent_size(extentSize)
 {
     setTitle( i18n("Available physical volumes") );
     QGridLayout *layout = new QGridLayout();
@@ -79,13 +81,16 @@ PVCheckBox::PVCheckBox(QList<PhysVol *> physicalVolumes, long long extentSize, Q
         connect(none_button, SIGNAL(clicked(bool)), this, SLOT(selectNone()));
 
     }
-
 }
 
-
-PVCheckBox::PVCheckBox(QList <StorageDevice *> devices, QList<StoragePartition *> partitions, QWidget *parent):
-    QGroupBox(parent), m_devices(devices), m_partitions(partitions)
+PVCheckBox::PVCheckBox(QList <StorageDevice *> devices, QList<StoragePartition *> partitions, 
+                       long long extentSize, QWidget *parent):
+    QGroupBox(parent), 
+    m_devices(devices), 
+    m_partitions(partitions), 
+    m_extent_size(extentSize)
 {
+
     setTitle( i18n("Available physical volumes") );
     QGridLayout *layout = new QGridLayout();
     setLayout(layout);
