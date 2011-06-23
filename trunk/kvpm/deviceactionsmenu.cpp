@@ -325,19 +325,15 @@ void DeviceActionsMenu::vgextendPartition(QAction *action)
 {
     QString group = action->text();
     group.remove(QChar('&'));
-    QString name;
-    long long size;
+    StorageDevice *device = NULL;
+    StoragePartition *partition = NULL;
 
-    if(m_part){
-        size = m_part->getSize();
-        name = m_part->getName();
-    }
-    else{
-        size = m_dev->getSize();
-        name = m_dev->getDevicePath();
-    }
+    if(m_part)
+        partition = m_part;
+    else
+        device = m_dev;
 
-    if( extend_vg(group, name, size) )
+    if( extend_vg(group, device, partition) )
 	MainWindow->reRun();
 }
 
