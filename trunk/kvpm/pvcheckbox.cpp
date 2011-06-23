@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -19,6 +19,9 @@
 #include "pvcheckbox.h"
 #include "physvol.h"
 #include "misc.h"
+#include "storagedevice.h"
+#include "storagepartition.h"
+
 
 PVCheckBox::PVCheckBox(QList<PhysVol *> physicalVolumes, long long extentSize, QWidget *parent):
     QGroupBox(parent), m_pvs(physicalVolumes), m_extent_size(extentSize)
@@ -77,6 +80,98 @@ PVCheckBox::PVCheckBox(QList<PhysVol *> physicalVolumes, long long extentSize, Q
 
     }
 
+}
+
+
+PVCheckBox::PVCheckBox(QList <StorageDevice *> devices, QList<StoragePartition *> partitions, QWidget *parent):
+    QGroupBox(parent), m_devices(devices), m_partitions(partitions)
+{
+    setTitle( i18n("Available physical volumes") );
+    QGridLayout *layout = new QGridLayout();
+    setLayout(layout);
+    QString name;
+    long long size;
+    int dev_count = 0;
+    QHBoxLayout *button_layout = new QHBoxLayout();
+    KPushButton *all_button = new KPushButton( i18n("Select all") );
+    KPushButton *none_button = new KPushButton( i18n("Clear all") );
+    NoMungeCheck *temp_check;
+    int pv_check_count = m_devices.size() + m_partitions.size();
+    m_space_label   = new QLabel;
+    m_extents_label = new QLabel;
+
+    if(pv_check_count < 1){
+        QLabel *pv_label = new QLabel( i18n("none found") );
+        layout->addWidget(pv_label);
+    }
+    else if(pv_check_count < 2){
+        if( m_devices.size() ){
+            name = m_devices[0]->getDevicePath();
+            size = m_devices[0]->getSize();
+        }
+        else{
+            name = m_partitions[0]->getName();
+            size = m_partitions[0]->getSize();
+        }
+        QLabel *pv_label = new QLabel( name + "  " + sizeToString(size) );
+        layout->addWidget(pv_label, 0, 0, 1, -1);
+        layout->addWidget(m_space_label,   layout->rowCount(), 0, 1, -1);
+        layout->addWidget(m_extents_label, layout->rowCount(), 0, 1, -1);
+        calculateSpace();
+    }
+    else{
+        for(int x = 0; x < m_devices.size(); x++){
+            dev_count++;
+            name = m_devices[x]->getDevicePath();
+            size = m_devices[x]->getSize();
+	    temp_check = new NoMungeCheck( name + "  " + sizeToString(size) );
+	    temp_check->setAlternateText(name);
+	    temp_check->setData( QVariant(size) );
+	    m_pv_checks.append(temp_check);
+
+            if(pv_check_count < 11 )
+                layout->addWidget(m_pv_checks[x], x % 5, x / 5);
+            else if (pv_check_count % 3 == 0)
+                layout->addWidget(m_pv_checks[x], x % (pv_check_count / 3), x / (pv_check_count / 3));
+            else
+                layout->addWidget(m_pv_checks[x], x % ( (pv_check_count + 2) / 3), x / ( (pv_check_count + 2) / 3));
+
+	    connect(temp_check, SIGNAL(toggled(bool)), 
+		    this, SLOT(calculateSpace()));
+	}
+
+        for(int x = 0; x < m_partitions.size(); x++){
+            name = m_partitions[x]->getName();
+            size = m_partitions[x]->getSize();
+	    temp_check = new NoMungeCheck( name + "  " + sizeToString(size) );
+	    temp_check->setAlternateText(name);
+	    temp_check->setData( QVariant(size) );
+	    m_pv_checks.append(temp_check);
+
+            if(pv_check_count < 11 )
+                layout->addWidget(temp_check, (dev_count + x) % 5, (dev_count + x) / 5);
+            else if (pv_check_count % 3 == 0)
+                layout->addWidget(temp_check, (dev_count + x) % (pv_check_count / 3), (dev_count + x) / (pv_check_count / 3));
+            else
+                layout->addWidget(temp_check, (dev_count + x) % ( (pv_check_count + 2) / 3), (dev_count + x) / ( (pv_check_count + 2) / 3));
+
+	    connect(temp_check, SIGNAL(toggled(bool)), 
+		    this, SLOT(calculateSpace()));
+	}
+
+        selectAll();
+        layout->addWidget(m_space_label,   layout->rowCount(), 0, 1, -1);
+        layout->addWidget(m_extents_label, layout->rowCount(), 0, 1, -1);
+        layout->addLayout(button_layout,   layout->rowCount(), 0, 1, -1);
+        button_layout->addStretch();
+        button_layout->addWidget(all_button);
+        button_layout->addStretch();
+        button_layout->addWidget(none_button);
+        button_layout->addStretch();
+        connect(all_button,  SIGNAL(clicked(bool)), this, SLOT(selectAll()));
+        connect(none_button, SIGNAL(clicked(bool)), this, SLOT(selectNone()));
+
+    }
 }
 
 QStringList PVCheckBox::getNames(){
@@ -171,8 +266,8 @@ void PVCheckBox::selectNone(){
 
 void PVCheckBox::calculateSpace(){
 
-    m_space_label->setText( i18n("Selected space: %1").arg( sizeToString(getUnusedSpace()) ) );
-    m_extents_label->setText( i18n("Selected extents: %1").arg( getUnusedSpace() / m_extent_size ) );
+    m_space_label->setText( i18n("Selected space: %1", sizeToString(getUnusedSpace()) ) );
+    m_extents_label->setText( i18n("Selected extents: %1", getUnusedSpace() / m_extent_size ) );
     emit stateChanged();
 
     return;
