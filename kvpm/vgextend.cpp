@@ -34,7 +34,6 @@ bool extend_vg(QString volumeGroupName, StorageDevice *device, StoragePartition 
 {
     QString message, error_message;
     QString name;
-    QStringList args;
     long long size;
     lvm_t  lvm;
     vg_t vg_dm;
@@ -87,27 +86,27 @@ bool extend_vg(QString volumeGroupName, StorageDevice *device, StoragePartition 
 
 bool extend_vg(VolGroup *volumeGroup)
 {
-    QList<StorageDevice *> storage_devices = master_list->getStorageDevices();   
+    QList<StorageDevice *> all_devices = master_list->getStorageDevices();   
     QList<StorageDevice *> usable_devices;
     QStringList device_names;
-    QList<StoragePartition *> storage_partitions;
+    QList<StoragePartition *> all_partitions;
     QList<StoragePartition *> usable_partitions;
 
-    for(int x = 0; x < storage_devices.size(); x++){
-        if( (storage_devices[x]->getRealPartitionCount() == 0) && 
-            (! storage_devices[x]->isBusy()) && 
-            (! storage_devices[x]->isPhysicalVolume() )){
-            usable_devices.append(storage_devices[x]);
+    for(int x = 0; x < all_devices.size(); x++){
+        if( (all_devices[x]->getRealPartitionCount() == 0) && 
+            (! all_devices[x]->isBusy()) && 
+            (! all_devices[x]->isPhysicalVolume() )){
+            usable_devices.append(all_devices[x]);
         }
-        else if( storage_devices[x]->getRealPartitionCount() > 0 ){
-            storage_partitions = storage_devices[x]->getStoragePartitions();
-            for(int y = 0; y <storage_partitions.size(); y++){
-                if( (! storage_partitions[y]->isBusy() ) &&
-                    (! storage_partitions[y]->isPhysicalVolume() ) &&
-                    (( storage_partitions[y]->isNormal() ) ||  
-                     ( storage_partitions[y]->isLogical() )))  
+        else if( all_devices[x]->getRealPartitionCount() > 0 ){
+            all_partitions = all_devices[x]->getStoragePartitions();
+            for(int y = 0; y <all_partitions.size(); y++){
+                if( (! all_partitions[y]->isBusy() ) &&
+                    (! all_partitions[y]->isPhysicalVolume() ) &&
+                    (( all_partitions[y]->isNormal() ) ||  
+                     ( all_partitions[y]->isLogical() )))  
                 {
-                    usable_partitions.append(storage_partitions[y]);
+                    usable_partitions.append(all_partitions[y]);
                 }
             }
         }
@@ -139,7 +138,8 @@ bool extend_vg(VolGroup *volumeGroup)
 
 VGExtendDialog::VGExtendDialog(VolGroup *volumeGroup, QList<StorageDevice *> devices, 
                                QList<StoragePartition *> partitions, QWidget *parent) : 
-    KDialog(parent), m_vg(volumeGroup)
+    KDialog(parent),
+    m_vg(volumeGroup)
 {
 
     setWindowTitle( i18n("Extend Volume Group") );
@@ -150,7 +150,6 @@ VGExtendDialog::VGExtendDialog(VolGroup *volumeGroup, QList<StorageDevice *> dev
     dialog_body->setLayout(m_layout);
 
     QLabel *name_label = new QLabel( i18n("Extending Volume Group <b>%1</b>", m_vg->getName()) );
-
     name_label->setAlignment(Qt::AlignCenter);
     m_layout->addWidget(name_label);
 
