@@ -54,6 +54,7 @@ VGTree::VGTree(VolGroup *VolumeGroup) : QTreeWidget(), m_vg(VolumeGroup)
     item->setToolTip(11, i18n("Filesystem mount points, if mounted"));
 
     setHeaderItem(item);
+    sortByColumn(0, Qt::AscendingOrder);
 }
 
 void VGTree::loadData()
@@ -235,7 +236,6 @@ void VGTree::loadData()
     setHiddenColumns();
     resizeColumnToContents(0);
     setSortingEnabled(true);
-    sortByColumn(0, Qt::AscendingOrder);
 
     return;
 }
