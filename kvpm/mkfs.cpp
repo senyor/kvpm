@@ -131,12 +131,13 @@ void MkfsDialog::buildDialog()
     QGridLayout *radio_layout = new QGridLayout;
     radio_box->setLayout(radio_layout);
     layout->addWidget(radio_box);
-    ext2    = new QRadioButton("Ext2", this);
-    ext3    = new QRadioButton("Ext3", this);
-    ext4    = new QRadioButton("Ext4", this);
-    btrfs   = new QRadioButton("Btrfs", this);
-    reiser  = new QRadioButton("Reiser", this);
-    reiser4 = new QRadioButton("Reiser4", this);
+    ext2    = new QRadioButton("ext2", this);
+    ext3    = new QRadioButton("ext3", this);
+    ext4    = new QRadioButton("ext4", this);
+    btrfs   = new QRadioButton("btrfs", this);
+    ntfs    = new QRadioButton("ntfs", this);
+    reiser  = new QRadioButton("reiser", this);
+    reiser4 = new QRadioButton("reiser4", this);
     jfs     = new QRadioButton("jfs", this);
     xfs     = new QRadioButton("xfs", this);
     swap    = new QRadioButton( i18n("Linux swap"), this);
@@ -145,6 +146,7 @@ void MkfsDialog::buildDialog()
     radio_layout->addWidget(ext3, 2, 0);
     radio_layout->addWidget(ext4, 3, 0);
     radio_layout->addWidget(btrfs, 4, 0);
+    radio_layout->addWidget(ntfs, 4, 1);
     radio_layout->addWidget(reiser, 1, 1);
     radio_layout->addWidget(reiser4, 2, 1);
     radio_layout->addWidget(swap, 3, 1);
@@ -259,6 +261,10 @@ QStringList MkfsDialog::arguments()
     else if(btrfs->isChecked()){
 	type = "btrfs";
     }
+    else if(ntfs->isChecked()){
+	type = "ntfs";
+        mkfs_options << "-Q" << "--with-uuid" << "--quiet";
+    }
     else if(reiser->isChecked()){
 	mkfs_options << "-q";
 	type = "reiserfs";
@@ -328,6 +334,7 @@ QStringList MkfsDialog::arguments()
 	arguments << "mkswap" 
 		  << m_path;
     }
+
     return arguments;
 }
 
