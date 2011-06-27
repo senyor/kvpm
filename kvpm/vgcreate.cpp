@@ -21,46 +21,43 @@
 #include <KSeparator>
 #include <QtGui>
 
+#include "masterlist.h"
+#include "pvcheckbox.h"
 #include "storagedevice.h"
 #include "storagepartition.h"
 #include "vgcreate.h"
-#include "masterlist.h"
+
 
 extern MasterList *master_list;
 
 bool create_vg()
 {
     QList<StorageDevice *> storage_devices = master_list->getStorageDevices();   
+    QList<StorageDevice *> usable_devices;
     QList<StoragePartition *> storage_partitions;
-    QList<AvailableDevice *> devices;
-    AvailableDevice *temp_device;
+    QList<StoragePartition *> usable_partitions;
 
     for(int x = 0; x < storage_devices.size(); x++){
         if( (storage_devices[x]->getRealPartitionCount() == 0) && 
             (! storage_devices[x]->isBusy()) && 
-            (! storage_devices[x]->isPhysicalVolume() )){
-            temp_device = new AvailableDevice;
-            temp_device->name = storage_devices[x]->getName();
-            temp_device->size = storage_devices[x]->getSize();
-            devices.append( temp_device );
+            (! storage_devices[x]->isPhysicalVolume() )) {
+
+                usable_devices.append( storage_devices[x] );
         }
         else if( storage_devices[x]->getRealPartitionCount() > 0 ){
             storage_partitions = storage_devices[x]->getStoragePartitions();
             for(int y = 0; y < storage_partitions.size(); y++){
                 if( (! storage_partitions[y]->isBusy() ) && (! storage_partitions[y]->isPhysicalVolume() ) &&
-                    (( storage_partitions[y]->isNormal() ) || ( storage_partitions[y]->isLogical() )))  
-                {
-                    temp_device = new AvailableDevice;
-                    temp_device->name = storage_partitions[y]->getName();
-                    temp_device->size = storage_partitions[y]->getSize();
-                    devices.append( temp_device );
+                    (( storage_partitions[y]->isNormal() ) || ( storage_partitions[y]->isLogical() )))  {
+
+                    usable_partitions.append(storage_partitions[y]); 
                 }
             }
         }
     }
 
-    if( devices.size() > 0 ){
-        VGCreateDialog dialog( devices );
+    if( usable_partitions.size() + usable_devices.size() > 0 ){
+        VGCreateDialog dialog( usable_devices, usable_partitions );
         dialog.exec();
         if(dialog.result() == QDialog::Accepted)
             return true;
@@ -73,15 +70,17 @@ bool create_vg()
     return false;
 }
 
-bool create_vg(QString physicalVolumePath, long long size){
+bool create_vg(StorageDevice *device, StoragePartition *partition){
 
-    QList<AvailableDevice *> devices;
-    AvailableDevice *temp_device = new AvailableDevice;
-    temp_device->name = physicalVolumePath;
-    temp_device->size = size;
-    devices.append(temp_device);
+    QList<StorageDevice *>    devices;
+    QList<StoragePartition *> partitions;
 
-    VGCreateDialog dialog(devices);
+    if(device)
+        devices.append(device);
+    else if(partition)
+        partitions.append(partition);
+
+    VGCreateDialog dialog(devices, partitions);
     dialog.exec();
     
     if(dialog.result() == QDialog::Accepted)
@@ -92,7 +91,7 @@ bool create_vg(QString physicalVolumePath, long long size){
     return true;
 }
 
-VGCreateDialog::VGCreateDialog(QList<AvailableDevice *> devices, QWidget *parent) : 
+VGCreateDialog::VGCreateDialog(QList<StorageDevice *> devices, QList<StoragePartition *> partitions, QWidget *parent) : 
     KDialog(parent) 
 {
     setWindowTitle( i18n("Create Volume Group") );
@@ -133,59 +132,18 @@ VGCreateDialog::VGCreateDialog(QList<AvailableDevice *> devices, QWidget *parent
     m_extent_suffix->setInsertPolicy(QComboBox::NoInsert);
     m_extent_suffix->setCurrentIndex(1);
 
-    QGroupBox *new_pv_box = new QGroupBox( i18n("Available potential physical volumes") ); 
-    QGridLayout *new_pv_box_layout = new QGridLayout();
-    new_pv_box->setLayout(new_pv_box_layout);
-    NoMungeCheck *temp_check;
-    int pv_check_count = devices.size();
-    QHBoxLayout *button_layout = new QHBoxLayout();
-    KPushButton *all_button = new KPushButton( i18n("Select all") );
-    KPushButton *none_button = new KPushButton( i18n("Select none") );
+    m_pv_checkbox = new PVCheckBox(devices, partitions);
+    m_layout->addWidget(m_pv_checkbox);
 
-    if(pv_check_count < 2){
-        m_pv_label = new QLabel(devices[0]->name);
-        new_pv_box_layout->addWidget(m_pv_label);
-    }
-    else{
-        for(int x = 0; x < pv_check_count; x++){
-	    temp_check = new NoMungeCheck(devices[x]->name + "  " + sizeToString(devices[x]->size));
-	    temp_check->setAlternateText( devices[x]->name );
-	    temp_check->setData( QVariant(devices[x]->size) );
-	    m_pv_checks.append(temp_check);
-
-            if(pv_check_count < 11 )
-                new_pv_box_layout->addWidget(m_pv_checks[x], x % 5, x / 5);
-            else if (pv_check_count % 3 == 0)
-                new_pv_box_layout->addWidget(m_pv_checks[x], x % (pv_check_count / 3), x / (pv_check_count / 3));
-            else
-                new_pv_box_layout->addWidget(m_pv_checks[x], x % ( (pv_check_count + 2) / 3), x / ( (pv_check_count + 2) / 3));
-
-	    connect(temp_check, SIGNAL(toggled(bool)), 
-		    this, SLOT(validateOK()));
-	}
-    }
-
-    long long total_space_available = 0;
-    for(int x = 0; x < devices.size(); x++)
-        total_space_available += devices[x]->size; 
-
-    m_total_available_label = new QLabel( i18n("Total available: %1").arg( sizeToString( total_space_available ) ) );
-    new_pv_box_layout->addWidget(m_total_available_label, new_pv_box_layout->rowCount(),0, 1, -1);
-
-    if(pv_check_count > 1){
-        m_total_selected_label = new QLabel( i18n("Total selected: 0") );
-        new_pv_box_layout->addWidget(m_total_selected_label, new_pv_box_layout->rowCount(),0, 1, -1);
-        new_pv_box_layout->addLayout(button_layout, new_pv_box_layout->rowCount(),0, 1, -1);
-        button_layout->addWidget(all_button);
-        button_layout->addWidget(none_button);
-        connect(all_button,  SIGNAL(clicked(bool)), this, SLOT(selectAll()));
-        connect(none_button, SIGNAL(clicked(bool)), this, SLOT(selectNone()));
-    }
+    connect(m_pv_checkbox, SIGNAL(stateChanged()),
+            this, SLOT(validateOK()));
 
     QHBoxLayout *extent_layout = new QHBoxLayout();
     extent_layout->addWidget(extent_label);
     extent_layout->addWidget(m_extent_size);
     extent_layout->addWidget(m_extent_suffix);
+
+    /*  liblvm does not support setting limits on lvs and pvs yet (will it ever?)
 
     QGroupBox *lv_box = new QGroupBox( i18n("Number of Logical Volumes") );
     QVBoxLayout *lv_layout_v = new QVBoxLayout();
@@ -219,17 +177,19 @@ VGCreateDialog::VGCreateDialog(QList<AvailableDevice *> devices, QWidget *parent
     pv_layout_h->addWidget(pv_label);
     pv_layout_h->addWidget(m_max_pvs);
 
+    */
+
     m_clustered = new QCheckBox( i18n("Cluster Aware") );
     m_clustered->setEnabled(false);
 
     m_auto_backup = new QCheckBox( i18n("Automatic Backup") );
     m_auto_backup->setCheckState(Qt::Checked);
+    m_auto_backup->setEnabled(false);
 
     m_layout->addLayout(name_layout);
     m_layout->addLayout(extent_layout);
-    m_layout->addWidget(new_pv_box);
-    m_layout->addWidget(lv_box);
-    m_layout->addWidget(pv_box);
+    //    m_layout->addWidget(lv_box);
+    //    m_layout->addWidget(pv_box);
     m_layout->addWidget(m_clustered);
     m_layout->addWidget(m_auto_backup);
     m_layout->addWidget(new KSeparator);
@@ -240,13 +200,13 @@ VGCreateDialog::VGCreateDialog(QList<AvailableDevice *> devices, QWidget *parent
 
     connect(m_vg_name, SIGNAL(textChanged(QString)), 
 	    this, SLOT(validateOK()));
-
+    /*
     connect(m_max_lvs_check, SIGNAL(stateChanged(int)), 
 	    this, SLOT(limitLogicalVolumes(int)));
 
     connect(m_max_pvs_check, SIGNAL(stateChanged(int)), 
 	    this, SLOT(limitPhysicalVolumes(int)));
-
+    */
     connect(this, SIGNAL(okClicked()), 
 	    this, SLOT(commitChanges()));
 
@@ -286,7 +246,7 @@ void VGCreateDialog::commitChanges()
     lvm_t  lvm;
     vg_t vg_dm;
     uint32_t new_extent_size = m_extent_size->currentText().toULong();
-    QStringList pv_paths;
+    QStringList pv_names = m_pv_checkbox->getNames();
 
     new_extent_size *= 1024;
     if( m_extent_suffix->currentIndex() > 0 )
@@ -294,17 +254,8 @@ void VGCreateDialog::commitChanges()
     if( m_extent_suffix->currentIndex() > 1 )
         new_extent_size *= 1024;
 
-    if( m_pv_checks.size() > 1 ){
-        for(int x = 0; x < m_pv_checks.size(); x++){
-	    if( m_pv_checks[x]->isChecked() )
-	        pv_paths.append( m_pv_checks[x]->getAlternateText() );
-	}
-    }
-    else
-        pv_paths << m_pv_label->text();
-
     QEventLoop *loop = new QEventLoop(this);
-    m_progress_bar->setRange(0, pv_paths.size());
+    m_progress_bar->setRange(0, pv_names.size());
     loop->processEvents();
 
     if( (lvm = lvm_init(NULL)) ){
@@ -313,25 +264,28 @@ void VGCreateDialog::commitChanges()
             if( (lvm_vg_set_extent_size(vg_dm, new_extent_size)) )
                 KMessageBox::error(0, QString(lvm_errmsg(lvm)));
 
-            for(int x = 0; x < pv_paths.size(); x++){
+            for(int x = 0; x < pv_names.size(); x++){
                 m_progress_bar->setValue(x);
                 loop->processEvents();
-                if( lvm_vg_extend(vg_dm, pv_paths[x].toAscii().data()) )
-                    KMessageBox::error(0, QString(lvm_errmsg(lvm)));
-            }
 
+                if( lvm_vg_extend(vg_dm, pv_names[x].toAscii().data()) )
+                    KMessageBox::error(0, QString(lvm_errmsg(lvm)));
+                
+            }
             // ****To Do... None of the following are supported by liblvm2app yet****
             //   if(m_clustered->isChecked())
             //   if(m_auto_backup->isChecked())          
-            //   if((!m_max_lvs_check->isChecked()) && (m_max_lvs->text() != ""))
-            //   if((!m_max_pvs_check->isChecked()) && (m_max_pvs->text() != ""))
+            //   if((m_max_lvs_check->isChecked()) && (m_max_lvs->text() != ""))
+            //   if((m_max_pvs_check->isChecked()) && (m_max_pvs->text() != ""))
 
             if( lvm_vg_write(vg_dm) )
                 KMessageBox::error(0, QString(lvm_errmsg(lvm)));
+
             lvm_vg_close(vg_dm);
             lvm_quit(lvm);
             return;
         }
+        
         lvm_quit(lvm);
         KMessageBox::error(0, QString(lvm_errmsg(lvm))); 
         return;
@@ -349,33 +303,16 @@ void VGCreateDialog::validateOK()
 {
     QString name = m_vg_name->text();
     int pos = 0;
-    long long total = 0;
+    long long space = m_pv_checkbox->getUnusedSpace();
 
     enableButtonOk(false);
 
-    if( m_pv_checks.size() ){
-        for(int x = 0; x < m_pv_checks.size(); x++){
-            if(m_pv_checks[x]->isChecked())
-                total += (m_pv_checks[x]->getData()).toLongLong();
-        }
-        m_total_selected_label->setText( i18n("Total selected: %1").arg( sizeToString(total) ) );
-    }
-
     if(m_validator->validate(name, pos) == QValidator::Acceptable && name != "." && name != ".."){
-
-        if( !m_pv_checks.size() )        // if there is only one pv possible, there is no list
-	        enableButtonOk(true);
-	else{
-	    for(int x = 0; x < m_pv_checks.size(); x++){
-	        if( m_pv_checks[x]->isChecked() ){
-		    enableButtonOk(true);
-		    break;
-		}
-	    }
-	}
+        if(space)
+            enableButtonOk(true);
     }
 }
-
+/*
 void VGCreateDialog::limitLogicalVolumes(int boxstate)
 {
     if(boxstate == Qt::Unchecked)
@@ -391,15 +328,4 @@ void VGCreateDialog::limitPhysicalVolumes(int boxstate)
     else
 	m_max_pvs->setEnabled(false);
 }
-
-void VGCreateDialog::selectAll()
-{
-    for(int x = 0; x < m_pv_checks.size(); x++)
-        m_pv_checks[x]->setChecked(true);
-}
-
-void VGCreateDialog::selectNone()
-{
-    for(int x = 0; x < m_pv_checks.size(); x++)
-        m_pv_checks[x]->setChecked(false);
-}
+*/

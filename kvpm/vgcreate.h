@@ -26,9 +26,11 @@
 #include <QRegExpValidator>
 #include <QVBoxLayout>
 
-#include "misc.h"
+class StorageDevice;
+class StoragePartition;
+class PVCheckBox;
 
-bool create_vg(QString physicalVolumePath, long long size);
+bool create_vg(StorageDevice *device, StoragePartition *partition);
 
 bool create_vg();
 
@@ -36,8 +38,11 @@ class VGCreateDialog : public KDialog
 {
 Q_OBJECT
 
-    QLabel *m_pv_label, *m_total_available_label, *m_total_selected_label;
-    QList<NoMungeCheck *> m_pv_checks;
+    QLabel *m_pv_label, 
+           *m_total_available_label, 
+           *m_total_selected_label;
+
+    PVCheckBox  *m_pv_checkbox;
     QVBoxLayout *m_layout;
 
     KLineEdit *m_vg_name, 
@@ -56,16 +61,15 @@ Q_OBJECT
     QProgressBar *m_progress_bar;
     
  public:
-    VGCreateDialog(QList<AvailableDevice *> devices, QWidget *parent = 0);
+    VGCreateDialog(QList<StorageDevice *> devices, QList<StoragePartition *> partitions, QWidget *parent = 0);
     
  private slots:
-    void limitLogicalVolumes(int boxstate);
-    void limitPhysicalVolumes(int boxstate);
+    //void limitLogicalVolumes(int boxstate);
+    //void limitPhysicalVolumes(int boxstate);
     void validateOK();
     void commitChanges();
     void limitExtentSize(int);
-    void selectAll();
-    void selectNone();    
+
 };
 
 #endif

@@ -103,7 +103,9 @@ PVCheckBox::PVCheckBox(QList <StorageDevice *> devices, QList<StoragePartition *
     NoMungeCheck *temp_check;
     int pv_check_count = m_devices.size() + m_partitions.size();
     m_space_label   = new QLabel;
-    m_extents_label = new QLabel;
+
+    if(m_extent_size)
+        m_extents_label = new QLabel;
 
     if(pv_check_count < 1){
         QLabel *pv_label = new QLabel( i18n("none found") );
@@ -121,7 +123,10 @@ PVCheckBox::PVCheckBox(QList <StorageDevice *> devices, QList<StoragePartition *
         QLabel *pv_label = new QLabel( name + "  " + sizeToString(size) );
         layout->addWidget(pv_label, 0, 0, 1, -1);
         layout->addWidget(m_space_label,   layout->rowCount(), 0, 1, -1);
-        layout->addWidget(m_extents_label, layout->rowCount(), 0, 1, -1);
+
+        if(m_extent_size)
+            layout->addWidget(m_extents_label, layout->rowCount(), 0, 1, -1);
+
         calculateSpace();
     }
     else{
@@ -166,7 +171,10 @@ PVCheckBox::PVCheckBox(QList <StorageDevice *> devices, QList<StoragePartition *
 
         selectAll();
         layout->addWidget(m_space_label,   layout->rowCount(), 0, 1, -1);
-        layout->addWidget(m_extents_label, layout->rowCount(), 0, 1, -1);
+
+        if(m_extent_size)
+            layout->addWidget(m_extents_label, layout->rowCount(), 0, 1, -1);
+
         layout->addLayout(button_layout,   layout->rowCount(), 0, 1, -1);
         button_layout->addStretch();
         button_layout->addWidget(all_button);
@@ -191,6 +199,10 @@ QStringList PVCheckBox::getNames(){
     }
     else if(m_pvs.size())
         names << m_pvs[0]->getName();
+    else if(m_devices.size())
+        names << m_devices[0]->getName();
+    else if(m_partitions.size())
+        names << m_partitions[0]->getName();
 
     return names;
 }
@@ -206,6 +218,10 @@ QStringList PVCheckBox::getAllNames(){
     }
     else if(m_pvs.size())
         names << m_pvs[0]->getName();
+    else if(m_devices.size())
+        names << m_devices[0]->getName();
+    else if(m_partitions.size())
+        names << m_partitions[0]->getName();
 
     return names;
 }
@@ -220,12 +236,14 @@ long long PVCheckBox::getUnusedSpace(){
                 space += (m_pv_checks[x]->getData()).toLongLong();
         }
     }
-    else if(m_pvs.size()){
+    else if(m_pvs.size())
         space = m_pvs[0]->getUnused();
-    }
-    else{
+    else if(m_devices.size())
+        space = m_devices[0]->getSize();
+    else if(m_partitions.size())
+        space = m_partitions[0]->getSize();
+    else
         space = 0;
-    }
 
     return space;
 }
@@ -240,9 +258,12 @@ QList<long long> PVCheckBox::getUnusedSpaceList(){
                 space.append( (m_pv_checks[x]->getData()).toLongLong() );
         }
     }
-    else if(m_pvs.size()){
+    else if(m_pvs.size())
         space.append( m_pvs[0]->getUnused() );
-    }
+    else if(m_devices.size())
+        space.append( m_devices[0]->getSize() );
+    else if(m_partitions.size())
+        space.append( m_partitions[0]->getSize() );
 
     return space;
 }
@@ -264,6 +285,7 @@ void PVCheckBox::selectNone(){
         for(int x = 0; x < m_pv_checks.size(); x++)
             m_pv_checks[x]->setChecked(false);
     }
+
     emit stateChanged();
 
     return;
@@ -272,7 +294,10 @@ void PVCheckBox::selectNone(){
 void PVCheckBox::calculateSpace(){
 
     m_space_label->setText( i18n("Selected space: %1", sizeToString(getUnusedSpace()) ) );
-    m_extents_label->setText( i18n("Selected extents: %1", getUnusedSpace() / m_extent_size ) );
+
+    if(m_extent_size)
+        m_extents_label->setText( i18n("Selected extents: %1", getUnusedSpace() / m_extent_size ) );
+
     emit stateChanged();
 
     return;
