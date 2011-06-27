@@ -22,12 +22,6 @@
 
 QString sizeToString(long long bytes);
 
-
-struct AvailableDevice {
-    QString name;
-    long long size;
-};
-
 class NoMungeCheck : public QCheckBox
 {
     QString     m_unmunged_text;    // QCheckBox text() without amperands

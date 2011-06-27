@@ -38,12 +38,12 @@ Q_OBJECT
     QList<StoragePartition *> m_partitions;
     QList<NoMungeCheck *> m_pv_checks; 
     QLabel *m_space_label, *m_extents_label;
-    long long m_extent_size;
+    long long m_extent_size;    // extent size = 0 means we are creating a vg, therefor size is not set yet
 
  public:
     PVCheckBox(QList<PhysVol *> physicalVolumes, long long extentSize, QWidget *parent = NULL); 
     PVCheckBox(QList<StorageDevice *> devices, QList<StoragePartition *> partitions, 
-               long long extentSize, QWidget *parent = NULL); 
+               long long extentSize = 0, QWidget *parent = NULL); 
 
     QStringList getAllNames();    // names of all pvs displayed in the box
     QStringList getNames();       // names of *selected* pvs

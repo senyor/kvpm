@@ -286,20 +286,14 @@ void DeviceActionsMenu::moveresizePartition()
 
 void DeviceActionsMenu::vgcreatePartition()
 {
-    QString name;
-    long long size;
-
     if(m_part){
-        size = m_part->getSize();
-        name = m_part->getName();
+        if( create_vg(NULL, m_part) )
+            MainWindow->reRun();
     }
-    else{
-        size = m_dev->getSize();
-        name = m_dev->getName();
+    else{                             // whole device, not partition
+        if( create_vg(m_dev, NULL) )
+            MainWindow->reRun();
     }
-
-    if( create_vg(name, size) )
-        MainWindow->reRun();
 }
 
 void DeviceActionsMenu::tablecreatePartition()
