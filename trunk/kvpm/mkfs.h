@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -40,8 +40,8 @@ Q_OBJECT
     KTabWidget  *m_tab_widget;
     QGroupBox   *radio_box, *m_stripe_box, *m_inode_box;
 
-    QRadioButton *ext2, *ext3, *ext4, *reiser, *reiser4,
-                 *jfs, *xfs, *vfat, *swap, *btrfs;
+    QRadioButton *ext2, *ext3, *ext4, *reiser, *reiser4, *ntfs,
+                 *jfs,  *xfs,  *vfat, *swap,   *btrfs;
 
     KComboBox *m_block_combo;      // blocksize
     KLineEdit *m_volume_edit;      // volume name

@@ -44,7 +44,7 @@ bool setup_kvpm()
          state, access, tags, mountpoints;
 
     QColor ext2, ext3, ext4, btrfs, reiser, reiser4, physvol, msdos,
-           jfs, xfs, hfs, none, free, swap;
+           jfs, xfs, hfs, ntfs, none, free, swap;
 
     QStringList default_entries;
 
@@ -110,6 +110,7 @@ bool setup_kvpm()
     skeleton->addItemColor("jfs",   jfs);
     skeleton->addItemColor("xfs",   xfs);
     skeleton->addItemColor("hfs",   hfs);
+    skeleton->addItemColor("ntfs",  ntfs);
     skeleton->addItemColor("none",  none);
     skeleton->addItemColor("free",  free);
     skeleton->addItemColor("swap",  swap);
@@ -125,6 +126,7 @@ bool setup_kvpm()
     jfs     = Qt::magenta;
     xfs     = Qt::darkCyan;
     hfs     = Qt::darkMagenta;
+    ntfs    = Qt::darkGray;
     none    = Qt::black;
     free    = Qt::green;
     swap    = Qt::lightGray;
