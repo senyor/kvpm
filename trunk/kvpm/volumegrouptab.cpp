@@ -94,14 +94,6 @@ void VolumeGroupTab::rescan()
     m_vg_info_labels = new VGInfoLabels(m_vg);
     m_layout->insertWidget(0, m_vg_info_labels);
 
-    if(m_lv_size_chart){
-        m_layout->removeWidget(m_lv_size_chart);
-        m_lv_size_chart->setParent(NULL);
-        m_lv_size_chart->deleteLater();
-    }
-    m_lv_size_chart  = new LVSizeChart(m_vg);
-    m_layout->insertWidget(1, m_lv_size_chart);
-
     if(m_lv_properties_stack){
         m_lv_properties_scroll->takeWidget();
         m_lv_properties_stack->setParent(NULL);
@@ -126,6 +118,14 @@ void VolumeGroupTab::rescan()
 
     m_vg_tree->loadData(); // This needs to be done after the lv property stack is built
     m_pv_tree->loadData(); // This needs to be done after the pv property stack is built
+
+    if(m_lv_size_chart){   // This needs to be after the vgtree is loaded
+        m_layout->removeWidget(m_lv_size_chart);
+        m_lv_size_chart->setParent(NULL);
+        m_lv_size_chart->deleteLater();
+    }
+    m_lv_size_chart  = new LVSizeChart(m_vg, m_vg_tree);
+    m_layout->insertWidget(1, m_lv_size_chart);
 
     return;
 }

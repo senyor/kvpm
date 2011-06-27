@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2009, 2010 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -52,7 +52,7 @@ LVChartSeg::LVChartSeg(VolGroup *volumeGroup, LogVol *logicalVolume, QString use
             reiser_color, reiser4_color, msdos_color,
             jfs_color,    xfs_color,     none_color,
             free_color,   swap_color,    hfs_color,
-            btrfs_color;
+            btrfs_color,  ntfs_color;
 
     skeleton.setCurrentGroup("FilesystemColors");
     skeleton.addItemColor("ext2",   ext2_color);
@@ -68,6 +68,7 @@ LVChartSeg::LVChartSeg(VolGroup *volumeGroup, LogVol *logicalVolume, QString use
     skeleton.addItemColor("free",  free_color);
     skeleton.addItemColor("swap",  swap_color);
     skeleton.addItemColor("hfs",   hfs_color);
+    skeleton.addItemColor("ntfs",  ntfs_color);
 
     if(use == "ext2")
 	colorset->setColor(QPalette::Window, ext2_color);
@@ -89,6 +90,8 @@ LVChartSeg::LVChartSeg(VolGroup *volumeGroup, LogVol *logicalVolume, QString use
         colorset->setColor(QPalette::Window, jfs_color);
     else if(use == "xfs")
 	colorset->setColor(QPalette::Window, xfs_color);
+    else if(use == "ntfs")
+	colorset->setColor(QPalette::Window, ntfs_color);
     else if(use == "swap")
 	colorset->setColor(QPalette::Window, swap_color);
     else if(use == "freespace")

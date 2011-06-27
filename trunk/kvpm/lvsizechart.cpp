@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2009, 2010 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -20,14 +20,11 @@
 #include "lvsizechartseg.h"
 #include "volgroup.h"
 
-LVSizeChart::LVSizeChart(VolGroup *VolumeGroup, QWidget *parent) : 
+LVSizeChart::LVSizeChart(VolGroup *VolumeGroup, QTreeWidget *vgTree, QWidget *parent) : 
     QFrame(parent),
-    m_vg(VolumeGroup)
+    m_vg(VolumeGroup),
+    m_vg_tree(vgTree)
 {
-
-  //setFrameStyle(QFrame::Sunken | QFrame::StyledPanel);
-  //setLineWidth(2);
-
     m_layout = new QHBoxLayout(this);
     m_layout->setSpacing(0);
     m_layout->setMargin(0);
@@ -37,18 +34,42 @@ LVSizeChart::LVSizeChart(VolGroup *VolumeGroup, QWidget *parent) :
     setLayout(m_layout);
     setMinimumHeight(45);
     setMaximumHeight(75);
+
+    connect(m_vg_tree->header(), SIGNAL(sectionClicked(int)),
+            this , SLOT(vgtreeClicked()));
 }
 
 void LVSizeChart::populateChart()
 {
+
+    QList<LogVol *> logical_volumes;
+    QTreeWidgetItem *item, *child_item;
+    LogVol *child_volume;
+    QLayoutItem *child;  // remove old children of layout
+    while( (child = m_layout->takeAt(0) ) != 0 )
+        delete child;
+
+    for(int x = 0; x < m_vg_tree->topLevelItemCount(); x++){ // get volumes as sorted by vgtree
+        item = m_vg_tree->topLevelItem(x);
+        logical_volumes.append( m_vg->getLogVolByName( item->data(0,Qt::UserRole).toString() ) );
+        if( item->childCount() ){
+            for(int y = 0; y < item->childCount(); y++){
+                child_item = item->child(y);
+                if( (child_volume = m_vg->getLogVolByName( child_item->data(0,Qt::UserRole).toString() ) ) ){
+                    if( child_volume->isSnap() )
+                        logical_volumes.append( m_vg->getLogVolByName(child_item->data(0,Qt::UserRole).toString()) );
+                }
+            }
+        }
+    }
+
     double seg_ratio;
     QWidget *widget;
 
     long long free_extents  = m_vg->getFreeExtents();
     long long total_extents = m_vg->getExtents();
     
-    QList<LogVol *> logical_volumes = m_vg->getLogicalVolumes();
-    int lv_count = m_vg->getLogVolCount();
+    int lv_count = logical_volumes.size();
     
     QString usage;                   // Filesystem: blank, ext2 etc. or freespace in vg
     int max_segment_width;
@@ -134,4 +155,9 @@ void LVSizeChart::resizeEvent(QResizeEvent *event)
 
 	m_widgets[x]->setMaximumWidth( max_segment_width ); 
     }
+}
+
+void LVSizeChart::vgtreeClicked()
+{
+    populateChart();
 }
