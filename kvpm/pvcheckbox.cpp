@@ -44,7 +44,7 @@ PVCheckBox::PVCheckBox(QList<PhysVol *> physicalVolumes, long long extentSize, Q
         layout->addWidget(pv_label);
     }
     else if(pv_check_count < 2){
-        QLabel *pv_label = new QLabel( m_pvs[0]->getDeviceName() + "  " + sizeToString( m_pvs[0]->getUnused() ) );
+        QLabel *pv_label = new QLabel( m_pvs[0]->getName() + "  " + sizeToString( m_pvs[0]->getUnused() ) );
         layout->addWidget(pv_label, 0, 0, 1, -1);
         layout->addWidget(m_space_label,   layout->rowCount(), 0, 1, -1);
         layout->addWidget(m_extents_label, layout->rowCount(), 0, 1, -1);
@@ -52,8 +52,8 @@ PVCheckBox::PVCheckBox(QList<PhysVol *> physicalVolumes, long long extentSize, Q
     }
     else{
         for(int x = 0; x < pv_check_count; x++){
-	    temp_check = new NoMungeCheck( m_pvs[x]->getDeviceName() + "  " + sizeToString( m_pvs[x]->getUnused() ) );
-	    temp_check->setAlternateText( m_pvs[x]->getDeviceName() );
+	    temp_check = new NoMungeCheck( m_pvs[x]->getName() + "  " + sizeToString( m_pvs[x]->getUnused() ) );
+	    temp_check->setAlternateText( m_pvs[x]->getName() );
 	    temp_check->setData( QVariant( m_pvs[x]->getUnused() ) );
 	    m_pv_checks.append(temp_check);
 
@@ -111,7 +111,7 @@ PVCheckBox::PVCheckBox(QList <StorageDevice *> devices, QList<StoragePartition *
     }
     else if(pv_check_count < 2){
         if( m_devices.size() ){
-            name = m_devices[0]->getDevicePath();
+            name = m_devices[0]->getName();
             size = m_devices[0]->getSize();
         }
         else{
@@ -127,7 +127,7 @@ PVCheckBox::PVCheckBox(QList <StorageDevice *> devices, QList<StoragePartition *
     else{
         for(int x = 0; x < m_devices.size(); x++){
             dev_count++;
-            name = m_devices[x]->getDevicePath();
+            name = m_devices[x]->getName();
             size = m_devices[x]->getSize();
 	    temp_check = new NoMungeCheck( name + "  " + sizeToString(size) );
 	    temp_check->setAlternateText(name);
@@ -190,7 +190,7 @@ QStringList PVCheckBox::getNames(){
         }
     }
     else if(m_pvs.size())
-        names << m_pvs[0]->getDeviceName();
+        names << m_pvs[0]->getName();
 
     return names;
 }
@@ -205,7 +205,7 @@ QStringList PVCheckBox::getAllNames(){
         }
     }
     else if(m_pvs.size())
-        names << m_pvs[0]->getDeviceName();
+        names << m_pvs[0]->getName();
 
     return names;
 }

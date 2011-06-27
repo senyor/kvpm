@@ -47,7 +47,7 @@ VGSplitDialog::VGSplitDialog(VolGroup *volumeGroup, QWidget *parent) : KDialog(p
     NoMungeCheck *temp_check;
 
     for(int x = 0; x < pv_list.size(); x++){
-        temp_check = new NoMungeCheck( pv_list[x]->getDeviceName() );
+        temp_check = new NoMungeCheck( pv_list[x]->getName() );
         m_pv_checks.append(temp_check);
 
         connect(temp_check, SIGNAL(toggled(bool)), 

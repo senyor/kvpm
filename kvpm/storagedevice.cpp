@@ -54,7 +54,7 @@ StorageDevice::StorageDevice( PedDevice *pedDevice,
     m_pv = NULL;
 
     for(int x = 0; x < pvList.size(); x++){
-	if(m_device_path == pvList[x]->getDeviceName()){
+	if(m_device_path == pvList[x]->getName()){
 	    m_pv = pvList[x];
 	    m_physical_volume = true;
 	}
@@ -87,7 +87,7 @@ StorageDevice::StorageDevice( PedDevice *pedDevice,
 
 }
 
-QString StorageDevice::getDevicePath()
+QString StorageDevice::getName()
 {
     return m_device_path;
 }

@@ -36,7 +36,7 @@ DevicePropertiesStack::DevicePropertiesStack( QList<StorageDevice *> Devices, QW
     QList<StoragePartition *> partitions;
 
     for(int x = 0; x < device_count; x++){
-	m_device_path_list.append( Devices[x]->getDevicePath() );
+	m_device_path_list.append( Devices[x]->getName() );
 	addWidget( new DeviceProperties( Devices[x] ) );
 
 	partitions << Devices[x]->getStoragePartitions() ;

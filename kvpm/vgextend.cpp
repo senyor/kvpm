@@ -42,7 +42,7 @@ bool extend_vg(QString volumeGroupName, StorageDevice *device, StoragePartition 
 
     if(device){
         size = device->getSize();
-        name = device->getDevicePath();
+        name = device->getName();
     }
     else{
         size = partition->getSize();
@@ -113,7 +113,7 @@ bool extend_vg(VolGroup *volumeGroup)
     }
 
     for(int x = usable_devices.size() - 1; x >= 0 ; x--){
-        if((usable_devices[x]->getDevicePath()).contains("/dev/mapper/") )
+        if((usable_devices[x]->getName()).contains("/dev/mapper/") )
             usable_devices.removeAt(x);
     }
 

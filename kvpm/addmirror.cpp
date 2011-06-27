@@ -149,7 +149,7 @@ void AddMirrorDialog::setupPhysicalTab()
         }
         else{
             for(int y = 0; y < pvs_in_use.size() ; y++){
-                if( leg_physical_volumes[x]->getDeviceName() == pvs_in_use[y] ){
+                if( leg_physical_volumes[x]->getName() == pvs_in_use[y] ){
                     leg_physical_volumes.removeAt(x);
                     break;
                 }

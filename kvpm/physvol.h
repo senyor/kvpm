@@ -40,7 +40,7 @@ class PhysVol
  public:
     PhysVol(pv_t lvm_pv, VolGroup *vg);
     void rescan(pv_t pv);
-    QString getDeviceName();       // eg: /dev/hde4
+    QString getName();       // eg: /dev/hde4
     QString getUuid();
     VolGroup* getVolGroup(); 
     bool isAllocateable();

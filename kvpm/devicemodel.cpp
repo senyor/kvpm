@@ -213,14 +213,14 @@ void StorageDeviceModel::setupModelData(QList<StorageDevice *> devices, StorageD
         dev_variant.setValue( (void *) dev);
         if(dev->isPhysicalVolume()){
             pv = dev->getPhysicalVolume();
-            data << dev->getDevicePath() << "" << sizeToString(dev->getSize());
+            data << dev->getName() << "" << sizeToString(dev->getSize());
             data << QString("%1 (%%2) ").arg( sizeToString( pv->getUnused() )).arg( 100 - pv->getPercentUsed() );
 
             data  << "physical volume" << pv->getVolGroup()->getName();
             dataAlternate << "" << dev_variant;
         }
         else{
-            data << dev->getDevicePath() << "" << sizeToString(dev->getSize());
+            data << dev->getName() << "" << sizeToString(dev->getSize());
             dataAlternate << "" << dev_variant;
         }
 	

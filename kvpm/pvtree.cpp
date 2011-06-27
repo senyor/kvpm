@@ -84,7 +84,7 @@ void PVTree::loadData()
     for(int n = 0; n < pvs.size(); n++){
 	pv = pvs[n];
 	pv_data.clear();
-	device_name = pv->getDeviceName();
+	device_name = pv->getName();
 	
 	pv_data << device_name
 		<< sizeToString(pv->getSize())

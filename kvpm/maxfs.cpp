@@ -82,7 +82,7 @@ bool max_fs(StoragePartition *partition)
 bool max_fs(StorageDevice *device)
 {
 
-    QString path = device->getDevicePath();
+    QString path = device->getName();
 
     QString message = i18n("Extend the physical volume on: %1 to fill the entire partition?", "<b>"+path+"</b>");
 

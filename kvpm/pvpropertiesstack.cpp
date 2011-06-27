@@ -64,7 +64,7 @@ void PVPropertiesStack::changePVStackIndex(QTreeWidgetItem *item, QTreeWidgetIte
 	pv_name = QVariant( item->data(0, Qt::DisplayRole ) ).toString();
 	for(int x = 0; x < devices.size(); x++){
 	    
-	    if(pv_name == (devices[x])->getDeviceName()){
+	    if(pv_name == (devices[x])->getName()){
 		m_stack_widget->setCurrentIndex(x);
 	    }
 	}

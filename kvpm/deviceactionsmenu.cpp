@@ -295,7 +295,7 @@ void DeviceActionsMenu::vgcreatePartition()
     }
     else{
         size = m_dev->getSize();
-        name = m_dev->getDevicePath();
+        name = m_dev->getName();
     }
 
     if( create_vg(name, size) )
@@ -304,7 +304,7 @@ void DeviceActionsMenu::vgcreatePartition()
 
 void DeviceActionsMenu::tablecreatePartition()
 {
-    if( create_table( m_dev->getDevicePath() ) )
+    if( create_table( m_dev->getName() ) )
         MainWindow->reRun();
 }
 
@@ -315,7 +315,7 @@ void DeviceActionsMenu::vgreducePartition() // pvs can also be whole devices
     if(m_part)
         name = m_part->getName();
     else
-        name = m_dev->getDevicePath();
+        name = m_dev->getName();
 
     if( reduce_vg_one(m_vg_name, name) )
 	MainWindow->reRun();

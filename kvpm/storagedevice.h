@@ -47,7 +47,7 @@ class StorageDevice : public QObject
 		  QList<PhysVol *> pvList, 
 		  MountInformationList *mountInformationList);
 
-    QString getDevicePath();
+    QString getName();
     QString getDiskLabel();
     QString getHardware();
     QList<StoragePartition *> getStoragePartitions();

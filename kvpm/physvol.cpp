@@ -81,7 +81,7 @@ VolGroup* PhysVol::getVolGroup()
     return m_vg;
 }
 
-QString PhysVol::getDeviceName()
+QString PhysVol::getName()
 {
     return m_device.trimmed();
 }
