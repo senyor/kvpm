@@ -195,6 +195,7 @@ void VGTree::loadData()
                         lv_data = lv_data.replaceInStrings("origin", "linear");
 
                     origin_item = new QTreeWidgetItem( lv_item, lv_data );
+                    origin_item->setData(0, Qt::UserRole, lv->getName());
                     for(int column = 1; column < origin_item->columnCount() ; column++)
                         origin_item->setTextAlignment(column, Qt::AlignRight);
                     insertSegmentItems(lv, origin_item );
