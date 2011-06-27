@@ -72,7 +72,7 @@ StoragePartition::StoragePartition(PedPartition *part,
     }
 
     for(int x = 0; x < pvList.size(); x++){
-	if(m_partition_path == pvList[x]->getDeviceName()){
+	if(m_partition_path == pvList[x]->getName()){
 	    m_is_pv = true;
 	    m_pv = pvList[x];
 	}

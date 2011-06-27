@@ -38,7 +38,7 @@ PVProperties::PVProperties(PhysVol *physicalVolume, QWidget *parent):QWidget(par
     QList<PhysVol *> pvs = vg->getPhysicalVolumes();
     QList<long long> starting_extent;
     QStringList pv_name_list;
-    QString device_name = physicalVolume->getDeviceName();
+    QString device_name = physicalVolume->getName();
 
     layout->setMargin(0);
     temp_label = new QLabel( "<b>" + device_name + "</b>");

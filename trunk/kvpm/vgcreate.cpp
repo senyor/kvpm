@@ -40,7 +40,7 @@ bool create_vg()
             (! storage_devices[x]->isBusy()) && 
             (! storage_devices[x]->isPhysicalVolume() )){
             temp_device = new AvailableDevice;
-            temp_device->name = storage_devices[x]->getDevicePath();
+            temp_device->name = storage_devices[x]->getName();
             temp_device->size = storage_devices[x]->getSize();
             devices.append( temp_device );
         }

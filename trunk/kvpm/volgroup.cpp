@@ -201,7 +201,7 @@ void VolGroup::rescan(lvm_t lvm)
     for(int z = 0; z < m_member_pvs.size(); z++){
         last_extent = 0;
         last_used_extent = 0;
-        pv_name = m_member_pvs[z]->getDeviceName();
+        pv_name = m_member_pvs[z]->getName();
         for(int x = 0; x < m_member_lvs.size() ; x++){
             lv = m_member_lvs[x];
             for(int segment = 0; segment < lv->getSegmentCount(); segment++){
@@ -298,7 +298,7 @@ LogVol* VolGroup::getLogVolByName(QString shortName)
 PhysVol* VolGroup::getPhysVolByName(QString name)
 {
     for(int x = 0; x < m_member_pvs.size(); x++){
-	if(name.trimmed() == m_member_pvs[x]->getDeviceName() && !name.contains("unknown device"))
+	if(name.trimmed() == m_member_pvs[x]->getName() && !name.contains("unknown device"))
 	    return m_member_pvs[x];
     }
 

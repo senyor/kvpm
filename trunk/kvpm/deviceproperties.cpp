@@ -42,7 +42,7 @@ DeviceProperties::DeviceProperties( StorageDevice *Device, QWidget *parent) : QW
     basic_info_frame->setFrameStyle( QFrame::Sunken | QFrame::StyledPanel );
     basic_info_frame->setLineWidth(2);   
 
-    temp_label = new QLabel( QString("<b>%1</b>").arg( Device->getDevicePath() ) );
+    temp_label = new QLabel( QString("<b>%1</b>").arg( Device->getName() ) );
     temp_label->setAlignment( Qt::AlignCenter );
     basic_info_layout->addWidget( temp_label );
 
