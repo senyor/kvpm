@@ -200,6 +200,7 @@ void KvpmConfigDialog::buildColorsPage()
     m_skeleton->addItemColor("jfs",   m_jfs_color);
     m_skeleton->addItemColor("xfs",   m_xfs_color);
     m_skeleton->addItemColor("hfs",   m_hfs_color);
+    m_skeleton->addItemColor("ntfs",  m_ntfs_color);
     m_skeleton->addItemColor("none",  m_none_color);
     m_skeleton->addItemColor("free",  m_free_color);
     m_skeleton->addItemColor("swap",  m_swap_color);
@@ -270,6 +271,11 @@ void KvpmConfigDialog::buildColorsPage()
     m_hfs_button = new KColorButton( m_hfs_color );
     selection_layout->addWidget(m_hfs_button, 3, 7, Qt::AlignLeft);
 
+    QLabel *ntfs_label = new QLabel("ntfs");
+    selection_layout->addWidget(ntfs_label, 4, 6,  Qt::AlignRight);
+    m_ntfs_button = new KColorButton( m_ntfs_color );
+    selection_layout->addWidget(m_ntfs_button, 4, 7, Qt::AlignLeft);
+
     QLabel *physical_label = new QLabel("physical volumes");
     selection_layout->addWidget(physical_label, 4, 0,  Qt::AlignRight);
     m_physical_button = new KColorButton( m_physical_color );
@@ -321,6 +327,7 @@ void KvpmConfigDialog::updateSettings()
     m_ext3_color  = m_ext3_button->color();
     m_ext4_color  = m_ext4_button->color();
     m_btrfs_color = m_btrfs_button->color();
+    m_ntfs_color  = m_ntfs_button->color();
     m_xfs_color   = m_xfs_button->color();
     m_jfs_color   = m_jfs_button->color();
     m_hfs_color   = m_hfs_button->color();
@@ -383,6 +390,7 @@ void KvpmConfigDialog::updateWidgetsDefault()
     m_free_button->setColor(Qt::green);
     m_xfs_button->setColor(Qt::darkCyan);
     m_hfs_button->setColor(Qt::darkMagenta);
+    m_ntfs_button->setColor(Qt::darkGray);
     m_jfs_button->setColor(Qt::magenta);
     m_msdos_button->setColor(Qt::darkYellow);
     m_reiser_button->setColor(Qt::red);

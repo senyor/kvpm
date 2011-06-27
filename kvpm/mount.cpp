@@ -77,18 +77,19 @@ QWidget* MountDialog::filesystemBox()
     filesystem_layout->addLayout(lower_layout);
     filesystem_box->setLayout(filesystem_layout);
     
-    ext2_button      = new QRadioButton("Ext2", this);
-    ext3_button      = new QRadioButton("Ext3", this);
-    ext4_button      = new QRadioButton("Ext4", this);
-    btrfs_button     = new QRadioButton("Btrfs",this);
-    reiserfs3_button = new QRadioButton("Reiserfs Ver. 3", this);
-    reiserfs4_button = new QRadioButton("Reiserfs Ver. 4", this);
-    xfs_button       = new QRadioButton("Xfs", this);
-    jfs_button       = new QRadioButton("Jfs", this);
+    ext2_button      = new QRadioButton("ext2", this);
+    ext3_button      = new QRadioButton("ext3", this);
+    ext4_button      = new QRadioButton("ext4", this);
+    btrfs_button     = new QRadioButton("btrfs",this);
+    reiserfs3_button = new QRadioButton("reiserfs Ver. 3", this);
+    reiserfs4_button = new QRadioButton("reiserfs Ver. 4", this);
+    xfs_button       = new QRadioButton("xfs", this);
+    jfs_button       = new QRadioButton("jfs", this);
     vfat_button      = new QRadioButton("vfat",this);
     udf_button       = new QRadioButton("udf", this);
     iso9660_button   = new QRadioButton("iso9660", this);
     hfs_button       = new QRadioButton("hfs", this);
+    ntfs_button      = new QRadioButton("ntfs", this);
     
     specify_button   = new QRadioButton( i18n("Specify other:"), this);
 
@@ -116,6 +117,8 @@ QWidget* MountDialog::filesystemBox()
 	iso9660_button->setChecked(true);
     else if( m_filesystem_type == "hfs" )
 	hfs_button->setChecked(true);
+    else if( m_filesystem_type == "ntfs" )
+	ntfs_button->setChecked(true);
     else
 	specify_button->setChecked(true);
 
@@ -128,15 +131,19 @@ QWidget* MountDialog::filesystemBox()
     layout_left->addWidget(ext3_button);
     layout_left->addWidget(ext4_button);
     layout_left->addWidget(btrfs_button);
+    layout_left->addWidget(ntfs_button);
+    layout_left->addStretch();
     layout_center->addWidget(reiserfs3_button);
     layout_center->addWidget(reiserfs4_button);
     layout_center->addWidget(xfs_button);
     layout_center->addWidget(jfs_button);
+    layout_center->addStretch();
     layout_right->addWidget(udf_button);
     layout_right->addWidget(iso9660_button);
     layout_right->addWidget(hfs_button);
     layout_right->addWidget(vfat_button);
-    
+    layout_right->addStretch();    
+
     lower_layout->addWidget(specify_button);
     lower_layout->addWidget(m_filesystem_edit);
 
@@ -356,6 +363,8 @@ void MountDialog::mountFilesystem()
 	m_filesystem_type = "jfs";
     else if( vfat_button->isChecked() )
 	m_filesystem_type = "vfat";
+    else if( ntfs_button->isChecked() )
+	m_filesystem_type = "ntfs";
     else
 	m_filesystem_type = m_filesystem_edit->text();
 

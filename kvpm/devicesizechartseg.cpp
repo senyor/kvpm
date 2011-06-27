@@ -37,21 +37,22 @@ DeviceChartSeg::DeviceChartSeg(StorageDeviceItem *storageDeviceItem, QWidget *pa
             reiser_color, reiser4_color, msdos_color,
             jfs_color,    xfs_color,     none_color,
             free_color,   swap_color,    hfs_color,
-            physical_color;
+            physical_color, ntfs_color;
 
     skeleton.setCurrentGroup("FilesystemColors");
-    skeleton.addItemColor("ext2",   ext2_color);
-    skeleton.addItemColor("ext3",   ext3_color);
-    skeleton.addItemColor("ext4",   ext4_color);
+    skeleton.addItemColor("ext2",    ext2_color);
+    skeleton.addItemColor("ext3",    ext3_color);
+    skeleton.addItemColor("ext4",    ext4_color);
     skeleton.addItemColor("reiser",  reiser_color);
     skeleton.addItemColor("reiser4", reiser4_color);
-    skeleton.addItemColor("msdos", msdos_color);
-    skeleton.addItemColor("jfs",   jfs_color);
-    skeleton.addItemColor("xfs",   xfs_color);
-    skeleton.addItemColor("none",  none_color);
-    skeleton.addItemColor("free",  free_color);
-    skeleton.addItemColor("swap",  swap_color);
-    skeleton.addItemColor("hfs",   hfs_color);
+    skeleton.addItemColor("msdos",   msdos_color);
+    skeleton.addItemColor("jfs",     jfs_color);
+    skeleton.addItemColor("xfs",     xfs_color);
+    skeleton.addItemColor("none",    none_color);
+    skeleton.addItemColor("free",    free_color);
+    skeleton.addItemColor("swap",    swap_color);
+    skeleton.addItemColor("hfs",     hfs_color);
+    skeleton.addItemColor("ntfs",    ntfs_color);
     skeleton.addItemColor("physvol", physical_color);
 
     use = (m_item->data(4)).toString();
@@ -86,6 +87,8 @@ DeviceChartSeg::DeviceChartSeg(StorageDeviceItem *storageDeviceItem, QWidget *pa
                 colorset->setColor(QPalette::Window, reiser4_color);
             else if(use == "hfs")
                 colorset->setColor(QPalette::Window, hfs_color);
+            else if(use == "ntfs")
+                colorset->setColor(QPalette::Window, ntfs_color);
             else if(use == "vfat")
                 colorset->setColor(QPalette::Window, msdos_color);
             else if(use == "jfs")

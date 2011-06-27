@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -39,7 +39,7 @@ Q_OBJECT
             m_filesystem_type;            // ext3, reiserfs, vfat etc.
  
     QRadioButton *ext2_button,      *ext3_button,    *ext4_button,       *reiserfs3_button, *btrfs_button,
-                 *reiserfs4_button, *xfs_button,     *jfs_button,        *vfat_button, 
+                 *reiserfs4_button, *xfs_button,     *jfs_button,        *vfat_button,      *ntfs_button, 
 	         *specify_button,   *udf_button,     *iso9660_button,    *hfs_button,
 	         *atime_button,     *noatime_button, *nodiratime_button, *relatime_button,
 	         *data_journal_button, *data_ordered_button, *data_writeback_button;
