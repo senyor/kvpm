@@ -23,7 +23,7 @@
 #include "storagepartition.h"
 
 
-PVCheckBox::PVCheckBox(QList<PhysVol *> physicalVolumes, long long extentSize, QWidget *parent):
+PVCheckBox::PVCheckBox(QList<PhysVol *> physicalVolumes, ulong extentSize, QWidget *parent):
     QGroupBox(parent), 
     m_pvs(physicalVolumes), 
     m_extent_size(extentSize)
@@ -84,11 +84,10 @@ PVCheckBox::PVCheckBox(QList<PhysVol *> physicalVolumes, long long extentSize, Q
 }
 
 PVCheckBox::PVCheckBox(QList <StorageDevice *> devices, QList<StoragePartition *> partitions, 
-                       long long extentSize, QWidget *parent):
+                       ulong extentSize, QWidget *parent):
     QGroupBox(parent), 
     m_devices(devices), 
-    m_partitions(partitions), 
-    m_extent_size(extentSize)
+    m_partitions(partitions) 
 {
 
     setTitle( i18n("Available physical volumes") );
@@ -104,8 +103,7 @@ PVCheckBox::PVCheckBox(QList <StorageDevice *> devices, QList<StoragePartition *
     int pv_check_count = m_devices.size() + m_partitions.size();
     m_space_label   = new QLabel;
 
-    if(m_extent_size)
-        m_extents_label = new QLabel;
+    m_extents_label = new QLabel;
 
     if(pv_check_count < 1){
         QLabel *pv_label = new QLabel( i18n("none found") );
@@ -123,9 +121,7 @@ PVCheckBox::PVCheckBox(QList <StorageDevice *> devices, QList<StoragePartition *
         QLabel *pv_label = new QLabel( name + "  " + sizeToString(size) );
         layout->addWidget(pv_label, 0, 0, 1, -1);
         layout->addWidget(m_space_label,   layout->rowCount(), 0, 1, -1);
-
-        if(m_extent_size)
-            layout->addWidget(m_extents_label, layout->rowCount(), 0, 1, -1);
+        layout->addWidget(m_extents_label, layout->rowCount(), 0, 1, -1);
 
         calculateSpace();
     }
@@ -171,10 +167,7 @@ PVCheckBox::PVCheckBox(QList <StorageDevice *> devices, QList<StoragePartition *
 
         selectAll();
         layout->addWidget(m_space_label,   layout->rowCount(), 0, 1, -1);
-
-        if(m_extent_size)
-            layout->addWidget(m_extents_label, layout->rowCount(), 0, 1, -1);
-
+        layout->addWidget(m_extents_label, layout->rowCount(), 0, 1, -1);
         layout->addLayout(button_layout,   layout->rowCount(), 0, 1, -1);
         button_layout->addStretch();
         button_layout->addWidget(all_button);
@@ -184,6 +177,7 @@ PVCheckBox::PVCheckBox(QList <StorageDevice *> devices, QList<StoragePartition *
         connect(all_button,  SIGNAL(clicked(bool)), this, SLOT(selectAll()));
         connect(none_button, SIGNAL(clicked(bool)), this, SLOT(selectNone()));
 
+        setExtentSize(extentSize);
     }
 }
 
@@ -271,8 +265,10 @@ QList<long long> PVCheckBox::getUnusedSpaceList(){
 void PVCheckBox::selectAll(){
 
     if(m_pv_checks.size()){
-        for(int x = 0; x < m_pv_checks.size(); x++)
-            m_pv_checks[x]->setChecked(true);
+        for(int x = 0; x < m_pv_checks.size(); x++){
+            if(m_pv_checks[x]->isEnabled())
+                m_pv_checks[x]->setChecked(true);
+        }
     }
     emit stateChanged();
 
@@ -294,12 +290,26 @@ void PVCheckBox::selectNone(){
 void PVCheckBox::calculateSpace(){
 
     m_space_label->setText( i18n("Selected space: %1", sizeToString(getUnusedSpace()) ) );
-
-    if(m_extent_size)
-        m_extents_label->setText( i18n("Selected extents: %1", getUnusedSpace() / m_extent_size ) );
+    m_extents_label->setText( i18n("Selected extents: %1", getUnusedSpace() / m_extent_size ) );
 
     emit stateChanged();
 
     return;
 }
 
+void PVCheckBox::setExtentSize(ulong extentSize){
+    m_extent_size = extentSize;
+
+    if(m_pv_checks.size()){
+        for(int x = 0; x < m_pv_checks.size(); x++){
+            if( (m_pv_checks[x]->getData()).toULongLong() > ( m_extent_size + 0xfffff ) ) // 1 MiB for MDA, fix this
+                m_pv_checks[x]->setEnabled(true);                                         // when MDA size is put in
+            else{                                                                         // liblvm2app
+                m_pv_checks[x]->setChecked(false);
+                m_pv_checks[x]->setEnabled(false);
+            }
+        }
+    }
+
+    calculateSpace();
+}

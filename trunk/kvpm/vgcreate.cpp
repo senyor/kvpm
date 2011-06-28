@@ -132,7 +132,7 @@ VGCreateDialog::VGCreateDialog(QList<StorageDevice *> devices, QList<StoragePart
     m_extent_suffix->setInsertPolicy(QComboBox::NoInsert);
     m_extent_suffix->setCurrentIndex(1);
 
-    m_pv_checkbox = new PVCheckBox(devices, partitions);
+    m_pv_checkbox = new PVCheckBox(devices, partitions, 0x3fffff);  // 4 MiB default extent size
     m_layout->addWidget(m_pv_checkbox);
 
     connect(m_pv_checkbox, SIGNAL(stateChanged()),
@@ -210,9 +210,27 @@ VGCreateDialog::VGCreateDialog(QList<StorageDevice *> devices, QList<StoragePart
     connect(this, SIGNAL(okClicked()), 
 	    this, SLOT(commitChanges()));
 
-    connect(m_extent_suffix, SIGNAL(activated(int)), 
-            this, SLOT(limitExtentSize(int)));
+    connect(m_extent_size, SIGNAL(activated(int)), 
+            this, SLOT(extentSizeChanged()));
 
+    connect(m_extent_suffix, SIGNAL(activated(int)), 
+            this, SLOT(extentSizeChanged()));
+
+}
+
+void VGCreateDialog::extentSizeChanged(){
+
+    limitExtentSize(m_extent_suffix->currentIndex() );
+
+    uint32_t new_extent_size = m_extent_size->currentText().toULong();
+
+    new_extent_size *= 1024;
+    if( m_extent_suffix->currentIndex() > 0 )
+        new_extent_size *= 1024;
+    if( m_extent_suffix->currentIndex() > 1 )
+        new_extent_size *= 1024;
+
+    m_pv_checkbox->setExtentSize(new_extent_size);
 }
 
 void VGCreateDialog::limitExtentSize(int index){

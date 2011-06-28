@@ -59,6 +59,8 @@ Q_OBJECT
 
     QRegExpValidator *m_validator;
     QProgressBar *m_progress_bar;
+
+    void limitExtentSize(int);
     
  public:
     VGCreateDialog(QList<StorageDevice *> devices, QList<StoragePartition *> partitions, QWidget *parent = 0);
@@ -68,7 +70,7 @@ Q_OBJECT
     //void limitPhysicalVolumes(int boxstate);
     void validateOK();
     void commitChanges();
-    void limitExtentSize(int);
+    void extentSizeChanged();
 
 };
 
