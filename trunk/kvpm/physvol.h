@@ -31,6 +31,7 @@ class PhysVol
     bool m_active;
     bool m_allocatable;
     uint64_t  m_mda_count;    // number of metadata areas
+    uint64_t  m_mda_used;     // number of metadata areas in use
     uint64_t  m_mda_size;    
     long long m_size;         // size in bytes of physical volume
     long long m_device_size;  // size in bytes of underlying device
@@ -52,7 +53,8 @@ class PhysVol
     long long getLastUsedExtent();  // needed for minimum shrink size determination
     void setLastUsedExtent(long long last);
     int getPercentUsed();           // 0 - 100
-    long long getMDACount();    
+    long getMDACount();    
+    long getMDAUsed();              // Meta Data areas in use    
     long long getMDASize();         // Meta Data Area size in bytes    
 };
 

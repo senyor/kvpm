@@ -31,6 +31,9 @@ void PhysVol::rescan(pv_t lvm_pv)
     value = lvm_pv_get_property(lvm_pv, "pv_attr");
     flags.append(value.value.string);
 
+    value = lvm_pv_get_property(lvm_pv, "pv_mda_used_count");
+    m_mda_used = value.value.integer;
+
     if(flags[0] == 'a')
         m_allocatable = true;
     else
@@ -47,7 +50,6 @@ void PhysVol::rescan(pv_t lvm_pv)
 
     value = lvm_pv_get_property(lvm_pv, "pv_mda_size");
     m_mda_size = value.value.integer;
-
 
     /*
     // The following wil be used to to calculate the last used
@@ -106,9 +108,14 @@ void PhysVol::setActive()
     m_active = true;
 }
 
-long long PhysVol::getMDACount()
+long PhysVol::getMDACount()
 {
     return m_mda_count;
+}
+
+long PhysVol::getMDAUsed()
+{
+    return m_mda_used;
 }
 
 long long PhysVol::getMDASize()
