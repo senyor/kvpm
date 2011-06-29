@@ -43,13 +43,13 @@ PVTree::PVTree(VolGroup *volumeGroup, QWidget *parent) : QTreeWidget(parent), m_
     header_labels << i18n("Name") << i18n("Size") 
 		  << i18n("Free") << i18n("Used")
 		  << i18n("Allocatable") 
-                  << i18n("MDA Count") << i18n("MDA Size") 
+                  << i18n("MDA\ncount") << i18n("MDA\nused") << i18n("MDA\nsize") 
                   << i18n("Tags") 
-		  << i18n("Logical volumes");
+		  << i18n("Logical\nvolumes");
 
     item = new QTreeWidgetItem((QTreeWidgetItem *)0, header_labels);
 
-    for(int column = 0; column < 8; column++)
+    for(int column = 0; column < 9; column++)
         item->setTextAlignment(column, Qt::AlignCenter);
 
     item->setToolTip(0, i18n("Physical volume device"));
@@ -58,8 +58,9 @@ PVTree::PVTree(VolGroup *volumeGroup, QWidget *parent) : QTreeWidget(parent), m_
     item->setToolTip(3, i18n("Space used on physical volume"));
     item->setToolTip(4, i18n("If physical volume allows more extents to be allocated"));
     item->setToolTip(5, i18n("Number of metadata areas on physical volume"));
-    item->setToolTip(6, i18n("Size of meta data areas on physical volume"));
-    item->setToolTip(7, i18n("Optional tags for physical volume"));
+    item->setToolTip(6, i18n("Number of metadata areas in use on physical volume"));
+    item->setToolTip(7, i18n("Size of meta data areas on physical volume"));
+    item->setToolTip(8, i18n("Optional tags for physical volume"));
 
     setHeaderItem(item);
 }
@@ -97,6 +98,7 @@ void PVTree::loadData()
 	    pv_data << "No";
 
         pv_data << QString("%1").arg(pv->getMDACount());
+        pv_data << QString("%1").arg(pv->getMDAUsed());
         pv_data << sizeToString(pv->getMDASize());
 
         pv_data << "   "; // replace with pv->getTag();
@@ -127,7 +129,7 @@ void PVTree::loadData()
 	item->setData(2, Qt::UserRole, pv->getUnused());
 	item->setData(3, Qt::UserRole, (pv->getSize() - pv->getUnused()));
 
-        for(int column = 1; column < 7; column++)
+        for(int column = 1; column < 8; column++)
             item->setTextAlignment(column, Qt::AlignRight);
 
 	pv_tree_items.append(item);
