@@ -25,7 +25,7 @@ VGInfoLabels::VGInfoLabels(VolGroup *volumeGroup, QWidget *parent) : QFrame(pare
 {
     QLabel *extent_size_label, *size_label, *used_label, 
 	   *free_label, *lvm_fmt_label, *resizable_label, 
-	   *clustered_label, *allocateable_label,
+	   *clustered_label, *allocatable_label,
            *max_lv_label, *max_pv_label, *policy_label, *mda_label,
            *uuid_label;
 
@@ -105,14 +105,14 @@ VGInfoLabels::VGInfoLabels(VolGroup *volumeGroup, QWidget *parent) : QFrame(pare
     policy_label    = new QLabel( i18n("Policy: %1").arg(volumeGroup->getPolicy()) );
     resizable_label = new QLabel( i18n("Resizable: %1").arg(resizable) );
     clustered_label = new QLabel( i18n("Clustered: %1").arg(clustered) );
-    allocateable_label = new QLabel( i18n("Allocateable: %1", sizeToString(volumeGroup->getAllocateableSpace())) );
+    allocatable_label = new QLabel( i18n("Allocatable: %1", sizeToString(volumeGroup->getAllocatableSpace())) );
     extent_size_label  = new QLabel( i18n("Extent size: %1", sizeToString(volumeGroup->getExtentSize())) );
     mda_label          = new QLabel( i18n("MDA count: %1", volumeGroup->getMDACount() ) );
     uuid_label         = new QLabel( i18n("UUID: %1", volumeGroup->getUuid()) );
     uuid_label->setWordWrap(true);
 
     vlayout1->addWidget(size_label);
-    vlayout1->addWidget(allocateable_label);
+    vlayout1->addWidget(allocatable_label);
     vlayout2->addWidget(used_label);    
     vlayout2->addWidget(free_label);  
     vlayout3->addWidget(clustered_label);

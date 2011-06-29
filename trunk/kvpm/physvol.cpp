@@ -93,7 +93,7 @@ QString PhysVol::getUuid()
     return m_uuid.trimmed();
 }
 
-bool PhysVol::isAllocateable()
+bool PhysVol::isAllocatable()
 {
     return m_allocatable;
 }
