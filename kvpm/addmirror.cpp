@@ -144,7 +144,7 @@ void AddMirrorDialog::setupPhysicalTab()
 // suitable for another so we remove those here
 
     for(int x = leg_physical_volumes.size() - 1; x >= 0; x--){
-        if( !leg_physical_volumes[x]->isAllocateable() || leg_physical_volumes[x]->getUnused() <= 0 ){
+        if( !leg_physical_volumes[x]->isAllocatable() || leg_physical_volumes[x]->getUnused() <= 0 ){
             leg_physical_volumes.removeAt(x);
         }
         else{

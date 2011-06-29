@@ -41,7 +41,7 @@ void VolGroup::rescan(lvm_t lvm)
     lvm_property_value value;
     QString vg_attr;
 
-    m_allocateable_extents = 0;
+    m_allocatable_extents = 0;
     m_mda_count    = 0;
     m_pv_max       = 0;
     m_extent_size  = 0;
@@ -123,8 +123,8 @@ void VolGroup::rescan(lvm_t lvm)
 	    }
         
 	    for(int x = 0; x < m_member_pvs.size(); x++){
-	        if( m_member_pvs[x]->isAllocateable() )
-		    m_allocateable_extents += m_member_pvs[x]->getUnused() / (long long) m_extent_size;
+	        if( m_member_pvs[x]->isAllocatable() )
+		    m_allocatable_extents += m_member_pvs[x]->getUnused() / (long long) m_extent_size;
 		m_mda_count += m_member_pvs[x]->getMDACount();
 	    }
 	    
@@ -320,14 +320,14 @@ long long VolGroup::getFreeExtents()
     return m_free_extents;
 }
 
-long long VolGroup::getAllocateableExtents()
+long long VolGroup::getAllocatableExtents()
 {
-    return m_allocateable_extents;
+    return m_allocatable_extents;
 }
 
-long long VolGroup::getAllocateableSpace()
+long long VolGroup::getAllocatableSpace()
 {
-    return m_allocateable_extents * (long long)m_extent_size;
+    return m_allocatable_extents * (long long)m_extent_size;
 }
 
 long long VolGroup::getSize()

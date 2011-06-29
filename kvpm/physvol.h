@@ -44,7 +44,7 @@ class PhysVol
     QString getName();       // eg: /dev/hde4
     QString getUuid();
     VolGroup* getVolGroup(); 
-    bool isAllocateable();
+    bool isAllocatable();
     void setActive();               // If any lv is active on the pv, the pv is active
     bool isActive();
     long long getSize();            // size of the physical volume in bytes    
