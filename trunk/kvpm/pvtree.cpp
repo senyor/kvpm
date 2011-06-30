@@ -92,7 +92,7 @@ void PVTree::loadData()
 		<< sizeToString(pv->getUnused())
 		<< sizeToString(pv->getSize() - pv->getUnused());
 
-	if(pv->isAllocateable())
+	if(pv->isAllocatable())
 	    pv_data << "Yes";
 	else
 	    pv_data << "No";
@@ -234,11 +234,14 @@ void PVTree::reduceVolumeGroup()
 
 void PVTree::changePhysicalVolume()
 {
-    PVChangeDialog dialog(m_pv_name);
-    dialog.exec();
+    PhysVol *pv = m_vg->getPhysVolByName(m_pv_name);
+    if(pv){
+        PVChangeDialog dialog(pv);
+        dialog.exec();
 
-    if(dialog.result() == QDialog::Accepted){
-        ProcessProgress change_pv(dialog.arguments(), i18n("Changing physical volume...") );
-	MainWindow->reRun();
+        if(dialog.result() == QDialog::Accepted){
+            ProcessProgress change_pv(dialog.arguments(), i18n("Changing physical volume...") );
+            MainWindow->reRun();
+        }
     }
 }
