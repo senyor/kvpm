@@ -131,8 +131,8 @@ VGCreateDialog::VGCreateDialog(QList<StorageDevice *> devices, QList<StoragePart
     m_extent_suffix->insertItem(2,"GiB");
     m_extent_suffix->setInsertPolicy(QComboBox::NoInsert);
     m_extent_suffix->setCurrentIndex(1);
-
-    m_pv_checkbox = new PVCheckBox(devices, partitions, 0x3fffff);  // 4 MiB default extent size
+    
+    m_pv_checkbox = new PVCheckBox(devices, partitions, 0x400000);  // 4 MiB default extent size
     m_layout->addWidget(m_pv_checkbox);
 
     connect(m_pv_checkbox, SIGNAL(stateChanged()),

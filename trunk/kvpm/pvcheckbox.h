@@ -38,18 +38,18 @@ Q_OBJECT
     QList<StoragePartition *> m_partitions;
     QList<NoMungeCheck *> m_pv_checks; 
     QLabel *m_space_label, *m_extents_label;
-    ulong m_extent_size;
+    long long m_extent_size;
 
  public:
-    PVCheckBox(QList<PhysVol *> physicalVolumes, ulong extentSize, QWidget *parent = NULL); 
+    PVCheckBox(QList<PhysVol *> physicalVolumes, long long extentSize, QWidget *parent = NULL); 
     PVCheckBox(QList<StorageDevice *> devices, QList<StoragePartition *> partitions, 
-               ulong extentSize, QWidget *parent = NULL); 
+               long long extentSize, QWidget *parent = NULL); 
 
     QStringList getAllNames();    // names of all pvs displayed in the box
     QStringList getNames();       // names of *selected* pvs
     long long getUnusedSpace();   // total unused space on selected pvs
     QList<long long> getUnusedSpaceList();  // ditto
-    void setExtentSize(ulong extentSize);
+    void setExtentSize(long long extentSize);
 
  signals:
     void stateChanged();

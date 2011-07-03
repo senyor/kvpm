@@ -23,7 +23,7 @@
 #include "storagepartition.h"
 
 
-PVCheckBox::PVCheckBox(QList<PhysVol *> physicalVolumes, ulong extentSize, QWidget *parent):
+PVCheckBox::PVCheckBox(QList<PhysVol *> physicalVolumes, long long extentSize, QWidget *parent):
     QGroupBox(parent), 
     m_pvs(physicalVolumes), 
     m_extent_size(extentSize)
@@ -84,12 +84,12 @@ PVCheckBox::PVCheckBox(QList<PhysVol *> physicalVolumes, ulong extentSize, QWidg
 }
 
 PVCheckBox::PVCheckBox(QList <StorageDevice *> devices, QList<StoragePartition *> partitions, 
-                       ulong extentSize, QWidget *parent):
+                       long long extentSize, QWidget *parent):
     QGroupBox(parent), 
     m_devices(devices), 
-    m_partitions(partitions) 
+    m_partitions(partitions), 
+    m_extent_size(extentSize)
 {
-
     setTitle( i18n("Available physical volumes") );
     QGridLayout *layout = new QGridLayout();
     setLayout(layout);
@@ -297,7 +297,7 @@ void PVCheckBox::calculateSpace(){
     return;
 }
 
-void PVCheckBox::setExtentSize(ulong extentSize){
+void PVCheckBox::setExtentSize(long long extentSize){
     m_extent_size = extentSize;
 
     if(m_pv_checks.size()){
