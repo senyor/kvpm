@@ -179,8 +179,8 @@ void LVCreateDialog::makeConnections()
     connect(m_core_log, SIGNAL(toggled(bool)), 
 	    this, SLOT(setMaxSize()));
 
-     connect(m_size_selector, SIGNAL(stateChanged()), 
-             this, SLOT(setMaxSize()));
+    connect(m_size_selector, SIGNAL(stateChanged()), 
+            this, SLOT(setMaxSize()));
 }
 
 QWidget* LVCreateDialog::createGeneralTab()
@@ -349,6 +349,8 @@ QWidget* LVCreateDialog::createPhysicalTab()
 	stripe_size_combo->setItemData(n - 2, QVariant( (int) pow(2, n) ), Qt::UserRole );
         m_stripe_box->setEnabled(true);   // only enabled if the combo box has at least one entry!
     }
+    if(physical_volumes.size() < 2)
+        m_stripe_box->setEnabled(false);
     
     QLabel *stripe_size = new QLabel( i18n("Stripe Size: ") );
     m_stripe_count_spin = new QSpinBox();
@@ -404,6 +406,8 @@ QWidget* LVCreateDialog::createPhysicalTab()
     m_mirror_box = new QGroupBox( i18n("Disk mirrors") );
     m_mirror_box->setCheckable(true);
     m_mirror_box->setChecked(false);
+    if(physical_volumes.size() < 2)
+        m_mirror_box->setEnabled(false);
     m_mirror_box->setLayout(mirror_layout);
 
     m_mirrored_log = new QRadioButton( i18n("Mirrored disk based log") );
@@ -708,6 +712,9 @@ QStringList LVCreateDialog::argumentsLV()
     QString program_to_run;
     QStringList args;
     QVariant stripe_size;
+    const int stripes = getStripeCount();
+    const long long max_extents = getLargestVolume() / m_vg->getExtentSize();
+    long long extents = m_size_selector->getCurrentSize();
 
     if(m_tag_edit){
         if( m_tag_edit->text() != "" )
@@ -723,7 +730,7 @@ QStringList LVCreateDialog::argumentsLV()
     stripe_size = stripe_size_combo->itemData(stripe_size_combo->currentIndex(), Qt::UserRole);
 
     if( m_stripe_box->isChecked() || m_extend){
-	args << "--stripes" << QString("%1").arg( getStripeCount() );
+	args << "--stripes" << QString("%1").arg(stripes);
 	args << "--stripesize" << QString("%1").arg( stripe_size.toLongLong() );
     }
     
@@ -773,10 +780,17 @@ QStringList LVCreateDialog::argumentsLV()
     }
 
     if(m_extend)
-        args << "--extents" << QString("+%1").arg( m_size_selector->getCurrentSize() - m_lv->getExtents() );
-    else
-        args << "--extents" << QString("+%1").arg( m_size_selector->getCurrentSize() );
-    
+        extents -= m_lv->getExtents();
+
+    if( extents % stripes ){  // make the number of extents divivsible by the stripe count then round up
+        extents = extents / stripes;
+        extents = extents * stripes;
+        if(extents + stripes <= max_extents)
+            extents += stripes;
+    }
+
+    args << "--extents" << QString("+%1").arg(extents);
+
     if( !m_extend && !m_snapshot ){                           // create a standard volume
 	program_to_run = "lvcreate";
 	
@@ -800,7 +814,7 @@ QStringList LVCreateDialog::argumentsLV()
     }
 
     args << m_pv_checkbox->getNames();
-    
+
     args.prepend(program_to_run);
     return args;
 }
