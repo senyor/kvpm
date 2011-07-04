@@ -66,13 +66,13 @@ SizeSelectorBox::SizeSelectorBox(long long unitSize, long long minSize, long lon
     if(m_is_volume){
         setTitle( i18n("Volume size") );
         if( !m_is_new ){
-            m_shrink_box = new QCheckBox( i18n("Prevent shrinking") );
-            m_shrink_box->setChecked(false);
-            layout->addWidget(m_shrink_box);
+            m_size_box = new QCheckBox( i18n("Lock volume size") );
+            m_size_box->setChecked(false);
+            layout->addWidget(m_size_box);
             setConstraints(false);
 
-            connect(m_shrink_box, SIGNAL(toggled(bool)),
-                    this, SLOT(lockShrink(bool)));
+            connect(m_size_box, SIGNAL(toggled(bool)),
+                    this, SLOT(lock(bool)));
         }
     }
     else if(m_is_offset){
@@ -325,10 +325,16 @@ void SizeSelectorBox::setToEdit(QString size)
     int x = 0;
 
     if(m_size_validator->validate(size, x) == QValidator::Acceptable){
-        proposed_size = convertSizeToUnits(m_suffix_combo->currentIndex(), size.toDouble());
+
+        if(m_suffix_combo->currentIndex() == 0 && m_is_volume)
+            proposed_size = size.toLongLong();
+        else
+            proposed_size = convertSizeToUnits(m_suffix_combo->currentIndex(), size.toDouble());
+
         if( (proposed_size >= m_constrained_min) && (proposed_size <= m_constrained_max)){
             m_current_size = proposed_size;
             m_is_valid = true;
+
             emit stateChanged();
             return;     
         }
@@ -383,7 +389,10 @@ void SizeSelectorBox::updateEdit()
         sized /= (long double)(0x100000);
     }
 
-    m_size_edit->setText( QString("%1").arg( (double)sized, 0, 'g', 4) );
+    if( index == -1 )
+        m_size_edit->setText( QString("%1").arg( (double)m_current_size, 0, 'g', 4) );
+    else
+        m_size_edit->setText( QString("%1").arg( (double)sized, 0, 'g', 4) );
     
     if( (m_current_size >= m_constrained_min) && (m_current_size <= m_constrained_max))
         m_is_valid = true;
@@ -420,9 +429,15 @@ void SizeSelectorBox::updateValidator()
     
     if( valid_bottomd < 0 )
         valid_bottomd = 0;
-    
-    m_size_validator->setTop( (double)valid_topd );
-    m_size_validator->setBottom( (double)valid_bottomd );
+
+    if( index != -1 ){    
+        m_size_validator->setTop( (double)valid_topd );
+        m_size_validator->setBottom( (double)valid_bottomd );
+    }
+    else{
+        m_size_validator->setTop( (double)m_constrained_max );
+        m_size_validator->setBottom( (double)m_constrained_min );
+    }
 }
 
 bool SizeSelectorBox::isValid()

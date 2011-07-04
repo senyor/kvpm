@@ -34,6 +34,7 @@ class PhysVol;
 class QRegExpValidator;
 class QDoubleValidator;
 class PVCheckBox;
+class SizeSelectorBox;
 
 bool lv_create(VolGroup *volumeGroup);
 bool lv_extend(LogVol *logicalVolume);
@@ -47,6 +48,8 @@ Q_OBJECT
      bool m_extend;          // TRUE if extending a volume
      bool m_name_is_valid;   // TRUE if the new name is acceptable
 
+     SizeSelectorBox *m_size_selector;
+
      VolGroup *m_vg;
      LogVol *m_lv;      // origin for snap or lv to extend
                         // set to NULL if creating a new logical volume
@@ -56,9 +59,10 @@ Q_OBJECT
 	     *m_advanced_tab;  // Adevanced options tab
      
      KLineEdit *m_minor_number_edit, *m_major_number_edit,
-               *m_name_edit, *m_size_edit, *m_tag_edit;
+               *m_name_edit, *m_tag_edit;
 
-     QRegExpValidator *m_name_validator, *m_tag_validator;
+     QRegExpValidator *m_name_validator, 
+                      *m_tag_validator;
 
      QCheckBox *m_zero_check, 
                *m_readonly_check,
@@ -72,24 +76,19 @@ Q_OBJECT
  
      KTabWidget *m_tab_widget;
 
-     long long m_volume_extents,               // proposed logical volume size in extents
-	       m_allocateable_space, 
-	       m_allocateable_extents;
+     KComboBox *stripe_size_combo; 
 
-     KComboBox *size_combo, *stripe_size_combo; 
-
-     QSpinBox *m_size_spin,
-	      *m_mirrors_number_spin,  // how many mirrors we want
+     QSpinBox *m_mirrors_number_spin,  // how many mirrors we want
 	      *m_stripes_number_spin;  // how many stripes we want
-
-     QDoubleValidator *m_size_validator;
 
      QLabel *m_stripes_count_label,
 	    *m_max_size_label, 
-            *m_max_extents_label;
+            *m_max_extents_label,
+            *m_extend_by_label,        // how much space we are adding to a volume 
+            *m_current_size_label;     // if we are extending this is the existing size
      
-     QRadioButton *contiguous_button, *normal_button,   //Radio button to chose 
-	          *anywhere_button, *inherited_button,  // the allocation policy
+     QRadioButton *contiguous_button, *normal_button,     // Radio button to chose 
+	          *anywhere_button,   *inherited_button,  // the allocation policy
 	          *cling_button;
 
      QRadioButton *m_mirrored_log, *m_disk_log, *m_core_log;
@@ -109,16 +108,11 @@ Q_OBJECT
      QStringList argumentsLV();
 
  private slots:
-     void adjustSizeCombo(int index);
-     void setMaxSize(bool toggle_state);
-     void setMaxSize(int stripes);
-     void adjustSizeEdit(int percentage);
-     void validateVolumeSize(QString size);
+     void setMaxSize();
      void validateVolumeName(QString name);
-     long long convertSizeToExtents(int index, double size);
-     void setAvailableSpace();
      void zeroReadonlyCheck(int state);
      void enableMonitoring(bool checked);
+
 };
 
 #endif
