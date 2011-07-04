@@ -136,7 +136,7 @@ LVCreateDialog::LVCreateDialog(LogVol *logicalVolume, bool snapshot, QWidget *pa
 	setCaption( i18n("Extend Logical Volume") );
     
     m_tab_widget = new KTabWidget(this);
-    m_physical_tab = createPhysicalTab();
+    m_physical_tab = createPhysicalTab();  // this order is important
     m_advanced_tab = createAdvancedTab();
     m_general_tab  = createGeneralTab();
     m_tab_widget->addTab(m_general_tab,  i18n("General") );
@@ -144,6 +144,38 @@ LVCreateDialog::LVCreateDialog(LogVol *logicalVolume, bool snapshot, QWidget *pa
     m_tab_widget->addTab(m_advanced_tab, i18n("Advanced") );
 
     setMainWidget(m_tab_widget);
+
+    connect(m_pv_checkbox, SIGNAL(stateChanged()), 
+            this, SLOT(setMaxSize()));
+
+    connect(m_stripe_count_spin, SIGNAL(valueChanged(int)), 
+	    this, SLOT(setMaxSize()));
+
+    connect(m_mirror_count_spin, SIGNAL(valueChanged(int)), 
+	    this, SLOT(setMaxSize()));
+
+    connect(m_stripe_box, SIGNAL(toggled(bool)), 
+	    this, SLOT(setMaxSize()));
+
+    connect(m_mirror_box, SIGNAL(toggled(bool)), 
+	    this, SLOT(setMaxSize()));
+
+    connect(m_mirror_box, SIGNAL(toggled(bool)), 
+	    this, SLOT(enableMonitoring(bool)));
+
+    connect(m_mirrored_log, SIGNAL(toggled(bool)), 
+	    this, SLOT(setMaxSize()));
+
+    connect(m_disk_log, SIGNAL(toggled(bool)), 
+	    this, SLOT(setMaxSize()));
+
+    connect(m_core_log, SIGNAL(toggled(bool)), 
+	    this, SLOT(setMaxSize()));
+
+     connect(m_size_selector, SIGNAL(stateChanged()), 
+             this, SLOT(setMaxSize()));
+
+     setMaxSize();
 }
 
 QWidget* LVCreateDialog::createGeneralTab()
@@ -210,9 +242,18 @@ QWidget* LVCreateDialog::createGeneralTab()
      }
 
      if(m_extend){
-         m_size_selector = new SizeSelectorBox(m_vg->getExtentSize(), m_lv->getExtents(), 
-                                               getLargestVolume() / m_vg->getExtentSize(), 
-                                               m_lv->getExtents(), true, false);
+         if( getStripeCount() > 1 ){
+             m_stripe_box->setChecked(false);
+             m_size_selector = new SizeSelectorBox(m_vg->getExtentSize(), m_lv->getExtents(), 
+                                                   getLargestVolume() / m_vg->getExtentSize(), 
+                                                   m_lv->getExtents(), true, false);
+             m_stripe_box->setChecked(true);
+         }
+         else{
+             m_size_selector = new SizeSelectorBox(m_vg->getExtentSize(), m_lv->getExtents(), 
+                                                   getLargestVolume() / m_vg->getExtentSize(), 
+                                                   m_lv->getExtents(), true, false);
+         }
      }
      else{
          m_size_selector = new SizeSelectorBox(m_vg->getExtentSize(), 0, 
@@ -222,15 +263,15 @@ QWidget* LVCreateDialog::createGeneralTab()
 
      upper_layout->addWidget(m_size_selector);
 
-     QGroupBox *volume_limit_box = new QGroupBox( i18n("Volume size limit") );
+     QGroupBox *volume_limit_box = new QGroupBox( i18n("Maximum volume size") );
      QVBoxLayout *volume_limit_layout = new QVBoxLayout();
      volume_limit_box->setLayout(volume_limit_layout);
      m_max_size_label = new QLabel();
      volume_limit_layout->addWidget(m_max_size_label);
      m_max_extents_label = new QLabel();
      volume_limit_layout->addWidget(m_max_extents_label);
-     m_stripes_count_label = new QLabel();
-     volume_limit_layout->addWidget(m_stripes_count_label);
+     m_stripe_count_label = new QLabel();
+     volume_limit_layout->addWidget(m_stripe_count_label);
      volume_limit_layout->addStretch();
      lower_layout->addWidget(volume_limit_box);
 
@@ -264,11 +305,6 @@ QWidget* LVCreateDialog::createGeneralTab()
      alloc_box_layout->addWidget(cling_button);
      alloc_box->setLayout(alloc_box_layout);
      lower_layout->addWidget(alloc_box);
-
-     connect(m_size_selector, SIGNAL(stateChanged()), 
-             this, SLOT(setMaxSize()));
-
-     setMaxSize();
 
      return general_tab;
 }
@@ -310,14 +346,14 @@ QWidget* LVCreateDialog::createPhysicalTab()
     }
     
     QLabel *stripe_size = new QLabel( i18n("Stripe Size: ") );
-    m_stripes_number_spin = new QSpinBox();
-    m_stripes_number_spin->setMinimum(2);
-    m_stripes_number_spin->setMaximum(m_vg->getPhysVolCount());
+    m_stripe_count_spin = new QSpinBox();
+    m_stripe_count_spin->setMinimum(2);
+    m_stripe_count_spin->setMaximum(m_vg->getPhysVolCount());
     stripe_size_layout->addWidget(stripe_size);
     stripe_size_layout->addWidget(stripe_size_combo);
     QLabel *stripes_number = new QLabel( i18n("Number of stripes: ") );
     stripes_number_layout->addWidget(stripes_number); 
-    stripes_number_layout->addWidget(m_stripes_number_spin);
+    stripes_number_layout->addWidget(m_stripe_count_spin);
     striped_layout->addLayout(stripe_size_layout);  
     striped_layout->addLayout(stripes_number_layout);
 
@@ -350,7 +386,7 @@ QWidget* LVCreateDialog::createPhysicalTab()
 	}
 
 	if(seg_stripe_count > 1){
-	    m_stripes_number_spin->setValue(seg_stripe_count);
+	    m_stripe_count_spin->setValue(seg_stripe_count);
 	    m_stripe_box->setChecked(true);
 	    stripe_index = stripe_size_combo->findData( QVariant(seg_stripe_size / 1024) );
 	    if(stripe_index == -1)
@@ -375,12 +411,12 @@ QWidget* LVCreateDialog::createPhysicalTab()
 
     QHBoxLayout *mirrors_spin_layout = new QHBoxLayout();
     
-    m_mirrors_number_spin = new QSpinBox();
-    m_mirrors_number_spin->setMinimum(2);
-    m_mirrors_number_spin->setMaximum(m_vg->getPhysVolCount());
+    m_mirror_count_spin = new QSpinBox();
+    m_mirror_count_spin->setMinimum(2);
+    m_mirror_count_spin->setMaximum(m_vg->getPhysVolCount());
     QLabel *mirrors_number_label  = new QLabel( i18n("Number of mirror legs: ") );
     mirrors_spin_layout->addWidget(mirrors_number_label);
-    mirrors_spin_layout->addWidget(m_mirrors_number_spin);
+    mirrors_spin_layout->addWidget(m_mirror_count_spin);
     mirror_layout->addLayout(mirrors_spin_layout);
 
     QHBoxLayout *lower_h_layout = new QHBoxLayout;
@@ -396,33 +432,6 @@ QWidget* LVCreateDialog::createPhysicalTab()
 	lower_v_layout->addWidget(m_mirror_box);
     else
 	m_mirror_box->setEnabled(false);
-
-    connect(m_pv_checkbox, SIGNAL(stateChanged()), 
-            this, SLOT(setMaxSize()));
-
-    connect(m_stripes_number_spin, SIGNAL(valueChanged(int)), 
-	    this, SLOT(setMaxSize()));
-
-    connect(m_mirrors_number_spin, SIGNAL(valueChanged(int)), 
-	    this, SLOT(setMaxSize()));
-
-    connect(m_stripe_box, SIGNAL(toggled(bool)), 
-	    this, SLOT(setMaxSize()));
-
-    connect(m_mirror_box, SIGNAL(toggled(bool)), 
-	    this, SLOT(setMaxSize()));
-
-    connect(m_mirror_box, SIGNAL(toggled(bool)), 
-	    this, SLOT(enableMonitoring(bool)));
-
-    connect(m_mirrored_log, SIGNAL(toggled(bool)), 
-	    this, SLOT(setMaxSize()));
-
-    connect(m_disk_log, SIGNAL(toggled(bool)), 
-	    this, SLOT(setMaxSize()));
-
-    connect(m_core_log, SIGNAL(toggled(bool)), 
-	    this, SLOT(setMaxSize()));
 
     return m_physical_tab;
 }
@@ -518,30 +527,30 @@ void LVCreateDialog::setMaxSize()
     const long long selected_size = m_size_selector->getCurrentSize() * m_vg->getExtentSize(); 
 
     m_size_selector->setConstrainedMax(free_extents);
-    m_max_size_label->setText( i18n("Maximum size: %1", sizeToString( getLargestVolume() )) );
-    m_max_extents_label->setText( i18n("Maximum extents: %1", free_extents) );
+    m_max_size_label->setText( i18n("Size: %1", sizeToString( getLargestVolume() )) );
+    m_max_extents_label->setText( i18n("Extents: %1", free_extents) );
 
     if(!m_extend){
         if( m_mirror_box->isChecked() && !m_stripe_box->isChecked() )
-            m_stripes_count_label->setText( i18n("(with %1 mirror legs)", mirror_count) );
+            m_stripe_count_label->setText( i18n("(with %1 mirror legs)", mirror_count) );
         else if( !m_mirror_box->isChecked() && m_stripe_box->isChecked() )
-            m_stripes_count_label->setText( i18n("(with %1 stripes)", stripe_count) );
+            m_stripe_count_label->setText( i18n("(with %1 stripes)", stripe_count) );
         else if( m_mirror_box->isChecked() && m_stripe_box->isChecked()  )
-            m_stripes_count_label->setText( i18n("(with %1 mirror legs\nand %2 stripes)", mirror_count, stripe_count) );
+            m_stripe_count_label->setText( i18n("(with %1 mirror legs\nand %2 stripes)", mirror_count, stripe_count) );
         else
-            m_stripes_count_label->setText( i18n("(linear volume)") );
+            m_stripe_count_label->setText( i18n("(linear volume)") );
     }
     else{
         m_extend_by_label->setText( i18n("Extend by: %1", sizeToString( selected_size - m_lv->getSize() )) );
 
         if( mirror_count > 1 && !m_stripe_box->isChecked() )
-            m_stripes_count_label->setText( i18n("(with %1 mirror legs)", mirror_count) );
+            m_stripe_count_label->setText( i18n("(with %1 mirror legs)", mirror_count) );
         else if( mirror_count < 2 && m_stripe_box->isChecked() )
-            m_stripes_count_label->setText( i18n("(with %1 stripes)", stripe_count) );
+            m_stripe_count_label->setText( i18n("(with %1 stripes)", stripe_count) );
         else if( mirror_count > 1 && m_stripe_box->isChecked() )
-            m_stripes_count_label->setText( i18n("(with %1 mirror legs\nand %2 stripes)", mirror_count, stripe_count) );
+            m_stripe_count_label->setText( i18n("(with %1 mirror legs\nand %2 stripes)", mirror_count, stripe_count) );
         else
-            m_stripes_count_label->setText( i18n("(linear volume)") );
+            m_stripe_count_label->setText( i18n("(linear volume)") );
     }
 
     resetOkButton();
@@ -645,7 +654,7 @@ long long LVCreateDialog::getLargestVolume()
 int LVCreateDialog::getStripeCount()
 {
     if(m_stripe_box->isChecked())
-	return m_stripes_number_spin->value();
+	return m_stripe_count_spin->value();
     else
 	return 1;
 }
@@ -659,7 +668,7 @@ int LVCreateDialog::getMirrorCount()
             return 1;
     }
     else if(m_mirror_box->isChecked())
-	return m_mirrors_number_spin->value();
+	return m_mirror_count_spin->value();
     else
 	return 1;
 }
