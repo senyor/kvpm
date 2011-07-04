@@ -100,6 +100,7 @@ Q_OBJECT
      int getStripeCount();
      int getMirrorCount();
      void resetOkButton();
+     void makeConnections();
 
  public:
      LVCreateDialog(VolGroup *volumeGroup, QWidget *parent = 0);

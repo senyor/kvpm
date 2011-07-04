@@ -119,6 +119,8 @@ LVCreateDialog::LVCreateDialog(VolGroup *volumeGroup, QWidget *parent):
     m_tab_widget->addTab(m_advanced_tab, i18n("Advanced") );
 
     setMainWidget(m_tab_widget);
+    makeConnections();
+    setMaxSize();
 }
 
 LVCreateDialog::LVCreateDialog(LogVol *logicalVolume, bool snapshot, QWidget *parent):
@@ -144,7 +146,12 @@ LVCreateDialog::LVCreateDialog(LogVol *logicalVolume, bool snapshot, QWidget *pa
     m_tab_widget->addTab(m_advanced_tab, i18n("Advanced") );
 
     setMainWidget(m_tab_widget);
+    makeConnections();
+    setMaxSize();
+}
 
+void LVCreateDialog::makeConnections()
+{
     connect(m_pv_checkbox, SIGNAL(stateChanged()), 
             this, SLOT(setMaxSize()));
 
@@ -174,8 +181,6 @@ LVCreateDialog::LVCreateDialog(LogVol *logicalVolume, bool snapshot, QWidget *pa
 
      connect(m_size_selector, SIGNAL(stateChanged()), 
              this, SLOT(setMaxSize()));
-
-     setMaxSize();
 }
 
 QWidget* LVCreateDialog::createGeneralTab()
@@ -531,6 +536,7 @@ void LVCreateDialog::setMaxSize()
     m_max_extents_label->setText( i18n("Extents: %1", free_extents) );
 
     if(!m_extend){
+
         if( m_mirror_box->isChecked() && !m_stripe_box->isChecked() )
             m_stripe_count_label->setText( i18n("(with %1 mirror legs)", mirror_count) );
         else if( !m_mirror_box->isChecked() && m_stripe_box->isChecked() )
