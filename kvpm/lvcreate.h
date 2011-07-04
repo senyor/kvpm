@@ -78,10 +78,10 @@ Q_OBJECT
 
      KComboBox *stripe_size_combo; 
 
-     QSpinBox *m_mirrors_number_spin,  // how many mirrors we want
-	      *m_stripes_number_spin;  // how many stripes we want
+     QSpinBox *m_mirror_count_spin,  // how many mirrors we want
+	      *m_stripe_count_spin;  // how many stripes we want
 
-     QLabel *m_stripes_count_label,
+     QLabel *m_stripe_count_label,
 	    *m_max_size_label, 
             *m_max_extents_label,
             *m_extend_by_label,        // how much space we are adding to a volume 
