@@ -215,12 +215,18 @@ void VGTree::loadData()
             walkTreeCurrentItem( currentItem(), m_lv_tree_items[x] );
     }
 
+    QString new_type, old_type;
+
     if( m_old_lv_tree_items.size() ){
         for(int x = 0; x < m_old_lv_tree_items.size(); x++){
             old_name = ( m_old_lv_tree_items[x]->data(0, Qt::UserRole) ).toString();
             for(int y = 0; y < m_lv_tree_items.size(); y++){
                 new_name = ( m_lv_tree_items[y]->data(0, Qt::UserRole) ).toString();
                 if(new_name == old_name){
+                    new_type = (m_lv_tree_items[y]->data(4, Qt::DisplayRole)).toString();
+                    old_type = (m_old_lv_tree_items[x]->data(4, Qt::DisplayRole)).toString();
+                    if( new_type == "origin" && old_type != "origin" )
+                        m_lv_tree_items[x]->setExpanded(true);
                     walkTreeExpandedItems( m_old_lv_tree_items[x], m_lv_tree_items[y] ); 
                 }
             }
@@ -546,8 +552,17 @@ void VGTree::walkTreeExpandedItems(QTreeWidgetItem *old_item, QTreeWidgetItem *n
 {
     QTreeWidgetItem *old_child, *new_child;
     QString old_child_name, new_child_name;
+    QString child_user_role, child_display_role;
 
-    new_item->setExpanded( old_item->isExpanded() );  
+    if( !new_item->isExpanded() )
+        new_item->setExpanded( old_item->isExpanded() );  
+
+    if( old_item->childCount() < new_item->childCount() ){ // don't expand just because segments got added
+        child_user_role    = (new_item->child(0)->data(0, Qt::UserRole)).toString();
+        child_display_role = (new_item->child(0)->data(0, Qt::DisplayRole)).toString(); 
+        if( child_user_role == child_display_role )  // this means child is not segment data
+            new_item->setExpanded(true);
+    }
 
     if( old_item->childCount() && new_item->childCount() ){
         for(int x = 0; x < old_item->childCount(); x++){
@@ -562,7 +577,6 @@ void VGTree::walkTreeExpandedItems(QTreeWidgetItem *old_item, QTreeWidgetItem *n
         }
     }
 }
-
 
 bool VGTree::walkTreeCurrentItem(QTreeWidgetItem *current_item, QTreeWidgetItem *new_item)
 {

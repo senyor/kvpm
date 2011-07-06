@@ -392,9 +392,14 @@ QWidget* LVCreateDialog::createPhysicalTab()
             seg_stripe_size = m_lv->getSegmentStripeSize(seg_count - 1);
 	}
 
-	if(seg_stripe_count > 1){
+	if( seg_stripe_count > 1 && m_stripe_box->isEnabled() ){
 	    m_stripe_count_spin->setValue(seg_stripe_count);
-	    m_stripe_box->setChecked(true);
+            qDebug() << m_lv->getMirrorCount() << "count";
+            if( physical_volumes.size() >= (seg_stripe_count * m_lv->getMirrorCount()) )
+                m_stripe_box->setChecked(true);
+            else
+                m_stripe_box->setChecked(false);
+
 	    stripe_index = stripe_size_combo->findData( QVariant(seg_stripe_size / 1024) );
 	    if(stripe_index == -1)
 		stripe_index = 0;
