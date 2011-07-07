@@ -416,7 +416,7 @@ void VGTree::insertMirrorLegItems(LogVol *mirrorVolume, QTreeWidgetItem *item)
 			 << sizeToString(leg_volume->getSize()) << "" 
 			 << leg_volume->getFilesystem()
 			 << leg_volume->getType();
- 
+
                 if( !leg_volume->isMirror() ){
                     leg_data << QString("%1").arg( leg_volume->getSegmentStripes(0) ) 
                              << sizeToString( leg_volume->getSegmentStripeSize(0) );
