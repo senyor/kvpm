@@ -84,8 +84,8 @@ void VGTree::loadData()
 	
 	lv = logical_volumes[x];
 	lv_data.clear();
-
-        if(( lv->getOrigin() == "" && !( (lv->getName()).startsWith("snapshot") )) || lv->isOrphan() ){
+        
+        if( ( lv->getOrigin() == "" || lv->isOrphan() ) && !lv->getName().startsWith("snapshot") ){
 
 	    if( lv->getSegmentCount() == 1 ) {
 
@@ -186,7 +186,7 @@ void VGTree::loadData()
 		lv_item->setData(0, Qt::UserRole, lv->getName());
 		lv_item->setData(1, Qt::UserRole, -1);            // -1 means not segment data
 		m_lv_tree_items.append(lv_item);
-                
+
                 if( insertSnapshotItems(lv, lv_item) ){
 
                     if( lv->isPvmove() )

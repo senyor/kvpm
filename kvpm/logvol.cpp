@@ -600,7 +600,18 @@ bool LogVol::isOrigin()
 
 bool LogVol::isOrphan()
 {
-    return m_orphan;
+    QList<LogVol *> lvs = m_vg->getLogicalVolumes();
+    bool has_invalid_origin = false;
+
+    if( m_mirror_log || m_mirror_leg ){ // look for legs and logs of lvs that are not mirrors!
+        has_invalid_origin = true;
+        for(int x = 0; x < lvs.size(); x++){
+            if( lvs[x]->getName() == m_origin && lvs[x]->isMirror() )
+                has_invalid_origin = false;  
+        } 
+    }
+
+    return ( m_orphan || has_invalid_origin );
 }
 
 bool LogVol::isFixed()
