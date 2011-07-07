@@ -62,7 +62,7 @@ void LogVol::rescan(lv_t lvm_lv)
 
     value = lvm_lv_get_property(lvm_lv, "lv_attr");
     flags.append(value.value.string);
-	
+
     m_under_conversion = false;
     m_mirror     = false;
     m_mirror_leg = false;
@@ -213,7 +213,7 @@ void LogVol::rescan(lv_t lvm_lv)
 
     if( m_lv_name.contains("_mlog", Qt::CaseSensitive) ){
         m_mirror_log = true;    // this needs to be here in case it is a mirrored mirror log
-        m_lv_fs = "mirror log";
+        m_lv_fs = "";
     }
     else
         m_lv_fs = fsprobe_getfstype2( "/dev/" + m_vg_name + "/" + m_lv_name );
@@ -242,6 +242,7 @@ void LogVol::rescan(lv_t lvm_lv)
     else if(m_mirror_log && m_mirror_leg){
         m_origin = m_lv_name;
         m_origin.truncate( m_origin.indexOf("_mimage_") );
+        m_type = m_type.replace("leg","log");
     }
     else if( m_mirror || m_virtual ){
 	if( m_lv_name.contains("_mimagetmp_") ){
