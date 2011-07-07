@@ -85,7 +85,7 @@ void VGTree::loadData()
 	lv = logical_volumes[x];
 	lv_data.clear();
 
-        if( lv->getOrigin() == "" && !( (lv->getName()).startsWith("snapshot") ) ){
+        if(( lv->getOrigin() == "" && !( (lv->getName()).startsWith("snapshot") )) || lv->isOrphan() ){
 
 	    if( lv->getSegmentCount() == 1 ) {
 
