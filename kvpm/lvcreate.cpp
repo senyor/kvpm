@@ -394,7 +394,7 @@ QWidget* LVCreateDialog::createPhysicalTab()
 
 	if( seg_stripe_count > 1 && m_stripe_box->isEnabled() ){
 	    m_stripe_count_spin->setValue(seg_stripe_count);
-            qDebug() << m_lv->getMirrorCount() << "count";
+            
             if( physical_volumes.size() >= (seg_stripe_count * m_lv->getMirrorCount()) )
                 m_stripe_box->setChecked(true);
             else
