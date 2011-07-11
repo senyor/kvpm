@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2009 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2009, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -33,6 +33,7 @@ long long fs_reduce(QString path, long long new_size, QString fs)
     QStringList arguments, 
                 output,
                 success_stringlist,
+                nothing_stringlist,
                 nospace_stringlist;
 
     QString size_string;
@@ -57,14 +58,24 @@ long long fs_reduce(QString path, long long new_size, QString fs)
     ProcessProgress fs_shrink(arguments, i18n("Shrinking filesystem..."), true );
     output = fs_shrink.programOutputAll();
 
-    success_stringlist = output.filter("is now");
+    success_stringlist = output.filter("is now");      // it worked
+    nothing_stringlist = output.filter("is already");  // already a reduced fs, nothing to do!
     nospace_stringlist = output.filter("space left");
 
     if( success_stringlist.size() > 0 ){ // Try to shrink the desired amount
 
         size_string = success_stringlist[0];
         size_string = size_string.remove( 0, size_string.indexOf("now") + 3 );
-        size_string.truncate(  size_string.indexOf("blocks") );
+        size_string.truncate( size_string.indexOf("blocks") );
+        size_string = size_string.simplified();
+        return size_string.toLongLong() * block_size;
+
+    }
+    else if( nothing_stringlist.size() > 0 ){
+
+        size_string = nothing_stringlist[0];
+        size_string = size_string.remove( 0, size_string.indexOf("already") + 7 );
+        size_string.truncate( size_string.indexOf("blocks") );
         size_string = size_string.simplified();
         return size_string.toLongLong() * block_size;
 
@@ -86,7 +97,7 @@ long long fs_reduce(QString path, long long new_size, QString fs)
 
             size_string = success_stringlist[0];
             size_string = size_string.remove( 0, size_string.indexOf("now") + 3 );
-            size_string.truncate(  size_string.indexOf("blocks") );
+            size_string.truncate( size_string.indexOf("blocks") );
             size_string = size_string.simplified();
             return size_string.toLongLong() * block_size;
         }
