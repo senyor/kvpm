@@ -103,13 +103,16 @@ PartitionAddDialog::PartitionAddDialog(StoragePartition *partition, QWidget *par
     else
         logical_freespace = false;
 
-// The hardware's own constraints, if any
-    m_ped_constraints   = ped_device_get_constraint(ped_device); 
-    m_max_part_start  = ped_geometry.start;
-    m_max_part_end    = ped_geometry.end;
-    m_max_part_size   = ped_geometry.length;
+    /* how big can it grow? */
+    PedGeometry ped_max_geometry = ped_free_partition->geom;
+    m_max_part_start = ped_max_geometry.start;
+    m_max_part_size  = ped_max_geometry.length;
+    m_max_part_end   = m_max_part_start + m_max_part_size - 1; 
+    m_sector_size    = ped_device->sector_size;
 
-    getMaximumPartition();
+    //hacks for msdos label bug in libparted -- disable when fixed!
+    if( QString( m_ped_disk->type->name ) == "msdos" )
+        getMaximumPartition();
 
     setWindowTitle( i18n("Add partition") );
 
@@ -333,10 +336,6 @@ void PartitionAddDialog::getMaximumPartition()
             }
             else
                 break;
-        }
-        else if( is_logical && (parts[prev]->type & PED_PARTITION_EXTENDED) ){  // first logical partiton needs 
-            m_max_part_start += 64;                                             // start to be offset for 
-            break;                                                              // alignment to account for EBR
         }
         else{
             break;
