@@ -18,6 +18,7 @@
 #include <lvm2app.h>
 
 #include <QString>
+#include <QStringList>
 #include <QWidget>
 
 class VolGroup;
@@ -27,6 +28,7 @@ class PhysVol
     QString m_device;      // eg: /dev/hde4
     QString m_format;      // e.g. lvm1 or lvm2
     QString m_uuid;
+    QStringList m_tags;
     VolGroup *m_vg;        // all pvs now must be in a vg
     bool m_active;
     bool m_allocatable;
@@ -43,6 +45,7 @@ class PhysVol
     void rescan(pv_t pv);
     QString getName();       // eg: /dev/hde4
     QString getUuid();
+    QStringList getTags();
     VolGroup* getVolGroup(); 
     bool isAllocatable();
     void setActive();               // If any lv is active on the pv, the pv is active
