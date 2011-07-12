@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -78,12 +78,12 @@ ProcessProgress::ProcessProgress(QStringList arguments,
             
             m_process->waitForFinished();
             
-            if (m_process->exitCode()){
+            if ( m_process->exitCode() || ( m_process->exitStatus() == QProcess::CrashExit ) ){
                 output_errors = m_output_all.join("");
-                KMessageBox::error(this, 
-                                   i18n("Execution of %1 produced the following errors: %2", 
-                                        executable_path, 
-                                        output_errors) );
+                if( m_process->exitStatus() != QProcess::CrashExit ) 
+                    KMessageBox::error(this, i18n("%1 produced this output: %2", executable_path, output_errors) );
+                else
+                    KMessageBox::error(this, i18n("%1 <b>crashed</b> with this output: %2", executable_path, output_errors) );
             }
         }
         else{
