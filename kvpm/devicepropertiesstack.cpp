@@ -30,7 +30,6 @@
 DevicePropertiesStack::DevicePropertiesStack( QList<StorageDevice *> Devices, QWidget *parent) : 
     QStackedWidget(parent)
 {
-
     int device_count = Devices.size();
 
     QList<StoragePartition *> partitions;
@@ -45,10 +44,11 @@ DevicePropertiesStack::DevicePropertiesStack( QList<StorageDevice *> Devices, QW
 	    m_device_path_list.append( partitions[n]->getName() );
 	    addWidget( new DeviceProperties( partitions[n] ) );
 	}
+        partitions.clear();
     }
 
     addWidget( new QWidget(this) ); // empty default widget
-    setCurrentIndex( 0 );
+    setCurrentIndex(0);
 }
 
 void DevicePropertiesStack::changeDeviceStackIndex(QModelIndex Index)
@@ -58,15 +58,12 @@ void DevicePropertiesStack::changeDeviceStackIndex(QModelIndex Index)
 
     device_item = static_cast<StorageDeviceItem*> (model_index.internalPointer());
 
-    QString device_path = device_item->data(0).toString();
-
-    setCurrentIndex( 0 );
+    const QString device_path = device_item->data(0).toString();
+    const int list_size = m_device_path_list.size();
+    setCurrentIndex(0);
     
-    for(int x = 0; x < m_device_path_list.size(); x++){
-
-	if( m_device_path_list[x] == device_path ){
-	    setCurrentIndex ( x );
-
-	}
+    for(int x = 0; x < list_size; x++){
+	if( m_device_path_list[x] == device_path )
+	    setCurrentIndex (x);
     }
 }
