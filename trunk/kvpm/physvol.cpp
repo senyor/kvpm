@@ -32,7 +32,10 @@ void PhysVol::rescan(pv_t lvm_pv)
     flags.append(value.value.string);
 
     value = lvm_pv_get_property(lvm_pv, "pv_tags");
-    m_tags.append( QString( value.value.string ) );
+    m_tags.clear();
+    m_tags = QString( value.value.string ).split(",");
+    for(int x = 0; x < m_tags.size(); x++)
+        m_tags[x] = m_tags[x].trimmed();
 
     value = lvm_pv_get_property(lvm_pv, "pv_mda_used_count");
     m_mda_used = value.value.integer;
