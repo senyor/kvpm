@@ -718,6 +718,7 @@ QStringList LVCreateDialog::argumentsLV()
     QStringList args;
     QVariant stripe_size;
     const int stripes = getStripeCount();
+    const int mirrors = getMirrorCount();
     const long long max_extents = getLargestVolume() / m_vg->getExtentSize();
     long long extents = m_size_selector->getCurrentSize();
 
@@ -752,7 +753,7 @@ QStringList LVCreateDialog::argumentsLV()
 		args << "--zero" << "n";
 
 	    if( m_mirror_box->isChecked() ){
-		args << "--mirrors" << QString("%1").arg( getMirrorCount() - 1 );
+		args << "--mirrors" << QString("%1").arg( mirrors - 1 );
 
 		if( m_mirrored_log->isChecked() )
 		    args << "--mirrorlog" << "mirrored";
@@ -787,11 +788,11 @@ QStringList LVCreateDialog::argumentsLV()
     if(m_extend)
         extents -= m_lv->getExtents();
 
-    if( extents % stripes ){  // make the number of extents divivsible by the stripe count then round up
-        extents = extents / stripes;
-        extents = extents * stripes;
-        if(extents + stripes <= max_extents)
-            extents += stripes;
+    if( extents % ( stripes * mirrors )){  // make the number of extents divivsible by the stripe X mirror count then round up
+        extents = extents / ( stripes * mirrors );
+        extents = extents * ( stripes * mirrors );
+        if(extents + ( stripes * mirrors ) <= max_extents)
+            extents += ( stripes * mirrors );
     }
 
     args << "--extents" << QString("+%1").arg(extents);
