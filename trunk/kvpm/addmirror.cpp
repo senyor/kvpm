@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2009, 2010 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -53,7 +53,7 @@ AddMirrorDialog::AddMirrorDialog(LogVol *logicalVolume, QWidget *parent):
     QWidget *general_tab  = new QWidget(this);
     QWidget *physical_tab = new QWidget(this);
     m_tab_widget->addTab(general_tab,  i18n("General") );
-    m_tab_widget->addTab(physical_tab, i18n("Logging and layout") );
+    m_tab_widget->addTab(physical_tab, i18n("Physical layout") );
     m_general_layout  = new QHBoxLayout;
     m_physical_layout = new QVBoxLayout();
     general_tab->setLayout(m_general_layout);
@@ -69,6 +69,7 @@ AddMirrorDialog::AddMirrorDialog(LogVol *logicalVolume, QWidget *parent):
 
     connect(m_add_mirrors_spin, SIGNAL(valueChanged(int)),
 	    this, SLOT(comparePvsNeededPvsAvailable()));
+
 }
 
 void AddMirrorDialog::setupGeneralTab()
@@ -128,6 +129,41 @@ void AddMirrorDialog::setupGeneralTab()
     alloc_box_layout->addWidget(cling_button);
     alloc_box->setLayout(alloc_box_layout);
     layout->addWidget(alloc_box);
+
+    QGroupBox *log_box = new QGroupBox( i18n("Mirror logging") );
+    QVBoxLayout *log_box_layout = new QVBoxLayout;
+    m_core_log_button = new QRadioButton( i18n("Memory based log") );
+    m_disk_log_button = new QRadioButton( i18n("Disk based log") );
+    m_mirrored_log_button = new QRadioButton( i18n("Mirrored disk based log") );
+    
+    if(m_lv->isMirror()){
+        if(m_lv->getLogCount() == 0)
+            m_core_log_button->setChecked(true);
+        else if(m_lv->getLogCount() == 1)
+            m_disk_log_button->setChecked(true);
+        else
+            m_mirrored_log_button->setChecked(true);
+    }
+    else
+        m_disk_log_button->setChecked(true);
+
+    log_box_layout->addWidget(m_mirrored_log_button);
+    log_box_layout->addWidget(m_disk_log_button);
+    log_box_layout->addWidget(m_core_log_button);
+    log_box->setLayout(log_box_layout);
+    layout->addWidget(log_box);
+
+    connect(m_disk_log_button, SIGNAL(toggled(bool)),
+            this, SLOT(comparePvsNeededPvsAvailable()));
+
+    connect(m_core_log_button, SIGNAL(toggled(bool)),
+            this, SLOT(comparePvsNeededPvsAvailable()));
+
+    connect(m_mirrored_log_button, SIGNAL(toggled(bool)),
+            this, SLOT(comparePvsNeededPvsAvailable()));
+
+
+
     layout->addStretch();
 
     return;
@@ -195,37 +231,7 @@ void AddMirrorDialog::setupPhysicalTab()
     striped_layout->addLayout(stripes_number_layout);
     lower_layout->addWidget(m_stripe_box);
 
-    QGroupBox *log_box = new QGroupBox( i18n("Mirror logging") );
-    QVBoxLayout *log_box_layout = new QVBoxLayout;
-    m_core_log_button = new QRadioButton( i18n("Memory based log") );
-    m_disk_log_button = new QRadioButton( i18n("Disk based log") );
-    m_mirrored_log_button = new QRadioButton( i18n("Mirrored disk based log") );
-    
-    if(m_lv->isMirror()){
-        if(m_lv->getLogCount() == 0)
-            m_core_log_button->setChecked(true);
-        else if(m_lv->getLogCount() == 1)
-            m_disk_log_button->setChecked(true);
-        else
-            m_mirrored_log_button->setChecked(true);
-    }
-    else
-        m_disk_log_button->setChecked(true);
-    log_box_layout->addWidget(m_mirrored_log_button);
-    log_box_layout->addWidget(m_disk_log_button);
-    log_box_layout->addWidget(m_core_log_button);
-    log_box->setLayout(log_box_layout);
-    lower_layout->addWidget(log_box);
     lower_layout->addStretch();
-
-    connect(m_disk_log_button, SIGNAL(toggled(bool)),
-            this, SLOT(comparePvsNeededPvsAvailable()));
-
-    connect(m_core_log_button, SIGNAL(toggled(bool)),
-            this, SLOT(comparePvsNeededPvsAvailable()));
-
-    connect(m_mirrored_log_button, SIGNAL(toggled(bool)),
-            this, SLOT(comparePvsNeededPvsAvailable()));
 
     connect(m_stripes_number_spin, SIGNAL(valueChanged(int)), 
             this, SLOT(comparePvsNeededPvsAvailable()));
@@ -354,6 +360,13 @@ void AddMirrorDialog::comparePvsNeededPvsAvailable()
         new_log_count = 2;
     else
         new_log_count = 0;
+
+    if( m_lv->isMirror() ){
+        if( ( m_lv->getLogCount() == new_log_count ) && ( !m_add_mirror_box->isChecked() ) ){ 
+            enableButtonOk(false);
+            return;
+        }
+    }
 
     qSort(available_pv_bytes);
 

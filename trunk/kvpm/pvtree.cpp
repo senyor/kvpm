@@ -51,6 +51,8 @@ PVTree::PVTree(VolGroup *volumeGroup, QWidget *parent) : QTreeWidget(parent), m_
     for(int column = 0; column < 7; column++)
         item->setTextAlignment(column, Qt::AlignCenter);
 
+    sortByColumn(0, Qt::AscendingOrder);
+
     item->setToolTip(0, i18n("Physical volume device"));
     item->setToolTip(1, i18n("Total size of physical volume"));
     item->setToolTip(2, i18n("Free space on physical volume"));
@@ -78,6 +80,7 @@ void PVTree::loadData()
 
     clear();
     setupContextMenu();
+    setSortingEnabled(false);
     
     for(int n = 0; n < pvs.size(); n++){
 	pv = pvs[n];
@@ -134,6 +137,8 @@ void PVTree::loadData()
 
     if( pv_tree_items.size() )
 	setCurrentItem( pv_tree_items[0] );
+
+    setSortingEnabled(true);
 
     return;
 }
