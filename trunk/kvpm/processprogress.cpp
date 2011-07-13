@@ -34,7 +34,9 @@ ProcessProgress::ProcessProgress(QStringList arguments,
     QString executable, 
             executable_path,
             output_errors;
- 
+
+    m_exit_code = 127;  // command not found
+
     if(arguments.size() == 0){
 	qDebug() << "ProcessProgress given an empty arguments list";
 	close();
@@ -77,8 +79,13 @@ ProcessProgress::ProcessProgress(QStringList arguments,
             m_loop->exec(QEventLoop::ExcludeUserInputEvents);
             
             m_process->waitForFinished();
-            
-            if ( m_process->exitCode() || ( m_process->exitStatus() == QProcess::CrashExit ) ){
+            m_exit_code = m_process->exitCode();
+
+            if ( m_exit_code || ( m_process->exitStatus() == QProcess::CrashExit ) ){
+
+                if ( ( m_exit_code == 0 ) && ( m_process->exitStatus() == QProcess::CrashExit ) )
+                    m_exit_code = 1;  // if it crashed without an exit code, set a non zero exit code
+
                 output_errors = m_output_all.join("");
                 if( m_process->exitStatus() != QProcess::CrashExit ) 
                     KMessageBox::error(this, i18n("%1 produced this output: %2", executable_path, output_errors) );
@@ -113,7 +120,7 @@ QStringList ProcessProgress::programOutputAll()
 
 int ProcessProgress::exitCode()
 {
-    return m_process->exitCode();
+    return m_exit_code;
 }
 
 void ProcessProgress::readStandardOut()
@@ -128,7 +135,6 @@ void ProcessProgress::readStandardOut()
 	}
 	m_output_all << output_line;
     }
-    
 }
 
 void ProcessProgress::readStandardError()
@@ -141,5 +147,4 @@ void ProcessProgress::readStandardError()
 	output_line = m_process->readLine();
 	m_output_all << output_line;
     }
-    
 }
