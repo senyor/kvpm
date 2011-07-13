@@ -17,6 +17,7 @@
 #include <QtGui>
 
 #include "masterlist.h"
+#include "misc.h"
 #include "physvol.h"
 #include "pvproperties.h"
 #include "logvol.h"
@@ -131,20 +132,43 @@ PVProperties::PVProperties(PhysVol *physicalVolume, QWidget *parent):QWidget(par
         }
     }
 
-    KSeparator *separator = new KSeparator(Qt::Horizontal);
-    separator->setFrameStyle(QFrame::Plain | QFrame::Box);
-    separator->setLineWidth(2);
-    separator->setMaximumHeight(2);
-    layout->addWidget(separator, row, 0, 1, -1 );
+    layout->setRowStretch(row, 10);
+
+    KSeparator *uuid_separator = new KSeparator(Qt::Horizontal);
+    uuid_separator->setFrameStyle(QFrame::Plain | QFrame::Box);
+    uuid_separator->setLineWidth(2);
+    uuid_separator->setMaximumHeight(2);
+    layout->addWidget(uuid_separator, row + 1, 0, 1, -1 );
  
     temp_label = new QLabel( "<b>Physical volume UUID</b>" );
     temp_label->setAlignment( Qt::AlignCenter );
-    layout->addWidget(temp_label, row + 1, 0, 1, -1 );
+    layout->addWidget(temp_label, row + 2, 0, 1, -1 );
 
     temp_label = new QLabel( physicalVolume->getUuid() );
     temp_label->setAlignment( Qt::AlignCenter );
     temp_label->setWordWrap(true);
-    layout->addWidget(temp_label, row + 2, 0, 1, -1 );
+    layout->addWidget(temp_label, row + 3, 0, 1, -1 );
 
-    layout->setRowStretch(row + 3, 10);
+    layout->setRowStretch(row + 4, 10);
+
+    KSeparator *mda_separator = new KSeparator(Qt::Horizontal);
+    mda_separator->setFrameStyle(QFrame::Plain | QFrame::Box);
+    mda_separator->setLineWidth(2);
+    mda_separator->setMaximumHeight(2);
+    layout->addWidget(mda_separator, row + 5, 0, 1, -1 );
+ 
+    temp_label = new QLabel( "<b>Metadata Areas</b>" );
+    temp_label->setAlignment( Qt::AlignCenter );
+    layout->addWidget(temp_label, row + 6, 0, 1, -1 );
+
+    temp_label = new QLabel( QString("Total: %1").arg( physicalVolume->getMDACount() ) );
+    layout->addWidget(temp_label, row + 7, 0, 1, 1 );
+
+    temp_label = new QLabel( QString("In use: %1").arg( physicalVolume->getMDAUsed() ) );
+    layout->addWidget(temp_label, row + 7, 1, 1, 1 );
+
+    temp_label = new QLabel( QString("Size: %1").arg( sizeToString( physicalVolume->getMDASize() ) ) );
+    layout->addWidget(temp_label, row + 7, 3, 1, 1, Qt::AlignRight);
+
+    layout->setRowStretch(row + 8, 10);
 } 
