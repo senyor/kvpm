@@ -41,6 +41,7 @@ class VolGroup
     QString m_lvm_format;                // lvm1 or lvm2
     QList<LogVol *>  m_member_lvs;    // lvs that belong to this group
     QList<PhysVol *> m_member_pvs;    // pvs that belong to this group
+    bool m_active;         // if any lv is active the group is active
     bool m_writable;
     bool m_resizable;
     bool m_clustered;
@@ -78,6 +79,7 @@ public:
     bool isClustered();
     bool isPartial();
     bool isExported();
+    bool isActive();
     
 };
 

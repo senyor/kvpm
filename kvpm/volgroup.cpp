@@ -53,6 +53,7 @@ void VolGroup::rescan(lvm_t lvm)
     m_exported     = false;
     m_partial      = false;
     m_clustered    = false;
+    m_active       = false;
 
     // clustered volumes can't be opened when clvmd isn't running 
     if( (lvm_vg = lvm_vg_open(lvm, m_vg_name.toAscii().data(), "r", NULL)) ){
@@ -184,6 +185,7 @@ void VolGroup::rescan(lvm_t lvm)
 
     for(int x = 0; x < m_member_lvs.size(); x++){
         if( m_member_lvs[x]->isActive() ){
+            m_active = true;
 	    pv_name_list = m_member_lvs[x]->getDevicePathAll();
 	    for(int x = 0; x < pv_name_list.size(); x++){
 	        if( (pv = getPhysVolByName(pv_name_list[x])) )
@@ -417,5 +419,10 @@ bool VolGroup::isPartial()
 bool VolGroup::isExported()
 {
     return m_exported;
+}
+
+bool VolGroup::isActive()
+{
+    return m_active;
 }
 
