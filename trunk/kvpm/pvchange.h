@@ -15,8 +15,11 @@
 #ifndef PVCHANGE_H
 #define PVCHANGE_H
 
+#include <KComboBox>
 #include <KDialog>
+#include <KLineEdit>
 #include <QCheckBox>
+#include <QGroupBox>
 #include <QLabel>
 #include <QStringList>
 
@@ -26,6 +29,9 @@ class PVChangeDialog : public KDialog
 {
 Q_OBJECT
 
+     KLineEdit *m_tag_edit;      // new tag to add 
+     KComboBox *m_deltag_combo;  // old tag to remove
+     QGroupBox *m_tags_group;
      QCheckBox *m_allocation_box;
      QCheckBox *m_uuid_box;
      QCheckBox *m_mda_box;
