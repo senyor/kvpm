@@ -37,6 +37,11 @@ bool make_fs(LogVol *logicalVolume)
                                  "unmounted before a new filesystem " 
                                  "can be written on it").arg( logicalVolume->getFullName() );
 
+    QByteArray zero_array(128 * 1024, '\0');
+    QString path = logicalVolume->getMapperPath();
+    qDebug() << path;
+    QFile *device;
+
     if( logicalVolume->isMounted() ){
         KMessageBox::error(0, error_message);
         return false;
@@ -47,6 +52,15 @@ bool make_fs(LogVol *logicalVolume)
             MkfsDialog dialog(logicalVolume);
             dialog.exec();
             if(dialog.result() == QDialog::Accepted){
+
+                device = new QFile(path);
+
+                if( device->open(QIODevice::ReadWrite) ){ // nuke the old filesystem with zeros
+                    device->write(zero_array);
+                    device->flush();
+                    device->close();
+                }
+
                 ProcessProgress mkfs(dialog.arguments(), i18n("Writing filesystem..."), true);
                 return true;
             }
@@ -67,6 +81,10 @@ bool make_fs(StoragePartition *partition)
                                  "be unmounted before a new filesystem " 
                                  "can be written on it").arg( partition->getName() );
 
+    QByteArray zero_array(128 * 1024, '\0');
+    QString path = partition->getName();
+    QFile *device;
+
     if( partition->isMounted() ){
         KMessageBox::error(0, error_message);
         return false;
@@ -77,6 +95,15 @@ bool make_fs(StoragePartition *partition)
             MkfsDialog dialog(partition);
             dialog.exec();
             if(dialog.result() == QDialog::Accepted){
+
+                device = new QFile(path);
+
+                if( device->open(QIODevice::ReadWrite) ){ // nuke the old filesystem with zeros
+                    device->write(zero_array);
+                    device->flush();
+                    device->close();
+                }
+
                 ProcessProgress mkfs(dialog.arguments(), i18n("Writing filesystem..."), true);
                 return true;
             }
