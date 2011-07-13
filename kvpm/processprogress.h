@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -33,6 +33,7 @@ Q_OBJECT
     QStringList m_output_all, m_output_no_error;
     KProgressDialog *m_progress_dialog;
     KProcess *m_process;
+    int m_exit_code;
 
  public:
     ProcessProgress(QStringList arguments,
