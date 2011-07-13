@@ -43,13 +43,12 @@ PVTree::PVTree(VolGroup *volumeGroup, QWidget *parent) : QTreeWidget(parent), m_
     header_labels << i18n("Name") << i18n("Size") 
 		  << i18n("Free") << i18n("Used")
 		  << i18n("Allocatable") 
-                  << i18n("MDA\ncount") << i18n("MDA\nused") << i18n("MDA\nsize") 
                   << i18n("Tags") 
-		  << i18n("Logical\nvolumes");
+		  << i18n("Logical volumes");
 
     item = new QTreeWidgetItem((QTreeWidgetItem *)0, header_labels);
 
-    for(int column = 0; column < 9; column++)
+    for(int column = 0; column < 7; column++)
         item->setTextAlignment(column, Qt::AlignCenter);
 
     item->setToolTip(0, i18n("Physical volume device"));
@@ -57,10 +56,8 @@ PVTree::PVTree(VolGroup *volumeGroup, QWidget *parent) : QTreeWidget(parent), m_
     item->setToolTip(2, i18n("Free space on physical volume"));
     item->setToolTip(3, i18n("Space used on physical volume"));
     item->setToolTip(4, i18n("If physical volume allows more extents to be allocated"));
-    item->setToolTip(5, i18n("Number of metadata areas on physical volume"));
-    item->setToolTip(6, i18n("Number of metadata areas in use on physical volume"));
-    item->setToolTip(7, i18n("Size of meta data areas on physical volume"));
-    item->setToolTip(8, i18n("Optional tags for physical volume"));
+    item->setToolTip(5, i18n("Optional tags for physical volume"));
+    item->setToolTip(6, i18n("Logical volumes on physical volume"));
 
     setHeaderItem(item);
 }
@@ -88,20 +85,16 @@ void PVTree::loadData()
 	device_name = pv->getName();
 	
 	pv_data << device_name
-		<< sizeToString(pv->getSize())
-		<< sizeToString(pv->getUnused())
-		<< sizeToString(pv->getSize() - pv->getUnused());
+		<< sizeToString( pv->getSize() )
+		<< sizeToString( pv->getUnused() )
+		<< sizeToString( pv->getSize() - pv->getUnused() );
 
-	if(pv->isAllocatable())
+	if( pv->isAllocatable() )
 	    pv_data << "Yes";
 	else
 	    pv_data << "No";
 
-        pv_data << QString("%1").arg(pv->getMDACount());
-        pv_data << QString("%1").arg(pv->getMDAUsed());
-        pv_data << sizeToString(pv->getMDASize());
-
-        pv_data << "   "; // replace with pv->getTag();
+        pv_data << pv->getTags().join(", ");
 
 /* here we get the names of logical volumes associated
    with the physical volume */
@@ -129,8 +122,11 @@ void PVTree::loadData()
 	item->setData(2, Qt::UserRole, pv->getUnused());
 	item->setData(3, Qt::UserRole, (pv->getSize() - pv->getUnused()));
 
-        for(int column = 1; column < 8; column++)
+        for(int column = 1; column < 5; column++)
             item->setTextAlignment(column, Qt::AlignRight);
+
+        item->setTextAlignment(5, Qt::AlignLeft);
+        item->setTextAlignment(6, Qt::AlignLeft);
 
 	pv_tree_items.append(item);
     }
@@ -139,7 +135,6 @@ void PVTree::loadData()
     if( pv_tree_items.size() )
 	setCurrentItem( pv_tree_items[0] );
 
-    setColumnHidden(8, true);
     return;
 }
 
