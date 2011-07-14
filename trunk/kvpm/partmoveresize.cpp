@@ -43,12 +43,12 @@ bool moveresize_partition(StoragePartition *partition)
 
     QString message = i18n("Currently only the ext2/3/4 file systems "
                            "are supported for file system shrinking. "
-                           "Growing is supported for ext2/3/4, jfs, xfs and Reiserfs. "
+                           "Growing is supported for ext2/3/4, jfs, xfs, ntfs and Reiserfs. "
                            "Moving a partition is supported for any filesystem. "
                            "Physical volumes may also be grown, shrunk or moved");
 
     if( ! ( fs == "ext2" || fs == "ext3" || fs == "ext4" || fs == "reiserfs" ||
-            fs == "xfs"  || fs == "jfs"  || partition->isPhysicalVolume() ) ){
+            fs == "xfs"  || fs == "jfs"  || fs == "ntfs" || partition->isPhysicalVolume() ) ){
 
         KMessageBox::information(0, message);
     }
@@ -84,7 +84,7 @@ PartitionMoveResizeDialog::PartitionMoveResizeDialog(StoragePartition *partition
 
 
     if( ! ( fs == "ext2" || fs == "ext3" || fs == "ext4" || fs == "reiserfs" || 
-            fs == "xfs"  || fs == "jfs"  || partition->isPhysicalVolume() ) )
+            fs == "xfs"  || fs == "jfs"  || fs == "ntfs" || partition->isPhysicalVolume() ) )
         {
             max_size = m_existing_part->geom.length;
         }

@@ -153,6 +153,24 @@ bool fs_extend(QString path, QString fs, bool isLV){
         else
             return true;
     }
+    else if( fs == "ntfs" ){
+
+        arguments << "ntfsresize" 
+                  << "--no-progress-bar"
+                  << "--force"
+                  << path; 
+
+        ProcessProgress fs_grow(arguments, i18n("Extending filesystem..."), true );
+        output = fs_grow.programOutput();
+        
+        if ( fs_grow.exitCode() ){
+            KMessageBox::error(0, error_message);
+            return false;
+        }
+        else
+            return true;
+    }
+
     return false;
 }
 
