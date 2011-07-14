@@ -61,13 +61,13 @@ bool lv_extend(LogVol *logicalVolume)
 {
     QString fs = logicalVolume->getFilesystem();
 
-    QString warning_message = i18n("Currently only the ext2/3/4, xfs, jfs " 
-				   "and reiserfs file systems are "
+    QString warning_message = i18n("Currently only the ext2/3/4, xfs, jfs, " 
+				   "ntfs and reiserfs file systems are "
 				   "supported for file system extention. If this logical "
 				   "volume has a filesystem or data, it will need to be " 
 				   "extended separately!");
 
-    if( fs == "xfs"  || fs == "jfs"  || fs == "reiserfs" || 
+    if( fs == "xfs"  || fs == "jfs"  || fs == "reiserfs" || fs == "ntfs" || 
         fs == "ext2" || fs == "ext3" || fs == "ext4" || logicalVolume->isSnap() ){
 
         LVCreateDialog dialog(logicalVolume, false);
