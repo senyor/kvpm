@@ -250,16 +250,14 @@ void VolGroup::rescan(lvm_t lvm)
    before its origin, it gets appended back onto the end of 
    the unsorted list.  */
 
-/* TO DO: a snapshot without an origin will cause an
-   infinite loop! */
-
 const QList<LogVol *>  VolGroup::getLogicalVolumes()
 {
     QList<LogVol *> sorted_list;
     QList<LogVol *> unsorted_list = m_member_lvs;
 
     LogVol *lv;
-    
+    bool has_more_origins;
+
     while( unsorted_list.size() ){
 	lv = unsorted_list.takeFirst();
 	if( lv->isOrigin() ){
@@ -270,8 +268,17 @@ const QList<LogVol *>  VolGroup::getLogicalVolumes()
 			sorted_list.append( unsorted_list.takeAt(x) );
 	    }
 	}
-	else if( lv->isSnap() )
-	    unsorted_list.append( lv );     
+	else if( lv->isSnap() ){
+            has_more_origins = false;
+            for(int x = 0; x < unsorted_list.size(); x++){
+                if( unsorted_list[x]->isOrigin() )
+                    has_more_origins = true;
+            }
+            if(has_more_origins)             // No more origins means any snaps left are 
+                unsorted_list.append(lv);    // orphans so we skip them
+            else
+                sorted_list.append(lv);
+        }     
 	else                                 
 	    sorted_list.append(lv);           
     }                                     
