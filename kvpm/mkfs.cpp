@@ -290,7 +290,7 @@ QStringList MkfsDialog::arguments()
     }
     else if(ntfs->isChecked()){
 	type = "ntfs";
-        mkfs_options << "-Q" << "--with-uuid" << "--quiet";
+        mkfs_options << "-Q" << "--quiet";
     }
     else if(reiser->isChecked()){
 	mkfs_options << "-q";
