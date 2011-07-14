@@ -34,9 +34,10 @@ bool max_fs(LogVol *logicalVolume)
     QString fs = logicalVolume->getFilesystem();
     
     QString message = i18n("Extend the filesystem on: %1 to fill the entire volume?").arg("<b>"+full_name+"</b>");
-    QString error_message = i18n("Extending is only supported for ext2/3/4, jfs, xfs and Reiserfs. ");
+    QString error_message = i18n("Extending is only supported for ext2/3/4, jfs, xfs, ntfs and Reiserfs. ");
 
-    if( ! ( fs == "ext2" || fs == "ext3" || fs == "ext4" || fs == "reiserfs" || fs == "xfs"  || fs == "jfs" ) ){
+    if( ! ( fs == "ext2" || fs == "ext3" || fs == "ext4" || fs == "reiserfs" || 
+            fs == "xfs"  || fs == "jfs" || fs == "ntfs" ) ){
         KMessageBox::error(0, error_message );
         return false;
     }
@@ -60,10 +61,10 @@ bool max_fs(StoragePartition *partition)
     else
         message = i18n("Extend the filesystem on: %1 to fill the entire partition?", "<b>"+path+"</b>");
 
-    error_message = i18n("Extending is only supported for ext2/3/4, jfs, xfs, Reiserfs and physical volumes. ");
+    error_message = i18n("Extending is only supported for ext2/3/4, jfs, xfs, Reiserfs, ntfs and physical volumes. ");
 
     if( ! ( fs == "ext2" || fs == "ext3" || fs == "ext4" || fs == "reiserfs" ||
-            fs == "xfs"  || fs == "jfs"  || partition->isPhysicalVolume() ) ){
+            fs == "xfs"  || fs == "jfs"  || fs == "ntfs" || partition->isPhysicalVolume() ) ){
 
         KMessageBox::error(0, error_message );
         return false;
