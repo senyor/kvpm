@@ -138,6 +138,7 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, VolGroup *volumeGroup, QWidg
 
 	    if( m_lv->isMounted() ){
 		lv_mkfs_action->setEnabled(false);
+		lv_removefs_action->setEnabled(false);
 		lv_reduce_action->setEnabled(false);
                 lv_extend_action->setEnabled(true);
 		lv_remove_action->setEnabled(false);
@@ -146,6 +147,7 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, VolGroup *volumeGroup, QWidg
 	    }
 	    else{
 		lv_mkfs_action->setEnabled(true);
+		lv_removefs_action->setEnabled(true);
 		lv_reduce_action->setEnabled(true);
                 lv_extend_action->setEnabled(true);
 		lv_remove_action->setEnabled(true);
@@ -198,6 +200,7 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, VolGroup *volumeGroup, QWidg
 	}
         else if( m_lv->isOrphan() ){
 	    lv_mkfs_action->setEnabled(false);
+	    lv_removefs_action->setEnabled(false);
 	    lv_maxfs_action->setEnabled(false);
 	    lv_remove_action->setEnabled(true);
 	    unmount_filesystem_action->setEnabled(false);
@@ -215,6 +218,7 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, VolGroup *volumeGroup, QWidg
         }
 	else if( m_lv->isPvmove() ){
 	    lv_mkfs_action->setEnabled(false);
+	    lv_removefs_action->setEnabled(false);
 	    lv_maxfs_action->setEnabled(false);
 	    lv_remove_action->setEnabled(false);
 	    unmount_filesystem_action->setEnabled(false);
@@ -233,6 +237,7 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, VolGroup *volumeGroup, QWidg
 	else if( m_lv->isMirrorLeg() || m_lv->isMirrorLog() ){
 
 	    lv_mkfs_action->setEnabled(false);
+	    lv_removefs_action->setEnabled(false);
 	    lv_maxfs_action->setEnabled(false);
 	    lv_remove_action->setEnabled(false);
             unmount_filesystem_action->setEnabled(false);
@@ -262,6 +267,7 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, VolGroup *volumeGroup, QWidg
 		unmount_filesystem_action->setEnabled(false);
 
             mount_filesystem_action->setEnabled(true);
+	    lv_removefs_action->setEnabled(false);
 	    lv_mkfs_action->setEnabled(false);
 	    lv_maxfs_action->setEnabled(false);
 	    lv_remove_action->setEnabled(false);
@@ -283,6 +289,7 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, VolGroup *volumeGroup, QWidg
 		unmount_filesystem_action->setEnabled(false);
 
             mount_filesystem_action->setEnabled(true);
+	    lv_removefs_action->setEnabled(true);
 	    lv_mkfs_action->setEnabled(true);
 	    lv_remove_action->setEnabled(false);
 	    add_mirror_action->setEnabled(false);
@@ -332,6 +339,7 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, VolGroup *volumeGroup, QWidg
             }
 
             mount_filesystem_action->setEnabled(true);
+	    lv_removefs_action->setEnabled(false);
 	    lv_mkfs_action->setEnabled(false);
 	    lv_maxfs_action->setEnabled(false);
 	    lv_reduce_action->setEnabled(false);
@@ -342,6 +350,7 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, VolGroup *volumeGroup, QWidg
 	}
 
         if( !m_lv->isActive() ){
+	    lv_removefs_action->setEnabled(false);
             lv_mkfs_action->setEnabled(false);
             unmount_filesystem_action->setEnabled(false);
             mount_filesystem_action->setEnabled(false);
@@ -352,6 +361,7 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, VolGroup *volumeGroup, QWidg
     else{
 	lv_maxfs_action->setEnabled(false);
 	lv_mkfs_action->setEnabled(false);
+	lv_removefs_action->setEnabled(false);
 	lv_remove_action->setEnabled(false);
 	unmount_filesystem_action->setEnabled(false);
 	mount_filesystem_action->setEnabled(false);
