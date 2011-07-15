@@ -98,6 +98,9 @@ void LogVol::rescan(lv_t lvm_lv)
 	m_type = "mirror";
 	m_mirror = true;
 	break;
+    case 'O':
+	m_type = "origin (merging)";
+	break;
     case 'o':
 	m_type = "origin";
 	break;
@@ -106,11 +109,11 @@ void LogVol::rescan(lv_t lvm_lv)
 	m_pvmove = true;
 	break;
     case 's':
-	m_type = "valid snap";
+	m_type = "snapshot";
 	m_snap = true;
 	break;
     case 'S':
-	m_type = "invalid snap";
+	m_type = "snapshot"; // change to "snapshot (merging)" when lvs stops calling invalid snaps 'S' too.
 	m_snap = true;
 	break;
     case 'v':
