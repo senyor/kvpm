@@ -37,6 +37,7 @@
 #include "removefs.h"
 #include "removemirror.h"
 #include "removemirrorleg.h"
+#include "snapmerge.h"
 #include "unmount.h"
 #include "volgroup.h"
 
@@ -72,7 +73,8 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, VolGroup *volumeGroup, QWidg
     lv_rename_action->setIcon( KIcon("edit-rename") );
     snap_create_action = lv_actions->addAction("snapcreate", this, SLOT(createSnapshot()));
     snap_create_action->setText( i18n("Create snapshot...") );
-    snap_create_action->setIcon( KIcon("camera-photo") );
+    snap_merge_action = lv_actions->addAction("snapmerge", this, SLOT(mergeSnapshot()));
+    snap_merge_action->setText( i18n("Merge snapshot...") );
     lv_reduce_action = lv_actions->addAction( "lvreduce", this, SLOT(reduceLogicalVolume()));
     lv_reduce_action->setText( i18n("Reduce logical volume...") );
     lv_extend_action = lv_actions->addAction( "lvextend", this, SLOT(extendLogicalVolume()));
@@ -133,6 +135,11 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, VolGroup *volumeGroup, QWidg
 
     if( m_lv ){
 
+        if( m_lv->isSnap() && m_lv->isValid() && !m_lv->isMerging() )
+		snap_merge_action->setEnabled(true);
+        else
+		snap_merge_action->setEnabled(false);
+
 	if(  m_lv->isWritable()  && !m_lv->isLocked() && !m_lv->isVirtual() && 
 	    !m_lv->isMirrorLeg() && !m_lv->isMirrorLog() ){
 
@@ -153,6 +160,12 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, VolGroup *volumeGroup, QWidg
 		lv_remove_action->setEnabled(true);
 		unmount_filesystem_action->setEnabled(false);
 		mount_filesystem_action->setEnabled(true);
+
+                if( m_lv->isSnap() && ( m_lv->isMerging() || !m_lv->isValid() ) ){
+                    lv_mkfs_action->setEnabled(false);
+                    lv_removefs_action->setEnabled(false);
+                    lv_remove_action->setEnabled(false);
+                }
 	    }
 
             if( m_lv->isSnap() || m_lv->isOrigin() ){
@@ -169,8 +182,14 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, VolGroup *volumeGroup, QWidg
 
                 if( m_lv->isSnap() ){
                     snap_create_action->setEnabled(false);
-                    lv_extend_action->setEnabled(true);
-                    lv_reduce_action->setEnabled(true);
+                    if( m_lv->isMerging() || !m_lv->isValid() ){
+                        lv_extend_action->setEnabled(false);
+                        lv_reduce_action->setEnabled(false);
+                    }
+                    else{
+                        lv_extend_action->setEnabled(true);
+                        lv_reduce_action->setEnabled(true);
+                    }
                 }
                 else
                     snap_create_action->setEnabled(true);
@@ -191,12 +210,18 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, VolGroup *volumeGroup, QWidg
                 snap_create_action->setEnabled(true);
             }
 
-	    lv_change_action->setEnabled(true);
-	    lv_rename_action->setEnabled(true);
 	    remove_mirror_leg_action->setEnabled(false);
-            filesystem_menu->setEnabled(true);
             lv_maxfs_action->setEnabled(true);
+            lv_change_action->setEnabled(true);
 
+            if( m_lv->isSnap() && ( m_lv->isMerging() || !m_lv->isValid() ) ){
+                filesystem_menu->setEnabled(false);
+                lv_rename_action->setEnabled(false);
+            }
+            else{
+                filesystem_menu->setEnabled(true);
+                lv_rename_action->setEnabled(true);
+            }
 	}
         else if( m_lv->isOrphan() ){
 	    lv_mkfs_action->setEnabled(false);
@@ -359,6 +384,7 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, VolGroup *volumeGroup, QWidg
         }
     }
     else{
+        snap_merge_action->setEnabled(false);
 	lv_maxfs_action->setEnabled(false);
 	lv_mkfs_action->setEnabled(false);
 	lv_removefs_action->setEnabled(false);
@@ -432,6 +458,12 @@ void LVActionsMenu::removefsLogicalVolume()
 void LVActionsMenu::maxfsLogicalVolume()
 {
     if( max_fs(m_lv) )
+	MainWindow->reRun();
+}
+
+void LVActionsMenu::mergeSnapshot()
+{
+    if( merge_snap(m_lv) )
 	MainWindow->reRun();
 }
 

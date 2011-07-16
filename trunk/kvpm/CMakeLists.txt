@@ -16,7 +16,7 @@ set(kvpm_SRCS addmirror.cpp kvpmconfigdialog.cpp devicemodel.cpp devicepropertie
 	      pvextend.cpp pvreduce.cpp partremove.cpp pvcheckbox.cpp
 	      partaddgraphic.cpp partadd.cpp pvproperties.cpp  pvpropertiesstack.cpp 
 	      devicetreeview.cpp physvol.cpp partmoveresize.cpp removefs.cpp
-	      misc.cpp pedexceptions.cpp processprogress.cpp pvchange.cpp 
+	      misc.cpp pedexceptions.cpp processprogress.cpp pvchange.cpp snapmerge.cpp
 	      pvmove.cpp pvtree.cpp removemissing.cpp removemirror.cpp sizeselectorbox.cpp
 	      removemirrorleg.cpp storagepartition.cpp storagedevice.cpp topwindow.cpp  
 	      tablecreate.cpp unmount.cpp vgchange.cpp vgexport.cpp vgimport.cpp
