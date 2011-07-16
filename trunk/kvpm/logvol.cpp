@@ -64,6 +64,7 @@ void LogVol::rescan(lv_t lvm_lv)
     flags.append(value.value.string);
 
     m_under_conversion = false;
+    m_merging    = false;
     m_mirror     = false;
     m_mirror_leg = false;
     m_mirror_log = false;
@@ -100,6 +101,7 @@ void LogVol::rescan(lv_t lvm_lv)
 	break;
     case 'O':
 	m_type = "origin (merging)";
+        m_merging = true;
 	break;
     case 'o':
 	m_type = "origin";
@@ -113,8 +115,16 @@ void LogVol::rescan(lv_t lvm_lv)
 	m_snap = true;
 	break;
     case 'S':
-	m_type = "snapshot"; // change to "snapshot (merging)" when lvs stops calling invalid snaps 'S' too.
-	m_snap = true;
+        if( flags[4] != 'I' ){         // When 'S' stops getting used for Invalid and only merging - remove this
+            m_type = "snapshot (merging)";
+            m_snap = true;
+            m_merging = true;
+        }
+        else{
+            m_type = "snapshot";
+            m_snap = true;
+            m_merging = false;
+        }
 	break;
     case 'v':
 	m_type = "virtual";
@@ -529,6 +539,11 @@ void LogVol::setLogCount(int logCount)
 {
     m_log_count = logCount;
     return;
+}
+
+bool LogVol::isMerging()
+{
+    return m_merging;
 }
 
 bool LogVol::isMounted()

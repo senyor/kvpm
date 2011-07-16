@@ -77,6 +77,7 @@ class LogVol
     bool m_pvmove;               // is a pvmove temporary volume
     bool m_snap;                 // is a snapshot volume
     bool m_writable;
+    bool m_merging;              // is snap or snap origin that is merging
 
     Segment* processSegments(lvseg_t lvm_lvseg);
     
@@ -121,6 +122,7 @@ class LogVol
     bool isActive();
     bool isFixed();
     bool isLocked();
+    bool isMerging();
     bool isMirror();
     bool isMirrorLeg();
     bool isMirrorLog();
