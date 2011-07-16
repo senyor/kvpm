@@ -70,6 +70,7 @@ void LogVol::rescan(lv_t lvm_lv)
     m_mirror_log = false;
     m_snap       = false;
     m_pvmove     = false;
+    m_valid      = true;
     m_virtual    = false;
     m_orphan     = false;
 
@@ -202,6 +203,7 @@ void LogVol::rescan(lv_t lvm_lv)
 	break;
     case 'I':
 	m_state = "Invalid";
+        m_valid = false;
 	break;
     case 'S':
 	m_state = "Suspended";
@@ -635,6 +637,11 @@ bool LogVol::isOrphan()
 bool LogVol::isFixed()
 {
     return m_fixed;
+}
+
+bool LogVol::isValid()
+{
+    return m_valid;
 }
 
 QString LogVol::getPolicy()
