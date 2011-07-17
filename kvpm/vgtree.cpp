@@ -137,6 +137,7 @@ void VGTree::loadData()
 
                         origin_item = new QTreeWidgetItem( lv_item, lv_data );
                         origin_item->setData(0, Qt::UserRole, lv->getName());
+                        origin_item->setData(1, Qt::UserRole, 0);
                         for(int column = 1; column < origin_item->columnCount() ; column++)
                             origin_item->setTextAlignment(column, Qt::AlignRight);
                         insertMirrorLegItems(lv, origin_item );
@@ -196,6 +197,7 @@ void VGTree::loadData()
 
                     origin_item = new QTreeWidgetItem( lv_item, lv_data );
                     origin_item->setData(0, Qt::UserRole, lv->getName());
+                    origin_item->setData(1, Qt::UserRole, -1);
                     for(int column = 1; column < origin_item->columnCount() ; column++)
                         origin_item->setTextAlignment(column, Qt::AlignRight);
                     insertSegmentItems(lv, origin_item );
