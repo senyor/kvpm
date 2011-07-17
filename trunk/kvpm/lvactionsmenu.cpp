@@ -181,6 +181,7 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, VolGroup *volumeGroup, QWidg
                 pv_move_action->setEnabled(false);
 
                 if( m_lv->isSnap() ){
+                    lv_maxfs_action->setEnabled(false);
                     snap_create_action->setEnabled(false);
                     if( m_lv->isMerging() || !m_lv->isValid() ){
                         lv_extend_action->setEnabled(false);
@@ -211,16 +212,18 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, VolGroup *volumeGroup, QWidg
             }
 
 	    remove_mirror_leg_action->setEnabled(false);
-            lv_maxfs_action->setEnabled(true);
+            lv_rename_action->setEnabled(true);
             lv_change_action->setEnabled(true);
+            filesystem_menu->setEnabled(true);
 
             if( m_lv->isSnap() && ( m_lv->isMerging() || !m_lv->isValid() ) ){
-                filesystem_menu->setEnabled(false);
                 lv_rename_action->setEnabled(false);
-            }
-            else{
-                filesystem_menu->setEnabled(true);
-                lv_rename_action->setEnabled(true);
+		lv_mkfs_action->setEnabled(false);
+		lv_removefs_action->setEnabled(false);
+		lv_reduce_action->setEnabled(false);
+                lv_extend_action->setEnabled(false);
+		mount_filesystem_action->setEnabled(false);
+		lv_remove_action->setEnabled(false);
             }
 	}
         else if( m_lv->isOrphan() ){
