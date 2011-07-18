@@ -36,12 +36,12 @@ Q_OBJECT
 
     LogVol *m_lv;
     
-    QCheckBox *available_check,    // Make the volume available 
-	      *ro_check,           // make the volume read only
-	      *refresh_check,      // refresh the metadata
-              *resync_check,       // re-sync mirrors
-              *m_udevsync_check,   // sync with udev
-              *m_persistant_check; // Set persistant kernel device numbers  
+    QCheckBox *m_available_check,    // Make the volume available 
+	      *m_ro_check,           // make the volume read only
+	      *m_refresh_check,      // refresh the metadata
+              *m_resync_check,       // re-sync mirrors
+              *m_udevsync_check,     // sync with udev
+              *m_persistant_check;   // Set persistant kernel device numbers  
 
     QRadioButton *m_normal_button,      // allocation policy 
                  *m_contiguous_button, 
@@ -55,11 +55,16 @@ Q_OBJECT
                  *m_nomonitor_button,  
                  *m_ignore_button;     // ignore dmeventd monitoring 
 
-    QGroupBox *m_devnum_box, *m_dmeventd_box, *m_polling_box, *m_udevsync_box, *m_tag_group, *m_alloc_box;
+    QGroupBox *m_devnum_box, 
+              *m_dmeventd_box, 
+              *m_polling_box, 
+              *m_udevsync_box, 
+              *m_tag_group, 
+              *m_alloc_box;
 
-    KLineEdit *minor_edit,  // User entered device minor number 
-              *major_edit,  // User entered device major number 
-              *m_tag_edit;  // new tag
+    KLineEdit *m_minor_edit,  // User entered device minor number 
+              *m_major_edit,  // User entered device major number 
+              *m_tag_edit;    // new tag
 
     KComboBox *m_deltag_combo;
 
