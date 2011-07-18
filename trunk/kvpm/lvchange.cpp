@@ -70,21 +70,21 @@ void LVChangeDialog::buildGeneralTab()
     general_group->setLayout(general_layout);
     layout->addWidget(general_group);
 
-    available_check  = new QCheckBox( i18n("Make volume available for use") );
-    ro_check         = new QCheckBox( i18n("Make volume read only") );
-    refresh_check    = new QCheckBox( i18n("Refresh volume metadata") );
-    general_layout->addWidget(available_check);
-    general_layout->addWidget(ro_check);
-    general_layout->addWidget(refresh_check);
+    m_available_check  = new QCheckBox( i18n("Make volume available for use") );
+    m_ro_check         = new QCheckBox( i18n("Make volume read only") );
+    m_refresh_check    = new QCheckBox( i18n("Refresh volume metadata") );
+    general_layout->addWidget(m_available_check);
+    general_layout->addWidget(m_ro_check);
+    general_layout->addWidget(m_refresh_check);
 
     if( m_lv->isActive() )
-	available_check->setChecked(true);
+	m_available_check->setChecked(true);
 
     if( m_lv->isMounted() || m_lv->isSnap() )    
-        available_check->setEnabled(false);
+        m_available_check->setEnabled(false);
 
     if( !m_lv->isWritable() )
-	ro_check->setChecked(true);
+	m_ro_check->setChecked(true);
 
     m_tag_group = new QGroupBox( i18n("Change volume tags"));
     m_tag_group->setCheckable(true);
@@ -170,9 +170,9 @@ void LVChangeDialog::buildMirrorTab()
     layout->addWidget(resync_box);
     QVBoxLayout *resync_layout = new QVBoxLayout();
     resync_box->setLayout(resync_layout);
-    resync_check = new QCheckBox( i18n("Re-synchronize mirrors") );
-    resync_check->setEnabled( !m_lv->isMounted() );
-    resync_layout->addWidget(resync_check);
+    m_resync_check = new QCheckBox( i18n("Re-synchronize mirrors") );
+    m_resync_check->setEnabled( !m_lv->isMounted() );
+    resync_layout->addWidget(m_resync_check);
 
     m_dmeventd_box = new QGroupBox( i18n("dmeventd monitoring") );
     m_dmeventd_box->setCheckable(true);
@@ -226,22 +226,22 @@ void LVChangeDialog::buildAdvancedTab()
     devnum_layout->addLayout(major_layout);
     devnum_layout->addLayout(minor_layout);
 
-    major_edit = new KLineEdit(QString("%1").arg(m_lv->getMajorDevice()));
+    m_major_edit = new KLineEdit(QString("%1").arg(m_lv->getMajorDevice()));
     major_layout->addWidget( new QLabel( i18n("Major number: ") ) );
-    major_layout->addWidget(major_edit);
-    minor_edit = new KLineEdit(QString("%1").arg(m_lv->getMinorDevice()));
+    major_layout->addWidget(m_major_edit);
+    m_minor_edit = new KLineEdit(QString("%1").arg(m_lv->getMinorDevice()));
     minor_layout->addWidget( new QLabel( i18n("Minor number: ") ) );
-    minor_layout->addWidget(minor_edit);
+    minor_layout->addWidget(m_minor_edit);
     layout->addWidget(m_devnum_box);
     m_persistant_check->setChecked( m_lv->isPersistant() );
     m_devnum_box->setChecked(false);
 
     m_dmeventd_box->setEnabled( m_lv->isMirror() );
 
-    connect(available_check,     SIGNAL(clicked()), this, SLOT(resetOkButton()));
-    connect(ro_check,            SIGNAL(clicked()), this, SLOT(resetOkButton()));
-    connect(refresh_check,       SIGNAL(clicked()), this, SLOT(resetOkButton()));
-    connect(resync_check,        SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    connect(m_available_check,     SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    connect(m_ro_check,            SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    connect(m_refresh_check,       SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    connect(m_resync_check,        SIGNAL(clicked()), this, SLOT(resetOkButton()));
     connect(m_udevsync_check,    SIGNAL(clicked()), this, SLOT(resetOkButton()));
     connect(m_persistant_check,  SIGNAL(clicked()), this, SLOT(resetOkButton()));
     connect(m_monitor_button,    SIGNAL(clicked()), this, SLOT(resetOkButton()));
@@ -263,7 +263,7 @@ void LVChangeDialog::buildAdvancedTab()
     connect(m_deltag_combo, SIGNAL(currentIndexChanged(int)), this, SLOT(resetOkButton()));
     connect(m_tag_edit, SIGNAL(userTextChanged(QString)), this, SLOT(resetOkButton()));
 
-    enableButtonOk(false);
+    resetOkButton();
 }
 
 QStringList LVChangeDialog::arguments()
@@ -273,21 +273,21 @@ QStringList LVChangeDialog::arguments()
     args << "lvchange" << "--yes"; // answer yes to any question
 
     if( !m_lv->isSnap() ){    
-        if( available_check->isChecked() && ( !m_lv->isActive() ))
+        if( m_available_check->isChecked() && ( !m_lv->isActive() ))
 	    args << "--available" << "y";
-	else if( ( ! available_check->isChecked() ) && ( m_lv->isActive() ))
+	else if( ( ! m_available_check->isChecked() ) && ( m_lv->isActive() ))
 	    args << "--available" << "n";
     }
 
-    if( ro_check->isChecked() && m_lv->isWritable() )
+    if( m_ro_check->isChecked() && m_lv->isWritable() )
 	args << "--permission" << "r";
-    else if( ( ! ro_check->isChecked() ) && ( ! m_lv->isWritable() ) )
+    else if( ( ! m_ro_check->isChecked() ) && ( ! m_lv->isWritable() ) )
 	args << "--permission" << "rw";
 
-    if( resync_check->isChecked() )
+    if( m_resync_check->isChecked() )
         args << "--resync";
 
-    if( refresh_check->isChecked() )
+    if( m_refresh_check->isChecked() )
         args << "--refresh";
     
     if( m_dmeventd_box->isChecked() ){
@@ -302,13 +302,13 @@ QStringList LVChangeDialog::arguments()
     if( m_devnum_box->isChecked() ){
         if( m_persistant_check->isChecked() ){
             args << "--force" << "--persistent" << "y";
-            args << "--major" << major_edit->text();
-            args << "--minor" << minor_edit->text();
+            args << "--major" << m_major_edit->text();
+            args << "--minor" << m_minor_edit->text();
         }
         else{
             args << "--force" << "--persistent" << "n";
-            args << "--major" << major_edit->text();
-            args << "--minor" << minor_edit->text();
+            args << "--major" << m_major_edit->text();
+            args << "--minor" << m_minor_edit->text();
         }
     }
 
@@ -349,6 +349,13 @@ QStringList LVChangeDialog::arguments()
 }
 
 void LVChangeDialog::resetOkButton(){
+
+    if( m_available_check->isChecked() )
+        m_polling_box->setEnabled(true);
+    else{
+        m_polling_box->setEnabled(false);
+        m_polling_box->setChecked(false);
+    }         
 
     QStringList args = arguments();
 
