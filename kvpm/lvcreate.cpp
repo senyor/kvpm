@@ -67,20 +67,63 @@ bool lv_extend(LogVol *logicalVolume)
 				   "volume has a filesystem or data, it will need to be " 
 				   "extended separately!");
 
+    if( logicalVolume->isOrigin() ){
+
+        if( logicalVolume->isOpen() ){
+            KMessageBox::error(0, i18n("Snapshot origins cannot be extended while open or mounted") );
+            return false;
+        }
+
+        QList<LogVol *> snap_shots = logicalVolume->getVolumeGroup()->getSnapshots(logicalVolume);
+
+        for(int x = 0; x < snap_shots.size(); x++){
+            if( snap_shots[x]->isOpen() ){
+                KMessageBox::error(0, i18n("Volumes cannot be extended with open or mounted snapshots") );
+                return false;
+            }
+        }
+    }
+
     if( fs == "xfs"  || fs == "jfs"  || fs == "reiserfs" || fs == "ntfs" || 
-        fs == "ext2" || fs == "ext3" || fs == "ext4" || logicalVolume->isSnap() ){
+        fs == "ext2" || fs == "ext3" || fs == "ext4"     || logicalVolume->isSnap() ){
 
         LVCreateDialog dialog(logicalVolume, false);
         dialog.exec();
 
         if( dialog.result() == QDialog::Accepted ){
-            ProcessProgress extend_lv(dialog.argumentsLV(), i18n("Extending volume..."), true);
-            if( !extend_lv.exitCode() && !logicalVolume->isSnap() )
-                fs_extend( logicalVolume->getMapperPath(), fs, true );		    
-	    return true;
+            if( logicalVolume->isOrigin() ){
+                QStringList lvchange_args;
+                lvchange_args << "lvchange" << "-an" << logicalVolume->getMapperPath();
+
+                ProcessProgress deactivate_lv(lvchange_args, i18n("Deactivating volume..."), true);
+                if( deactivate_lv.exitCode() ){
+                    KMessageBox::error(0, i18n("Volume deactivation failed, volume not extended") );
+                    return false;
+                }
+
+                ProcessProgress extend_origin(dialog.argumentsLV(), i18n("Extending volume..."), true);
+
+                lvchange_args.clear();
+                lvchange_args << "lvchange" << "-ay" << logicalVolume->getMapperPath();
+                ProcessProgress activate_lv(lvchange_args, i18n("Activating volume..."), true);
+                if( (!activate_lv.exitCode()) && (!extend_origin.exitCode()) ){
+                    fs_extend( logicalVolume->getMapperPath(), fs, true );		    
+                    return true;
+                }
+                else{
+                    KMessageBox::error(0, i18n("Filesystem not extended") );
+                    return false;
+                }
+            }
+            else{
+                ProcessProgress extend_lv(dialog.argumentsLV(), i18n("Extending volume..."), true);
+                if( !extend_lv.exitCode() && !logicalVolume->isSnap() )
+                    fs_extend( logicalVolume->getMapperPath(), fs, true );		    
+                return true;
+            }
         }
 	else
-	  return false;
+            return false;
     }
     else{
         if(KMessageBox::warningContinueCancel(0, warning_message) == KMessageBox::Continue){
