@@ -20,6 +20,7 @@
 #include <KLineEdit>
 #include <KComboBox>
 
+#include <QCheckBox>
 #include <QGroupBox>
 #include <QRadioButton>
 #include <QLabel>
@@ -38,22 +39,40 @@ class MkfsDialog : public KDialog
 Q_OBJECT
 
     KTabWidget  *m_tab_widget;
-    QGroupBox   *radio_box, *m_stripe_box, *m_inode_box;
+    QGroupBox   *radio_box, *m_stripe_box, *m_misc_box, 
+                *m_base_options_box, *m_ext4_options_box;
 
     QRadioButton *ext2, *ext3, *ext4, *reiser, *reiser4, *ntfs,
                  *jfs,  *xfs,  *vfat, *swap,   *btrfs;
 
     KComboBox *m_block_combo;      // blocksize
+    KComboBox *m_inode_combo;      // inode size
     KLineEdit *m_volume_edit;      // volume name
-    KLineEdit *m_inode_edit;       // bytes /inode
+    KLineEdit *m_inode_edit;       // bytes / inode
+    KLineEdit *m_total_edit;       // total inode count
     KLineEdit *m_stride_edit;      // stride size
     KLineEdit *m_count_edit;       // strides per stripe
     QSpinBox  *m_reserved_spin;
+    QCheckBox *m_extent_check;
+    QCheckBox *m_ext_attr_check;
+    QCheckBox *m_resize_inode_check;
+    QCheckBox *m_dir_index_check; 
+    QCheckBox *m_filetype_check; 
+    QCheckBox *m_sparse_super_check; 
+
+    QCheckBox *m_flex_bg_check;  
+    QCheckBox *m_huge_file_check;
+    QCheckBox *m_uninit_bg_check;
+    QCheckBox *m_dir_nlink_check;
+    QCheckBox *m_extra_isize_check;
+    QCheckBox *m_lazy_itable_init_check;
+
     QString m_path;
 
     int m_stride_size, m_stride_count;
 
-    void buildDialog();
+    QWidget *generalTab();
+    QWidget *advancedTab();
 
  public slots:
     void setAdvancedTab(bool);

@@ -39,7 +39,6 @@ bool make_fs(LogVol *logicalVolume)
 
     QByteArray zero_array(128 * 1024, '\0');
     QString path = logicalVolume->getMapperPath();
-    qDebug() << path;
     QFile *device;
 
     if( logicalVolume->isMounted() ){
@@ -112,7 +111,6 @@ bool make_fs(StoragePartition *partition)
     return false;
 }
 
-
 MkfsDialog::MkfsDialog(LogVol *logicalVolume, QWidget *parent) : KDialog(parent)
 {
     m_path = QString( "/dev/" + logicalVolume->getFullName() );
@@ -120,9 +118,14 @@ MkfsDialog::MkfsDialog(LogVol *logicalVolume, QWidget *parent) : KDialog(parent)
     m_stride_size = 1; // logicalVolume->getSegmentStripeSize( 0 ); <-- must convert to blocks!
     m_stride_count = logicalVolume->getSegmentStripes( 0 );
 
-    buildDialog();
-}
+    m_tab_widget = new KTabWidget(this);
+    m_tab_widget->addTab(generalTab(), i18n("General") );
+    m_tab_widget->addTab(advancedTab(), i18n("Advanced") );
+    setMainWidget(m_tab_widget);
+    setCaption( i18n("Write filesystem") );
 
+    setAdvancedTab(true);
+}
 
 MkfsDialog::MkfsDialog(StoragePartition *partition, QWidget *parent) : KDialog(parent)
 {
@@ -130,25 +133,20 @@ MkfsDialog::MkfsDialog(StoragePartition *partition, QWidget *parent) : KDialog(p
     m_stride_size = 1;
     m_stride_count = 1;
 
-    buildDialog();
-}
-
-
-void MkfsDialog::buildDialog()
-{
-
     m_tab_widget = new KTabWidget(this);
-
-    QWidget *dialog_body = new QWidget();
-    QWidget *advanced_options = new QWidget();
-    m_tab_widget->addTab(dialog_body, i18n("General") );
-    m_tab_widget->addTab(advanced_options, i18n("Advanced") );
-
+    m_tab_widget->addTab(generalTab(), i18n("General") );
+    m_tab_widget->addTab(advancedTab(), i18n("Advanced") );
     setMainWidget(m_tab_widget);
     setCaption( i18n("Write filesystem") );
 
-    QVBoxLayout *layout = new QVBoxLayout;
-    dialog_body->setLayout(layout);
+    setAdvancedTab(true);
+}
+
+QWidget* MkfsDialog::generalTab()
+{
+    QWidget *tab = new QWidget();
+    QVBoxLayout *layout = new QVBoxLayout();
+    tab->setLayout(layout);
 
     QLabel *label = new QLabel( i18n("<b>Write filesystem on: %1</b>").arg(m_path) );
     label->setAlignment(Qt::AlignCenter);
@@ -181,15 +179,52 @@ void MkfsDialog::buildDialog()
     radio_layout->addWidget(xfs, 2, 2);
     radio_layout->addWidget(vfat, 3, 2);
     ext4->setChecked(true);
+    layout->addStretch();
 
-    QVBoxLayout *advanced_layout = new QVBoxLayout;
+    connect(ext2,  SIGNAL(toggled(bool)), 
+            this, SLOT(setAdvancedTab(bool)));
+
+    connect(ext3,  SIGNAL(toggled(bool)), 
+            this, SLOT(setAdvancedTab(bool)));
+
+    connect(ext4,  SIGNAL(toggled(bool)), 
+            this, SLOT(setAdvancedTab(bool)));
+
+    return tab;
+}
+
+QWidget* MkfsDialog::advancedTab()
+{
+    QWidget *tab = new QWidget();
+
+    QVBoxLayout *layout = new QVBoxLayout();
+    tab->setLayout(layout);
+
+    QLabel *override_label = new QLabel( i18n("<b>Override mkfs defaults</b>") );
+    override_label->setAlignment(Qt::AlignCenter);
+    layout->addWidget(override_label);
+
+    QHBoxLayout *lower_layout = new QHBoxLayout();
+    layout->addLayout(lower_layout);
+
+    QVBoxLayout *left_layout = new QVBoxLayout;
+    QVBoxLayout *right_layout = new QVBoxLayout;
+    lower_layout->addLayout(left_layout);
+    lower_layout->addLayout(right_layout);
+
     QHBoxLayout *reserved_layout = new QHBoxLayout;
     QHBoxLayout *block_layout  = new QHBoxLayout;
+    QHBoxLayout *isize_layout  = new QHBoxLayout;
     QHBoxLayout *name_layout   = new QHBoxLayout;
     QHBoxLayout *stride_layout = new QHBoxLayout;
     QHBoxLayout *count_layout  = new QHBoxLayout;
+    QVBoxLayout *misc_layout   = new QVBoxLayout;
     QHBoxLayout *inode_layout  = new QHBoxLayout;
-    advanced_options->setLayout(advanced_layout);
+    QHBoxLayout *total_layout  = new QHBoxLayout;
+
+    m_misc_box = new QGroupBox();
+    m_misc_box->setLayout(misc_layout);
+    left_layout->addWidget(m_misc_box);
 
     reserved_layout->addWidget( new QLabel( i18n("Reserved space: ") ) );
     m_reserved_spin = new QSpinBox;
@@ -198,11 +233,11 @@ void MkfsDialog::buildDialog()
     m_reserved_spin->setPrefix("%");
     reserved_layout->addWidget(m_reserved_spin);
     reserved_layout->addStretch();
-    advanced_layout->addLayout(reserved_layout);
+    misc_layout->addLayout(reserved_layout);
 
     block_layout->addWidget( new QLabel( i18n("Block size: ") ) );
     m_block_combo = new KComboBox();
-    m_block_combo->insertItem(0, i18n("automatic") );
+    m_block_combo->insertItem(0, i18n("default") );
     m_block_combo->insertItem(1,"1024 KiB");
     m_block_combo->insertItem(2,"2048 KiB");
     m_block_combo->insertItem(3,"4096 KiB");
@@ -210,31 +245,50 @@ void MkfsDialog::buildDialog()
     m_block_combo->setCurrentIndex(0);
     block_layout->addWidget(m_block_combo);
     block_layout->addStretch();
-    advanced_layout->addLayout(block_layout);
+    misc_layout->addLayout(block_layout);
+
+    isize_layout->addWidget( new QLabel( i18n("Inode size: ") ) );
+    m_inode_combo = new KComboBox();
+    m_inode_combo->insertItem(0, i18n("default") );
+    m_inode_combo->insertItem(1,"128 Bytes");
+    m_inode_combo->insertItem(2,"256 Bytes");
+    m_inode_combo->insertItem(3,"512 Bytes");
+    m_inode_combo->setInsertPolicy(KComboBox::NoInsert);
+    m_inode_combo->setCurrentIndex(0);
+    isize_layout->addWidget(m_inode_combo);
+    isize_layout->addStretch();
+    misc_layout->addLayout(isize_layout);
 
     name_layout->addWidget( new QLabel( i18n("Volume name: ") ) );
     m_volume_edit = new KLineEdit();
     name_layout->addWidget(m_volume_edit);
     name_layout->addStretch();
-    advanced_layout->addLayout(name_layout);
+    misc_layout->addLayout(name_layout);
 
-    m_inode_box = new QGroupBox( i18n("Inodes") );
-    m_inode_box->setCheckable(true);
-    m_inode_box->setChecked(false);
     inode_layout->addWidget( new QLabel( i18n("Bytes / inode: ") ) );
     m_inode_edit = new KLineEdit();
+    QIntValidator *inode_validator = new QIntValidator(m_inode_edit);
+    m_inode_edit->setValidator(inode_validator);
+    inode_validator->setBottom(0);
     inode_layout->addWidget(m_inode_edit);
-    m_inode_box->setLayout(inode_layout);
-    advanced_layout->addWidget(m_inode_box);
+    misc_layout->addLayout(inode_layout);
+
+    total_layout->addWidget( new QLabel( i18n("Total inodes: ") ) );
+    m_total_edit = new KLineEdit();
+    QIntValidator *total_validator = new QIntValidator(m_total_edit);
+    m_total_edit->setValidator(total_validator);
+    total_validator->setBottom(0);
+    total_layout->addWidget(m_total_edit);
+    misc_layout->addLayout(total_layout);
 
     m_stripe_box = new QGroupBox( i18n("Striping") );
     m_stripe_box->setCheckable(true);
     m_stripe_box->setChecked(false);
     QVBoxLayout *stripe_layout = new QVBoxLayout();
     m_stripe_box->setLayout(stripe_layout);
-    advanced_layout->addWidget(m_stripe_box);
+    right_layout->addWidget(m_stripe_box);
 
-    stride_layout->addWidget( new QLabel( i18n("Stride size: ") ) );
+    stride_layout->addWidget( new QLabel( i18n("Stride size in blocks: ") ) );
     m_stride_edit = new KLineEdit( QString("%1").arg(m_stride_size) );
     QIntValidator *stride_validator = new QIntValidator(m_stride_edit);
     m_stride_edit->setValidator(stride_validator);
@@ -252,28 +306,98 @@ void MkfsDialog::buildDialog()
     count_layout->addStretch();
     stripe_layout->addLayout(count_layout);
 
-    connect(ext2,  SIGNAL(toggled(bool)), 
+    m_base_options_box = new QGroupBox("Basic options");
+    m_ext4_options_box = new QGroupBox("Ext4 options");
+    m_base_options_box->setCheckable(true);
+    m_ext4_options_box->setCheckable(true);
+    m_base_options_box->setChecked(false);
+    m_ext4_options_box->setChecked(false);
+
+    QVBoxLayout *base_options_layout = new QVBoxLayout();
+    QVBoxLayout *ext4_options_layout = new QVBoxLayout();
+
+    m_ext_attr_check     = new QCheckBox( i18n("Extended attributes") );
+    m_resize_inode_check = new QCheckBox( i18n("Resize inode") );
+    m_resize_inode_check->setEnabled(false);
+    m_dir_index_check    = new QCheckBox( i18n("Directory B-Tree index") );
+    m_filetype_check     = new QCheckBox( i18n("Store filetype in inode") );
+    m_sparse_super_check = new QCheckBox( i18n("Sparse superblock") );
+    base_options_layout->addWidget(m_ext_attr_check);
+    base_options_layout->addWidget(m_resize_inode_check);
+    base_options_layout->addWidget(m_dir_index_check);
+    base_options_layout->addWidget(m_filetype_check);
+    base_options_layout->addWidget(m_sparse_super_check);
+
+    m_extent_check      = new QCheckBox( i18n("Use extents") ); 
+    m_flex_bg_check     = new QCheckBox( i18n("Flexible block group layout") );
+    m_huge_file_check   = new QCheckBox( i18n("Enable files over 2TB") );
+    m_uninit_bg_check   = new QCheckBox( i18n("Don't init all block groups") );
+    m_lazy_itable_init_check = new QCheckBox( i18n("Don't init all inodes") );
+    m_dir_nlink_check   = new QCheckBox( i18n("Unlimited subdirectories") );
+    m_extra_isize_check = new QCheckBox( i18n("Nanosecond timestamps") );
+    ext4_options_layout->addWidget(m_flex_bg_check);
+    ext4_options_layout->addWidget(m_huge_file_check);
+    ext4_options_layout->addWidget(m_uninit_bg_check);
+    ext4_options_layout->addWidget(m_lazy_itable_init_check);
+    ext4_options_layout->addWidget(m_dir_nlink_check);
+    ext4_options_layout->addWidget(m_extra_isize_check);
+    ext4_options_layout->addWidget(m_extent_check);
+
+    m_base_options_box->setLayout(base_options_layout);
+    m_ext4_options_box->setLayout(ext4_options_layout);
+
+    left_layout->addWidget(m_base_options_box);
+    right_layout->addWidget(m_ext4_options_box);
+    left_layout->addStretch();
+    right_layout->addStretch();
+
+    connect(m_sparse_super_check, SIGNAL(toggled(bool)), 
             this, SLOT(setAdvancedTab(bool)));
 
-    connect(ext3,  SIGNAL(toggled(bool)), 
-            this, SLOT(setAdvancedTab(bool)));
+    connect(m_inode_edit,  SIGNAL(textEdited(QString)), 
+            m_total_edit, SLOT(clear()));
 
-    connect(ext4,  SIGNAL(toggled(bool)), 
-            this, SLOT(setAdvancedTab(bool)));
+    connect(m_total_edit,  SIGNAL(textEdited(QString)), 
+            m_inode_edit, SLOT(clear()));
+
+    return tab;
 }
 
 void MkfsDialog::setAdvancedTab(bool)
 {
-    if( ext2->isChecked() || ext3->isChecked() || ext4->isChecked() )
+    if( ext2->isChecked() || ext3->isChecked() || ext4->isChecked() ){
         m_tab_widget->setTabEnabled( 1, true );
-    else
+        m_base_options_box->setEnabled(true);
+
+        if( ext4->isChecked() )
+            m_ext4_options_box->setEnabled(true);
+        else{
+            m_ext4_options_box->setEnabled(false);
+            m_ext4_options_box->setChecked(false);
+        }
+    }
+    else{
+        m_base_options_box->setEnabled(false);
+        m_base_options_box->setChecked(false);
+        m_ext4_options_box->setEnabled(false);
+        m_ext4_options_box->setChecked(false);
         m_tab_widget->setTabEnabled( 1, false );
+    }
+
+    if( m_sparse_super_check->isChecked() )
+        m_resize_inode_check->setEnabled(true);
+    else{
+        m_resize_inode_check->setEnabled(false);
+        m_resize_inode_check->setChecked(false);
+    }
 }
 
 QStringList MkfsDialog::arguments()
 {
     QStringList arguments;
     QStringList mkfs_options;
+    QStringList ext_options;
+    QStringList extended_options;
     QString type;
     
     if(ext2->isChecked()){
@@ -321,45 +445,115 @@ QStringList MkfsDialog::arguments()
     
     if( (type == "ext2") || (type == "ext3") || (type == "ext4") ){
         mkfs_options << "-m" << QString("%1").arg(m_reserved_spin->value());
-        if(m_block_combo->currentIndex() > 0){
 
-            if(m_block_combo->currentIndex() == 1)
-                mkfs_options << "-b" << "1024";
-            else if(m_block_combo->currentIndex() == 2)
-                mkfs_options << "-b" << "2048";
-            else
-                mkfs_options << "-b" << "4096";
-        } 
+        if(m_block_combo->currentIndex() > 0)
+            mkfs_options << "-b" << m_block_combo->currentText().remove("KiB").trimmed();
 
-        if(m_inode_box->isChecked())
+        if( m_inode_edit->text() != "" )
             mkfs_options << "-i" << m_inode_edit->text();
+        else if ( m_total_edit->text() != "" )
+            mkfs_options << "-N" << m_total_edit->text();
 
-        if(m_stripe_box->isChecked())
-            mkfs_options << "-E" << QString("stride=" + m_stride_edit->text() + ",stripe-width=" + m_count_edit->text());
+        if( m_inode_combo->currentIndex() > 0 )
+            mkfs_options << "-I" << m_inode_combo->currentText().remove("Bytes").trimmed();
 
-        if(m_volume_edit->text() != "")
+        if(m_stripe_box->isChecked() || m_ext4_options_box->isChecked() ){
+            mkfs_options << "-E";
+
+            if( m_stripe_box->isChecked() ){
+                extended_options << QString("stride=%1").arg( m_stride_edit->text() ); 
+                extended_options << QString("stripe_width=%1").arg( m_count_edit->text() );
+            }
+
+            if( m_ext4_options_box->isChecked() ){
+                if( m_lazy_itable_init_check->isChecked() )
+                    extended_options << "lazy_itable_init=1";
+                else
+                    extended_options << "lazy_itable_init=0";
+            }
+            
+            mkfs_options << extended_options.join(",");
+        }
+
+        if( m_volume_edit->text() != "" )
             mkfs_options << "-L" << m_volume_edit->text();
+
+        if( m_base_options_box->isChecked() ){
+
+            if( m_ext_attr_check->isChecked() )
+                ext_options << "ext_attr";
+            else
+                ext_options << "^ext_attr";
+
+            if( m_resize_inode_check->isChecked() )
+                ext_options << "resize_inode";
+            else
+                ext_options << "^resize_inode"; 
+
+            if( m_dir_index_check->isChecked() ) 
+                ext_options << "dir_index"; 
+            else
+                ext_options << "^dir_index"; 
+
+            if( m_filetype_check->isChecked() ) 
+                ext_options << "filetype"; 
+            else
+                ext_options << "^filetype"; 
+            
+            if( m_sparse_super_check->isChecked() ) 
+                ext_options << "sparse_super"; 
+            else
+                ext_options << "^sparse_super"; 
+        }
+
+        if( m_ext4_options_box->isChecked() && ext4->isChecked() ){
+
+            if( m_extent_check->isChecked() )      
+                ext_options << "extent";
+            else
+                ext_options << "^extent";
+
+            if( m_flex_bg_check->isChecked() )      
+                ext_options << "flex_bg";
+            else
+                ext_options << "^flex_bg";
+
+            if( m_huge_file_check->isChecked() )      
+                ext_options << "huge_file";
+            else
+                ext_options << "^huge_file";
+
+            if( m_uninit_bg_check->isChecked() )      
+                ext_options << "uninit_bg";
+            else
+                ext_options << "^uninit_bg";
+
+            if( m_dir_nlink_check->isChecked() )      
+                ext_options << "dir_nlink";
+            else
+                ext_options << "^dir_nlink";
+
+            if( m_extra_isize_check->isChecked() )      
+                ext_options << "extra_isize";
+            else
+                ext_options << "^extra_isize";
+        }
     }
 
     if(type != "swap"){
 
-	arguments << "mkfs";
+	arguments << "mkfs" << "-t" << type;;
 
-	if(mkfs_options.size()){
-	    arguments << "-t" 
-		      << type 
-		      << mkfs_options 
-		      << m_path;
-	}
-	else{
-	    arguments << "-t" 
-		      << type 
-		      << m_path;
-	}
+	if( mkfs_options.size() )
+	    arguments << mkfs_options;
+
+        if( ext_options.size() )
+            arguments << "-O" << ext_options.join(",");
+
+        arguments << m_path;
     }
     else{
-	arguments << "mkswap" 
-		  << m_path;
+	arguments << "mkswap" << m_path;
     }
 
     return arguments;
