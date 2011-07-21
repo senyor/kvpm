@@ -53,6 +53,7 @@ public:
     ~VolGroup();
     void rescan(lvm_t lvm);
     const QList<LogVol *>  getLogicalVolumes();
+    const QList<LogVol *>  getSnapshots(LogVol *logicalVolume); // get any snaps of the referenced lv
     const QList<PhysVol *> getPhysicalVolumes();
     LogVol* getLogVolByName(QString shortName);  // lv name without the vg name and "/"
     PhysVol* getPhysVolByName(QString name);

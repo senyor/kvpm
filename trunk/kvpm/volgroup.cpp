@@ -286,6 +286,22 @@ const QList<LogVol *>  VolGroup::getLogicalVolumes()
     return sorted_list;
 }
 
+const QList<LogVol *>  VolGroup::getSnapshots(LogVol *logicalVolume)
+{
+    QList<LogVol *> lv_list;
+    QString lv_name = logicalVolume->getName();
+
+    if( logicalVolume->isOrigin() ){
+        lv_list = getLogicalVolumes();
+        for(int x = lv_list.size() - 1; x >= 0; x--){
+            if( !( lv_list[x]->isSnap() &&  lv_list[x]->getOrigin() == lv_name ) )
+                lv_list.removeAt(x);
+        }
+    }
+
+    return lv_list;
+}
+
 const QList<PhysVol *> VolGroup::getPhysicalVolumes()
 {
     return m_member_pvs;
