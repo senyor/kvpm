@@ -41,7 +41,7 @@ Q_OBJECT
     long long m_extent_size;
 
  public:
-    PVCheckBox(QList<PhysVol *> physicalVolumes, long long extentSize, QWidget *parent = NULL); 
+    PVCheckBox(QList<PhysVol *> physicalVolumes, QWidget *parent = NULL); 
     PVCheckBox(QList<StorageDevice *> devices, QList<StoragePartition *> partitions, 
                long long extentSize, QWidget *parent = NULL); 
 
@@ -50,6 +50,7 @@ Q_OBJECT
     long long getUnusedSpace();   // total unused space on selected pvs
     QList<long long> getUnusedSpaceList();  // ditto
     void setExtentSize(long long extentSize);
+    void disableOrigin(PhysVol *originVolume); // disable origin to prevent move from and to same pv
 
  signals:
     void stateChanged();

@@ -25,10 +25,10 @@
 
 #include "misc.h"
 
-class PhysVol;
 class LogVol;
+class PhysVol;
+class PVCheckBox;
 class VolGroup;
-
 
 bool move_pv(PhysVol *physicalVolume);
 bool move_pv(LogVol *logicalVolume);
@@ -39,18 +39,16 @@ class PVMoveDialog : public KDialog
 {
 Q_OBJECT
 
-    QLabel *free_space_total_label;
-    
     LogVol   *m_lv;
     long long m_pv_used_space;
-
-    QList<PhysVol *> m_source_pvs;    // source physical volumes
-    QList<PhysVol *> m_target_pvs;    // destination physical volumes
-    QList<NoMungeCheck *> m_check_boxes;         // user can select multiple destination pv's
-    QList<NoMungeRadioButton *> m_radio_buttons; // user can select one source pv
     bool move_lv;
 
-    QRadioButton *m_contiguous_button, *m_normal_button,   //Radio button to chose
+    QList<PhysVol *> m_source_pvs;               // source physical volumes
+    QList<PhysVol *> m_target_pvs;               // destination physical volumes
+    QList<NoMungeRadioButton *> m_radio_buttons; // user can select only one source pv
+    PVCheckBox *m_pv_checkbox;                   // many target pvs may be selected
+
+    QRadioButton *m_contiguous_button, *m_normal_button,   // Radio button to chose
                  *m_anywhere_button, *m_inherited_button,  // the allocation policy
                  *m_cling_button;
 
@@ -63,11 +61,8 @@ public:
     QStringList arguments();
     
 private slots:
-    void calculateSpace(bool checked);
-    void disableDestination(bool checked);
-    void checkBoxEnable(bool checked);
-    void selectAll();
-    void selectNone();
+    void resetOkButton();
+    void disableDestination();
 
 };
 

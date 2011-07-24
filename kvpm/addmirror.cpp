@@ -193,7 +193,7 @@ void AddMirrorDialog::setupPhysicalTab()
         }
     }
 
-    m_pv_box = new PVCheckBox( leg_physical_volumes, m_lv->getVolumeGroup()->getExtentSize() );
+    m_pv_box = new PVCheckBox(leg_physical_volumes);
     m_physical_layout->addWidget(m_pv_box);
     m_physical_layout->addStretch();
 

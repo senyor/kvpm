@@ -373,7 +373,7 @@ QWidget* LVCreateDialog::createPhysicalTab()
             physical_volumes.removeAt(x);
     }
 
-    m_pv_checkbox = new PVCheckBox(physical_volumes, m_vg->getExtentSize());
+    m_pv_checkbox = new PVCheckBox(physical_volumes);
     layout->addWidget(m_pv_checkbox);
 
     QVBoxLayout *striped_layout = new QVBoxLayout;
