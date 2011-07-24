@@ -21,13 +21,15 @@
 #include "misc.h"
 #include "storagedevice.h"
 #include "storagepartition.h"
+#include "volgroup.h"
 
 
-PVCheckBox::PVCheckBox(QList<PhysVol *> physicalVolumes, long long extentSize, QWidget *parent):
+PVCheckBox::PVCheckBox(QList<PhysVol *> physicalVolumes, QWidget *parent):
     QGroupBox(parent), 
-    m_pvs(physicalVolumes), 
-    m_extent_size(extentSize)
+    m_pvs(physicalVolumes)
 {
+    m_extent_size = m_pvs[0]->getVolGroup()->getExtentSize();
+
     setTitle( i18n("Available physical volumes") );
     QGridLayout *layout = new QGridLayout();
     setLayout(layout);
@@ -312,4 +314,23 @@ void PVCheckBox::setExtentSize(long long extentSize){
     }
 
     calculateSpace();
+}
+
+void PVCheckBox::disableOrigin(PhysVol *originVolume){
+
+    QString name;
+
+    if(originVolume){ 
+
+        name = originVolume->getName();
+
+        for(int x = 0; x < m_pvs.size(); x++){
+            if( m_pvs[x]->getName() == name ){
+                m_pv_checks[x]->setChecked(false);
+                m_pv_checks[x]->setEnabled(false);
+            }
+            else
+                m_pv_checks[x]->setEnabled(true);
+        }
+    }
 }
