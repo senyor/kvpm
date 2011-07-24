@@ -62,7 +62,7 @@ public:
     
 private slots:
     void resetOkButton();
-    void disableDestination();
+    void disableSource();
 
 };
 

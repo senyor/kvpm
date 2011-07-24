@@ -206,8 +206,12 @@ void PVMoveDialog::buildDialog()
     dialog_body->setLayout(layout);
 
     if(move_lv){
-        layout->addWidget( new QLabel( i18n("<b>Move only physical extents on:</b>") ) );
-	layout->addWidget( new QLabel("<b>" + m_lv->getFullName() + "</b>") );
+        label = new QLabel( i18n("<b>Move only physical extents on:</b>") );
+        label->setAlignment(Qt::AlignCenter);
+	layout->addWidget(label);
+	label = new QLabel("<b>" + m_lv->getFullName() + "</b>");
+        label->setAlignment(Qt::AlignCenter);
+	layout->addWidget(label);
     }
 
     QGroupBox *radio_group = new QGroupBox( i18n("Source Physical Volumes") );
@@ -242,7 +246,7 @@ void PVMoveDialog::buildDialog()
 	    m_radio_buttons.append(radio_button);
 	    
 	    connect(radio_button, SIGNAL(toggled(bool)), 
-		    this, SLOT(disableDestination()));
+		    this, SLOT(disableSource()));
 
 	    if( !x )
 		radio_button->setChecked(true);
@@ -313,7 +317,7 @@ void PVMoveDialog::resetOkButton()
 	enableButtonOk(true);
 }
 
-void PVMoveDialog::disableDestination()
+void PVMoveDialog::disableSource()  // don't allow source and target to be the same pv
 {
     PhysVol *source_pv = NULL;
     
@@ -362,8 +366,7 @@ QStringList PVMoveDialog::arguments()
     }
     
     args << source;
-
-    args << m_pv_checkbox->getNames();
+    args << m_pv_checkbox->getNames(); // target(s)
 
     return args;
 }
