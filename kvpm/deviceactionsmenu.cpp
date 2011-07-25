@@ -16,6 +16,7 @@
 #include <QtGui>
 #include <KLocale>
 
+#include "fsck.h"
 #include "devicetreeview.h"
 #include "deviceactionsmenu.h"
 #include "devicesizechartseg.h"
@@ -45,6 +46,7 @@ DeviceActionsMenu::DeviceActionsMenu( StorageDeviceItem *item, QWidget *parent) 
 {
     setup(item);
 
+    connect(m_fsck_action,       SIGNAL(triggered()), this, SLOT(fsckPartition()));
     connect(m_maxfs_action,      SIGNAL(triggered()), this, SLOT(maxfsPartition()));
     connect(m_maxpv_action,      SIGNAL(triggered()), this, SLOT(maxfsPartition()));
     connect(m_mkfs_action,       SIGNAL(triggered()), this, SLOT(mkfsPartition()));
@@ -67,6 +69,7 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
     KMenu *filesystem_menu = new KMenu( i18n("Filesystem operations"), this);
     m_vgextend_menu       = new KMenu( i18n("Extend volume group"), this);
     m_maxfs_action      = new KAction( i18n("Extend filesystem to fill partition"), this);
+    m_fsck_action       = new KAction( i18n("Run 'fsck -fp' on filesystem"), this);
     m_maxpv_action      = new KAction( i18n("Extend physical volume to fill device"), this);
     m_mkfs_action       = new KAction( i18n("Make filesystem"), this);
     m_partadd_action    = new KAction( i18n("Add disk partition"), this);
@@ -94,6 +97,8 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
     filesystem_menu->addAction(m_unmount_action);
     filesystem_menu->addSeparator();
     filesystem_menu->addAction(m_maxfs_action);
+    filesystem_menu->addAction(m_fsck_action);
+    filesystem_menu->addSeparator();
     filesystem_menu->addAction(m_mkfs_action);
     filesystem_menu->addAction(m_removefs_action);
 
@@ -117,6 +122,7 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
             m_tablecreate_action->setEnabled(false);
 	    m_mount_action->setEnabled( m_part->isMountable() );
             m_unmount_action->setEnabled( m_part->isMounted() );
+            m_fsck_action->setEnabled( !m_part->isMounted() );
 
             if( m_part->getPedType() & 0x04 ){    // freespace
                 m_maxfs_action->setEnabled(false);
@@ -203,6 +209,7 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
             m_mount_action->setEnabled(false);
             m_unmount_action->setEnabled(false);
             m_maxfs_action->setEnabled(false);
+            m_fsck_action->setEnabled(false);
 
             if( m_dev->isPhysicalVolume() ){
                 m_tablecreate_action->setEnabled(false);
@@ -251,6 +258,12 @@ void DeviceActionsMenu::setup(StorageDeviceItem *item)
 void DeviceActionsMenu::mkfsPartition()
 {
     if( make_fs(m_part) )
+	    MainWindow->reRun();
+}
+
+void DeviceActionsMenu::fsckPartition()
+{
+    if( manual_fsck(m_part) )
 	    MainWindow->reRun();
 }
 

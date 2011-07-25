@@ -17,6 +17,7 @@
 #include <KLocale>
 #include <KActionCollection>
 
+#include "fsck.h"
 #include "lvactionsmenu.h"
 #include "logvol.h"
 #include "vgtree.h"
@@ -43,7 +44,9 @@
 
 
 LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, VolGroup *volumeGroup, QWidget *parent) : 
-    KMenu(parent), m_vg(volumeGroup), m_lv(logicalVolume)
+    KMenu(parent), 
+    m_vg(volumeGroup), 
+    m_lv(logicalVolume)
 {
     if( m_vg->getSize() == 0 )
         setEnabled(false);
@@ -85,6 +88,7 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, VolGroup *volumeGroup, QWidg
     lv_change_action->setText( i18n("Change attributes or tags...")); 
 
     lv_mkfs_action      = new KAction( i18n("Make filesystem..."), this);
+    lv_fsck_action      = new KAction( i18n("Run 'fsck -fp' on filesystem..."), this);
     lv_removefs_action  = new KAction( i18n("Remove filesystem..."), this);
     lv_maxfs_action     = new KAction( i18n("Extend filesystem to fill volume..."), this);
     mount_filesystem_action   = new KAction( i18n("Mount filesystem..."), this);
@@ -95,6 +99,9 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, VolGroup *volumeGroup, QWidg
 
     connect(lv_mkfs_action, SIGNAL(triggered()), 
 	    this, SLOT(mkfsLogicalVolume()));
+
+    connect(lv_fsck_action, SIGNAL(triggered()), 
+	    this, SLOT(fsckLogicalVolume()));
 
     connect(lv_removefs_action, SIGNAL(triggered()), 
 	    this, SLOT(removefsLogicalVolume()));
@@ -129,6 +136,8 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, VolGroup *volumeGroup, QWidg
     filesystem_menu->addAction(unmount_filesystem_action);
     filesystem_menu->addSeparator();
     filesystem_menu->addAction(lv_maxfs_action);
+    filesystem_menu->addAction(lv_fsck_action);
+    filesystem_menu->addSeparator();
     filesystem_menu->addAction(lv_mkfs_action);
     filesystem_menu->addAction(lv_removefs_action);
     filesystem_menu->setEnabled(false);
@@ -447,6 +456,12 @@ void LVActionsMenu::removeMirrorLeg()
 void LVActionsMenu::mkfsLogicalVolume()
 {
     if( make_fs(m_lv) )
+	MainWindow->reRun();
+}
+
+void LVActionsMenu::fsckLogicalVolume()
+{
+    if( manual_fsck(m_lv) )
 	MainWindow->reRun();
 }
 

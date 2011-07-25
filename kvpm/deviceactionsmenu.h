@@ -36,6 +36,7 @@ Q_OBJECT
     KMenu *m_vgextend_menu;
 
     KAction *m_mkfs_action,
+            *m_fsck_action,
             *m_maxfs_action,
             *m_maxpv_action,
             *m_partremove_action,
@@ -59,6 +60,7 @@ Q_OBJECT
     DeviceActionsMenu( StorageDeviceItem *item, QWidget *parent = 0);
 
  private slots:
+    void fsckPartition();
     void mkfsPartition();
     void maxfsPartition();
     void addPartition();
