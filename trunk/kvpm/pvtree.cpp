@@ -18,12 +18,12 @@
 
 #include "logvol.h"
 #include "masterlist.h"
+#include "misc.h"
 #include "processprogress.h"
 #include "pvtree.h"
 #include "pvmove.h"
 #include "pvchange.h"
 #include "physvol.h"
-#include "misc.h"
 #include "topwindow.h"
 #include "vgreduce.h"
 #include "vgreduceone.h"
@@ -188,6 +188,7 @@ void PVTree::setupContextMenu()
 void PVTree::popupContextMenu(QPoint point)
 {
     QTreeWidgetItem *item = itemAt(point);
+    QStringList lvs;
 
     if(item){
 	if( (QVariant(item->data(3, 0)).toString()) == "0" ){  // 0 =  Zero used extents on pv
@@ -202,11 +203,14 @@ void PVTree::popupContextMenu(QPoint point)
         }
 	else{
 	    m_pv_name = QVariant(item->data(0, 0)).toString();
-
 	    vg_reduce_action->setEnabled(false);
 
-	    if(m_vg->getPhysVolCount() > 1)            // can't move extents if there isn't
-		pv_move_action->setEnabled(true);      // another volume to put them on
+	    if(m_vg->getPhysVolCount() > 1){     // can't move extents if there isn't another volume to put them on
+                if( QVariant(item->data(6, 0)).toString().contains("pvmove") ) // can't have more than one pvmove
+                    pv_move_action->setEnabled(false);                      // See physvol.cpp about removing this
+                else
+                    pv_move_action->setEnabled(true); 
+            }
 	    else
 		pv_move_action->setEnabled(false);
 	}
@@ -214,7 +218,7 @@ void PVTree::popupContextMenu(QPoint point)
 	m_context_menu->exec(QCursor::pos());
     }
     else
-	m_context_menu->setEnabled(false);  //item = 0 if there is no item a that point
+	m_context_menu->setEnabled(false);  // item = 0 if there is no item a that point
 }
 
 void PVTree::movePhysicalExtents()

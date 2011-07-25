@@ -60,13 +60,26 @@ void PhysVol::rescan(pv_t lvm_pv)
     /*
     // The following wil be used to to calculate the last used
     // segement once the "lv_name" property gets implemented
+
+    // Finding segments with lvs locked against change (snaps mirrors and pvmoves)
+    // will also be possible 
+
+    // remove clunky code from pvtree.cpp when this get implemented!
+
     dm_list* pvseg_dm_list = lvm_pv_list_pvsegs(lvm_pv);  
     lvm_pvseg_list *pvseg_list;
 
     if(pvseg_dm_list){
         dm_list_iterate_items(pvseg_list, pvseg_dm_list){ 
 	    
-            //            value = lvm_pvseg_get_property( pvseg_list->pvseg , "lv_name");
+            value = lvm_pvseg_get_property( pvseg_list->pvseg , "lv_name");
+
+            qDebug() << "Name: " << value.value.string;
+
+            value = lvm_pvseg_get_property( pvseg_list->pvseg , "lv_attr");
+
+            qDebug() << "attr: " << value.value.string;
+
             value = lvm_pvseg_get_property( pvseg_list->pvseg , "pvseg_start");
             if(value.is_valid)
                 qDebug() << "Seg start: " << value.value.integer;
