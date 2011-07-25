@@ -252,13 +252,12 @@ QWidget* MountDialog::optionsTab()
 
     QGroupBox *filesystem_options_box = new QGroupBox( i18n("Filesystem specific  mount options") );
     m_fs_specific_edit = new KLineEdit();
-    QLabel *additional_options_label = new QLabel( i18n("comma separated list of additional mount options") );
-    
+    m_fs_specific_edit->setPlaceholderText( i18n("comma separated list of additional mount options") );
+
     options_layout->addWidget(filesystem_options_box);
     QVBoxLayout *filesystem_options_box_layout = new QVBoxLayout();
     
     filesystem_options_box->setLayout(filesystem_options_box_layout);
-    filesystem_options_box_layout->addWidget(additional_options_label);
     filesystem_options_box_layout->addWidget(m_fs_specific_edit);
 
     toggleAdditionalOptions(true);
