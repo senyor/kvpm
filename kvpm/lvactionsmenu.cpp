@@ -153,6 +153,7 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, VolGroup *volumeGroup, QWidg
 	    !m_lv->isMirrorLeg() && !m_lv->isMirrorLog() ){
 
 	    if( m_lv->isMounted() ){
+		lv_fsck_action->setEnabled(false);
 		lv_mkfs_action->setEnabled(false);
 		lv_removefs_action->setEnabled(false);
 		lv_reduce_action->setEnabled(false);

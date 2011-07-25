@@ -107,7 +107,7 @@ StoragePartition::StoragePartition(PedPartition *part,
     else{
 	m_fs_type = fsprobe_getfstype2(m_partition_path);
 
-	if( m_fs_type == "swap" || m_fs_type == "" || m_is_pv )
+	if( m_fs_type == "swap" || m_is_pv )
 	    m_is_mountable = false;
 	else
             m_is_mountable = true;
