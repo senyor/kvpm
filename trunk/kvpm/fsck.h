@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2009 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2009, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -15,8 +15,13 @@
 #ifndef FSCK_H
 #define FSCK_H
 
+class LogVol;
+class StoragePartition;
+
 #include <QString>
 
 bool fsck(QString path);
+bool manual_fsck(LogVol *logicalVolume);
+bool manual_fsck(StoragePartition *partition);
 
 #endif

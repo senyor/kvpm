@@ -1,7 +1,19 @@
+version 0.7.8
+Added a menu option for running 'fsck -fp' on a filesystem.
+
+version 0.7.7
+Changed lvcreate to allow the extention of snapshot origings by
+shutting them down then extending the lv, reactivating and extending
+the filesystem.
+
 version 0.7.6
-The lv size chart graphic now is presented in the same order as
-the volumes appear in the volume group tree even when the tree
-sort order is changed.
+Added more selections to the mkfs dialog such a setting inode size and
+many other advanced options.  The lv size chart graphic now is
+presented in the same order as the volumes appear in the volume group
+tree even when the tree sort order is changed. Added a new column in
+the pvtree showing the use/ignoring of metadata areas in a
+pv. pvchange can set the use or ignoring of metadata and generate a
+new pv uuid. There is now a dialog for merging snapshots.
 
 version 0.7.5 
 Re-worked and debugged add partition dialog. Changed the code for

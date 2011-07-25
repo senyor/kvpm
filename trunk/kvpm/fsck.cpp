@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2009 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2009, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -13,10 +13,13 @@
  */
 
 #include <KLocale>
+#include <KMessageBox>
 
 #include <QtGui>
 
+#include "logvol.h"
 #include "processprogress.h"
+#include "storagepartition.h"
 
 bool fsck(QString path){
 
@@ -33,4 +36,26 @@ bool fsck(QString path){
         return false;
     else
         return true;
+}
+
+bool manual_fsck(LogVol *logicalVolume){
+
+    const QString path = logicalVolume->getMapperPath();
+    const QString message = i18n("<b>Run 'fsck -fp' on %1?</b>", path);
+
+    if(KMessageBox::warningYesNo( 0, message) == 3)  // 3 = yes button
+        return fsck(path);
+    else
+        return false;
+}
+
+bool manual_fsck(StoragePartition *partition){
+
+    const QString path = partition->getName();
+    const QString message = i18n("<b>Run 'fsck -fp' on %1?</b>", path);
+
+    if(KMessageBox::warningYesNo( 0, message) == 3)  // 3 = yes button
+        return fsck(path);
+    else
+        return false;
 }
