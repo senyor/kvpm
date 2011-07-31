@@ -13,8 +13,6 @@
  */
 
 
-#include <parted/parted.h>
-
 #include <KMessageBox>
 #include <KLocale>
 
@@ -30,21 +28,26 @@
 bool remove_fs(StoragePartition *partition)
 {
 
-    PedGeometry geometry = partition->getPedPartition()->geom;
-
     QString message = i18n("Are you sure you want delete this filesystem? "
                            "Any data on it will be lost!");
 
+    QByteArray zero_array(128 * 1024, '\0');
+    QString path = partition->getName();
+    QFile *device;
+
     if(KMessageBox::warningContinueCancel(0, message) == KMessageBox::Continue){
 
-        if( ped_file_system_clobber( &geometry ) )
-            return true;
-        else
-            return false;
-    }
-    else
-        return false;
+        device = new QFile(path);
 
+        if( device->open(QIODevice::ReadWrite) ){
+            device->write(zero_array);
+            device->flush();
+            device->close();
+
+            return(true);
+        }
+    }
+    return(false);
 }
 
 bool remove_fs(LogVol *logicalVolume)
@@ -69,6 +72,5 @@ bool remove_fs(LogVol *logicalVolume)
             return(true);
         }
     }
-        
     return(false);
 }
