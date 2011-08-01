@@ -277,6 +277,7 @@ void VGCreateDialog::commitChanges()
     loop->processEvents();
 
     if( (lvm = lvm_init(NULL)) ){
+
         if( (vg_dm = lvm_vg_create(lvm, m_vg_name->text().toAscii().data())) ){
 
             if( (lvm_vg_set_extent_size(vg_dm, new_extent_size)) )
@@ -288,27 +289,32 @@ void VGCreateDialog::commitChanges()
 
                 if( lvm_vg_extend(vg_dm, pv_names[x].toAscii().data()) )
                     KMessageBox::error(0, QString(lvm_errmsg(lvm)));
-                
             }
+
             // ****To Do... None of the following are supported by liblvm2app yet****
             //   if(m_clustered->isChecked())
             //   if(m_auto_backup->isChecked())          
             //   if((m_max_lvs_check->isChecked()) && (m_max_lvs->text() != ""))
             //   if((m_max_pvs_check->isChecked()) && (m_max_pvs->text() != ""))
 
+
             if( lvm_vg_write(vg_dm) )
                 KMessageBox::error(0, QString(lvm_errmsg(lvm)));
 
             lvm_vg_close(vg_dm);
             lvm_quit(lvm);
+            delete loop;
             return;
         }
         
         lvm_quit(lvm);
         KMessageBox::error(0, QString(lvm_errmsg(lvm))); 
+        delete loop;
         return;
     }
+
     KMessageBox::error(0, QString(lvm_errmsg(lvm))); 
+    delete loop;
     return;
 }
 
