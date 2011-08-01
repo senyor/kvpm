@@ -31,8 +31,9 @@ class LogVol
     QList<Segment *> m_segments;
     QList<MountInformation *> m_mount_info_list;
     
-    QString m_lv_full_name;  // volume_group/logical_volume
-    QString m_lv_name;       // name of this logical volume
+    QString m_lv_full_name;    // volume_group/logical_volume
+    QString m_lv_name;         // name of this logical volume
+    QString m_lv_mapper_path;  // full path to volume, ie: /dev/vg1/lvol1
     QString m_lv_fs;         // Filesystem on volume or "unknown"
     QString m_origin;        // the origin if this is a snapshot or 
                              // the parent mirror volume to a mirror leg

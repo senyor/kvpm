@@ -60,6 +60,9 @@ void LogVol::rescan(lv_t lvm_lv)
     m_vg_name   = m_vg->getName();
     m_lv_full_name = m_vg_name + "/" + m_lv_name;
 
+    value = lvm_lv_get_property(lvm_lv, "lv_path");
+    m_lv_mapper_path = QString(value.value.string).trimmed();
+
     value = lvm_lv_get_property(lvm_lv, "lv_attr");
     flags.append(value.value.string);
 
@@ -466,11 +469,7 @@ QString LogVol::getFullName()
 
 QString LogVol::getMapperPath()
 {
-    QString path;
-
-    path = "/dev/" + m_vg_name + "/" + m_lv_name;
-    
-    return path;
+    return m_lv_mapper_path;
 }
 
 long long LogVol::getSpaceOnPhysicalVolume(QString physicalVolume)
