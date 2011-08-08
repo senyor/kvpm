@@ -1,0 +1,503 @@
+<?xml version="1.0" ?>
+<!DOCTYPE book PUBLIC "-//KDE//DTD DocBook XML V4.2-Based Variant V1.1//EN" "dtd/kdex.dtd" [
+  <!ENTITY kvpm "<application>kvpm</application>">
+  <!ENTITY Benjamin.Scott "<personname><firstname>Benjamin</firstname><surname>Scott</surname></personname>">
+  <!ENTITY benscott.email "<email>benscott@nwlink.com</email>">
+  <!ENTITY % English "INCLUDE">
+  <!ENTITY % addindex "IGNORE">
+]>
+
+<book lang="&language;">
+
+<bookinfo>
+<title>The &kvpm; Handbook</title>
+
+<authorgroup>
+<author>
+<firstname>Benjamin</firstname>
+<othername></othername>
+<surname>Scott</surname>
+<affiliation>
+<address>&benscott.email;</address>
+</affiliation>
+</author>
+<!-- TRANS:ROLES_OF_TRANSLATORS -->
+</authorgroup>
+
+<legalnotice>&FDLNotice;</legalnotice>
+
+<date>2011-5-29</date>
+<releaseinfo>0.01.00</releaseinfo>
+
+<abstract>
+<para>
+&kvpm; is an application for the &kde; environment that lets a system
+administrator modify partitions on disk drives or logical volumes
+created by lvm2.
+</para>
+</abstract>
+
+
+<keywordset>
+<keyword>KDE</keyword>
+<keyword>kvpm</keyword>
+<keyword>lvm2</keyword>
+</keywordset>
+
+</bookinfo>
+
+<chapter id="introduction">
+<title>Introduction</title>
+<para>The KDE Logical Volume and Partition Manager can manipulate
+logical volumes, physical volumes and volume groups as defined by the
+Linux Logical Volume Manager, LVM2. It can also write a partion table
+or modify an existing one to add, delete or resize partitions. This
+guide assumes a basic knowlege of LVM2 operation and disk
+partitioning. The following is a good starting point for learning the
+basics of
+LVM2: <ulink url="http://tldp.org/HOWTO/LVM-HOWTO">http://tldp.org/HOWTO/LVM-HOWTO/</ulink></para>
+
+<para>Currently most LVM functions are implemented by the standard lvm
+command line programs. KDE dialog boxes are used to determine the
+parameters to pass the program. If you are already using lvm on the
+command line the dialogs will probably seem familiar. For example this
+is the dialog to change a logical volume's attributes:
+
+<screenshot>
+<screeninfo>Logical volume change attributes dialog</screeninfo>
+	<mediaobject>
+	  <imageobject>
+	    <imagedata fileref="lvchange.png" format="PNG"/>
+	  </imageobject>
+	    <textobject>
+	    <phrase>&kvpm; change attributes dialog</phrase>
+	  </textobject>
+	</mediaobject>
+</screenshot>
+
+</para>
+</chapter>
+
+<chapter id="getting-started-kvpm">
+<title>Getting Started</title>
+
+<para>When first started on a system with no volume groups the screen
+will look something like this:</para>
+
+<screenshot>
+<screeninfo>This is a screenshot of &kvpm; when first started</screeninfo>
+	<mediaobject>
+	  <imageobject>
+	    <imagedata fileref="main.png" format="PNG"/>
+	  </imageobject>
+	    <textobject>
+	    <phrase>&kvpm; main window</phrase>
+	  </textobject>
+	</mediaobject>
+</screenshot>
+
+<para>The devices found are listed in the large table. Most kvpm
+functions can be accessed by simply right-clicking on the line
+representing the device you wish to change. Left-clicking to select a
+device brings up additional information on the pane to the right and
+the colored bar across the top of the tab gives a visual of the
+partitoning of the device. The color indicates the filesystem type,
+ext3 or vfat for instance, in use on the device.</para>
+
+</chapter>
+
+
+<chapter id="volume-group-kvpm">
+<title>Volume Groups</title>
+
+<sect1 id="typical-volume-group">
+<title>An Example Volume Group Tab</title>
+
+<screenshot>
+<screeninfo>This is a screenshot of a typical volume group.</screeninfo>
+	<mediaobject>
+	  <imageobject>
+	    <imagedata fileref="typicalvg.png" format="PNG"/>
+	  </imageobject>
+	    <textobject>
+	    <phrase>a typical group</phrase>
+	  </textobject>
+	</mediaobject>
+</screenshot>
+<para>Across the top is an information window about the volume group as a whole. It shows the size of the group and the amount of space used up and still left. There are also entries for the uuid, clustering status, default allocation policy, metadata areas, whether resizing is allowed and the extent size.</para> 
+
+<para>Below that is a graphical representation of the group. There are four logical volumes in this group. Each volume is shown according to its relative size and has a color representing the filesystem, if it has one. The first two and last are light blue for ext4 and the third one is red for Reiserfs. The end of the bar is green and shows the free space remaining. Right clicking on the bar calls a <link linkend="logical-volume-menu">context menu</link> of actions that can be taken on logical volumes.</para>
+
+<para>The large window at center left is a list of the logical volumes by name, along with some information about them. Selecting a name in the list window shows additional information about that volume in the window to its right. Here, the volume Vol03 is selected. Right clicking the name of a volume calls a <link linkend="logical-volume-menu">context menu</link> of actions that can be taken on logical volumes.</para>
+
+<para>The last two windows at the bottom deal with physical volumes. The left window lists them by name while the right window gives more detailed information. Right clicking the name list brings up a context menu of actions that can be taken on physical volumes.</para>
+</sect1>
+
+<sect1 id="menu-vgchange">
+<title>The <guimenu>Volume Groups</guimenu> Menu</title>
+
+<variablelist>
+
+<varlistentry>
+<term><menuchoice>
+<guimenu>Volume Groups</guimenu>
+<guimenuitem>Create volume group</guimenuitem>
+</menuchoice></term>
+<listitem><para>Create a new volume group with a dialog.</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><menuchoice>
+<guimenu>Volume Groups</guimenu>
+<guimenuitem>Delete volume group</guimenuitem>
+</menuchoice></term>
+<listitem><para>Delete the volume group. A group must be empty before it may be deleted.</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><menuchoice>
+<guimenu>Volume Groups</guimenu>
+<guimenuitem>Rename volume group</guimenuitem>
+</menuchoice></term>
+<listitem><para>Rename the volume group.</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><menuchoice>
+<guimenu>Volume Groups</guimenu>
+<guimenuitem>Remove mising physical volumes</guimenuitem>
+</menuchoice></term>
+<listitem><para>Remove any missing physical volumes. This may cause data loss, use with caution</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><menuchoice>
+<guimenu>Volume Groups</guimenu>
+<guimenuitem>Extend volume group</guimenuitem>
+</menuchoice></term>
+<listitem><para>Extend the volume group by adding new physical volumes with a dialog.</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><menuchoice>
+<guimenu>Volume Groups</guimenu>
+<guimenuitem>Reduce volume group</guimenuitem>
+</menuchoice></term>
+<listitem><para>Reduce the volume group by removing physical volumes with a dialog.</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><menuchoice>
+<guimenu>Volume Groups</guimenu>
+<guimenuitem>Split volume group</guimenuitem>
+</menuchoice></term>
+<listitem><para>Split the volume group into two groups with a dialog.</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><menuchoice>
+<guimenu>Volume Groups</guimenu>
+<guimenuitem>Merge volume group</guimenuitem>
+</menuchoice></term>
+<listitem><para>Merge the volume group and another with a dialog.</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><menuchoice>
+<guimenu>Volume Groups</guimenu>
+<guimenuitem>Export volume group</guimenuitem>
+</menuchoice></term>
+<listitem><para>Export the volume group.</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><menuchoice>
+<guimenu>Volume Groups</guimenu>
+<guimenuitem>Import volume group</guimenuitem>
+</menuchoice></term>
+<listitem><para>Import the volume group.</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><menuchoice>
+<guimenu>Volume Groups</guimenu>
+<guimenuitem>Change volume group attributes</guimenuitem>
+</menuchoice></term>
+<listitem><para>Call a dialog that allows many group attributes to be modified.</para></listitem>
+</varlistentry>
+</variablelist>
+</sect1>
+
+<sect1 id="creating-group">
+<title>Creating a Volume Group</title>
+
+<para>To create a new volume group select <guibutton>Volume
+Groups</guibutton> and then <guilabel>Create Volume
+Group</guilabel>. A dialog box will ask which devices to use, its name
+and other pertinent questions about the new group. I have selected
+/dev/sdd as the device and the name MyVolumeGroup. After the
+dialog's <guibutton>OK</guibutton> button has been pressed notice the
+new tab titled MyVolumeGroup.</para>
+
+<screenshot>
+<screeninfo>This is a screenshot of &kvpm; creating a new volume group.</screeninfo>
+	<mediaobject>
+	  <imageobject>
+	    <imagedata fileref="vg1.png" format="PNG"/>
+	  </imageobject>
+	    <textobject>
+	    <phrase>create a volume group</phrase>
+	  </textobject>
+	</mediaobject>
+</screenshot>
+<note><para>Because kvpm uses the lvm2app library to create volume groups, not all options of the command "lvcreate" are available here yet. Some, such a clustering, need to be selected from the <menuchoice><guimenu>Volume Groups</guimenu><guimenuitem>Change volume group attributes</guimenuitem></menuchoice> dialog discussed later.</para></note>
+
+</sect1>
+
+<sect1 id="volume-group-changes">
+<title>Changing a Volume Group</title>
+<para> By first selecting the tab called MyVolumeGroup and then <guibutton>Volume Groups</guibutton> a wide variety of changes can be made to the group. It is also possible, and sometimes more convenient, to create a new group from this menu</para>
+
+<para>Except for <guimenu>Create volume group</guimenu> all of the following menu choices act on the current volume group. The current group is the one inside the tab selected on the main window.</para>
+
+<screenshot>
+<screeninfo>This is a screenshot of the volume group change dialog.</screeninfo>
+	<mediaobject>
+	  <imageobject>
+	    <imagedata fileref="vgchange.png" format="PNG"/>
+	  </imageobject>
+	    <textobject>
+	    <phrase>change a volume group</phrase>
+	  </textobject>
+	</mediaobject>
+</screenshot>
+<note><para>Most Volume group attributes may be changed here with some restrictions. For example: changes in the extent size depend on the alignment of allocated extents, so some sizes my not be possible. A volume group can not be made unavailable if it contains mounted or otherwise busy volumes and the allocation policy is only a default and can be overridden by most commands. </para></note>
+
+</sect1>
+</chapter>
+
+
+<chapter id="logical-volumes-kvpm">
+<title>Logical Volumes</title>
+
+<sect1 id="logical-volume-menu">
+<title>The Logical Volume Action Menu</title>
+
+<note><para>See <link linkend="typical-volume-group">An Example Volume Group Tab</link> for information on calling this context menu</para></note>
+
+<variablelist>
+<varlistentry>
+<term><menuchoice>
+<guimenuitem>Create logical volume</guimenuitem>
+</menuchoice></term>
+<listitem><para>Creates a new logical volume.</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><menuchoice>
+<guimenuitem>Remove logical volume</guimenuitem>
+</menuchoice></term>
+<listitem><para>Deletes the logical volume.</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><menuchoice>
+<guimenuitem>Rename logical volume</guimenuitem>
+</menuchoice></term>
+<listitem><para>Changes the name of the logical volume.</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><menuchoice>
+<guimenuitem>Create snapshot</guimenuitem>
+</menuchoice></term>
+<listitem><para>Creates a snapshot volume based on the selected volume.</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><menuchoice>
+<guimenuitem>Merge snapshot</guimenuitem>
+</menuchoice></term>
+<listitem><para>Merges the snapshot with it logical volume origin.</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><menuchoice>
+<guimenuitem>Reduce logical volume</guimenuitem>
+</menuchoice></term>
+<listitem><para>Reduces the size of a logical volume.</para></listitem>
+</varlistentry>
+
+
+<varlistentry>
+<term><menuchoice>
+<guimenuitem>Extends logical volume</guimenuitem>
+</menuchoice></term>
+<listitem><para>Enlarges the size of a logical volume.</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><menuchoice>
+<guimenuitem>Move physical extents</guimenuitem>
+</menuchoice></term>
+<listitem><para>Move a logical volume's extents to other physical volumes.</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><menuchoice>
+<guimenuitem>Change attributes or tags</guimenuitem>
+</menuchoice></term>
+<listitem><para>Changes the logical volume's attributes, such as allocation policy, or tags.</para></listitem>
+</varlistentry>
+
+
+<varlistentry>
+<term><menuchoice>
+<guimenuitem>Mirror operations</guimenuitem>
+</menuchoice></term>
+<listitem><para>A submenu for changing mirrored volumes.</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><menuchoice>
+<guimenuitem>Filesystem operations</guimenuitem>
+</menuchoice></term>
+<listitem><para>A submenu for working with file systems.</para></listitem>
+</varlistentry>
+
+
+</variablelist>
+</sect1>
+
+<sect1 id="logical-volume-creation">
+<title>Creating a Logical Volume</title>
+
+<para>If a volume group exists and has free space, a logical volume can be created in it. Select the tab titled with the name of the volume group you wish to work with first. Then a dialog can be called up by right clicking on the long green bar or the (still empty) table below it. selecting <guibutton>Create logical lolume</guibutton>. I have called it VolumeOne and it will take %50 of the available space</para>
+
+<screenshot>
+<screeninfo>This is the volume group</screeninfo>
+	<mediaobject>
+	  <imageobject>
+	    <imagedata fileref="vg2.png" format="PNG"/>
+	  </imageobject>
+	    <textobject>
+	    <phrase>A dialog for creating logical volumes</phrase>
+	  </textobject>
+	</mediaobject>
+</screenshot>
+</sect1>
+
+<sect1 id="filesystems">
+<title>Filesystems</title>
+
+<variablelist>
+
+<varlistentry>
+<term><menuchoice>
+<guimenu>Filesystem operations</guimenu>
+<guimenuitem>Mount</guimenuitem>
+</menuchoice></term>
+<listitem><para>Mount the filesystem under a directory.</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><menuchoice>
+<guimenu>Filesystem operations</guimenu>
+<guimenuitem>Unmount</guimenuitem>
+</menuchoice></term>
+<listitem><para>Unmount the filesytem.</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><menuchoice>
+<guimenu>Filesystem operations</guimenu>
+<guimenuitem>Extend filesystem to fill volume</guimenuitem>
+</menuchoice></term>
+<listitem><para>If the filesystem is smaller than the volume that contains it, extend it.</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><menuchoice>
+<guimenu>Filesystem operations</guimenu>
+<guimenuitem>Run fsck -fp on filesystem</guimenuitem>
+</menuchoice></term>
+<listitem><para>Force fsck to preen a filesystem, use with caution.</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><menuchoice>
+<guimenu>Filesystem operations</guimenu>
+<guimenuitem>Make filesystem</guimenuitem>
+</menuchoice></term>
+<listitem><para>Make a filesystem on the volume.</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><menuchoice>
+<guimenu>Filesytem operations</guimenu>
+<guimenuitem>Remove filesystem</guimenuitem>
+</menuchoice></term>
+<listitem><para>Zero out the beginning of a filesystem so it won't be recognized.</para></listitem>
+</varlistentry>
+</variablelist>
+
+
+<sect2 id="writing-a-filesystem">
+<title>Writing a Filesystem</title>
+
+<para>Now a filesystem can be written to the volume. Right click on VolumeOne and select menu item <guibutton>Filesystem operations</guibutton> and then <guibutton>Make filesystem</guibutton>.   </para>
+
+<screenshot>
+<screeninfo>Writing a filesystem</screeninfo>
+	<mediaobject>
+	  <imageobject>
+	    <imagedata fileref="mkfs.png" format="PNG"/>
+	  </imageobject>
+	    <textobject>
+	    <phrase>Writing a filesystem</phrase>
+	  </textobject>
+	</mediaobject>
+</screenshot>
+</sect2>
+
+<sect2 id="writing-a-filesystem-advanced">
+<title>Advanced options</title>
+<para>The <guibutton>Advanced</guibutton> tab has many options for the creation of ext2, ext3 and ext4 filesystems. Options for other filesystem types are not supported.</para>
+</sect2>
+</sect1>
+
+</chapter>
+
+<chapter id="credits">
+
+<title>Credits and License</title>
+
+<para>
+&kvpm;
+</para>
+
+
+<!--List all the copyright holders here-->
+<para>Program Copyright 2008, 2009, 2010, 2011 &Benjamin.Scott; &benscott.email;</para>
+
+<para>Documentation Copyright 2011 &Benjamin.Scott; &benscott.email;</para>
+
+<!-- TRANS:CREDIT_FOR_TRANSLATORS -->
+&underFDL;               <!-- FDL: do not remove -->
+&underGPL;        	 <!-- GPL License -->
+
+</chapter>
+
+<!-- !!!!do not change ANYTHING after this line!!!! (?) -->
+
+</book>
+<!--
+Local Variables:
+mode: sgml
+sgml-minimize-attributes: nil
+sgml-general-insert-case: lower
+sgml-indent-step:0
+sgml-indent-data:nil
+End:
+-->
+
