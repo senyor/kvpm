@@ -280,8 +280,13 @@ new tab titled MyVolumeGroup.</para>
 <chapter id="logical-volumes-kvpm">
 <title>Logical Volumes</title>
 
+<sect1 id="logical-volume-intro">
+<title>Working With Logical Volumes</title>
+<para>Nearly any action that can be taken on a logical volume is done from the logical volume context menu discussed next. It has menu entries for the creation, deletion, extention and reduction of logical volumes and a variety of other changes that can be made to a volume. There are also two sub menus, one for changes in mirroring and another for handling or writing filesystems on the volume. </para>
+</sect1>
+
 <sect1 id="logical-volume-menu">
-<title>The Logical Volume Action Menu</title>
+<title>The Logical Volume Context Menu</title>
 
 <note><para>See <link linkend="typical-volume-group">An Example Volume Group Tab</link> for information on calling this context menu</para></note>
 
@@ -350,47 +355,29 @@ new tab titled MyVolumeGroup.</para>
 <listitem><para>Changes the logical volume's attributes, such as allocation policy, or tags.</para></listitem>
 </varlistentry>
 
-
 <varlistentry>
 <term><menuchoice>
-<guimenuitem>Mirror operations</guimenuitem>
+<guimenu>Mirror operations</guimenu>
+<guimenuitem>Add leg or change mirror</guimenuitem>
 </menuchoice></term>
-<listitem><para>A submenu for changing mirrored volumes.</para></listitem>
+<listitem><para>Add one or more mirror legs, change logging options or change allocation policy.</para></listitem>
 </varlistentry>
 
 <varlistentry>
 <term><menuchoice>
-<guimenuitem>Filesystem operations</guimenuitem>
+<guimenu>Mirror operations</guimenu>
+<guimenuitem>Remove mirror leg</guimenuitem>
 </menuchoice></term>
-<listitem><para>A submenu for working with file systems.</para></listitem>
+<listitem><para>Remove any mirror leg from the selected mirror.</para></listitem>
 </varlistentry>
 
-
-</variablelist>
-</sect1>
-
-<sect1 id="logical-volume-creation">
-<title>Creating a Logical Volume</title>
-
-<para>If a volume group exists and has free space, a logical volume can be created in it. Select the tab titled with the name of the volume group you wish to work with first. Then a dialog can be called up by right clicking on the long green bar or the (still empty) table below it. selecting <guibutton>Create logical lolume</guibutton>. I have called it VolumeOne and it will take %50 of the available space</para>
-
-<screenshot>
-<screeninfo>This is the volume group</screeninfo>
-	<mediaobject>
-	  <imageobject>
-	    <imagedata fileref="vg2.png" format="PNG"/>
-	  </imageobject>
-	    <textobject>
-	    <phrase>A dialog for creating logical volumes</phrase>
-	  </textobject>
-	</mediaobject>
-</screenshot>
-</sect1>
-
-<sect1 id="filesystems">
-<title>Filesystems</title>
-
-<variablelist>
+<varlistentry>
+<term><menuchoice>
+<guimenu>Mirror operations</guimenu>
+<guimenuitem>Remove this mirror leg</guimenuitem>
+</menuchoice></term>
+<listitem><para>Remove selected mirror leg.</para></listitem>
+</varlistentry>
 
 <varlistentry>
 <term><menuchoice>
@@ -439,13 +426,49 @@ new tab titled MyVolumeGroup.</para>
 </menuchoice></term>
 <listitem><para>Zero out the beginning of a filesystem so it won't be recognized.</para></listitem>
 </varlistentry>
-</variablelist>
 
+</variablelist>
+</sect1>
+
+<sect1 id="logical-volume-creation">
+<title>Creating a Logical Volume</title>
+
+<para>If a volume group exists and has free space, a logical volume can be created in it. Select the tab titled with the name of the volume group you wish to work with first. Then a dialog can be called up by right clicking on the long green bar or the (still empty) table below it. selecting <guibutton>Create logical lolume</guibutton>. I have called it VolumeOne and it will take %50 of the available space</para>
+
+<screenshot>
+<screeninfo>This is the volume group</screeninfo>
+	<mediaobject>
+	  <imageobject>
+	    <imagedata fileref="vg2.png" format="PNG"/>
+	  </imageobject>
+	    <textobject>
+	    <phrase>A dialog for creating logical volumes</phrase>
+	  </textobject>
+	</mediaobject>
+</screenshot>
+</sect1>
+
+<sect1 id="mirrors">
+<title>Mirrors</title>
+
+<para>To create a mirror simply bring up the Logical Volume Context Menu on a linear volume and select 
+<menuchoice><guimenu>Mirror operations</guimenu><guimenuitem>Add leg or change mirror</guimenuitem></menuchoice>.
+Then select the physical volumes and other options from the dialog. A mirror may be created with multiple legs or as few as two and the legs can be striped. When the dialog is finished the data on the original linear volume will be copied to the new mirror leg or legs and synchronized. 
+</para>
+<note>Remember to account for the space the mirror log takes when selecting physical volumes.</note>
+<para>A mirror can be returned to a linear volume by removing all but one of its mirror legs. This can be a convenient way to move data on a mounted volume. Simply create a new mirror leg on the destination physical volume and wait for the mirror to sync. When finished, remove the source mirror leg and the remaining leg will have all the original data.</para>
+</sect1>
+
+<sect1 id="filesystems">
+<title>Filesystems</title>
 
 <sect2 id="writing-a-filesystem">
 <title>Writing a Filesystem</title>
 
-<para>Now a filesystem can be written to the volume. Right click on VolumeOne and select menu item <guibutton>Filesystem operations</guibutton> and then <guibutton>Make filesystem</guibutton>.   </para>
+<para>To write a filesystem select <menuchoice><guimenu>Filesystem operations</guimenu>
+<guimenuitem>Make filesystem</guimenuitem></menuchoice>. 
+Here I have selected MyVolumeGroup/VolumeOne for a new ext4 filesystem.
+</para>
 
 <screenshot>
 <screeninfo>Writing a filesystem</screeninfo>
