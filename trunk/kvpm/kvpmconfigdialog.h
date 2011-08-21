@@ -12,6 +12,8 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
+#ifndef KVPMCONFIGDIALOG_H
+#define KVPMCONFIGDIALOG_H
 
 #include <KConfigDialog>
 #include <KConfigSkeleton>
@@ -108,3 +110,4 @@ public slots:
     bool hasChanged();
 };
 
+#endif

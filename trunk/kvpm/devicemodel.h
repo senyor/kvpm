@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2009 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -12,8 +12,8 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
-#ifndef STORAGEDEVICEVIEW_H
-#define STORAGEDEVICEVIEW_H
+#ifndef DEVICEMODEL_H
+#define DEVICEMODEL_H
 
 #include <QList>
 #include <QAbstractItemModel>
