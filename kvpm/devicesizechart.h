@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -11,6 +11,7 @@
  * 
  * See the file "COPYING" for the exact licensing terms.
  */
+
 #ifndef STORAGEDEVICESIZECHART_H
 #define STORAGEDEVICESIZECHART_H
 
@@ -28,7 +29,7 @@ class DeviceSizeChart : public QFrame
     Q_OBJECT
 
     QHBoxLayout *m_layout;
-    QHBoxLayout *m_extended_layout;        // The layout for chart segments inside an extented partition
+    QHBoxLayout *m_extended_layout;        // The layout for chart segments inside an extended partition
 
     QList<QWidget *> m_segments, m_extended_segments;    // Segments of the bar chart, not the disk.
     QList<double> m_ratios, m_extended_ratios;
