@@ -28,6 +28,8 @@ class StoragePartition;
 
 class StorageDevice : public QObject
 {
+Q_OBJECT
+
     long long m_device_size; // Size in bytes
     QString   m_device_path;
     QString   m_disk_label;

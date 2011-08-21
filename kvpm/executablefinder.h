@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2009 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -23,6 +23,7 @@
 
 class ExecutableFinder : public QObject
 {
+Q_OBJECT
 
     QStringList m_default_search_paths;
     QStringList m_keys;                       // Names of the executables we are looking for
