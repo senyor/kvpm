@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2009, 2010 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -32,6 +32,7 @@ class StorageDevice;
 
 class MasterList : public QObject
 {
+Q_OBJECT
     QList<VolGroup *> m_volume_groups;
     QList<StorageDevice *> m_storage_devices;
     

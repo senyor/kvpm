@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -24,6 +24,7 @@ class MountInformation;
 
 class MountInformationList
 {
+
     QList<MountInformation *> m_list;
     
  public:
@@ -35,6 +36,8 @@ class MountInformationList
     
 class MountInformation : public QObject
 {
+Q_OBJECT
+
     QString m_device_name,        // for example: "/dev/sda1"
 	    m_mount_point, 
 	    m_filesystem_type,    // ext3, reiserfs, swap etcetera 
