@@ -43,7 +43,7 @@ bool remove_lv(LogVol *logicalVolume)
         if( logicalVolume->isActive() && !logicalVolume->isSnap() ){
             args << "lvchange" << "-an" << full_name;
 
-            ProcessProgress deactive( args, i18n("Deactivating volume..."), true);
+            ProcessProgress deactivate( args, i18n("Deactivating volume..."), true);
         }
 
         args.clear();

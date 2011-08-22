@@ -548,14 +548,14 @@ bool PartitionMoveResizeDialog::growPartition()
 
     /* if constraint solves to NULL then the new part will fail, so just bail out */
     if( ped_constraint_solve_max( constraint ) == NULL ){
-        KMessageBox::error( 0, i18n("Partition extention failed") );
+        KMessageBox::error( 0, i18n("Partition extension failed") );
         return false;
     }
 
     success = ped_disk_set_partition_geom(m_ped_disk, m_existing_part, constraint, max_start, max_end);
 
     if( ! success ){  
-        KMessageBox::error( 0, i18n("Partition extention failed") );
+        KMessageBox::error( 0, i18n("Partition extension failed") );
         return false;
     }
     else {
