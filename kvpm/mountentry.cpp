@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -124,7 +124,7 @@ bool addMountEntryOptions(QString mountPoint, QString newOptions)
 	    options = temp_entry->mnt_opts;
 	    options = options.simplified();
 
-	    if( newOptions.startsWith("," ) )
+	    if( newOptions.startsWith(',' ) )
 		options.append(newOptions);
 	    else
 		options.append( "," + newOptions);

@@ -320,8 +320,8 @@ void KvpmConfigDialog::updateSettings()
     m_search_entries = m_edit_list->items();
 
     for( int x = 0; x < m_search_entries.size(); x++)
-      if( ! m_search_entries[x].endsWith("/") )
-	m_search_entries[x].append("/");
+      if( ! m_search_entries[x].endsWith('/') )
+	m_search_entries[x].append('/');
 
     m_ext2_color  = m_ext2_button->color();
     m_ext3_color  = m_ext3_button->color();
