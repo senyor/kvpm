@@ -206,8 +206,8 @@ bool unmount_filesystem(StoragePartition *partition)
 bool unmount_filesystem(const QString mountPoint)
 {
     QString error_string, error_message;
-
-    const char *mount_point = mountPoint.toAscii().data();
+    QByteArray mount_point_array = mountPoint.toAscii();
+    const char *mount_point = mount_point_array.data();
 
     if( umount2(mount_point, 0) ){
 	error_string =  strerror( errno );

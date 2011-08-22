@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2010 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -37,7 +37,8 @@ FSData *get_fs_data(QString path){
     struct statvfs *buf;
     buf = new struct statvfs;
 
-    const char *mp = path.toAscii().data();
+    QByteArray path_array = path.toAscii();
+    const char *mp = path_array.data();
     error =  statvfs(mp, buf);
  
     if(!error){  // We use "long long" intermediate variables here
