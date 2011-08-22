@@ -13,11 +13,12 @@
  */
 
 
+#include "lvchange.h"
+
 #include <QtGui>
 #include <KLocale>
 #include <KSeparator>
 
-#include "lvchange.h"
 #include "logvol.h"
 #include "processprogress.h"
 
@@ -325,7 +326,7 @@ QStringList LVChangeDialog::arguments()
     if( m_tag_group->isChecked() ){
         if( m_deltag_combo->currentIndex() )
             args << "--deltag" << m_deltag_combo->currentText();
-        if(m_tag_edit->text() != "")
+        if( ! (m_tag_edit->text()).isEmpty() )
             args << "--addtag" << m_tag_edit->text();
     }
 

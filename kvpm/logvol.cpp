@@ -379,7 +379,7 @@ Segment* LogVol::processSegments(lvseg_t lvm_lvseg)
     if( value.is_valid )
         raw_paths = value.value.string;
 
-    if(raw_paths == "" && m_virtual)
+    if( raw_paths.isEmpty() && m_virtual )
         m_orphan = true;
 
     if( raw_paths.size() ){

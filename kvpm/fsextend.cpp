@@ -77,7 +77,7 @@ bool fs_extend(QString path, QString fs, bool isLV){
             return true;
     }
     else if( fs == "xfs" ){
-        if( mp == "" ){
+        if( mp.isEmpty() ){
             if( do_temp_mount(path, fs) ){
 
                 arguments << "xfs_growfs" 

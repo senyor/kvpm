@@ -12,13 +12,14 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
+#include "processprogress.h"
+
 #include <KMessageBox>
 #include <KProcess>
 #include <KLocale>
 #include <QtGui>
 
 #include "executablefinder.h"
-#include "processprogress.h"
 
 extern ExecutableFinder *g_executable_finder;
 
@@ -46,7 +47,7 @@ ProcessProgress::ProcessProgress(QStringList arguments,
         executable = arguments.takeFirst();
 	executable_path = g_executable_finder->getExecutablePath( executable );
 
-        if( executable_path != "" ){
+        if( !executable_path.isEmpty() ){
             m_process = new KProcess(this);
             QStringList environment = QProcess::systemEnvironment();
             environment << "LVM_SUPPRESS_FD_WARNINGS=1";

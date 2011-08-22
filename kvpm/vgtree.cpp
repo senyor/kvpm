@@ -11,6 +11,8 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
+#include "vgtree.h"
+
 #include <KConfigSkeleton>
 #include <KLocale>
 #include <QtGui>
@@ -20,7 +22,6 @@
 #include "masterlist.h"
 #include "misc.h"
 #include "topwindow.h"
-#include "vgtree.h"
 #include "volgroup.h"
 
 extern MasterList *master_list;
@@ -85,7 +86,7 @@ void VGTree::loadData()
 	lv = logical_volumes[x];
 	lv_data.clear();
         
-        if( ( lv->getOrigin() == "" || lv->isOrphan() ) && !lv->getName().startsWith("snapshot") ){
+        if( ( lv->getOrigin().isEmpty() || lv->isOrphan() ) && !lv->getName().startsWith("snapshot") ){
 
 	    if( lv->getSegmentCount() == 1 ) {
 
