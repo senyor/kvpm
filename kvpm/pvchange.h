@@ -38,7 +38,7 @@ Q_OBJECT
      PhysVol   *m_pv;
 
 public:
-     PVChangeDialog(PhysVol *physicalVolume, QWidget *parent = 0);
+     explicit PVChangeDialog(PhysVol *physicalVolume, QWidget *parent = 0);
      QStringList arguments();
 
 private slots:

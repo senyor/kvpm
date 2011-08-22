@@ -57,7 +57,7 @@ Q_OBJECT
     void setup(StorageDeviceItem *item);
     
  public:
-    DeviceActionsMenu( StorageDeviceItem *item, QWidget *parent = 0);
+    explicit DeviceActionsMenu( StorageDeviceItem *item, QWidget *parent = 0);
 
  private slots:
     void fsckPartition();

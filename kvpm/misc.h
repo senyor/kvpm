@@ -30,7 +30,7 @@ class NoMungeCheck : public QCheckBox
     QVariant    m_data;
 
  public:
-    NoMungeCheck(const QString text, QWidget *parent = NULL);
+    explicit NoMungeCheck(const QString text, QWidget *parent = NULL);
     QString     getAlternateText();
     QStringList getAlternateTextList();
     QString     getUnmungedText();
@@ -47,7 +47,7 @@ class NoMungeRadioButton : public QRadioButton
     QVariant m_data;
 
  public:
-    NoMungeRadioButton(const QString text, QWidget *parent = NULL);
+    explicit NoMungeRadioButton(const QString text, QWidget *parent = NULL);
     QString getAlternateText();
     QString getUnmungedText();
     void setAlternateText(QString alternateText);

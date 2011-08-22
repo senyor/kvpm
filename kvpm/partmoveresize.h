@@ -75,7 +75,7 @@ Q_OBJECT
     void getMaximumPartition();
 
 public:
-    PartitionMoveResizeDialog(StoragePartition *partition, QWidget *parent = 0);
+    explicit PartitionMoveResizeDialog(StoragePartition *partition, QWidget *parent = 0);
 
 private slots:
     void commitPartition();

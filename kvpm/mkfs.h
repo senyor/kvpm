@@ -78,8 +78,8 @@ Q_OBJECT
     void setAdvancedTab(bool);
 
  public:
-    MkfsDialog(LogVol *logicalVolume, QWidget *parent = 0);
-    MkfsDialog(StoragePartition *partition, QWidget *parent = 0);
+    explicit MkfsDialog(LogVol *logicalVolume, QWidget *parent = 0);
+    explicit MkfsDialog(StoragePartition *partition, QWidget *parent = 0);
     QStringList arguments();
 };
 

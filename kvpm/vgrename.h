@@ -33,7 +33,7 @@ Q_OBJECT
     QRegExpValidator *m_name_validator;
 
 public:
-    VGRenameDialog(VolGroup *volumeGroup, QWidget *parent = 0);
+    explicit VGRenameDialog(VolGroup *volumeGroup, QWidget *parent = 0);
     QStringList arguments();
 
 private slots:

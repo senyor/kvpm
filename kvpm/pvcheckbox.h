@@ -41,7 +41,7 @@ Q_OBJECT
     long long m_extent_size;
 
  public:
-    PVCheckBox(QList<PhysVol *> physicalVolumes, QWidget *parent = NULL); 
+    explicit PVCheckBox(QList<PhysVol *> physicalVolumes, QWidget *parent = NULL); 
     PVCheckBox(QList<StorageDevice *> devices, QList<StoragePartition *> partitions, 
                long long extentSize, QWidget *parent = NULL); 
 

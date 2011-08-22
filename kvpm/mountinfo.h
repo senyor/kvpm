@@ -40,7 +40,7 @@ Q_OBJECT
                                   // of mount order. 1 is the *last* one mounted, highest 
                                   // number is the first one mounted. 
  public:
-    MountInformation(mntent *mountTableEntry, QObject *parent = 0);
+    explicit MountInformation(mntent *mountTableEntry, QObject *parent = 0);
     QString getDeviceName();
     QString getMountPoint();
     QString getFilesystemType();

@@ -56,8 +56,8 @@ Q_OBJECT
     void removeEmptyTargets();
     
 public:
-    PVMoveDialog(PhysVol *physicalVolume, QWidget *parent = 0);
-    PVMoveDialog(LogVol *logicalVolume, QWidget *parent = 0);
+    explicit PVMoveDialog(PhysVol *physicalVolume, QWidget *parent = 0);
+    explicit PVMoveDialog(LogVol *logicalVolume, QWidget *parent = 0);
     QStringList arguments();
     
 private slots:

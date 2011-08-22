@@ -26,8 +26,8 @@ class DeviceProperties : public QWidget
 {
 
  public:
-     DeviceProperties( StorageDevice *Device, QWidget *parent = 0);
-     DeviceProperties( StoragePartition *Partition, QWidget *parent = 0);
+     explicit DeviceProperties( StorageDevice *Device, QWidget *parent = 0);
+     explicit DeviceProperties( StoragePartition *Partition, QWidget *parent = 0);
 };
 
 #endif

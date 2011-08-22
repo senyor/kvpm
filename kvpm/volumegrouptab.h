@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -44,7 +44,7 @@ Q_OBJECT
     QString m_group_name;
 
  public:
-    VolumeGroupTab(VolGroup *volumeGroup, QWidget *parent = 0);
+    explicit VolumeGroupTab(VolGroup *volumeGroup, QWidget *parent = 0);
     VolGroup* getVolumeGroup();
     QString getVolumeGroupName();
     void rescan();

@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -38,7 +38,7 @@ Q_OBJECT
      QList<NoMungeCheck *> m_mirror_leg_checks;
      
 public:
-     RemoveMirrorDialog(LogVol *logicalVolume, QWidget *parent = 0);
+     explicit RemoveMirrorDialog(LogVol *logicalVolume, QWidget *parent = 0);
      QStringList arguments();
 
 private slots:     

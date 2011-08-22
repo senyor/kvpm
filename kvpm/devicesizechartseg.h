@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -31,7 +31,7 @@ Q_OBJECT
     StoragePartition  *m_partition;
 
 public:
-    DeviceChartSeg(StorageDeviceItem *storageDeviceItem, QWidget *parent = 0);
+    explicit DeviceChartSeg(StorageDeviceItem *storageDeviceItem, QWidget *parent = 0);
 
 public slots:
     void popupContextMenu(QPoint point);

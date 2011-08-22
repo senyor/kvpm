@@ -77,7 +77,7 @@ Q_OBJECT
     void buildAdvancedTab();
     
 public:
-    LVChangeDialog(LogVol *logicalVolume, QWidget *parent = 0);
+    explicit LVChangeDialog(LogVol *logicalVolume, QWidget *parent = 0);
     QStringList arguments();
 
 private slots:

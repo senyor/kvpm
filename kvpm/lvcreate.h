@@ -103,7 +103,7 @@ Q_OBJECT
      void makeConnections();
 
  public:
-     LVCreateDialog(VolGroup *volumeGroup, QWidget *parent = 0);
+     explicit LVCreateDialog(VolGroup *volumeGroup, QWidget *parent = 0);
      LVCreateDialog(LogVol *logicalVolume, bool snapshot, QWidget *parent = 0);
      
      QStringList argumentsLV();

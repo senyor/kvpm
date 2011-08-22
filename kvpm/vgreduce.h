@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008 2010 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -35,7 +35,7 @@ Q_OBJECT
     bool m_unremovable_pvs_present;
 
  public:
-    VGReduceDialog(VolGroup *volumeGroup, QWidget *parent = 0);
+    explicit VGReduceDialog(VolGroup *volumeGroup, QWidget *parent = 0);
     QStringList arguments();
     
  private slots:

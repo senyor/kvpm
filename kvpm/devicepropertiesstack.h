@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -11,6 +11,8 @@
  * 
  * See the file "COPYING" for the exact licensing terms.
  */
+
+
 #ifndef DEVICEPROPERTIESSTACK_H
 #define DEVICEPROPERTIESSTACK_H
 
@@ -29,10 +31,11 @@ Q_OBJECT
     QStringList m_device_path_list;  // full path of each device on the stack, in the same order
 
  public:
-     DevicePropertiesStack(QList<StorageDevice *> Devices, QWidget *parent = 0);
+     explicit DevicePropertiesStack(QList<StorageDevice *> Devices, QWidget *parent = 0);
 
  public slots:
      void changeDeviceStackIndex(QModelIndex Index);
 };
 
 #endif
+
