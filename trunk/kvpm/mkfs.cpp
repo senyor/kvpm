@@ -35,7 +35,7 @@ bool make_fs(LogVol *logicalVolume)
 
     QString error_message = i18n("The volume: <b>%1</b> is mounted. It must be "
                                  "unmounted before a new filesystem " 
-                                 "can be written on it").arg( logicalVolume->getFullName() );
+                                 "can be written on it", logicalVolume->getFullName() );
 
     QByteArray zero_array(128 * 1024, '\0');
     QString path = logicalVolume->getMapperPath();
@@ -78,7 +78,7 @@ bool make_fs(StoragePartition *partition)
     
     QString error_message = i18n("The partition: <b>%1</b> is mounted. It must "
                                  "be unmounted before a new filesystem " 
-                                 "can be written on it").arg( partition->getName() );
+                                 "can be written on it", partition->getName() );
 
     QByteArray zero_array(128 * 1024, '\0');
     QString path = partition->getName();
@@ -119,8 +119,8 @@ MkfsDialog::MkfsDialog(LogVol *logicalVolume, QWidget *parent) : KDialog(parent)
     m_stride_count = logicalVolume->getSegmentStripes( 0 );
 
     m_tab_widget = new KTabWidget(this);
-    m_tab_widget->addTab(generalTab(), i18n("General") );
-    m_tab_widget->addTab(advancedTab(), i18n("Advanced") );
+    m_tab_widget->addTab(generalTab(), i18nc("The common options", "General") );
+    m_tab_widget->addTab(advancedTab(), i18nc("Less used or complex options", "Advanced") );
     setMainWidget(m_tab_widget);
     setCaption( i18n("Write filesystem") );
 
@@ -134,8 +134,8 @@ MkfsDialog::MkfsDialog(StoragePartition *partition, QWidget *parent) : KDialog(p
     m_stride_count = 1;
 
     m_tab_widget = new KTabWidget(this);
-    m_tab_widget->addTab(generalTab(), i18n("General") );
-    m_tab_widget->addTab(advancedTab(), i18n("Advanced") );
+    m_tab_widget->addTab(generalTab(), i18nc("The common options", "General") );
+    m_tab_widget->addTab(advancedTab(), i18nc("Less used or complex options", "Advanced") );
     setMainWidget(m_tab_widget);
     setCaption( i18n("Write filesystem") );
 
@@ -148,7 +148,7 @@ QWidget* MkfsDialog::generalTab()
     QVBoxLayout *layout = new QVBoxLayout();
     tab->setLayout(layout);
 
-    QLabel *label = new QLabel( i18n("<b>Write filesystem on: %1</b>").arg(m_path) );
+    QLabel *label = new QLabel( i18n("<b>Write filesystem on: %1</b>", m_path) );
     label->setAlignment(Qt::AlignCenter);
     layout->addWidget(label);
 
@@ -237,7 +237,7 @@ QWidget* MkfsDialog::advancedTab()
 
     block_layout->addWidget( new QLabel( i18n("Block size: ") ) );
     m_block_combo = new KComboBox();
-    m_block_combo->insertItem(0, i18n("default") );
+    m_block_combo->insertItem(0, i18nc("Let the program decide", "default") );
     m_block_combo->insertItem(1,"1024 KiB");
     m_block_combo->insertItem(2,"2048 KiB");
     m_block_combo->insertItem(3,"4096 KiB");
@@ -249,7 +249,7 @@ QWidget* MkfsDialog::advancedTab()
 
     isize_layout->addWidget( new QLabel( i18n("Inode size: ") ) );
     m_inode_combo = new KComboBox();
-    m_inode_combo->insertItem(0, i18n("default") );
+    m_inode_combo->insertItem(0, i18nc("Let the program decide", "default") );
     m_inode_combo->insertItem(1,"128 Bytes");
     m_inode_combo->insertItem(2,"256 Bytes");
     m_inode_combo->insertItem(3,"512 Bytes");

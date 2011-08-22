@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -45,7 +45,7 @@ VGRenameDialog::VGRenameDialog(VolGroup *volumeGroup, QWidget *parent) :
     dialog_body->setLayout(layout);
 
     m_old_name = volumeGroup->getName();
-    QLabel *old_name_label = new QLabel( i18n("Old volume group name: %1").arg(m_old_name) );
+    QLabel *old_name_label = new QLabel( i18n("Old volume group name: %1", m_old_name) );
     layout->addWidget(old_name_label);
     
     QLabel *name_label = new QLabel( i18n("New volume group name: ") );

@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -28,7 +28,7 @@ bool export_vg(VolGroup *volumeGroup)
 
     QStringList args;
 
-    QString message = i18n("Export volume group: %1 ?").arg(volumeGroup->getName());
+    QString message = i18n("Export volume group: %1 ?", volumeGroup->getName() );
     
     if(KMessageBox::questionYesNo( 0, message) == 3){      // 3 = "yes" button
 

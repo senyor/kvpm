@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -49,7 +49,7 @@ UnmountDialog::UnmountDialog(QString device, QStringList mountPoints,
 
     QString unmount_message = i18n( "<b>%1</b> is mounted at multiple locatations. "
 				    "Check the boxes for any you "
-				    "wish to unmount." ).arg(device);
+				    "wish to unmount.", device);
 
     QString position_message = i18n( "One or more unmount selections have been disabled. "
 				     "Another device or volume is mounted over the same "
@@ -100,7 +100,7 @@ void UnmountDialog::unmountFilesystems()
 		error_string =  strerror( errno );
 
 		error_message = i18n("Unmounting %1 failed with error number: %2 "
-				     "%3").arg(mount_point).arg(errno).arg(error_string);
+				     "%3", mount_point, errno, error_string );
 
 		KMessageBox::error(0, error_message);
 	    }
@@ -162,7 +162,7 @@ bool unmount_filesystem(StoragePartition *partition)
     QString path = partition->getName();
 
     QString unused_message = i18n("The partition <b>%1</b> is mounted on <b>%2</b> "
-				  "Do you want to unmount it?").arg(path).arg(mount_points[0]);
+				  "Do you want to unmount it?", path, mount_points[0]);
 
     QString position_message = i18n("Another device or volume is mounted at the same "
 				    "mount point over this one. It must be unmounted "
@@ -213,7 +213,7 @@ bool unmount_filesystem(const QString mountPoint)
 	error_string =  strerror( errno );
 	
 	error_message = i18n("Unmounting %1 failed with error number: %2 "
-			     "%3").arg(mountPoint).arg(errno).arg(error_string);
+			     "%3", mountPoint, errno, error_string );
 	
 	KMessageBox::error(0, error_message);
 	return false;

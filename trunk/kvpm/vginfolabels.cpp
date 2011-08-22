@@ -98,13 +98,13 @@ VGInfoLabels::VGInfoLabels(VolGroup *volumeGroup, QWidget *parent) : QFrame(pare
     else if(volumeGroup->isExported())
         hlayout2->addWidget( new QLabel( i18n("<b>*** Exported Volume Group ***</b>") ) );
 
-    used_label   = new QLabel( i18n("Used: %1", sizeToString(volumeGroup->getUsedSpace())) );
-    free_label   = new QLabel( i18n("Free: %1", sizeToString(volumeGroup->getFreeSpace())) );
-    size_label   = new QLabel( i18n("Total: %1", sizeToString(volumeGroup->getSize())));
-    lvm_fmt_label   = new QLabel( i18n("Format: %1").arg(volumeGroup->getFormat()) );
-    policy_label    = new QLabel( i18n("Policy: %1").arg(volumeGroup->getPolicy()) );
-    resizable_label = new QLabel( i18n("Resizable: %1").arg(resizable) );
-    clustered_label = new QLabel( i18n("Clustered: %1").arg(clustered) );
+    used_label   = new QLabel( i18nc("Space used up", "Used: %1", sizeToString(volumeGroup->getUsedSpace())) );
+    free_label   = new QLabel( i18nc("Space not used", "Free: %1", sizeToString(volumeGroup->getFreeSpace())) );
+    size_label   = new QLabel( i18nc("Total space on device", "Total: %1", sizeToString(volumeGroup->getSize())));
+    lvm_fmt_label   = new QLabel( i18n("Format: %1", volumeGroup->getFormat()) );
+    policy_label    = new QLabel( i18n("Policy: %1", volumeGroup->getPolicy()) );
+    resizable_label = new QLabel( i18n("Resizable: %1", resizable) );
+    clustered_label = new QLabel( i18n("Clustered: %1", clustered) );
     allocatable_label = new QLabel( i18n("Allocatable: %1", sizeToString(volumeGroup->getAllocatableSpace())) );
     extent_size_label  = new QLabel( i18n("Extent size: %1", sizeToString(volumeGroup->getExtentSize())) );
     mda_label          = new QLabel( i18n("MDA count: %1", volumeGroup->getMDACount() ) );

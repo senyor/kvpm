@@ -267,10 +267,10 @@ void PVMoveDialog::buildDialog()
 
     QGroupBox *alloc_box = new QGroupBox( i18n("Allocation Policy") );
     QVBoxLayout *alloc_box_layout = new QVBoxLayout;
-    m_normal_button     = new QRadioButton( i18n("Normal") );
+    m_normal_button     = new QRadioButton( i18nc("The usual way", "Normal") );
     m_contiguous_button = new QRadioButton( i18n("Contiguous") );
     m_anywhere_button   = new QRadioButton( i18n("Anywhere") );
-    m_inherited_button  = new QRadioButton( i18n("Inherited") );
+    m_inherited_button  = new QRadioButton( i18nc("Inherited from the group", "Inherited") );
     m_inherited_button->setChecked(true);
     m_cling_button      = new QRadioButton( i18n("Cling") );
     alloc_box_layout->addWidget(m_normal_button);

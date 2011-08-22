@@ -52,7 +52,7 @@ AddMirrorDialog::AddMirrorDialog(LogVol *logicalVolume, QWidget *parent):
    
     QWidget *general_tab  = new QWidget(this);
     QWidget *physical_tab = new QWidget(this);
-    m_tab_widget->addTab(general_tab,  i18n("General") );
+    m_tab_widget->addTab(general_tab,  i18nc("Common user options", "General") );
     m_tab_widget->addTab(physical_tab, i18n("Physical layout") );
     m_general_layout  = new QHBoxLayout;
     m_physical_layout = new QVBoxLayout();
@@ -74,7 +74,7 @@ AddMirrorDialog::AddMirrorDialog(LogVol *logicalVolume, QWidget *parent):
 
 void AddMirrorDialog::setupGeneralTab()
 {
-    QLabel *lv_name_label = new QLabel( i18n("<b>Volume: %1").arg(m_lv->getName()) );
+    QLabel *lv_name_label = new QLabel( i18n("<b>Volume: %1</b>", m_lv->getName() ));
     QLabel *current_mirrors_label = new QLabel();
     QVBoxLayout *layout = new QVBoxLayout;
     lv_name_label->setAlignment(Qt::AlignCenter);
@@ -116,10 +116,10 @@ void AddMirrorDialog::setupGeneralTab()
   
     QGroupBox *alloc_box = new QGroupBox( i18n("Allocation policy") );
     QVBoxLayout *alloc_box_layout = new QVBoxLayout;
-    normal_button     = new QRadioButton( i18n("Normal") );
+    normal_button     = new QRadioButton( i18nc("The usual way", "Normal") );
     contiguous_button = new QRadioButton( i18n("Contiguous") );
     anywhere_button   = new QRadioButton( i18n("Anywhere") );
-    inherited_button  = new QRadioButton( i18n("Inherited") );
+    inherited_button  = new QRadioButton( i18nc("Inherited from the parent group", "Inherited") );
     cling_button      = new QRadioButton( i18n("Cling") );
     normal_button->setChecked(true);
     alloc_box_layout->addWidget(normal_button);

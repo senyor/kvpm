@@ -94,7 +94,7 @@ ProcessProgress::ProcessProgress(QStringList arguments,
             }
         }
         else{
-            KMessageBox::error(this, i18n("Executable: '%1' not found").arg(executable));
+            KMessageBox::error(this, i18n("Executable: '%1' not found", executable));
             close();
         }
     }

@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -26,8 +26,8 @@ bool reduce_vg_one(QString volumeGroupName, QString physicalVolumeName)
 
     QStringList args;
  
-    QString message = i18n("Remove physical volume: <b>%1</b> from volume " 
-			   "group: <b>%2</b>").arg(physicalVolumeName).arg(volumeGroupName);
+    QString message = i18n( "Remove physical volume: <b>%1</b> from volume " 
+			    "group: <b>%2</b>", physicalVolumeName, volumeGroupName );
     
 
     int return_code =  KMessageBox::questionYesNo( 0, message);

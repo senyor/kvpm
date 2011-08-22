@@ -40,8 +40,8 @@ PVTree::PVTree(VolGroup *volumeGroup, QWidget *parent) : QTreeWidget(parent), m_
     setColumnCount(6);
     QTreeWidgetItem * item;
 
-    header_labels << i18n("Name") << i18n("Size") 
-		  << i18n("Free") << i18n("Used")
+    header_labels << i18nc("The name of the device", "Name") << i18n("Size") 
+		  << i18nc("Unused space", "Free") << i18nc("Space used up", "Used")
 		  << i18n("Allocatable") 
                   << i18n("Tags") 
 		  << i18n("Logical volumes");
