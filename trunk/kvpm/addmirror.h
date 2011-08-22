@@ -73,7 +73,7 @@ Q_OBJECT
     QStringList getPvsInUse();
     
 public:
-    AddMirrorDialog(LogVol *logicalVolume, QWidget *parent = 0);
+    explicit AddMirrorDialog(LogVol *logicalVolume, QWidget *parent = 0);
     QStringList arguments();
 
 private slots:

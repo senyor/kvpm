@@ -42,7 +42,7 @@ Q_OBJECT
     QSpinBox  *m_max_lvs_spin, *m_max_pvs_spin; 
 
 public:
-    VGChangeDialog(VolGroup *volumeGroup, QWidget *parent = 0);
+    explicit VGChangeDialog(VolGroup *volumeGroup, QWidget *parent = 0);
     QStringList arguments();
 
 private slots:

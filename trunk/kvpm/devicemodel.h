@@ -48,7 +48,7 @@ class StorageDeviceModel : public QAbstractItemModel
     Q_OBJECT
 
 public:
-    StorageDeviceModel(QList<StorageDevice *> devices, QObject *parent = 0);
+    explicit StorageDeviceModel(QList<StorageDevice *> devices, QObject *parent = 0);
     ~StorageDeviceModel();
     
     QVariant data(const QModelIndex &index, int role) const;

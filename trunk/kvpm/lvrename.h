@@ -35,7 +35,7 @@ Q_OBJECT
     LogVol *m_lv;
 
 public:
-    LVRenameDialog(LogVol *logicalVolume, QWidget *parent = 0);
+    explicit LVRenameDialog(LogVol *logicalVolume, QWidget *parent = 0);
     QStringList arguments();
 
 private slots:

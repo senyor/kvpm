@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2009, 2010 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2009, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -34,7 +34,7 @@ Q_OBJECT
                  *m_destroy_button;
     
  public:
-    TableCreateDialog(QString devicePath, QWidget *parent = 0);
+    explicit TableCreateDialog(QString devicePath, QWidget *parent = 0);
     
  private slots:
     void commitTable();

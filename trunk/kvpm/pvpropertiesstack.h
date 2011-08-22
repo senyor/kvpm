@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -32,7 +32,7 @@ Q_OBJECT
     QList<QStackedWidget *> m_pv_stack_list;
     
  public:
-    PVPropertiesStack(VolGroup *volumeGroup, QWidget *parent = 0);
+    explicit PVPropertiesStack(VolGroup *volumeGroup, QWidget *parent = 0);
  
  public slots:
     void changePVStackIndex(QTreeWidgetItem *item, QTreeWidgetItem*);

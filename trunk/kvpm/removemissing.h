@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -33,7 +33,7 @@ Q_OBJECT
                  *m_all_button;
     
  public:
-    RemoveMissingDialog(VolGroup *volumeGroup, QWidget *parent = 0);
+    explicit RemoveMissingDialog(VolGroup *volumeGroup, QWidget *parent = 0);
     QStringList arguments();
     
 };

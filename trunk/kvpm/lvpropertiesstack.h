@@ -30,7 +30,7 @@ Q_OBJECT
     QList<QStackedWidget *> m_lv_stack_list;
     
  public:
-    LVPropertiesStack(VolGroup *Group, QWidget *parent = 0);
+    explicit LVPropertiesStack(VolGroup *Group, QWidget *parent = 0);
  
  public slots:
     void changeLVStackIndex(QTreeWidgetItem *item, QTreeWidgetItem*);

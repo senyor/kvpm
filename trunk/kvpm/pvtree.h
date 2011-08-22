@@ -43,7 +43,7 @@ Q_OBJECT
     void setupContextMenu();
     
 public:
-    PVTree(VolGroup *volumeGroup, QWidget *parent = 0);
+    explicit PVTree(VolGroup *volumeGroup, QWidget *parent = 0);
     void loadData();
 
 private slots:    

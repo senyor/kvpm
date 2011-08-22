@@ -44,7 +44,7 @@ Q_OBJECT
     long long getSizeEditExtents(int index);
 
  public:
-    LVReduceDialog(LogVol *logicalVolume, QWidget *parent = 0);
+    explicit LVReduceDialog(LogVol *logicalVolume, QWidget *parent = 0);
      
  private slots:
     void sizeComboAdjust(int index);

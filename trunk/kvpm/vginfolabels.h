@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -23,7 +23,7 @@ class VolGroup;
 class VGInfoLabels : public QFrame
 {
  public:
-     VGInfoLabels(VolGroup *volumeGroup, QWidget *parent = 0);
+     explicit VGInfoLabels(VolGroup *volumeGroup, QWidget *parent = 0);
     
 };
 

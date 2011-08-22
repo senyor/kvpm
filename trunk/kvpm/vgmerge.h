@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2010 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -33,7 +33,7 @@ Q_OBJECT
     QCheckBox *m_autobackup;
 
  public:
-    VGMergeDialog(VolGroup *volumeGroup, QWidget *parent = 0);
+    explicit VGMergeDialog(VolGroup *volumeGroup, QWidget *parent = 0);
     QStringList arguments();    
 
 };
