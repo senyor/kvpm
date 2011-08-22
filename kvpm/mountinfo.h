@@ -15,25 +15,13 @@
 #ifndef MOUNTINFO_H
 #define MOUNTINFO_H
 
+#include <QObject>
 #include <QString>
 #include <QList>
 
 class mntent;
-class MountInformation;
 
 
-class MountInformationList
-{
-
-    QList<MountInformation *> m_list;
-    
- public:
-    MountInformationList();
-    ~MountInformationList();
-    QList<MountInformation *> getMountInformation(QString deviceName);
-};
-
-    
 class MountInformation : public QObject
 {
 Q_OBJECT

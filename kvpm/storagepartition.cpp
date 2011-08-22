@@ -19,6 +19,7 @@
 #include "misc.h"
 #include "mountentry.h"
 #include "mountinfo.h"
+#include "mountinfolist.h"
 #include "physvol.h"
 #include "storagepartition.h"
 

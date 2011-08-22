@@ -12,6 +12,8 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
+#include "fsextend.h"
+
 #include <sys/mount.h>
 #include <errno.h>
 #include <string.h>
@@ -21,8 +23,8 @@
 
 #include <QtGui>
 
-#include "fsextend.h"
 #include "mountinfo.h"
+#include "mountinfolist.h"
 #include "processprogress.h"
 #include "fsck.h"
 

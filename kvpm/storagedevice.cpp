@@ -22,6 +22,7 @@
 
 #include "physvol.h"
 #include "mountentry.h"
+#include "mountinfolist.h"
 
 StorageDevice::StorageDevice( PedDevice *pedDevice,
 			      QList<PhysVol *> pvList, 
