@@ -60,7 +60,7 @@ void LogVol::rescan(lv_t lvm_lv)
     m_lv_name   = QString(value.value.string).trimmed();
 
     m_vg_name   = m_vg->getName();
-    m_lv_full_name = m_vg_name + "/" + m_lv_name;
+    m_lv_full_name = m_vg_name + '/' + m_lv_name;
 
     value = lvm_lv_get_property(lvm_lv, "lv_path");
     m_lv_mapper_path = QString(value.value.string).trimmed();
@@ -236,7 +236,7 @@ void LogVol::rescan(lv_t lvm_lv)
         m_lv_fs = "";
     }
     else
-        m_lv_fs = fsprobe_getfstype2( "/dev/" + m_vg_name + "/" + m_lv_name );
+        m_lv_fs = fsprobe_getfstype2( "/dev/" + m_vg_name + '/' + m_lv_name );
  
     value = lvm_lv_get_property(lvm_lv, "lv_size");
     m_size = value.value.integer;
@@ -304,7 +304,7 @@ void LogVol::rescan(lv_t lvm_lv)
     m_tags = tag.split(',', QString::SkipEmptyParts);
 
     MountInformationList *mountInformationList = new MountInformationList();
-    m_mount_info_list = mountInformationList->getMountInformation( "/dev/" + m_vg_name + "/" + m_lv_name );
+    m_mount_info_list = mountInformationList->getMountInformation( "/dev/" + m_vg_name + '/' + m_lv_name );
 
 /* To Do: get all the rest of the mount info, not just mount points */
 
@@ -383,12 +383,12 @@ Segment* LogVol::processSegments(lvseg_t lvm_lvseg)
         m_orphan = true;
 
     if( raw_paths.size() ){
-	devices_and_starts = raw_paths.split(",");
+	devices_and_starts = raw_paths.split(',');
 
 	for(int x = 0; x < devices_and_starts.size(); x++){
-	    temp = devices_and_starts[x].split("(");
-	    segment->m_device_path.append(temp[0]);
-	    segment->m_starting_extent.append((temp[1].remove(")")).toLongLong());
+	    temp = devices_and_starts[x].split('(');
+	    segment->m_device_path.append( temp[0] );
+	    segment->m_starting_extent.append( ( temp[1].remove(')') ).toLongLong() );
 	}
     }
 

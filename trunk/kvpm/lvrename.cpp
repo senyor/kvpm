@@ -12,11 +12,11 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
+#include "lvrename.h"
 
 #include <KLocale>
 #include <QtGui>
 
-#include "lvrename.h"
 #include "logvol.h"
 #include "mountentry.h"
 #include "volgroup.h" 
@@ -106,6 +106,6 @@ void LVRenameDialog::validateName(QString name)
 
 void LVRenameDialog::renameMountEntries()
 {
-    rename_mount_entries(m_lv->getMapperPath(), "/dev/" + m_vg_name + "/" + m_new_name->text());
+    rename_mount_entries(m_lv->getMapperPath(), "/dev/" + m_vg_name + '/' + m_new_name->text());
 }
 

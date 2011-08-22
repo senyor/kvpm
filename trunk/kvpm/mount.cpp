@@ -12,6 +12,7 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
+#include "mount.h"
 
 #include <sys/mount.h>
 #include <linux/fs.h>
@@ -27,7 +28,6 @@
 #include <QtGui>
 
 #include "logvol.h"
-#include "mount.h"
 #include "mountentry.h"
 #include "storagepartition.h"
 
@@ -312,8 +312,11 @@ void MountDialog::selectMountPoint(bool)
     char device[BUFF_LEN];
 
     strncpy(device, m_device_to_mount.toAscii().data(), BUFF_LEN);
+
+    // TODO
+    // Some of this can be moved out of the 'if()' I think.
     
-    if(m_mount_point != ""){
+    if(m_mount_point != ""){  
 	const KUrl url( "file://" + QString(m_mount_point) );
 	const QString filter = "*";
 	KFileDialog dialog( url, filter, 0 );

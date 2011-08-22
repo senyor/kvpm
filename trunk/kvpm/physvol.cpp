@@ -12,9 +12,10 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
+#include "physvol.h"
+
 #include <QtGui>
 
-#include "physvol.h"
 #include "volgroup.h"
 
 PhysVol::PhysVol(pv_t pv, VolGroup *vg)
@@ -33,7 +34,7 @@ void PhysVol::rescan(pv_t lvm_pv)
 
     value = lvm_pv_get_property(lvm_pv, "pv_tags");
     m_tags.clear();
-    m_tags = QString( value.value.string ).split(",");
+    m_tags = QString( value.value.string ).split(',');
     for(int x = 0; x < m_tags.size(); x++)
         m_tags[x] = m_tags[x].trimmed();
 
