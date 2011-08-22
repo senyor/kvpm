@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2010 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -59,7 +59,7 @@ VGMergeDialog::VGMergeDialog(VolGroup *volumeGroup, QWidget *parent) : KDialog(p
     setMainWidget(dialog_body);
     QVBoxLayout *layout = new QVBoxLayout();
     dialog_body->setLayout(layout);
-    QLabel *name_label = new QLabel( i18n("Volume Group: <b>%1</b>").arg(m_vg->getName() ) );
+    QLabel *name_label = new QLabel( i18n("Volume Group: <b>%1</b>", m_vg->getName() ) );
     name_label->setAlignment(Qt::AlignCenter);
     layout->addWidget(name_label);
 

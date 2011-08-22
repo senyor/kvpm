@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2009, 2010 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -30,7 +30,7 @@ bool remove_mirror_leg(LogVol *mirrorLeg)
     LogVol *mirror = vg->getLogVolByName( mirrorLeg->getOrigin() );
     QStringList pvs_to_remove  = mirrorLeg->getDevicePathAll();
 
-    QString message = i18n("Remove mirror leg: %1 ?").arg(mirrorLeg->getName());
+    QString message = i18n("Remove mirror leg: %1 ?", mirrorLeg->getName());
     
     if(KMessageBox::warningYesNo( 0, message) == 3){      // 3 = "yes" button
 

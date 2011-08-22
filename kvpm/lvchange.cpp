@@ -48,10 +48,10 @@ LVChangeDialog::LVChangeDialog(LogVol *logicalVolume, QWidget *parent) :
     buildMirrorTab();
     buildAdvancedTab();
     
-    tab_widget->addTab(m_general_tab,  i18n("General") );
+    tab_widget->addTab(m_general_tab,  i18nc("The standard or basic options", "General") );
     if( m_lv->isSnap() || m_lv->isMirror() )
         tab_widget->addTab(m_mirror_tab,   i18n("Mirror/Snapshot") );
-    tab_widget->addTab(m_advanced_tab, i18n("Advanced") );
+    tab_widget->addTab(m_advanced_tab, i18nc("Less used or complex options", "Advanced") );
 }
 
 void LVChangeDialog::buildGeneralTab()
@@ -116,11 +116,11 @@ void LVChangeDialog::buildGeneralTab()
     m_alloc_box->setCheckable(true);
     m_alloc_box->setChecked(false);
     QVBoxLayout *alloc_box_layout = new QVBoxLayout;
-    m_normal_button     = new QRadioButton( i18n("Normal") );
+    m_normal_button     = new QRadioButton( i18nc("The usual way", "Normal") );
     m_contiguous_button = new QRadioButton( i18n("Contiguous") );
     m_anywhere_button   = new QRadioButton( i18n("Anywhere") );
     m_cling_button      = new QRadioButton( i18n("Cling") );
-    m_inherit_button    = new QRadioButton( i18n("Inherited") );
+    m_inherit_button    = new QRadioButton( i18nc("Inherited from the parent group", "Inherited") );
 
     QString policy = m_lv->getPolicy(); 
 

@@ -98,14 +98,14 @@ LVProperties::LVProperties(LogVol *logicalVolume, int segment, QWidget *parent):
 	}
 	if( !(logicalVolume->isMirrorLeg() || logicalVolume->isMirrorLog() )){
 
-            basic_info_layout->addWidget(new QLabel( i18n("Filesystem: %1").arg(logicalVolume->getFilesystem()) ));
+            basic_info_layout->addWidget(new QLabel( i18n("Filesystem: %1", logicalVolume->getFilesystem() ) ));
 
 	    if(logicalVolume->isWritable())
 	        basic_info_layout->addWidget(new QLabel( i18n("Access: r/w") ));
 	    else
 	        basic_info_layout->addWidget(new QLabel( i18n("Access: r/o") ));
-
-	    basic_info_layout->addWidget(new QLabel( i18n("Allocation policy: %1").arg(logicalVolume->getPolicy())));
+                                         
+            basic_info_layout->addWidget(new QLabel( i18n("Allocation policy: %1", logicalVolume->getPolicy() ) ));
 	}
     }
     else{
@@ -117,19 +117,19 @@ LVProperties::LVProperties(LogVol *logicalVolume, int segment, QWidget *parent):
 
 	if( !( logicalVolume->isMirrorLeg() || logicalVolume->isMirrorLog() )){
 
-            basic_info_layout->addWidget(new QLabel( i18n("Filesystem %1").arg(logicalVolume->getFilesystem()) ));
+            basic_info_layout->addWidget(new QLabel( i18n("Filesystem %1", logicalVolume->getFilesystem()) ));
 
 	    if(logicalVolume->isWritable())
 	        basic_info_layout->addWidget(new QLabel( i18n("Access: r/w") ));
 	    else
 	        basic_info_layout->addWidget(new QLabel( i18n("Access: r/o") ));
 
-	    basic_info_layout->addWidget(new QLabel( i18n("Allocation policy: %1").arg(logicalVolume->getPolicy())));
+	    basic_info_layout->addWidget(new QLabel( i18n("Allocation policy: %1", logicalVolume->getPolicy())));
 	}
     }
 
     if(logicalVolume->isSnap())
-        basic_info_layout->addWidget(new QLabel( i18n("Origin: %1").arg(logicalVolume->getOrigin()) ));
+        basic_info_layout->addWidget(new QLabel( i18n("Origin: %1", logicalVolume->getOrigin()) ));
     
     QFrame *mount_info_frame = new QFrame();
     QVBoxLayout *mount_info_layout = new QVBoxLayout();
@@ -159,7 +159,7 @@ LVProperties::LVProperties(LogVol *logicalVolume, int segment, QWidget *parent):
 	}
 	
 	if(mount_points.size() == 0){
-	    temp_label = new QLabel( i18n("<none>") ) ;
+	    temp_label = new QLabel( i18n("not mounted") ) ;
 	    temp_label->setAlignment(Qt::AlignLeft);
 	    mount_info_layout->addWidget(temp_label);
 	}

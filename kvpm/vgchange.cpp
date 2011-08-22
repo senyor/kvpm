@@ -49,7 +49,7 @@ VGChangeDialog::VGChangeDialog(VolGroup *volumeGroup, QWidget *parent) :
     QVBoxLayout *layout = new QVBoxLayout();
     dialog_body->setLayout(layout);
 
-    QLabel *name_label = new QLabel( i18n("Volume group: <b>%1</b>").arg(m_vg_name) );
+    QLabel *name_label = new QLabel( i18n("Volume group: <b>%1</b>", m_vg_name) );
     name_label->setAlignment(Qt::AlignCenter);
     layout->addWidget(name_label);
 
@@ -64,7 +64,7 @@ VGChangeDialog::VGChangeDialog(VolGroup *volumeGroup, QWidget *parent) :
     upper_left_layout->addWidget(alloc_box);
     layout->addWidget(upper_box);
 
-    m_normal     = new QRadioButton( i18n("Normal") );
+    m_normal     = new QRadioButton( i18nc("The usual way", "Normal") );
     m_contiguous = new QRadioButton( i18n("Contiguous") );
     m_anywhere   = new QRadioButton( i18n("Anwhere") );
     m_cling      = new QRadioButton( i18n("Cling") );    

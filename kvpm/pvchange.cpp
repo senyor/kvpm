@@ -33,7 +33,7 @@ PVChangeDialog::PVChangeDialog(PhysVol *physicalVolume, QWidget *parent):
     dialog_body->setLayout(layout);
 
     QString pv_name = m_pv->getName();
-    QLabel *label = new QLabel( i18n("<b>%1</b>").arg(pv_name) );
+    QLabel *label = new QLabel( i18n("<b>%1</b>", pv_name) );
     label->setAlignment(Qt::AlignCenter);
     layout->addWidget(label);
     QGroupBox *attrib_box = new QGroupBox( i18n("Attributes") );

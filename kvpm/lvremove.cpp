@@ -29,7 +29,7 @@ bool remove_lv(LogVol *logicalVolume)
     QStringList args;
     
     QString message = i18n("Are you certain you want to delete the logical volume named: %1 "
-			   "Any data on it will be lost.").arg("<b>" + full_name + "</b>");
+			   "Any data on it will be lost.", "<b>" + full_name + "</b>");
 
     QString message2 = i18n("This volume has snapshots that must be deleted first");
 

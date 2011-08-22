@@ -157,9 +157,9 @@ LVCreateDialog::LVCreateDialog(VolGroup *volumeGroup, QWidget *parent):
     m_physical_tab = createPhysicalTab();
     m_advanced_tab = createAdvancedTab();
     m_general_tab  = createGeneralTab();
-    m_tab_widget->addTab(m_general_tab,  i18n("General") );
+    m_tab_widget->addTab(m_general_tab,  i18nc("The standard common options", "General") );
     m_tab_widget->addTab(m_physical_tab, i18n("Physical layout") );
-    m_tab_widget->addTab(m_advanced_tab, i18n("Advanced") );
+    m_tab_widget->addTab(m_advanced_tab, i18nc("Less used or complex options", "Advanced") );
 
     setMainWidget(m_tab_widget);
     makeConnections();
@@ -184,9 +184,9 @@ LVCreateDialog::LVCreateDialog(LogVol *logicalVolume, bool snapshot, QWidget *pa
     m_physical_tab = createPhysicalTab();  // this order is important
     m_advanced_tab = createAdvancedTab();
     m_general_tab  = createGeneralTab();
-    m_tab_widget->addTab(m_general_tab,  i18n("General") );
+    m_tab_widget->addTab(m_general_tab,  i18nc("The standard common options", "General") );
     m_tab_widget->addTab(m_physical_tab, i18n("Physical layout") );
-    m_tab_widget->addTab(m_advanced_tab, i18n("Advanced") );
+    m_tab_widget->addTab(m_advanced_tab, i18nc("Less used or complex options", "Advanced") );
 
     setMainWidget(m_tab_widget);
     makeConnections();
@@ -325,10 +325,10 @@ QWidget* LVCreateDialog::createGeneralTab()
 
      QGroupBox *alloc_box = new QGroupBox( i18n("Allocation Policy") );
      QVBoxLayout *alloc_box_layout = new QVBoxLayout;
-     normal_button     = new QRadioButton( i18n("Normal") );
+     normal_button     = new QRadioButton( i18nc("The usual way", "Normal") );
      contiguous_button = new QRadioButton( i18n("Contiguous") );
      anywhere_button   = new QRadioButton( i18n("Anywhere") );
-     inherited_button  = new QRadioButton( i18n("Inherited") );
+     inherited_button  = new QRadioButton( i18nc("Inherited from the parent group", "Inherited") );
      cling_button      = new QRadioButton( i18n("Cling") );
 
      QString policy = "Inherited";

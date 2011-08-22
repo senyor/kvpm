@@ -54,7 +54,7 @@ MountDialog::MountDialog(QString deviceToMount, QString filesystemType, bool wri
     main_layout->addWidget( filesystemBox() );
     main_layout->addWidget( mountPointBox() );
 
-    dialog_body->addTab(main_tab,     i18n("Main") );
+    dialog_body->addTab(main_tab,     i18nc("The basic choices", "Main") );
     dialog_body->addTab(optionsTab(), i18n("Options") );
 
     connect(this, SIGNAL( accepted() ), 

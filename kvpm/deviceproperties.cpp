@@ -52,7 +52,7 @@ DeviceProperties::DeviceProperties( StorageDevice *Device, QWidget *parent) : QW
     basic_info_layout->addWidget( new QLabel( i18n("Sectors: %1", Device->getSize() / Device->getSectorSize() ) ) );
 
     if( !Device->isWritable() )
-        basic_info_layout->addWidget( new QLabel( i18n("Read only") ) );
+        basic_info_layout->addWidget( new QLabel( i18nc("May be read and not written", "Read only") ) );
     else
         basic_info_layout->addWidget( new QLabel( i18n("Read/write") ) );
 

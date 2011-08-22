@@ -63,11 +63,11 @@ VGReduceDialog::VGReduceDialog(VolGroup *volumeGroup, QWidget *parent) : KDialog
     QLabel *label;
     if(m_unremovable_pvs_present){
         label = new QLabel( i18n( "Select physical volumes to "
-                                  "remove them from volume group <b>%1</b>").arg(vg_name));
+                                  "remove them from volume group <b>%1</b>", vg_name));
     }
     else{
         label = new QLabel( i18n( "Select physical volumes <b>excluding one</b> to "
-                                  "remove them from volume group <b>%1</b>").arg(vg_name));
+                                  "remove them from volume group <b>%1</b>", vg_name));
     }
 
     label->setWordWrap(true);

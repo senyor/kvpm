@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -51,7 +51,7 @@ LVRenameDialog::LVRenameDialog(LogVol *logicalVolume, QWidget *parent) :
     m_vg_name  = m_lv->getVolumeGroupName();
     m_old_name = m_lv->getName();
 
-    QLabel *old_name_label = new QLabel( i18n("Old logical volume name: %1").arg(m_old_name) );
+    QLabel *old_name_label = new QLabel( i18n("Old logical volume name: %1", m_old_name) );
     layout->addWidget(old_name_label);
 
     QLabel *name_label = new QLabel( i18n("New logical volume name: ") );
