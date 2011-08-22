@@ -12,6 +12,7 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
+#include "mountentry.h"
 
 #include <mntent.h>
 #include <fstab.h>
@@ -19,10 +20,10 @@
 #include <stdio.h>
 
 #include <QtGui>
+#include <kde_file.h>
 
 #include "logvol.h"
 #include "volgroup.h"
-#include "mountentry.h"
 
 const int BUFF_LEN = 2000;   // Enough?
 
@@ -182,7 +183,7 @@ bool removeMountEntry(QString mountPoint)
     }
     endmntent(fp_new);
 
-    rename("/etc/mtab.new", _PATH_MOUNTED);
+    KDE_rename("/etc/mtab.new", _PATH_MOUNTED);
     return true;
 }
 	    
@@ -353,7 +354,7 @@ bool rename_mount_entries(QString oldName, QString newName)
     }
     endmntent(fp_new);
 
-    rename("/etc/mtab.new", _PATH_MOUNTED);
+    KDE_rename("/etc/mtab.new", _PATH_MOUNTED);
 
     return true;
 }

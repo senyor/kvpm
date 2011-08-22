@@ -12,17 +12,14 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
-
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
+#include "executablefinder.h"
 
 #include <KSharedConfig>
+#include <kde_file.h>
 #include <KConfigGroup>
 
 #include <QtGui>
 
-#include "executablefinder.h"
 
 /* The purpoise of this class is to map the name of a program
    with the full path of the executable */
@@ -87,8 +84,11 @@ QString ExecutableFinder::getExecutablePath(QString name)
 
 void ExecutableFinder::reload()
 {
-    struct stat buf;
+
+    QByteArray path_array;
     const char *path;
+    KDE_struct_stat buf;
+
     int key_length = m_keys.size();
 
     // Read the kvpmrc files and get the search paths or use the default
@@ -108,8 +108,9 @@ void ExecutableFinder::reload()
 
     for(int y = 0; y < key_length; y++){
 	for(int x = 0; x < search_paths.size(); x++){
-	    path = QString( search_paths[x] + m_keys[y] ).toAscii().data();
-	    if( lstat(path, &buf) == 0 ){
+            path_array = QString( search_paths[x] + m_keys[y] ).toAscii();
+            path = path_array.data(); 
+            if( KDE_lstat(path, &buf) == 0 ){
 		m_path_map.insert( m_keys[y], search_paths[x] + m_keys[y] );
 		break;
 	    }
