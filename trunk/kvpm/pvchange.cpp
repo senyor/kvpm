@@ -12,12 +12,12 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
+#include "pvchange.h"
 
 #include <KLocale>
 #include <QtGui>
 
 #include "physvol.h"
-#include "pvchange.h"
 #include "volgroup.h"
 
 PVChangeDialog::PVChangeDialog(PhysVol *physicalVolume, QWidget *parent):
@@ -105,7 +105,7 @@ void PVChangeDialog::resetOkButton()
     if( m_uuid_box->isChecked() )
         enableButtonOk(true);
 
-    if( ( m_deltag_combo->currentIndex() || (m_tag_edit->text() != "") ) && m_tags_group->isChecked() )
+    if( ( m_deltag_combo->currentIndex() || ( !m_tag_edit->text().isEmpty() ) ) && m_tags_group->isChecked() )
         enableButtonOk(true);
 }
 
@@ -131,7 +131,7 @@ QStringList PVChangeDialog::arguments()
     if( m_tags_group->isChecked() ){
         if( m_deltag_combo->currentIndex() )
             args << "--deltag" << m_deltag_combo->currentText();
-        if(m_tag_edit->text() != "")
+        if( !m_tag_edit->text().isEmpty() )
             args << "--addtag" << m_tag_edit->text();
     }
 

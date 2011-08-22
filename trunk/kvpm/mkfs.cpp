@@ -12,6 +12,7 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
+#include "mkfs.h"
 
 #include <KMessageBox>
 #include <KDialog>
@@ -20,7 +21,6 @@
 #include <QtGui>
 
 #include "logvol.h"
-#include "mkfs.h"
 #include "processprogress.h"
 #include "storagedevice.h"
 #include "storagepartition.h"
@@ -449,9 +449,9 @@ QStringList MkfsDialog::arguments()
         if(m_block_combo->currentIndex() > 0)
             mkfs_options << "-b" << m_block_combo->currentText().remove("KiB").trimmed();
 
-        if( m_inode_edit->text() != "" )
+        if( !(m_inode_edit->text()).isEmpty() )
             mkfs_options << "-i" << m_inode_edit->text();
-        else if ( m_total_edit->text() != "" )
+        else if ( !(m_total_edit->text()).isEmpty() )
             mkfs_options << "-N" << m_total_edit->text();
 
         if( m_inode_combo->currentIndex() > 0 )
@@ -475,7 +475,7 @@ QStringList MkfsDialog::arguments()
             mkfs_options << extended_options.join(",");
         }
 
-        if( m_volume_edit->text() != "" )
+        if( !(m_volume_edit->text()).isEmpty() )
             mkfs_options << "-L" << m_volume_edit->text();
 
         if( m_base_options_box->isChecked() ){

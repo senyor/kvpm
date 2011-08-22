@@ -12,6 +12,7 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
+#include "lvcreate.h"
 
 #include <sys/mount.h>
 #include <errno.h>
@@ -23,7 +24,6 @@
 
 #include "fsextend.h"
 #include "logvol.h"
-#include "lvcreate.h"
 #include "misc.h"
 #include "mountentry.h"
 #include "physvol.h"
@@ -620,7 +620,7 @@ void LVCreateDialog::validateVolumeName(QString name)
 
     if( m_name_validator->validate(name, pos) == QValidator::Acceptable && name != "." && name != ".." )
 	m_name_is_valid = true;
-    else if( name == "" )
+    else if( name.isEmpty() )
 	m_name_is_valid = true;
     else
 	m_name_is_valid = false;
@@ -766,7 +766,7 @@ QStringList LVCreateDialog::argumentsLV()
     long long extents = m_size_selector->getCurrentSize();
 
     if(m_tag_edit){
-        if( m_tag_edit->text() != "" )
+        if( ! ( m_tag_edit->text() ).isEmpty() )
             args << "--addtag" << m_tag_edit->text();
     } 
 
@@ -843,7 +843,7 @@ QStringList LVCreateDialog::argumentsLV()
     if( !m_extend && !m_snapshot ){                           // create a standard volume
 	program_to_run = "lvcreate";
 	
-	if( m_name_edit->text() != "" )
+	if( ! (m_name_edit->text()).isEmpty() )
 	    args << "--name" << m_name_edit->text();
 	
 	args << m_vg->getName();
@@ -853,7 +853,7 @@ QStringList LVCreateDialog::argumentsLV()
 	
 	args << "--snapshot";
 	    
-	if( m_name_edit->text() != "" )
+	if( ! (m_name_edit->text()).isEmpty() )
 	    args << "--name" << m_name_edit->text() ;
 	args << m_lv->getFullName();
     }

@@ -76,7 +76,7 @@ QString ExecutableFinder::getExecutablePath(QString name)
 {
     QString path = m_path_map.value(name);
 
-    if(path == "")
+    if( path.isEmpty() )
 	qDebug() << "Excutable Finder: error " << name  << " does not map to any path";
     
     return path;
@@ -119,7 +119,7 @@ void ExecutableFinder::reload()
 
     m_not_found.clear();
     for(int x = 0; x < key_length; x++){
-        if( m_path_map.value( m_keys[x] ) == "" )
+        if( (m_path_map.value( m_keys[x] )).isEmpty() )
 	    m_not_found.append( m_keys[x] );
     }
 }

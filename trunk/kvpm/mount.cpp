@@ -124,7 +124,7 @@ QWidget* MountDialog::filesystemBox()
 
     m_filesystem_edit = new KLineEdit(m_filesystem_type);
 
-    if( specify_button->isChecked() && m_filesystem_edit->text() == "" )
+    if( specify_button->isChecked() && (m_filesystem_edit->text()).isEmpty() )
 	(button(KDialog::Ok))->setEnabled(false);
     
     layout_left->addWidget(ext2_button);
@@ -290,7 +290,7 @@ QWidget* MountDialog::mountPointBox()
     
     m_mount_point_edit = new KLineEdit(m_mount_point);
 
-    if( m_mount_point_edit->text() == "" )
+    if( (m_mount_point_edit->text()).isEmpty() )
     	(button(KDialog::Ok))->setEnabled(false);
 
     mount_point_layout->addWidget(m_mount_point_edit);
@@ -316,7 +316,7 @@ void MountDialog::selectMountPoint(bool)
     // TODO
     // Some of this can be moved out of the 'if()' I think.
     
-    if(m_mount_point != ""){  
+    if( !m_mount_point.isEmpty() ){  
 	const KUrl url( "file://" + QString(m_mount_point) );
 	const QString filter = "*";
 	KFileDialog dialog( url, filter, 0 );
@@ -440,7 +440,7 @@ void MountDialog::mountFilesystem()
     if( user_xattr_check->isChecked() )
 	additional_options.append("user_xattr");
 
-    if( m_fs_specific_edit->text().trimmed() != "" )
+    if( !m_fs_specific_edit->text().trimmed().isEmpty() )
 	additional_options.append( (m_fs_specific_edit->text()).trimmed() );
     
     all_options = standard_options.join(",");
@@ -465,7 +465,7 @@ void MountDialog::mountFilesystem()
 
 void MountDialog::toggleOKButton()
 {
-    if ( (specify_button->isChecked() && m_filesystem_edit->text() == "" ) || m_mount_point_edit->text() == "")
+    if ( (specify_button->isChecked() && (m_filesystem_edit->text()).isEmpty()) || (m_mount_point_edit->text()).isEmpty())
     	(button(KDialog::Ok))->setEnabled(false);
     else
     	(button(KDialog::Ok))->setEnabled(true);

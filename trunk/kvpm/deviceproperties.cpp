@@ -13,13 +13,14 @@
  */
 
 
+#include "deviceproperties.h"
+
 #include <QtGui>
 #include <KGlobal>
 #include <KLocale>
 #include <KSeparator>
 
 #include "physvol.h"
-#include "deviceproperties.h"
 #include "storagedevice.h"
 #include "storagepartition.h"
 
@@ -188,7 +189,7 @@ DeviceProperties::DeviceProperties( StoragePartition *Partition, QWidget *parent
 	flags = Partition->getFlags();
 
 	if( flags.size() == 1)
-	    if( flags[0] == "" )
+	    if( flags[0].isEmpty() )
 	        flags << "No flags set";
 
 	for( int x = 0; x < flags.size(); x++){
