@@ -332,7 +332,7 @@ void MountDialog::selectMountPoint(bool)
 	m_mount_point = dialog.selectedFile();
     }
     
-    if( m_mount_point.length() > 1 && m_mount_point.endsWith("/") )
+    if( m_mount_point.length() > 1 && m_mount_point.endsWith('/') )
 	m_mount_point.chop(1);                           // remove trailing "/" character
 
     m_mount_point_edit->setText(m_mount_point);
@@ -369,7 +369,7 @@ void MountDialog::mountFilesystem()
 
     m_mount_point = m_mount_point_edit->text();
 
-    if( m_mount_point.length() > 1 && m_mount_point.endsWith("/") )  // remove trailing slash
+    if( m_mount_point.length() > 1 && m_mount_point.endsWith('/') )  // remove trailing slash
 	m_mount_point.chop(1);
 
     if( sync_check->isChecked() ){
