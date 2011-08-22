@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -13,49 +13,17 @@
  */
 
 
+#include "mountinfo.h"
+
 #include <mntent.h>
 #include <stdio.h>
 
 #include <QtGui>
 
 #include "logvol.h"
-#include "mountinfo.h"
 #include "mountentry.h"
 #include "volgroup.h"
 
-
-MountInformationList::MountInformationList()
-{
-    const char mount_table[] = _PATH_MOUNTED;
-    mntent *mount_entry;
-    
-    FILE *fp = setmntent(mount_table, "r");
-
-    if(fp){
-	while( (mount_entry = getmntent(fp)) )
-	    m_list.append( new MountInformation(mount_entry) );
-
-	endmntent(fp);
-    }
-}
-
-MountInformationList::~MountInformationList()
-{
-    for(int x = 0; x < m_list.size(); x++)
-	delete (m_list[x]);
-}
-
-QList<MountInformation *> MountInformationList::getMountInformation(QString deviceName)
-{
-    QList<MountInformation *> device_mounts;
-    
-    for(int x = m_list.size() - 1; x >= 0; x--){
-	if( deviceName == m_list[x]->getDeviceName() )
-	    device_mounts.append( m_list.takeAt(x) );
-    }
-
-    return device_mounts;
-}
 
 MountInformation::MountInformation(mntent *mountTableEntry, QObject *parent) : QObject(parent)
 {

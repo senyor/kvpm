@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -25,7 +25,7 @@
 #include "logvol.h"
 #include "masterlist.h"
 #include "mountentry.h"
-#include "mountinfo.h"
+#include "mountinfolist.h"
 #include "pedexceptions.h"
 #include "physvol.h"
 #include "processprogress.h"

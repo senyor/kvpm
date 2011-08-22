@@ -13,13 +13,15 @@
  */
 
 
+#include "logvol.h"
+
 #include <QtGui>
 
 #include "fsdata.h"
 #include "fsprobe.h"
-#include "logvol.h"
 #include "mountentry.h"
 #include "mountinfo.h"
+#include "mountinfolist.h"
 #include "storagedevice.h"
 #include "volgroup.h"
 

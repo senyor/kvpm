@@ -19,10 +19,9 @@
 #include <QWidget>
 #include <QString>
 
-#include "mountinfo.h"
-
 #include <parted/parted.h>
 
+class MountInformationList;
 class PhysVol;
 class StoragePartition;
 
