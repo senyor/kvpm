@@ -128,7 +128,7 @@ bool addMountEntryOptions(QString mountPoint, QString newOptions)
 	    if( newOptions.startsWith(',' ) )
 		options.append(newOptions);
 	    else
-		options.append( "," + newOptions);
+		options.append( ',' + newOptions);
 
 	    type = temp_entry->mnt_type;
 	    device = temp_entry->mnt_fsname;
