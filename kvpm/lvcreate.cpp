@@ -63,7 +63,7 @@ bool lv_extend(LogVol *logicalVolume)
 
     QString warning_message = i18n("Currently only the ext2/3/4, xfs, jfs, " 
 				   "ntfs and reiserfs file systems are "
-				   "supported for file system extention. If this logical "
+				   "supported for file system extension. If this logical "
 				   "volume has a filesystem or data, it will need to be " 
 				   "extended separately!");
 
@@ -141,7 +141,7 @@ bool lv_extend(LogVol *logicalVolume)
 }
 
 /* This class handles both the creation and extension of logical
-   volumes and snapshots since both processes are so similiar. */
+   volumes and snapshots since both processes are so similar. */
 
 LVCreateDialog::LVCreateDialog(VolGroup *volumeGroup, QWidget *parent):
     KDialog(parent),

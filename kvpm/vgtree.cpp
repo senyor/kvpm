@@ -212,7 +212,7 @@ void VGTree::loadData()
     }
     insertTopLevelItems(0, m_lv_tree_items);
     
-    if( currentItem() != NULL ){   // set the current item to the coresponding named new item
+    if( currentItem() != NULL ){   // set the current item to the corresponding named new item
         for(int x = 0; x < m_lv_tree_items.size(); x++)
             walkTreeCurrentItem( currentItem(), m_lv_tree_items[x] );
     }

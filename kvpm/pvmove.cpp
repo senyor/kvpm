@@ -56,7 +56,7 @@ bool move_pv(LogVol *logicalVolume)
 bool restart_pvmove()
 {
     QStringList args;
-    QString message = i18n("Do you wish to restart all interupted physical volume moves?");
+    QString message = i18n("Do you wish to restart all interrupted physical volume moves?");
 
     if(KMessageBox::questionYesNo( 0, message) == 3){      // 3 = "yes" button
 

@@ -669,7 +669,7 @@ QString LogVol::getOrigin()
 }
 
 /* TO DO: Merge these next two lists in a single
-   list of objects containing mount point and relevent
+   list of objects containing mount point and relevant
    mount position. See "mountinfo.h" for more on mount 
    position. */
 
