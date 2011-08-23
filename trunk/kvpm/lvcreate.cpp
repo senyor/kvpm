@@ -159,7 +159,7 @@ LVCreateDialog::LVCreateDialog(VolGroup *volumeGroup, QWidget *parent):
     m_general_tab  = createGeneralTab();
     m_tab_widget->addTab(m_general_tab,  i18nc("The standard common options", "General") );
     m_tab_widget->addTab(m_physical_tab, i18n("Physical layout") );
-    m_tab_widget->addTab(m_advanced_tab, i18nc("Less used or complex options", "Advanced") );
+    m_tab_widget->addTab(m_advanced_tab, i18nc("Less used, dangerous or complex options", "Advanced options") );
 
     setMainWidget(m_tab_widget);
     makeConnections();
@@ -186,7 +186,7 @@ LVCreateDialog::LVCreateDialog(LogVol *logicalVolume, bool snapshot, QWidget *pa
     m_general_tab  = createGeneralTab();
     m_tab_widget->addTab(m_general_tab,  i18nc("The standard common options", "General") );
     m_tab_widget->addTab(m_physical_tab, i18n("Physical layout") );
-    m_tab_widget->addTab(m_advanced_tab, i18nc("Less used or complex options", "Advanced") );
+    m_tab_widget->addTab(m_advanced_tab, i18nc("Less used, dangerous or complex options", "Advanced options") );
 
     setMainWidget(m_tab_widget);
     makeConnections();
