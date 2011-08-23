@@ -113,15 +113,25 @@ bool make_fs(StoragePartition *partition)
 
 MkfsDialog::MkfsDialog(LogVol *logicalVolume, QWidget *parent) : KDialog(parent)
 {
-    m_path = QString( "/dev/" + logicalVolume->getFullName() );
+    m_path = logicalVolume->getMapperPath();
 
     m_stride_size = 1; // logicalVolume->getSegmentStripeSize( 0 ); <-- must convert to blocks!
     m_stride_count = logicalVolume->getSegmentStripes( 0 );
 
+    QWidget *dialog_body = new QWidget;
+    QVBoxLayout *layout = new QVBoxLayout;
+    dialog_body->setLayout(layout);
+
+    QLabel *label = new QLabel( i18n("<b>Write filesystem on: %1</b>", m_path) );
+    label->setAlignment(Qt::AlignCenter);
+    layout->addWidget(label);
+
     m_tab_widget = new KTabWidget(this);
-    m_tab_widget->addTab(generalTab(), i18nc("The common options", "General") );
-    m_tab_widget->addTab(advancedTab(), i18nc("Less used or complex options", "Advanced") );
-    setMainWidget(m_tab_widget);
+    m_tab_widget->addTab(generalTab(), i18n("Filesystem type") );
+    m_tab_widget->addTab(advancedTab(), i18nc("Less used, dangerous or complex options", "Advanced options") );
+    layout->addWidget(m_tab_widget);
+
+    setMainWidget(dialog_body);
     setCaption( i18n("Write filesystem") );
 
     setAdvancedTab(true);
@@ -133,10 +143,20 @@ MkfsDialog::MkfsDialog(StoragePartition *partition, QWidget *parent) : KDialog(p
     m_stride_size = 1;
     m_stride_count = 1;
 
+    QWidget *dialog_body = new QWidget;
+    QVBoxLayout *layout = new QVBoxLayout;
+    dialog_body->setLayout(layout);
+
+    QLabel *label = new QLabel( i18n("<b>Write filesystem on: %1</b>", m_path) );
+    label->setAlignment(Qt::AlignCenter);
+    layout->addWidget(label);
+
     m_tab_widget = new KTabWidget(this);
-    m_tab_widget->addTab(generalTab(), i18nc("The common options", "General") );
-    m_tab_widget->addTab(advancedTab(), i18nc("Less used or complex options", "Advanced") );
-    setMainWidget(m_tab_widget);
+    m_tab_widget->addTab(generalTab(), i18n("Filesystem type") );
+    m_tab_widget->addTab(advancedTab(), i18nc("Less used, dangerous or complex options", "Advanced options") );
+    layout->addWidget(m_tab_widget);
+
+    setMainWidget(dialog_body);
     setCaption( i18n("Write filesystem") );
 
     setAdvancedTab(true);
@@ -147,10 +167,6 @@ QWidget* MkfsDialog::generalTab()
     QWidget *tab = new QWidget();
     QVBoxLayout *layout = new QVBoxLayout();
     tab->setLayout(layout);
-
-    QLabel *label = new QLabel( i18n("<b>Write filesystem on: %1</b>", m_path) );
-    label->setAlignment(Qt::AlignCenter);
-    layout->addWidget(label);
 
     radio_box = new QGroupBox( i18n("Filesystem") );
     QGridLayout *radio_layout = new QGridLayout;
