@@ -8,16 +8,14 @@ move or resize partitions.
 This program is currently being developed on lvm version (with library lvm2app):
 
 lvs --version
-  LVM version:     2.02.73(2)-cvs (2010-07-28)
-  Library version: 1.02.54-cvs (2010-07-28)
-  Driver version:  4.15.0
 
+  LVM version:     2.02.86(2) (2011-07-08)
+  Library version: 1.02.65 (2011-07-08)
+  Driver version:  4.20.0
 
 Because kvpm relies on the exact format of the lvm program output and 
 the presence of the new library "lvm2app" it won't work correctly with 
-earlier versions. As of August 2010 this lvm version is only available 
-by cvs download, but newer revisions should turn up pre-compiled in Linux 
-distributions soon.
+earlier versions.
 
 udev and udevadm must be installed too.
 
@@ -26,20 +24,26 @@ installed for compilation:
 
 lvm2app.h
 libdevmapper.h
-libparted version 1.8
+libparted version 2.3 or higher
 libblkid
 kdelibs version 4
 <sys/mount.h>
 <linux/fs.h>
 
 
-NOTE: libparted also links to libdevmapper and may need to recompiled for
-the new version. I have been using parted v2.3 
+NOTE: If you compile a new version of lvm and devmapper, libparted 
+also links to libdevmapper and may need to recompiled. I have been 
+using parted v2.3 but v3.0 should also work now.
 
 To compile the source just "cd" into the source directory then run
-"cmake -i" and answer the questions. Next run "make" and if all goes
-well you will have a working executable.
+"cmake." Next run "make" and if all goes well you will have a working 
+executable.
 
+Translation files are in the "po" subdirectory under the source files.
+The icons need to be placed into appropriate directories and renamed
+kvpm.png. 
+For example:
 
-
- LocalWords:  distobutions
+  /usr/share/icons/oxygen/32x32/apps/kvpm.png
+  /usr/share/icons/oxygen/16x16/apps/kvpm.png
+  /usr/share/icons/oxygen/64x64/apps/kvpm.png
