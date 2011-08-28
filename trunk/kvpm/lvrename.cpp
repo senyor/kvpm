@@ -30,6 +30,9 @@ bool rename_lv(LogVol *logicalVolume)
     if(dialog.result() == QDialog::Accepted){
         ProcessProgress rename( dialog.arguments(), i18n("Renaming logical volume..."), false );
 
+        if( ! rename.exitCode() )
+            rename_mount_entries( logicalVolume->getMapperPath(), dialog.getNewMapperPath() );
+
 	return true;
     }
     else{
@@ -70,8 +73,6 @@ LVRenameDialog::LVRenameDialog(LogVol *logicalVolume, QWidget *parent) :
     connect(m_new_name, SIGNAL(textChanged(QString)), 
 	    this, SLOT(validateName(QString)));
 
-    connect(this, SIGNAL(okClicked()), 
-	    this, SLOT(renameMountEntries()));
 }
 
 QStringList LVRenameDialog::arguments()
@@ -104,8 +105,10 @@ void LVRenameDialog::validateName(QString name)
 	enableButtonOk(false);
 }
 
-void LVRenameDialog::renameMountEntries()
+QString LVRenameDialog::getNewMapperPath()
 {
-    rename_mount_entries(m_lv->getMapperPath(), "/dev/" + m_vg_name + '/' + m_new_name->text());
-}
+    // Fix me! the following assumes the path: /dev/vg/lv
+    // We need to confirm the root really is "/dev"
 
+    return QString("/dev/" + m_vg_name + '/' + m_new_name->text());
+}
