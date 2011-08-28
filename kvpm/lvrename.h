@@ -35,12 +35,12 @@ Q_OBJECT
     LogVol *m_lv;
 
 public:
-    explicit LVRenameDialog(LogVol *logicalVolume, QWidget *parent = 0);
+    explicit    LVRenameDialog(LogVol *logicalVolume, QWidget *parent = 0);
     QStringList arguments();
+    QString     getNewMapperPath();
 
 private slots:
     void validateName(QString);
-    void renameMountEntries();
 
 };
 
