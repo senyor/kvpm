@@ -12,13 +12,14 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
+#include "addmirror.h"
+
 #include <KIntSpinBox>
 #include <KLocale>
 #include <KComboBox>
 
 #include <QtGui>
 
-#include "addmirror.h"
 #include "logvol.h"
 #include "misc.h"
 #include "physvol.h"
