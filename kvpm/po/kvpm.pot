@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-08-22 17:26-0700\n"
+"POT-Creation-Date: 2011-08-28 22:46-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,97 +17,97 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: addmirror.cpp:36
+#: addmirror.cpp:37
 msgid "Changing Mirror..."
 msgstr ""
 
-#: addmirror.cpp:48
+#: addmirror.cpp:49
 msgid "Add Mirror"
 msgstr ""
 
-#: addmirror.cpp:55
+#: addmirror.cpp:56
 msgctxt "Common user options"
 msgid "General"
 msgstr ""
 
-#: addmirror.cpp:56 lvcreate.cpp:161 lvcreate.cpp:188
+#: addmirror.cpp:57 lvcreate.cpp:161 lvcreate.cpp:188
 msgid "Physical layout"
 msgstr ""
 
-#: addmirror.cpp:77 lvreduce.cpp:103
+#: addmirror.cpp:78 lvreduce.cpp:104
 msgid "<b>Volume: %1</b>"
 msgstr ""
 
-#: addmirror.cpp:86
+#: addmirror.cpp:87
 msgid "Add mirror legs"
 msgstr ""
 
-#: addmirror.cpp:97
+#: addmirror.cpp:98
 msgid "Existing mirror legs: %1"
 msgstr ""
 
-#: addmirror.cpp:102
+#: addmirror.cpp:103
 msgid "Existing mirror legs: none"
 msgstr ""
 
-#: addmirror.cpp:110
+#: addmirror.cpp:111
 msgid "Add mirror legs: "
 msgstr ""
 
-#: addmirror.cpp:117 vgchange.cpp:59
+#: addmirror.cpp:118 vgchange.cpp:59
 msgid "Allocation policy"
 msgstr ""
 
-#: addmirror.cpp:119 lvchange.cpp:120 lvcreate.cpp:328 pvmove.cpp:270
+#: addmirror.cpp:120 lvchange.cpp:120 lvcreate.cpp:328 pvmove.cpp:270
 #: vgchange.cpp:67
 msgctxt "The usual way"
 msgid "Normal"
 msgstr ""
 
-#: addmirror.cpp:120 lvchange.cpp:121 lvcreate.cpp:329 pvmove.cpp:271
+#: addmirror.cpp:121 lvchange.cpp:121 lvcreate.cpp:329 pvmove.cpp:271
 #: vgchange.cpp:68
 msgid "Contiguous"
 msgstr ""
 
-#: addmirror.cpp:121 lvchange.cpp:122 lvcreate.cpp:330 pvmove.cpp:272
+#: addmirror.cpp:122 lvchange.cpp:122 lvcreate.cpp:330 pvmove.cpp:272
 msgid "Anywhere"
 msgstr ""
 
-#: addmirror.cpp:122 lvchange.cpp:124 lvcreate.cpp:331
+#: addmirror.cpp:123 lvchange.cpp:124 lvcreate.cpp:331
 msgctxt "Inherited from the parent group"
 msgid "Inherited"
 msgstr ""
 
-#: addmirror.cpp:123 lvchange.cpp:123 lvcreate.cpp:332 pvmove.cpp:275
+#: addmirror.cpp:124 lvchange.cpp:123 lvcreate.cpp:332 pvmove.cpp:275
 #: vgchange.cpp:70
 msgid "Cling"
 msgstr ""
 
-#: addmirror.cpp:133
+#: addmirror.cpp:134
 msgid "Mirror logging"
 msgstr ""
 
-#: addmirror.cpp:135 lvcreate.cpp:463
+#: addmirror.cpp:136 lvcreate.cpp:463
 msgid "Memory based log"
 msgstr ""
 
-#: addmirror.cpp:136 lvcreate.cpp:462
+#: addmirror.cpp:137 lvcreate.cpp:462
 msgid "Disk based log"
 msgstr ""
 
-#: addmirror.cpp:137 lvcreate.cpp:461
+#: addmirror.cpp:138 lvcreate.cpp:461
 msgid "Mirrored disk based log"
 msgstr ""
 
-#: addmirror.cpp:207 lvcreate.cpp:383
+#: addmirror.cpp:208 lvcreate.cpp:383
 msgid "Disk striping"
 msgstr ""
 
-#: addmirror.cpp:219 lvcreate.cpp:398
+#: addmirror.cpp:220 lvcreate.cpp:398
 msgid "Stripe Size: "
 msgstr ""
 
-#: addmirror.cpp:226 lvcreate.cpp:404
+#: addmirror.cpp:227 lvcreate.cpp:404
 msgid "Number of stripes: "
 msgstr ""
 
@@ -263,15 +263,15 @@ msgstr ""
 msgid "Error number: %1 %2"
 msgstr ""
 
-#: fsreduce.cpp:50
+#: fsreduce.cpp:52
 msgid "Shrink failed: could not determine filesystem block size"
 msgstr ""
 
-#: fsreduce.cpp:58 fsreduce.cpp:92
+#: fsreduce.cpp:60 fsreduce.cpp:94
 msgid "Shrinking filesystem..."
 msgstr ""
 
-#: fsreduce.cpp:127
+#: fsreduce.cpp:129
 msgid "Checking minimum shrink size"
 msgstr ""
 
@@ -542,7 +542,7 @@ msgstr ""
 msgid "Extending volume: %1"
 msgstr ""
 
-#: lvcreate.cpp:255 lvreduce.cpp:107
+#: lvcreate.cpp:255 lvreduce.cpp:108
 msgid "Current size: %1"
 msgstr ""
 
@@ -685,40 +685,40 @@ msgstr ""
 msgid "<b>Physical volumes</b>"
 msgstr ""
 
-#: lvreduce.cpp:34
+#: lvreduce.cpp:35
 msgid ""
-"Currently only the ext2, ext3 and ext4  file systems are supported for file "
-"system reduction. If this logical volume is reduced any data it contains "
-"will be lost!"
+"Only the ext2, ext3 and ext4 file systems are supported for file system "
+"reduction. If this logical volume is reduced any <b>data</b> it contains "
+"<b>will be lost!</b>"
 msgstr ""
 
-#: lvreduce.cpp:39
+#: lvreduce.cpp:40
 msgid ""
-"If this <b>Inactive</b> logical volume is reduced any data it contains will "
-"be lost!"
+"If this <b>Inactive</b> logical volume is reduced any <b>data</b> it "
+"contains <b>will be lost!</b>"
 msgstr ""
 
-#: lvreduce.cpp:56
+#: lvreduce.cpp:57
 msgid "The filesystem must be unmounted first"
 msgstr ""
 
-#: lvreduce.cpp:89
+#: lvreduce.cpp:90
 msgid "Reduce Logical Volume"
 msgstr ""
 
-#: lvreduce.cpp:105 vginfolabels.cpp:109
+#: lvreduce.cpp:106 vginfolabels.cpp:109
 msgid "Extent size: %1"
 msgstr ""
 
-#: lvreduce.cpp:109 partmoveresize.cpp:126
+#: lvreduce.cpp:110 partmoveresize.cpp:126
 msgid "Minimum size: %1"
 msgstr ""
 
-#: lvreduce.cpp:117
+#: lvreduce.cpp:118
 msgid "New size: "
 msgstr ""
 
-#: lvreduce.cpp:255
+#: lvreduce.cpp:262
 msgid "Reducing volume..."
 msgstr ""
 
@@ -740,15 +740,15 @@ msgstr ""
 msgid "Renaming logical volume..."
 msgstr ""
 
-#: lvrename.cpp:44
+#: lvrename.cpp:47
 msgid "Rename logical volume"
 msgstr ""
 
-#: lvrename.cpp:54
+#: lvrename.cpp:57
 msgid "Old logical volume name: %1"
 msgstr ""
 
-#: lvrename.cpp:57
+#: lvrename.cpp:60
 msgid "New logical volume name: "
 msgstr ""
 
@@ -1175,27 +1175,31 @@ msgstr ""
 msgid "Change tags"
 msgstr ""
 
-#: pvcheckbox.cpp:33 pvcheckbox.cpp:95
+#: pvcheckbox.cpp:32 pvcheckbox.cpp:97
 msgid "Available physical volumes"
 msgstr ""
 
-#: pvcheckbox.cpp:37 pvcheckbox.cpp:102
+#: pvcheckbox.cpp:36 pvcheckbox.cpp:104
 msgid "Select all"
 msgstr ""
 
-#: pvcheckbox.cpp:38 pvcheckbox.cpp:103
+#: pvcheckbox.cpp:37 pvcheckbox.cpp:105
 msgid "Clear all"
 msgstr ""
 
-#: pvcheckbox.cpp:45 pvcheckbox.cpp:111
+#: pvcheckbox.cpp:45
+msgid "<b>No suitable volumes found!</b>"
+msgstr ""
+
+#: pvcheckbox.cpp:113
 msgid "none found"
 msgstr ""
 
-#: pvcheckbox.cpp:294
+#: pvcheckbox.cpp:296
 msgid "Selected space: %1"
 msgstr ""
 
-#: pvcheckbox.cpp:295
+#: pvcheckbox.cpp:297
 msgid "Selected extents: %1"
 msgstr ""
 
