@@ -36,8 +36,8 @@ also links to libdevmapper and may need to recompiled. I have been
 using parted v2.3 but v3.0 should also work now.
 
 To compile the source just "cd" into the source directory then run
-"cmake." Next run "make" and if all goes well you will have a working 
-executable.
+"cmake ." with the space and period after it. Next run "make" and 
+if all goes well you will have a working executable.
 
 Translation files are in the "po" subdirectory under the source files.
 The icons need to be placed into appropriate directories and renamed
