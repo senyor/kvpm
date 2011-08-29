@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -12,12 +12,13 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
+#include "lvreduce.h"
+
 #include <KMessageBox>
 #include <KLocale>
 #include <QtGui>
 
 #include "logvol.h"
-#include "lvreduce.h"
 #include "processprogress.h"
 #include "fsreduce.h"
 #include "misc.h"
@@ -31,13 +32,13 @@ bool lv_reduce(LogVol *logicalVolume)
     
     fs = logicalVolume->getFilesystem();
 
-    QString warning_message = i18n("Currently only the ext2, ext3 and ext4  file systems "
+    QString warning_message = i18n("Only the ext2, ext3 and ext4 file systems "
 				   "are supported for file system reduction. If this " 
-				   "logical volume is reduced any data it contains "
-				   "will be lost!");
+				   "logical volume is reduced any <b>data</b> it contains "
+				   "<b>will be lost!</b>");
 
     QString warning_message2 = i18n("If this <b>Inactive</b> logical volume is reduced "
-				    "any data it contains will be lost!");
+				    "any <b>data</b> it contains <b>will be lost!</b>");
 
     if( !logicalVolume->isActive() && !logicalVolume->isSnap() ){
 	if(KMessageBox::warningContinueCancel(0, warning_message2) != KMessageBox::Continue)
@@ -238,22 +239,27 @@ void LVReduceDialog::doShrink()
 {
 
     QStringList lv_arguments;
-    long long new_size = getSizeEditExtents(m_size_combo->currentIndex()) * m_vg->getExtentSize();
+    long long target_size = getSizeEditExtents(m_size_combo->currentIndex()) * m_vg->getExtentSize();
+    long long new_size;
 
     hide();
+
     if( !m_lv->isSnap() )  // never reduce the fs of a snap!
-        new_size = fs_reduce( m_lv->getMapperPath(), new_size, m_lv->getFilesystem() );
+        new_size = fs_reduce( m_lv->getMapperPath(), target_size, m_lv->getFilesystem() );
+    else
+        new_size = target_size;
+
+    if( new_size == -1 )         // means the fs or data can't be reduced (not ext2/3/4) 
+        new_size = target_size;  // Go ahead and shrink lv -- we warned the user about data loss!
 
     if( new_size ){
-
         lv_arguments << "lvreduce" 
                      << "--force" 
                      << "--size" 
                      << QString("%1K").arg( new_size / 1024 )
                      << m_lv->getMapperPath();
-    
-        ProcessProgress reduce_lv( lv_arguments, i18n("Reducing volume..."), true);
 
+        ProcessProgress reduce_lv( lv_arguments, i18n("Reducing volume..."), true);
     }
 }
 

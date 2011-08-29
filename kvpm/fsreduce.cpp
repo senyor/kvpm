@@ -12,18 +12,20 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
+#include "fsreduce.h"
+
 #include <KLocale>
 #include <KMessageBox>
 
 #include <QtGui>
 
 #include "processprogress.h"
-#include "fsreduce.h"
 #include "fsblocksize.h"
 #include "fsck.h"
 
 
 // Returns new fs size in bytes or 0 if no shrinking was done
+// Returns -1 if fs isn't one of ext2, ext3 or ext4 (not shrinkable)
 // Takes new_size in bytes.
 
 
@@ -39,7 +41,7 @@ long long fs_reduce(QString path, long long new_size, QString fs)
     QString size_string;
 
     if( fs != "ext2" && fs != "ext3" && fs != "ext4" )
-        return 0;
+        return -1;
 
     if( ! fsck( path ) )
         return 0;
