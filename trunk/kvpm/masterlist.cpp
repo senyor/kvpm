@@ -13,6 +13,8 @@
  */
 
 
+#include "masterlist.h"
+
 #include <parted/parted.h>
 
 #include <KLocale>
@@ -23,7 +25,6 @@
 
 #include "fsprobe.h"
 #include "logvol.h"
-#include "masterlist.h"
 #include "mountentry.h"
 #include "mountinfolist.h"
 #include "pedexceptions.h"
@@ -36,8 +37,6 @@
 MasterList::MasterList() : QObject()
 {
     ped_exception_set_handler(my_handler);
-
-    rescan();
 }
 
 void MasterList::rescan()

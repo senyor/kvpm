@@ -13,6 +13,8 @@
  */
 
 
+#include "topwindow.h"
+
 #include <KHelpMenu>
 #include <KAboutData>
 #include <KStandardAction>
@@ -28,7 +30,6 @@
 #include "processprogress.h"
 #include "pvmove.h"
 #include "removemissing.h"
-#include "topwindow.h"
 #include "vgcreate.h"
 #include "vgchange.h"
 #include "vgexport.h"
@@ -170,6 +171,8 @@ TopWindow::TopWindow(QWidget *parent):KMainWindow(parent)
     m_device_tab = new DeviceTab();
     m_tab_widget->appendDeviceTab(m_device_tab, i18n("Storage devices") );
 
+    master_list = new MasterList();
+
     reRun();    // reRun also does the initial run
 }
 
@@ -180,10 +183,7 @@ void TopWindow::reRun()
     QList<VolGroup *> groups;
     bool vg_exists;
 
-    if( !master_list )
-        master_list = new MasterList();
-    else
-        master_list->rescan();
+    master_list->rescan();
 
     disconnect(m_tab_widget, SIGNAL(currentIndexChanged()), 
 	    this, SLOT(setupMenus()));
