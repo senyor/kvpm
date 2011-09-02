@@ -171,7 +171,7 @@ TopWindow::TopWindow(QWidget *parent):KMainWindow(parent)
     m_device_tab = new DeviceTab();
     m_tab_widget->appendDeviceTab(m_device_tab, i18n("Storage devices") );
 
-    master_list = new MasterList();
+    master_list = new MasterList(); // creates *empty* masterlist
 
     reRun();    // reRun also does the initial run
 }
@@ -183,12 +183,11 @@ void TopWindow::reRun()
     QList<VolGroup *> groups;
     bool vg_exists;
 
-    master_list->rescan();
+    master_list->rescan(); // loads the list with data
 
     disconnect(m_tab_widget, SIGNAL(currentIndexChanged()), 
 	    this, SLOT(setupMenus()));
 
-    //    m_device_tab->setDevices( master_list->getStorageDevices() );
     m_device_tab->rescan( master_list->getStorageDevices() );
 
     groups = master_list->getVolGroups();
@@ -313,83 +312,83 @@ void TopWindow::setupMenus()
 void TopWindow::changeVolumeGroup()
 {
     if( change_vg(m_vg) )
-	MainWindow->reRun();
+	reRun();
 }
 
 void TopWindow::createVolumeGroup()
 {
     if( create_vg() )
-        MainWindow->reRun();
+        reRun();
 }
 
 void TopWindow::removeVolumeGroup()
 {
     if( remove_vg(m_vg) )
-        MainWindow->reRun();
+        reRun();
 }
 
 void TopWindow::renameVolumeGroup()
 {
     if( rename_vg(m_vg) )
-        MainWindow->reRun();
+        reRun();
 }
 
 void TopWindow::reduceVolumeGroup()
 {
     if( reduce_vg(m_vg) )
-        MainWindow->reRun();
+        reRun();
 }
 
 void TopWindow::exportVolumeGroup()
 {
     if( export_vg(m_vg) )
-        MainWindow->reRun();
+        reRun();
 }
 
 void TopWindow::extendVolumeGroup()
 {
     if( extend_vg(m_vg) )
-        MainWindow->reRun();
+        reRun();
 }
 
 void TopWindow::importVolumeGroup()
 {
     if( import_vg(m_vg) )
-        MainWindow->reRun();
+        reRun();
 }
 
 void TopWindow::splitVolumeGroup()
 {
     if( split_vg(m_vg) )
-        MainWindow->reRun();
+        reRun();
 }
 
 void TopWindow::mergeVolumeGroup()
 {
     if( merge_vg(m_vg) )
-        MainWindow->reRun();
+        reRun();
 }
 
 void TopWindow::removeMissingVolumes()
 {
     if( remove_missing_pv(m_vg) )
-        MainWindow->reRun();
+        reRun();
 }
 
 void TopWindow::restartPhysicalVolumeMove()
 {
     if( restart_pvmove() )
-        MainWindow->reRun();
+        reRun();
 }
 
 void TopWindow::stopPhysicalVolumeMove()
 {
     if( stop_pvmove() )
-        MainWindow->reRun();
+        reRun();
 }
 
 void TopWindow::configKvpm()
 {
     if( config_kvpm() )
-        MainWindow->reRun();
+        reRun();
 }
