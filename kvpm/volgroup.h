@@ -56,7 +56,8 @@ public:
     const QList<LogVol *>  getSnapshots(LogVol *logicalVolume); // get any snaps of the referenced lv
     const QList<PhysVol *> getPhysicalVolumes();
     LogVol* getLogVolByName(QString shortName);  // lv name without the vg name and "/"
-    PhysVol* getPhysVolByName(QString name);
+    LogVol* getLogVolByUuid(QString uuid);
+    PhysVol* getPhysVolByName(QString name);     //   /dev/something
     long long getExtents();
     long long getFreeExtents();
     long long getAllocatableExtents();
