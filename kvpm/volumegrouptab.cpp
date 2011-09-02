@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -12,6 +12,8 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
+
+#include "volumegrouptab.h"
 
 #include <QtGui>
 
@@ -24,7 +26,6 @@
 #include "vgremove.h"
 #include "vgtree.h"
 #include "volgroup.h"
-#include "volumegrouptab.h"
 
 
 VolumeGroupTab::VolumeGroupTab(VolGroup *volumeGroup, QWidget *parent) : QWidget(parent), m_vg(volumeGroup) 
@@ -134,9 +135,3 @@ VolGroup* VolumeGroupTab::getVolumeGroup()
 {
     return m_vg;   
 }
-
-QString VolumeGroupTab::getVolumeGroupName()
-{
-    return m_group_name;   // will return empty string if not a volume group
-}
-
