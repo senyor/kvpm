@@ -12,11 +12,12 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
+#include "volgroup.h"
+
 #include <QtGui>
 
 #include "logvol.h"
 #include "physvol.h"
-#include "volgroup.h"
 
 VolGroup::VolGroup(lvm_t lvm, const char *vgname)
 {
@@ -314,6 +315,18 @@ LogVol* VolGroup::getLogVolByName(QString shortName)
     name = shortName.trimmed();
     for(int x = 0; x < m_member_lvs.size(); x++){
 	if(name == m_member_lvs[x]->getName())
+	    return m_member_lvs[x];
+    }
+
+    return NULL;
+}
+
+LogVol* VolGroup::getLogVolByUuid(QString uuid)
+{
+    uuid = uuid.trimmed();
+
+    for(int x = 0; x < m_member_lvs.size(); x++){
+	if(uuid == m_member_lvs[x]->getUuid())
 	    return m_member_lvs[x];
     }
 
