@@ -57,7 +57,11 @@ void VolGroup::rescan(lvm_t lvm)
     m_active       = false;
 
     // clustered volumes can't be opened when clvmd isn't running 
-    if( (lvm_vg = lvm_vg_open(lvm, m_vg_name.toAscii().data(), "r", NULL)) ){
+
+    QByteArray  vg_name_array = m_vg_name.toAscii();
+    const char *vg_name_ascii = vg_name_array.data();
+
+    if( (lvm_vg = lvm_vg_open(lvm, vg_name_ascii, "r", 0x00 )) ){
 
 	m_pv_max       = lvm_vg_get_max_pv(lvm_vg); 
 	m_extent_size  = lvm_vg_get_extent_size(lvm_vg);
@@ -136,19 +140,79 @@ void VolGroup::rescan(lvm_t lvm)
 
 	dm_list* lv_dm_list = lvm_vg_list_lvs(lvm_vg);
 	lvm_lv_list *lv_list;
+        QString lv_name;
+        QList<lv_t> lvm_lvs_all_top;       // top level lvm logical volume handles
+        QList<lv_t> lvm_lvs_all_children;  // snap shots and mostly hidden child volumes, mirror legs etc.
+        QList<lv_t> lvm_lv_children;       // children of just one selected volume
+        QByteArray flags;
 	
 	if(lv_dm_list){
 	
-	    dm_list_iterate_items(lv_list, lv_dm_list){ // rescan() existing LogVols 
+	    dm_list_iterate_items(lv_list, lv_dm_list){ 
+
+                value = lvm_lv_get_property(lv_list->lv, "lv_attr");
+                flags = value.value.string;
+
+                switch( flags[0] ){
+                case '-':
+                case 'c':
+                case 'O':
+                case 'o':
+                case 'p':
+                    lvm_lvs_all_top.append( lv_list->lv );
+                    break;
+
+                case 'S':                  // A merging snap is top level
+                    if( flags[4] != 'I' )  // When 'S' stops getting used for Invalid and only merging - remove this
+                        lvm_lvs_all_top.append( lv_list->lv );
+                    else
+                        lvm_lvs_all_children.append( lv_list->lv );
+                    break;
+
+                case 'M': 
+                case 'm':
+                    value = lvm_lv_get_property(lv_list->lv, "lv_name");
+                    if( QString(value.value.string).trimmed().endsWith("_mlog") )
+                        lvm_lvs_all_children.append( lv_list->lv );
+                    else
+                        lvm_lvs_all_top.append( lv_list->lv );
+                    break;
+
+                default:
+                    lvm_lvs_all_children.append( lv_list->lv );
+                    break;
+                }
+	    }
+
+	    for(int y = 0; y < lvm_lvs_all_top.size(); y++ ){ // rescan() existing LogVols 
 	        existing_lv = false;
+                lvm_lv_children.clear();
+                value = lvm_lv_get_property(lvm_lvs_all_top[y], "lv_name");
+                lv_name = QString(value.value.string).trimmed();
+
+                for(int n = lvm_lvs_all_children.size() - 1; n >= 0; n--){
+
+                    value = lvm_lv_get_property(lvm_lvs_all_children[n], "lv_name");
+
+                    if( QString(value.value.string).trimmed().startsWith(lv_name + '_') )
+                        lvm_lv_children.append(lvm_lvs_all_children[n]);
+
+                    value = lvm_lv_get_property(lvm_lvs_all_children[n], "origin");
+
+                    if( QString(value.value.string).trimmed() == lv_name )
+                        lvm_lv_children.append(lvm_lvs_all_children.takeAt(n));
+                } 
+
 		for(int x = 0; x < m_member_lvs.size(); x++){
-		    if( QString( lvm_lv_get_uuid( lv_list->lv ) ).trimmed() == m_member_lvs[x]->getUuid() ){
+		    if( QString( lvm_lv_get_uuid( lvm_lvs_all_top[y] ) ).trimmed() == m_member_lvs[x]->getUuid() ){
 		      existing_lv = true;
-		      m_member_lvs[x]->rescan( lv_list->lv );
+
+                      m_member_lvs[x]->getName();
+		      m_member_lvs[x]->rescan(lvm_lvs_all_top[y], lvm_lv_children);
 		    }
 		}
 		if( !existing_lv )
-		    m_member_lvs.append( new LogVol( lv_list->lv, this ) );
+		    m_member_lvs.append( new LogVol( lvm_lvs_all_top[y], this, NULL, lvm_lv_children ) );
 	    }
 	  
 	    for(int x = m_member_lvs.size() - 1; x >= 0; x--){ // delete LogVol if the lv is gone
@@ -239,68 +303,24 @@ void VolGroup::rescan(lvm_t lvm)
     return;
 }
 
-/* The following function sorts some of the member volumes
-   by type before returning the list. Any "Origin" volume 
-   will be followed by all of its snapshots. Any volume that
-   is not a snap or an origin for a snap gets put straight
-   on the sorted list. If an origin is found it is appended to
-   the sorted list and a loop starts that runs through the 
-   unsorted list and finds all of its snapshots and appends 
-   them to the sorted list after the origin. Finally if a
-   snapshot turns up at the beginning of the unsorted list 
-   before its origin, it gets appended back onto the end of 
-   the unsorted list.  */
-
 const QList<LogVol *>  VolGroup::getLogicalVolumes()
 {
-    QList<LogVol *> sorted_list;
-    QList<LogVol *> unsorted_list = m_member_lvs;
-
-    LogVol *lv;
-    bool has_more_origins;
-
-    while( unsorted_list.size() ){
-	lv = unsorted_list.takeFirst();
-	if( lv->isOrigin() ){
-	    sorted_list.append(lv);
-	    for(int x = (unsorted_list.size() - 1); x >= 0; x--){
-		if( unsorted_list[x]->isSnap() )
-		    if( unsorted_list[x]->getOrigin() == lv->getName() )
-			sorted_list.append( unsorted_list.takeAt(x) );
-	    }
-	}
-	else if( lv->isSnap() ){
-            has_more_origins = false;
-            for(int x = 0; x < unsorted_list.size(); x++){
-                if( unsorted_list[x]->isOrigin() )
-                    has_more_origins = true;
-            }
-            if(has_more_origins)             // No more origins means any snaps left are 
-                unsorted_list.append(lv);    // orphans so we skip them
-            else
-                sorted_list.append(lv);
-        }     
-	else                                 
-	    sorted_list.append(lv);           
-    }                                     
-
-    return sorted_list;
+    return m_member_lvs;
 }
 
-const QList<LogVol *>  VolGroup::getSnapshots(LogVol *logicalVolume)
+const QList<LogVol *>  VolGroup::getLogicalVolumesFlat()
 {
-    QList<LogVol *> lv_list;
-    QString lv_name = logicalVolume->getName();
+    QList<LogVol *> tree_list = m_member_lvs;
+    QList<LogVol *> flat_list;
 
-    if( logicalVolume->isOrigin() ){
-        lv_list = getLogicalVolumes();
-        for(int x = lv_list.size() - 1; x >= 0; x--){
-            if( !( lv_list[x]->isSnap() &&  lv_list[x]->getOrigin() == lv_name ) )
-                lv_list.removeAt(x);
-        }
-    }
+    long tree_list_size = tree_list.size(); 
 
-    return lv_list;
+    for(int x = 0; x < tree_list_size; x++){
+        flat_list.append(tree_list[x]);
+        flat_list.append(tree_list[x]->getAllChildrenFlat());
+    } 
+
+    return flat_list;
 }
 
 const QList<PhysVol *> VolGroup::getPhysicalVolumes()
@@ -310,12 +330,13 @@ const QList<PhysVol *> VolGroup::getPhysicalVolumes()
 
 LogVol* VolGroup::getLogVolByName(QString shortName)
 {
-    QString name;
-    
-    name = shortName.trimmed();
-    for(int x = 0; x < m_member_lvs.size(); x++){
-	if(name == m_member_lvs[x]->getName())
-	    return m_member_lvs[x];
+    QList<LogVol *> all_lvs = getLogicalVolumesFlat();
+    const int lv_count = all_lvs.size();
+    const QString name = shortName.trimmed();
+
+    for(int x = 0; x < lv_count; x++){
+	if( name == all_lvs[x]->getName() && !all_lvs[x]->isSnapContainer() )
+	    return all_lvs[x];
     }
 
     return NULL;
@@ -323,11 +344,13 @@ LogVol* VolGroup::getLogVolByName(QString shortName)
 
 LogVol* VolGroup::getLogVolByUuid(QString uuid)
 {
+    QList<LogVol *> all_lvs = getLogicalVolumesFlat();
+    const int lv_count = all_lvs.size();
     uuid = uuid.trimmed();
 
-    for(int x = 0; x < m_member_lvs.size(); x++){
-	if(uuid == m_member_lvs[x]->getUuid())
-	    return m_member_lvs[x];
+    for(int x = 0; x < lv_count; x++){
+	if(uuid == all_lvs[x]->getUuid() && !all_lvs[x]->isSnapContainer() )
+	    return all_lvs[x];
     }
 
     return NULL;

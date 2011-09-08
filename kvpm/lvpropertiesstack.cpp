@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -12,9 +12,10 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
+#include "lvpropertiesstack.h"
+
 #include <QtGui>
 
-#include "lvpropertiesstack.h"
 #include "lvproperties.h"
 #include "logvol.h"
 #include "volgroup.h"
@@ -27,7 +28,7 @@
 LVPropertiesStack::LVPropertiesStack(VolGroup *Group, QWidget *parent) : QStackedWidget(parent)
 {
     m_vg = Group;
-    QList<LogVol *> members  = m_vg->getLogicalVolumes();
+    QList<LogVol *> members  = m_vg->getLogicalVolumesFlat();
 
     for(int x = 0; x < members.size(); x++){
 	QStackedWidget *segment_properties_stack = new QStackedWidget();
@@ -56,12 +57,11 @@ void LVPropertiesStack::changeLVStackIndex(QTreeWidgetItem *item, QTreeWidgetIte
    widget with that volume's information.
    If *item points to nothing but volumes exist we go to the
    first stack widget.
-   Else we set the stack widget index to -1, nothing 
-*/ 
+   Else we set the stack widget index to -1, nothing  */ 
 
     QString lv_name;
     int segment;
-    QList<LogVol *> members  = m_vg->getLogicalVolumes();
+    QList<LogVol *> members  = m_vg->getLogicalVolumesFlat();
 
     if(item && ( members.size() == m_lv_stack_list.size() ) ){  // These *should* be equal
 	lv_name = QVariant(item->data(0, Qt::UserRole)).toString();

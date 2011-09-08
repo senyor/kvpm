@@ -173,6 +173,10 @@ TopWindow::TopWindow(QWidget *parent):KMainWindow(parent)
 
     master_list = new MasterList(); // creates *empty* masterlist
 
+    connect(qApp, SIGNAL(aboutToQuit()), 
+	    this, SLOT(cleanUp()));
+
+
     reRun();    // reRun also does the initial run
 }
 
@@ -391,4 +395,14 @@ void TopWindow::configKvpm()
 {
     if( config_kvpm() )
         reRun();
+}
+
+void TopWindow::cleanUp()
+{
+    delete master_list;  // This calls lvm_quit() on destruct
+}
+
+void TopWindow::closeEvent(QCloseEvent *)
+{
+    qApp->quit();
 }

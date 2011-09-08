@@ -37,6 +37,23 @@
 MasterList::MasterList() : QObject()
 {
     ped_exception_set_handler(my_handler);
+    m_lvm = lvm_init(NULL);
+}
+
+/* We can't just clear the lists, we need to delete 
+   all the objects they point to  before we can 
+   create a brand new list */
+
+MasterList::~MasterList()
+{
+
+    lvm_quit(m_lvm);
+
+    for(int x = 0; x < m_volume_groups.size(); x++)
+	delete m_volume_groups[x];
+
+    for(int x = 0; x < m_storage_devices.size(); x++)
+	delete m_storage_devices[x];
 }
 
 void MasterList::rescan()
@@ -51,15 +68,13 @@ void MasterList::rescan()
     progress_dialog->ensurePolished();
     qApp->processEvents();
 
-    lvm_t lvm = lvm_init(NULL);
-    lvm_scan(lvm);
+    lvm_scan(m_lvm);
 
     progress_bar->setValue(1);
     progress_dialog->setLabelText( i18n("scanning volume groups") );
     progress_dialog->ensurePolished();
     qApp->processEvents();
-    scanVolumeGroups(lvm);
-    lvm_quit(lvm);
+    scanVolumeGroups();
 
     progress_bar->setValue(2);
     progress_dialog->setLabelText( i18n("scanning logical volumes") );
@@ -79,21 +94,7 @@ void MasterList::rescan()
     return;
 }
 
-
-/* We can't just clear the lists, we need to delete 
-   all the objects they point to  before we can 
-   create a brand new list */
-
-MasterList::~MasterList()
-{
-    for(int x = 0; x < m_volume_groups.size(); x++)
-	delete m_volume_groups[x];
-
-    for(int x = 0; x < m_storage_devices.size(); x++)
-	delete m_storage_devices[x];
-}
-
-void MasterList::scanVolumeGroups(lvm_t lvm)
+void MasterList::scanVolumeGroups()
 {
     QStringList vg_output;
     QStringList arguments;
@@ -103,17 +104,17 @@ void MasterList::scanVolumeGroups(lvm_t lvm)
     dm_list *vgnames;
     lvm_str_list *strl;
     
-    vgnames = lvm_list_vg_names(lvm);
+    vgnames = lvm_list_vg_names(m_lvm);
     dm_list_iterate_items(strl, vgnames){ // rescan() existing VolGroup, don't create a new one
         existing_vg = false;
         for(int x = 0; x < m_volume_groups.size(); x++){
             if( QString(strl->str).trimmed() == m_volume_groups[x]->getName() ){
                 existing_vg = true;
-                m_volume_groups[x]->rescan(lvm);
+                m_volume_groups[x]->rescan(m_lvm);
             }
         }
         if( !existing_vg )
-            m_volume_groups.append( new VolGroup(lvm, strl->str) );
+            m_volume_groups.append( new VolGroup(m_lvm, strl->str) );
     }
     for(int x = m_volume_groups.size() - 1; x >= 0; x--){ // delete VolGroup if the vg is gone
         deleted_vg = true;
@@ -164,6 +165,11 @@ const QList<VolGroup *> MasterList::getVolGroups()
 const QList<StorageDevice *> MasterList::getStorageDevices()
 {
     return m_storage_devices;
+}
+
+lvm_t MasterList::getLVM()
+{
+    return m_lvm;
 }
 
 VolGroup* MasterList::getVolGroupByName(QString name)

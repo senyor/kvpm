@@ -44,22 +44,24 @@ void LVSizeChart::populateChart()
 {
 
     QList<LogVol *> logical_volumes;
-    QTreeWidgetItem *item, *child_item;
-    LogVol *child_volume;
-    QLayoutItem *child;  // remove old children of layout
-    while( (child = m_layout->takeAt(0) ) != 0 )
+    QTreeWidgetItem *item;
+    LogVol *lv;
+    QLayoutItem *child;
+    long item_count = m_vg_tree->topLevelItemCount(); 
+
+    while( (child = m_layout->takeAt(0) ) != 0 )   // remove old children of layout
         delete child;
 
-    for(int x = 0; x < m_vg_tree->topLevelItemCount(); x++){ // get volumes as sorted by vgtree
+    for(int x = 0; x < item_count; x++){
+
         item = m_vg_tree->topLevelItem(x);
-        logical_volumes.append( m_vg->getLogVolByName( item->data(0,Qt::UserRole).toString() ) );
-        if( item->childCount() ){
-            for(int y = 0; y < item->childCount(); y++){
-                child_item = item->child(y);
-                if( (child_volume = m_vg->getLogVolByName( child_item->data(0,Qt::UserRole).toString() ) ) ){
-                    if( child_volume->isSnap() )
-                        logical_volumes.append( m_vg->getLogVolByName(child_item->data(0,Qt::UserRole).toString()) );
-                }
+        lv = m_vg->getLogVolByName( item->data(0,Qt::UserRole).toString() );
+
+        if( lv != NULL ){
+            logical_volumes.append(lv);
+        
+            if( lv->getSnapshotCount() ){
+                logical_volumes.append( lv->getSnapshots() );
             }
         }
     }

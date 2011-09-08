@@ -37,18 +37,14 @@ Q_OBJECT
     VolGroup *m_vg;
     LogVol   *m_lv;
 
-    QList<QTreeWidgetItem *> m_lv_tree_items, m_old_lv_tree_items;
     QString m_vg_name;
     QString m_lv_name;
-    QString m_pv_name;
 
     void setupContextMenu();
+    QTreeWidgetItem *loadItem(LogVol *lv, QTreeWidgetItem *item);
+    void insertChildItems(LogVol *mirrorVolume, QTreeWidgetItem *item);
     void insertSegmentItems(LogVol *logicalVolume, QTreeWidgetItem *item);
-    void insertMirrorLegItems(LogVol *mirrorVolume, QTreeWidgetItem *item);
-    bool insertSnapshotItems(LogVol *originVolume, QTreeWidgetItem *item);
     void setHiddenColumns();
-    void walkTreeExpandedItems(QTreeWidgetItem *old_item, QTreeWidgetItem *new_item);
-    bool walkTreeCurrentItem(QTreeWidgetItem *current_item, QTreeWidgetItem *new_item);
 
 public:
     VGTree(VolGroup *VolumeGroup);

@@ -45,6 +45,7 @@ Q_OBJECT
     
     DeviceTab *m_device_tab;
     VolGroup  *m_vg;
+    void closeEvent(QCloseEvent *);
 
  public:
     TopWindow(QWidget *parent);
@@ -53,6 +54,7 @@ Q_OBJECT
     void reRun();
  
  private slots:
+    void cleanUp();
     void setupMenus();
     void changeVolumeGroup();
     void createVolumeGroup();
