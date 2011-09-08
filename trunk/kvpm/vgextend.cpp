@@ -12,6 +12,8 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
+#include "vgextend.h"
+
 #include <lvm2app.h>
 
 #include <KMessageBox>
@@ -25,7 +27,6 @@
 #include "storagedevice.h"
 #include "storagepartition.h"
 #include "vgcreate.h"
-#include "vgextend.h"
 #include "volgroup.h"
 
 extern MasterList *master_list;
@@ -35,7 +36,7 @@ bool extend_vg(QString volumeGroupName, StorageDevice *device, StoragePartition 
     QString message, error_message;
     QString name;
     long long size;
-    lvm_t  lvm;
+    lvm_t  lvm = master_list->getLVM();
     vg_t vg_dm;
     VolGroup *vg =  master_list->getVolGroupByName(volumeGroupName);
     long long extent_size = vg->getExtentSize();
@@ -59,28 +60,25 @@ bool extend_vg(QString volumeGroupName, StorageDevice *device, StoragePartition 
                        "physical volume: <b>%2</b> (size: %3)", volumeGroupName, name, sizeToString(size));
 
         if( KMessageBox::questionYesNo(0, message) == 3 ){     // 3 is the "yes" button
-            if( (lvm = lvm_init(NULL)) ){
-                if( (vg_dm = lvm_vg_open(lvm, volumeGroupName.toAscii().data(), "w", 0)) ){
-                    if( ! lvm_vg_extend(vg_dm, name.toAscii().data()) ){
-                        if( lvm_vg_write(vg_dm) )
-                            KMessageBox::error(0, QString(lvm_errmsg(lvm)));;
-                        lvm_vg_close(vg_dm);
-                        lvm_quit(lvm);
-                        return true;
-                    }
-                    KMessageBox::error(0, QString(lvm_errmsg(lvm))); 
+
+            if( (vg_dm = lvm_vg_open(lvm, volumeGroupName.toAscii().data(), "w", 0)) ){
+                if( ! lvm_vg_extend(vg_dm, name.toAscii().data()) ){
+                    if( lvm_vg_write(vg_dm) )
+                        KMessageBox::error(0, QString(lvm_errmsg(lvm)));;
                     lvm_vg_close(vg_dm);
-                    lvm_quit(lvm);
                     return true;
                 }
                 KMessageBox::error(0, QString(lvm_errmsg(lvm))); 
-                lvm_quit(lvm);
+                lvm_vg_close(vg_dm);
                 return true;
             }
-            KMessageBox::error(0, QString(lvm_errmsg(lvm)));
+            KMessageBox::error(0, QString(lvm_errmsg(lvm))); 
             return true;
         }
-    }
+        KMessageBox::error(0, QString(lvm_errmsg(lvm)));
+        return true;
+    }   
+
     return false;  // do nothing
 }
 
@@ -165,7 +163,7 @@ VGExtendDialog::VGExtendDialog(VolGroup *volumeGroup, QList<StorageDevice *> dev
 
 void VGExtendDialog::commitChanges()
 {
-    lvm_t  lvm;
+    lvm_t  lvm = master_list->getLVM();
     vg_t vg_dm;
     QStringList pv_names = m_pv_checkbox->getNames();
 
@@ -175,24 +173,18 @@ void VGExtendDialog::commitChanges()
     m_layout->addWidget(progress_bar);
     loop->processEvents();
 
-    if( (lvm = lvm_init(NULL)) ){
-        if( (vg_dm = lvm_vg_open(lvm, m_vg->getName().toAscii().data(), "w", 0 )) ){
-
-            for(int x = 0; x < pv_names.size(); x++){
-	        progress_bar->setValue(x);
-	        loop->processEvents();
-                if( lvm_vg_extend(vg_dm, pv_names[x].toAscii().data()) )
-                    KMessageBox::error(0, QString(lvm_errmsg(lvm)));
-            }
-
-            if( lvm_vg_write(vg_dm) )
+    if( (vg_dm = lvm_vg_open(lvm, m_vg->getName().toAscii().data(), "w", 0 )) ){
+        
+        for(int x = 0; x < pv_names.size(); x++){
+            progress_bar->setValue(x);
+            loop->processEvents();
+            if( lvm_vg_extend(vg_dm, pv_names[x].toAscii().data()) )
                 KMessageBox::error(0, QString(lvm_errmsg(lvm)));
-            lvm_vg_close(vg_dm);
-            lvm_quit(lvm);
-            return;
         }
-        KMessageBox::error(0, QString(lvm_errmsg(lvm))); 
-        lvm_quit(lvm);
+        
+        if( lvm_vg_write(vg_dm) )
+            KMessageBox::error(0, QString(lvm_errmsg(lvm)));
+        lvm_vg_close(vg_dm);
         return;
     }
     KMessageBox::error(0, QString(lvm_errmsg(lvm))); 

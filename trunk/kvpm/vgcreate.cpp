@@ -12,6 +12,8 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
+#include "vgcreate.h"
+
 #include <lvm2app.h>
 
 #include <KLocale>
@@ -25,7 +27,6 @@
 #include "pvcheckbox.h"
 #include "storagedevice.h"
 #include "storagepartition.h"
-#include "vgcreate.h"
 
 
 extern MasterList *master_list;
@@ -261,7 +262,7 @@ void VGCreateDialog::limitExtentSize(int index){
 
 void VGCreateDialog::commitChanges()
 {
-    lvm_t  lvm;
+    lvm_t lvm = master_list->getLVM();
     vg_t vg_dm;
     uint32_t new_extent_size = m_extent_size->currentText().toULong();
     QStringList pv_names = m_pv_checkbox->getNames();
@@ -276,21 +277,19 @@ void VGCreateDialog::commitChanges()
     m_progress_bar->setRange(0, pv_names.size());
     loop->processEvents();
 
-    if( (lvm = lvm_init(NULL)) ){
+    if( (vg_dm = lvm_vg_create(lvm, m_vg_name->text().toAscii().data())) ){
 
-        if( (vg_dm = lvm_vg_create(lvm, m_vg_name->text().toAscii().data())) ){
-
-            if( (lvm_vg_set_extent_size(vg_dm, new_extent_size)) )
+        if( (lvm_vg_set_extent_size(vg_dm, new_extent_size)) )
+            KMessageBox::error(0, QString(lvm_errmsg(lvm)));
+        
+        for(int x = 0; x < pv_names.size(); x++){
+            m_progress_bar->setValue(x);
+            loop->processEvents();
+            
+            if( lvm_vg_extend(vg_dm, pv_names[x].toAscii().data()) )
                 KMessageBox::error(0, QString(lvm_errmsg(lvm)));
-
-            for(int x = 0; x < pv_names.size(); x++){
-                m_progress_bar->setValue(x);
-                loop->processEvents();
-
-                if( lvm_vg_extend(vg_dm, pv_names[x].toAscii().data()) )
-                    KMessageBox::error(0, QString(lvm_errmsg(lvm)));
-            }
-
+        }
+        
             // ****To Do... None of the following are supported by liblvm2app yet****
             //   if(m_clustered->isChecked())
             //   if(m_auto_backup->isChecked())          
@@ -298,21 +297,14 @@ void VGCreateDialog::commitChanges()
             //   if((m_max_pvs_check->isChecked()) && (m_max_pvs->text() != ""))
 
 
-            if( lvm_vg_write(vg_dm) )
-                KMessageBox::error(0, QString(lvm_errmsg(lvm)));
-
-            lvm_vg_close(vg_dm);
-            lvm_quit(lvm);
-            delete loop;
-            return;
-        }
+        if( lvm_vg_write(vg_dm) )
+            KMessageBox::error(0, QString(lvm_errmsg(lvm)));
         
-        lvm_quit(lvm);
-        KMessageBox::error(0, QString(lvm_errmsg(lvm))); 
+        lvm_vg_close(vg_dm);
         delete loop;
         return;
     }
-
+        
     KMessageBox::error(0, QString(lvm_errmsg(lvm))); 
     delete loop;
     return;

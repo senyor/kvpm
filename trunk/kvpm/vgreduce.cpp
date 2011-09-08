@@ -12,18 +12,19 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
+#include "vgreduce.h"
+
 #include <lvm2app.h>
 
 #include <KMessageBox>
 #include <KLocale>
 #include <QtGui>
 
-#include "pvcheckbox.h"
 #include "masterlist.h"
 #include "misc.h"
-#include "vgreduce.h"
-#include "volgroup.h"
 #include "physvol.h"
+#include "pvcheckbox.h"
+#include "volgroup.h"
 
 extern MasterList *master_list;
 
@@ -87,25 +88,20 @@ VGReduceDialog::VGReduceDialog(VolGroup *volumeGroup, QWidget *parent) : KDialog
 void VGReduceDialog::commitChanges()
 {
     QStringList pvs;
-    lvm_t  lvm = NULL;
     vg_t vg_dm = NULL;
+    lvm_t lvm = master_list->getLVM();
 
     QStringList pv_list; // pvs to remove by name
     pv_list << m_pv_checkbox->getNames();
 
-    if( (lvm = lvm_init(NULL)) ){
-        if( (vg_dm = lvm_vg_open(lvm, m_vg->getName().toAscii().data(), "w", 0)) ){
-            for(int x = 0; x < pv_list.size(); x++){
-                if( lvm_vg_reduce(vg_dm, pv_list[x].toAscii().data()) )
-                    KMessageBox::error(0, QString(lvm_errmsg(lvm)));
-            }
-            if( lvm_vg_write(vg_dm) )
+    if( (vg_dm = lvm_vg_open(lvm, m_vg->getName().toAscii().data(), "w", 0)) ){
+        for(int x = 0; x < pv_list.size(); x++){
+            if( lvm_vg_reduce(vg_dm, pv_list[x].toAscii().data()) )
                 KMessageBox::error(0, QString(lvm_errmsg(lvm)));
-            lvm_vg_close(vg_dm);
         }
-        else
+        if( lvm_vg_write(vg_dm) )
             KMessageBox::error(0, QString(lvm_errmsg(lvm)));
-        lvm_quit(lvm);
+        lvm_vg_close(vg_dm);
     }
     else
         KMessageBox::error(0, QString(lvm_errmsg(lvm)));

@@ -13,11 +13,12 @@
  */
 
 
+#include "vgreduceone.h"
+
 #include <KMessageBox>
 #include <KLocale>
 #include <QtGui>
 
-#include "vgreduceone.h"
 #include "processprogress.h"
 
 

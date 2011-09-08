@@ -13,12 +13,13 @@
  */
 
 
+#include "lvactionsmenu.h"
+
 #include <QtGui>
 #include <KLocale>
 #include <KActionCollection>
 
 #include "fsck.h"
-#include "lvactionsmenu.h"
 #include "logvol.h"
 #include "vgtree.h"
 #include "lvsizechartseg.h"

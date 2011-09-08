@@ -35,8 +35,9 @@ class MasterList : public QObject
 Q_OBJECT
     QList<VolGroup *> m_volume_groups;
     QList<StorageDevice *> m_storage_devices;
+    lvm_t m_lvm;
     
-    void scanVolumeGroups(lvm_t lvm);
+    void scanVolumeGroups();
     void scanStorageDevices();
     bool determinePVState(PhysVol *pv, VolGroup *vg); 
 
@@ -44,6 +45,7 @@ public:
     MasterList();
     ~MasterList();
     void rescan();    
+    lvm_t getLVM();
     const QList<VolGroup *> getVolGroups();
     const QList<StorageDevice *> getStorageDevices();
     int getVolGroupCount();

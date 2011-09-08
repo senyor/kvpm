@@ -74,7 +74,7 @@ bool lv_extend(LogVol *logicalVolume)
             return false;
         }
 
-        QList<LogVol *> snap_shots = logicalVolume->getVolumeGroup()->getSnapshots(logicalVolume);
+        QList<LogVol *> snap_shots = logicalVolume->getSnapshots();
 
         for(int x = 0; x < snap_shots.size(); x++){
             if( snap_shots[x]->isOpen() ){

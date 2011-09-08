@@ -12,16 +12,19 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
+#include "vgsplit.h"
+
 #include <KLocale>
 #include <KMessageBox>
 #include <QtGui>
 
 #include "logvol.h"
+#include "masterlist.h"
 #include "physvol.h"
-#include "vgsplit.h"
-#include "volgroup.h"
 #include "processprogress.h"
+#include "volgroup.h"
 
+extern MasterList *master_list;
 
 bool split_vg(VolGroup *volumeGroup)
 {
@@ -229,41 +232,36 @@ QStringList VGSplitDialog::arguments()
 
 void VGSplitDialog::deactivate()
 {
-    lvm_t  lvm;
+    lvm_t lvm = master_list->getLVM();
     vg_t vg_dm;
     dm_list *lv_dm_list;
     lvm_lv_list *lv_list;
     QList<lv_t> lvs_to_deactivate;
 
-    if( (lvm = lvm_init(NULL)) ){
-        if( (vg_dm = lvm_vg_open(lvm, m_vg->getName().toAscii().data(), "w", NULL)) ){
+    if( (vg_dm = lvm_vg_open(lvm, m_vg->getName().toAscii().data(), "w", NULL)) ){
 
-            for(int x = 0; x < m_lvs_moving.size(); x++){
-                lv_dm_list = lvm_vg_list_lvs(vg_dm);
-                dm_list_iterate_items(lv_list, lv_dm_list){ 
-                    if( QString( lvm_lv_get_name( lv_list->lv ) ).trimmed() == m_lvs_moving[x])
-                        lvs_to_deactivate.append( lv_list->lv );
-                }
+        for(int x = 0; x < m_lvs_moving.size(); x++){
+            lv_dm_list = lvm_vg_list_lvs(vg_dm);
+            dm_list_iterate_items(lv_list, lv_dm_list){ 
+                if( QString( lvm_lv_get_name( lv_list->lv ) ).trimmed() == m_lvs_moving[x])
+                    lvs_to_deactivate.append( lv_list->lv );
             }
+        }
         
-            for(int x = 0; x < lvs_to_deactivate.size(); x++){
-                if( lvm_lv_is_active(lvs_to_deactivate[x]) ){
-                    if( lvm_lv_deactivate(lvs_to_deactivate[x]) )
-                        KMessageBox::error(0, QString(lvm_errmsg(lvm))); 
-                }
+        for(int x = 0; x < lvs_to_deactivate.size(); x++){
+            if( lvm_lv_is_active(lvs_to_deactivate[x]) ){
+                if( lvm_lv_deactivate(lvs_to_deactivate[x]) )
+                    KMessageBox::error(0, QString(lvm_errmsg(lvm))); 
             }
-            lvm_vg_close(vg_dm);
-            lvm_quit(lvm);
-            return;
         }
-        else{
-            KMessageBox::error(0, QString(lvm_errmsg(lvm))); 
-            lvm_quit(lvm);
-            return;
-        }
+        lvm_vg_close(vg_dm);
+        return;
     }
-
-    KMessageBox::error(0, QString(lvm_errmsg(lvm))); 
+    else{
+        KMessageBox::error(0, QString(lvm_errmsg(lvm))); 
+        return;
+    }
+    
     return;
 }
 

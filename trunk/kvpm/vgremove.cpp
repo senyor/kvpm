@@ -12,6 +12,8 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
+#include "vgremove.h"
+
 #include <lvm2app.h>
  
 #include <KMessageBox>
@@ -19,13 +21,15 @@
 #include <KProgressDialog>
 #include <QtGui>
 
-#include "vgremove.h"
+#include "masterlist.h"
 #include "volgroup.h"
+
+extern MasterList *master_list;
 
 bool remove_vg(VolGroup *volumeGroup)
 {
     QString message;
-    lvm_t  lvm = NULL;
+    lvm_t  lvm = master_list->getLVM();
     vg_t vg_dm = NULL;
     KProgressDialog *progress_dialog;
 
@@ -43,33 +47,30 @@ bool remove_vg(VolGroup *volumeGroup)
         progress_dialog->show();
         qApp->processEvents();
                 
-        if( (lvm = lvm_init(NULL)) ){
+        progress_bar->setValue(2);
+        qApp->processEvents();
+        if( (vg_dm = lvm_vg_open(lvm, volumeGroup->getName().toAscii().data(), "w", 0)) ){
             progress_bar->setValue(2);
             qApp->processEvents();
-            if( (vg_dm = lvm_vg_open(lvm, volumeGroup->getName().toAscii().data(), "w", 0)) ){
-                progress_bar->setValue(2);
-                qApp->processEvents();
-                if( lvm_vg_remove(vg_dm) ) 
-                    KMessageBox::error(0, QString(lvm_errmsg(lvm)));
-                else{
-                    if( lvm_vg_write(vg_dm) )
-                        KMessageBox::error(0, QString(lvm_errmsg(lvm)));
-                }
-                lvm_vg_close(vg_dm);
-                progress_bar->setValue(3);
-                qApp->processEvents();
-            }
-            else
+            if( lvm_vg_remove(vg_dm) ) 
                 KMessageBox::error(0, QString(lvm_errmsg(lvm)));
-            lvm_quit(lvm);
+            else{
+                if( lvm_vg_write(vg_dm) )
+                    KMessageBox::error(0, QString(lvm_errmsg(lvm)));
+            }
+            lvm_vg_close(vg_dm);
+            progress_bar->setValue(3);
+            qApp->processEvents();
         }
         else
             KMessageBox::error(0, QString(lvm_errmsg(lvm)));
 
         progress_dialog->close();
         progress_dialog->delayedDestruct();
-        qApp->processEvents();
-        return true;
     }
-    return false;
+    else
+        KMessageBox::error(0, QString(lvm_errmsg(lvm)));
+    
+    qApp->processEvents();
+    return true;
 }
