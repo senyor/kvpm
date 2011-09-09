@@ -161,14 +161,6 @@ void VolGroup::rescan(lvm_t lvm)
                 case 'p':
                     lvm_lvs_all_top.append( lv_list->lv );
                     break;
-
-                case 'S':                  // A merging snap is top level
-                    if( flags[4] != 'I' )  // When 'S' stops getting used for Invalid and only merging - remove this
-                        lvm_lvs_all_top.append( lv_list->lv );
-                    else
-                        lvm_lvs_all_children.append( lv_list->lv );
-                    break;
-
                 case 'M': 
                 case 'm':
                     value = lvm_lv_get_property(lv_list->lv, "lv_name");
