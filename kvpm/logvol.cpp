@@ -324,7 +324,7 @@ void LogVol::rescan(lv_t lvmLV, QList<lv_t> lvmAllChildren)  // lv_t seems to ch
     m_size = value.value.integer;
     m_extents = m_size / m_vg->getExtentSize();
 
-    if(m_snap){
+    if(m_snap || m_merging){
         value = lvm_lv_get_property(m_lvm_lv, "origin");
         m_origin = value.value.string;
 	value = lvm_lv_get_property(m_lvm_lv, "snap_percent");
@@ -450,7 +450,6 @@ void LogVol::rescan(lv_t lvmLV, QList<lv_t> lvmAllChildren)  // lv_t seems to ch
 
     for(int x = 0; x < immediate_children.size(); x++)
         m_lv_children.append( new LogVol( immediate_children[x], m_vg, this, remaining_children) ); 
-
 }
 
 Segment* LogVol::processSegments(lvseg_t lvm_lvseg)
@@ -839,12 +838,18 @@ QList<int> LogVol::getMountPosition()
 
 double LogVol::getSnapPercent()
 {
-    return m_snap_percent;
+    if( m_snap || m_merging )
+        return m_snap_percent;
+    else
+        return 0.0;
 }
 
 double LogVol::getCopyPercent()
 {
-    return m_copy_percent;
+    if( m_pvmove )
+        return m_copy_percent;
+    else
+        return 0.0;
 }
 
 QString LogVol::getUuid()
