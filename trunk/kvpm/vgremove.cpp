@@ -32,6 +32,7 @@ bool remove_vg(VolGroup *volumeGroup)
     lvm_t  lvm = master_list->getLVM();
     vg_t vg_dm = NULL;
     KProgressDialog *progress_dialog;
+    bool success = true;
 
     message = i18n("Are you certain you want to "
 		   "delete volume group: <b>%1</b>", volumeGroup->getName());
@@ -52,25 +53,32 @@ bool remove_vg(VolGroup *volumeGroup)
         if( (vg_dm = lvm_vg_open(lvm, volumeGroup->getName().toAscii().data(), "w", 0)) ){
             progress_bar->setValue(2);
             qApp->processEvents();
-            if( lvm_vg_remove(vg_dm) ) 
+            if( lvm_vg_remove(vg_dm) ){ 
                 KMessageBox::error(0, QString(lvm_errmsg(lvm)));
+                success = false;
+            }
             else{
-                if( lvm_vg_write(vg_dm) )
+                if( lvm_vg_write(vg_dm) ){
                     KMessageBox::error(0, QString(lvm_errmsg(lvm)));
+                    success = false;
+                }
             }
             lvm_vg_close(vg_dm);
             progress_bar->setValue(3);
             qApp->processEvents();
         }
-        else
+        else{
             KMessageBox::error(0, QString(lvm_errmsg(lvm)));
-
+            success = false;
+        }
         progress_dialog->close();
         progress_dialog->delayedDestruct();
     }
-    else
+    else{
         KMessageBox::error(0, QString(lvm_errmsg(lvm)));
-    
+        success = false;
+    }
+
     qApp->processEvents();
-    return true;
+    return success;
 }
