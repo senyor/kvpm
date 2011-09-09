@@ -147,21 +147,40 @@ QTreeWidgetItem *VGTree::loadItem(LogVol *lv, QTreeWidgetItem *item)
     long long fs_remaining;       // remaining space on fs -- if known
     int fs_percent;               // percentage of space remaining
 
-    if( lv->getSegmentCount() == 1 ) {
-        
-        item->setData(0, Qt::DisplayRole, lv->getName());
-        item->setData(1, Qt::DisplayRole, sizeToString(lv->getSize()));           
+    item->setData(0, Qt::DisplayRole, lv->getName());
+    item->setData(1, Qt::DisplayRole, sizeToString(lv->getSize()));           
       
-        if( lv->getFilesystemSize() > -1 &&  lv->getFilesystemUsed() > -1 ){
-            fs_remaining = lv->getFilesystemSize() - lv->getFilesystemUsed();
-            fs_percent = qRound( ((double)fs_remaining / (double)lv->getFilesystemSize()) * 100 );
-            item->setData(2, Qt::DisplayRole, QString(sizeToString(fs_remaining) + " (%%1)").arg(fs_percent) );
-        }
-        else
-            item->setData(2, Qt::DisplayRole, QString(""));
+    if( lv->getFilesystemSize() > -1 &&  lv->getFilesystemUsed() > -1 ){
+        fs_remaining = lv->getFilesystemSize() - lv->getFilesystemUsed();
+        fs_percent = qRound( ((double)fs_remaining / (double)lv->getFilesystemSize()) * 100 );
+        item->setData(2, Qt::DisplayRole, QString(sizeToString(fs_remaining) + " (%%1)").arg(fs_percent) );
+    }
+    else
+        item->setData(2, Qt::DisplayRole, QString(""));
     
-        item->setData(3, Qt::DisplayRole, lv->getFilesystem() );
-        item->setData(4, Qt::DisplayRole, lv->getType());
+    item->setData(3, Qt::DisplayRole, lv->getFilesystem() );
+    item->setData(4, Qt::DisplayRole, lv->getType());
+
+    if( lv->isPvmove() )
+        item->setData(7, Qt::DisplayRole, QString("%%1").arg(lv->getCopyPercent(), 1, 'f', 2));
+    else if( lv->isSnap() || lv->isMerging() )
+        item->setData(7, Qt::DisplayRole, QString("%%1").arg(lv->getSnapPercent(), 1, 'f', 2));
+    else
+        item->setData(7, Qt::DisplayRole, QString(""));
+
+    item->setData(8, Qt::DisplayRole, lv->getState());
+
+    if(lv->isWritable())
+        item->setData(9, Qt::DisplayRole, QString("r/w"));
+    else
+        item->setData(9, Qt::DisplayRole, QString("r/o"));
+
+    item->setData(10, Qt::DisplayRole, lv->getTags().join(",")); 
+    item->setData(11, Qt::DisplayRole, lv->getMountPoints().join(","));
+    item->setData(0, Qt::UserRole, lv->getName());
+
+    if( lv->getSegmentCount() == 1 ) {
+        item->setData(1, Qt::UserRole, 0);            // 0 means segment 0 data present
 
         if( lv->isMirror() ){
             item->setData(5, Qt::DisplayRole, QString(""));
@@ -172,72 +191,23 @@ QTreeWidgetItem *VGTree::loadItem(LogVol *lv, QTreeWidgetItem *item)
             item->setData(6, Qt::DisplayRole, sizeToString(lv->getSegmentStripeSize(0)) );
         }
 
-        if( lv->isPvmove() )
-            item->setData(7, Qt::DisplayRole, QString("%%1").arg(lv->getCopyPercent(), 1, 'f', 2));
-        else if( lv->isSnap() || lv->isMerging() )
-            item->setData(7, Qt::DisplayRole, QString("%%1").arg(lv->getSnapPercent(), 1, 'f', 2));
-        else
-            item->setData(7, Qt::DisplayRole, QString(""));
-        
-        item->setData(8, Qt::DisplayRole, lv->getState());
-        
-        if(lv->isWritable())
-            item->setData(9, Qt::DisplayRole, QString("r/w"));
-        else
-            item->setData(9, Qt::DisplayRole, QString("r/o"));
-
-        item->setData(10, Qt::DisplayRole, lv->getTags().join(",")); 
-        item->setData(11, Qt::DisplayRole, lv->getMountPoints().join(","));
-
-        item->setData(0, Qt::UserRole, lv->getName());
-        item->setData(1, Qt::UserRole, 0);            // 0 means segment 0 data present
-
         insertChildItems(lv, item);
         new_child_count = item->childCount();
 
         if( lv->isSnapContainer() ){   // expand the item if it is a new snap container or snap count is different
-            if( old_type.isEmpty() || !old_type.contains("origin", Qt::CaseInsensitive) || old_child_count != new_child_count){
+            if( old_type.isEmpty() || 
+                !old_type.contains("origin", Qt::CaseInsensitive) || 
+                old_child_count != new_child_count){
                 item->setExpanded(true);
             }
         }
+        else if( (old_type != "mirror") && (lv->getType() == "mirror") )
+                item->setExpanded(true);
     }
     else {
-        item->setData(0, Qt::DisplayRole, lv->getName());
-        item->setData(1, Qt::DisplayRole, sizeToString(lv->getSize()));
-        
-        if( lv->getFilesystemSize() > -1 &&  lv->getFilesystemUsed() > -1 ){
-            fs_remaining = lv->getFilesystemSize() - lv->getFilesystemUsed();
-            fs_percent = qRound( ((double)fs_remaining / (double)lv->getFilesystemSize()) * 100 );
-            item->setData(2, Qt::DisplayRole, QString(sizeToString(fs_remaining) + " (%%1)").arg(fs_percent) );
-        }
-        else
-            item->setData(2, Qt::DisplayRole, QString(""));
-
-        item->setData(3, Qt::DisplayRole, lv->getFilesystem() );
-        item->setData(4, Qt::DisplayRole, lv->getType());
-        
+        item->setData(1, Qt::UserRole, -1);            // -1 means not segment data
         item->setData(5, Qt::DisplayRole, QString(""));
         item->setData(6, Qt::DisplayRole, QString(""));
-        qDebug() << lv->getName() << lv->getSnapPercent();
-        if( lv->isPvmove())
-            item->setData(7, Qt::DisplayRole, QString("%%1").arg(lv->getCopyPercent(), 1, 'f', 2));
-        else if( lv->isSnap() || lv->isMerging() )
-            item->setData(7, Qt::DisplayRole, QString("%%1").arg(lv->getSnapPercent(), 1, 'f', 2));
-        else
-            item->setData(7, Qt::DisplayRole, QString(""));
-        
-        item->setData(8, Qt::DisplayRole, lv->getState());
-        
-        if(lv->isWritable())
-            item->setData(9, Qt::DisplayRole, QString("r/w"));
-        else
-            item->setData(9, Qt::DisplayRole, QString("r/o"));
-
-        item->setData(10, Qt::DisplayRole, lv->getTags().join(",")); 
-        item->setData(11, Qt::DisplayRole, lv->getMountPoints().join(","));
-
-        item->setData(0, Qt::UserRole, lv->getName());
-        item->setData(1, Qt::UserRole, -1);            // -1 means not segment data
        
         insertSegmentItems(lv, item);
     }
