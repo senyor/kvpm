@@ -98,8 +98,9 @@ void VGTree::loadData()
         }  
 
         if(new_item == NULL){
-            new_item = loadItem(lv, new QTreeWidgetItem((QTreeWidgetItem *)0) );
+            new_item = new QTreeWidgetItem((QTreeWidgetItem *)0);
             addTopLevelItem(new_item);
+            loadItem(lv, new_item);
         }
 
     }
@@ -139,12 +140,12 @@ void VGTree::loadData()
 
 QTreeWidgetItem *VGTree::loadItem(LogVol *lv, QTreeWidgetItem *item)
 {
-    QStringList lv_data;
+    QString old_type = item->data(4, Qt::DisplayRole).toString();  // lv type before reload or "" if new item
+    int old_child_count = item->childCount();
+    int new_child_count;
     QList<LogVol *> temp_kids;
     long long fs_remaining;       // remaining space on fs -- if known
     int fs_percent;               // percentage of space remaining
-
-    lv_data.clear();
 
     if( lv->getSegmentCount() == 1 ) {
         
@@ -161,7 +162,7 @@ QTreeWidgetItem *VGTree::loadItem(LogVol *lv, QTreeWidgetItem *item)
     
         item->setData(3, Qt::DisplayRole, lv->getFilesystem() );
         item->setData(4, Qt::DisplayRole, lv->getType());
-        
+
         if( lv->isMirror() ){
             item->setData(5, Qt::DisplayRole, QString(""));
             item->setData(6, Qt::DisplayRole, QString(""));
@@ -173,6 +174,8 @@ QTreeWidgetItem *VGTree::loadItem(LogVol *lv, QTreeWidgetItem *item)
 
         if( lv->isPvmove() )
             item->setData(7, Qt::DisplayRole, QString("%%1").arg(lv->getCopyPercent(), 1, 'f', 2));
+        else if( lv->isSnap() || lv->isMerging() )
+            item->setData(7, Qt::DisplayRole, QString("%%1").arg(lv->getSnapPercent(), 1, 'f', 2));
         else
             item->setData(7, Qt::DisplayRole, QString(""));
         
@@ -190,6 +193,13 @@ QTreeWidgetItem *VGTree::loadItem(LogVol *lv, QTreeWidgetItem *item)
         item->setData(1, Qt::UserRole, 0);            // 0 means segment 0 data present
 
         insertChildItems(lv, item);
+        new_child_count = item->childCount();
+
+        if( lv->isSnapContainer() ){   // expand the item if it is a new snap container or snap count is different
+            if( old_type.isEmpty() || !old_type.contains("origin", Qt::CaseInsensitive) || old_child_count != new_child_count){
+                item->setExpanded(true);
+            }
+        }
     }
     else {
         item->setData(0, Qt::DisplayRole, lv->getName());
@@ -208,9 +218,11 @@ QTreeWidgetItem *VGTree::loadItem(LogVol *lv, QTreeWidgetItem *item)
         
         item->setData(5, Qt::DisplayRole, QString(""));
         item->setData(6, Qt::DisplayRole, QString(""));
-
+        qDebug() << lv->getName() << lv->getSnapPercent();
         if( lv->isPvmove())
             item->setData(7, Qt::DisplayRole, QString("%%1").arg(lv->getCopyPercent(), 1, 'f', 2));
+        else if( lv->isSnap() || lv->isMerging() )
+            item->setData(7, Qt::DisplayRole, QString("%%1").arg(lv->getSnapPercent(), 1, 'f', 2));
         else
             item->setData(7, Qt::DisplayRole, QString(""));
         
@@ -293,6 +305,9 @@ void VGTree::insertSegmentItems(LogVol *lv, QTreeWidgetItem *item)
         child_item->setData(6, Qt::DisplayRole, sizeToString(lv->getSegmentStripeSize(x))); 
  	child_item->setData(0, Qt::UserRole, lv->getName());
 	child_item->setData(1, Qt::UserRole, x);
+
+        for(int x = 7; x < 12; x++)
+            child_item->setData(x, Qt::DisplayRole, QString(""));
     
         for(int column = 1; column < child_item->columnCount() ; column++)
             child_item->setTextAlignment(column, Qt::AlignRight);
