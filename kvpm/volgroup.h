@@ -52,7 +52,7 @@ public:
     VolGroup(lvm_t lvm, const char *vgname);
     ~VolGroup();
     void rescan(lvm_t lvm);
-    const QList<LogVol *>  getLogicalVolumes();
+    const QList<LogVol *>  getLogicalVolumes();   // *TOP LEVEL ONLY* snapcontainers returned not snaps and origin 
     const QList<LogVol *>  getLogicalVolumesFlat(); // un-nest the volumes, snapshots and mirror legs
     const QList<PhysVol *> getPhysicalVolumes();
     LogVol* getLogVolByName(QString shortName);  // lv name without the vg name and "/" -- skips snap containers

@@ -13,6 +13,8 @@
  */
 
 
+#include "vgchange.h"
+
 #include <KLocale>
 #include <KSeparator>
 #include <QtGui>
@@ -20,7 +22,6 @@
 #include "logvol.h"
 #include "misc.h"
 #include "processprogress.h"
-#include "vgchange.h"
 #include "volgroup.h"
 
 bool change_vg(VolGroup *volumeGroup)
@@ -180,18 +181,22 @@ VGChangeDialog::VGChangeDialog(VolGroup *volumeGroup, QWidget *parent) :
     middle_layout->addWidget(m_polling_box);
 
     QList<LogVol *> lv_list = volumeGroup->getLogicalVolumes();
-    bool has_mounted = false;
 
-    for(int x = 0; x < lv_list.size(); x++){
-	if( lv_list[x]->isMounted() )
-	    has_mounted = true;
+    for(int x = lv_list.size() - 1;x >= 0 ;x--){  // replace snap containers with first level children
+	if( lv_list[x]->isSnapContainer() ){
+	    lv_list.append( lv_list[x]->getChildren() );
+            lv_list.removeAt(x);
+        }
+    }
+    for(int x = lv_list.size() - 1;x >=0 ;x--){
+	if( lv_list[x]->isMounted() ){
+            m_available_box->setEnabled(false);
+            m_available_yes->setEnabled(false);
+            m_available_no->setEnabled(false);
+            break;
+        }
     }
     
-    if( has_mounted ){
-        m_available_box->setEnabled(false);
-        m_available_yes->setEnabled(false);
-        m_available_no->setEnabled(false);
-    }
 
 // We don't want the limit set to less than the number already in existence!
 
