@@ -152,7 +152,7 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, VolGroup *volumeGroup, QWidg
 
 	if(  m_lv->isWritable()  && !m_lv->isLocked() && !m_lv->isVirtual() && 
 	    !m_lv->isMirrorLeg() && !m_lv->isMirrorLog() ){
-
+     
 	    if( m_lv->isMounted() ){
 		lv_fsck_action->setEnabled(false);
 		lv_mkfs_action->setEnabled(false);
@@ -272,7 +272,6 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, VolGroup *volumeGroup, QWidg
 	    filesystem_menu->setEnabled(false);
 	}
 	else if( m_lv->isMirrorLeg() || m_lv->isMirrorLog() ){
-
 	    lv_mkfs_action->setEnabled(false);
 	    lv_removefs_action->setEnabled(false);
 	    lv_maxfs_action->setEnabled(false);

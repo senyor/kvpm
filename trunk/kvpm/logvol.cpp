@@ -788,7 +788,7 @@ bool LogVol::isOrigin()
 
 bool LogVol::isOrphan()
 {
-    QList<LogVol *> lvs = getAllChildrenFlat();
+    QList<LogVol *> lvs = m_vg->getLogicalVolumesFlat();
     bool has_invalid_origin = false;
 
     if( m_mirror_log || m_mirror_leg ){ // look for legs and logs of lvs that are not mirrors!
