@@ -46,7 +46,7 @@ bool split_vg(VolGroup *volumeGroup)
 VGSplitDialog::VGSplitDialog(VolGroup *volumeGroup, QWidget *parent) : KDialog(parent), m_vg(volumeGroup)
 {
     QList<PhysVol *> pv_list = m_vg->getPhysicalVolumes();
-    m_lvs = m_vg->getLogicalVolumes();
+    m_lvs = m_vg->getLogicalVolumesFlat();
     NoMungeCheck *temp_check;
 
     for(int x = 0; x < pv_list.size(); x++){
@@ -264,6 +264,9 @@ void VGSplitDialog::deactivate()
     
     return;
 }
+
+/* !!!   FIXME   !!!*/
+/* This next part isn't using the nesting effectivly */
 
 QStringList VGSplitDialog::getUnderlyingDevices(LogVol *lv)
 {
