@@ -241,7 +241,7 @@ void TopWindow::setupMenus()
         m_vg = master_list->getVolGroupByName( m_tab_widget->getUnmungedText(index) );
         if( m_vg != NULL ){
             lvs = m_vg->getLogicalVolumes();
-            for( int x = 0; x < lvs.size(); x++ ){
+            for( int x = lvs.size() - 1; x >= 0 ;x-- ){
                 if( lvs[x]->isActive() )
                     has_active = true;
             }
