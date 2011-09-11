@@ -35,10 +35,7 @@ class VGTree : public QTreeWidget
 Q_OBJECT
 
     VolGroup *m_vg;
-    LogVol   *m_lv;
-
-    QString m_vg_name;
-    QString m_lv_name;
+    bool m_init;        // is this the initial building of the tree or a reload?
 
     void setupContextMenu();
     QTreeWidgetItem *loadItem(LogVol *lv, QTreeWidgetItem *item);

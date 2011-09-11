@@ -166,6 +166,8 @@ void VolGroup::rescan(lvm_t lvm)
                     value = lvm_lv_get_property(lv_list->lv, "lv_name");
                     if( QString(value.value.string).trimmed().endsWith("_mlog") )
                         lvm_lvs_all_children.append( lv_list->lv );
+                    else if( QString(value.value.string).trimmed().contains("_mimagetmp_") )
+                        lvm_lvs_all_children.append( lv_list->lv );
                     else
                         lvm_lvs_all_top.append( lv_list->lv );
                     break;
