@@ -13,13 +13,14 @@
  */
 
 
+#include "removemirror.h"
+
 #include <KLocale>
 #include <QtGui>
 
 #include "logvol.h"
 #include "misc.h"
 #include "processprogress.h"
-#include "removemirror.h"
 #include "volgroup.h"
 
 bool remove_mirror(LogVol *logicalVolume)
@@ -44,7 +45,7 @@ RemoveMirrorDialog::RemoveMirrorDialog(LogVol *logicalVolume, QWidget *parent):
     QStringList   pv_names;
     
     m_vg = m_lv->getVolumeGroup();
-    QList<LogVol *> lvs = m_vg->getLogicalVolumes();
+    QList<LogVol *> lvs = m_lv->getChildren();
 
     setWindowTitle( i18n("Remove mirrors") );
 
@@ -57,7 +58,7 @@ RemoveMirrorDialog::RemoveMirrorDialog(LogVol *logicalVolume, QWidget *parent):
     layout->addWidget(message);
 
     for(int x = lvs.size() - 1; x >= 0 ;x--){
-	if( lvs[x]->isMirrorLeg() && (lvs[x]->getOrigin() == m_lv->getName()) ){
+	if( lvs[x]->isMirrorLeg() ){
 
 	    temp_check = new NoMungeCheck( lvs[x]->getName() );
 	    pv_names = lvs[x]->getDevicePathAll();
