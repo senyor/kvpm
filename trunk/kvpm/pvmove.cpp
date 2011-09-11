@@ -12,6 +12,9 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
+
+#include "pvmove.h"
+
 #include <KPushButton>
 #include <KMessageBox>
 #include <KLocale>
@@ -22,7 +25,6 @@
 #include "processprogress.h"
 #include "physvol.h"
 #include "pvcheckbox.h"
-#include "pvmove.h"
 #include "misc.h"
 #include "volgroup.h"
 
@@ -123,25 +125,17 @@ PVMoveDialog::PVMoveDialog(LogVol *logicalVolume, QWidget *parent) :
 
     if( m_lv->isMirror() ){  // find the mirror legs and get the pvs
 
-        lv_list = m_lv->getVolumeGroup()->getLogicalVolumes();
+        lv_list = m_lv->getAllChildrenFlat();
         lv_count = lv_list.size();
 
         for(int x = 0; x < lv_count; x++){
 
             leg = lv_list[x];
 
-            if( ( leg->getOrigin() == m_lv->getName() ) && ( leg->isMirrorLog() ||
-                                                             leg->isMirrorLeg() ||
-                                                             leg->isVirtual()   ||
-                                                             leg->isMirror() ) )  {
-                
-             
+            if( !leg->isMirror() )  // skips temp sub mirrors and log mirror
                 physical_volume_paths << leg->getDevicePathAll();
 
-            }
-
-            if( physical_volume_paths.size() > 1 ){
-
+            if( physical_volume_paths.size() > 1 ){ // removes duplicates
                 physical_volume_paths.sort();
 
                 for( int x = ( physical_volume_paths.size() - 1 ); x > 0 ;x--){
