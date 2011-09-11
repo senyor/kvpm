@@ -82,24 +82,31 @@ QList<lv_t> LogVol::takeLVMChildren(QList<lv_t> &lvmAllChildren)
 {
     QList<lv_t> children;
     QString child_name;
-    QString origin_name;
     lvm_property_value value;
+    QStringList devices = getDevicePathAll();
 
     if(m_snap_container){
         children.append(m_lvm_lv);
     }
     else{
-        if(m_mirror){ // parent is a mirror
+        if(m_mirror){
 
             for(int x = lvmAllChildren.size() - 1; x >= 0; x--){
-                
+
                 value = lvm_lv_get_property(lvmAllChildren[x], "lv_name");
                 child_name = QString(value.value.string).trimmed();
 
-                if(child_name == m_lv_name + "_mlog")            // child is a log of parent
+                if( child_name == m_log ){
                     children.append( lvmAllChildren.takeAt(x) );
-                else if( child_name.startsWith(m_lv_name + "_mimage_") ) // child is mirror leg
-                    children.append( lvmAllChildren.takeAt(x) );
+                }
+                else{
+                    for(int y = devices.size() - 1; y >= 0 ; y--){
+                        if( devices[y] == child_name ){
+                            children.append( lvmAllChildren.takeAt(x) );
+                            break;
+                        }
+                    } 
+                }
             }
         }
     }
@@ -146,6 +153,9 @@ void LogVol::rescan(lv_t lvmLV, QList<lv_t> lvmAllChildren)  // lv_t seems to ch
 
     value = lvm_lv_get_property(m_lvm_lv, "lv_path");
     m_lv_mapper_path = QString(value.value.string).trimmed();
+
+    value = lvm_lv_get_property(m_lvm_lv, "mirror_log");
+    m_log = QString(value.value.string).trimmed();
 
     value = lvm_lv_get_property(m_lvm_lv, "lv_attr");
     flags.append(value.value.string);
@@ -442,6 +452,13 @@ void LogVol::rescan(lv_t lvmLV, QList<lv_t> lvmAllChildren)  // lv_t seems to ch
                 m_mirror_count++;
         }
     }
+
+    if( m_snap_container )
+        m_type = "origin";
+    else if( m_under_conversion )
+        m_type = "under conversion";
+    else if( m_virtual )
+        m_type = "virtual";
 
     immediate_children.append( takeLVMChildren(remaining_children) );
 

@@ -49,6 +49,7 @@ class LogVol
     QString m_origin;        // the origin if this is a snapshot or 
                              // the parent mirror volume to a mirror leg
 
+    QString m_log;           // The mirror log, if this is a mirror 
     QString m_type;          // the type of volume
     QString m_policy;        // the allocation policy
     QString m_state;         // the lv state

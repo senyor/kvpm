@@ -30,8 +30,7 @@ extern MasterList *master_list;
 VGTree::VGTree(VolGroup *VolumeGroup) : QTreeWidget(), m_vg(VolumeGroup)
 {
     QStringList header_labels;
-
-    m_vg_name = m_vg->getName();
+    m_init = true;
 
     header_labels << "Volume" << "Size" << "Remaining" << "Filesystem" << "type" << "Stripes" << "Stripe size" 
 		  << "Snap/Move" << "State" << "Access" << "Tags" << "Mount points";
@@ -62,9 +61,7 @@ void VGTree::loadData()
 {
     QList<LogVol *> logical_volumes = m_vg->getLogicalVolumes();
     LogVol *lv = NULL;   
-
-    QStringList lv_data;
-    QString old_name, new_name;
+    QTreeWidgetItem *new_item;
 
     disconnect(this, SIGNAL(itemExpanded(QTreeWidgetItem *)), 
 	    this, SLOT(adjustColumnWidth(QTreeWidgetItem *)));
@@ -73,19 +70,6 @@ void VGTree::loadData()
 	    this, SLOT(adjustColumnWidth(QTreeWidgetItem *)));
 
     setSortingEnabled(false);
-
-    /*
-                    if( lv->isUnderConversion() )
-                        lv_data = lv_data.replaceInStrings("origin", "under conversion");
-                    else if( lv->isVirtual() )
-                        lv_data = lv_data.replaceInStrings("origin", "virtual");
-                    else if( lv->isMirror() )
-                        lv_data = lv_data.replaceInStrings("origin", "mirror");
-    */  
-
-    QTreeWidgetItem *new_item;
-
-    // Check header for unused globals
 
     for(int x = 0; x < m_vg->getLogVolCount(); x++){
 	
@@ -134,20 +118,36 @@ void VGTree::loadData()
     resizeColumnToContents(0);
     setSortingEnabled(true);
     setupContextMenu();
+    m_init = false;
 
     return;
 }
 
 QTreeWidgetItem *VGTree::loadItem(LogVol *lv, QTreeWidgetItem *item)
 {
-    QString old_type = item->data(4, Qt::DisplayRole).toString();  // lv type before reload or "" if new item
-    int old_child_count = item->childCount();
+    const QString old_type = item->data(4, Qt::DisplayRole).toString();  // lv type before reload or "" if new item
+    const QString lv_name = lv->getName();
+    const bool was_sc = old_type.contains("origin", Qt::CaseInsensitive);
+    const bool is_sc  = lv->isSnapContainer();
+    const int old_child_count = item->childCount();
+    bool was_expanded = false;
+
     int new_child_count;
     QList<LogVol *> temp_kids;
     long long fs_remaining;       // remaining space on fs -- if known
     int fs_percent;               // percentage of space remaining
 
-    item->setData(0, Qt::DisplayRole, lv->getName());
+    if(is_sc && !was_sc)
+        was_expanded = item->isExpanded();
+
+    if(!is_sc && was_sc){
+        for(int x = 0; x < old_child_count; x++){
+            if( lv_name == item->child(x)->data(0, Qt::DisplayRole).toString() )
+                was_expanded = item->child(x)->isExpanded();
+        }
+    }
+
+    item->setData(0, Qt::DisplayRole, lv_name);
     item->setData(1, Qt::DisplayRole, sizeToString(lv->getSize()));           
       
     if( lv->getFilesystemSize() > -1 &&  lv->getFilesystemUsed() > -1 ){
@@ -177,7 +177,7 @@ QTreeWidgetItem *VGTree::loadItem(LogVol *lv, QTreeWidgetItem *item)
 
     item->setData(10, Qt::DisplayRole, lv->getTags().join(",")); 
     item->setData(11, Qt::DisplayRole, lv->getMountPoints().join(","));
-    item->setData(0, Qt::UserRole, lv->getName());
+    item->setData(0, Qt::UserRole, lv_name);
 
     if( lv->getSegmentCount() == 1 ) {
         item->setData(1, Qt::UserRole, 0);            // 0 means segment 0 data present
@@ -191,18 +191,14 @@ QTreeWidgetItem *VGTree::loadItem(LogVol *lv, QTreeWidgetItem *item)
             item->setData(6, Qt::DisplayRole, sizeToString(lv->getSegmentStripeSize(0)) );
         }
 
-        insertChildItems(lv, item);
-        new_child_count = item->childCount();
-
-        if( lv->isSnapContainer() ){   // expand the item if it is a new snap container or snap count is different
-            if( old_type.isEmpty() || 
-                !old_type.contains("origin", Qt::CaseInsensitive) || 
-                old_child_count != new_child_count){
-                item->setExpanded(true);
+        if( !is_sc && old_type.contains("origin", Qt::CaseInsensitive) ){
+            for(int x = 0; x < old_child_count; x++){
+                if( item->child(x)->data(0, Qt::DisplayRole) == lv->getName() )
+                    item->setExpanded( item->child(x)->isExpanded() );
             }
         }
-        else if( (old_type != "mirror") && (lv->getType() == "mirror") )
-                item->setExpanded(true);
+
+        insertChildItems(lv, item);
     }
     else {
         item->setData(1, Qt::UserRole, -1);            // -1 means not segment data
@@ -212,6 +208,30 @@ QTreeWidgetItem *VGTree::loadItem(LogVol *lv, QTreeWidgetItem *item)
         insertSegmentItems(lv, item);
     }
     
+    new_child_count = item->childCount();
+
+    if( is_sc ){   // expand the item if it is a new snap container or snap count is different
+        if(m_init){
+            item->setExpanded(true);
+        }
+        else{
+            if( !was_sc || old_child_count != new_child_count){
+                item->setExpanded(true);
+                if( !was_sc ){
+                    for(int x = 0; x < new_child_count; x++){
+                        if( item->child(x)->data(0, Qt::DisplayRole) == lv_name )
+                            item->child(x)->setExpanded(was_expanded);
+                    }
+                }
+            }
+        }
+    }
+    else if( was_sc && !is_sc ){ // if it was formerly a snap container, set expanded to what the "real" lv was
+        if( indexOfTopLevelItem(item) >= 0 )
+            addTopLevelItem( takeTopLevelItem( indexOfTopLevelItem(item) ) ); // next line doesn't work without this!
+        item->setExpanded(was_expanded);
+    }
+
     for(int column = 1; column < item->columnCount() ; column++)
         item->setTextAlignment(column, Qt::AlignRight);
 
@@ -335,12 +355,14 @@ void VGTree::popupContextMenu(QPoint point)
 {
     QTreeWidgetItem *item;
     KMenu *context_menu;
+    LogVol *lv;
+    QString lv_name;
 
     item = itemAt(point);
     if(item){                                 //item = 0 if there is no item a that point
-	m_lv_name = QVariant(item->data(0, Qt::UserRole)).toString();
-	m_lv = m_vg->getLogVolByName(m_lv_name);
-	context_menu = new LVActionsMenu(m_lv, m_vg, this);
+	lv_name = QVariant(item->data(0, Qt::UserRole)).toString();
+	lv = m_vg->getLogVolByName(lv_name);
+	context_menu = new LVActionsMenu(lv, m_vg, this);
 	context_menu->exec(QCursor::pos());
     }
     else{
