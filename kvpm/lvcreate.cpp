@@ -416,16 +416,14 @@ QWidget* LVCreateDialog::createPhysicalTab()
 	int seg_stripe_size = 4;
         QList<LogVol *>  logvols;
 
-        if( m_lv->isMirror() ){
-            logvols = m_vg->getLogicalVolumes();
+        if( m_lv->isMirror() ){                        // Tries to match striping to last segment of first leg
+            logvols = m_lv->getAllChildrenFlat();
             for(int x = 0; x < logvols.size(); x++){
                 if(logvols[x]->isMirrorLeg() && !(logvols[x]->isMirrorLog()) ){
-                    if(logvols[x]->getOrigin() == m_lv->getName()){
-                        seg_count = logvols[x]->getSegmentCount();
-                        seg_stripe_count = logvols[x]->getSegmentStripes(seg_count - 1);
-                        seg_stripe_size = logvols[x]->getSegmentStripeSize(seg_count - 1);
-                        break;
-                    }
+                    seg_count = logvols[x]->getSegmentCount();
+                    seg_stripe_count = logvols[x]->getSegmentStripes(seg_count - 1);
+                    seg_stripe_size = logvols[x]->getSegmentStripeSize(seg_count - 1);
+                    break;
                 }
             }
         }
