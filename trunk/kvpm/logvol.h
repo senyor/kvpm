@@ -145,7 +145,6 @@ class LogVol
     int getLogCount();
     int getMirrorCount();
     int getSnapshotCount();
-    void setLogCount(int count);
     bool isActive();
     bool isFixed();
     bool isLocked();

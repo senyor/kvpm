@@ -280,20 +280,6 @@ void VolGroup::rescan(lvm_t lvm)
         m_member_pvs[z]->setLastUsedExtent(last_used_extent);
     }
 
-    LogVol *origin;
-
-    for(int x = 0; x < m_member_lvs.size(); x++){
-        if( m_member_lvs[x]->isMirrorLog() && !m_member_lvs[x]->isMirrorLeg() ){
-            origin = getLogVolByName( m_member_lvs[x]->getOrigin() ); 
-	    if(origin){
-	        if( m_member_lvs[x]->isMirror() )
-		    origin->setLogCount(2);
-		else
-		    origin->setLogCount(1);
-	    }
-	}
-    }
-
     return;
 }
 
@@ -322,7 +308,7 @@ const QList<PhysVol *> VolGroup::getPhysicalVolumes()
     return m_member_pvs;
 }
 
-LogVol* VolGroup::getLogVolByName(QString shortName)
+LogVol* VolGroup::getLogVolByName(QString shortName)  // Do not return snap container, just the "real" lv
 {
     QList<LogVol *> all_lvs = getLogicalVolumesFlat();
     const int lv_count = all_lvs.size();
