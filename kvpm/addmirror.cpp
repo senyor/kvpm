@@ -46,6 +46,9 @@ AddMirrorDialog::AddMirrorDialog(LogVol *logicalVolume, QWidget *parent):
     KDialog(parent), 
     m_lv(logicalVolume)
 {
+    QList<LogVol *> children;
+    QString lv_name = m_lv->getName();
+ 
     setWindowTitle( i18n("Add Mirror") );
 
     m_tab_widget = new KTabWidget();
@@ -70,7 +73,6 @@ AddMirrorDialog::AddMirrorDialog(LogVol *logicalVolume, QWidget *parent):
 
     connect(m_add_mirrors_spin, SIGNAL(valueChanged(int)),
 	    this, SLOT(comparePvsNeededPvsAvailable()));
-
 }
 
 void AddMirrorDialog::setupGeneralTab()
@@ -255,24 +257,20 @@ void AddMirrorDialog::setupPhysicalTab()
 
 QStringList AddMirrorDialog::getPvsInUse()
 {
-    QList<LogVol *>  mirror_legs = (m_lv->getVolumeGroup())->getLogicalVolumes();
+    QList<LogVol *>  mirror_legs = m_lv->getAllChildrenFlat();
     QStringList pvs_in_use;
     
     if( m_lv->isMirror() ){
 	for(int x = mirror_legs.size() - 1; x >= 0; x--){
 
-	    if(  mirror_legs[x]->getOrigin() != m_lv->getName() || 
-                 (!mirror_legs[x]->isMirrorLeg() && !mirror_legs[x]->isMirrorLog()) )
-	    {
+	    if( (!mirror_legs[x]->isMirrorLeg() && !mirror_legs[x]->isMirrorLog()) )
 		mirror_legs.removeAt(x);
-	    }
 	    else
 		pvs_in_use << mirror_legs[x]->getDevicePathAll();
 	}
     }
     else{
 	pvs_in_use << m_lv->getDevicePathAll();
-	mirror_legs.clear();
     }
 
     return pvs_in_use;

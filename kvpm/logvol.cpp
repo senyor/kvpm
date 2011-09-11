@@ -144,8 +144,6 @@ void LogVol::rescan(lv_t lvmLV, QList<lv_t> lvmAllChildren)  // lv_t seems to ch
         m_seg_total = value.value.integer;
     }
 
-    m_log_count = 0;
-
     value = lvm_lv_get_property(m_lvm_lv, "lv_name");
     m_lv_name   = QString(value.value.string).trimmed();
     m_vg_name   = m_vg->getName();
@@ -467,6 +465,13 @@ void LogVol::rescan(lv_t lvmLV, QList<lv_t> lvmAllChildren)  // lv_t seems to ch
 
     for(int x = 0; x < immediate_children.size(); x++)
         m_lv_children.append( new LogVol( immediate_children[x], m_vg, this, remaining_children) ); 
+
+    m_log_count = 0;
+    QList<LogVol *> all_lvs_flat = getAllChildrenFlat();
+    for(int x = all_lvs_flat.size() - 1; x >= 0; x--){
+        if( all_lvs_flat[x]->isMirrorLog() && !all_lvs_flat[x]->isMirror() )
+            m_log_count++;
+    }
 }
 
 Segment* LogVol::processSegments(lvseg_t lvm_lvseg)
@@ -699,12 +704,6 @@ int LogVol::getMirrorCount()
 int LogVol::getSnapshotCount()
 {
     return getSnapshots().size(); 
-}
-
-void LogVol::setLogCount(int logCount)
-{
-    m_log_count = logCount;
-    return;
 }
 
 bool LogVol::isMerging()
