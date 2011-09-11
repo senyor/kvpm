@@ -12,6 +12,9 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
+
+#include "pvproperties.h"
+
 #include <KSeparator>
 #include <KLocale>
 #include <QtGui>
@@ -19,7 +22,6 @@
 #include "masterlist.h"
 #include "misc.h"
 #include "physvol.h"
-#include "pvproperties.h"
 #include "logvol.h"
 #include "volgroup.h"
 
@@ -35,7 +37,7 @@ PVProperties::PVProperties(PhysVol *physicalVolume, QWidget *parent):QWidget(par
     long long first_extent;
     long long last_extent;
     
-    QList<LogVol *>  lvs = vg->getLogicalVolumes();
+    QList<LogVol *>  lvs = vg->getLogicalVolumesFlat();
     QList<PhysVol *> pvs = vg->getPhysicalVolumes();
     QList<long long> starting_extent;
     QStringList pv_name_list;
