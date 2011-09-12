@@ -17,6 +17,7 @@
 #include <QtGui>
 
 #include "logvol.h"
+#include "misc.h"
 #include "physvol.h"
 
 VolGroup::VolGroup(lvm_t lvm, const char *vgname)
@@ -178,6 +179,8 @@ void VolGroup::rescan(lvm_t lvm)
                 }
 	    }
 
+            findOrphans(lvm_lvs_all_top, lvm_lvs_all_children);
+
 	    for(int y = 0; y < lvm_lvs_all_top.size(); y++ ){ // rescan() existing LogVols 
 	        existing_lv = false;
                 lvm_lv_children.clear();
@@ -281,6 +284,40 @@ void VolGroup::rescan(lvm_t lvm)
     }
 
     return;
+}
+
+
+/* Takes orphan volumes off the child lv list and puts them back onto
+   the top level lv list. An orphan is a volume that should be hidden
+   under another, like a mirror leg, but doesn't seem to have a parent  */
+ 
+void VolGroup::findOrphans(QList<lv_t> &topList, QList<lv_t> &childList)
+{
+    QString top_name;
+    QString child_name;
+    bool orphan;
+    lvm_property_value value;
+
+    for(int m = childList.size() - 1; m >= 0; m--){
+        orphan = true;
+
+        for(int n = topList.size() - 1; n >= 0; n--){
+            
+            value = lvm_lv_get_property(topList[n], "lv_name");
+            top_name = QString(value.value.string).trimmed();
+            
+            value = lvm_lv_get_property(childList[m], "lv_name");
+            child_name = QString(value.value.string).trimmed();
+            
+            if( top_name == parseMirrorOrigin(child_name) ){
+                orphan = false;
+                break;
+            }
+        }
+        
+        if(orphan)
+            topList.append(childList[m]);
+    }
 }
 
 const QList<LogVol *>  VolGroup::getLogicalVolumes()
