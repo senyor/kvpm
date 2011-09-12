@@ -92,10 +92,8 @@ void LVSizeChart::populateChart()
             else
                 seg_ratio = m_lv->getExtents() / (double) total_extents;
 
-	    if( m_lv->isUnderConversion() )
-	        seg_ratio *= ( m_lv->getSegmentStripes(0) + 1);
-	    else if( m_lv->isMirror() )
-	        seg_ratio *= m_lv->getSegmentStripes(0); // number of mirror legs
+	   if( m_lv->isMirror() )
+	        seg_ratio *= m_lv->getMirrorCount();
 
 	    m_ratios.append(seg_ratio);
 	    widget = new LVChartSeg(m_vg, m_lv, usage, this);
