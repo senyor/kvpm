@@ -13,13 +13,13 @@
  */
 
 
+#include "devicetreeview.h"
+
 #include <QtGui>
 #include <KLocale>
 
 #include "deviceactionsmenu.h"
-#include "devicetreeview.h"
 
-extern MasterList *master_list;
 
 DeviceTreeView::DeviceTreeView(QWidget *parent) : QTreeView(parent)
 {

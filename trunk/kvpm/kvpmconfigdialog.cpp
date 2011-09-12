@@ -13,6 +13,8 @@
  */
 
 
+#include "kvpmconfigdialog.h"
+
 #include <KConfigSkeleton>
 #include <KIconLoader>
 #include <KLocale>
@@ -26,7 +28,6 @@
 #include <QListWidgetItem>
 #include <QTableWidget>
 
-#include "kvpmconfigdialog.h"
 #include "executablefinder.h"
 
 

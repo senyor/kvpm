@@ -22,11 +22,11 @@
 #include "volgroup.h"
 #include "processprogress.h"
 
-extern MasterList *master_list;
+extern MasterList *g_master_list;
 
 bool merge_vg(VolGroup *volumeGroup)
 {
-    QStringList vg_names = master_list->getVolumeGroupNames();
+    QStringList vg_names = g_master_list->getVolumeGroupNames();
     QStringList lv_names = volumeGroup->getLogVolNames();
 
     if( vg_names.size() < 2  ){
@@ -69,7 +69,7 @@ VGMergeDialog::VGMergeDialog(VolGroup *volumeGroup, QWidget *parent) : KDialog(p
     layout->addWidget(target_group);
     m_target_combo = new KComboBox();
 
-    QStringList vg_names = master_list->getVolumeGroupNames();
+    QStringList vg_names = g_master_list->getVolumeGroupNames();
     for(int x = 0; x < vg_names.size(); x++){  // remove this groups own name from list
         if( m_vg->getName() != vg_names[x] )
             m_target_combo->addItem( vg_names[x] );

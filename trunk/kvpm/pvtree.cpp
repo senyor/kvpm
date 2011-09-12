@@ -30,7 +30,6 @@
 #include "vgreduceone.h"
 #include "volgroup.h"
 
-extern MasterList *master_list;
 
 /* This is the physical volume tree list on the volume group tab */
 

@@ -29,11 +29,11 @@
 #include "storagepartition.h"
 
 
-extern MasterList *master_list;
+extern MasterList *g_master_list;
 
 bool create_vg()
 {
-    QList<StorageDevice *> storage_devices = master_list->getStorageDevices();   
+    QList<StorageDevice *> storage_devices = g_master_list->getStorageDevices();   
     QList<StorageDevice *> usable_devices;
     QList<StoragePartition *> storage_partitions;
     QList<StoragePartition *> usable_partitions;
@@ -262,7 +262,7 @@ void VGCreateDialog::limitExtentSize(int index){
 
 void VGCreateDialog::commitChanges()
 {
-    lvm_t lvm = master_list->getLVM();
+    lvm_t lvm = g_master_list->getLVM();
     vg_t vg_dm;
     uint32_t new_extent_size = m_extent_size->currentText().toULong();
     QStringList pv_names = m_pv_checkbox->getNames();

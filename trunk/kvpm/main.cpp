@@ -31,7 +31,7 @@ class MasterList;
 
 
 TopWindow *MainWindow;
-MasterList *master_list;
+MasterList *g_master_list;
 ExecutableFinder *g_executable_finder;
 
 

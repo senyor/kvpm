@@ -29,16 +29,16 @@
 #include "vgcreate.h"
 #include "volgroup.h"
 
-extern MasterList *master_list;
+extern MasterList *g_master_list;
 
 bool extend_vg(QString volumeGroupName, StorageDevice *device, StoragePartition *partition)
 {
     QString message, error_message;
     QString name;
     long long size;
-    lvm_t  lvm = master_list->getLVM();
+    lvm_t  lvm = g_master_list->getLVM();
     vg_t vg_dm;
-    VolGroup *vg =  master_list->getVolGroupByName(volumeGroupName);
+    VolGroup *vg =  g_master_list->getVolGroupByName(volumeGroupName);
     long long extent_size = vg->getExtentSize();
 
     if(device){
@@ -84,7 +84,7 @@ bool extend_vg(QString volumeGroupName, StorageDevice *device, StoragePartition 
 
 bool extend_vg(VolGroup *volumeGroup)
 {
-    QList<StorageDevice *> all_devices = master_list->getStorageDevices();   
+    QList<StorageDevice *> all_devices = g_master_list->getStorageDevices();   
     QList<StorageDevice *> usable_devices;
     QStringList device_names;
     QList<StoragePartition *> all_partitions;
@@ -163,7 +163,7 @@ VGExtendDialog::VGExtendDialog(VolGroup *volumeGroup, QList<StorageDevice *> dev
 
 void VGExtendDialog::commitChanges()
 {
-    lvm_t  lvm = master_list->getLVM();
+    lvm_t  lvm = g_master_list->getLVM();
     vg_t vg_dm;
     QStringList pv_names = m_pv_checkbox->getNames();
 
