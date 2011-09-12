@@ -12,11 +12,11 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
+#include "misc.h"
+
 #include <KPushButton>
 
 #include <QtGui>
-
-#include "misc.h"
 
 
 NoMungeCheck::NoMungeCheck(const QString text, QWidget *parent) : QCheckBox(text, parent)
@@ -115,4 +115,26 @@ QString sizeToString(long long bytes)
     return QString("%1 TiB").arg(size, 0, 'g', 3);
 }
 
+QString parseMirrorOrigin(QString volumeName){
 
+    QString origin = volumeName;
+    int index = origin.lastIndexOf("_mimage_");
+
+    if( index > 0 )
+        origin.truncate(index);
+
+    index = origin.lastIndexOf("_mimagetmp_");
+
+    if( index > 0 )
+        origin.truncate(index);
+
+    if( origin.endsWith("_mlog") ){
+        index = origin.lastIndexOf("_mlog");
+        origin.truncate(index);
+    }
+
+    if(volumeName == origin)
+        origin = "";
+
+    return origin;
+}

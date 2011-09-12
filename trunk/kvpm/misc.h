@@ -21,6 +21,7 @@
 #include <QVariant>
 
 QString sizeToString(long long bytes);
+QString parseMirrorOrigin(QString volumeName);
 
 class NoMungeCheck : public QCheckBox
 {

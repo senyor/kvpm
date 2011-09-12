@@ -19,6 +19,7 @@
 
 #include "fsdata.h"
 #include "fsprobe.h"
+#include "misc.h"
 #include "mountentry.h"
 #include "mountinfo.h"
 #include "mountinfolist.h"
@@ -341,27 +342,16 @@ void LogVol::rescan(lv_t lvmLV, QList<lv_t> lvmAllChildren)  // lv_t seems to ch
         else 
             m_snap_percent = 0;
     }
-    else if(m_mirror_leg && !m_mirror_log){
-        m_origin = m_lv_name;
-        m_origin.truncate( m_origin.indexOf("_mimage_") );
-    }
-    else if(m_mirror_log && !m_mirror_leg){
-        m_origin = m_lv_name;
-        m_origin.truncate( m_origin.indexOf("_mlog") );
-    }
-    else if(m_mirror_log && m_mirror_leg){
-        m_origin = m_lv_name;
-        m_origin.truncate( m_origin.indexOf("_mimage_") );
-        m_type = m_type.replace("leg","log");
-    }
-    else if( m_mirror || m_virtual ){
-	if( m_lv_name.contains("_mimagetmp_") ){
-            m_origin = m_lv_name;
-	    m_origin.remove(0,1);
-	    m_origin.truncate( m_origin.indexOf("_mimagetmp_") );
-	}
-	else
-	    m_origin = "";
+    else if( (m_mirror_leg || m_mirror_log) ){
+        m_origin = parseMirrorOrigin(m_lv_name);
+
+        if(m_mirror_log && m_mirror_leg){
+            m_type = m_type.replace("leg","log");
+        }
+        else if( m_mirror || m_virtual ){
+            m_origin = parseMirrorOrigin(m_lv_name);
+            m_mirror_leg = true;
+        }
     }
     else
         m_origin = "";

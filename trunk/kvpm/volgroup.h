@@ -12,6 +12,7 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
+
 #ifndef VOLGROUP_H
 #define VOLGROUP_H
 
@@ -47,6 +48,8 @@ class VolGroup
     bool m_clustered;
     bool m_exported;
     bool m_partial;        // some physical volumes may be missing
+
+    void findOrphans(QList<lv_t> &topList, QList<lv_t> &childList);
 
 public:
     VolGroup(lvm_t lvm, const char *vgname);
