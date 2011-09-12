@@ -349,7 +349,6 @@ void LogVol::rescan(lv_t lvmLV, QList<lv_t> lvmAllChildren)  // lv_t seems to ch
             m_type = m_type.replace("leg","log");
         }
         else if( m_mirror || m_virtual ){
-            m_origin = parseMirrorOrigin(m_lv_name);
             m_mirror_leg = true;
         }
     }
