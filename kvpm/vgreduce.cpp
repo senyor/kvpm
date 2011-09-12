@@ -26,7 +26,7 @@
 #include "pvcheckbox.h"
 #include "volgroup.h"
 
-extern MasterList *master_list;
+extern MasterList *g_master_list;
 
 bool reduce_vg(VolGroup *volumeGroup)
 {
@@ -89,7 +89,7 @@ void VGReduceDialog::commitChanges()
 {
     QStringList pvs;
     vg_t vg_dm = NULL;
-    lvm_t lvm = master_list->getLVM();
+    lvm_t lvm = g_master_list->getLVM();
 
     QStringList pv_list; // pvs to remove by name
     pv_list << m_pv_checkbox->getNames();

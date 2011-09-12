@@ -24,7 +24,7 @@
 #include "processprogress.h"
 #include "volgroup.h"
 
-extern MasterList *master_list;
+extern MasterList *g_master_list;
 
 bool split_vg(VolGroup *volumeGroup)
 {
@@ -232,7 +232,7 @@ QStringList VGSplitDialog::arguments()
 
 void VGSplitDialog::deactivate()
 {
-    lvm_t lvm = master_list->getLVM();
+    lvm_t lvm = g_master_list->getLVM();
     vg_t vg_dm;
     dm_list *lv_dm_list;
     lvm_lv_list *lv_list;

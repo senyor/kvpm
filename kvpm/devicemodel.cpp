@@ -1,3 +1,5 @@
+
+
 /*
  *
  * 
@@ -13,15 +15,15 @@
  */
 
 
-#include <QtGui>
 #include "devicemodel.h"
+
+#include <QtGui>
+
+#include "misc.h"
 #include "physvol.h"
-#include "volgroup.h"
 #include "storagedevice.h"
 #include "storagepartition.h"
-
-
-extern QString sizeToString(long long bytes);
+#include "volgroup.h"
 
 
 StorageDeviceItem::StorageDeviceItem(const QList<QVariant> &data, 

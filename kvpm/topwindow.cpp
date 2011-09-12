@@ -43,7 +43,7 @@
 #include "volgroup.h"
 #include "volumegrouptab.h"
 
-extern MasterList *master_list;
+extern MasterList *g_master_list;
 
 
 TopWindow::TopWindow(QWidget *parent):KMainWindow(parent)
@@ -117,7 +117,7 @@ TopWindow::TopWindow(QWidget *parent):KMainWindow(parent)
 
     settings_menu->addAction(config_kvpm_action);
     
-    master_list = NULL;
+    g_master_list = NULL;
     m_tab_widget = NULL;
 
     connect(change_vg_action,  SIGNAL(triggered()), 
@@ -171,7 +171,7 @@ TopWindow::TopWindow(QWidget *parent):KMainWindow(parent)
     m_device_tab = new DeviceTab();
     m_tab_widget->appendDeviceTab(m_device_tab, i18n("Storage devices") );
 
-    master_list = new MasterList(); // creates *empty* masterlist
+    g_master_list = new MasterList(); // creates *empty* masterlist
 
     connect(qApp, SIGNAL(aboutToQuit()), 
 	    this, SLOT(cleanUp()));
@@ -187,14 +187,14 @@ void TopWindow::reRun()
     QList<VolGroup *> groups;
     bool vg_exists;
 
-    master_list->rescan(); // loads the list with data
+    g_master_list->rescan(); // loads the list with data
 
     disconnect(m_tab_widget, SIGNAL(currentIndexChanged()), 
 	    this, SLOT(setupMenus()));
 
-    m_device_tab->rescan( master_list->getStorageDevices() );
+    m_device_tab->rescan( g_master_list->getStorageDevices() );
 
-    groups = master_list->getVolGroups();
+    groups = g_master_list->getVolGroups();
     // if there is a tab for a deleted vg then delete the tab
 
     for(int x = 1; x < m_tab_widget->getCount(); x++){
@@ -238,7 +238,7 @@ void TopWindow::setupMenus()
     QList<LogVol *> lvs;
 
     if(index){
-        m_vg = master_list->getVolGroupByName( m_tab_widget->getUnmungedText(index) );
+        m_vg = g_master_list->getVolGroupByName( m_tab_widget->getUnmungedText(index) );
         if( m_vg != NULL ){
             lvs = m_vg->getLogicalVolumes();
             for( int x = lvs.size() - 1; x >= 0 ;x-- ){
@@ -399,7 +399,7 @@ void TopWindow::configKvpm()
 
 void TopWindow::cleanUp()
 {
-    delete master_list;  // This calls lvm_quit() on destruct
+    delete g_master_list;  // This calls lvm_quit() on destruct
 }
 
 void TopWindow::closeEvent(QCloseEvent *)

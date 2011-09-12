@@ -24,7 +24,6 @@
 #include "topwindow.h"
 #include "volgroup.h"
 
-extern MasterList *master_list;
 
 
 VGTree::VGTree(VolGroup *VolumeGroup) : QTreeWidget(), m_vg(VolumeGroup)

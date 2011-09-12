@@ -28,8 +28,6 @@
 #include "misc.h"
 #include "volgroup.h"
 
-extern MasterList *master_list;
-
 
 bool move_pv(PhysVol *physicalVolume)
 {

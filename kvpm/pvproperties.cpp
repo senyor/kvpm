@@ -25,7 +25,6 @@
 #include "logvol.h"
 #include "volgroup.h"
 
-extern MasterList *master_list;
 
 PVProperties::PVProperties(PhysVol *physicalVolume, QWidget *parent):QWidget(parent)
 {

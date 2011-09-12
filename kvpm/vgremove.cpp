@@ -24,12 +24,12 @@
 #include "masterlist.h"
 #include "volgroup.h"
 
-extern MasterList *master_list;
+extern MasterList *g_master_list;
 
 bool remove_vg(VolGroup *volumeGroup)
 {
     QString message;
-    lvm_t  lvm = master_list->getLVM();
+    lvm_t  lvm = g_master_list->getLVM();
     vg_t vg_dm = NULL;
     KProgressDialog *progress_dialog;
     bool success = true;
