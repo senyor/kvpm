@@ -59,6 +59,7 @@ Q_OBJECT
     QCheckBox *m_dir_index_check; 
     QCheckBox *m_filetype_check; 
     QCheckBox *m_sparse_super_check; 
+    QCheckBox *m_clobber_fs_check;
 
     QCheckBox *m_flex_bg_check;  
     QCheckBox *m_huge_file_check;
@@ -74,7 +75,8 @@ Q_OBJECT
     QWidget *generalTab();
     QWidget *advancedTab();
 
- public slots:
+ private slots:
+    void clobberFS();
     void setAdvancedTab(bool);
 
  public:

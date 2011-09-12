@@ -38,8 +38,6 @@ bool make_fs(LogVol *logicalVolume)
                                  "can be written on it", logicalVolume->getFullName() );
 
     QByteArray zero_array(128 * 1024, '\0');
-    QString path = logicalVolume->getMapperPath();
-    QFile *device;
 
     if( logicalVolume->isMounted() ){
         KMessageBox::error(0, error_message);
@@ -51,15 +49,6 @@ bool make_fs(LogVol *logicalVolume)
             MkfsDialog dialog(logicalVolume);
             dialog.exec();
             if(dialog.result() == QDialog::Accepted){
-
-                device = new QFile(path);
-
-                if( device->open(QIODevice::ReadWrite) ){ // nuke the old filesystem with zeros
-                    device->write(zero_array);
-                    device->flush();
-                    device->close();
-                }
-
                 ProcessProgress mkfs(dialog.arguments(), i18n("Writing filesystem..."), true);
                 return true;
             }
@@ -80,10 +69,6 @@ bool make_fs(StoragePartition *partition)
                                  "be unmounted before a new filesystem " 
                                  "can be written on it", partition->getName() );
 
-    QByteArray zero_array(128 * 1024, '\0');
-    QString path = partition->getName();
-    QFile *device;
-
     if( partition->isMounted() ){
         KMessageBox::error(0, error_message);
         return false;
@@ -94,15 +79,7 @@ bool make_fs(StoragePartition *partition)
             MkfsDialog dialog(partition);
             dialog.exec();
             if(dialog.result() == QDialog::Accepted){
-
-                device = new QFile(path);
-
-                if( device->open(QIODevice::ReadWrite) ){ // nuke the old filesystem with zeros
-                    device->write(zero_array);
-                    device->flush();
-                    device->close();
-                }
-
+                qDebug() << "mkn fs ...";
                 ProcessProgress mkfs(dialog.arguments(), i18n("Writing filesystem..."), true);
                 return true;
             }
@@ -135,6 +112,9 @@ MkfsDialog::MkfsDialog(LogVol *logicalVolume, QWidget *parent) : KDialog(parent)
     setCaption( i18n("Write filesystem") );
 
     setAdvancedTab(true);
+
+    connect(this, SIGNAL(okClicked()), 
+            this, SLOT(clobberFS()));
 }
 
 MkfsDialog::MkfsDialog(StoragePartition *partition, QWidget *parent) : KDialog(parent)
@@ -160,6 +140,9 @@ MkfsDialog::MkfsDialog(StoragePartition *partition, QWidget *parent) : KDialog(p
     setCaption( i18n("Write filesystem") );
 
     setAdvancedTab(true);
+
+    connect(this, SIGNAL(okClicked()), 
+            this, SLOT(clobberFS()));
 }
 
 QWidget* MkfsDialog::generalTab()
@@ -183,6 +166,8 @@ QWidget* MkfsDialog::generalTab()
     xfs     = new QRadioButton("xfs", this);
     swap    = new QRadioButton( i18n("Linux swap"), this);
     vfat    = new QRadioButton("ms-dos", this);
+    m_clobber_fs_check = new QCheckBox("Remove old filesystem first", this);
+    m_clobber_fs_check->setChecked(true);
     radio_layout->addWidget(ext2, 1, 0);
     radio_layout->addWidget(ext3, 2, 0);
     radio_layout->addWidget(ext4, 3, 0);
@@ -194,6 +179,8 @@ QWidget* MkfsDialog::generalTab()
     radio_layout->addWidget(jfs, 1, 2);
     radio_layout->addWidget(xfs, 2, 2);
     radio_layout->addWidget(vfat, 3, 2);
+    radio_layout->setRowStretch(5, 1);
+    radio_layout->addWidget(m_clobber_fs_check, 6, 0, 1, -1, Qt::AlignLeft);
     ext4->setChecked(true);
     layout->addStretch();
 
@@ -405,6 +392,21 @@ void MkfsDialog::setAdvancedTab(bool)
     else{
         m_resize_inode_check->setEnabled(false);
         m_resize_inode_check->setChecked(false);
+    }
+}
+
+void MkfsDialog::clobberFS()
+{
+    QFile *device;
+    QByteArray zero_array(128 * 1024, '\0');
+
+    if(m_clobber_fs_check->isChecked()){
+        device = new QFile(m_path);
+        if( device->open(QIODevice::ReadWrite) ){ // nuke the old filesystem with zeros
+            device->write(zero_array);
+            device->flush();
+            device->close();
+        }
     }
 }
 
