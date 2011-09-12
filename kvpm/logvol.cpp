@@ -173,6 +173,7 @@ void LogVol::rescan(lv_t lvmLV, QList<lv_t> lvmAllChildren)  // lv_t seems to ch
     switch( flags[0] ){
     case 'c':
 	m_type = "under conversion";
+	m_mirror = true;
 	m_under_conversion = true;
 	break;
     case 'I':
@@ -427,19 +428,6 @@ void LogVol::rescan(lv_t lvmLV, QList<lv_t> lvmAllChildren)  // lv_t seems to ch
 	}
     }
 
-    m_mirror_count = 0;
-    QStringList pvs = getDevicePathAll();
-
-    for(int x =0; x < pvs.size(); x++){
-        if( pvs[x].contains("_mimage_") ){
-            m_mirror = true;
-            if( !m_snap_container )
-                m_type = "mirror";
-            if( !pvs[x].contains("_mlog_") )
-                m_mirror_count++;
-        }
-    }
-
     if( m_snap_container )
         m_type = "origin";
     else if( m_under_conversion )
@@ -455,11 +443,26 @@ void LogVol::rescan(lv_t lvmLV, QList<lv_t> lvmAllChildren)  // lv_t seems to ch
     for(int x = 0; x < immediate_children.size(); x++)
         m_lv_children.append( new LogVol( immediate_children[x], m_vg, this, remaining_children) ); 
 
+    countLegsAndLogs();
+}
+
+void LogVol::countLegsAndLogs()
+{
+    m_mirror_count = 0;
     m_log_count = 0;
     QList<LogVol *> all_lvs_flat = getAllChildrenFlat();
-    for(int x = all_lvs_flat.size() - 1; x >= 0; x--){
-        if( all_lvs_flat[x]->isMirrorLog() && !all_lvs_flat[x]->isMirror() )
-            m_log_count++;
+    LogVol *lv;
+
+    if(m_mirror){
+        for(int x = all_lvs_flat.size() - 1; x >= 0; x--){
+            lv = all_lvs_flat[x];
+
+            if( lv->isMirrorLeg() && !lv->isMirror() && !lv->isMirrorLog() )
+                m_mirror_count++;
+
+            if( lv->isMirrorLog() && !lv->isMirror() )
+                m_log_count++;
+        }
     }
 }
 
@@ -553,7 +556,7 @@ int LogVol::getSegmentCount()
     return m_seg_total;
 }
 
-int LogVol::getSegmentStripes(int segment)  // number of mirrors if this is a mirror
+int LogVol::getSegmentStripes(int segment)
 {
     return m_segments[segment]->m_stripes;
 }

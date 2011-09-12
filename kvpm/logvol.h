@@ -100,6 +100,7 @@ class LogVol
     QList<lv_t> takeLVMChildren(QList<lv_t> &lvmAllChildren); 
     QList<lv_t> takeLVMSnapshots(QList<lv_t> &lvmAllChildren);
     LogVol *getParent();
+    void countLegsAndLogs();
 
  public:
     LogVol(lv_t lvmLV, VolGroup *vg, LogVol *lvParent, QList<lv_t> lvmAllChildren );
