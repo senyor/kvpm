@@ -13,6 +13,8 @@
  */
 
 
+#include "pvtree.h"
+
 #include <KLocale>
 #include <QtGui>
 
@@ -20,7 +22,6 @@
 #include "masterlist.h"
 #include "misc.h"
 #include "processprogress.h"
-#include "pvtree.h"
 #include "pvmove.h"
 #include "pvchange.h"
 #include "physvol.h"
@@ -67,7 +68,7 @@ PVTree::PVTree(VolGroup *volumeGroup, QWidget *parent) : QTreeWidget(parent), m_
 void PVTree::loadData()
 {
     QList<QTreeWidgetItem *> pv_tree_items;
-    QList<LogVol *>  lvs = m_vg->getLogicalVolumes();
+    QList<LogVol *>  lvs = m_vg->getLogicalVolumesFlat();
     QList<PhysVol *> pvs = m_vg->getPhysicalVolumes();
 
     QStringList lv_name_list;
