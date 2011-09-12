@@ -151,6 +151,10 @@ void VolGroup::rescan(lvm_t lvm)
 	
 	    dm_list_iterate_items(lv_list, lv_dm_list){ 
 
+                value = lvm_lv_get_property(lv_list->lv, "lv_name");
+                if( QString(value.value.string).trimmed().startsWith("snapshot") )
+                    continue;
+
                 value = lvm_lv_get_property(lv_list->lv, "lv_attr");
                 flags = value.value.string;
 
@@ -295,28 +299,36 @@ void VolGroup::findOrphans(QList<lv_t> &topList, QList<lv_t> &childList)
 {
     QString top_name;
     QString child_name;
+    QString origin;
     bool orphan;
     lvm_property_value value;
 
     for(int m = childList.size() - 1; m >= 0; m--){
-        orphan = true;
+
+        value = lvm_lv_get_property(childList[m], "lv_name");
+        child_name = QString(value.value.string).trimmed();
+        origin = parseMirrorOrigin(child_name);
+
+        if(origin.isEmpty()){
+            orphan = false;
+            continue;
+        }
+        else
+            orphan = true;
 
         for(int n = topList.size() - 1; n >= 0; n--){
             
             value = lvm_lv_get_property(topList[n], "lv_name");
             top_name = QString(value.value.string).trimmed();
             
-            value = lvm_lv_get_property(childList[m], "lv_name");
-            child_name = QString(value.value.string).trimmed();
-            
-            if( top_name == parseMirrorOrigin(child_name) ){
+            if( top_name == origin ){
                 orphan = false;
                 break;
             }
         }
         
         if(orphan)
-            topList.append(childList[m]);
+            topList.append(childList.takeAt(m));
     }
 }
 
