@@ -123,6 +123,19 @@ void LogVol::rescan(lv_t lvmLV, QList<lv_t> lvmAllChildren)  // lv_t seems to ch
     QList<lv_t> immediate_children; // just the children one step below this lv and snapshots
     QList<lv_t> remaining_children; // The children of children and so on.
 
+    m_under_conversion = false;
+    m_merging    = false;
+    m_mirror     = false;
+    m_mirror_leg = false;
+    m_mirror_log = false;
+    m_snap       = false;
+    m_pvmove     = false;
+    m_valid      = true;
+    m_virtual    = false;
+    m_orphan     = false;
+
+    processSegments();  // sets m_mirror according to segment property "regionsize" -- total hack!
+
     remaining_children = lvmAllChildren;
     immediate_children = takeLVMSnapshots(remaining_children);
 
@@ -158,17 +171,6 @@ void LogVol::rescan(lv_t lvmLV, QList<lv_t> lvmAllChildren)  // lv_t seems to ch
 
     value = lvm_lv_get_property(m_lvm_lv, "lv_attr");
     flags.append(value.value.string);
-
-    m_under_conversion = false;
-    m_merging    = false;
-    m_mirror     = false;
-    m_mirror_leg = false;
-    m_mirror_log = false;
-    m_snap       = false;
-    m_pvmove     = false;
-    m_valid      = true;
-    m_virtual    = false;
-    m_orphan     = false;
 
     switch( flags[0] ){
     case 'c':
@@ -376,8 +378,14 @@ void LogVol::rescan(lv_t lvmLV, QList<lv_t> lvmAllChildren)  // lv_t seems to ch
 	m_persistant = false;
     */
 
-    value = lvm_lv_get_property(m_lvm_lv, "lv_uuid");
-    m_uuid  = value.value.string;
+    if( m_snap_container ){
+        if( m_uuid.isEmpty() )
+            m_uuid = QUuid::createUuid().toString();
+    }
+    else{
+        value = lvm_lv_get_property(m_lvm_lv, "lv_uuid");
+        m_uuid  = value.value.string;
+    }
 
     value = lvm_lv_get_property(m_lvm_lv, "lv_tags");
     QString tag = value.value.string;
@@ -413,19 +421,6 @@ void LogVol::rescan(lv_t lvmLV, QList<lv_t> lvmAllChildren)  // lv_t seems to ch
         m_block_size = -1;
         m_fs_size = -1;
         m_fs_used = -1;
-    }
-
-    for(int x = 0; x < m_segments.size(); x++)
-        delete m_segments[x];
-    m_segments.clear();
-
-    dm_list* lvseg_dm_list = lvm_lv_list_lvsegs(m_lvm_lv);  
-    lvm_lvseg_list *lvseg_list;
-
-    if(lvseg_dm_list){
-        dm_list_iterate_items(lvseg_list, lvseg_dm_list){ 
-	    m_segments.append(processSegments(lvseg_list->lvseg));
-	}
     }
 
     if( m_snap_container )
@@ -466,40 +461,59 @@ void LogVol::countLegsAndLogs()
     }
 }
 
-Segment* LogVol::processSegments(lvseg_t lvm_lvseg)
+void LogVol::processSegments()
 {
-    Segment *segment = new Segment();
+    Segment *segment;
     QStringList devices_and_starts, temp;
     QString raw_paths;
     lvm_property_value value;
+    dm_list* lvseg_dm_list = lvm_lv_list_lvsegs(m_lvm_lv);  
+    lvm_lvseg_list *lvseg_list;
+    lvseg_t lvm_lvseg;
 
-    value = lvm_lvseg_get_property(lvm_lvseg, "stripes");
-    segment->m_stripes = value.value.integer; 
+    for(int x = 0; x < m_segments.size(); x++)
+        delete m_segments.takeAt(x);
 
-    value = lvm_lvseg_get_property(lvm_lvseg, "stripesize");
-    segment->m_stripe_size = value.value.integer;
+    if(lvseg_dm_list){
+        dm_list_iterate_items(lvseg_list, lvseg_dm_list){ 
 
-    value = lvm_lvseg_get_property(lvm_lvseg, "seg_size");
-    segment->m_size = value.value.integer;
+            lvm_lvseg = lvseg_list->lvseg;
+            value = lvm_lvseg_get_property(lvm_lvseg, "regionsize");
+            if( value.is_valid ){
+                if( value.value.integer )
+                    m_mirror = true;
+            }
 
-    value = lvm_lvseg_get_property(lvm_lvseg, "devices");
-    if( value.is_valid )
-        raw_paths = value.value.string;
+            segment = new Segment();
 
-    if( raw_paths.isEmpty() && m_virtual )
-        m_orphan = true;
+            value = lvm_lvseg_get_property(lvm_lvseg, "stripes");
+            segment->m_stripes = value.value.integer; 
 
-    if( raw_paths.size() ){
-	devices_and_starts = raw_paths.split(',');
+            value = lvm_lvseg_get_property(lvm_lvseg, "stripesize");
+            segment->m_stripe_size = value.value.integer;
 
-	for(int x = 0; x < devices_and_starts.size(); x++){
-	    temp = devices_and_starts[x].split('(');
-	    segment->m_device_path.append( temp[0] );
-	    segment->m_starting_extent.append( ( temp[1].remove(')') ).toLongLong() );
+            value = lvm_lvseg_get_property(lvm_lvseg, "seg_size");
+            segment->m_size = value.value.integer;
+
+            value = lvm_lvseg_get_property(lvm_lvseg, "devices");
+            if( value.is_valid )
+                raw_paths = value.value.string;
+
+            if( raw_paths.isEmpty() && m_virtual )
+                m_orphan = true;
+
+            if( raw_paths.size() ){
+                devices_and_starts = raw_paths.split(',');
+
+                for(int x = 0; x < devices_and_starts.size(); x++){
+                    temp = devices_and_starts[x].split('(');
+                    segment->m_device_path.append( temp[0] );
+                    segment->m_starting_extent.append( ( temp[1].remove(')') ).toLongLong() );
+                }
+            }
+	    m_segments.append(segment);
 	}
     }
-
-    return segment;
 }
 
 QList<LogVol *> LogVol::getChildren()
@@ -593,16 +607,30 @@ QStringList LogVol::getDevicePathAll()
     for (int seg = 0; seg < m_seg_total; seg++)
 	devices << m_segments[seg]->m_device_path;
 
-// remove repeated physical volumes
-
     devices.sort();
+    devices.removeDuplicates();
 
-    for(int x = devices.size() - 1; x > 0; x--){
-	if(devices[x] == devices[x - 1])
-	    devices.removeAt(x);
-    }
-    
     return devices;
+}
+
+QStringList LogVol::getDevicePathAllFlat()
+{
+    QStringList devices;
+    QList<LogVol *> children;
+
+    if( m_snap_container || m_mirror ){
+        children = getChildren();
+
+        for(int x = children.size() - 1; x >= 0; x--)
+            devices.append( children[x]->getDevicePathAllFlat() );
+
+        devices.sort();
+        devices.removeDuplicates();
+
+        return devices;
+    }
+    else
+        return getDevicePathAll();
 }
 
 VolGroup* LogVol::getVolumeGroup()

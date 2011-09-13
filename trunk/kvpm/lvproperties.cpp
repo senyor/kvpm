@@ -12,11 +12,13 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
+
+#include "lvproperties.h"
+
 #include <KLocale>
 #include <QtGui>
 
 #include "logvol.h"
-#include "lvproperties.h"
 #include "misc.h"
 #include "volgroup.h"
 
@@ -142,8 +144,7 @@ LVProperties::LVProperties(LogVol *logicalVolume, int segment, QWidget *parent):
 
     if( !logicalVolume->isMirrorLeg() && !logicalVolume->isMirrorLog() &&
 	!logicalVolume->isPvmove()    && !logicalVolume->isVirtual() &&
-	( (segment_count == 1) ||
-	  (segment == -1) ) )
+        !logicalVolume->isSnapContainer() && ( (segment_count == 1) || (segment == -1) ) )
     {
         layout->addWidget(mount_info_frame); // don't add this widget at all if in a mirror leg 
 
@@ -187,18 +188,19 @@ LVProperties::LVProperties(LogVol *logicalVolume, int segment, QWidget *parent):
     pv_info_frame->setLineWidth(2);
     layout->addWidget(pv_info_frame);
 
-    if( logicalVolume->isMirror() ){
-        temp_label = new QLabel( i18n("<b>Mirror legs</b>") );
-	temp_label->setAlignment(Qt::AlignCenter);
-	pv_info_layout->addWidget(temp_label);
-    }
-    else{
-        temp_label = new QLabel( i18n("<b>Physical volumes</b>") );
-	temp_label->setAlignment(Qt::AlignCenter);
-	pv_info_layout->addWidget(temp_label);
-    }
-    
-    if(segment > -1){
+    temp_label = new QLabel( i18n("<b>Physical volumes</b>") );
+    temp_label->setAlignment(Qt::AlignCenter);
+    pv_info_layout->addWidget(temp_label);
+
+    if( logicalVolume->isMirror() || logicalVolume->isSnapContainer() ){
+	pv_list = logicalVolume->getDevicePathAllFlat();
+	for(int pv = 0; pv < pv_list.size(); pv++){
+	    temp_label = new QLabel( pv_list[pv] );
+	    temp_label->setToolTip( pv_list[pv] );
+	    pv_info_layout->addWidget( temp_label );
+	}
+    } 
+    else if(segment > -1){
 	pv_list = logicalVolume->getDevicePath(segment);
 	for(int pv = 0; pv < pv_list.size(); pv++){
 	    temp_label = new QLabel( pv_list[pv] );
@@ -213,7 +215,6 @@ LVProperties::LVProperties(LogVol *logicalVolume, int segment, QWidget *parent):
 	    temp_label->setToolTip( pv_list[pv] );
 	    pv_info_layout->addWidget( temp_label );
 	}
-
     }
 
     QFrame *uuid_info_frame = new QFrame();
@@ -221,14 +222,16 @@ LVProperties::LVProperties(LogVol *logicalVolume, int segment, QWidget *parent):
     uuid_info_frame->setLayout(uuid_info_layout);
     uuid_info_frame->setFrameStyle( QFrame::Sunken | QFrame::StyledPanel );
     uuid_info_frame->setLineWidth(2);
-    layout->addWidget(uuid_info_frame);
+
+    if( !logicalVolume->isSnapContainer() )
+        layout->addWidget(uuid_info_frame);
+
     temp_label = new QLabel("<b>Logical volume UUID</b>");
     temp_label->setAlignment(Qt::AlignCenter);
     uuid_info_layout->addWidget( temp_label );
     temp_label = new QLabel( logicalVolume->getUuid() );
     temp_label->setToolTip( logicalVolume->getUuid() );
     temp_label->setWordWrap(true);
-
     uuid_info_layout->addWidget( temp_label );
     uuid_info_layout->addStretch();
     

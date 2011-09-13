@@ -50,6 +50,7 @@ class VolGroup
     bool m_partial;        // some physical volumes may be missing
 
     void findOrphans(QList<lv_t> &topList, QList<lv_t> &childList);
+    void processLogicalVolumes(vg_t lvmVG);
 
 public:
     VolGroup(lvm_t lvm, const char *vgname);
