@@ -27,213 +27,245 @@
    we are not focused on any one segment. Therefor stripes and
    stripe size have no meaning */
 
-LVProperties::LVProperties(LogVol *logicalVolume, int segment, QWidget *parent):QWidget(parent)
+LVProperties::LVProperties(LogVol *logicalVolume, int segment, QWidget *parent):
+    QWidget(parent),
+    m_lv(logicalVolume)
 {
-    const long long extent_size = logicalVolume->getVolumeGroup()->getExtentSize();
-    const int segment_count = logicalVolume->getSegmentCount();
-    long long extents, total_size, total_extents;
-    int stripes, stripe_size;
-    QStringList pv_list;
-    QLabel *temp_label;
-    
     QVBoxLayout *layout = new QVBoxLayout();
     layout->setSpacing(0);
     layout->setMargin(0);
 
-    QFrame *basic_info_frame = new QFrame();
-    QVBoxLayout *basic_info_layout = new QVBoxLayout();
-    basic_info_frame->setLayout(basic_info_layout);
-    basic_info_frame->setFrameStyle( QFrame::Sunken | QFrame::StyledPanel );
-    basic_info_frame->setLineWidth(2);
-    layout->addWidget(basic_info_frame);
+    layout->addWidget( generalFrame(segment) );
+
+    if( !m_lv->isMirrorLeg() && !m_lv->isMirrorLog() &&
+	!m_lv->isPvmove()    && !m_lv->isVirtual() &&
+        !m_lv->isSnapContainer() && ( (m_lv->getSegmentCount() == 1) || (segment == -1) ) ){
+
+        layout->addWidget( mountPointsFrame() );
+    }
+
+    layout->addWidget( physicalVolumesFrame(segment) );
+
+    if( !m_lv->isSnapContainer() )
+        layout->addWidget( uuidFrame() );
+    
+    setLayout(layout);
+}
+
+QFrame *LVProperties::mountPointsFrame()
+{
+    QLabel *temp_label;
+    QFrame *frame = new QFrame();
+    QVBoxLayout *layout = new QVBoxLayout();
+    frame->setLayout(layout);
+    frame->setFrameStyle( QFrame::Sunken | QFrame::StyledPanel );
+    frame->setLineWidth(2);
+
+    QStringList mount_points   = m_lv->getMountPoints();
+    QList<int>  mount_position = m_lv->getMountPosition();
+
+    if(mount_points.size() > 1){
+        temp_label = new QLabel( i18n("<b>Mount points</b>") );
+        temp_label->setAlignment(Qt::AlignCenter);
+        layout->addWidget(temp_label);
+    }
+    else{
+        temp_label = new QLabel( i18n("<b>Mount point</b>") ) ;
+        temp_label->setAlignment(Qt::AlignCenter);
+        layout->addWidget(temp_label);
+    }
+    
+    if(mount_points.size() == 0){
+        temp_label = new QLabel( i18n("not mounted") ) ;
+        temp_label->setAlignment(Qt::AlignLeft);
+        layout->addWidget(temp_label);
+    }
+    else{
+        for(int x = 0; x < mount_points.size(); x++){
+            if(mount_position[x] > 0){
+                temp_label = new QLabel( QString("%1 <%2>").arg(mount_points[x]).arg(mount_position[x]) );
+                temp_label->setToolTip( QString("%1 <%2>").arg(mount_points[x]).arg(mount_position[x]) );
+                layout->addWidget( temp_label );
+            }
+            else{
+                temp_label = new QLabel( mount_points[x] );
+                temp_label->setToolTip( mount_points[x] );
+                layout->addWidget( temp_label );
+            }
+        }
+    }
+
+    return frame;
+}
+
+QFrame *LVProperties::uuidFrame()
+{
+    QFrame *frame = new QFrame();
+    QVBoxLayout *layout = new QVBoxLayout();
+    frame->setLayout(layout);
+    frame->setFrameStyle( QFrame::Sunken | QFrame::StyledPanel );
+    frame->setLineWidth(2);
+
+    QLabel *temp_label = new QLabel("<b>Logical volume UUID</b>");
+    temp_label->setAlignment(Qt::AlignCenter);
+    layout->addWidget( temp_label );
+    temp_label = new QLabel( m_lv->getUuid() );
+    temp_label->setToolTip( m_lv->getUuid() );
+    temp_label->setWordWrap(true);
+    layout->addWidget( temp_label );
+    layout->addStretch();
+
+    return frame;
+}
+
+QFrame *LVProperties::generalFrame(int segment)
+{
+    const long long extent_size = m_lv->getVolumeGroup()->getExtentSize();
+    const int segment_count = m_lv->getSegmentCount();
+    long long extents, total_size, total_extents;
+    int stripes, stripe_size;
+    QStringList pv_list;
+    QLabel *temp_label;
+
+    QFrame *frame = new QFrame();
+    QVBoxLayout *layout = new QVBoxLayout();
+    frame->setLayout(layout);
+    frame->setFrameStyle( QFrame::Sunken | QFrame::StyledPanel );
+    frame->setLineWidth(2);
 
     if((segment >= 0) && (segment_count > 1)){
 
-	temp_label = new QLabel( "<b>" + logicalVolume->getName() + QString("[%1]").arg(segment) + "</b>" );
+        temp_label = new QLabel( "<b>" + m_lv->getName() + QString("[%1]").arg(segment) + "</b>" );
 	temp_label->setAlignment(Qt::AlignCenter);
-	basic_info_layout->addWidget(temp_label);
+	layout->addWidget(temp_label);
 
-	extents = logicalVolume->getSegmentExtents(segment);
-	stripes = logicalVolume->getSegmentStripes(segment);
-	stripe_size = logicalVolume->getSegmentStripeSize(segment);
+	extents = m_lv->getSegmentExtents(segment);
+	stripes = m_lv->getSegmentStripes(segment);
+	stripe_size = m_lv->getSegmentStripeSize(segment);
 
-	basic_info_layout->addWidget(new QLabel( i18n("Extents: %1", extents) ) );
+	layout->addWidget(new QLabel( i18n("Extents: %1", extents) ) );
 
-	if( !logicalVolume->isMirror() ){
+	if( !m_lv->isMirror() ){
 
 	    if( stripes != 1 ){
-		basic_info_layout->addWidget(new QLabel( i18n("Stripes: %1", stripes) ));
-                basic_info_layout->addWidget(new QLabel( i18n("Stripe size: %1", stripe_size) ));
+		layout->addWidget(new QLabel( i18n("Stripes: %1", stripes) ));
+                layout->addWidget(new QLabel( i18n("Stripe size: %1", stripe_size) ));
 	    }
 	    else{
-		basic_info_layout->addWidget(new QLabel( i18n("Stripes: none") ));
-		basic_info_layout->addWidget(new QLabel( i18n("Stripe size: n/a") ));
+		layout->addWidget(new QLabel( i18n("Stripes: none") ));
+		layout->addWidget(new QLabel( i18n("Stripe size: n/a") ));
 	    }
 	}
     }
     else if((segment >= 0) && (segment_count == 1)){
 
-	temp_label = new QLabel( "<b> " + logicalVolume->getName() + "</b>" );
-	temp_label->setAlignment(Qt::AlignCenter);
-	basic_info_layout->addWidget(temp_label);
-	extents = logicalVolume->getSegmentExtents(segment);
-        total_extents = (extents * logicalVolume->getMirrorCount()) + logicalVolume->getLogCount();
-        total_size = extent_size * total_extents;
-	stripes = logicalVolume->getSegmentStripes(segment);
-	stripe_size = logicalVolume->getSegmentStripeSize(segment);
-	basic_info_layout->addWidget(new QLabel( i18n("Extents: %1", extents) ));
+        if(m_lv->isSnapContainer())
+            temp_label = new QLabel( "<b>" + m_lv->getName() + " + Snapshots </b>" );
+        else
+            temp_label = new QLabel( "<b>" + m_lv->getName() + "</b>" );
 
-	if( !logicalVolume->isMirror() ){
+	temp_label->setAlignment(Qt::AlignCenter);
+	layout->addWidget(temp_label);
+	extents = m_lv->getSegmentExtents(segment);
+        total_extents = (extents * m_lv->getMirrorCount()) + m_lv->getLogCount();
+        total_size = extent_size * total_extents;
+	stripes = m_lv->getSegmentStripes(segment);
+	stripe_size = m_lv->getSegmentStripeSize(segment);
+	layout->addWidget(new QLabel( i18n("Extents: %1", extents) ));
+
+	if( !m_lv->isMirror() ){
 
 	    if( stripes != 1 ){
-		basic_info_layout->addWidget(new QLabel( i18n("Stripes: %1", stripes) ));
-                basic_info_layout->addWidget(new QLabel( i18n("Stripe size: %1", stripe_size) ));
+		layout->addWidget(new QLabel( i18n("Stripes: %1", stripes) ));
+                layout->addWidget(new QLabel( i18n("Stripe size: %1", stripe_size) ));
 	    }
 	    else{
-		basic_info_layout->addWidget(new QLabel( i18n("Stripes: none") ));
-		basic_info_layout->addWidget(new QLabel( i18n("Stripe size: n/a") ));
+		layout->addWidget(new QLabel( i18n("Stripes: none") ));
+		layout->addWidget(new QLabel( i18n("Stripe size: n/a") ));
 	    }
 	}
-	else if( !logicalVolume->isMirrorLog() ){
-            basic_info_layout->addWidget(new QLabel( i18n("Total extents: %1", total_extents) ));
-	    basic_info_layout->addWidget(new QLabel( i18n("Total size: %1", sizeToString(total_size)) ));
+	else if( !m_lv->isMirrorLog() ){
+            layout->addWidget(new QLabel( i18n("Total extents: %1", total_extents) ));
+	    layout->addWidget(new QLabel( i18n("Total size: %1", sizeToString(total_size)) ));
 	}
-	if( !(logicalVolume->isMirrorLeg() || logicalVolume->isMirrorLog() )){
+	if( !(m_lv->isMirrorLeg() || m_lv->isMirrorLog() )){
 
-            basic_info_layout->addWidget(new QLabel( i18n("Filesystem: %1", logicalVolume->getFilesystem() ) ));
+            layout->addWidget(new QLabel( i18n("Filesystem: %1", m_lv->getFilesystem() ) ));
 
-	    if(logicalVolume->isWritable())
-	        basic_info_layout->addWidget(new QLabel( i18n("Access: r/w") ));
+	    if(m_lv->isWritable())
+	        layout->addWidget(new QLabel( i18n("Access: r/w") ));
 	    else
-	        basic_info_layout->addWidget(new QLabel( i18n("Access: r/o") ));
+	        layout->addWidget(new QLabel( i18n("Access: r/o") ));
                                          
-            basic_info_layout->addWidget(new QLabel( i18n("Allocation policy: %1", logicalVolume->getPolicy() ) ));
+            layout->addWidget(new QLabel( i18n("Allocation policy: %1", m_lv->getPolicy() ) ));
 	}
     }
     else{
-	temp_label = new QLabel( "<b> " + logicalVolume->getName() + "</b>" );
+	temp_label = new QLabel( "<b> " + m_lv->getName() + "</b>" );
 	temp_label->setAlignment(Qt::AlignCenter);
-	basic_info_layout->addWidget(temp_label);
-	extents = logicalVolume->getExtents();
-	basic_info_layout->addWidget(new QLabel( i18n("Extents: %1", extents) ));
+	layout->addWidget(temp_label);
+	extents = m_lv->getExtents();
+	layout->addWidget(new QLabel( i18n("Extents: %1", extents) ));
 
-	if( !( logicalVolume->isMirrorLeg() || logicalVolume->isMirrorLog() )){
+	if( !( m_lv->isMirrorLeg() || m_lv->isMirrorLog() )){
 
-            basic_info_layout->addWidget(new QLabel( i18n("Filesystem %1", logicalVolume->getFilesystem()) ));
+            layout->addWidget(new QLabel( i18n("Filesystem %1", m_lv->getFilesystem()) ));
 
-	    if(logicalVolume->isWritable())
-	        basic_info_layout->addWidget(new QLabel( i18n("Access: r/w") ));
+	    if(m_lv->isWritable())
+	        layout->addWidget(new QLabel( i18n("Access: r/w") ));
 	    else
-	        basic_info_layout->addWidget(new QLabel( i18n("Access: r/o") ));
+	        layout->addWidget(new QLabel( i18n("Access: r/o") ));
 
-	    basic_info_layout->addWidget(new QLabel( i18n("Allocation policy: %1", logicalVolume->getPolicy())));
+	    layout->addWidget(new QLabel( i18n("Allocation policy: %1", m_lv->getPolicy())));
 	}
     }
 
-    if(logicalVolume->isSnap())
-        basic_info_layout->addWidget(new QLabel( i18n("Origin: %1", logicalVolume->getOrigin()) ));
-    
-    QFrame *mount_info_frame = new QFrame();
-    QVBoxLayout *mount_info_layout = new QVBoxLayout();
-    mount_info_frame->setLayout(mount_info_layout);
-    mount_info_frame->setFrameStyle( QFrame::Sunken | QFrame::StyledPanel );
-    mount_info_frame->setLineWidth(2);
+    if(m_lv->isSnap())
+        layout->addWidget(new QLabel( i18n("Origin: %1", m_lv->getOrigin()) ));
 
-    QStringList mount_points = logicalVolume->getMountPoints();
-    QList<int>  mount_position = logicalVolume->getMountPosition();
+    return frame;
+}
 
-    if( !logicalVolume->isMirrorLeg() && !logicalVolume->isMirrorLog() &&
-	!logicalVolume->isPvmove()    && !logicalVolume->isVirtual() &&
-        !logicalVolume->isSnapContainer() && ( (segment_count == 1) || (segment == -1) ) )
-    {
-        layout->addWidget(mount_info_frame); // don't add this widget at all if in a mirror leg 
+QFrame *LVProperties::physicalVolumesFrame(int segment)
+{
+    QStringList pv_list;
+    QFrame *frame = new QFrame();
+    QVBoxLayout *layout = new QVBoxLayout();
 
-	if(mount_points.size() > 1){
-            temp_label = new QLabel( i18n("<b>Mount points</b>") );
-	    temp_label->setAlignment(Qt::AlignCenter);
-	    mount_info_layout->addWidget(temp_label);
-	}
-	else{
-	    temp_label = new QLabel( i18n("<b>Mount point</b>") ) ;
-	    temp_label->setAlignment(Qt::AlignCenter);
-	    mount_info_layout->addWidget(temp_label);
-	}
-	
-	if(mount_points.size() == 0){
-	    temp_label = new QLabel( i18n("not mounted") ) ;
-	    temp_label->setAlignment(Qt::AlignLeft);
-	    mount_info_layout->addWidget(temp_label);
-	}
-	else{
+    frame->setLayout(layout);
+    frame->setFrameStyle( QFrame::Sunken | QFrame::StyledPanel );
+    frame->setLineWidth(2);
 
-	    for(int x = 0; x < mount_points.size(); x++){
-	        if(mount_position[x] > 0){
-		    temp_label = new QLabel( QString("%1 <%2>").arg(mount_points[x]).arg(mount_position[x]) );
-		    temp_label->setToolTip( QString("%1 <%2>").arg(mount_points[x]).arg(mount_position[x]) );
-		    mount_info_layout->addWidget( temp_label );
-		}
-		else{
-		    temp_label = new QLabel( mount_points[x] );
-		    temp_label->setToolTip( mount_points[x] );
-		    mount_info_layout->addWidget( temp_label );
-		}
-	    }
-	}
-    }
-
-    QFrame *pv_info_frame = new QFrame();
-    QVBoxLayout *pv_info_layout = new QVBoxLayout();
-    pv_info_frame->setLayout(pv_info_layout);
-    pv_info_frame->setFrameStyle( QFrame::Sunken | QFrame::StyledPanel );
-    pv_info_frame->setLineWidth(2);
-    layout->addWidget(pv_info_frame);
-
-    temp_label = new QLabel( i18n("<b>Physical volumes</b>") );
+    QLabel *temp_label = new QLabel( i18n("<b>Physical volumes</b>") );
     temp_label->setAlignment(Qt::AlignCenter);
-    pv_info_layout->addWidget(temp_label);
+    layout->addWidget(temp_label);
 
-    if( logicalVolume->isMirror() || logicalVolume->isSnapContainer() ){
-	pv_list = logicalVolume->getDevicePathAllFlat();
+    if( m_lv->isMirror() || m_lv->isSnapContainer() ){
+	pv_list = m_lv->getDevicePathAllFlat();
 	for(int pv = 0; pv < pv_list.size(); pv++){
 	    temp_label = new QLabel( pv_list[pv] );
 	    temp_label->setToolTip( pv_list[pv] );
-	    pv_info_layout->addWidget( temp_label );
+	    layout->addWidget( temp_label );
 	}
     } 
     else if(segment > -1){
-	pv_list = logicalVolume->getDevicePath(segment);
+	pv_list = m_lv->getDevicePath(segment);
 	for(int pv = 0; pv < pv_list.size(); pv++){
 	    temp_label = new QLabel( pv_list[pv] );
 	    temp_label->setToolTip( pv_list[pv] );
-	    pv_info_layout->addWidget( temp_label );
+	    layout->addWidget( temp_label );
 	}
     }
     else{
-	pv_list = logicalVolume->getDevicePathAll();
+	pv_list = m_lv->getDevicePathAll();
 	for(int pv = 0; pv < pv_list.size(); pv++){
 	    temp_label = new QLabel( pv_list[pv] );
 	    temp_label->setToolTip( pv_list[pv] );
-	    pv_info_layout->addWidget( temp_label );
+	    layout->addWidget( temp_label );
 	}
     }
 
-    QFrame *uuid_info_frame = new QFrame();
-    QVBoxLayout *uuid_info_layout = new QVBoxLayout();
-    uuid_info_frame->setLayout(uuid_info_layout);
-    uuid_info_frame->setFrameStyle( QFrame::Sunken | QFrame::StyledPanel );
-    uuid_info_frame->setLineWidth(2);
+    layout->addStretch();
 
-    if( !logicalVolume->isSnapContainer() )
-        layout->addWidget(uuid_info_frame);
-
-    temp_label = new QLabel("<b>Logical volume UUID</b>");
-    temp_label->setAlignment(Qt::AlignCenter);
-    uuid_info_layout->addWidget( temp_label );
-    temp_label = new QLabel( logicalVolume->getUuid() );
-    temp_label->setToolTip( logicalVolume->getUuid() );
-    temp_label->setWordWrap(true);
-    uuid_info_layout->addWidget( temp_label );
-    uuid_info_layout->addStretch();
-    
-    setLayout(layout);
+    return frame;
 }
