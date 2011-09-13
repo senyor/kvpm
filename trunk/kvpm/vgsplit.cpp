@@ -83,9 +83,9 @@ VGSplitDialog::VGSplitDialog(VolGroup *volumeGroup, QWidget *parent) : KDialog(p
     connect(this, SIGNAL(okClicked()), 
             this, SLOT(deactivate()));
 
-    for(int x = 0; x < m_lvs.size(); x++){
-        if(m_lvs[x]->isOpen() && !(m_lvs[x]->isMirrorLog() || m_lvs[x]->isMirrorLeg()) ) // logs and legs are always open
-            m_busy_pvs << getUnderlyingDevices(m_lvs[x]);
+    for(int x = 0; x < m_lvs.size(); x++){    // logs and legs are always open
+        if(m_lvs[x]->isOpen() && !(m_lvs[x]->isMirrorLog() || m_lvs[x]->isMirrorLeg()) )
+            m_busy_pvs << m_lvs[x]->getDevicePathAllFlat();
     }
     m_busy_pvs.removeDuplicates();
 
@@ -147,9 +147,10 @@ void VGSplitDialog::adjustTable(bool)
         original_vg = false;
         new_vg = false;
 
-        lv_pv_names = getUnderlyingDevices(m_lvs[x]);
+        lv_pv_names = m_lvs[x]->getDevicePathAllFlat();
         if(m_lvs[x]->isSnap())
-            lv_pv_names << getUnderlyingDevices(m_vg->getLogVolByName( m_lvs[x]->getOrigin() ));
+            lv_pv_names << m_vg->getLogVolByName( m_lvs[x]->getOrigin() )->getDevicePathAllFlat();
+
         for(int y = 0; y < lv_pv_names.size(); y++){
 
             if( original_vg_pv_names.contains(lv_pv_names[y]) )
@@ -265,28 +266,3 @@ void VGSplitDialog::deactivate()
     return;
 }
 
-/* !!!   FIXME   !!!*/
-/* This next part isn't using the nesting effectivly */
-
-QStringList VGSplitDialog::getUnderlyingDevices(LogVol *lv)
-{
-    QStringList devices;
-    QList<LogVol *> legsAndLogs;
-
-    if( lv->isMirror() ){
-        for(int x = 0; x < m_lvs.size(); x++){
-            if( (lv->getName() == m_lvs[x]->getOrigin()) && !m_lvs[x]->isSnap() )
-                legsAndLogs.append(m_lvs[x]);
-        }
-        for(int x = 0; x < legsAndLogs.size(); x++){
-            if(legsAndLogs[x]->isMirror())
-                devices << getUnderlyingDevices(legsAndLogs[x]);
-            else
-                devices << legsAndLogs[x]->getDevicePathAll();
-        }
-    }
-    else
-        devices = lv->getDevicePathAll();
-
-    return devices;
-}

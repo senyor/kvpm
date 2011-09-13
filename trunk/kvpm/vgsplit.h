@@ -43,10 +43,6 @@ Q_OBJECT
     QRegExpValidator *m_validator;
     VolGroup *m_vg;
 
-    // TODO: following function should be in LogVol
-    // lv->getDevicePathAll() returns hidden lvs for mirrors. We want the real pvs here.
-    QStringList getUnderlyingDevices(LogVol *lv); 
-    
  public:
     explicit VGSplitDialog(VolGroup *volumeGroup, QWidget *parent = 0);
     QStringList arguments();    
