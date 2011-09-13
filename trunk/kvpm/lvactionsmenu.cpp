@@ -236,7 +236,6 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, VolGroup *volumeGroup, QWidg
             }
 	}
         else if( m_lv->isOrphan() ){
-            qDebug() << "Got here ????";
 	    lv_mkfs_action->setEnabled(false);
 	    lv_removefs_action->setEnabled(false);
 	    lv_maxfs_action->setEnabled(false);
@@ -378,6 +377,7 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, VolGroup *volumeGroup, QWidg
             mount_filesystem_action->setEnabled(true);
 	    lv_removefs_action->setEnabled(false);
 	    lv_mkfs_action->setEnabled(false);
+	    lv_fsck_action->setEnabled(false);
 	    lv_maxfs_action->setEnabled(false);
 	    lv_reduce_action->setEnabled(false);
 	    lv_change_action->setEnabled(true);
