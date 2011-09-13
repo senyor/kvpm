@@ -38,10 +38,10 @@ VolGroup::~VolGroup()
 void VolGroup::rescan(lvm_t lvm)
 {
     bool existing_pv, deleted_pv;
-    bool existing_lv, deleted_lv;
     vg_t lvm_vg;
     lvm_property_value value;
     QString vg_attr;
+    QList<LogVol *> lv_children;
 
     m_allocatable_extents = 0;
     m_mda_count    = 0;
@@ -139,101 +139,10 @@ void VolGroup::rescan(lvm_t lvm)
 	else
 	    qDebug() << " Empty pv_dm_list?";
 
-	dm_list* lv_dm_list = lvm_vg_list_lvs(lvm_vg);
-	lvm_lv_list *lv_list;
-        QString lv_name;
-        QList<lv_t> lvm_lvs_all_top;       // top level lvm logical volume handles
-        QList<lv_t> lvm_lvs_all_children;  // snap shots and mostly hidden child volumes, mirror legs etc.
-        QList<lv_t> lvm_lv_children;       // children of just one selected volume
-        QByteArray flags;
-	
-	if(lv_dm_list){
-	
-	    dm_list_iterate_items(lv_list, lv_dm_list){ 
+        processLogicalVolumes(lvm_vg);
 
-                value = lvm_lv_get_property(lv_list->lv, "lv_name");
-                if( QString(value.value.string).trimmed().startsWith("snapshot") )
-                    continue;
+        lvm_vg_close(lvm_vg);
 
-                value = lvm_lv_get_property(lv_list->lv, "lv_attr");
-                flags = value.value.string;
-
-                switch( flags[0] ){
-                case '-':
-                case 'c':
-                case 'O':
-                case 'o':
-                case 'p':
-                    lvm_lvs_all_top.append( lv_list->lv );
-                    break;
-                case 'M': 
-                case 'm':
-                    value = lvm_lv_get_property(lv_list->lv, "lv_name");
-                    if( QString(value.value.string).trimmed().endsWith("_mlog") )
-                        lvm_lvs_all_children.append( lv_list->lv );
-                    else if( QString(value.value.string).trimmed().contains("_mimagetmp_") )
-                        lvm_lvs_all_children.append( lv_list->lv );
-                    else
-                        lvm_lvs_all_top.append( lv_list->lv );
-                    break;
-
-                default:
-                    lvm_lvs_all_children.append( lv_list->lv );
-                    break;
-                }
-	    }
-
-            findOrphans(lvm_lvs_all_top, lvm_lvs_all_children);
-
-	    for(int y = 0; y < lvm_lvs_all_top.size(); y++ ){ // rescan() existing LogVols 
-	        existing_lv = false;
-                lvm_lv_children.clear();
-                value = lvm_lv_get_property(lvm_lvs_all_top[y], "lv_name");
-                lv_name = QString(value.value.string).trimmed();
-
-                for(int n = lvm_lvs_all_children.size() - 1; n >= 0; n--){
-
-                    value = lvm_lv_get_property(lvm_lvs_all_children[n], "lv_name");
-
-                    if( QString(value.value.string).trimmed().startsWith(lv_name + '_') )
-                        lvm_lv_children.append(lvm_lvs_all_children[n]);
-
-                    value = lvm_lv_get_property(lvm_lvs_all_children[n], "origin");
-
-                    if( QString(value.value.string).trimmed() == lv_name )
-                        lvm_lv_children.append(lvm_lvs_all_children.takeAt(n));
-                } 
-
-		for(int x = 0; x < m_member_lvs.size(); x++){
-		    if( QString( lvm_lv_get_uuid( lvm_lvs_all_top[y] ) ).trimmed() == m_member_lvs[x]->getUuid() ){
-		      existing_lv = true;
-
-                      m_member_lvs[x]->getName();
-		      m_member_lvs[x]->rescan(lvm_lvs_all_top[y], lvm_lv_children);
-		    }
-		}
-		if( !existing_lv )
-		    m_member_lvs.append( new LogVol( lvm_lvs_all_top[y], this, NULL, lvm_lv_children ) );
-	    }
-	  
-	    for(int x = m_member_lvs.size() - 1; x >= 0; x--){ // delete LogVol if the lv is gone
-	        deleted_lv = true;
-		dm_list_iterate_items(lv_list, lv_dm_list){ 
-		    if( QString( lvm_lv_get_uuid( lv_list->lv ) ).trimmed() == m_member_lvs[x]->getUuid() )
-		      deleted_lv = false;
-		}
-		if(deleted_lv){
-		    delete m_member_lvs.takeAt(x);
-		}
-	    }
-        
-	}
-        else{      // lv_dm_list is empty so clean up member lvs 
-            for(int x = m_member_lvs.size() - 1; x >= 0; x--) 
-                delete m_member_lvs.takeAt(x);
-        }
-
-	lvm_vg_close(lvm_vg);
     }
     else{
         for(int x = m_member_pvs.size() - 1; x >= 0; x--) 
@@ -245,7 +154,8 @@ void VolGroup::rescan(lvm_t lvm)
         m_member_pvs.clear();
         m_member_lvs.clear();
     }
-
+    
+    
     QStringList pv_name_list;
     PhysVol *pv;
 
@@ -265,6 +175,7 @@ void VolGroup::rescan(lvm_t lvm)
     LogVol *lv;
     QString pv_name;
     QList<long long> starting_extent;
+
 
     for(int z = 0; z < m_member_pvs.size(); z++){
         last_extent = 0;
@@ -286,7 +197,6 @@ void VolGroup::rescan(lvm_t lvm)
         }
         m_member_pvs[z]->setLastUsedExtent(last_used_extent);
     }
-
     return;
 }
 
@@ -514,3 +424,107 @@ bool VolGroup::isActive()
     return m_active;
 }
 
+void VolGroup::processLogicalVolumes(vg_t lvmVG)
+{
+    lvm_property_value value;
+    bool is_new;
+    dm_list* lv_dm_list = lvm_vg_list_lvs(lvmVG);
+    lvm_lv_list *lv_list;
+    QString lv_name;
+    QList<lv_t> lvm_lvs_all_top;       // top level lvm logical volume handles
+    QList<lv_t> lvm_lvs_all_children;  // snap shots and mostly hidden child volumes, mirror legs etc.
+    QList<lv_t> lvm_lv_children;       // children of just one selected volume
+    QByteArray flags;
+    
+    QList<LogVol *> old_member_lvs = m_member_lvs;
+    m_member_lvs.clear();
+
+    if(lv_dm_list){
+	
+        dm_list_iterate_items(lv_list, lv_dm_list){ 
+            
+            value = lvm_lv_get_property(lv_list->lv, "lv_name");
+            if( QString(value.value.string).trimmed().startsWith("snapshot") )
+                continue;
+            
+            value = lvm_lv_get_property(lv_list->lv, "lv_attr");
+            flags = value.value.string;
+            
+            switch( flags[0] ){
+            case '-':
+            case 'c':
+            case 'O':
+            case 'o':
+            case 'p':
+                lvm_lvs_all_top.append( lv_list->lv );
+                break;
+            case 'M': 
+            case 'm':
+                value = lvm_lv_get_property(lv_list->lv, "lv_name");
+                if( QString(value.value.string).trimmed().endsWith("_mlog") )
+                    lvm_lvs_all_children.append( lv_list->lv );
+                else if( QString(value.value.string).trimmed().contains("_mimagetmp_") )
+                    lvm_lvs_all_children.append( lv_list->lv );
+                else
+                    lvm_lvs_all_top.append( lv_list->lv );
+                break;
+                
+            default:
+                lvm_lvs_all_children.append( lv_list->lv );
+                break;
+            }
+        }
+        
+        findOrphans(lvm_lvs_all_top, lvm_lvs_all_children);
+        
+        for(int y = 0; y < lvm_lvs_all_top.size(); y++ ){ // rescan() existing LogVols 
+            is_new = true;
+
+            lvm_lv_children.clear();
+            value = lvm_lv_get_property(lvm_lvs_all_top[y], "lv_name");
+            lv_name = QString(value.value.string).trimmed();
+            
+            for(int n = lvm_lvs_all_children.size() - 1; n >= 0; n--){
+                
+                value = lvm_lv_get_property(lvm_lvs_all_children[n], "lv_name");
+                
+                if( QString(value.value.string).trimmed().startsWith(lv_name + '_') )
+                    lvm_lv_children.append(lvm_lvs_all_children[n]);
+                
+                value = lvm_lv_get_property(lvm_lvs_all_children[n], "origin");
+                
+                if( QString(value.value.string).trimmed() == lv_name )
+                    lvm_lv_children.append(lvm_lvs_all_children.takeAt(n));
+            } 
+            
+            for(int x = old_member_lvs.size() - 1; x >= 0; x--){
+
+                value = lvm_lv_get_property(lvm_lvs_all_top[y], "copy_percent");
+                if( value.is_valid ){                
+                    if( value.value.integer ){
+                        old_member_lvs[x]->rescan(lvm_lvs_all_top[y], lvm_lv_children);
+                        m_member_lvs.append( old_member_lvs.takeAt(x) );
+                        is_new = false;
+                        continue;
+                    }
+                }
+                else if( QString(lvm_lv_get_uuid( lvm_lvs_all_top[y] )).trimmed() == old_member_lvs[x]->getUuid() ){
+                    old_member_lvs[x]->rescan(lvm_lvs_all_top[y], lvm_lv_children);
+                    m_member_lvs.append( old_member_lvs.takeAt(x) );
+                    is_new = false;
+                }
+            }
+            if(is_new)
+                m_member_lvs.append( new LogVol( lvm_lvs_all_top[y], this, NULL, lvm_lv_children ) );
+        }
+	
+        for(int x = old_member_lvs.size() - 1; x >= 0; x--)   // delete LogVol if the lv is gone
+            delete m_member_lvs.takeAt(x);
+        
+    }
+    else{      // lv_dm_list is empty so clean up member lvs 
+        for(int x = m_member_lvs.size() - 1; x >= 0; x--) 
+            delete m_member_lvs.takeAt(x);
+    }
+    
+}

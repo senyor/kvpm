@@ -94,13 +94,13 @@ class LogVol
     bool m_valid;                // is a valid snap
     bool m_merging;              // is snap or snap origin that is merging
 
-    Segment* processSegments(lvseg_t lvm_lvseg);
 
     // get the lvm_t children exactly one step down from this lv and remove from the QList parameter
     QList<lv_t> takeLVMChildren(QList<lv_t> &lvmAllChildren); 
     QList<lv_t> takeLVMSnapshots(QList<lv_t> &lvmAllChildren);
     LogVol *getParent();
     void countLegsAndLogs();
+    void processSegments();
 
  public:
     LogVol(lv_t lvmLV, VolGroup *vg, LogVol *lvParent, QList<lv_t> lvmAllChildren );
@@ -129,6 +129,7 @@ class LogVol
     QList<long long> getSegmentStartingExtent(int segment);
     QStringList getDevicePath(int segment);     
     QStringList getDevicePathAll();         // full path of physical volumes for all segments
+    QStringList getDevicePathAllFlat();     // full path of physical volumes including child lvs, un-nested
     QStringList getMountPoints();
     QStringList getTags();
     QList<int>  getMountPosition();

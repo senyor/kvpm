@@ -177,6 +177,7 @@ QTreeWidgetItem *VGTree::loadItem(LogVol *lv, QTreeWidgetItem *item)
     item->setData(10, Qt::DisplayRole, lv->getTags().join(",")); 
     item->setData(11, Qt::DisplayRole, lv->getMountPoints().join(","));
     item->setData(0, Qt::UserRole, lv_name);
+    item->setData(2, Qt::UserRole, lv->getUuid());
 
     if( lv->getSegmentCount() == 1 ) {
         item->setData(1, Qt::UserRole, 0);            // 0 means segment 0 data present
@@ -294,6 +295,7 @@ void VGTree::insertSegmentItems(LogVol *lv, QTreeWidgetItem *item)
         child_item->setData(6, Qt::DisplayRole, sizeToString(lv->getSegmentStripeSize(x))); 
  	child_item->setData(0, Qt::UserRole, lv->getName());
 	child_item->setData(1, Qt::UserRole, x);
+ 	child_item->setData(2, Qt::UserRole, lv->getUuid());
 
         for(int x = 7; x < 12; x++)
             child_item->setData(x, Qt::DisplayRole, QString(""));

@@ -64,9 +64,9 @@ void LVPropertiesStack::changeLVStackIndex(QTreeWidgetItem *item, QTreeWidgetIte
     QList<LogVol *> members  = m_vg->getLogicalVolumesFlat();
 
     if(item && ( members.size() == m_lv_stack_list.size() ) ){  // These *should* be equal
-	lv_name = QVariant(item->data(0, Qt::UserRole)).toString();
+	lv_name = QVariant(item->data(2, Qt::UserRole)).toString();
 	for(int x = 0; x < members.size(); x++){
-            if(lv_name == ( members[x])->getName() ){
+            if(lv_name == ( members[x])->getUuid() ){
 		setCurrentIndex(x);
 		segment = QVariant(item->data(1, Qt::UserRole)).toInt();
 		if(segment == -1)
