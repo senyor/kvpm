@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -16,11 +16,18 @@
 #define LVPROPERTIES_H
 
 #include <QWidget>
+#include <QFrame>
 
 class LogVol;
 
 class LVProperties : public QWidget
 {
+    LogVol *m_lv;
+    QFrame *mountPointsFrame();
+    QFrame *uuidFrame();
+    QFrame *generalFrame(int segment);
+    QFrame *physicalVolumesFrame(int segment);
+
  public:
     LVProperties(LogVol *logicalVolume, int segment, QWidget *parent = 0);
 
