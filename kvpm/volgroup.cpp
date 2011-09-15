@@ -17,7 +17,6 @@
 #include <QtGui>
 
 #include "logvol.h"
-#include "misc.h"
 #include "physvol.h"
 
 VolGroup::VolGroup(lvm_t lvm, const char *vgname)
@@ -37,7 +36,6 @@ VolGroup::~VolGroup()
 
 void VolGroup::rescan(lvm_t lvm)
 {
-    bool existing_pv, deleted_pv;
     vg_t lvm_vg;
     lvm_property_value value;
     QString vg_attr;
@@ -101,48 +99,10 @@ void VolGroup::rescan(lvm_t lvm)
         else if(vg_attr.at(4) == 'a')
             m_allocation_policy = "anywhere";
         
-	dm_list* pv_dm_list = lvm_vg_list_pvs(lvm_vg);
-	lvm_pv_list *pv_list;
-	
-	if(pv_dm_list){  // This should never be empty
-	
-	    dm_list_iterate_items(pv_list, pv_dm_list){ // rescan() existing PhysVols 
-	        existing_pv = false;
-		for(int x = 0; x < m_member_pvs.size(); x++){
-		    if( QString( lvm_pv_get_uuid( pv_list->pv ) ).trimmed() == m_member_pvs[x]->getUuid() ){
-		      existing_pv = true;
-		      m_member_pvs[x]->rescan( pv_list->pv );
-		    }
-		}
-		if( !existing_pv )
-		    m_member_pvs.append( new PhysVol( pv_list->pv, this ) );
-	    }
-	  
-	    for(int x = m_member_pvs.size() - 1; x >= 0; x--){ // delete PhysVolGroup if the pv is gone
-	        deleted_pv = true;
-		dm_list_iterate_items(pv_list, pv_dm_list){ 
-		    if( QString( lvm_pv_get_uuid( pv_list->pv ) ).trimmed() == m_member_pvs[x]->getUuid() )
-		      deleted_pv = false;
-		}
-		if(deleted_pv){
-		    delete m_member_pvs.takeAt(x);
-		}
-	    }
-        
-	    for(int x = 0; x < m_member_pvs.size(); x++){
-	        if( m_member_pvs[x]->isAllocatable() )
-		    m_allocatable_extents += m_member_pvs[x]->getUnused() / (long long) m_extent_size;
-		m_mda_count += m_member_pvs[x]->getMDACount();
-	    }
-	    
-	}
-	else
-	    qDebug() << " Empty pv_dm_list?";
-
+        processPhysicalVolumes(lvm_vg);
         processLogicalVolumes(lvm_vg);
 
         lvm_vg_close(lvm_vg);
-
     }
     else{
         for(int x = m_member_pvs.size() - 1; x >= 0; x--) 
@@ -155,91 +115,41 @@ void VolGroup::rescan(lvm_t lvm)
         m_member_lvs.clear();
     }
     
-    
-    QStringList pv_name_list;
-    PhysVol *pv;
+    setActivePhysicalVolumes();
+    setLastUsedExtent();
 
-    for(int x = 0; x < m_member_lvs.size(); x++){
-        if( m_member_lvs[x]->isActive() ){
-            m_active = true;
-	    pv_name_list = m_member_lvs[x]->getDevicePathAll();
-	    for(int x = 0; x < pv_name_list.size(); x++){
-	        if( (pv = getPhysVolByName(pv_name_list[x])) )
-		    pv->setActive();
-	    }
-	    pv_name_list.clear();
-	}
-    }
-
-    long long last_extent, last_used_extent;
-    LogVol *lv;
-    QString pv_name;
-    QList<long long> starting_extent;
-
-
-    for(int z = 0; z < m_member_pvs.size(); z++){
-        last_extent = 0;
-        last_used_extent = 0;
-        pv_name = m_member_pvs[z]->getName();
-        for(int x = 0; x < m_member_lvs.size() ; x++){
-            lv = m_member_lvs[x];
-            for(int segment = 0; segment < lv->getSegmentCount(); segment++){
-                pv_name_list = lv->getDevicePath(segment);
-                starting_extent = lv->getSegmentStartingExtent(segment);
-                for(int y = 0; y < pv_name_list.size() ; y++){
-                    if( pv_name == pv_name_list[y] ){
-                        last_extent = starting_extent[y] - 1 + (lv->getSegmentExtents(segment) / (lv->getSegmentStripes(segment)));
-                        if( last_extent > last_used_extent )
-                            last_used_extent = last_extent;
-                    }
-                }
-            }
-        }
-        m_member_pvs[z]->setLastUsedExtent(last_used_extent);
-    }
     return;
 }
 
 
 /* Takes orphan volumes off the child lv list and puts them back onto
    the top level lv list. An orphan is a volume that should be hidden
-   under another, like a mirror leg, but doesn't seem to have a parent  */
+   under another, like a mirror leg, but doesn't seem to have a parent,
+   or something left behind by a misbehaving lvm process  */
  
-void VolGroup::findOrphans(QList<lv_t> &topList, QList<lv_t> &childList)
+QList<lv_t> VolGroup::findOrphans(QList<lv_t> childList)
 {
-    QString top_name;
-    QString child_name;
-    QString origin;
-    bool orphan;
+    QList<LogVol *> all_lvs;
     lvm_property_value value;
+    QString child_name;
 
-    for(int m = childList.size() - 1; m >= 0; m--){
+    all_lvs = getLogicalVolumesFlat();
 
-        value = lvm_lv_get_property(childList[m], "lv_name");
-        child_name = QString(value.value.string).trimmed();
-        origin = parseMirrorOrigin(child_name);
+    for(int x = all_lvs.size() - 1; x >= 0; x--){
+        for(int y = childList.size() - 1; y >= 0; y--){
 
-        if(origin.isEmpty()){
-            orphan = false;
-            continue;
-        }
-        else
-            orphan = true;
+            value = lvm_lv_get_property(childList[y], "lv_name");
+            child_name = QString(value.value.string).trimmed();
 
-        for(int n = topList.size() - 1; n >= 0; n--){
-            
-            value = lvm_lv_get_property(topList[n], "lv_name");
-            top_name = QString(value.value.string).trimmed();
-            
-            if( top_name == origin ){
-                orphan = false;
+            if( child_name == all_lvs[x]->getName() ){
+                childList.removeAt(y);
+                all_lvs.removeAt(x);
                 break;
             }
         }
-        
-        if(orphan)
-            topList.append(childList.takeAt(m));
     }
+
+    return childList;
 }
 
 const QList<LogVol *>  VolGroup::getLogicalVolumes()
@@ -393,7 +303,8 @@ QString VolGroup::getFormat()
 QStringList VolGroup::getLogVolNames()
 {
     QStringList names;
-    for(int x = 0; x < m_member_lvs.size(); x++)
+
+    for(int x = m_member_lvs.size() - 1; x >= 0; x--)
         names << (m_member_lvs[x])->getName();
 
     return names;
@@ -424,6 +335,48 @@ bool VolGroup::isActive()
     return m_active;
 }
 
+void VolGroup::processPhysicalVolumes(vg_t lvmVG)
+{
+    dm_list* pv_dm_list = lvm_vg_list_pvs(lvmVG);
+    lvm_pv_list *pv_list;
+    bool existing_pv, deleted_pv;
+	
+    if(pv_dm_list){  // This should never be empty
+	
+        dm_list_iterate_items(pv_list, pv_dm_list){ // rescan() existing PhysVols 
+            existing_pv = false;
+            for(int x = 0; x < m_member_pvs.size(); x++){
+                if( QString( lvm_pv_get_uuid( pv_list->pv ) ).trimmed() == m_member_pvs[x]->getUuid() ){
+                    existing_pv = true;
+                    m_member_pvs[x]->rescan( pv_list->pv );
+                }
+            }
+            if( !existing_pv )
+                m_member_pvs.append( new PhysVol( pv_list->pv, this ) );
+        }
+        
+        for(int x = m_member_pvs.size() - 1; x >= 0; x--){ // delete PhysVolGroup if the pv is gone
+            deleted_pv = true;
+            dm_list_iterate_items(pv_list, pv_dm_list){ 
+                if( QString( lvm_pv_get_uuid( pv_list->pv ) ).trimmed() == m_member_pvs[x]->getUuid() )
+                    deleted_pv = false;
+            }
+            if(deleted_pv){
+                delete m_member_pvs.takeAt(x);
+            }
+        }
+        
+        for(int x = 0; x < m_member_pvs.size(); x++){
+            if( m_member_pvs[x]->isAllocatable() )
+                m_allocatable_extents += m_member_pvs[x]->getUnused() / (long long) m_extent_size;
+            m_mda_count += m_member_pvs[x]->getMDACount();
+        }
+	
+    }
+    else
+        qDebug() << " Empty pv_dm_list?";
+}
+
 void VolGroup::processLogicalVolumes(vg_t lvmVG)
 {
     lvm_property_value value;
@@ -431,9 +384,10 @@ void VolGroup::processLogicalVolumes(vg_t lvmVG)
     dm_list* lv_dm_list = lvm_vg_list_lvs(lvmVG);
     lvm_lv_list *lv_list;
     QString lv_name;
+    QString top_name;
     QList<lv_t> lvm_lvs_all_top;       // top level lvm logical volume handles
-    QList<lv_t> lvm_lvs_all_children;  // snap shots and mostly hidden child volumes, mirror legs etc.
-    QList<lv_t> lvm_lv_children;       // children of just one selected volume
+    QList<lv_t> lvm_lvs_all_children;  // top level lvm logical volume handles
+    QList<lv_t> lvm_lvs_orphans;       // non-top lvm logical volume handles with no home
     QByteArray flags;
     
     QList<LogVol *> old_member_lvs = m_member_lvs;
@@ -461,70 +415,100 @@ void VolGroup::processLogicalVolumes(vg_t lvmVG)
             case 'M': 
             case 'm':
                 value = lvm_lv_get_property(lv_list->lv, "lv_name");
-                if( QString(value.value.string).trimmed().endsWith("_mlog") )
-                    lvm_lvs_all_children.append( lv_list->lv );
-                else if( QString(value.value.string).trimmed().contains("_mimagetmp_") )
-                    lvm_lvs_all_children.append( lv_list->lv );
-                else
+                top_name = QString(value.value.string).trimmed();
+                if( !(top_name.endsWith("_mlog") || top_name.contains("_mimagetmp_")) )
                     lvm_lvs_all_top.append( lv_list->lv );
                 break;
-                
             default:
                 lvm_lvs_all_children.append( lv_list->lv );
                 break;
             }
         }
         
-        findOrphans(lvm_lvs_all_top, lvm_lvs_all_children);
-        
         for(int y = 0; y < lvm_lvs_all_top.size(); y++ ){ // rescan() existing LogVols 
             is_new = true;
 
-            lvm_lv_children.clear();
             value = lvm_lv_get_property(lvm_lvs_all_top[y], "lv_name");
             lv_name = QString(value.value.string).trimmed();
-            
-            for(int n = lvm_lvs_all_children.size() - 1; n >= 0; n--){
-                
-                value = lvm_lv_get_property(lvm_lvs_all_children[n], "lv_name");
-                
-                if( QString(value.value.string).trimmed().startsWith(lv_name + '_') )
-                    lvm_lv_children.append(lvm_lvs_all_children[n]);
-                
-                value = lvm_lv_get_property(lvm_lvs_all_children[n], "origin");
-                
-                if( QString(value.value.string).trimmed() == lv_name )
-                    lvm_lv_children.append(lvm_lvs_all_children.takeAt(n));
-            } 
-            
+
             for(int x = old_member_lvs.size() - 1; x >= 0; x--){
 
-                value = lvm_lv_get_property(lvm_lvs_all_top[y], "copy_percent");
-                if( value.is_valid ){                
-                    if( value.value.integer ){
-                        old_member_lvs[x]->rescan(lvm_lvs_all_top[y], lvm_lv_children);
-                        m_member_lvs.append( old_member_lvs.takeAt(x) );
-                        is_new = false;
-                        continue;
-                    }
-                }
-                else if( QString(lvm_lv_get_uuid( lvm_lvs_all_top[y] )).trimmed() == old_member_lvs[x]->getUuid() ){
-                    old_member_lvs[x]->rescan(lvm_lvs_all_top[y], lvm_lv_children);
+                value = lvm_lv_get_property(lvm_lvs_all_top[y], "lv_attr");
+                flags = value.value.string;
+
+                if( QString(lvm_lv_get_name( lvm_lvs_all_top[y] )).trimmed() == old_member_lvs[x]->getName() ){
+                    old_member_lvs[x]->rescan(lvm_lvs_all_top[y], lvmVG);
                     m_member_lvs.append( old_member_lvs.takeAt(x) );
                     is_new = false;
                 }
             }
-            if(is_new)
-                m_member_lvs.append( new LogVol( lvm_lvs_all_top[y], this, NULL, lvm_lv_children ) );
+
+            if(is_new){
+                m_member_lvs.append( new LogVol( lvm_lvs_all_top[y], lvmVG, this, NULL ) );
+            }
         }
-	
-        for(int x = old_member_lvs.size() - 1; x >= 0; x--)   // delete LogVol if the lv is gone
-            delete m_member_lvs.takeAt(x);
-        
+
+        for(int x = old_member_lvs.size() - 1; x >= 0; x--){   // delete LogVol if lv is gone, always delete orphans
+            delete old_member_lvs.takeAt(x);
+        }
+
+        lvm_lvs_orphans = findOrphans(lvm_lvs_all_children);
+
+        for(int x = lvm_lvs_orphans.size() - 1; x >= 0; x--)
+            m_member_lvs.append( new LogVol( lvm_lvs_orphans[x], lvmVG, this, NULL, true ) );
     }
     else{      // lv_dm_list is empty so clean up member lvs 
         for(int x = m_member_lvs.size() - 1; x >= 0; x--) 
             delete m_member_lvs.takeAt(x);
     }
-    
+}
+
+void VolGroup::setActivePhysicalVolumes()
+{
+    QStringList pv_name_list;
+    PhysVol *pv;
+
+    for(int x = 0; x < m_member_lvs.size(); x++){
+        if( m_member_lvs[x]->isActive() ){
+            m_active = true;
+	    pv_name_list = m_member_lvs[x]->getDevicePathAll();
+	    for(int x = 0; x < pv_name_list.size(); x++){
+	        if( (pv = getPhysVolByName(pv_name_list[x])) )
+		    pv->setActive();
+	    }
+	    pv_name_list.clear();
+	}
+    }
+}
+
+// TODO -- this should use pvseg properties pvseg_start pvseg_size
+// It should be moved to PhysVol
+void VolGroup::setLastUsedExtent()
+{
+    long long last_extent, last_used_extent;
+    LogVol *lv;
+    QString pv_name;
+    QList<long long> starting_extent;
+    QStringList pv_name_list;
+
+    for(int z = m_member_pvs.size() - 1; z >= 0; z--){
+        last_extent = 0;
+        last_used_extent = 0;
+        pv_name = m_member_pvs[z]->getName();
+        for(int x = m_member_lvs.size() - 1; x >= 0; x--){
+            lv = m_member_lvs[x];
+            for(int segment = lv->getSegmentCount() - 1; segment >= 0; segment--){
+                pv_name_list = lv->getDevicePath(segment);
+                starting_extent = lv->getSegmentStartingExtent(segment);
+                for(int y = pv_name_list.size() - 1; y >= 0; y--){
+                    if( pv_name == pv_name_list[y] ){
+                        last_extent = starting_extent[y] - 1 + (lv->getSegmentExtents(segment) / (lv->getSegmentStripes(segment)));
+                        if( last_extent > last_used_extent )
+                            last_used_extent = last_extent;
+                    }
+                }
+            }
+        }
+        m_member_pvs[z]->setLastUsedExtent(last_used_extent);
+    }
 }

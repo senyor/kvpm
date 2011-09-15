@@ -38,22 +38,17 @@ class LogVol
     QList<LogVol *> m_lv_children;  // For a mirror the children are the legs and log
                                     // Snapshots are also children -- see m_snap_container
 
-    lv_t m_lvm_lv;                  // The LVM lib handle for this volume
-    QList<lv_t> m_lvm_lv_children;  // LVM handles for all the children of this volume
-
     LogVol *m_lv_parent;       // NULL if this is the 'top' lv
     QString m_lv_full_name;    // volume_group/logical_volume
     QString m_lv_name;         // name of this logical volume
     QString m_lv_mapper_path;  // full path to volume, ie: /dev/vg1/lvol1
-    QString m_lv_fs;         // Filesystem on volume or "unknown"
-    QString m_origin;        // the origin if this is a snapshot or 
-                             // the parent mirror volume to a mirror leg
+    QString m_lv_fs;         // Filesystem on volume, if known
+    QString m_origin;        // the origin if this is a snapshot
 
     QString m_log;           // The mirror log, if this is a mirror 
     QString m_type;          // the type of volume
     QString m_policy;        // the allocation policy
     QString m_state;         // the lv state
-    QString m_vg_name;       // associated volume group name
 
     QString m_uuid;
     QStringList m_tags;
@@ -93,25 +88,23 @@ class LogVol
     bool m_writable;
     bool m_valid;                // is a valid snap
     bool m_merging;              // is snap or snap origin that is merging
-
-
-    // get the lvm_t children exactly one step down from this lv and remove from the QList parameter
-    QList<lv_t> takeLVMChildren(QList<lv_t> &lvmAllChildren); 
-    QList<lv_t> takeLVMSnapshots(QList<lv_t> &lvmAllChildren);
+    
     LogVol *getParent();
     void countLegsAndLogs();
-    void processSegments();
+    void processSegments(lv_t lvmLV);
+    QStringList removePVDevices(QStringList devices);
+    QList<lv_t> getLvmSnapshots(vg_t lvmVG);
+    void insertChildren(lv_t lvmLV, vg_t lvmVG);
 
  public:
-    LogVol(lv_t lvmLV, VolGroup *vg, LogVol *lvParent, QList<lv_t> lvmAllChildren );
+    LogVol(lv_t lvmLV, vg_t lvmVG, VolGroup *vg, LogVol *lvParent, bool orphan = false);
     ~LogVol();
 
-    void rescan(lv_t lvmLV, QList<lv_t> lvmAllChildren);
+    void rescan(lv_t lvmLV, vg_t lvmVG);
     QList<LogVol *> getChildren();         // just the children -- not grandchildren etc.
     QList<LogVol *> takeChildren();        // removes the children from the logical volume
     QList<LogVol *> getAllChildrenFlat();  // All children, grandchildren etc. un-nested.
     QList<LogVol *> getSnapshots();        // This will work the same for snapcontainers or the real lv 
-    QString getVolumeGroupName();
     QString getName();
     QString getFullName();
     QString getFilesystem();

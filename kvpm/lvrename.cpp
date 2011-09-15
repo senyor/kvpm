@@ -51,7 +51,7 @@ LVRenameDialog::LVRenameDialog(LogVol *logicalVolume, QWidget *parent) :
     QVBoxLayout *layout = new QVBoxLayout();
     dialog_body->setLayout(layout);
 
-    m_vg_name  = m_lv->getVolumeGroupName();
+    m_vg_name  = m_lv->getVolumeGroup()->getName();
     m_old_name = m_lv->getName();
 
     QLabel *old_name_label = new QLabel( i18n("Old logical volume name: %1", m_old_name) );
