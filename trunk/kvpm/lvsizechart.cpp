@@ -73,7 +73,7 @@ void LVSizeChart::populateChart()
     long long total_extents = m_vg->getExtents();
     
     int lv_count = logical_volumes.size();
-    
+
     QString usage;                   // Filesystem: blank, ext2 etc. or freespace in vg
     int max_segment_width;
     

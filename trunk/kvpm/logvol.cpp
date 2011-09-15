@@ -19,10 +19,10 @@
 
 #include "fsdata.h"
 #include "fsprobe.h"
-#include "misc.h"
 #include "mountentry.h"
 #include "mountinfo.h"
 #include "mountinfolist.h"
+#include "physvol.h"
 #include "storagedevice.h"
 #include "volgroup.h"
 
@@ -41,12 +41,12 @@ struct Segment
                                           // for this segment
 };
 
-LogVol::LogVol(lv_t lvmLV, VolGroup *vg, LogVol *lvParent, QList<lv_t> lvmAllChildren ):
+LogVol::LogVol(lv_t lvmLV, vg_t lvmVG, VolGroup *vg, LogVol *lvParent, bool orphan):
     m_vg(vg),
-    m_lv_parent(lvParent)
+    m_lv_parent(lvParent),
+    m_orphan(orphan)
 {
-    m_snap_container = false;
-    rescan(lvmLV, lvmAllChildren);
+    rescan(lvmLV, lvmVG);
 }
 
 LogVol::~LogVol()
@@ -57,72 +57,12 @@ LogVol::~LogVol()
         delete children.takeAt(0);
 }
 
-QList<lv_t> LogVol::takeLVMSnapshots(QList<lv_t> &lvmAllChildren)
+void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)  // lv_t seems to change -- why?
 {
-    QList<lv_t> children;
-    QString child_name;
-    QString origin_name;
-    lvm_property_value value;
-
-    value = lvm_lv_get_property(m_lvm_lv, "lv_name");
-    QString lv_name = QString(value.value.string).trimmed();
-
-    for(int x = lvmAllChildren.size() - 1; x >= 0; x--){
-
-        value = lvm_lv_get_property(lvmAllChildren[x], "origin");
-        origin_name = QString(value.value.string).trimmed();
-
-        if( origin_name == lv_name )
-            children.append( lvmAllChildren.takeAt(x) );
-
-    }
-    return children;
-}
-
-QList<lv_t> LogVol::takeLVMChildren(QList<lv_t> &lvmAllChildren)
-{
-    QList<lv_t> children;
-    QString child_name;
-    lvm_property_value value;
-    QStringList devices = getDevicePathAll();
-
-    if(m_snap_container){
-        children.append(m_lvm_lv);
-    }
-    else{
-        if(m_mirror){
-
-            for(int x = lvmAllChildren.size() - 1; x >= 0; x--){
-
-                value = lvm_lv_get_property(lvmAllChildren[x], "lv_name");
-                child_name = QString(value.value.string).trimmed();
-
-                if( child_name == m_log ){
-                    children.append( lvmAllChildren.takeAt(x) );
-                }
-                else{
-                    for(int y = devices.size() - 1; y >= 0 ; y--){
-                        if( devices[y] == child_name ){
-                            children.append( lvmAllChildren.takeAt(x) );
-                            break;
-                        }
-                    } 
-                }
-            }
-        }
-    }
-
-    return children;
-}
-
-void LogVol::rescan(lv_t lvmLV, QList<lv_t> lvmAllChildren)  // lv_t seems to change -- why?
-{
-    m_lvm_lv = lvmLV;
     QByteArray flags;
     lvm_property_value value;
-    QList<lv_t> immediate_children; // just the children one step below this lv and snapshots
-    QList<lv_t> remaining_children; // The children of children and so on.
 
+    m_snap_container   = false;
     m_under_conversion = false;
     m_merging    = false;
     m_mirror     = false;
@@ -132,12 +72,8 @@ void LogVol::rescan(lv_t lvmLV, QList<lv_t> lvmAllChildren)  // lv_t seems to ch
     m_pvmove     = false;
     m_valid      = true;
     m_virtual    = false;
-    m_orphan     = false;
 
-    processSegments();  // sets m_mirror according to segment property "regionsize" -- total hack!
-
-    remaining_children = lvmAllChildren;
-    immediate_children = takeLVMSnapshots(remaining_children);
+    processSegments(lvmLV);  // sets m_mirror according to segment property "regionsize" -- total hack!
 
     /*
 
@@ -148,28 +84,30 @@ void LogVol::rescan(lv_t lvmLV, QList<lv_t> lvmAllChildren)  // lv_t seems to ch
 
     */
 
-    if( immediate_children.size() ){
+    value = lvm_lv_get_property(lvmLV, "lv_name");
+    m_lv_name = QString(value.value.string).trimmed();
+    m_lv_full_name = m_vg->getName() + '/' + m_lv_name;
+
+    value = lvm_lv_get_property(lvmLV, "lv_path");
+    m_lv_mapper_path = QString(value.value.string).trimmed();
+
+    value = lvm_lv_get_property(lvmLV, "mirror_log");
+    m_log = QString(value.value.string).trimmed();
+
+    QList<lv_t> lvm_child_snapshots;
+    lvm_child_snapshots.append( getLvmSnapshots(lvmVG) );
+
+    if( ( ! lvm_child_snapshots.isEmpty() ) && m_lv_parent == NULL ){
         m_snap_container = true;
         m_seg_total = 1;
     }
     else{
         m_snap_container = false;
-        value = lvm_lv_get_property(m_lvm_lv, "seg_count");
+        value = lvm_lv_get_property(lvmLV, "seg_count");
         m_seg_total = value.value.integer;
     }
 
-    value = lvm_lv_get_property(m_lvm_lv, "lv_name");
-    m_lv_name   = QString(value.value.string).trimmed();
-    m_vg_name   = m_vg->getName();
-    m_lv_full_name = m_vg_name + '/' + m_lv_name;
-
-    value = lvm_lv_get_property(m_lvm_lv, "lv_path");
-    m_lv_mapper_path = QString(value.value.string).trimmed();
-
-    value = lvm_lv_get_property(m_lvm_lv, "mirror_log");
-    m_log = QString(value.value.string).trimmed();
-
-    value = lvm_lv_get_property(m_lvm_lv, "lv_attr");
+    value = lvm_lv_get_property(lvmLV, "lv_attr");
     flags.append(value.value.string);
 
     switch( flags[0] ){
@@ -332,41 +270,40 @@ void LogVol::rescan(lv_t lvmLV, QList<lv_t> lvmAllChildren)  // lv_t seems to ch
     else
         m_lv_fs = fsprobe_getfstype2(m_lv_mapper_path);
  
-    value = lvm_lv_get_property(m_lvm_lv, "lv_size");
+    value = lvm_lv_get_property(lvmLV, "lv_size");
     m_size = value.value.integer;
     m_extents = m_size / m_vg->getExtentSize();
 
     if(m_snap || m_merging){
-        value = lvm_lv_get_property(m_lvm_lv, "origin");
+        value = lvm_lv_get_property(lvmLV, "origin");
         m_origin = value.value.string;
-	value = lvm_lv_get_property(m_lvm_lv, "snap_percent");
+	value = lvm_lv_get_property(lvmLV, "snap_percent");
         if( value.is_valid )
             m_snap_percent = (double)value.value.integer / 1.0e+6;
         else 
             m_snap_percent = 0;
     }
-    else if( (m_mirror_leg || m_mirror_log) ){
-        m_origin = parseMirrorOrigin(m_lv_name);
-
-        if(m_mirror_log && m_mirror_leg){
-            m_type = m_type.replace("leg","log");
-        }
-        else if( m_mirror || m_virtual ){
-            m_mirror_leg = true;
-        }
-    }
     else
         m_origin = "";
 
-    value = lvm_lv_get_property(m_lvm_lv, "copy_percent");
+    if( (m_mirror_leg || m_mirror_log) ){
+
+        if(m_mirror_log && m_mirror_leg)
+            m_type = m_type.replace("leg","log");
+        else if( m_mirror || m_virtual )
+            m_mirror_leg = true;
+
+    }
+
+    value = lvm_lv_get_property(lvmLV, "copy_percent");
     if(value.is_valid)
         m_copy_percent = (double)value.value.integer / 1.0e+6;
     else
         m_copy_percent = 0;
 
-    value = lvm_lv_get_property(m_lvm_lv, "lv_kernel_major");
+    value = lvm_lv_get_property(lvmLV, "lv_kernel_major");
     m_major_device = value.value.integer;
-    value = lvm_lv_get_property(m_lvm_lv, "lv_kernel_minor");
+    value = lvm_lv_get_property(lvmLV, "lv_kernel_minor");
     m_minor_device = value.value.integer;
 
     /* 
@@ -383,11 +320,11 @@ void LogVol::rescan(lv_t lvmLV, QList<lv_t> lvmAllChildren)  // lv_t seems to ch
             m_uuid = QUuid::createUuid().toString();
     }
     else{
-        value = lvm_lv_get_property(m_lvm_lv, "lv_uuid");
+        value = lvm_lv_get_property(lvmLV, "lv_uuid");
         m_uuid  = value.value.string;
     }
 
-    value = lvm_lv_get_property(m_lvm_lv, "lv_tags");
+    value = lvm_lv_get_property(lvmLV, "lv_tags");
     QString tag = value.value.string;
     m_tags = tag.split(',', QString::SkipEmptyParts);
 
@@ -430,15 +367,38 @@ void LogVol::rescan(lv_t lvmLV, QList<lv_t> lvmAllChildren)  // lv_t seems to ch
     else if( m_virtual )
         m_type = "virtual";
 
-    immediate_children.append( takeLVMChildren(remaining_children) );
+    insertChildren(lvmLV, lvmVG);
+    countLegsAndLogs();
+}
+
+void LogVol::insertChildren(lv_t lvmLV, vg_t lvmVG)
+{
+    lv_t lvm_child;
+    QByteArray  child_name;
+    QStringList child_name_list;
+    QList<lv_t> lvm_child_snapshots;
+    lvm_child_snapshots.append( getLvmSnapshots(lvmVG) );
 
     while( m_lv_children.size() )
         delete m_lv_children.takeAt(0);
 
-    for(int x = 0; x < immediate_children.size(); x++)
-        m_lv_children.append( new LogVol( immediate_children[x], m_vg, this, remaining_children) ); 
+    if( m_snap_container ){
+        for(int x = lvm_child_snapshots.size() - 1; x >= 0; x--)
+            m_lv_children.append( new LogVol(lvm_child_snapshots[x], lvmVG, m_vg, this) );
 
-    countLegsAndLogs();
+        m_lv_children.append( new LogVol(lvmLV, lvmVG, m_vg, this) );
+    }
+    else{
+        child_name_list = removePVDevices( getDevicePathAll() );
+        if( m_mirror && (! m_log.isEmpty()) )
+                child_name_list.append( m_log );
+
+        for(int x = child_name_list.size() - 1; x >= 0; x--){
+            child_name = child_name_list[x].toAscii();
+            lvm_child = lvm_lv_from_name(lvmVG, child_name.data());
+            m_lv_children.append( new LogVol(lvm_child, lvmVG, m_vg, this) );
+        }
+    }
 }
 
 void LogVol::countLegsAndLogs()
@@ -461,13 +421,47 @@ void LogVol::countLegsAndLogs()
     }
 }
 
-void LogVol::processSegments()
+QList<lv_t> LogVol::getLvmSnapshots(vg_t lvmVG)
+{
+    lvm_property_value value;
+    dm_list     *lv_dm_list = lvm_vg_list_lvs(lvmVG);
+    lvm_lv_list *lv_list;
+    QList<lv_t>  lvm_snapshots;
+
+    if(lv_dm_list){
+        dm_list_iterate_items(lv_list, lv_dm_list){ 
+            
+            value = lvm_lv_get_property(lv_list->lv, "origin");
+            if( QString(value.value.string).trimmed() == m_lv_name )
+                lvm_snapshots.append(lv_list->lv);
+        }
+    }
+
+    return lvm_snapshots;
+}
+
+QStringList LogVol::removePVDevices(QStringList devices)
+{
+    QList<PhysVol *> pvs;
+    pvs = m_vg->getPhysicalVolumes();
+
+    for(int x = pvs.size() - 1; x >= 0; x--){
+        for(int y = devices.size() - 1; y >= 0; y--){
+            if( pvs[x]->getName() == devices[y] )
+                devices.removeAt(y);
+        }
+    }
+
+    return devices;
+}
+
+void LogVol::processSegments(lv_t lvmLV)
 {
     Segment *segment;
     QStringList devices_and_starts, temp;
     QString raw_paths;
     lvm_property_value value;
-    dm_list* lvseg_dm_list = lvm_lv_list_lvsegs(m_lvm_lv);  
+    dm_list* lvseg_dm_list = lvm_lv_list_lvsegs(lvmLV);  
     lvm_lvseg_list *lvseg_list;
     lvseg_t lvm_lvseg;
 
@@ -498,9 +492,6 @@ void LogVol::processSegments()
             value = lvm_lvseg_get_property(lvm_lvseg, "devices");
             if( value.is_valid )
                 raw_paths = value.value.string;
-
-            if( raw_paths.isEmpty() && m_virtual )
-                m_orphan = true;
 
             if( raw_paths.size() ){
                 devices_and_starts = raw_paths.split(',');
@@ -638,11 +629,6 @@ VolGroup* LogVol::getVolumeGroup()
     return m_vg;
 }
 
-QString LogVol::getVolumeGroupName()
-{
-    return m_vg_name;
-}
-
 QString LogVol::getName()
 {
     return m_lv_name;
@@ -661,8 +647,8 @@ QString LogVol::getMapperPath()
 long long LogVol::getSpaceOnPhysicalVolume(QString physicalVolume)
 {
     long long space_used = 0;
-    for(int x = 0; x < getSegmentCount(); x++){
-	for(int y = 0; y < m_segments[x]->m_device_path.size(); y++){
+    for(int x = getSegmentCount() - 1; x >= 0; x--){
+	for(int y = m_segments[x]->m_device_path.size() - 1; y >= 0; y--){
 	    if(physicalVolume == (m_segments[x])->m_device_path[y]){
 		space_used += (m_segments[x]->m_size) / (m_segments[x]->m_stripes) ;
 	    }
@@ -808,18 +794,7 @@ bool LogVol::isOrigin()
 
 bool LogVol::isOrphan()
 {
-    QList<LogVol *> lvs = m_vg->getLogicalVolumesFlat();
-    bool has_invalid_origin = false;
-
-    if( m_mirror_log || m_mirror_leg ){ // look for legs and logs of lvs that are not mirrors!
-        has_invalid_origin = true;
-        for(int x = lvs.size() - 1; x >= 0; x--){
-            if( lvs[x]->getName() == m_origin && lvs[x]->isMirror() )
-                has_invalid_origin = false;  
-        } 
-    }
-
-    return ( m_orphan || has_invalid_origin );
+    return m_orphan;
 }
 
 bool LogVol::isFixed()

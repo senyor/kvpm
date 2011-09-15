@@ -13,6 +13,8 @@
  */
 
 
+#include "unmount.h"
+
 #include <sys/mount.h>
 #include <errno.h>
 #include <string.h>
@@ -25,7 +27,7 @@
 #include "mountentry.h"
 #include "misc.h"
 #include "storagepartition.h"
-#include "unmount.h"
+#include "volgroup.h"
 
 
 /* The unmount dialog is only needed for unmounting devices that have
@@ -116,7 +118,7 @@ bool unmount_filesystem(LogVol *logicalVolume)
     QList<int>  mount_position = logicalVolume->getMountPosition();
 
     QString name = logicalVolume->getName();
-    QString vg_name = logicalVolume->getVolumeGroupName();
+    QString vg_name = logicalVolume->getVolumeGroup()->getName();
 
     QString unused_message = i18n("The volume <b>%1</b> is mounted on <b>%2</b> "
 				  "Do you want to unmount it?", name, mount_points[0]);
