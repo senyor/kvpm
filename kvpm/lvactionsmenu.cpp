@@ -52,16 +52,6 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, VolGroup *volumeGroup, QWidg
     if( m_vg->getSize() == 0 )
         setEnabled(false);
 
-    m_mirror_origin = NULL;
-    if( m_lv ){
-        if( m_lv->isMirrorLeg() || m_lv->isMirrorLog() ){  // legs and logs may be nested 
-            m_mirror_origin = m_vg->getLogVolByName( m_lv->getOrigin() );
-            if( m_mirror_origin ){
-                if( m_mirror_origin->isMirrorLeg() || m_mirror_origin->isMirrorLog()  )
-                    m_mirror_origin = m_vg->getLogVolByName( m_mirror_origin->getOrigin() );
-            }
-        }
-    }
 
     KActionCollection *lv_actions = new KActionCollection(this);
     lv_actions->addAssociatedWidget(this);

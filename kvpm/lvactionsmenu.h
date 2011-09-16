@@ -37,7 +37,7 @@ Q_OBJECT
     
     KMenu *filesystem_menu;
     VolGroup *m_vg;
-    LogVol *m_lv, *m_mirror_origin;
+    LogVol *m_lv;
 
  public:
     LVActionsMenu(LogVol *logicalVolume, VolGroup *volumeGroup, QWidget *parent);

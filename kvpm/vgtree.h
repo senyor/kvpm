@@ -39,7 +39,7 @@ Q_OBJECT
 
     void setupContextMenu();
     QTreeWidgetItem *loadItem(LogVol *lv, QTreeWidgetItem *item);
-    void insertChildItems(LogVol *mirrorVolume, QTreeWidgetItem *item);
+    void insertChildItems(LogVol *parentVolume, QTreeWidgetItem *parentItem);
     void insertSegmentItems(LogVol *logicalVolume, QTreeWidgetItem *item);
     void setHiddenColumns();
 

@@ -73,8 +73,6 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)  // lv_t seems to change -- why?
     m_valid      = true;
     m_virtual    = false;
 
-    processSegments(lvmLV);  // sets m_mirror according to segment property "regionsize" -- total hack!
-
     /*
 
       The child LogVols need to be re-used, and re-parented,
@@ -87,6 +85,8 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)  // lv_t seems to change -- why?
     value = lvm_lv_get_property(lvmLV, "lv_name");
     m_lv_name = QString(value.value.string).trimmed();
     m_lv_full_name = m_vg->getName() + '/' + m_lv_name;
+
+    processSegments(lvmLV);  // sets m_mirror according to segment property "regionsize" -- total hack!
 
     value = lvm_lv_get_property(lvmLV, "lv_path");
     m_lv_mapper_path = QString(value.value.string).trimmed();
@@ -360,12 +360,16 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)  // lv_t seems to change -- why?
         m_fs_used = -1;
     }
 
-    if( m_snap_container )
+    if( m_snap_container ){
         m_type = "origin";
-    else if( m_under_conversion )
-        m_type = "under conversion";
-    else if( m_virtual )
-        m_type = "virtual";
+    }
+    else if( m_type.contains("origin", Qt::CaseInsensitive) && ! m_snap_container ){
+
+        if( m_mirror )
+            m_type = "mirror";
+        else 
+            m_type = "linear";
+    }
 
     insertChildren(lvmLV, lvmVG);
     countLegsAndLogs();
@@ -390,6 +394,7 @@ void LogVol::insertChildren(lv_t lvmLV, vg_t lvmVG)
     }
     else{
         child_name_list = removePVDevices( getDevicePathAll() );
+
         if( m_mirror && (! m_log.isEmpty()) )
                 child_name_list.append( m_log );
 
@@ -465,8 +470,8 @@ void LogVol::processSegments(lv_t lvmLV)
     lvm_lvseg_list *lvseg_list;
     lvseg_t lvm_lvseg;
 
-    for(int x = 0; x < m_segments.size(); x++)
-        delete m_segments.takeAt(x);
+    while( m_segments.size() )
+        delete m_segments.takeAt(0);
 
     if(lvseg_dm_list){
         dm_list_iterate_items(lvseg_list, lvseg_dm_list){ 
@@ -490,12 +495,11 @@ void LogVol::processSegments(lv_t lvmLV)
             segment->m_size = value.value.integer;
 
             value = lvm_lvseg_get_property(lvm_lvseg, "devices");
-            if( value.is_valid )
+            if( value.is_valid ){
                 raw_paths = value.value.string;
-
+            }
             if( raw_paths.size() ){
                 devices_and_starts = raw_paths.split(',');
-
                 for(int x = 0; x < devices_and_starts.size(); x++){
                     temp = devices_and_starts[x].split('(');
                     segment->m_device_path.append( temp[0] );

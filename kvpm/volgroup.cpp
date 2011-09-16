@@ -98,7 +98,7 @@ void VolGroup::rescan(lvm_t lvm)
             m_allocation_policy = "normal";
         else if(vg_attr.at(4) == 'a')
             m_allocation_policy = "anywhere";
-        
+
         processPhysicalVolumes(lvm_vg);
         processLogicalVolumes(lvm_vg);
 
@@ -401,27 +401,32 @@ void VolGroup::processLogicalVolumes(vg_t lvmVG)
             if( QString(value.value.string).trimmed().startsWith("snapshot") )
                 continue;
             
-            value = lvm_lv_get_property(lv_list->lv, "lv_attr");
-            flags = value.value.string;
+            value = lvm_lv_get_property(lv_list->lv, "lv_name");
+            top_name = QString(value.value.string).trimmed();
             
-            switch( flags[0] ){
-            case '-':
-            case 'c':
-            case 'O':
-            case 'o':
-            case 'p':
-                lvm_lvs_all_top.append( lv_list->lv );
-                break;
-            case 'M': 
-            case 'm':
-                value = lvm_lv_get_property(lv_list->lv, "lv_name");
-                top_name = QString(value.value.string).trimmed();
-                if( !(top_name.endsWith("_mlog") || top_name.contains("_mimagetmp_")) )
-                    lvm_lvs_all_top.append( lv_list->lv );
-                break;
-            default:
+            if(top_name.endsWith("_mlog") || top_name.contains("_mimagetmp_") || top_name.contains("_mimage_")){
                 lvm_lvs_all_children.append( lv_list->lv );
-                break;
+            }
+            else{
+                value = lvm_lv_get_property(lv_list->lv, "lv_attr");
+                flags = value.value.string;
+
+                switch( flags[0] ){
+                case '-':
+                case 'c':
+                case 'O':
+                case 'o':
+                case 'p':
+                    lvm_lvs_all_top.append( lv_list->lv );
+                    break;
+                case 'M': 
+                case 'm':
+                    lvm_lvs_all_top.append( lv_list->lv );
+                    break;
+                default:
+                    lvm_lvs_all_children.append( lv_list->lv );
+                    break;
+                }
             }
         }
         
