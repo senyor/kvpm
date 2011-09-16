@@ -12,22 +12,30 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
+
+#include "removemirrorleg.h"
+
 #include <KMessageBox>
 #include <KLocale>
 #include <QtGui>
 
 #include "logvol.h"
 #include "processprogress.h"
-#include "removemirrorleg.h"
 #include "volgroup.h"
 
 
 bool remove_mirror_leg(LogVol *mirrorLeg)
 {
     QStringList args;
+    LogVol *parent_mirror = mirrorLeg->getParent();
 
-    VolGroup *vg = mirrorLeg->getVolumeGroup();
-    LogVol *mirror = vg->getLogVolByName( mirrorLeg->getOrigin() );
+    while( parent_mirror->getParent() != NULL ){
+        if(  !parent_mirror->getParent()->isSnapContainer() )
+            break;
+        else
+            parent_mirror = parent_mirror->getParent();
+    }
+
     QStringList pvs_to_remove  = mirrorLeg->getDevicePathAll();
 
     QString message = i18n("Remove mirror leg: %1 ?", mirrorLeg->getName());
@@ -37,7 +45,7 @@ bool remove_mirror_leg(LogVol *mirrorLeg)
 	args << "lvconvert"
 	     << "--mirrors" 
 	     << QString("-1")
-	     << mirror->getFullName()
+	     << parent_mirror->getFullName()
 	     << pvs_to_remove;
 
 	ProcessProgress remove(args, i18n("Removing mirror leg..."), true);

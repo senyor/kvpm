@@ -89,7 +89,6 @@ class LogVol
     bool m_valid;                // is a valid snap
     bool m_merging;              // is snap or snap origin that is merging
     
-    LogVol *getParent();
     void countLegsAndLogs();
     void processSegments(lv_t lvmLV);
     QStringList removePVDevices(QStringList devices);
@@ -105,6 +104,7 @@ class LogVol
     QList<LogVol *> takeChildren();        // removes the children from the logical volume
     QList<LogVol *> getAllChildrenFlat();  // All children, grandchildren etc. un-nested.
     QList<LogVol *> getSnapshots();        // This will work the same for snapcontainers or the real lv 
+    LogVol *getParent();                   // NULL if this is a "top level" lv
     QString getName();
     QString getFullName();
     QString getFilesystem();
@@ -112,7 +112,7 @@ class LogVol
     QString getPolicy();
     QString getState();
     QString getType();
-    QString getOrigin();        // The name of the parent volume to a snapshot or mirror leg/log
+    QString getOrigin();        // The name of the parent volume to a snapshot
     QString getUuid();
     int getSegmentCount();
     int getSegmentStripes(int segment);

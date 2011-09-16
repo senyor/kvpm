@@ -211,6 +211,8 @@ QTreeWidgetItem *VGTree::loadItem(LogVol *lv, QTreeWidgetItem *item)
     new_child_count = item->childCount();
 
     if( is_sc ){   // expand the item if it is a new snap container or snap count is different
+        qDebug() << "Is snapc";
+
         if(m_init){
             item->setExpanded(true);
         }
@@ -305,47 +307,47 @@ void VGTree::insertSegmentItems(LogVol *lv, QTreeWidgetItem *item)
     }
 }
 
-//
-// Change to parentVolume ????
-// parentItem ????
-void VGTree::insertChildItems(LogVol *originVolume, QTreeWidgetItem *item)
+void VGTree::insertChildItems(LogVol *parentVolume, QTreeWidgetItem *parentItem)
 {
     QTreeWidgetItem *child_item;
     QStringList child_data;
     LogVol *child_volume;
 
-    QList<LogVol *>  immediate_children = originVolume->getChildren();
+    QList<LogVol *>  immediate_children = parentVolume->getChildren();
     long lv_child_count = immediate_children.size();
 
     for(int x = 0; x < lv_child_count; x++){
         child_item = NULL;
 	child_volume = immediate_children[x];
 
-        for(int y = item->childCount() - 1; y >= 0; y--){
-            if(item->child(y)->data(0, Qt::DisplayRole).toString() == child_volume->getName() )
-                child_item = loadItem(child_volume, item->child(y));
+        for(int y = parentItem->childCount() - 1; y >= 0; y--){
+            if(parentItem->child(y)->data(0, Qt::DisplayRole).toString() == child_volume->getName() )
+                child_item = loadItem(child_volume, parentItem->child(y));
         }
 
-        if(child_item == NULL)
-            child_item = loadItem(child_volume, new QTreeWidgetItem(item));
-            
+        if(child_item == NULL){
+            child_item = loadItem(child_volume, new QTreeWidgetItem(parentItem));
+        }
+
         for(int column = 1; column < child_item->columnCount() ; column++)
             child_item->setTextAlignment(column, Qt::AlignRight);
-        
     }
 
     bool match;     // Remove child items for logical volumes that no longer exist
-    for(int y = item->childCount() - 1; y >= 0; y--){
+    for(int y = parentItem->childCount() - 1; y >= 0; y--){
+
         match = false;
+
         for(int x = 0; x < immediate_children.size(); x++){
             child_volume = immediate_children[x];
 
-            if(item->child(y)->data(0, Qt::DisplayRole).toString() == child_volume->getName() )
+            if(parentItem->child(y)->data(0, Qt::DisplayRole).toString() == child_volume->getName() ){
                 match = true;
+            }
         }
 
         if( !match ){
-            delete item->takeChild(y);
+            delete parentItem->takeChild(y);
         }
     }
 
