@@ -127,11 +127,14 @@ void VolGroup::rescan(lvm_t lvm)
    under another, like a mirror leg, but doesn't seem to have a parent,
    or something left behind by a misbehaving lvm process  */
  
-QList<lv_t> VolGroup::findOrphans(QList<lv_t> childList)
+lv_t VolGroup::findOrphan(QList<lv_t> &childList)
 {
     QList<LogVol *> all_lvs;
+    QList<lv_t> orphan_list;
     lvm_property_value value;
     QString child_name;
+    QString lv_attr;
+    lv_t orphan = NULL;
 
     all_lvs = getLogicalVolumesFlat();
 
@@ -149,7 +152,26 @@ QList<lv_t> VolGroup::findOrphans(QList<lv_t> childList)
         }
     }
 
-    return childList;
+    for(int x = childList.size() - 1; x >= 0; x--){  // sort mirrors first, loners last
+
+        value = lvm_lv_get_property(childList[x], "lv_attr");
+        lv_attr = QString(value.value.string);
+
+        if( lv_attr[0] == 'm' || lv_attr[0] == 'M' )
+            orphan_list.prepend(childList[x]);
+        else
+            orphan_list.append(childList[x]);
+
+    }
+
+    if( ! orphan_list.isEmpty() ){
+        orphan = orphan_list.takeAt(0);
+        childList = orphan_list;
+        return orphan;
+    }
+
+    childList = orphan_list;
+    return NULL;
 }
 
 const QList<LogVol *>  VolGroup::getLogicalVolumes()
@@ -161,7 +183,6 @@ const QList<LogVol *>  VolGroup::getLogicalVolumesFlat()
 {
     QList<LogVol *> tree_list = m_member_lvs;
     QList<LogVol *> flat_list;
-
     long tree_list_size = tree_list.size(); 
 
     for(int x = 0; x < tree_list_size; x++){
@@ -387,7 +408,7 @@ void VolGroup::processLogicalVolumes(vg_t lvmVG)
     QString top_name;
     QList<lv_t> lvm_lvs_all_top;       // top level lvm logical volume handles
     QList<lv_t> lvm_lvs_all_children;  // top level lvm logical volume handles
-    QList<lv_t> lvm_lvs_orphans;       // non-top lvm logical volume handles with no home
+    lv_t lvm_lv_orphan;                // non-top lvm logical volume handle with no home
     QByteArray flags;
     
     QList<LogVol *> old_member_lvs = m_member_lvs;
@@ -453,14 +474,12 @@ void VolGroup::processLogicalVolumes(vg_t lvmVG)
             }
         }
 
-        for(int x = old_member_lvs.size() - 1; x >= 0; x--){   // delete LogVol if lv is gone, always delete orphans
+        for(int x = old_member_lvs.size() - 1; x >= 0; x--){   // delete LogVol if lv is gone or is orphan
             delete old_member_lvs.takeAt(x);
         }
 
-        lvm_lvs_orphans = findOrphans(lvm_lvs_all_children);
-
-        for(int x = lvm_lvs_orphans.size() - 1; x >= 0; x--)
-            m_member_lvs.append( new LogVol( lvm_lvs_orphans[x], lvmVG, this, NULL, true ) );
+        while( (lvm_lv_orphan = findOrphan(lvm_lvs_all_children)) )
+            m_member_lvs.append( new LogVol( lvm_lv_orphan, lvmVG, this, NULL, true ) );
     }
     else{      // lv_dm_list is empty so clean up member lvs 
         for(int x = m_member_lvs.size() - 1; x >= 0; x--) 

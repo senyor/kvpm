@@ -290,7 +290,7 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)  // lv_t seems to change -- why?
 
         if(m_mirror_log && m_mirror_leg)
             m_type = m_type.replace("leg","log");
-        else if( m_mirror || m_virtual )
+        else if( (m_mirror || m_virtual) && !m_mirror_log )
             m_mirror_leg = true;
 
     }
@@ -373,6 +373,9 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)  // lv_t seems to change -- why?
 
     insertChildren(lvmLV, lvmVG);
     countLegsAndLogs();
+
+    qDebug() << m_lv_name << isOrphan();
+
 }
 
 void LogVol::insertChildren(lv_t lvmLV, vg_t lvmVG)

@@ -49,7 +49,7 @@ class VolGroup
     bool m_exported;
     bool m_partial;        // some physical volumes may be missing
 
-    QList<lv_t>  findOrphans(QList<lv_t> childList);
+    lv_t findOrphan(QList<lv_t> &childList);
     void processLogicalVolumes(vg_t lvmVG);
     void processPhysicalVolumes(vg_t lvmVG);
     void setActivePhysicalVolumes();
