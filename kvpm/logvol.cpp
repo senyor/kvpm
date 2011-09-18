@@ -46,6 +46,7 @@ LogVol::LogVol(lv_t lvmLV, vg_t lvmVG, VolGroup *vg, LogVol *lvParent, bool orph
     m_lv_parent(lvParent),
     m_orphan(orphan)
 {
+    m_snap_container   = false;
     rescan(lvmLV, lvmVG);
 }
 
@@ -61,7 +62,7 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)  // lv_t seems to change -- why?
 {
     QByteArray flags;
     lvm_property_value value;
-
+    bool was_snap_container = m_snap_container;
     m_snap_container   = false;
     m_under_conversion = false;
     m_is_origin  = false;
@@ -318,8 +319,7 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)  // lv_t seems to change -- why?
 	m_persistant = false;
     */
 
-    if( m_snap_container ){
-        if( m_uuid.isEmpty() )
+    if( m_snap_container && !was_snap_container ){
             m_uuid = QUuid::createUuid().toString();
     }
     else{
@@ -376,6 +376,10 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)  // lv_t seems to change -- why?
 
     insertChildren(lvmLV, lvmVG);
     countLegsAndLogs();
+    calculateTotalSize();
+
+    qDebug() << m_lv_name << getUuid() << isSnapContainer();
+
 }
 
 void LogVol::insertChildren(lv_t lvmLV, vg_t lvmVG)
@@ -461,6 +465,19 @@ QStringList LogVol::removePVDevices(QStringList devices)
     }
 
     return devices;
+}
+
+void LogVol::calculateTotalSize()
+{
+    m_total_size = 0;
+
+    if( m_lv_children.size() ){
+        for(int x = m_lv_children.size() - 1; x >= 0; x--)
+            m_total_size += m_lv_children[x]->getTotalSize();
+    }
+    else{
+        m_total_size = m_size;
+    }
 }
 
 void LogVol::processSegments(lv_t lvmLV)
@@ -672,6 +689,11 @@ long long LogVol::getExtents()
 long long LogVol::getSize()
 {
     return m_size;
+}
+
+long long LogVol::getTotalSize()
+{
+    return m_total_size;
 }
 
 QString LogVol::getFilesystem()

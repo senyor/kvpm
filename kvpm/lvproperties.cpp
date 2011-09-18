@@ -167,11 +167,13 @@ QFrame *LVProperties::generalFrame(int segment)
 	temp_label->setAlignment(Qt::AlignCenter);
 	layout->addWidget(temp_label);
 	extents = m_lv->getSegmentExtents(segment);
-        total_extents = (extents * m_lv->getMirrorCount()) + m_lv->getLogCount();
-        total_size = extent_size * total_extents;
+        total_size = m_lv->getTotalSize();
+        total_extents = total_size / extent_size;
 	stripes = m_lv->getSegmentStripes(segment);
 	stripe_size = m_lv->getSegmentStripeSize(segment);
-	layout->addWidget(new QLabel( i18n("Extents: %1", extents) ));
+
+        if( !m_lv->isSnapContainer() )
+            layout->addWidget(new QLabel( i18n("Extents: %1", extents) ));
 
 	if( !m_lv->isMirror() ){
 
@@ -184,11 +186,11 @@ QFrame *LVProperties::generalFrame(int segment)
 		layout->addWidget(new QLabel( i18n("Stripe size: n/a") ));
 	    }
 	}
-	else if( !m_lv->isMirrorLog() ){
+	else if( !m_lv->isMirrorLog() || ( m_lv->isMirrorLog() && m_lv->isMirror() ) ){
             layout->addWidget(new QLabel( i18n("Total extents: %1", total_extents) ));
 	    layout->addWidget(new QLabel( i18n("Total size: %1", sizeToString(total_size)) ));
 	}
-	if( !(m_lv->isMirrorLeg() || m_lv->isMirrorLog() )){
+	if( !( m_lv->isMirrorLeg() || m_lv->isMirrorLog() )){
 
             layout->addWidget(new QLabel( i18n("Filesystem: %1", m_lv->getFilesystem() ) ));
 

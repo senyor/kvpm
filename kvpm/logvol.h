@@ -59,6 +59,7 @@ class LogVol
     double  m_snap_percent;      // the percentage used, if this is a snapshot
     double  m_copy_percent;      // the percentage of extents moved, if pvmove underway
     long long m_size;            // size in bytes
+    long long m_total_size;      // size in bytes, size of all children (mirror legs/logs and snaps) added together
     long long m_extents;         // size in extents
     long long m_block_size;      // block size of fs
     long long m_fs_size;         // fs size in bytes 
@@ -95,6 +96,7 @@ class LogVol
     QStringList removePVDevices(QStringList devices);
     QList<lv_t> getLvmSnapshots(vg_t lvmVG);
     void insertChildren(lv_t lvmLV, vg_t lvmVG);
+    void calculateTotalSize();
 
  public:
     LogVol(lv_t lvmLV, vg_t lvmVG, VolGroup *vg, LogVol *lvParent, bool orphan = false);
@@ -130,6 +132,7 @@ class LogVol
     long long getSpaceOnPhysicalVolume(QString physicalVolume);
     long long getExtents();
     long long getSize();
+    long long getTotalSize();
     long long getFilesystemSize();
     long long getFilesystemUsed();
     long long getFilesystemBlockSize();
