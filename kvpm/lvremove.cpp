@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008 2010 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -13,11 +13,12 @@
  */
 
 
+#include "lvremove.h"
+
 #include <KMessageBox>
 #include <KLocale>
 #include <QtGui>
 
-#include "lvremove.h"
 #include "logvol.h"
 #include "processprogress.h"
 
@@ -32,6 +33,8 @@ bool remove_lv(LogVol *logicalVolume)
 			   "Any data on it will be lost.", "<b>" + full_name + "</b>");
 
     QString message2 = i18n("This volume has snapshots that must be deleted first");
+
+    qDebug() << "Origin:" << logicalVolume->isOrigin();
 
     if( logicalVolume->isOrigin() ){
         KMessageBox::error( 0, message2);
