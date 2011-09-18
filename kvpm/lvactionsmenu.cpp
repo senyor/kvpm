@@ -174,10 +174,18 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, VolGroup *volumeGroup, QWidg
                     remove_mirror_action->setEnabled(false);
 		}
 
-                lv_extend_action->setEnabled(true);
-		lv_reduce_action->setEnabled(false);
+                if( m_lv->isMerging() ){
+                    lv_extend_action->setEnabled(false);
+                    snap_create_action->setEnabled(false);
+                    add_mirror_action->setEnabled(false);
+                }
+                else{
+                    lv_extend_action->setEnabled(true);
+                    snap_create_action->setEnabled(true);
+                }
+
+                lv_reduce_action->setEnabled(false);
                 pv_move_action->setEnabled(false);
-                snap_create_action->setEnabled(true);
             }
             else if( m_lv->isSnap() ){
                 add_mirror_action->setEnabled(false);
