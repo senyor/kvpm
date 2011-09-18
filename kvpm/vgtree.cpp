@@ -118,6 +118,7 @@ void VGTree::loadData()
     setSortingEnabled(true);
     setupContextMenu();
     m_init = false;
+    emit currentItemChanged(currentItem(), currentItem());
 
     return;
 }
