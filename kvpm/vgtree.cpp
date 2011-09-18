@@ -211,7 +211,6 @@ QTreeWidgetItem *VGTree::loadItem(LogVol *lv, QTreeWidgetItem *item)
     new_child_count = item->childCount();
 
     if( is_sc ){   // expand the item if it is a new snap container or snap count is different
-        qDebug() << "Is snapc";
 
         if(m_init){
             item->setExpanded(true);

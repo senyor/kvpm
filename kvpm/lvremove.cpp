@@ -34,8 +34,6 @@ bool remove_lv(LogVol *logicalVolume)
 
     QString message2 = i18n("This volume has snapshots that must be deleted first");
 
-    qDebug() << "Origin:" << logicalVolume->isOrigin();
-
     if( logicalVolume->isOrigin() ){
         KMessageBox::error( 0, message2);
         return false; 

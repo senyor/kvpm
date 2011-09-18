@@ -161,40 +161,52 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, VolGroup *volumeGroup, QWidg
 		lv_remove_action->setEnabled(true);
 		unmount_filesystem_action->setEnabled(false);
 		mount_filesystem_action->setEnabled(true);
-
-                if( m_lv->isSnap() && ( m_lv->isMerging() || !m_lv->isValid() ) ){
-                    lv_mkfs_action->setEnabled(false);
-                    lv_removefs_action->setEnabled(false);
-                    lv_remove_action->setEnabled(false);
-                }
 	    }
 
-            if( m_lv->isSnap() || m_lv->isOrigin() ){
-                add_mirror_action->setEnabled(false);
-		remove_mirror_action->setEnabled(false);
+            if( m_lv->isOrigin() ){
 
-		if( m_lv->isOrigin() )
-                    lv_extend_action->setEnabled(true);
+                if( m_lv->isMirror() ){
+                    add_mirror_action->setEnabled(false);
+                    remove_mirror_action->setEnabled(true);
+                }
+                else{
+                    add_mirror_action->setEnabled(true);
+                    remove_mirror_action->setEnabled(false);
+		}
 
+                lv_extend_action->setEnabled(true);
 		lv_reduce_action->setEnabled(false);
                 pv_move_action->setEnabled(false);
-
-                if( m_lv->isSnap() ){
-                    lv_maxfs_action->setEnabled(false);
-                    snap_create_action->setEnabled(false);
-                    if( m_lv->isMerging() || !m_lv->isValid() ){
-                        lv_extend_action->setEnabled(false);
-                        lv_reduce_action->setEnabled(false);
-                    }
-                    else{
-                        lv_extend_action->setEnabled(true);
-                        lv_reduce_action->setEnabled(true);
-                    }
-                }
-                else
-                    snap_create_action->setEnabled(true);
-
+                snap_create_action->setEnabled(true);
+            }
+            else if( m_lv->isSnap() ){
+                add_mirror_action->setEnabled(false);
+                remove_mirror_action->setEnabled(false);
                 mirror_menu->setEnabled(false);
+                lv_maxfs_action->setEnabled(false);
+                snap_create_action->setEnabled(false);
+                pv_move_action->setEnabled(false);
+
+                if( m_lv->isMerging() || !m_lv->isValid() ){
+                    lv_extend_action->setEnabled(false);
+                    lv_reduce_action->setEnabled(false);
+                    mount_filesystem_action->setEnabled(false);
+                    lv_fsck_action->setEnabled(false);
+                    lv_mkfs_action->setEnabled(false);
+                    lv_removefs_action->setEnabled(false);
+                    
+                    if( !m_lv->isValid() )
+                        lv_remove_action->setEnabled(true);
+                    else
+                        lv_remove_action->setEnabled(false);
+                }
+                else{
+                    lv_extend_action->setEnabled(true);
+                    lv_reduce_action->setEnabled(true);
+                    lv_fsck_action->setEnabled(true);
+                    lv_mkfs_action->setEnabled(true);
+                    lv_removefs_action->setEnabled(true);
+                }
             }
             else if( m_lv->isMirror() ){
                 add_mirror_action->setEnabled(true);
@@ -211,18 +223,16 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, VolGroup *volumeGroup, QWidg
             }
 
 	    remove_mirror_leg_action->setEnabled(false);
-            lv_rename_action->setEnabled(true);
-            lv_change_action->setEnabled(true);
-            filesystem_menu->setEnabled(true);
 
-            if( m_lv->isSnap() && ( m_lv->isMerging() || !m_lv->isValid() ) ){
+            if(m_lv->isSnap() && m_lv->isMerging()){
                 lv_rename_action->setEnabled(false);
-		lv_mkfs_action->setEnabled(false);
-		lv_removefs_action->setEnabled(false);
-		lv_reduce_action->setEnabled(false);
-                lv_extend_action->setEnabled(false);
-		mount_filesystem_action->setEnabled(false);
-		lv_remove_action->setEnabled(false);
+                lv_change_action->setEnabled(false);
+                filesystem_menu->setEnabled(false);
+            }
+            else{
+                lv_rename_action->setEnabled(true);
+                lv_change_action->setEnabled(true);
+                filesystem_menu->setEnabled(true);
             }
 	}
         else if( m_lv->isOrphan() ){
