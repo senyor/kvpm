@@ -64,6 +64,7 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)  // lv_t seems to change -- why?
 
     m_snap_container   = false;
     m_under_conversion = false;
+    m_is_origin  = false;
     m_merging    = false;
     m_mirror     = false;
     m_mirror_leg = false;
@@ -139,10 +140,12 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)  // lv_t seems to change -- why?
 	break;
     case 'O':
 	m_type = "origin (merging)";
+        m_is_origin = true;
         m_merging = true;
 	break;
     case 'o':
 	m_type = "origin";
+        m_is_origin = true;
 	break;
     case 'p':
 	m_type = "pvmove";
@@ -373,9 +376,6 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)  // lv_t seems to change -- why?
 
     insertChildren(lvmLV, lvmVG);
     countLegsAndLogs();
-
-    qDebug() << m_lv_name << isOrphan();
-
 }
 
 void LogVol::insertChildren(lv_t lvmLV, vg_t lvmVG)
@@ -796,7 +796,7 @@ bool LogVol::isPvmove()
 
 bool LogVol::isOrigin()
 {
-    return m_type.contains("origin", Qt::CaseInsensitive);
+    return m_is_origin;
 }
 
 bool LogVol::isOrphan()
