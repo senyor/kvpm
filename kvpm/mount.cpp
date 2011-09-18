@@ -309,10 +309,6 @@ QWidget* MountDialog::mountPointBox()
 
 void MountDialog::selectMountPoint(bool)
 {
-    char device[BUFF_LEN];
-
-    strncpy(device, m_device_to_mount.toAscii().data(), BUFF_LEN);
-
     // TODO
     // Some of this can be moved out of the 'if()' I think.
     
@@ -450,11 +446,12 @@ void MountDialog::mountFilesystem()
 	all_options.append( additional_options.join(",") );
     }
 
-    int error = mount( m_device_to_mount.toAscii().data(),
-		       m_mount_point.toAscii().data(),
-		       m_filesystem_type.toAscii().data(),
-		       options, 
-		       ( additional_options.join(",") ).toAscii().data() );
+    const QByteArray device      = m_device_to_mount.toAscii();
+    const QByteArray mount_point = m_mount_point.toAscii();
+    const QByteArray fs_type     = m_filesystem_type.toAscii();
+    const QByteArray fs_options  = additional_options.join(",").toAscii();
+
+    int error = mount( device.data(), mount_point.data(), fs_type.data(), options, fs_options.data() );
 
     if( !error )
 	addMountEntry( m_device_to_mount, m_mount_point, m_filesystem_type, all_options, 0, 0);

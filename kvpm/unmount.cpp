@@ -92,17 +92,18 @@ UnmountDialog::UnmountDialog(QString device, QStringList mountPoints,
 
 void UnmountDialog::unmountFilesystems()
 {
-    QString mount_point, error_string, error_message;
-    
+    QByteArray mount_point;
+    QString error_string, error_message;
+
     for(int x = 0; x < m_check_list.size(); x++){
 	if( m_check_list[x]->isChecked() ) {
 	    
-	    mount_point = m_check_list[x]->getUnmungedText();
-	    if( umount2( mount_point.toAscii().data() , 0) ){
+	    mount_point = m_check_list[x]->getUnmungedText().toAscii();
+	    if( umount2( mount_point.data() , 0) ){
 		error_string =  strerror( errno );
 
 		error_message = i18n("Unmounting %1 failed with error number: %2 "
-				     "%3", mount_point, errno, error_string );
+				     "%3", QString(mount_point), errno, error_string );
 
 		KMessageBox::error(0, error_message);
 	    }
@@ -208,10 +209,9 @@ bool unmount_filesystem(StoragePartition *partition)
 bool unmount_filesystem(const QString mountPoint)
 {
     QString error_string, error_message;
-    QByteArray mount_point_array = mountPoint.toAscii();
-    const char *mount_point = mount_point_array.data();
+    QByteArray mount_point = mountPoint.toAscii();
 
-    if( umount2(mount_point, 0) ){
+    if( umount2(mount_point.data(), 0) ){
 	error_string =  strerror( errno );
 	
 	error_message = i18n("Unmounting %1 failed with error number: %2 "

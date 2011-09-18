@@ -39,12 +39,15 @@ bool fs_extend(QString path, QString fs, bool isLV){
     QList<MountInformation *> mounts = mount_info_list.getMountInformation( path );
     QString mp;               // mount point
     bool isMounted = false;
+    const QByteArray path_array = path.toAscii();
+    const QByteArray fs_array = fs.toAscii();
 
     if( mounts.size() ){
         mp = mounts[0]->getMountPoint();
         isMounted = true;
     }
 
+    const QByteArray mp_array = mp.toAscii();
     QStringList arguments, output;
     unsigned long options = 0;
 
@@ -119,7 +122,7 @@ bool fs_extend(QString path, QString fs, bool isLV){
 
         if( ! isMounted ){
             if( do_temp_mount(path, fs) ){
-                if( ! mount( path.toAscii().data(), "/tmp/kvpm_tmp_mount", NULL, options, "resize" )){
+                if( ! mount( path_array.data(), "/tmp/kvpm_tmp_mount", NULL, options, "resize" )){
                     do_temp_unmount();
                     return true;
                 }
@@ -131,7 +134,7 @@ bool fs_extend(QString path, QString fs, bool isLV){
             return false;
         }
         else{
-            if(mount( path.toAscii().data(), mp.toAscii().data(), NULL, options, "resize" )){
+            if(mount( path_array.data(), mp_array.data(), NULL, options, "resize" )){
                 KMessageBox::error(0, i18n("Error number: %1 %2", errno, strerror(errno)));
                 return false;
             }
@@ -180,17 +183,15 @@ bool do_temp_mount(QString path, QString fs){
 
     QDir temp_dir( "/tmp/kvpm_tmp_mount" );
     unsigned long options = 0;
+    const QByteArray path_array = path.toAscii();
+    const QByteArray fs_array = fs.toAscii();
 
     if( ! temp_dir.exists() ){
         temp_dir.cdUp();
         temp_dir.mkdir("kvpm_tmp_mount");
     }
 
-    int error = mount( path.toAscii().data(), 
-                       "/tmp/kvpm_tmp_mount",
-                       fs.toAscii().data(),
-                       options,
-                       NULL );
+    int error = mount( path_array.data(), "/tmp/kvpm_tmp_mount", fs_array.data(), options, NULL );
 
     if( error ){
         KMessageBox::error(0, QString("Error number: %1 %2").arg(errno).arg(strerror(errno)));
