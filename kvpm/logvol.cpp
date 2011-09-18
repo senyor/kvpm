@@ -377,9 +377,6 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)  // lv_t seems to change -- why?
     insertChildren(lvmLV, lvmVG);
     countLegsAndLogs();
     calculateTotalSize();
-
-    qDebug() << m_lv_name << getUuid() << isSnapContainer();
-
 }
 
 void LogVol::insertChildren(lv_t lvmLV, vg_t lvmVG)
