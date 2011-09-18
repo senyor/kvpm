@@ -148,7 +148,11 @@ QTreeWidgetItem *VGTree::loadItem(LogVol *lv, QTreeWidgetItem *item)
     }
 
     item->setData(0, Qt::DisplayRole, lv_name);
-    item->setData(1, Qt::DisplayRole, sizeToString(lv->getSize()));           
+
+    if(lv->isSnapContainer())
+        item->setData(1, Qt::DisplayRole, sizeToString(lv->getTotalSize()));           
+    else
+        item->setData(1, Qt::DisplayRole, sizeToString(lv->getSize()));           
       
     if( lv->getFilesystemSize() > -1 &&  lv->getFilesystemUsed() > -1 ){
         fs_remaining = lv->getFilesystemSize() - lv->getFilesystemUsed();
