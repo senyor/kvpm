@@ -30,7 +30,7 @@ bool remove_mirror_leg(LogVol *mirrorLeg)
     LogVol *parent_mirror = mirrorLeg->getParent();
 
     while( parent_mirror->getParent() != NULL ){
-        if(  !parent_mirror->getParent()->isSnapContainer() )
+        if( parent_mirror->getParent()->isSnapContainer() )
             break;
         else
             parent_mirror = parent_mirror->getParent();
