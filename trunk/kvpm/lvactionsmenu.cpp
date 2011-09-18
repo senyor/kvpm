@@ -219,9 +219,16 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, VolGroup *volumeGroup, QWidg
             else if( m_lv->isMirror() ){
                 add_mirror_action->setEnabled(true);
 		remove_mirror_action->setEnabled(true);
-                lv_extend_action->setEnabled(true);
-                lv_reduce_action->setEnabled(true);
                 pv_move_action->setEnabled(false);
+
+                if( m_lv->isUnderConversion() ){
+                    lv_extend_action->setEnabled(false);
+                    lv_reduce_action->setEnabled(false);
+                }
+                else{
+                    lv_extend_action->setEnabled(true);
+                    lv_reduce_action->setEnabled(true);
+                }
             }
 	    else{
                 add_mirror_action->setEnabled(true);
