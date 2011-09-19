@@ -129,14 +129,12 @@ void VolGroup::rescan(lvm_t lvm)
  
 lv_t VolGroup::findOrphan(QList<lv_t> &childList)
 {
-    QList<LogVol *> all_lvs;
+    QList<LogVol *> all_lvs = getLogicalVolumesFlat();
     QList<lv_t> orphan_list;
     lvm_property_value value;
     QString child_name;
     QString lv_attr;
     lv_t orphan = NULL;
-
-    all_lvs = getLogicalVolumesFlat();
 
     for(int x = all_lvs.size() - 1; x >= 0; x--){
         for(int y = childList.size() - 1; y >= 0; y--){
@@ -491,15 +489,18 @@ void VolGroup::setActivePhysicalVolumes()
 {
     QStringList pv_name_list;
     PhysVol *pv;
+    QList<LogVol *> all_lvs = getLogicalVolumesFlat(); 
 
-    for(int x = 0; x < m_member_lvs.size(); x++){
-        if( m_member_lvs[x]->isActive() ){
+    for(int x = all_lvs.size() - 1; x >= 0; x--){
+        if( all_lvs[x]->isActive() ){
             m_active = true;
-	    pv_name_list = m_member_lvs[x]->getDevicePathAll();
-	    for(int x = 0; x < pv_name_list.size(); x++){
+	    pv_name_list = all_lvs[x]->getDevicePathAllFlat();
+
+	    for(int x = pv_name_list.size() - 1; x >= 0; x--){
 	        if( (pv = getPhysVolByName(pv_name_list[x])) )
 		    pv->setActive();
 	    }
+
 	    pv_name_list.clear();
 	}
     }
