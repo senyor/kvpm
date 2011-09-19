@@ -12,6 +12,8 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
+#include "fsdata.h"
+
 #include <errno.h>
 #include <string.h>
 #include <sys/statvfs.h>
@@ -21,7 +23,6 @@
 
 #include <QtGui>
 
-#include "fsdata.h"
 #include "misc.h"
 
 FSData *get_fs_data(QString path){

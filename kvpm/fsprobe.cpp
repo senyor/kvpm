@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -13,19 +13,20 @@
  */
 
 
+#include "fsprobe.h"
+
 #include <blkid/blkid.h>
 
 #include <QtGui>
 
-#include "fsprobe.h"
 
 #define BLKID_EMPTY_CACHE       "/dev/null"
 
 QString fsprobe_getfstype2(QString devicePath)
 {
     static blkid_cache blkid2;
+    const QByteArray path = devicePath.toAscii();
     QString fs_type;
-
     blkid2 = NULL;
     
     if( blkid_get_cache(&blkid2, BLKID_EMPTY_CACHE) < 0){
@@ -33,7 +34,7 @@ QString fsprobe_getfstype2(QString devicePath)
 	return QString();
     }
     else{
-	fs_type = QString( blkid_get_tag_value(blkid2, "TYPE", devicePath.toAscii().data() ) );
+	fs_type = QString( blkid_get_tag_value(blkid2, "TYPE", path.data() ) );
 	blkid_put_cache(blkid2);
 	return fs_type;
     }
