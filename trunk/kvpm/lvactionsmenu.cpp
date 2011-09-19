@@ -354,7 +354,6 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, VolGroup *volumeGroup, QWidg
 	    filesystem_menu->setEnabled(true);
 	}
 	else{
-
 	    if( m_lv->isMounted() ){
 		lv_remove_action->setEnabled(false);
 		unmount_filesystem_action->setEnabled(true);
@@ -389,17 +388,28 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, VolGroup *volumeGroup, QWidg
                 snap_create_action->setEnabled(true);
             }
 
-            mount_filesystem_action->setEnabled(true);
 	    lv_removefs_action->setEnabled(false);
 	    lv_mkfs_action->setEnabled(false);
 	    lv_fsck_action->setEnabled(false);
 	    lv_maxfs_action->setEnabled(false);
 	    lv_reduce_action->setEnabled(false);
-	    lv_change_action->setEnabled(true);
 	    lv_extend_action->setEnabled(false);
 	    remove_mirror_leg_action->setEnabled(false);
-	    filesystem_menu->setEnabled(true);
-	}
+
+            if(!m_lv->isVirtual()){
+                filesystem_menu->setEnabled(true);
+                mount_filesystem_action->setEnabled(true);
+                lv_change_action->setEnabled(true);
+            }
+            else{
+                lv_rename_action->setEnabled(false);
+                lv_remove_action->setEnabled(false);
+                mount_filesystem_action->setEnabled(false);
+                lv_change_action->setEnabled(false);
+                filesystem_menu->setEnabled(false);
+                mirror_menu->setEnabled(false);
+            }
+        }
 
         if( !m_lv->isActive() ){
 	    lv_removefs_action->setEnabled(false);
