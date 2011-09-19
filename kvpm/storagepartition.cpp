@@ -12,6 +12,9 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
+
+#include "storagepartition.h"
+
 #include <QtGui>
 
 #include "fsdata.h"
@@ -21,7 +24,6 @@
 #include "mountinfo.h"
 #include "mountinfolist.h"
 #include "physvol.h"
-#include "storagepartition.h"
 
 StoragePartition::StoragePartition(PedPartition *part,
 				   int freespaceCount,
@@ -106,7 +108,9 @@ StoragePartition::StoragePartition(PedPartition *part,
 	m_fs_type = "";
     }
     else{
-	m_fs_type = fsprobe_getfstype2(m_partition_path);
+	m_fs_type  = fsprobe_getfstype2(m_partition_path).trimmed();
+	m_fs_uuid  = fsprobe_getfsuuid(m_partition_path).trimmed();
+	m_fs_label = fsprobe_getfslabel(m_partition_path).trimmed();
 
 	if( m_fs_type == "swap" || m_is_pv )
 	    m_is_mountable = false;
@@ -175,7 +179,17 @@ PedPartition* StoragePartition::getPedPartition()
 
 QString StoragePartition::getFilesystem()
 {
-    return m_fs_type.trimmed();
+    return m_fs_type;
+}
+
+QString StoragePartition::getFilesystemUuid()
+{
+    return m_fs_uuid;
+}
+
+QString StoragePartition::getFilesystemLabel()
+{
+    return m_fs_label;
 }
 
 PhysVol* StoragePartition::getPhysicalVolume()

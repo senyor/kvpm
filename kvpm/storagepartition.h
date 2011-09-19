@@ -34,6 +34,8 @@ class StoragePartition
     QString m_partition_type;
     unsigned int m_ped_type;
     QString m_fs_type;
+    QString m_fs_uuid;
+    QString m_fs_label;
     QStringList m_flags;
     long long m_partition_size;
     long long m_first_sector;
@@ -60,6 +62,8 @@ public:
 
     PedPartition *getPedPartition();    
     QString getFilesystem();
+    QString getFilesystemUuid();
+    QString getFilesystemLabel();
     QString getName();
     PhysVol *getPhysicalVolume();
     QString getType();
