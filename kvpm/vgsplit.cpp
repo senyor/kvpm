@@ -233,13 +233,14 @@ QStringList VGSplitDialog::arguments()
 
 void VGSplitDialog::deactivate()
 {
+    const QByteArray vg_name = m_vg->getName().toAscii();
     lvm_t lvm = g_master_list->getLVM();
     vg_t vg_dm;
     dm_list *lv_dm_list;
     lvm_lv_list *lv_list;
     QList<lv_t> lvs_to_deactivate;
 
-    if( (vg_dm = lvm_vg_open(lvm, m_vg->getName().toAscii().data(), "w", NULL)) ){
+    if( (vg_dm = lvm_vg_open(lvm, vg_name.data(), "w", NULL)) ){
 
         for(int x = 0; x < m_lvs_moving.size(); x++){
             lv_dm_list = lvm_vg_list_lvs(vg_dm);

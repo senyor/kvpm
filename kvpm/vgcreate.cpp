@@ -265,7 +265,9 @@ void VGCreateDialog::commitChanges()
     lvm_t lvm = g_master_list->getLVM();
     vg_t vg_dm;
     uint32_t new_extent_size = m_extent_size->currentText().toULong();
-    QStringList pv_names = m_pv_checkbox->getNames();
+    const QStringList pv_names = m_pv_checkbox->getNames();
+    const QByteArray vg_name_array = m_vg_name->text().toAscii();
+    QByteArray pv_name_array;
 
     new_extent_size *= 1024;
     if( m_extent_suffix->currentIndex() > 0 )
@@ -277,7 +279,7 @@ void VGCreateDialog::commitChanges()
     m_progress_bar->setRange(0, pv_names.size());
     loop->processEvents();
 
-    if( (vg_dm = lvm_vg_create(lvm, m_vg_name->text().toAscii().data())) ){
+    if( (vg_dm = lvm_vg_create(lvm, vg_name_array.data())) ){
 
         if( (lvm_vg_set_extent_size(vg_dm, new_extent_size)) )
             KMessageBox::error(0, QString(lvm_errmsg(lvm)));
@@ -285,8 +287,8 @@ void VGCreateDialog::commitChanges()
         for(int x = 0; x < pv_names.size(); x++){
             m_progress_bar->setValue(x);
             loop->processEvents();
-            
-            if( lvm_vg_extend(vg_dm, pv_names[x].toAscii().data()) )
+            pv_name_array = pv_names[x].toAscii();
+            if( lvm_vg_extend(vg_dm, pv_name_array.data()) )
                 KMessageBox::error(0, QString(lvm_errmsg(lvm)));
         }
         
