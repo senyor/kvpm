@@ -48,6 +48,8 @@ LVProperties::LVProperties(LogVol *logicalVolume, int segment, QWidget *parent):
 
     if( !m_lv->isSnapContainer() )
         layout->addWidget( uuidFrame() );
+
+    layout->addStretch();
     
     setLayout(layout);
 }
@@ -106,14 +108,29 @@ QFrame *LVProperties::uuidFrame()
     frame->setFrameStyle( QFrame::Sunken | QFrame::StyledPanel );
     frame->setLineWidth(2);
 
-    QLabel *temp_label = new QLabel("<b>Logical volume UUID</b>");
+    QLabel *temp_label = new QLabel( i18n("<b>Filesystem label</b>") );
+    temp_label->setAlignment(Qt::AlignCenter);
+    layout->addWidget( temp_label );
+    temp_label = new QLabel( m_lv->getFilesystemLabel() );
+    temp_label->setToolTip( m_lv->getFilesystemLabel() );
+    temp_label->setWordWrap(true);
+    layout->addWidget( temp_label );
+
+    temp_label = new QLabel( i18n("<b>Filesystem UUID</b>") );
+    temp_label->setAlignment(Qt::AlignCenter);
+    layout->addWidget( temp_label );
+    temp_label = new QLabel( m_lv->getFilesystemUuid() );
+    temp_label->setToolTip( m_lv->getFilesystemUuid() );
+    temp_label->setWordWrap(true);
+    layout->addWidget( temp_label );
+
+    temp_label = new QLabel( i18n("<b>Logical volume UUID</b>") );
     temp_label->setAlignment(Qt::AlignCenter);
     layout->addWidget( temp_label );
     temp_label = new QLabel( m_lv->getUuid() );
     temp_label->setToolTip( m_lv->getUuid() );
     temp_label->setWordWrap(true);
     layout->addWidget( temp_label );
-    layout->addStretch();
 
     return frame;
 }
