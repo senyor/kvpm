@@ -332,9 +332,9 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)  // lv_t seems to change -- why?
     */
 
     if( m_snap_container && !was_snap_container ){
-            m_uuid = QUuid::createUuid().toString();
+        m_uuid = QUuid::createUuid().toString();
     }
-    else{
+    else if( !m_snap_container ){
         value = lvm_lv_get_property(lvmLV, "lv_uuid");
         m_uuid  = value.value.string;
     }

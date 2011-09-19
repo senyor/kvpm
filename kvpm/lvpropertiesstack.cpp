@@ -66,10 +66,12 @@ void LVPropertiesStack::changeLVStackIndex(QTreeWidgetItem *item, QTreeWidgetIte
     if(item && ( members.size() == m_lv_stack_list.size() ) ){  // These *should* be equal
 	lv_uuid = QVariant(item->data(2, Qt::UserRole)).toString();
 
-	for(int x = 0; x < members.size(); x++){
+	for(int x = members.size() - 1; x >= 0; x--){
             if(lv_uuid == ( members[x])->getUuid() ){
+
 		setCurrentIndex(x);
 		segment = QVariant(item->data(1, Qt::UserRole)).toInt();
+
 		if(segment == -1)
 		    m_lv_stack_list[x]->setCurrentIndex(0);
 		else
