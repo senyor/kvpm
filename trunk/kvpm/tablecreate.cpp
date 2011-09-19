@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2009, 2010 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2009, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -12,17 +12,18 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
+#include "tablecreate.h"
+
 #include <parted/parted.h>
 
 #include <KMessageBox>
 #include <KLocale>
 #include <QtGui>
 
-#include "tablecreate.h"
 
-/*
-  Creates or deletes a partition table "disk label" on a device.
-*/
+
+//  Creates or deletes a partition table "disk label" on a device.
+
 
 bool create_table(QString devicePath)
 {
@@ -81,8 +82,8 @@ TableCreateDialog::TableCreateDialog(QString devicePath, QWidget *parent) :
 
 void TableCreateDialog::commitTable()
 {
-
-    PedDevice   *ped_device    = ped_device_get ( m_device_path.toAscii().data() ); 
+    const QByteArray path      = m_device_path.toAscii(); 
+    PedDevice   *ped_device    = ped_device_get( path.data() ); 
     PedDiskType *ped_disk_type = NULL;
     PedDisk     *ped_disk = NULL;
     char        *buff = NULL;
