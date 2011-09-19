@@ -87,16 +87,18 @@ VGReduceDialog::VGReduceDialog(VolGroup *volumeGroup, QWidget *parent) : KDialog
 
 void VGReduceDialog::commitChanges()
 {
-    QStringList pvs;
+    const QByteArray vg_name = m_vg->getName().toAscii();
+    QByteArray pv_name;
     vg_t vg_dm = NULL;
     lvm_t lvm = g_master_list->getLVM();
 
     QStringList pv_list; // pvs to remove by name
     pv_list << m_pv_checkbox->getNames();
 
-    if( (vg_dm = lvm_vg_open(lvm, m_vg->getName().toAscii().data(), "w", 0)) ){
+    if( (vg_dm = lvm_vg_open(lvm, vg_name.data(), "w", 0)) ){
         for(int x = 0; x < pv_list.size(); x++){
-            if( lvm_vg_reduce(vg_dm, pv_list[x].toAscii().data()) )
+            pv_name = pv_list[x].toAscii();
+            if( lvm_vg_reduce(vg_dm, pv_name.data()) )
                 KMessageBox::error(0, QString(lvm_errmsg(lvm)));
         }
         if( lvm_vg_write(vg_dm) )

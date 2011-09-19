@@ -28,6 +28,7 @@ extern MasterList *g_master_list;
 
 bool remove_vg(VolGroup *volumeGroup)
 {
+    const QByteArray vg_name = volumeGroup->getName().toAscii();
     QString message;
     lvm_t  lvm = g_master_list->getLVM();
     vg_t vg_dm = NULL;
@@ -50,7 +51,7 @@ bool remove_vg(VolGroup *volumeGroup)
                 
         progress_bar->setValue(2);
         qApp->processEvents();
-        if( (vg_dm = lvm_vg_open(lvm, volumeGroup->getName().toAscii().data(), "w", 0)) ){
+        if( (vg_dm = lvm_vg_open(lvm, vg_name.data(), "w", 0)) ){
             progress_bar->setValue(2);
             qApp->processEvents();
             if( lvm_vg_remove(vg_dm) ){ 

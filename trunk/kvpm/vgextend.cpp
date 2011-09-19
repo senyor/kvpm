@@ -33,36 +33,40 @@ extern MasterList *g_master_list;
 
 bool extend_vg(QString volumeGroupName, StorageDevice *device, StoragePartition *partition)
 {
+    const QByteArray vg_name = volumeGroupName.toAscii();
+    QByteArray pv_name;
     QString message, error_message;
-    QString name;
     long long size;
-    lvm_t  lvm = g_master_list->getLVM();
-    vg_t vg_dm;
-    VolGroup *vg =  g_master_list->getVolGroupByName(volumeGroupName);
-    long long extent_size = vg->getExtentSize();
+    lvm_t lvm = g_master_list->getLVM();
+    vg_t  vg_dm;
+    VolGroup *const vg = g_master_list->getVolGroupByName(volumeGroupName);
+    const long long extent_size = vg->getExtentSize();
 
     if(device){
         size = device->getSize();
-        name = device->getName();
+        pv_name = device->getName().toAscii();
     }
     else{
         size = partition->getSize();
-        name = partition->getName();
+        pv_name = partition->getName().toAscii();
     }
 
-    error_message = i18n("This physical volume <b>%1</b> is smaller than the extent size", name);
+    error_message = i18n("This physical volume <b>%1</b> is smaller than the extent size", QString(pv_name));
 
     if(extent_size > size){
         KMessageBox::error(0, error_message);
     }
     else{
         message = i18n("Do you want to extend volume group: <b>%1</b> with "
-                       "physical volume: <b>%2</b> (size: %3)", volumeGroupName, name, sizeToString(size));
+                       "physical volume: <b>%2</b> (size: %3)", 
+                       volumeGroupName, 
+                       QString(pv_name), 
+                       sizeToString(size));
 
         if( KMessageBox::questionYesNo(0, message) == 3 ){     // 3 is the "yes" button
 
-            if( (vg_dm = lvm_vg_open(lvm, volumeGroupName.toAscii().data(), "w", 0)) ){
-                if( ! lvm_vg_extend(vg_dm, name.toAscii().data()) ){
+            if( (vg_dm = lvm_vg_open(lvm, vg_name.data(), "w", 0)) ){
+                if( ! lvm_vg_extend(vg_dm, pv_name.data()) ){
                     if( lvm_vg_write(vg_dm) )
                         KMessageBox::error(0, QString(lvm_errmsg(lvm)));;
                     lvm_vg_close(vg_dm);
@@ -163,9 +167,11 @@ VGExtendDialog::VGExtendDialog(VolGroup *volumeGroup, QList<StorageDevice *> dev
 
 void VGExtendDialog::commitChanges()
 {
-    lvm_t  lvm = g_master_list->getLVM();
-    vg_t vg_dm;
-    QStringList pv_names = m_pv_checkbox->getNames();
+    const QByteArray vg_name   = m_vg->getName().toAscii();
+    const QStringList pv_names = m_pv_checkbox->getNames();
+    QByteArray pv_name;
+    lvm_t lvm = g_master_list->getLVM();
+    vg_t  vg_dm;
 
     QEventLoop *loop = new QEventLoop(this);
     QProgressBar *progress_bar = new QProgressBar();
@@ -173,20 +179,23 @@ void VGExtendDialog::commitChanges()
     m_layout->addWidget(progress_bar);
     loop->processEvents();
 
-    if( (vg_dm = lvm_vg_open(lvm, m_vg->getName().toAscii().data(), "w", 0 )) ){
+    if( (vg_dm = lvm_vg_open(lvm, vg_name.data(), "w", 0 )) ){
         
         for(int x = 0; x < pv_names.size(); x++){
             progress_bar->setValue(x);
             loop->processEvents();
-            if( lvm_vg_extend(vg_dm, pv_names[x].toAscii().data()) )
+            pv_name = pv_names[x].toAscii();
+            if( lvm_vg_extend(vg_dm, pv_name.data()) )
                 KMessageBox::error(0, QString(lvm_errmsg(lvm)));
         }
         
         if( lvm_vg_write(vg_dm) )
             KMessageBox::error(0, QString(lvm_errmsg(lvm)));
+
         lvm_vg_close(vg_dm);
         return;
     }
+
     KMessageBox::error(0, QString(lvm_errmsg(lvm))); 
     return;
 }
