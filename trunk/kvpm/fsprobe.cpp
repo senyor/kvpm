@@ -39,3 +39,39 @@ QString fsprobe_getfstype2(QString devicePath)
 	return fs_type;
     }
 }
+
+QString fsprobe_getfsuuid(QString devicePath)
+{
+    static blkid_cache blkid2;
+    const QByteArray path = devicePath.toAscii();
+    QString fs_uuid;
+    blkid2 = NULL;
+    
+    if( blkid_get_cache(&blkid2, BLKID_EMPTY_CACHE) < 0){
+	qDebug() << "blkid2 cache could not be allocated?";
+	return QString();
+    }
+    else{
+	fs_uuid = QString( blkid_get_tag_value(blkid2, "UUID", path.data() ) );
+	blkid_put_cache(blkid2);
+	return fs_uuid;
+    }
+}
+
+QString fsprobe_getfslabel(QString devicePath)
+{
+    static blkid_cache blkid2;
+    const QByteArray path = devicePath.toAscii();
+    QString fs_label;
+    blkid2 = NULL;
+    
+    if( blkid_get_cache(&blkid2, BLKID_EMPTY_CACHE) < 0){
+	qDebug() << "blkid2 cache could not be allocated?";
+	return QString();
+    }
+    else{
+        fs_label = QString( blkid_get_tag_value(blkid2, "LABEL", path.data() ) );
+	blkid_put_cache(blkid2);
+	return fs_label;
+    }
+}

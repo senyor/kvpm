@@ -262,7 +262,7 @@ QWidget* MkfsDialog::advancedTab()
     isize_layout->addStretch();
     misc_layout->addLayout(isize_layout);
 
-    name_layout->addWidget( new QLabel( i18n("Volume name: ") ) );
+    name_layout->addWidget( new QLabel( i18n("Name or label: ") ) );
     m_volume_edit = new KLineEdit();
     name_layout->addWidget(m_volume_edit);
     name_layout->addStretch();

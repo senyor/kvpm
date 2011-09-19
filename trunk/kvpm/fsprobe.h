@@ -18,5 +18,7 @@
 #include <QString>
 
 QString fsprobe_getfstype2(QString devicePath);
+QString fsprobe_getfsuuid(QString devicePath);
+QString fsprobe_getfslabel(QString devicePath);
 
 #endif

@@ -31,6 +31,7 @@ DeviceProperties::DeviceProperties( StorageDevice *Device, QWidget *parent) : QW
     QStringList mount_points;
     QList<int>  mount_position;
     QLabel     *temp_label;
+    PhysVol *pv;
 
     QVBoxLayout *layout = new QVBoxLayout();
     layout->setSpacing(0);
@@ -74,21 +75,50 @@ DeviceProperties::DeviceProperties( StorageDevice *Device, QWidget *parent) : QW
     temp_label = new QLabel( i18n("<b>Hardware</b>") );
     temp_label->setAlignment( Qt::AlignCenter );
     hardware_info_layout->addWidget( temp_label );
-
     temp_label = new QLabel( Device->getHardware() );
     temp_label->setWordWrap(true);
     hardware_info_layout->addWidget( temp_label );
-    hardware_info_layout->addStretch();
 
     layout->addWidget(hardware_info_frame);
 
+    if( Device->isPhysicalVolume() ){
+        pv = Device->getPhysicalVolume();
+
+        QFrame *pv_info_frame = new QFrame;
+        QVBoxLayout *pv_info_layout = new QVBoxLayout();
+        pv_info_frame->setLayout(pv_info_layout);
+        pv_info_frame->setFrameStyle( QFrame::Sunken | QFrame::StyledPanel );
+        pv_info_frame->setLineWidth(2);
+   
+	temp_label =  new QLabel( i18n("<b>Physical volume</b>") );
+	temp_label->setAlignment( Qt::AlignCenter );
+	pv_info_layout->addWidget( temp_label );
+
+        if( pv->isActive() )
+            temp_label = new QLabel( i18n("State: active") );
+        else
+            temp_label = new QLabel( i18n("State: inactive") );
+
+	pv_info_layout->addWidget( temp_label );
+
+	temp_label =  new QLabel( i18n("<b>UUID</b>") );
+	temp_label->setAlignment( Qt::AlignCenter );
+	pv_info_layout->addWidget( temp_label );
+
+	temp_label =  new QLabel( pv->getUuid() );
+	temp_label->setWordWrap(true);
+	pv_info_layout->addWidget( temp_label );
+	layout->addWidget(pv_info_frame);
+    }
+
+    layout->addStretch();
 }
 
 DeviceProperties::DeviceProperties( StoragePartition *Partition, QWidget *parent)
     : QWidget(parent) 
 {
     QStringList mount_points;
-    QList<int> mount_position;
+    QList<int>  mount_position;
     PhysVol *pv;
     QLabel *temp_label;
 
@@ -113,68 +143,6 @@ DeviceProperties::DeviceProperties( StoragePartition *Partition, QWidget *parent
     basic_info_layout->addWidget( new QLabel( i18n("First sector: %1", Partition->getFirstSector() ) ) );
     basic_info_layout->addWidget( new QLabel( i18n("Last sector: %1", Partition->getLastSector() ) ) );
 
-    QFrame *pv_info_frame = new QFrame;
-    QVBoxLayout *pv_info_layout = new QVBoxLayout();
-    pv_info_frame->setLayout(pv_info_layout);
-    pv_info_frame->setFrameStyle( QFrame::Sunken | QFrame::StyledPanel );
-    pv_info_frame->setLineWidth(2);   
-
-    QFrame *mount_info_frame = new QFrame;
-    QVBoxLayout *mount_info_layout = new QVBoxLayout();
-    mount_info_frame->setLayout(mount_info_layout);
-    mount_info_frame->setFrameStyle( QFrame::Sunken | QFrame::StyledPanel );
-    mount_info_frame->setLineWidth(2);   
-
-    if( Partition->isPhysicalVolume() ){
-
-        pv = Partition->getPhysicalVolume();
-
-	temp_label =  new QLabel( "<b>Physical volume</b>" );
-	temp_label->setAlignment( Qt::AlignCenter );
-	pv_info_layout->addWidget( temp_label );
-
-        if( pv->isActive() )
-            temp_label = new QLabel( "active" );
-        else
-            temp_label = new QLabel( "inactive" );
-
-	pv_info_layout->addWidget( temp_label );
-
-	temp_label =  new QLabel( "<b>UUID</b>" );
-	temp_label->setAlignment( Qt::AlignCenter );
-	pv_info_layout->addWidget( temp_label );
-
-	temp_label =  new QLabel( pv->getUuid() );
-	temp_label->setWordWrap(true);
-	pv_info_layout->addWidget( temp_label );
-	layout->addWidget(pv_info_frame);
-    }
-    else{
-
-	mount_points   = Partition->getMountPoints();
-	mount_position = Partition->getMountPosition();
-
-	if( mount_points.size() <= 1 )
-	    temp_label = new QLabel( i18n("<b>Mount point</b>") );
-	else
-	    temp_label = new QLabel( i18n("<b>Mount points</b>") );
-
-	temp_label->setAlignment( Qt::AlignCenter );
-	mount_info_layout->addWidget( temp_label );
-
-	if( mount_points.size() ){
-	    for(int x = 0; x < mount_points.size(); x++){
-	        if( mount_position[x] > 1 )
-		    mount_points[x] = mount_points[x] + QString("<%1>").arg(mount_position[x]);
-		mount_info_layout->addWidget( new QLabel( mount_points[x] ) );
-	    }
-	}
-	else{
-	    mount_info_layout->addWidget( new QLabel( i18n("Not mounted") ) );
-	}
-        layout->addWidget(mount_info_frame);
-    }
-
     QFrame *flag_info_frame = new QFrame;
     QVBoxLayout *flag_info_layout = new QVBoxLayout();
     flag_info_frame->setLayout(flag_info_layout);
@@ -198,6 +166,93 @@ DeviceProperties::DeviceProperties( StoragePartition *Partition, QWidget *parent
 	}
 
 	layout->addWidget(flag_info_frame);
+    }
+
+    if( !Partition->isPhysicalVolume() ){
+        QFrame *mount_info_frame = new QFrame;
+        QVBoxLayout *mount_info_layout = new QVBoxLayout();
+        mount_info_frame->setLayout(mount_info_layout);
+        mount_info_frame->setFrameStyle( QFrame::Sunken | QFrame::StyledPanel );
+        mount_info_frame->setLineWidth(2);   
+
+	mount_points   = Partition->getMountPoints();
+	mount_position = Partition->getMountPosition();
+
+	if( mount_points.size() <= 1 )
+	    temp_label = new QLabel( i18n("<b>Mount point</b>") );
+	else
+	    temp_label = new QLabel( i18n("<b>Mount points</b>") );
+
+	temp_label->setAlignment( Qt::AlignCenter );
+	mount_info_layout->addWidget( temp_label );
+
+	if( mount_points.size() ){
+	    for(int x = 0; x < mount_points.size(); x++){
+	        if( mount_position[x] > 1 )
+		    mount_points[x] = mount_points[x] + QString("<%1>").arg(mount_position[x]);
+
+		mount_info_layout->addWidget( new QLabel( mount_points[x] ) );
+	    }
+	}
+	else{
+	    mount_info_layout->addWidget( new QLabel( i18n("Not mounted") ) );
+	}
+
+        layout->addWidget(mount_info_frame);
+    }
+
+    if( !Partition->isPhysicalVolume() ){
+
+        QFrame *label_frame = new QFrame;
+        QVBoxLayout *label_layout = new QVBoxLayout();
+        label_frame->setLayout(label_layout);
+        label_frame->setFrameStyle( QFrame::Sunken | QFrame::StyledPanel );
+        label_frame->setLineWidth(2);   
+
+        temp_label = new QLabel( i18n("<b>Filesystem LABEL</b>") );
+        temp_label->setAlignment( Qt::AlignCenter );
+        label_layout->addWidget(temp_label);
+        
+        temp_label = new QLabel( Partition->getFilesystemLabel() );
+        label_layout->addWidget(temp_label);
+
+        temp_label = new QLabel( i18n("<b>Filesystem UUID</b>") );
+        temp_label->setAlignment( Qt::AlignCenter );
+        label_layout->addWidget(temp_label);
+        
+        temp_label = new QLabel( Partition->getFilesystemUuid() );
+        temp_label->setWordWrap(true);
+        label_layout->addWidget(temp_label);
+
+        layout->addWidget(label_frame);
+    }
+    else{
+        pv = Partition->getPhysicalVolume();
+        QFrame *pv_info_frame = new QFrame;
+        QVBoxLayout *pv_info_layout = new QVBoxLayout();
+        pv_info_frame->setLayout(pv_info_layout);
+        pv_info_frame->setFrameStyle( QFrame::Sunken | QFrame::StyledPanel );
+        pv_info_frame->setLineWidth(2);   
+
+	temp_label =  new QLabel( i18n("<b>Physical volume</b>") );
+	temp_label->setAlignment( Qt::AlignCenter );
+	pv_info_layout->addWidget( temp_label );
+
+        if( pv->isActive() )
+            temp_label = new QLabel( i18n("State: active") );
+        else
+            temp_label = new QLabel( i18n("State: inactive") );
+
+	pv_info_layout->addWidget( temp_label );
+
+	temp_label =  new QLabel( i18n("<b>UUID</b>") );
+	temp_label->setAlignment( Qt::AlignCenter );
+	pv_info_layout->addWidget( temp_label );
+
+	temp_label =  new QLabel( pv->getUuid() );
+	temp_label->setWordWrap(true);
+	pv_info_layout->addWidget( temp_label );
+	layout->addWidget(pv_info_frame);
     }
 
     layout->addStretch();
