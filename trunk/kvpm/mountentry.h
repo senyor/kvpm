@@ -19,7 +19,7 @@
 
 class mntent;
 
-int addMountEntry(QString device, QString mountPoint, QString type, 
+bool addMountEntry(QString device, QString mountPoint, QString type, 
 		  QString options, int dumpFreq, int pass);
 
 mntent* buildMountEntry(QString device, QString mountPoint, QString type, 

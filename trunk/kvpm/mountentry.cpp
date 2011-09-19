@@ -27,27 +27,22 @@
 
 const int BUFF_LEN = 2000;   // Enough?
 
-/* Adds an entry into the mount table file, usually /etc/mtab.
-   It returns 0 on success and 1 on failure  */
 
-int addMountEntry(QString device, QString mountPoint, QString type, 
-		  QString options, int dumpFreq, int pass)
+// Adds an entry into the mount table file, usually /etc/mtab.
+
+bool addMountEntry(QString device, QString mountPoint, QString type, QString options, int dumpFreq, int pass)
 {
     char mount_table_char[] = _PATH_MOUNTED;
-    char device_char[BUFF_LEN];
-    char mount_point_char[BUFF_LEN];
-    char type_char[BUFF_LEN];
-    char options_char[BUFF_LEN];
 
-    strncpy(device_char,      device.toAscii().data(),     BUFF_LEN);
-    strncpy(mount_point_char, mountPoint.toAscii().data(), BUFF_LEN);
-    strncpy(type_char,        type.toAscii().data(),       BUFF_LEN);
-    strncpy(options_char,     options.toAscii().data(),    BUFF_LEN);
-    
-    const struct mntent mount_entry  = { device_char, 
-					 mount_point_char, 
-					 type_char, 
-					 options_char, 
+    QByteArray device_array      = device.toAscii();
+    QByteArray mount_point_array = mountPoint.toAscii();
+    QByteArray type_array        = type.toAscii();
+    QByteArray options_array     = options.toAscii();
+
+    const struct mntent mount_entry  = { device_array.data(), 
+					 mount_point_array.data(), 
+					 type_array.data(), 
+					 options_array.data(), 
 					 dumpFreq, 
 					 pass };
     
@@ -56,15 +51,15 @@ int addMountEntry(QString device, QString mountPoint, QString type,
     if(fp){
 	if( addmntent(fp, &mount_entry) ){
 	    endmntent(fp);
-	    return 1;
+	    return false;
 	}
-	else{
+	else{              // success
 	    endmntent(fp);
-	    return 0;
+	    return true;
 	}
     }
     else{
-	return 1;
+	return false;
     }
 }
 
@@ -72,28 +67,19 @@ int addMountEntry(QString device, QString mountPoint, QString type,
 /* This function generates an mntent structure from its parameters
 and returns it  */
 
-
-mntent* buildMountEntry(QString device, QString mountPoint, 
-			QString type, QString options, 
-			int dumpFreq, int pass)
+mntent* buildMountEntry(QString device, QString mountPoint, QString type, QString options, int dumpFreq, int pass)
 {
-    char *device_char      = new char[BUFF_LEN];
-    char *mount_point_char = new char[BUFF_LEN];
-    char *type_char        = new char[BUFF_LEN];
-    char *options_char     = new char[BUFF_LEN];
+    QByteArray device_array      = device.toAscii();
+    QByteArray mount_point_array = mountPoint.toAscii();
+    QByteArray type_array        = type.toAscii();
+    QByteArray options_array     = options.toAscii();
 
-    strncpy(device_char,      device.toAscii().data(),     BUFF_LEN);
-    strncpy(mount_point_char, mountPoint.toAscii().data(), BUFF_LEN);
-    strncpy(type_char,        type.toAscii().data(),       BUFF_LEN);
-    strncpy(options_char,     options.toAscii().data(),    BUFF_LEN);
-    
     mntent *mount_entry = new mntent;
     
-    mount_entry->mnt_fsname = device_char;
-    mount_entry->mnt_dir    = mount_point_char;
-    mount_entry->mnt_type   = type_char;
-    mount_entry->mnt_opts   = options_char;
-
+    mount_entry->mnt_fsname = device_array.data();
+    mount_entry->mnt_dir    = mount_point_array.data();
+    mount_entry->mnt_type   = type_array.data();
+    mount_entry->mnt_opts   = options_array.data();
     mount_entry->mnt_freq   = dumpFreq;
     mount_entry->mnt_passno = pass;
 
@@ -101,10 +87,8 @@ mntent* buildMountEntry(QString device, QString mountPoint,
 }
 
 
-/* 
-   Add a comma separated list of mount options to an existing entry
-   in the /etc/mtab file. 
-*/
+/*    Add a comma separated list of mount options to an existing entry
+      in the /etc/mtab file.  */
 
 bool addMountEntryOptions(QString mountPoint, QString newOptions)
 {
@@ -272,14 +256,14 @@ bool hasFstabEntry(QString device)
 
 QString getFstabEntry(QString device)
 {
-    QString mount_table = _PATH_FSTAB;
+    const QByteArray mount_table = _PATH_FSTAB;
     QString name_entry;                // returned entry to compare to
     QString mount_dir;
 
     FILE *fp;
     mntent *mount_entry;
-    
-    fp = setmntent(mount_table.toAscii(), "r");
+
+    fp = setmntent(mount_table.data(), "r");
 
     while( (mount_entry = getmntent(fp)) ){
 	name_entry = QByteArray( mount_entry->mnt_fsname );
@@ -317,7 +301,6 @@ mntent *copyMountEntry(mntent *mountEntry)
 
 bool rename_mount_entries(QString oldName, QString newName)
 {
-
     QList<mntent *> mount_entry_list;
     mntent *mount_entry;
     mntent *temp_entry;
