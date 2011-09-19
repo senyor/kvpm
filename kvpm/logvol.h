@@ -43,6 +43,8 @@ class LogVol
     QString m_lv_name;         // name of this logical volume
     QString m_lv_mapper_path;  // full path to volume, ie: /dev/vg1/lvol1
     QString m_lv_fs;         // Filesystem on volume, if known
+    QString m_lv_fs_label;   // Filesystem label or name
+    QString m_lv_fs_uuid;    // Filesystem uuid
     QString m_origin;        // the origin if this is a snapshot
 
     QString m_log;           // The mirror log, if this is a mirror 
@@ -111,6 +113,8 @@ class LogVol
     QString getName();
     QString getFullName();
     QString getFilesystem();
+    QString getFilesystemLabel();
+    QString getFilesystemUuid();
     QString getMapperPath();
     QString getPolicy();
     QString getState();

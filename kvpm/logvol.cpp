@@ -275,10 +275,16 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)  // lv_t seems to change -- why?
         m_virtual = true;    // This is to get lvactionsmenu to forbid doing anything to it
         m_lv_fs = "";
     }
-    else if( !m_mirror_log && !m_mirror_leg && !m_virtual)
+    else if( !m_mirror_log && !m_mirror_leg && !m_virtual){
         m_lv_fs = fsprobe_getfstype2(m_lv_mapper_path);
-    else
+        m_lv_fs_label = fsprobe_getfslabel(m_lv_mapper_path);
+        m_lv_fs_uuid  = fsprobe_getfsuuid(m_lv_mapper_path);
+    }
+    else{
         m_lv_fs = "";
+        m_lv_fs_label = "";
+        m_lv_fs_uuid  = "";
+    }
 
     value = lvm_lv_get_property(lvmLV, "lv_size");
     m_size = value.value.integer;
@@ -702,6 +708,16 @@ long long LogVol::getTotalSize()
 QString LogVol::getFilesystem()
 {
   return m_lv_fs;
+}
+
+QString LogVol::getFilesystemLabel()
+{
+  return m_lv_fs_label;
+}
+
+QString LogVol::getFilesystemUuid()
+{
+  return m_lv_fs_uuid;
 }
 
 long long LogVol::getFilesystemSize()
