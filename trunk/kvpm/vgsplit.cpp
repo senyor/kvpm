@@ -12,6 +12,7 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
+
 #include "vgsplit.h"
 
 #include <KLocale>
@@ -20,6 +21,7 @@
 
 #include "logvol.h"
 #include "masterlist.h"
+#include "misc.h"
 #include "physvol.h"
 #include "processprogress.h"
 #include "volgroup.h"

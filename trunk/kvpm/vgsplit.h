@@ -23,10 +23,10 @@
 #include <QRegExpValidator>
 #include <QTableWidget>
 
-#include "misc.h"
 
-class VolGroup;
 class LogVol;
+class NoMungeCheck;
+class VolGroup;
 
 bool split_vg(VolGroup *volumeGroup);
 
@@ -36,10 +36,10 @@ Q_OBJECT
 
     QList<NoMungeCheck *> m_pv_checks;
     QList<LogVol *> m_lvs;
-    QStringList m_busy_pvs;    // all pvs under busy logical volumes
-    QStringList m_lvs_moving;  // names of lvs to be moved to new vg 
+    QStringList   m_busy_pvs;    // all pvs under busy logical volumes
+    QStringList   m_lvs_moving;  // names of lvs to be moved to new vg 
     QTableWidget *m_pv_table;
-    KLineEdit *m_new_vg_name;
+    KLineEdit    *m_new_vg_name;
     QRegExpValidator *m_validator;
     VolGroup *m_vg;
 

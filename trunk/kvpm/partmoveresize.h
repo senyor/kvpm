@@ -30,11 +30,11 @@
 #include <QSlider>
 #include <QSpinBox>
 
-#include "storagepartition.h"
-
 
 class PartAddGraphic;
 class SizeSelectorBox;
+class StoragePartition;
+
 
 bool moveresize_partition(StoragePartition *partition);
 

@@ -23,6 +23,7 @@
 #include "pedexceptions.h"
 #include "misc.h"
 #include "sizeselectorbox.h"
+#include "storagepartition.h"
 
 /* 
    The "partition" we get here is usually a ped pointer to a the freespace 

@@ -12,13 +12,16 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
+
+#include "pvextend.h"
+
 #include <KLocale>
 #include <KMessageBox>
 
 #include <QtGui>
 
 #include "processprogress.h"
-#include "pvextend.h"
+#include "storagepartition.h"
 
 
 bool pv_extend(QString path)

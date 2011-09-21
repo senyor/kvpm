@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2009 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2009, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -17,7 +17,6 @@
 
 #include <QString>
 
-#include "storagepartition.h"
 
 long long pv_reduce(QString path, long long new_size);
 

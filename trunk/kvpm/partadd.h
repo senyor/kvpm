@@ -26,11 +26,12 @@
 #include <QLabel>
 #include <QSpinBox>
 
-#include "storagepartition.h"
 
 class QDoubleValidator;
 class PartAddGraphic;
 class DualSelectorBox;
+class StoragePartition;
+
 
 bool add_partition(StoragePartition *partition);
 

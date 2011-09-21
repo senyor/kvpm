@@ -23,17 +23,19 @@
 #include <QGroupBox>
 #include <QLabel>
 
-#include "misc.h"
 
 class LogVol;
+class NoMungeRadioButton;
 class PhysVol;
 class PVCheckBox;
 class VolGroup;
+
 
 bool move_pv(PhysVol *physicalVolume);
 bool move_pv(LogVol *logicalVolume);
 bool restart_pvmove();
 bool stop_pvmove();
+
 
 class PVMoveDialog : public KDialog
 {
