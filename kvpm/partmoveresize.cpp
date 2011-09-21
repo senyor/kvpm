@@ -13,6 +13,8 @@
  */
 
 
+#include "partmoveresize.h"
+
 #include <KLocale>
 #include <KMessageBox>
 #include <KProgressDialog>
@@ -25,13 +27,13 @@
 #include "fsextend.h"
 #include "fsreduce.h"
 #include "pedexceptions.h"
-#include "partmoveresize.h"
 #include "partaddgraphic.h"
 #include "physvol.h"
 #include "processprogress.h"
 #include "pvextend.h"
 #include "pvreduce.h"
 #include "sizeselectorbox.h"
+#include "storagepartition.h"
 #include "misc.h"
 #include "volgroup.h"
 

@@ -22,7 +22,6 @@
 #include <QRadioButton>
 #include <QVariant>
 
-#include "misc.h"
 
 class NoMungeCheck;
 class PhysVol;

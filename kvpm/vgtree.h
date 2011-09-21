@@ -24,7 +24,6 @@
 #include <QTreeWidget>
 #include <QTreeWidgetItem>
 
-#include "masterlist.h"
 
 class LogVol;
 class VolGroup;

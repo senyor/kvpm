@@ -12,13 +12,15 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
+
+#include "pvreduce.h"
+
 #include <KLocale>
 #include <KMessageBox>
 
 #include <QtGui>
 
 #include "processprogress.h"
-#include "pvreduce.h"
 
 
 // Returns new pv size in bytes or 0 if no shrinking was done
