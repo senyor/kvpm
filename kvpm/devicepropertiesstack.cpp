@@ -15,7 +15,7 @@
 
 #include <QtGui>
 
-#include "devicemodel.h"
+#include "storageitem.h"
 #include "devicepropertiesstack.h"
 #include "deviceproperties.h"
 #include "storagedevice.h"
@@ -24,8 +24,8 @@
 
 /* This stack widget simply displays some information about the
    drive or device selected in the tree view. If nothing is selected
-   an empty widget is used.
-*/
+   an empty widget is used.  */
+
 
 DevicePropertiesStack::DevicePropertiesStack( QList<StorageDevice *> Devices, QWidget *parent) : 
     QStackedWidget(parent)
@@ -54,9 +54,9 @@ DevicePropertiesStack::DevicePropertiesStack( QList<StorageDevice *> Devices, QW
 void DevicePropertiesStack::changeDeviceStackIndex(QModelIndex Index)
 {
     QModelIndex model_index = Index;
-    StorageDeviceItem *device_item;
+    StorageItem *device_item;
 
-    device_item = static_cast<StorageDeviceItem*> (model_index.internalPointer());
+    device_item = static_cast<StorageItem*> (model_index.internalPointer());
 
     const QString device_path = device_item->data(0).toString();
     const int list_size = m_device_path_list.size();

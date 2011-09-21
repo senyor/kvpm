@@ -14,6 +14,7 @@
 #include "vgtree.h"
 
 #include <KConfigSkeleton>
+#include <KIcon>
 #include <KLocale>
 #include <QtGui>
 
@@ -176,6 +177,13 @@ QTreeWidgetItem *VGTree::loadItem(LogVol *lv, QTreeWidgetItem *item)
         item->setData(7, Qt::DisplayRole, QString(""));
 
     item->setData(8, Qt::DisplayRole, lv->getState());
+
+    if( !lv->isSnapContainer() && !lv->isMirrorLog() && !lv->isMirrorLeg() && !lv->isVirtual() ){
+        if( lv->isMounted() )
+            item->setIcon( 8, KIcon("emblem-mounted") );
+        else
+            item->setIcon( 8, KIcon("emblem-unmounted") );
+    }
 
     if(lv->isWritable())
         item->setData(9, Qt::DisplayRole, QString("r/w"));

@@ -15,23 +15,23 @@
 #ifndef STORAGEDEVICESIZECHARTSEG_H
 #define STORAGEDEVICESIZECHARTSEG_H
 
-class StoragePartition;
-class StorageDeviceItem;
-
-
 #include <QMenu>
 #include <QFrame>
+
+
+class StoragePartition;
+class StorageItem;
 
 
 class DeviceChartSeg : public QFrame
 {
 Q_OBJECT
 
-    StorageDeviceItem *m_item;
-    StoragePartition  *m_partition;
+    StorageItem *m_item;
+    StoragePartition *m_partition;
 
 public:
-    explicit DeviceChartSeg(StorageDeviceItem *storageDeviceItem, QWidget *parent = 0);
+    explicit DeviceChartSeg(StorageItem *storageItem, QWidget *parent = 0);
 
 public slots:
     void popupContextMenu(QPoint point);

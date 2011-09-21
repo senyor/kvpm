@@ -17,15 +17,15 @@
 #include <KLocale>
 #include <KConfigSkeleton>
 
-#include "devicemodel.h"
+#include "storageitem.h"
 #include "devicesizechartseg.h"
 #include "deviceactionsmenu.h"
 #include "storagepartition.h"
 
 
-DeviceChartSeg::DeviceChartSeg(StorageDeviceItem *storageDeviceItem, QWidget *parent) : 
+DeviceChartSeg::DeviceChartSeg(StorageItem *storageItem, QWidget *parent) : 
     QFrame(parent),
-    m_item(storageDeviceItem)
+    m_item(storageItem)
 {
     QStringList group_names;
     QString use;

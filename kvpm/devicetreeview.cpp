@@ -19,6 +19,7 @@
 #include <KLocale>
 
 #include "deviceactionsmenu.h"
+#include "storageitem.h"
 
 
 DeviceTreeView::DeviceTreeView(QWidget *parent) : QTreeView(parent)
@@ -39,7 +40,7 @@ void DeviceTreeView::popupContextMenu(QPoint point)
 
     //item = 0 if there is no item a that point
 
-    item = static_cast<StorageDeviceItem*> (index.internalPointer());
+    item = static_cast<StorageItem*> (index.internalPointer());
 
     if(item){                          
         if( (item->dataAlternate(0)).canConvert<void *>() )
