@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2009 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -21,9 +21,8 @@
 #include <QTreeView>
 #include <QAbstractItemModel>
 
-#include "devicemodel.h"
-
 class StoragePartition;
+class StorageItem;
 
 class DeviceTreeView : public QTreeView 
 {
@@ -31,7 +30,7 @@ Q_OBJECT
 
     QList<QAction *> vgextend_actions;
     QModelIndex index;
-    StorageDeviceItem *item;
+    StorageItem *item;
     StoragePartition *part;
     
 public:

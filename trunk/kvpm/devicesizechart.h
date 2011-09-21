@@ -15,14 +15,11 @@
 #ifndef STORAGEDEVICESIZECHART_H
 #define STORAGEDEVICESIZECHART_H
 
-#include <QAbstractItemModel>
+#include <QWidget>
 #include <QList>
-#include <QLabel>
-#include <QFrame>
 #include <QHBoxLayout>
 
-#include "devicemodel.h"
-#include "devicesizechartseg.h"
+class StorageModel;
 
 class DeviceSizeChart : public QFrame
 {
@@ -32,12 +29,12 @@ class DeviceSizeChart : public QFrame
     QHBoxLayout *m_extended_layout;        // The layout for chart segments inside an extended partition
 
     QList<QWidget *> m_segments, m_extended_segments;    // Segments of the bar chart, not the disk.
-    QList<double> m_ratios, m_extended_ratios;
+    QList<double>    m_ratios,   m_extended_ratios;
     
-    StorageDeviceModel *m_device_model;
+    StorageModel *m_device_model;
 
 public:
-    DeviceSizeChart(StorageDeviceModel *model, QWidget *parent);
+    DeviceSizeChart(StorageModel *model, QWidget *parent);
     void resizeEvent(QResizeEvent *event);
     
 public slots:

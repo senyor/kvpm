@@ -23,8 +23,7 @@
 #include <QVBoxLayout>
 					
 class StorageDevice;
-class StorageDeviceModel;
-class MasterList;
+class StorageModel;
 class DeviceTreeView;
 class DeviceSizeChart;
 
@@ -32,13 +31,12 @@ class DeviceTab : public QWidget
 {
     QList<StorageDevice *> m_devs;
     DeviceTreeView *m_tree;
-    StorageDeviceModel *m_model;
+    StorageModel *m_model;
     QVBoxLayout *m_layout;
     QSplitter *m_tree_properties_splitter;
     DeviceSizeChart *m_size_chart;
 
     QScrollArea *setupPropertyWidgets();
-
     void setHiddenColumns();
 
  public:

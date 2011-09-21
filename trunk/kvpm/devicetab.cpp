@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2009, 2010 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -13,17 +13,18 @@
  */
 
 
+#include "devicetab.h"
+
 #include <QtGui>
 #include <KLocale>
 #include <KConfigSkeleton>
 
-#include "devicetab.h"
 #include "devicetreeview.h"
-#include "devicemodel.h"
 #include "devicesizechart.h"
 #include "deviceproperties.h"
 #include "devicepropertiesstack.h"
 #include "storagedevice.h"
+#include "storagemodel.h"
 
 
 DeviceTab::DeviceTab(QWidget *parent) : QWidget(parent)
@@ -42,7 +43,7 @@ void DeviceTab::rescan( QList<StorageDevice *> Devices )
 
     if(m_model)
         m_model->deleteLater();
-    m_model = new StorageDeviceModel(m_devs, this);
+    m_model = new StorageModel(m_devs, this);
 
     if(m_size_chart)
         m_size_chart->deleteLater();

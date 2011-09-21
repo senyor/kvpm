@@ -30,6 +30,7 @@
 #include "partmoveresize.h"
 #include "physvol.h"
 #include "storagedevice.h"
+#include "storageitem.h"
 #include "storagepartition.h"
 #include "tablecreate.h"
 #include "topwindow.h"
@@ -42,7 +43,7 @@
 extern MasterList *g_master_list;
 
 
-DeviceActionsMenu::DeviceActionsMenu( StorageDeviceItem *item, QWidget *parent) : KMenu(parent)
+DeviceActionsMenu::DeviceActionsMenu( StorageItem *item, QWidget *parent) : KMenu(parent) 
 {
     setup(item);
 
@@ -63,7 +64,7 @@ DeviceActionsMenu::DeviceActionsMenu( StorageDeviceItem *item, QWidget *parent) 
     connect(m_vgextend_menu, SIGNAL(triggered(QAction*)), this, SLOT(vgextendPartition(QAction*)));
 }
 
-void DeviceActionsMenu::setup(StorageDeviceItem *item)
+void DeviceActionsMenu::setup(StorageItem *item)
 {
     QStringList group_names;
     KMenu *filesystem_menu = new KMenu( i18n("Filesystem operations"), this);

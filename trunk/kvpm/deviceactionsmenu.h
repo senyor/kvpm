@@ -12,22 +12,19 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
+
 #ifndef DEVICEACTIONSMENU_H
 #define DEVICEACTIONSMENU_H
 
 #include <KMenu>
 #include <KAction>
 
-#include <QTreeView>
-#include <QAbstractItemModel>
+#include <QList>
 #include <QString>
-
-#include "devicemodel.h"
 
 class StoragePartition;
 class StorageDevice;
-class DeviceTreeView;
-class DeviceChartSeg;
+class StorageItem;
 
 class DeviceActionsMenu : public KMenu
 {
@@ -54,10 +51,10 @@ Q_OBJECT
     StorageDevice *m_dev;
     QString m_vg_name;
 
-    void setup(StorageDeviceItem *item);
+    void setup(StorageItem *item);
     
  public:
-    explicit DeviceActionsMenu( StorageDeviceItem *item, QWidget *parent = 0);
+    explicit DeviceActionsMenu( StorageItem *item, QWidget *parent = 0);
 
  private slots:
     void fsckPartition();
@@ -74,7 +71,6 @@ Q_OBJECT
     void mountPartition();
     void unmountPartition();
     
-
 };
 
 #endif

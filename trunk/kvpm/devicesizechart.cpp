@@ -16,10 +16,14 @@
 #include <QtGui>
 
 #include "devicesizechart.h"
+#include "storageitem.h"
 #include "storagedevice.h"
+#include "storagemodel.h"
 #include "storagepartition.h"
+#include "devicesizechartseg.h"
 
-DeviceSizeChart::DeviceSizeChart(StorageDeviceModel *model, QWidget *parent) : QFrame(parent)
+
+DeviceSizeChart::DeviceSizeChart(StorageModel *model, QWidget *parent) : QFrame(parent)
 {
     m_device_model = model;
     QModelIndex index;
@@ -44,7 +48,7 @@ void DeviceSizeChart::setNewDevice(QModelIndex index)
     QWidget *segment, *extended_segment;
     QString usage, path;
     double ratio;
-    StorageDeviceItem *device_item, *partition_item, *extended_item;
+    StorageItem *device_item, *partition_item, *extended_item;
     StoragePartition *partition;
     StorageDevice    *device;
     long long part_size, device_size;
@@ -64,7 +68,7 @@ void DeviceSizeChart::setNewDevice(QModelIndex index)
     while(index.parent() != QModelIndex())
 	index = index.parent();
 
-    device_item = static_cast<StorageDeviceItem*> (index.internalPointer());
+    device_item = static_cast<StorageItem*> (index.internalPointer());
 
     if( !device_item->childCount() ){
 	device    = (StorageDevice *) (( device_item->dataAlternate(1)).value<void *>() );

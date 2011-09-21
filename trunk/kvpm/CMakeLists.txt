@@ -4,7 +4,7 @@ project (kvpm)
 find_package(KDE4 REQUIRED)
 include_directories( ${KDE4_INCLUDES} ${QT4_INCLUDES} )
  
-set(kvpm_SRCS addmirror.cpp kvpmconfigdialog.cpp devicemodel.cpp deviceproperties.cpp 
+set(kvpm_SRCS addmirror.cpp kvpmconfigdialog.cpp deviceproperties.cpp 
               devicepropertiesstack.cpp devicesizechart.cpp devicesizechartseg.cpp 
 	      devicetab.cpp executablefinder.cpp deviceactionsmenu.cpp fsck.cpp
 	      fsblocksize.cpp fsdata.cpp fsextend.cpp dualselectorbox.cpp
@@ -18,8 +18,8 @@ set(kvpm_SRCS addmirror.cpp kvpmconfigdialog.cpp devicemodel.cpp devicepropertie
 	      devicetreeview.cpp physvol.cpp partmoveresize.cpp removefs.cpp
 	      misc.cpp pedexceptions.cpp processprogress.cpp pvchange.cpp snapmerge.cpp
 	      pvmove.cpp pvtree.cpp removemissing.cpp removemirror.cpp sizeselectorbox.cpp
-	      removemirrorleg.cpp storagepartition.cpp storagedevice.cpp topwindow.cpp  
-	      tablecreate.cpp unmount.cpp vgchange.cpp vgexport.cpp vgimport.cpp
+	      removemirrorleg.cpp storagepartition.cpp storagedevice.cpp storageitem.cpp storagemodel.cpp
+	      topwindow.cpp tablecreate.cpp unmount.cpp vgchange.cpp vgexport.cpp vgimport.cpp
 	      vgcreate.cpp vgextend.cpp vginfolabels.cpp 
 	      vgreduce.cpp vgremove.cpp vgtree.cpp volgroup.cpp vgreduceone.cpp
 	      vgrename.cpp volumegrouptab.cpp vgsplit.cpp vgmerge.cpp)
