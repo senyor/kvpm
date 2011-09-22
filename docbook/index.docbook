@@ -455,7 +455,7 @@ new tab titled MyVolumeGroup.</para>
 <menuchoice><guimenu>Mirror operations</guimenu><guimenuitem>Add leg or change mirror</guimenuitem></menuchoice>.
 Then select the physical volumes and other options from the dialog. A mirror may be created with multiple legs or as few as two and the legs can be striped. When the dialog is finished the data on the original linear volume will be copied to the new mirror leg or legs and synchronized. 
 </para>
-<note>Remember to account for the space the mirror log takes when selecting physical volumes.</note>
+<note><para>Remember to account for the space the mirror log takes when selecting physical volumes.</para></note>
 <para>A mirror can be returned to a linear volume by removing all but one of its mirror legs. This can be a convenient way to move data on a mounted volume. Simply create a new mirror leg on the destination physical volume and wait for the mirror to sync. When finished, remove the source mirror leg and the remaining leg will have all the original data.</para>
 </sect1>
 
