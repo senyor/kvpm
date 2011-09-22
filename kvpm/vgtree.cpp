@@ -151,7 +151,7 @@ QTreeWidgetItem *VGTree::loadItem(LogVol *lv, QTreeWidgetItem *item)
     item->setData(0, Qt::DisplayRole, lv_name);
 
     if( !lv->isSnapContainer() && lv->isOrigin() )
-        item->setIcon( 0, KIcon("draw-star") );
+        item->setIcon( 0, KIcon("bullet_star") );
 
     if(lv->isSnapContainer())
         item->setData(1, Qt::DisplayRole, sizeToString(lv->getTotalSize()));           
