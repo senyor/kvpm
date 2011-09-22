@@ -158,6 +158,7 @@ void StorageModel::setupModelData(QList<StorageDevice *> devices, StorageItem *p
 	dataAlternate.clear();
 	dev = devices[x];
         dev_variant.setValue( (void *) dev);
+
         if(dev->isPhysicalVolume()){
             pv = dev->getPhysicalVolume();
             data << dev->getName() << "" << sizeToString(dev->getSize());
@@ -172,6 +173,13 @@ void StorageModel::setupModelData(QList<StorageDevice *> devices, StorageItem *p
         }
 	
         StorageItem *item = new StorageItem(data, dataAlternate, parent);
+
+        if( dev->isPhysicalVolume() ){
+            if( dev->getPhysicalVolume()->isActive() )
+                item->setIcon( 4, KIcon("lightbulb") );
+            else
+                item->setIcon( 4, KIcon("lightbulb_off") );
+        }
 
         parent->appendChild(item);
         for(int y = 0; y < dev->getPartitionCount(); y++){
@@ -225,6 +233,13 @@ void StorageModel::setupModelData(QList<StorageDevice *> devices, StorageItem *p
                         child->setIcon( 4, KIcon("emblem-unmounted") );
                 }
 
+                if( part->isPhysicalVolume() ){
+                    if( part->getPhysicalVolume()->isActive() )
+                        child->setIcon( 4, KIcon("lightbulb") );
+                    else
+                        child->setIcon( 4, KIcon("lightbulb_off") );
+                }
+
                 item->appendChild(child);
             }
             else if(extended){
@@ -235,6 +250,13 @@ void StorageModel::setupModelData(QList<StorageDevice *> devices, StorageItem *p
                         child->setIcon( 4, KIcon("emblem-mounted") );
                     else
                         child->setIcon( 4, KIcon("emblem-unmounted") );
+                }
+
+                if( part->isPhysicalVolume() ){
+                    if( part->getPhysicalVolume()->isActive() )
+                        child->setIcon( 4, KIcon("lightbulb") );
+                    else
+                        child->setIcon( 4, KIcon("lightbulb-off") );
                 }
 
                 extended->appendChild(child);
