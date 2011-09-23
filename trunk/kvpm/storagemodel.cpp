@@ -103,18 +103,18 @@ QVariant StorageModel::data(const QModelIndex &index, int role) const
     if( (role == Qt::TextAlignmentRole) && (index.column() > 0 && index.column() < 7) )
         return QVariant(Qt::AlignRight);
 
-    if( (role != Qt::DisplayRole) && (role != Qt::UserRole) && (role != Qt::DecorationRole) )
-	return QVariant();
-
     StorageItem *item = static_cast<StorageItem*>(index.internalPointer());
 
     if ( role == Qt::UserRole )
 	return item->dataAlternate(index.column());
-
-    if( role == Qt::DecorationRole )
+    else if( role == Qt::DecorationRole )
         return item->dataIcon(index.column());
-        
-    return item->data(index.column());
+    else if( role == Qt::ToolTipRole )
+        return item->dataToolTip(index.column());
+    else if( role == Qt::DisplayRole )
+        return item->data(index.column());
+    else
+        return QVariant();
 }
 
 Qt::ItemFlags StorageModel::flags(const QModelIndex &index) const
@@ -175,10 +175,14 @@ void StorageModel::setupModelData(QList<StorageDevice *> devices, StorageItem *p
         StorageItem *item = new StorageItem(data, dataAlternate, parent);
 
         if( dev->isPhysicalVolume() ){
-            if( dev->getPhysicalVolume()->isActive() )
-                item->setIcon( 4, KIcon("lightbulb") );
-            else
-                item->setIcon( 4, KIcon("lightbulb_off") );
+            if( dev->getPhysicalVolume()->isActive() ){
+                item->setIcon(4, KIcon("lightbulb"));
+                item->setToolTip(4, "Active");
+            }
+            else{
+                item->setIcon(4, KIcon("lightbulb_off"));
+                item->setToolTip(4, "Inactive");
+            }
         }
 
         parent->appendChild(item);
@@ -227,17 +231,24 @@ void StorageModel::setupModelData(QList<StorageDevice *> devices, StorageItem *p
                 child = new StorageItem(data, dataAlternate, item);
 
                 if( part->isMountable() ){
-                    if( part->isMounted() )
-                        child->setIcon( 4, KIcon("emblem-mounted") );
-                    else
-                        child->setIcon( 4, KIcon("emblem-unmounted") );
+                    if( part->isMounted() ){
+                        child->setIcon(4, KIcon("emblem-mounted"));
+                        child->setToolTip(4, "Mounted");
+                    }
+                    else{
+                        child->setIcon(4, KIcon("emblem-unmounted"));
+                        child->setToolTip(4, "Unmounted");
+                    }
                 }
-
                 if( part->isPhysicalVolume() ){
-                    if( part->getPhysicalVolume()->isActive() )
-                        child->setIcon( 4, KIcon("lightbulb") );
-                    else
-                        child->setIcon( 4, KIcon("lightbulb_off") );
+                    if( part->getPhysicalVolume()->isActive() ){
+                        child->setIcon(4, KIcon("lightbulb"));
+                        child->setToolTip(4, "Active");
+                    }
+                    else{
+                        child->setIcon(4, KIcon("lightbulb_off"));
+                        child->setToolTip(4, "Inactive");
+                    }
                 }
 
                 item->appendChild(child);
@@ -246,17 +257,25 @@ void StorageModel::setupModelData(QList<StorageDevice *> devices, StorageItem *p
                 child = new StorageItem(data, dataAlternate, extended);
 
                 if( part->isMountable() ){
-                    if( part->isMounted() )
-                        child->setIcon( 4, KIcon("emblem-mounted") );
-                    else
-                        child->setIcon( 4, KIcon("emblem-unmounted") );
+                    if( part->isMounted() ){
+                        child->setIcon(4, KIcon("emblem-mounted"));
+                        child->setToolTip(4, "Mounted");
+                            }
+                    else{
+                        child->setIcon(4, KIcon("emblem-unmounted"));
+                        child->setToolTip(4, "Unmounted");
+                    }
                 }
 
                 if( part->isPhysicalVolume() ){
-                    if( part->getPhysicalVolume()->isActive() )
-                        child->setIcon( 4, KIcon("lightbulb") );
-                    else
-                        child->setIcon( 4, KIcon("lightbulb-off") );
+                    if( part->getPhysicalVolume()->isActive() ){
+                        child->setIcon(4, KIcon("lightbulb"));
+                        child->setToolTip(4, "Active");
+                    }
+                    else{
+                        child->setIcon(4, KIcon("lightbulb_off"));
+                        child->setToolTip(4, "Inactive");
+                    }
                 }
 
                 extended->appendChild(child);
