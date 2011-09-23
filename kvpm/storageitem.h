@@ -18,6 +18,7 @@
 
 #include <QIcon>
 #include <QList>
+#include <QString>
 #include <QVariant>
 
 
@@ -27,6 +28,7 @@ class StorageItem
     QList<QVariant> itemData;
     QList<QVariant> itemDataAlternate;
     QList<QVariant> itemDataIcon;
+    QList<QVariant> itemDataToolTip;
     StorageItem *parentItem;
 
  public:
@@ -39,10 +41,12 @@ class StorageItem
     int columnCount() const;
     QVariant data(int column) const;
     QVariant dataIcon(int column) const;
+    QVariant dataToolTip(int column) const;
     QVariant dataAlternate(int column) const;
     int row() const;
     StorageItem *parent();
     void setIcon(int column, const QIcon & icon);
+    void setToolTip(int column, QString tip);
     
  };
 

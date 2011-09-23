@@ -27,8 +27,10 @@ StorageItem::StorageItem(const QList<QVariant> &data,
     itemData = data;
     itemDataAlternate = dataAlternate;
 
-    for(int x = itemData.size() - 1; x >= 0; x--) // makes the icon list as long as the main data list 
+    for(int x = itemData.size() - 1; x >= 0; x--){ // makes the other lists as long as the main data list 
         itemDataIcon.append( QVariant() );
+        itemDataToolTip.append( QVariant() );
+    }
 }
 
 StorageItem::~StorageItem()
@@ -77,6 +79,14 @@ QVariant StorageItem::dataIcon(int column) const
         return QVariant();
 }
 
+QVariant StorageItem::dataToolTip(int column) const
+{
+    if( column < itemDataToolTip.size() )
+        return itemDataToolTip.value(column);
+    else
+        return QVariant();
+}
+
 QVariant StorageItem::dataAlternate(int column) const
 {
     return itemDataAlternate.value(column);
@@ -86,6 +96,12 @@ void StorageItem::setIcon(int column, const QIcon &icon)
 {
     if( column < itemDataIcon.size() )  // don't set icons for columns past the end
         itemDataIcon[column] = icon;
+}
+
+void StorageItem::setToolTip(int column, QString tip) 
+{
+    if( column < itemDataToolTip.size() )  // don't set icons for columns past the end
+        itemDataToolTip[column] = tip;
 }
 
 StorageItem *StorageItem::parent() 
