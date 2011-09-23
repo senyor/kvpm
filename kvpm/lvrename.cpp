@@ -107,8 +107,9 @@ void LVRenameDialog::validateName(QString name)
 
 QString LVRenameDialog::getNewMapperPath()
 {
-    // Fix me! the following assumes the path: /dev/vg/lv
-    // We need to confirm the root really is "/dev"
+    QString path = m_lv->getMapperPath();
 
-    return QString("/dev/" + m_vg_name + '/' + m_new_name->text());
+    path.truncate( path.lastIndexOf('/') + 1 );
+
+    return QString( path + m_new_name->text() );
 }
