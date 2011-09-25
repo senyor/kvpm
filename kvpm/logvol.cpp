@@ -915,3 +915,8 @@ QString LogVol::getUuid()
 {
   return m_uuid;
 }
+
+bool LogVol::hasMissingVolume()
+{
+    return getDevicePathAllFlat().contains("unknown device");
+}

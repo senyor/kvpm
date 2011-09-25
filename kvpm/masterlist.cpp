@@ -103,7 +103,9 @@ void MasterList::scanVolumeGroups()
 
     dm_list *vgnames;
     lvm_str_list *strl;
-    
+
+    lvm_config_reload(m_lvm);    
+
     vgnames = lvm_list_vg_names(m_lvm);
     dm_list_iterate_items(strl, vgnames){ // rescan() existing VolGroup, don't create a new one
         existing_vg = false;

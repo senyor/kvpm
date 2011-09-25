@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2010 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -15,6 +15,7 @@
 #ifndef MAINTABWIDGET_H
 #define MAINTABWIDGET_H
 
+#include <QIcon>
 #include <QStringList>
 #include <KTabWidget>
 
@@ -35,13 +36,14 @@ Q_OBJECT
  public:
     MainTabWidget(QWidget *parent = 0);
     QString getUnmungedText(int index);
-    void appendVolumeGroupTab(VolumeGroupTab *page, const QString & label);
+    void appendVolumeGroupTab(VolumeGroupTab *page, const QIcon &icon, const QString &label);
     void appendDeviceTab(DeviceTab *page, const QString & label);
     void deleteTab(int index);
     QWidget *getWidget(int index);
     int getCount();
     int getCurrentIndex();
     VolumeGroupTab *getVolumeGroupTab(int index);
+    void setIcon(int index, const QIcon &icon);
  
  public slots:
     void indexChanged(int index);

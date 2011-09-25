@@ -167,6 +167,7 @@ class LogVol
     bool isValid();
     bool isVirtual();
     bool isWritable();
+    bool hasMissingVolume();
     
 };
 

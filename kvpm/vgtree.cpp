@@ -150,8 +150,18 @@ QTreeWidgetItem *VGTree::loadItem(LogVol *lv, QTreeWidgetItem *item)
 
     item->setData(0, Qt::DisplayRole, lv_name);
 
-    if( !lv->isSnapContainer() && lv->isOrigin() )
+    if( lv->hasMissingVolume() ){
+        item->setIcon( 0, KIcon("exclamation") );
+        item->setToolTip( 0, i18n("one or more physical volumes are missing") );
+    }
+    else if( !lv->isSnapContainer() && lv->isOrigin() ){
         item->setIcon( 0, KIcon("bullet_star") );
+        item->setToolTip( 0, QString("origin") );
+    }
+    else{
+        item->setIcon( 0, KIcon() );
+        item->setToolTip( 0, QString() );
+    }
 
     if(lv->isSnapContainer())
         item->setData(1, Qt::DisplayRole, sizeToString(lv->getTotalSize()));           
@@ -306,6 +316,15 @@ void VGTree::insertSegmentItems(LogVol *lv, QTreeWidgetItem *item)
     for(int x = 0; x < segment_count; x++){
             
         child_item = item->child(x);
+
+        if( lv->getDevicePath(x).contains("unknown device") ){
+            child_item->setIcon(0, KIcon("exclamation") );
+            child_item->setToolTip( 0, i18n("one or more physical volumes are missing") );
+        }
+        else{
+            child_item->setIcon(0, KIcon() );
+            child_item->setToolTip( 0, QString() );
+        }
 
         child_item->setData(0, Qt::DisplayRole, QString("Seg# %1").arg(x));
         child_item->setData(1, Qt::DisplayRole, sizeToString(lv->getSegmentSize(x)));           

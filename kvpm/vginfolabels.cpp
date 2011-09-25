@@ -13,11 +13,13 @@
  */
 
 
+#include "vginfolabels.h"
+
 #include <KLocale>
+
 #include <QtGui>
 
 #include "misc.h"
-#include "vginfolabels.h"
 #include "volgroup.h"
 
 
@@ -93,10 +95,16 @@ VGInfoLabels::VGInfoLabels(VolGroup *volumeGroup, QWidget *parent) : QFrame(pare
     else    
 	clustered = "No";
 
-    if(volumeGroup->isPartial())
-        hlayout2->addWidget( new QLabel( i18n("<b>*** Warning: Partial Volume Group ***</b>") ) );
-    else if(volumeGroup->isExported())
-        hlayout2->addWidget( new QLabel( i18n("<b>*** Exported Volume Group ***</b>") ) );
+    if(volumeGroup->isPartial()){
+        hlayout2->addStretch();
+        hlayout2->addWidget( new QLabel( i18n("<b>Warning: Partial Volume Group</b>") ) );
+        hlayout2->addStretch();
+    }
+    else if(volumeGroup->isExported()){
+        hlayout2->addStretch();
+        hlayout2->addWidget( new QLabel( i18n("<b>Exported Volume Group</b>") ) );
+        hlayout2->addStretch();
+    }
 
     used_label   = new QLabel( i18nc("Space used up", "Used: %1", sizeToString(volumeGroup->getUsedSpace())) );
     free_label   = new QLabel( i18nc("Space not used", "Free: %1", sizeToString(volumeGroup->getFreeSpace())) );
