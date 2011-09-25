@@ -63,12 +63,13 @@ void MasterList::rescan()
     progress_dialog->setAllowCancel(false);
     progress_dialog->setMinimumDuration(250); 
     QProgressBar *progress_bar = progress_dialog->progressBar();
-    progress_bar->setRange(0,4);
+    progress_bar->setRange(0,3);
     progress_dialog->show();
     progress_dialog->ensurePolished();
     qApp->processEvents();
 
     lvm_scan(m_lvm);
+    lvm_config_reload(m_lvm);    
 
     progress_bar->setValue(1);
     progress_dialog->setLabelText( i18n("scanning volume groups") );
@@ -77,11 +78,6 @@ void MasterList::rescan()
     scanVolumeGroups();
 
     progress_bar->setValue(2);
-    progress_dialog->setLabelText( i18n("scanning logical volumes") );
-    progress_dialog->ensurePolished();
-    qApp->processEvents();
-
-    progress_bar->setValue(3);
     progress_dialog->setLabelText( i18n("scanning storage devices") );
     progress_dialog->ensurePolished();
     qApp->processEvents();
@@ -103,8 +99,6 @@ void MasterList::scanVolumeGroups()
 
     dm_list *vgnames;
     lvm_str_list *strl;
-
-    lvm_config_reload(m_lvm);    
 
     vgnames = lvm_list_vg_names(m_lvm);
     dm_list_iterate_items(strl, vgnames){ // rescan() existing VolGroup, don't create a new one

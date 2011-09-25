@@ -15,6 +15,7 @@
 
 #include "pvtree.h"
 
+#include <KIcon>
 #include <KLocale>
 #include <QtGui>
 
@@ -121,6 +122,13 @@ void PVTree::loadData()
 	pv_data << lv_name_list.join(", ");
 
 	item = new QTreeWidgetItem((QTreeWidgetItem *)0, pv_data);
+
+        if( device_name == "unknown device" )
+            item->setIcon(0, KIcon("exclamation"));
+        else
+            item->setIcon(0, KIcon());
+
+	item->setData(0, Qt::UserRole, pv->getUuid());
 	item->setData(1, Qt::UserRole, pv->getSize());
 	item->setData(2, Qt::UserRole, pv->getUnused());
 	item->setData(3, Qt::UserRole, (pv->getSize() - pv->getUnused()));
