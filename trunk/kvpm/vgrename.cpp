@@ -13,20 +13,42 @@
  */
 
 
+#include "vgrename.h"
+
 #include <KLocale>
 #include <QtGui>
 
-#include "vgrename.h"
-#include "volgroup.h"
+#include "logvol.h"
+#include "mountentry.h"
 #include "processprogress.h"
+#include "volgroup.h"
+
 
 bool rename_vg(VolGroup *volumeGroup)
 {
+    QList<LogVol *> lvs;
+    QString new_path, old_path;
+    QString new_name, old_name;
+
     VGRenameDialog dialog(volumeGroup);
     dialog.exec();
-    
+
     if(dialog.result() == QDialog::Accepted){
         ProcessProgress rename( dialog.arguments(), i18n("Renaming volume group..."), false );
+
+        if( ! rename.exitCode() ){
+            lvs = volumeGroup->getLogicalVolumes();
+            old_name = '/' + dialog.getOldName() + '/';
+            new_name = '/' + dialog.getNewName() + '/';
+
+            for(int x = lvs.size() - 1; x >= 0; x--){
+                if( lvs[x]->isMounted() ){
+                    old_path = lvs[x]->getMapperPath();
+                    new_path = lvs[x]->getMapperPath().replace(old_path.lastIndexOf(old_name), old_name.size(), new_name);
+                    rename_mount_entries(old_path, new_path);
+                }
+            }
+        }
         return true;
     }
     else
@@ -92,4 +114,14 @@ void VGRenameDialog::validateName(QString name)
     }
     else
 	enableButtonOk(false);
+}
+
+QString VGRenameDialog::getNewName()
+{
+    return m_new_name->text().trimmed();
+}
+
+QString VGRenameDialog::getOldName()
+{
+    return m_old_name;
 }

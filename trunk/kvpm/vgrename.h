@@ -36,6 +36,8 @@ Q_OBJECT
 public:
     explicit VGRenameDialog(VolGroup *volumeGroup, QWidget *parent = 0);
     QStringList arguments();
+    QString getNewName();
+    QString getOldName();
 
 private slots:
     void validateName(QString);
