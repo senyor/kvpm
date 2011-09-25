@@ -42,6 +42,7 @@ LVProperties::LVProperties(LogVol *logicalVolume, int segment, QWidget *parent):
         !m_lv->isSnapContainer() && ( (m_lv->getSegmentCount() == 1) || (segment == -1) ) ){
 
         layout->addWidget( mountPointsFrame() );
+        layout->addWidget( fsFrame() );
     }
 
     layout->addWidget( physicalVolumesFrame(segment) );
@@ -108,6 +109,25 @@ QFrame *LVProperties::uuidFrame()
     frame->setFrameStyle( QFrame::Sunken | QFrame::StyledPanel );
     frame->setLineWidth(2);
 
+    QLabel *temp_label = new QLabel( i18n("<b>Logical volume UUID</b>") );
+    temp_label->setAlignment(Qt::AlignCenter);
+    layout->addWidget( temp_label );
+    temp_label = new QLabel( m_lv->getUuid() );
+    temp_label->setToolTip( m_lv->getUuid() );
+    temp_label->setWordWrap(true);
+    layout->addWidget( temp_label );
+
+    return frame;
+}
+
+QFrame *LVProperties::fsFrame()
+{
+    QFrame *frame = new QFrame();
+    QVBoxLayout *layout = new QVBoxLayout();
+    frame->setLayout(layout);
+    frame->setFrameStyle( QFrame::Sunken | QFrame::StyledPanel );
+    frame->setLineWidth(2);
+
     QLabel *temp_label = new QLabel( i18n("<b>Filesystem label</b>") );
     temp_label->setAlignment(Qt::AlignCenter);
     layout->addWidget( temp_label );
@@ -121,14 +141,6 @@ QFrame *LVProperties::uuidFrame()
     layout->addWidget( temp_label );
     temp_label = new QLabel( m_lv->getFilesystemUuid() );
     temp_label->setToolTip( m_lv->getFilesystemUuid() );
-    temp_label->setWordWrap(true);
-    layout->addWidget( temp_label );
-
-    temp_label = new QLabel( i18n("<b>Logical volume UUID</b>") );
-    temp_label->setAlignment(Qt::AlignCenter);
-    layout->addWidget( temp_label );
-    temp_label = new QLabel( m_lv->getUuid() );
-    temp_label->setToolTip( m_lv->getUuid() );
     temp_label->setWordWrap(true);
     layout->addWidget( temp_label );
 
@@ -207,6 +219,7 @@ QFrame *LVProperties::generalFrame(int segment)
             layout->addWidget(new QLabel( i18n("Total extents: %1", total_extents) ));
 	    layout->addWidget(new QLabel( i18n("Total size: %1", sizeToString(total_size)) ));
 	}
+
 	if( !( m_lv->isMirrorLeg() || m_lv->isMirrorLog() )){
 
             layout->addWidget(new QLabel( i18n("Filesystem: %1", m_lv->getFilesystem() ) ));
@@ -283,8 +296,6 @@ QFrame *LVProperties::physicalVolumesFrame(int segment)
 	    layout->addWidget( temp_label );
 	}
     }
-
-    layout->addStretch();
 
     return frame;
 }
