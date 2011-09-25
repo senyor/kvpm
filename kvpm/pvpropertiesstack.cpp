@@ -13,11 +13,12 @@
  */
 
 
+#include "pvpropertiesstack.h"
+
 #include <QtGui>
 
 #include "logvol.h"
 #include "physvol.h"
-#include "pvpropertiesstack.h"
 #include "pvproperties.h"
 #include "volgroup.h"
 
@@ -55,18 +56,18 @@ PVPropertiesStack::PVPropertiesStack(VolGroup *volumeGroup, QWidget *parent)
 
 void PVPropertiesStack::changePVStackIndex(QTreeWidgetItem *item, QTreeWidgetItem*)
 {
-
     QString pv_name;
-    
     QList<PhysVol *> devices  = m_vg->getPhysicalVolumes();
 
     if(item){
-	pv_name = QVariant( item->data(0, Qt::DisplayRole ) ).toString();
-	for(int x = 0; x < devices.size(); x++){
-	    
-	    if(pv_name == (devices[x])->getName()){
+
+	pv_name = QVariant( item->data(0, Qt::UserRole ) ).toString();
+
+	for(int x = devices.size() - 1; x >= 0; x--){
+
+	    if( pv_name == ( devices[x])->getUuid() )
 		m_stack_widget->setCurrentIndex(x);
-	    }
+
 	}
     }
     else if( devices.size() )
