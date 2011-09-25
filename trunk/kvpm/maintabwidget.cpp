@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2010 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -13,10 +13,11 @@
  */
 
 
+#include "maintabwidget.h"
+
 #include <KTabWidget>
 #include <QtGui>
 
-#include "maintabwidget.h"
 #include "volumegrouptab.h"
 
 MainTabWidget::MainTabWidget(QWidget *parent) : QWidget(parent)
@@ -38,19 +39,17 @@ QString MainTabWidget::getUnmungedText(int index)
     return m_unmunged_text[index];
 }
 
-void MainTabWidget::appendVolumeGroupTab(VolumeGroupTab *page, const QString & label )
+void MainTabWidget::appendVolumeGroupTab(VolumeGroupTab *page, const QIcon &icon, const QString &label )
 {
-    m_tab_widget->insertTab( m_tab_widget->count(), (QWidget *)page, label );
+    m_tab_widget->insertTab( m_tab_widget->count(), (QWidget *)page, icon, label );
     m_unmunged_text.append(label);
     m_vg_tabs.append(page);
-    return;
 }
 
 void MainTabWidget::appendDeviceTab(DeviceTab *page, const QString & label )
 {
     m_tab_widget->insertTab( m_tab_widget->count(), (QWidget *) page, label );
     m_unmunged_text.append(label);
-    return;
 }
 
 void MainTabWidget::deleteTab(int index)
@@ -59,7 +58,6 @@ void MainTabWidget::deleteTab(int index)
     m_tab_widget->removeTab(index);
     m_unmunged_text.removeAt(index);
     m_vg_tabs.removeAt(index - 1);
-    return;
 }
 
 QWidget *MainTabWidget::getWidget(int index)
@@ -82,9 +80,13 @@ VolumeGroupTab *MainTabWidget::getVolumeGroupTab(int index)
     return m_vg_tabs[index];
 }
 
+void MainTabWidget::setIcon(int index, const QIcon &icon)
+{
+    m_tab_widget->setTabIcon(index, icon);
+}
+
 void MainTabWidget::indexChanged(int)
 {
     emit currentIndexChanged();
-    return;
 }
 
