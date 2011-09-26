@@ -28,7 +28,7 @@ extern MasterList *g_master_list;
 
 bool remove_vg(VolGroup *volumeGroup)
 {
-    const QByteArray vg_name = volumeGroup->getName().toAscii();
+    const QByteArray vg_name = volumeGroup->getName().toLocal8Bit();
     QString message;
     lvm_t  lvm = g_master_list->getLVM();
     vg_t vg_dm = NULL;

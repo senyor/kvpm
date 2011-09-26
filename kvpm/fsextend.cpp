@@ -39,15 +39,15 @@ bool fs_extend(QString path, QString fs, bool isLV){
     QList<MountInformation *> mounts = mount_info_list.getMountInformation( path );
     QString mp;               // mount point
     bool isMounted = false;
-    const QByteArray path_array = path.toAscii();
-    const QByteArray fs_array = fs.toAscii();
+    const QByteArray path_array = path.toLocal8Bit();
+    const QByteArray fs_array = fs.toLocal8Bit();
 
     if( mounts.size() ){
         mp = mounts[0]->getMountPoint();
         isMounted = true;
     }
 
-    const QByteArray mp_array = mp.toAscii();
+    const QByteArray mp_array = mp.toLocal8Bit();
     QStringList arguments, output;
     unsigned long options = 0;
 
@@ -183,8 +183,8 @@ bool do_temp_mount(QString path, QString fs){
 
     QDir temp_dir( "/tmp/kvpm_tmp_mount" );
     unsigned long options = 0;
-    const QByteArray path_array = path.toAscii();
-    const QByteArray fs_array = fs.toAscii();
+    const QByteArray path_array = path.toLocal8Bit();
+    const QByteArray fs_array = fs.toLocal8Bit();
 
     if( ! temp_dir.exists() ){
         temp_dir.cdUp();

@@ -98,7 +98,7 @@ void UnmountDialog::unmountFilesystems()
     for(int x = 0; x < m_check_list.size(); x++){
 	if( m_check_list[x]->isChecked() ) {
 	    
-	    mount_point = m_check_list[x]->getUnmungedText().toAscii();
+	    mount_point = m_check_list[x]->getUnmungedText().toLocal8Bit();
 	    if( umount2( mount_point.data() , 0) ){
 		error_string =  strerror( errno );
 
@@ -209,7 +209,7 @@ bool unmount_filesystem(StoragePartition *partition)
 bool unmount_filesystem(const QString mountPoint)
 {
     QString error_string, error_message;
-    QByteArray mount_point = mountPoint.toAscii();
+    QByteArray mount_point = mountPoint.toLocal8Bit();
 
     if( umount2(mount_point.data(), 0) ){
 	error_string =  strerror( errno );

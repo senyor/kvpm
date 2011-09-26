@@ -235,7 +235,7 @@ QStringList VGSplitDialog::arguments()
 
 void VGSplitDialog::deactivate()
 {
-    const QByteArray vg_name = m_vg->getName().toAscii();
+    const QByteArray vg_name = m_vg->getName().toLocal8Bit();
     lvm_t lvm = g_master_list->getLVM();
     vg_t vg_dm;
     dm_list *lv_dm_list;

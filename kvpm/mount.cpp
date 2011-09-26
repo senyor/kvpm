@@ -446,10 +446,10 @@ void MountDialog::mountFilesystem()
 	all_options.append( additional_options.join(",") );
     }
 
-    const QByteArray device      = m_device_to_mount.toAscii();
-    const QByteArray mount_point = m_mount_point.toAscii();
-    const QByteArray fs_type     = m_filesystem_type.toAscii();
-    const QByteArray fs_options  = additional_options.join(",").toAscii();
+    const QByteArray device      = m_device_to_mount.toLocal8Bit();
+    const QByteArray mount_point = m_mount_point.toLocal8Bit();
+    const QByteArray fs_type     = m_filesystem_type.toLocal8Bit();
+    const QByteArray fs_options  = additional_options.join(",").toLocal8Bit();
 
     int error = mount( device.data(), mount_point.data(), fs_type.data(), options, fs_options.data() );
 

@@ -34,10 +34,10 @@ bool addMountEntry(QString device, QString mountPoint, QString type, QString opt
 {
     char mount_table_char[] = _PATH_MOUNTED;
 
-    QByteArray device_array      = device.toAscii();
-    QByteArray mount_point_array = mountPoint.toAscii();
-    QByteArray type_array        = type.toAscii();
-    QByteArray options_array     = options.toAscii();
+    QByteArray device_array      = device.toLocal8Bit();
+    QByteArray mount_point_array = mountPoint.toLocal8Bit();
+    QByteArray type_array        = type.toLocal8Bit();
+    QByteArray options_array     = options.toLocal8Bit();
 
     const struct mntent mount_entry  = { device_array.data(), 
 					 mount_point_array.data(), 
@@ -69,10 +69,10 @@ and returns it  */
 
 mntent* buildMountEntry(QString device, QString mountPoint, QString type, QString options, int dumpFreq, int pass)
 {
-    QByteArray device_array      = device.toAscii();
-    QByteArray mount_point_array = mountPoint.toAscii();
-    QByteArray type_array        = type.toAscii();
-    QByteArray options_array     = options.toAscii();
+    QByteArray device_array      = device.toLocal8Bit();
+    QByteArray mount_point_array = mountPoint.toLocal8Bit();
+    QByteArray type_array        = type.toLocal8Bit();
+    QByteArray options_array     = options.toLocal8Bit();
 
     mntent *mount_entry = new mntent;
     

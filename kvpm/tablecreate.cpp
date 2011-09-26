@@ -82,7 +82,7 @@ TableCreateDialog::TableCreateDialog(QString devicePath, QWidget *parent) :
 
 void TableCreateDialog::commitTable()
 {
-    const QByteArray path      = m_device_path.toAscii(); 
+    const QByteArray path      = m_device_path.toLocal8Bit(); 
     PedDevice   *ped_device    = ped_device_get( path.data() ); 
     PedDiskType *ped_disk_type = NULL;
     PedDisk     *ped_disk = NULL;

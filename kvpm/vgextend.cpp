@@ -33,7 +33,7 @@ extern MasterList *g_master_list;
 
 bool extend_vg(QString volumeGroupName, StorageDevice *device, StoragePartition *partition)
 {
-    const QByteArray vg_name = volumeGroupName.toAscii();
+    const QByteArray vg_name = volumeGroupName.toLocal8Bit();
     QByteArray pv_name;
     QString message, error_message;
     long long size;
@@ -44,11 +44,11 @@ bool extend_vg(QString volumeGroupName, StorageDevice *device, StoragePartition 
 
     if(device){
         size = device->getSize();
-        pv_name = device->getName().toAscii();
+        pv_name = device->getName().toLocal8Bit();
     }
     else{
         size = partition->getSize();
-        pv_name = partition->getName().toAscii();
+        pv_name = partition->getName().toLocal8Bit();
     }
 
     error_message = i18n("This physical volume <b>%1</b> is smaller than the extent size", QString(pv_name));
@@ -167,7 +167,7 @@ VGExtendDialog::VGExtendDialog(VolGroup *volumeGroup, QList<StorageDevice *> dev
 
 void VGExtendDialog::commitChanges()
 {
-    const QByteArray vg_name   = m_vg->getName().toAscii();
+    const QByteArray vg_name   = m_vg->getName().toLocal8Bit();
     const QStringList pv_names = m_pv_checkbox->getNames();
     QByteArray pv_name;
     lvm_t lvm = g_master_list->getLVM();
@@ -184,7 +184,7 @@ void VGExtendDialog::commitChanges()
         for(int x = 0; x < pv_names.size(); x++){
             progress_bar->setValue(x);
             loop->processEvents();
-            pv_name = pv_names[x].toAscii();
+            pv_name = pv_names[x].toLocal8Bit();
             if( lvm_vg_extend(vg_dm, pv_name.data()) )
                 KMessageBox::error(0, QString(lvm_errmsg(lvm)));
         }
