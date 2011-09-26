@@ -1,3 +1,9 @@
+version 0.8.0
+Added icons for most menus. Added several more for the Tree lists
+of physical volumes, logical volumes and devices to show mount state,
+active status and missing volumes in partial groups. Improved cmake 
+commands for "make install."
+
 version 0.7.8
 Added a menu option for running 'fsck -fp' on a filesystem.
 Removed call to ped_file_system_clobber() which is no longer
