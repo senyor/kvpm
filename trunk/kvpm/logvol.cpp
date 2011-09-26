@@ -415,7 +415,7 @@ void LogVol::insertChildren(lv_t lvmLV, vg_t lvmVG)
                 child_name_list.append( m_log );
 
         for(int x = child_name_list.size() - 1; x >= 0; x--){
-            child_name = child_name_list[x].toAscii();
+            child_name = child_name_list[x].toLocal8Bit();
             lvm_child = lvm_lv_from_name(lvmVG, child_name.data());
             m_lv_children.append( new LogVol(lvm_child, lvmVG, m_vg, this) );
         }

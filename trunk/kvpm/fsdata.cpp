@@ -38,7 +38,7 @@ FSData *get_fs_data(QString path){
     struct statvfs *buf;
     buf = new struct statvfs;
 
-    QByteArray path_array = path.toAscii();
+    QByteArray path_array = path.toLocal8Bit();
     const char *mp = path_array.data();
     error =  statvfs(mp, buf);
  

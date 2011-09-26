@@ -25,7 +25,7 @@
 QString fsprobe_getfstype2(QString devicePath)
 {
     static blkid_cache blkid2;
-    const QByteArray path = devicePath.toAscii();
+    const QByteArray path = devicePath.toLocal8Bit();
     QString fs_type;
     blkid2 = NULL;
     
@@ -43,7 +43,7 @@ QString fsprobe_getfstype2(QString devicePath)
 QString fsprobe_getfsuuid(QString devicePath)
 {
     static blkid_cache blkid2;
-    const QByteArray path = devicePath.toAscii();
+    const QByteArray path = devicePath.toLocal8Bit();
     QString fs_uuid;
     blkid2 = NULL;
     
@@ -61,7 +61,7 @@ QString fsprobe_getfsuuid(QString devicePath)
 QString fsprobe_getfslabel(QString devicePath)
 {
     static blkid_cache blkid2;
-    const QByteArray path = devicePath.toAscii();
+    const QByteArray path = devicePath.toLocal8Bit();
     QString fs_label;
     blkid2 = NULL;
     

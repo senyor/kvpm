@@ -58,7 +58,7 @@ void VolGroup::rescan(lvm_t lvm)
 
     // clustered volumes can't be opened when clvmd isn't running 
 
-    QByteArray  vg_name_array = m_vg_name.toAscii();
+    QByteArray  vg_name_array = m_vg_name.toLocal8Bit();
     const char *vg_name_ascii = vg_name_array.data();
 
     if( (lvm_vg = lvm_vg_open(lvm, vg_name_ascii, "r", 0x00 )) ){

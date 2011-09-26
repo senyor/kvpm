@@ -266,7 +266,7 @@ void VGCreateDialog::commitChanges()
     vg_t vg_dm;
     uint32_t new_extent_size = m_extent_size->currentText().toULong();
     const QStringList pv_names = m_pv_checkbox->getNames();
-    const QByteArray vg_name_array = m_vg_name->text().toAscii();
+    const QByteArray vg_name_array = m_vg_name->text().toLocal8Bit();
     QByteArray pv_name_array;
 
     new_extent_size *= 1024;
@@ -287,7 +287,7 @@ void VGCreateDialog::commitChanges()
         for(int x = 0; x < pv_names.size(); x++){
             m_progress_bar->setValue(x);
             loop->processEvents();
-            pv_name_array = pv_names[x].toAscii();
+            pv_name_array = pv_names[x].toLocal8Bit();
             if( lvm_vg_extend(vg_dm, pv_name_array.data()) )
                 KMessageBox::error(0, QString(lvm_errmsg(lvm)));
         }

@@ -108,7 +108,7 @@ void ExecutableFinder::reload()
 
     for(int y = 0; y < key_length; y++){
 	for(int x = 0; x < search_paths.size(); x++){
-            path_array = QString( search_paths[x] + m_keys[y] ).toAscii();
+            path_array = QString( search_paths[x] + m_keys[y] ).toLocal8Bit();
             path = path_array.data(); 
             if( KDE_lstat(path, &buf) == 0 ){
 		m_path_map.insert( m_keys[y], search_paths[x] + m_keys[y] );

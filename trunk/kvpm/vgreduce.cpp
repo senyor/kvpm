@@ -87,7 +87,7 @@ VGReduceDialog::VGReduceDialog(VolGroup *volumeGroup, QWidget *parent) : KDialog
 
 void VGReduceDialog::commitChanges()
 {
-    const QByteArray vg_name = m_vg->getName().toAscii();
+    const QByteArray vg_name = m_vg->getName().toLocal8Bit();
     QByteArray pv_name;
     vg_t vg_dm = NULL;
     lvm_t lvm = g_master_list->getLVM();
@@ -97,7 +97,7 @@ void VGReduceDialog::commitChanges()
 
     if( (vg_dm = lvm_vg_open(lvm, vg_name.data(), "w", 0)) ){
         for(int x = 0; x < pv_list.size(); x++){
-            pv_name = pv_list[x].toAscii();
+            pv_name = pv_list[x].toLocal8Bit();
             if( lvm_vg_reduce(vg_dm, pv_name.data()) )
                 KMessageBox::error(0, QString(lvm_errmsg(lvm)));
         }
