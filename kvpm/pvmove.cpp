@@ -29,6 +29,15 @@
 #include "volgroup.h"
 
 
+struct NameAndRange
+{
+    QString   name;        // Physical volume name
+    QString   name_range;  // name + range of extents  ie: /dev/sda1:10-100 and just name if no range specified 
+    long long start;       // Starting extent
+    long long end;         // Last extent
+};
+
+
 bool move_pv(PhysVol *physicalVolume)
 {
     PVMoveDialog dialog(physicalVolume);
@@ -41,9 +50,9 @@ bool move_pv(PhysVol *physicalVolume)
 	return false;
 }
 
-bool move_pv(LogVol *logicalVolume)
+bool move_pv(LogVol *logicalVolume, int segment)
 {
-    PVMoveDialog dialog(logicalVolume);
+    PVMoveDialog dialog(logicalVolume, segment);
     dialog.exec();
     if(dialog.result() == QDialog::Accepted){
         ProcessProgress move( dialog.arguments(), i18n("Moving extents..."), false );
@@ -87,103 +96,116 @@ bool stop_pvmove()
         return false;
 }
 
-
 PVMoveDialog::PVMoveDialog(PhysVol *physicalVolume, QWidget *parent) : KDialog(parent) 
 {
+    m_vg = physicalVolume->getVolGroup();
+    m_target_pvs = m_vg->getPhysicalVolumes();
+    m_move_lv = false;
+    m_move_segment = false;
 
-    PhysVol  *pv = physicalVolume;
-    VolGroup *vg = pv->getVolGroup();
-    m_target_pvs = vg->getPhysicalVolumes();
-    
-    move_lv = false;
-    m_source_pvs.append(pv);
+    QString name = physicalVolume->getName(); 
+    QStringList forbidden_targets;  // A whole pv can't be moved to a pv it is striped with along any segment
+    QStringList striped_targets;
+    QList<LogVol *> lvs = m_vg->getLogicalVolumes();
 
-    for(int x = m_target_pvs.size() - 1 ; x >= 0; x--)
-	if(m_target_pvs[x]->getName() == m_source_pvs[0]->getName())
-	    m_target_pvs.removeAt(x);
+    NameAndRange *nar = new NameAndRange;
+    nar->name = name;
+    nar->name_range = name;
+    m_sources.append(nar);
 
-    removeEmptyTargets();
+    forbidden_targets.append(name);
+
+    for(int x = lvs.size() - 1; x >= 0; x--){
+        for(int seg = lvs[x]->getSegmentCount() - 1; seg >= 0; seg--){
+            if( lvs[x]->getSegmentStripes(seg) > 1 ){
+                striped_targets = lvs[x]->getDevicePath(seg);
+                if( striped_targets.contains(name) )
+                    forbidden_targets.append(striped_targets); 
+            }
+        }
+    }
+
+    forbidden_targets.removeDuplicates();
+
+    for(int x = m_target_pvs.size() - 1 ; x >= 0; x--){
+        for(int y = forbidden_targets.size() - 1; y >= 0; y--){
+            if( m_target_pvs[x]->getName() == forbidden_targets[y] ){
+                m_target_pvs.removeAt(x);
+                forbidden_targets.removeAt(y);
+                break;
+            }
+        }
+    }
+
+    removeFullTargets();
     buildDialog();
 }
 
-PVMoveDialog::PVMoveDialog(LogVol *logicalVolume, QWidget *parent) : 
+PVMoveDialog::PVMoveDialog(LogVol *logicalVolume, int segment, QWidget *parent) : 
     KDialog(parent), 
     m_lv(logicalVolume)
 {
-    QStringList physical_volume_paths;
+    m_vg = m_lv->getVolumeGroup();
+    m_move_lv = true;
+    m_target_pvs = m_vg->getPhysicalVolumes();
 
-    QList<LogVol *>  lv_list;  // these 3 are only for mirrors
-    LogVol *leg; 
-    int lv_count;
-
-    move_lv = true;
-    m_target_pvs = m_lv->getVolumeGroup()->getPhysicalVolumes();
-
-    // Turns out mirrors don't work with pv move so the following isn't needed yet.
-
-    if( m_lv->isMirror() ){  // find the mirror legs and get the pvs
-
-        lv_list = m_lv->getAllChildrenFlat();
-        lv_count = lv_list.size();
-
-        for(int x = 0; x < lv_count; x++){
-
-            leg = lv_list[x];
-
-            if( !leg->isMirror() )  // skips temp sub mirrors and log mirror
-                physical_volume_paths << leg->getDevicePathAll();
-
-            if( physical_volume_paths.size() > 1 ){ // removes duplicates
-                physical_volume_paths.sort();
-
-                for( int x = ( physical_volume_paths.size() - 1 ); x > 0 ;x--){
-                    if( physical_volume_paths[x] == physical_volume_paths[x - 1] )
-                        physical_volume_paths.removeAt(x);
-                } 
-            }
-        }
-
-        for(int x = 0; x < physical_volume_paths.size(); x++)
-            m_source_pvs.append( m_lv->getVolumeGroup()->getPhysVolByName( physical_volume_paths[x] ));
-
+    if( segment >= 0 ){
+        setupSegmentMove(segment);
+        m_move_segment = true;
     }
-    else{	
-        physical_volume_paths << m_lv->getDevicePathAll();
-        
-        for(int x = 0; x < physical_volume_paths.size(); x++)
-            m_source_pvs.append(m_lv->getVolumeGroup()->getPhysVolByName( physical_volume_paths[x] ));
+    else{
+        setupFullMove();
+        m_move_segment = false;
     }
 
-/* if there is only one source physical volumes possible on this logical volume
-   then we eliminate it from the possible target pv list completely. */
+    /* if there is only one source physical volumes possible on this logical volume
+       then we eliminate it from the possible target pv list completely. */
 
-    if(m_source_pvs.size() == 1){
-	for(int x = (m_target_pvs.size() - 1); x >= 0; x--){
-	    if( m_target_pvs[x] == m_source_pvs[0] )
+    if( m_sources.size() == 1 ){
+	for(int x = m_target_pvs.size() - 1; x >= 0; x--){
+	    if( m_target_pvs[x]->getName() == m_sources[0]->name )
 		m_target_pvs.removeAt(x);
 	}
     }
 
-    removeEmptyTargets();
+    /* If this is a segment move then all source pvs need to be 
+       removed from the target list */
+
+    if( m_move_segment ){
+	for(int x = m_target_pvs.size() - 1; x >= 0; x--){
+            for(int y = m_sources.size() - 1; y >= 0; y--){
+                if( m_target_pvs[x]->getName() == m_sources[y]->name )
+                    m_target_pvs.removeAt(x);
+            }
+        }
+    }
+
+    removeFullTargets();
     buildDialog();
 }
 
-void PVMoveDialog::removeEmptyTargets(){
+void PVMoveDialog::removeFullTargets(){
 
     for(int x = (m_target_pvs.size() - 1); x >= 0; x--){
         if( m_target_pvs[x]->getUnused() <= 0 )
             m_target_pvs.removeAt(x);
     }
 
-/* If there is only one physical volume in the group or they are 
-   all full then a pv move will have no place to go */
+    /* If there is only one physical volume in the group or they are 
+       all full then a pv move will have no place to go */
 
     if(m_target_pvs.size() < 1){
-	KMessageBox::error(this, i18n("There are no available physical volumes with space to move too"));
+	KMessageBox::error(this, i18n("There are no available physical volumes with space to move to"));
 	QEventLoop loop(this);
 	loop.exec();
 	reject();
     }
+}
+
+PVMoveDialog::~PVMoveDialog()
+{
+    for(int x = 0; x < m_sources.size(); x++)
+        delete m_sources[x];
 }
 
 void PVMoveDialog::buildDialog()
@@ -197,7 +219,7 @@ void PVMoveDialog::buildDialog()
     QVBoxLayout *layout = new QVBoxLayout;
     dialog_body->setLayout(layout);
 
-    if(move_lv){
+    if(m_move_lv){
         label = new QLabel( i18n("<b>Move only physical extents on:</b>") );
         label->setAlignment(Qt::AlignCenter);
 	layout->addWidget(label);
@@ -216,17 +238,26 @@ void PVMoveDialog::buildDialog()
     m_pv_checkbox = new PVCheckBox(m_target_pvs);
     lower_layout->addWidget(m_pv_checkbox);
 
-    int radio_count = m_source_pvs.size();
-    if( radio_count > 1){
-	for(int x = 0; x < m_source_pvs.size(); x++){
+    const int radio_count = m_sources.size();
 
-	    if(move_lv)
-	        m_pv_used_space = m_lv->getSpaceOnPhysicalVolume(m_source_pvs[x]->getName());
-	    else
-	        m_pv_used_space = m_source_pvs[x]->getSize() - m_source_pvs[x]->getUnused();
-
-	    radio_button = new NoMungeRadioButton( m_source_pvs[x]->getName() + "  " + sizeToString(m_pv_used_space));
-            radio_button->setAlternateText( m_source_pvs[x]->getName() );
+    if( radio_count > 1 ){
+	for(int x = 0; x < radio_count; x++){
+   
+            if(m_move_segment){
+                m_pv_used_space = (1 + m_sources[x]->end - m_sources[x]->start) * m_vg->getExtentSize();
+                radio_button = new NoMungeRadioButton( QString("%1  %2").arg(m_sources[x]->name_range).arg(sizeToString(m_pv_used_space)));
+                radio_button->setAlternateText( m_sources[x]->name );
+            }
+	    else if(m_move_lv){
+	        m_pv_used_space = m_lv->getSpaceOnPhysicalVolume(m_sources[x]->name);
+                radio_button = new NoMungeRadioButton( QString("%1  %2").arg(m_sources[x]->name).arg(sizeToString(m_pv_used_space)));
+                radio_button->setAlternateText( m_sources[x]->name );
+            }
+            else{
+                m_pv_used_space = m_vg->getPhysVolByName(m_sources[x]->name)->getSize() - m_vg->getPhysVolByName(m_sources[x]->name )->getUnused();
+                radio_button = new NoMungeRadioButton( QString("%1  %2").arg(m_sources[x]->name).arg(sizeToString(m_pv_used_space)));
+                radio_button->setAlternateText( m_sources[x]->name );
+            }
 
             if(radio_count < 11 )
                 radio_layout->addWidget(radio_button, x % 5, x / 5);
@@ -245,16 +276,18 @@ void PVMoveDialog::buildDialog()
 	}
     }
     else{
-
- 	radio_layout->addWidget( new QLabel( m_source_pvs[0]->getName() ) );
-
-	if(move_lv)
-	    m_pv_used_space = m_lv->getSpaceOnPhysicalVolume(m_source_pvs[0]->getName());
-	else
-	    m_pv_used_space = m_source_pvs[0]->getSize() - m_source_pvs[0]->getUnused();
-    
-	label = new QLabel("Required space: " + sizeToString( m_pv_used_space ) );
-	radio_layout->addWidget(label);
+        if(m_move_segment){
+            m_pv_used_space = (1 + m_sources[0]->end - m_sources[0]->start) * m_vg->getExtentSize();
+            radio_layout->addWidget( new QLabel( QString("%1  %2").arg(m_sources[0]->name_range).arg(sizeToString(m_pv_used_space)) ) );
+        }
+	else if(m_move_lv){
+	    m_pv_used_space = m_lv->getSpaceOnPhysicalVolume(m_sources[0]->name);
+            radio_layout->addWidget( new QLabel( QString("%1  %2").arg(m_sources[0]->name).arg(sizeToString(m_pv_used_space)) ) );
+        }
+	else{
+            m_pv_used_space = m_vg->getPhysVolByName( m_sources[0]->name )->getSize() - m_vg->getPhysVolByName( m_sources[0]->name )->getUnused();
+            radio_layout->addWidget( new QLabel( QString("%1  %2").arg(m_sources[0]->name).arg(sizeToString(m_pv_used_space)) ) );
+        }
     }
 
     QGroupBox *alloc_box = new QGroupBox( i18n("Allocation Policy") );
@@ -286,18 +319,18 @@ void PVMoveDialog::resetOkButton()
     long long needed_space_total = 0;
     QString device_name;
 
-    if(move_lv){
+    if(m_move_lv){
 	if(m_radio_buttons.size() > 1){
 	    for(int x = 0; x < m_radio_buttons.size(); x++){
 		if(m_radio_buttons[x]->isChecked()){
-		    device_name = m_source_pvs[x]->getName();
-		    needed_space_total = m_lv->getSpaceOnPhysicalVolume( device_name );
+		    device_name = m_radio_buttons[x]->getAlternateText();
+		    needed_space_total = m_lv->getSpaceOnPhysicalVolume(device_name);
 		}
 	    }
 	}
 	else{
-	    device_name = m_source_pvs[0]->getName();
-	    needed_space_total = m_lv->getSpaceOnPhysicalVolume( device_name );
+	    device_name = m_sources[0]->name;
+	    needed_space_total = m_lv->getSpaceOnPhysicalVolume(device_name);
 	}
     }
     else
@@ -313,9 +346,9 @@ void PVMoveDialog::disableSource()  // don't allow source and target to be the s
 {
     PhysVol *source_pv = NULL;
     
-    for(int x = 0; x < m_radio_buttons.size(); x++){
+    for(int x = m_radio_buttons.size() - 1; x>= 0; x--){
 	if(m_radio_buttons[x]->isChecked())
-	    source_pv = m_source_pvs[x];
+	    source_pv = m_vg->getPhysVolByName( m_sources[x]->name );
     }
 
     m_pv_checkbox->disableOrigin(source_pv);
@@ -330,7 +363,7 @@ QStringList PVMoveDialog::arguments()
 
     args << "pvmove" << "--background";
 
-    if(move_lv){
+    if(m_move_lv){
 	args << "--name";
 	args << m_lv->getFullName();
     }
@@ -347,18 +380,52 @@ QStringList PVMoveDialog::arguments()
             args << "normal" ;
     }
 
-    if(m_source_pvs.size() > 1){
-	for(int x = 0; x < m_radio_buttons.size(); x++){
-	    if(m_radio_buttons[x]->isChecked())
-		source = m_source_pvs[x]->getName();
-	}
+    if( m_sources.size() > 1 ){
+        for(int x = m_sources.size() - 1; x >= 0; x--){
+            if(m_radio_buttons[x]->isChecked())
+                source = m_sources[x]->name_range;
+        }
     }
     else{
-	source = m_source_pvs[0]->getName();
+        source = m_sources[0]->name_range;
     }
-    
+
+    qDebug() << source;
+    qDebug() <<m_pv_checkbox->getNames();
+
     args << source;
     args << m_pv_checkbox->getNames(); // target(s)
 
     return args;
+}
+
+void PVMoveDialog::setupSegmentMove(int segment)
+{
+    QStringList names = m_lv->getDevicePath(segment);                   // source pv name
+    int stripes = m_lv->getSegmentStripes(segment);                     // source pv stripe count
+    long long extents = m_lv->getSegmentExtents(segment);               // extent count
+    QList<long long> starts = m_lv->getSegmentStartingExtent(segment);  // lv's first extent on pv 
+    NameAndRange *nar;
+    
+    for(int x = 0; x < names.size(); x++){
+        nar = new NameAndRange;
+        nar->name  = names[x];
+        nar->start = starts[x];
+        nar->end   = starts[x] + (extents / stripes) - 1;
+        nar->name_range = QString("%1:%2-%3").arg(nar->name).arg(nar->start).arg(nar->end);
+        m_sources.append(nar);
+    }
+}
+
+void PVMoveDialog::setupFullMove()
+{
+    QStringList names = m_lv->getDevicePathAllFlat();
+    NameAndRange *nar;
+
+    for(int x = names.size() - 1; x >= 0; x--){
+        nar = new NameAndRange();
+        nar->name = names[x];
+        nar->name_range = names[x];
+        m_sources.append(nar);
+    }
 }

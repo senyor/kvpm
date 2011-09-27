@@ -38,9 +38,10 @@ Q_OBJECT
     KMenu *filesystem_menu;
     VolGroup *m_vg;
     LogVol *m_lv;
+    int m_segment;
 
  public:
-    LVActionsMenu(LogVol *logicalVolume, VolGroup *volumeGroup, QWidget *parent);
+    LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volumeGroup, QWidget *parent);
 
  private slots:
     void createLogicalVolume();

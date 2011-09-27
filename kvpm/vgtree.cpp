@@ -336,6 +336,7 @@ void VGTree::insertSegmentItems(LogVol *lv, QTreeWidgetItem *item)
  	child_item->setData(0, Qt::UserRole, lv->getName());
 	child_item->setData(1, Qt::UserRole, x);
  	child_item->setData(2, Qt::UserRole, lv->getUuid());
+ 	child_item->setData(3, Qt::UserRole, QString("segment"));
 
         for(int x = 7; x < 12; x++)
             child_item->setData(x, Qt::DisplayRole, QString(""));
@@ -398,16 +399,23 @@ void VGTree::popupContextMenu(QPoint point)
     KMenu *context_menu;
     LogVol *lv;
     QString lv_name;
+    int segment;    // segment = -1 means whole lv
 
     item = itemAt(point);
     if(item){                                 //item = 0 if there is no item a that point
 	lv_name = QVariant(item->data(0, Qt::UserRole)).toString();
 	lv = m_vg->getLogVolByName(lv_name);
-	context_menu = new LVActionsMenu(lv, m_vg, this);
+
+        if( QVariant(item->data(3, Qt::UserRole) ).toString() == "segment" )
+            segment = QVariant(item->data(1, Qt::UserRole)).toInt();
+        else
+            segment = -1;
+
+	context_menu = new LVActionsMenu(lv, segment, m_vg, this);
 	context_menu->exec(QCursor::pos());
     }
     else{
-	context_menu = new LVActionsMenu(NULL, m_vg, this);
+	context_menu = new LVActionsMenu(NULL, 0, m_vg, this);
 	context_menu->exec(QCursor::pos());
     }
 }

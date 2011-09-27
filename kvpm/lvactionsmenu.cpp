@@ -44,14 +44,14 @@
 #include "volgroup.h"
 
 
-LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, VolGroup *volumeGroup, QWidget *parent) : 
+LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volumeGroup, QWidget *parent) : 
     KMenu(parent), 
-    m_vg(volumeGroup), 
-    m_lv(logicalVolume)
+    m_vg(volumeGroup),
+    m_lv(logicalVolume),
+    m_segment(segment) 
 {
     if( m_vg->getSize() == 0 )
         setEnabled(false);
-
 
     KActionCollection *lv_actions = new KActionCollection(this);
     lv_actions->addAssociatedWidget(this);
@@ -333,6 +333,7 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, VolGroup *volumeGroup, QWidg
 	    lv_change_action->setEnabled(true);
 	    lv_extend_action->setEnabled(false);
 	    lv_reduce_action->setEnabled(false);
+            lv_rename_action->setEnabled(false);
 	    pv_move_action->setEnabled(false);
 	    remove_mirror_action->setEnabled(false);
 	    remove_mirror_leg_action->setEnabled(false);
@@ -350,6 +351,7 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, VolGroup *volumeGroup, QWidg
 	    lv_removefs_action->setEnabled(true);
 	    lv_mkfs_action->setEnabled(true);
 	    lv_remove_action->setEnabled(false);
+            lv_rename_action->setEnabled(false);
 	    add_mirror_action->setEnabled(false);
 	    lv_change_action->setEnabled(true);
 	    lv_extend_action->setEnabled(false);
@@ -555,6 +557,6 @@ void LVActionsMenu::unmountFilesystem()
 
 void LVActionsMenu::movePhysicalExtents()
 {
-    if( move_pv(m_lv) )
+    if( move_pv(m_lv, m_segment) )
         MainWindow->reRun();
 }
