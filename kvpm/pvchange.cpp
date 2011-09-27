@@ -50,7 +50,7 @@ PVChangeDialog::PVChangeDialog(PhysVol *physicalVolume, QWidget *parent):
     attrib_box_layout->addWidget(m_mda_box);
     m_uuid_box = new QCheckBox( i18n("Generate new UUID for this volume") );
     m_uuid_box->setChecked(false);
-    if( m_pv->getVolGroup()->isActive() )
+    if( m_pv->getVolumeGroup()->isActive() )
         m_uuid_box->setEnabled(false);
     attrib_box_layout->addWidget(m_uuid_box);
 

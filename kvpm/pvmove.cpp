@@ -98,7 +98,7 @@ bool stop_pvmove()
 
 PVMoveDialog::PVMoveDialog(PhysVol *physicalVolume, QWidget *parent) : KDialog(parent) 
 {
-    m_vg = physicalVolume->getVolGroup();
+    m_vg = physicalVolume->getVolumeGroup();
     m_target_pvs = m_vg->getPhysicalVolumes();
     m_move_lv = false;
     m_move_segment = false;

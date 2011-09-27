@@ -28,7 +28,7 @@
 
 PVProperties::PVProperties(PhysVol *physicalVolume, QWidget *parent):QWidget(parent)
 {
-    VolGroup *vg = physicalVolume->getVolGroup();
+    VolGroup *vg = physicalVolume->getVolumeGroup();
     QGridLayout *layout = new QGridLayout;
     LogVol *lv;
     QLabel *temp_label;

@@ -335,7 +335,7 @@ void PartitionMoveResizeDialog::setup()
 
         PhysVol* const pv = m_old_storage_part->getPhysicalVolume();
         const long mda_count = pv->getMDACount();
-        const long long extent_size = pv->getVolGroup()->getExtentSize();
+        const long long extent_size = pv->getVolumeGroup()->getExtentSize();
         const long long mda_extents = (pv->getMDASize() / extent_size) + 1;
 
         m_min_shrink_size = 1 + (mda_extents * mda_count) + pv->getLastUsedExtent();
