@@ -105,7 +105,7 @@ LVChartSeg::LVChartSeg(VolGroup *volumeGroup, LogVol *logicalVolume, QString use
     if( !m_vg->isExported() ){
 	
 	setContextMenuPolicy(Qt::CustomContextMenu);
-	m_context_menu = new LVActionsMenu(m_lv, m_vg, this);
+	m_context_menu = new LVActionsMenu(m_lv, -1, m_vg, this);
 
 	if( m_lv )
 	    setToolTip( m_lv->getName() );

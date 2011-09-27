@@ -25,6 +25,7 @@
 
 
 class LogVol;
+class NameAndRange;
 class NoMungeRadioButton;
 class PhysVol;
 class PVCheckBox;
@@ -32,7 +33,7 @@ class VolGroup;
 
 
 bool move_pv(PhysVol *physicalVolume);
-bool move_pv(LogVol *logicalVolume);
+bool move_pv(LogVol *logicalVolume, int segment);
 bool restart_pvmove();
 bool stop_pvmove();
 
@@ -41,11 +42,13 @@ class PVMoveDialog : public KDialog
 {
 Q_OBJECT
 
+    VolGroup *m_vg;
     LogVol   *m_lv;
+    bool      m_move_lv;
+    bool      m_move_segment;
     long long m_pv_used_space;
-    bool move_lv;
 
-    QList<PhysVol *> m_source_pvs;               // source physical volumes
+    QList<NameAndRange *> m_sources; 
     QList<PhysVol *> m_target_pvs;               // destination physical volumes
     QList<NoMungeRadioButton *> m_radio_buttons; // user can select only one source pv
     PVCheckBox *m_pv_checkbox;                   // many target pvs may be selected
@@ -55,11 +58,14 @@ Q_OBJECT
                  *m_cling_button;
 
     void buildDialog();
-    void removeEmptyTargets();
+    void removeFullTargets();
+    void setupSegmentMove(int segment);
+    void setupFullMove();
     
 public:
     explicit PVMoveDialog(PhysVol *physicalVolume, QWidget *parent = 0);
-    explicit PVMoveDialog(LogVol *logicalVolume, QWidget *parent = 0);
+    explicit PVMoveDialog(LogVol *logicalVolume, int segment, QWidget *parent = 0);
+    ~PVMoveDialog();
     QStringList arguments();
     
 private slots:
