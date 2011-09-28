@@ -71,7 +71,7 @@ void VGTree::loadData()
 
     setSortingEnabled(false);
 
-    for(int x = 0; x < m_vg->getLogVolCount(); x++){
+    for(int x = 0; x < m_vg->getLVCount(); x++){
 	
  	lv = logical_volumes[x];
         new_item = NULL;
@@ -317,7 +317,7 @@ void VGTree::insertSegmentItems(LogVol *lv, QTreeWidgetItem *item)
             
         child_item = item->child(x);
 
-        if( lv->getDevicePath(x).contains("unknown device") ){
+        if( lv->getPVNames(x).contains("unknown device") ){
             child_item->setIcon(0, KIcon("exclamation") );
             child_item->setToolTip( 0, i18n("one or more physical volumes are missing") );
         }
@@ -404,7 +404,7 @@ void VGTree::popupContextMenu(QPoint point)
     item = itemAt(point);
     if(item){                                 //item = 0 if there is no item a that point
 	lv_name = QVariant(item->data(0, Qt::UserRole)).toString();
-	lv = m_vg->getLogVolByName(lv_name);
+	lv = m_vg->getLVByName(lv_name);
 
         if( QVariant(item->data(3, Qt::UserRole) ).toString() == "segment" )
             segment = QVariant(item->data(1, Qt::UserRole)).toInt();

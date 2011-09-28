@@ -87,7 +87,7 @@ VGSplitDialog::VGSplitDialog(VolGroup *volumeGroup, QWidget *parent) : KDialog(p
 
     for(int x = 0; x < m_lvs.size(); x++){    // logs and legs are always open
         if(m_lvs[x]->isOpen() && !(m_lvs[x]->isMirrorLog() || m_lvs[x]->isMirrorLeg()) )
-            m_busy_pvs << m_lvs[x]->getDevicePathAllFlat();
+            m_busy_pvs << m_lvs[x]->getPVNamesAllFlat();
     }
     m_busy_pvs.removeDuplicates();
 
@@ -149,9 +149,9 @@ void VGSplitDialog::adjustTable(bool)
         original_vg = false;
         new_vg = false;
 
-        lv_pv_names = m_lvs[x]->getDevicePathAllFlat();
+        lv_pv_names = m_lvs[x]->getPVNamesAllFlat();
         if(m_lvs[x]->isSnap())
-            lv_pv_names << m_vg->getLogVolByName( m_lvs[x]->getOrigin() )->getDevicePathAllFlat();
+            lv_pv_names << m_vg->getLVByName( m_lvs[x]->getOrigin() )->getPVNamesAllFlat();
 
         for(int y = 0; y < lv_pv_names.size(); y++){
 

@@ -46,7 +46,7 @@ class PhysVol
     QString getName();       // eg: /dev/hde4
     QString getUuid();
     QStringList getTags();
-    VolGroup* getVolumeGroup(); 
+    VolGroup* getVG(); 
     bool isAllocatable();
     void setActive();               // If any lv is active on the pv, the pv is active
     bool isActive();

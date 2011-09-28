@@ -98,7 +98,7 @@ void PhysVol::rescan(pv_t lvm_pv)
     return;
 }
 
-VolGroup* PhysVol::getVolumeGroup()
+VolGroup* PhysVol::getVG()
 {
     return m_vg;
 }

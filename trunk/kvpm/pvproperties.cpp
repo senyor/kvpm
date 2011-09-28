@@ -28,7 +28,7 @@
 
 PVProperties::PVProperties(PhysVol *physicalVolume, QWidget *parent):QWidget(parent)
 {
-    VolGroup *vg = physicalVolume->getVolumeGroup();
+    VolGroup *vg = physicalVolume->getVG();
     QGridLayout *layout = new QGridLayout;
     LogVol *lv;
     QLabel *temp_label;
@@ -70,7 +70,7 @@ PVProperties::PVProperties(PhysVol *physicalVolume, QWidget *parent):QWidget(par
     for(int x = 0; x < lvs.size() ; x++){
 	lv = lvs[x];
 	for(int segment = 0; segment < lv->getSegmentCount(); segment++){
-	    pv_name_list = lv->getDevicePath(segment);
+	    pv_name_list = lv->getPVNames(segment);
 	    starting_extent = lv->getSegmentStartingExtent(segment);
 	    for(int y = 0; y < pv_name_list.size() ; y++){
 		if( device_name == pv_name_list[y] ){

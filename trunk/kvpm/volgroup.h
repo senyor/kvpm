@@ -62,9 +62,9 @@ public:
     const QList<LogVol *>  getLogicalVolumes();   // *TOP LEVEL ONLY* snapcontainers returned not snaps and origin 
     const QList<LogVol *>  getLogicalVolumesFlat(); // un-nest the volumes, snapshots and mirror legs
     const QList<PhysVol *> getPhysicalVolumes();
-    LogVol* getLogVolByName(QString shortName);  // lv name without the vg name and "/" -- skips snap containers
-    LogVol* getLogVolByUuid(QString uuid);       // also skips snap containers
-    PhysVol* getPhysVolByName(QString name);     //   /dev/something
+    LogVol* getLVByName(QString shortName);  // lv name without the vg name and "/" -- skips snap containers
+    LogVol* getLVByUuid(QString uuid);       // also skips snap containers
+    PhysVol* getPVByName(QString name);     //   /dev/something
     long long getExtents();
     long long getFreeExtents();
     long long getAllocatableExtents();
@@ -73,16 +73,16 @@ public:
     long long getSize();
     long long getFreeSpace();
     long long getUsedSpace();
-    int getLogVolCount();
-    int getLogVolMax();
-    int getPhysVolCount();
-    int getPhysVolMax();
+    int getLVCount();
+    int getLVMax();
+    int getPVCount();
+    int getPVMax();
     int getMDACount();
     QString getName();
     QString getUuid();
     QString getPolicy();
     QString getFormat();
-    QStringList getLogVolNames();
+    QStringList getLVNames();
     bool isWritable();
     bool isResizable();
     bool isClustered();
