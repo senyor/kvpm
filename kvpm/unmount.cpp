@@ -119,7 +119,7 @@ bool unmount_filesystem(LogVol *logicalVolume)
     QList<int>  mount_position = logicalVolume->getMountPosition();
 
     QString name = logicalVolume->getName();
-    QString vg_name = logicalVolume->getVolumeGroup()->getName();
+    QString vg_name = logicalVolume->getVG()->getName();
 
     QString unused_message = i18n("The volume <b>%1</b> is mounted on <b>%2</b> "
 				  "Do you want to unmount it?", name, mount_points[0]);

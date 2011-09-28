@@ -173,7 +173,7 @@ LVCreateDialog::LVCreateDialog(LogVol *logicalVolume, bool snapshot, QWidget *pa
 {
 
     m_extend = !m_snapshot;
-    m_vg = m_lv->getVolumeGroup();
+    m_vg = m_lv->getVG();
 
     if(m_snapshot)
 	setCaption( i18n("Create snapshot Volume") );
@@ -398,7 +398,7 @@ QWidget* LVCreateDialog::createPhysicalTab()
     QLabel *stripe_size = new QLabel( i18n("Stripe Size: ") );
     m_stripe_count_spin = new QSpinBox();
     m_stripe_count_spin->setMinimum(2);
-    m_stripe_count_spin->setMaximum(m_vg->getPhysVolCount());
+    m_stripe_count_spin->setMaximum(m_vg->getPVCount());
     stripe_size_layout->addWidget(stripe_size);
     stripe_size_layout->addWidget(stripe_size_combo);
     QLabel *stripes_number = new QLabel( i18n("Number of stripes: ") );
@@ -468,7 +468,7 @@ QWidget* LVCreateDialog::createPhysicalTab()
     
     m_mirror_count_spin = new QSpinBox();
     m_mirror_count_spin->setMinimum(2);
-    m_mirror_count_spin->setMaximum(m_vg->getPhysVolCount());
+    m_mirror_count_spin->setMaximum(m_vg->getPVCount());
     QLabel *mirrors_number_label  = new QLabel( i18n("Number of mirror legs: ") );
     mirrors_spin_layout->addWidget(mirrors_number_label);
     mirrors_spin_layout->addWidget(m_mirror_count_spin);

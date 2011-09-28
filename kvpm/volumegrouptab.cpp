@@ -131,7 +131,7 @@ void VolumeGroupTab::rescan()
     return;
 }
 
-VolGroup* VolumeGroupTab::getVolumeGroup()
+VolGroup* VolumeGroupTab::getVG()
 {
     return m_vg;   
 }

@@ -55,7 +55,7 @@ void LVSizeChart::populateChart()
     for(int x = 0; x < item_count; x++){
 
         item = m_vg_tree->topLevelItem(x);
-        lv = m_vg->getLogVolByName( item->data(0,Qt::UserRole).toString() );
+        lv = m_vg->getLVByName( item->data(0,Qt::UserRole).toString() );
 
         if( lv != NULL ){
             logical_volumes.append(lv);

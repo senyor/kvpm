@@ -164,7 +164,7 @@ void StorageModel::setupModelData(QList<StorageDevice *> devices, StorageItem *p
             data << dev->getName() << "" << sizeToString(dev->getSize());
             data << QString("%1 (%%2) ").arg( sizeToString( pv->getUnused() )).arg( 100 - pv->getPercentUsed() );
 
-            data  << "physical volume" << pv->getVolumeGroup()->getName();
+            data  << "physical volume" << pv->getVG()->getName();
             dataAlternate << "" << dev_variant;
         }
         else{
@@ -203,7 +203,7 @@ void StorageModel::setupModelData(QList<StorageDevice *> devices, StorageItem *p
                 data << QString("%1 (%%2) ").arg( sizeToString( (pv->getUnused()))).arg(100 - pv->getPercentUsed() )
                     
                      << "physical volume"
-                     << pv->getVolumeGroup()->getName()
+                     << pv->getVG()->getName()
                      << (part->getFlags()).join(", ") 
                      << "";
             }

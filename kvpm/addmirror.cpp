@@ -174,7 +174,7 @@ void AddMirrorDialog::setupGeneralTab()
 
 void AddMirrorDialog::setupPhysicalTab()
 {
-    QList<PhysVol *> leg_physical_volumes = (m_lv->getVolumeGroup())->getPhysicalVolumes();
+    QList<PhysVol *> leg_physical_volumes = (m_lv->getVG())->getPhysicalVolumes();
     QList<PhysVol *> log_physical_volumes;
     
     QStringList pvs_in_use = getPvsInUse();
@@ -214,7 +214,7 @@ void AddMirrorDialog::setupPhysicalTab()
     m_stripe_box->setLayout(striped_layout);
     
     m_stripe_size_combo = new KComboBox();    
-    for(int n = 2; (pow(2, n) * 1024) <= m_lv->getVolumeGroup()->getExtentSize() ; n++){
+    for(int n = 2; (pow(2, n) * 1024) <= m_lv->getVG()->getExtentSize() ; n++){
 	m_stripe_size_combo->addItem(QString("%1").arg(pow(2, n)) + " KiB");
 	m_stripe_size_combo->setItemData(n - 2, QVariant( (int) pow(2, n) ), Qt::UserRole );
     }
@@ -222,7 +222,7 @@ void AddMirrorDialog::setupPhysicalTab()
     QLabel *stripe_size = new QLabel( i18n("Stripe Size: ") );
     m_stripes_number_spin = new KIntSpinBox();
     m_stripes_number_spin->setMinimum(2);
-    m_stripes_number_spin->setMaximum(m_lv->getVolumeGroup()->getPhysVolCount());
+    m_stripes_number_spin->setMaximum(m_lv->getVG()->getPVCount());
     QHBoxLayout *stripe_size_layout = new QHBoxLayout();
     stripe_size_layout->addWidget(stripe_size);
     stripe_size_layout->addWidget(m_stripe_size_combo);
@@ -266,11 +266,11 @@ QStringList AddMirrorDialog::getPvsInUse()
 	    if( (!mirror_legs[x]->isMirrorLeg() && !mirror_legs[x]->isMirrorLog()) )
 		mirror_legs.removeAt(x);
 	    else
-		pvs_in_use << mirror_legs[x]->getDevicePathAll();
+		pvs_in_use << mirror_legs[x]->getPVNamesAll();
 	}
     }
     else{
-	pvs_in_use << m_lv->getDevicePathAll();
+	pvs_in_use << m_lv->getPVNamesAll();
     }
 
     return pvs_in_use;

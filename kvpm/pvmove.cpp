@@ -98,7 +98,7 @@ bool stop_pvmove()
 
 PVMoveDialog::PVMoveDialog(PhysVol *physicalVolume, QWidget *parent) : KDialog(parent) 
 {
-    m_vg = physicalVolume->getVolumeGroup();
+    m_vg = physicalVolume->getVG();
     m_target_pvs = m_vg->getPhysicalVolumes();
     m_move_lv = false;
     m_move_segment = false;
@@ -118,7 +118,7 @@ PVMoveDialog::PVMoveDialog(PhysVol *physicalVolume, QWidget *parent) : KDialog(p
     for(int x = lvs.size() - 1; x >= 0; x--){
         for(int seg = lvs[x]->getSegmentCount() - 1; seg >= 0; seg--){
             if( lvs[x]->getSegmentStripes(seg) > 1 ){
-                striped_targets = lvs[x]->getDevicePath(seg);
+                striped_targets = lvs[x]->getPVNames(seg);
                 if( striped_targets.contains(name) )
                     forbidden_targets.append(striped_targets); 
             }
@@ -145,7 +145,7 @@ PVMoveDialog::PVMoveDialog(LogVol *logicalVolume, int segment, QWidget *parent) 
     KDialog(parent), 
     m_lv(logicalVolume)
 {
-    m_vg = m_lv->getVolumeGroup();
+    m_vg = m_lv->getVG();
     m_move_lv = true;
     m_target_pvs = m_vg->getPhysicalVolumes();
 
@@ -249,12 +249,12 @@ void PVMoveDialog::buildDialog()
                 radio_button->setAlternateText( m_sources[x]->name );
             }
 	    else if(m_move_lv){
-	        m_pv_used_space = m_lv->getSpaceOnPhysicalVolume(m_sources[x]->name);
+	        m_pv_used_space = m_lv->getSpaceUsedOnPV(m_sources[x]->name);
                 radio_button = new NoMungeRadioButton( QString("%1  %2").arg(m_sources[x]->name).arg(sizeToString(m_pv_used_space)));
                 radio_button->setAlternateText( m_sources[x]->name );
             }
             else{
-                m_pv_used_space = m_vg->getPhysVolByName(m_sources[x]->name)->getSize() - m_vg->getPhysVolByName(m_sources[x]->name )->getUnused();
+                m_pv_used_space = m_vg->getPVByName(m_sources[x]->name)->getSize() - m_vg->getPVByName(m_sources[x]->name )->getUnused();
                 radio_button = new NoMungeRadioButton( QString("%1  %2").arg(m_sources[x]->name).arg(sizeToString(m_pv_used_space)));
                 radio_button->setAlternateText( m_sources[x]->name );
             }
@@ -281,11 +281,11 @@ void PVMoveDialog::buildDialog()
             radio_layout->addWidget( new QLabel( QString("%1  %2").arg(m_sources[0]->name_range).arg(sizeToString(m_pv_used_space)) ) );
         }
 	else if(m_move_lv){
-	    m_pv_used_space = m_lv->getSpaceOnPhysicalVolume(m_sources[0]->name);
+	    m_pv_used_space = m_lv->getSpaceUsedOnPV(m_sources[0]->name);
             radio_layout->addWidget( new QLabel( QString("%1  %2").arg(m_sources[0]->name).arg(sizeToString(m_pv_used_space)) ) );
         }
 	else{
-            m_pv_used_space = m_vg->getPhysVolByName( m_sources[0]->name )->getSize() - m_vg->getPhysVolByName( m_sources[0]->name )->getUnused();
+            m_pv_used_space = m_vg->getPVByName( m_sources[0]->name )->getSize() - m_vg->getPVByName( m_sources[0]->name )->getUnused();
             radio_layout->addWidget( new QLabel( QString("%1  %2").arg(m_sources[0]->name).arg(sizeToString(m_pv_used_space)) ) );
         }
     }
@@ -317,20 +317,20 @@ void PVMoveDialog::resetOkButton()
 {
     long long free_space_total = m_pv_checkbox->getUnusedSpace();
     long long needed_space_total = 0;
-    QString device_name;
+    QString pv_name;
 
     if(m_move_lv){
 	if(m_radio_buttons.size() > 1){
 	    for(int x = 0; x < m_radio_buttons.size(); x++){
 		if(m_radio_buttons[x]->isChecked()){
-		    device_name = m_radio_buttons[x]->getAlternateText();
-		    needed_space_total = m_lv->getSpaceOnPhysicalVolume(device_name);
+		    pv_name = m_radio_buttons[x]->getAlternateText();
+		    needed_space_total = m_lv->getSpaceUsedOnPV(pv_name);
 		}
 	    }
 	}
 	else{
-	    device_name = m_sources[0]->name;
-	    needed_space_total = m_lv->getSpaceOnPhysicalVolume(device_name);
+	    pv_name = m_sources[0]->name;
+	    needed_space_total = m_lv->getSpaceUsedOnPV(pv_name);
 	}
     }
     else
@@ -348,7 +348,7 @@ void PVMoveDialog::disableSource()  // don't allow source and target to be the s
     
     for(int x = m_radio_buttons.size() - 1; x>= 0; x--){
 	if(m_radio_buttons[x]->isChecked())
-	    source_pv = m_vg->getPhysVolByName( m_sources[x]->name );
+	    source_pv = m_vg->getPVByName( m_sources[x]->name );
     }
 
     m_pv_checkbox->disableOrigin(source_pv);
@@ -390,9 +390,6 @@ QStringList PVMoveDialog::arguments()
         source = m_sources[0]->name_range;
     }
 
-    qDebug() << source;
-    qDebug() <<m_pv_checkbox->getNames();
-
     args << source;
     args << m_pv_checkbox->getNames(); // target(s)
 
@@ -401,7 +398,7 @@ QStringList PVMoveDialog::arguments()
 
 void PVMoveDialog::setupSegmentMove(int segment)
 {
-    QStringList names = m_lv->getDevicePath(segment);                   // source pv name
+    QStringList names = m_lv->getPVNames(segment);                   // source pv name
     int stripes = m_lv->getSegmentStripes(segment);                     // source pv stripe count
     long long extents = m_lv->getSegmentExtents(segment);               // extent count
     QList<long long> starts = m_lv->getSegmentStartingExtent(segment);  // lv's first extent on pv 
@@ -419,7 +416,7 @@ void PVMoveDialog::setupSegmentMove(int segment)
 
 void PVMoveDialog::setupFullMove()
 {
-    QStringList names = m_lv->getDevicePathAllFlat();
+    QStringList names = m_lv->getPVNamesAllFlat();
     NameAndRange *nar;
 
     for(int x = names.size() - 1; x >= 0; x--){

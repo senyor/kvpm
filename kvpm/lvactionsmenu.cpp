@@ -140,7 +140,7 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
     filesystem_menu->addAction(lv_removefs_action);
     filesystem_menu->setEnabled(false);
 
-    if( m_lv ){  // snap containers are replaced by the "real" lv before getting here, see: vg->getLogVolByName()
+    if( m_lv ){  // snap containers are replaced by the "real" lv before getting here, see: vg->getLVByName()
 
         if( m_lv->isSnap() && m_lv->isValid() && !m_lv->isMerging() )
 		snap_merge_action->setEnabled(true);

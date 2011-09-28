@@ -27,7 +27,7 @@ extern MasterList *g_master_list;
 bool merge_vg(VolGroup *volumeGroup)
 {
     QStringList vg_names = g_master_list->getVolumeGroupNames();
-    QStringList lv_names = volumeGroup->getLogVolNames();
+    QStringList lv_names = volumeGroup->getLVNames();
 
     if( vg_names.size() < 2  ){
         KMessageBox::error(0, i18n("There is no other volume group to merge with") );
@@ -35,7 +35,7 @@ bool merge_vg(VolGroup *volumeGroup)
     }
 
     for(int x = 0; x < lv_names.size(); x++){
-        if( (volumeGroup->getLogVolByName(lv_names[x]))->isActive() ){
+        if( (volumeGroup->getLVByName(lv_names[x]))->isActive() ){
             KMessageBox::error(0, i18n("The volume group to merge must not have active logical volumes") );
             return false;
         }

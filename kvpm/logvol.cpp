@@ -409,7 +409,7 @@ void LogVol::insertChildren(lv_t lvmLV, vg_t lvmVG)
         m_lv_children.append( new LogVol(lvmLV, lvmVG, m_vg, this) );
     }
     else{
-        child_name_list = removePVDevices( getDevicePathAll() );
+        child_name_list = removePVDevices( getPVNamesAll() );
 
         if( m_mirror && (! m_log.isEmpty()) )
                 child_name_list.append( m_log );
@@ -619,12 +619,12 @@ QList<long long> LogVol::getSegmentStartingExtent(int segment)
     return m_segments[segment]->m_starting_extent;
 }
 
-QStringList LogVol::getDevicePath(int segment)
+QStringList LogVol::getPVNames(int segment)
 {
     return m_segments[segment]->m_device_path;
 }
 
-QStringList LogVol::getDevicePathAll()
+QStringList LogVol::getPVNamesAll()
 {
     QStringList devices;
     
@@ -637,7 +637,7 @@ QStringList LogVol::getDevicePathAll()
     return devices;
 }
 
-QStringList LogVol::getDevicePathAllFlat()
+QStringList LogVol::getPVNamesAllFlat()
 {
     QStringList devices;
     QList<LogVol *> children;
@@ -646,7 +646,7 @@ QStringList LogVol::getDevicePathAllFlat()
         children = getChildren();
 
         for(int x = children.size() - 1; x >= 0; x--)
-            devices.append( children[x]->getDevicePathAllFlat() );
+            devices.append( children[x]->getPVNamesAllFlat() );
 
         devices.sort();
         devices.removeDuplicates();
@@ -654,10 +654,10 @@ QStringList LogVol::getDevicePathAllFlat()
         return devices;
     }
     else
-        return getDevicePathAll();
+        return getPVNamesAll();
 }
 
-VolGroup* LogVol::getVolumeGroup()
+VolGroup* LogVol::getVG()
 {
     return m_vg;
 }
@@ -677,7 +677,7 @@ QString LogVol::getMapperPath()
     return m_lv_mapper_path;
 }
 
-long long LogVol::getSpaceOnPhysicalVolume(QString physicalVolume)
+long long LogVol::getSpaceUsedOnPV(QString physicalVolume)
 {
     long long space_used = 0;
     for(int x = getSegmentCount() - 1; x >= 0; x--){
@@ -918,5 +918,5 @@ QString LogVol::getUuid()
 
 bool LogVol::hasMissingVolume()
 {
-    return getDevicePathAllFlat().contains("unknown device");
+    return getPVNamesAllFlat().contains("unknown device");
 }

@@ -105,7 +105,7 @@ void PVTree::loadData()
 
 	lv_name_list.clear();
 	for(int x = 0; x < lvs.size() ; x++){
-	    pv_name_list = lvs[x]->getDevicePathAll();
+	    pv_name_list = lvs[x]->getPVNamesAll();
 	    for(int y = 0; y < pv_name_list.size() ; y++)
 		if( device_name == pv_name_list[y] ) 
 		    lv_name_list.append( lvs[x]->getName() );
@@ -204,7 +204,7 @@ void PVTree::popupContextMenu(QPoint point)
 
             pv_move_action->setEnabled(false);
             
-            if(m_vg->getPhysVolCount() > 1)
+            if(m_vg->getPVCount() > 1)
                 vg_reduce_action->setEnabled(true);
             else
                 vg_reduce_action->setEnabled(false);  // can't remove last pv from group
@@ -213,7 +213,7 @@ void PVTree::popupContextMenu(QPoint point)
 	    m_pv_name = QVariant(item->data(0, 0)).toString();
 	    vg_reduce_action->setEnabled(false);
 
-	    if(m_vg->getPhysVolCount() > 1){     // can't move extents if there isn't another volume to put them on
+	    if(m_vg->getPVCount() > 1){     // can't move extents if there isn't another volume to put them on
                 if( QVariant(item->data(6, 0)).toString().contains("pvmove") ) // can't have more than one pvmove
                     pv_move_action->setEnabled(false);                      // See physvol.cpp about removing this
                 else
@@ -231,7 +231,7 @@ void PVTree::popupContextMenu(QPoint point)
 
 void PVTree::movePhysicalExtents()
 {
-    PhysVol *pv = m_vg->getPhysVolByName(m_pv_name);
+    PhysVol *pv = m_vg->getPVByName(m_pv_name);
     if(pv){
         if( move_pv(pv) )
             MainWindow->reRun();
@@ -246,7 +246,7 @@ void PVTree::reduceVolumeGroup()
 
 void PVTree::changePhysicalVolume()
 {
-    PhysVol *pv = m_vg->getPhysVolByName(m_pv_name);
+    PhysVol *pv = m_vg->getPVByName(m_pv_name);
     if(pv){
         PVChangeDialog dialog(pv);
         dialog.exec();

@@ -197,7 +197,7 @@ const QList<PhysVol *> VolGroup::getPhysicalVolumes()
     return m_member_pvs;
 }
 
-LogVol* VolGroup::getLogVolByName(QString shortName)  // Do not return snap container, just the "real" lv
+LogVol* VolGroup::getLVByName(QString shortName)  // Do not return snap container, just the "real" lv
 {
     QList<LogVol *> all_lvs = getLogicalVolumesFlat();
     const int lv_count = all_lvs.size();
@@ -211,7 +211,7 @@ LogVol* VolGroup::getLogVolByName(QString shortName)  // Do not return snap cont
     return NULL;
 }
 
-LogVol* VolGroup::getLogVolByUuid(QString uuid)
+LogVol* VolGroup::getLVByUuid(QString uuid)
 {
     QList<LogVol *> all_lvs = getLogicalVolumesFlat();
     const int lv_count = all_lvs.size();
@@ -225,7 +225,7 @@ LogVol* VolGroup::getLogVolByUuid(QString uuid)
     return NULL;
 }
 
-PhysVol* VolGroup::getPhysVolByName(QString name)
+PhysVol* VolGroup::getPVByName(QString name)
 {
     for(int x = 0; x < m_member_pvs.size(); x++){
 	if(name.trimmed() == m_member_pvs[x]->getName() && !name.contains("unknown device"))
@@ -275,22 +275,22 @@ long long VolGroup::getUsedSpace()
     return (m_extents - m_free_extents) * m_extent_size;
 }
 
-int VolGroup::getLogVolCount()
+int VolGroup::getLVCount()
 {
     return m_member_lvs.size();
 }
 
-int VolGroup::getLogVolMax()
+int VolGroup::getLVMax()
 {
     return m_lv_max;
 }
 
-int VolGroup::getPhysVolCount()
+int VolGroup::getPVCount()
 {
     return m_member_pvs.size();
 }
 
-int VolGroup::getPhysVolMax()
+int VolGroup::getPVMax()
 {
     return m_pv_max;
 }
@@ -320,7 +320,7 @@ QString VolGroup::getFormat()
     return m_lvm_format;
 }
 
-QStringList VolGroup::getLogVolNames()
+QStringList VolGroup::getLVNames()
 {
     QStringList names;
 
@@ -495,10 +495,10 @@ void VolGroup::setActivePhysicalVolumes()
     for(int x = all_lvs.size() - 1; x >= 0; x--){
         if( all_lvs[x]->isActive() ){
             m_active = true;
-	    pv_name_list = all_lvs[x]->getDevicePathAllFlat();
+	    pv_name_list = all_lvs[x]->getPVNamesAllFlat();
 
 	    for(int x = pv_name_list.size() - 1; x >= 0; x--){
-	        if( (pv = getPhysVolByName(pv_name_list[x])) )
+	        if( (pv = getPVByName(pv_name_list[x])) )
 		    pv->setActive();
 	    }
 
@@ -524,7 +524,7 @@ void VolGroup::setLastUsedExtent()
         for(int x = m_member_lvs.size() - 1; x >= 0; x--){
             lv = m_member_lvs[x];
             for(int segment = lv->getSegmentCount() - 1; segment >= 0; segment--){
-                pv_name_list = lv->getDevicePath(segment);
+                pv_name_list = lv->getPVNames(segment);
                 starting_extent = lv->getSegmentStartingExtent(segment);
                 for(int y = pv_name_list.size() - 1; y >= 0; y--){
                     if( pv_name == pv_name_list[y] ){

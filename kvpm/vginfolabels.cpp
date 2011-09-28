@@ -138,15 +138,15 @@ VGInfoLabels::VGInfoLabels(VolGroup *volumeGroup, QWidget *parent) : QFrame(pare
     hlayout1->addWidget(label_widget5);
     hlayout1->addWidget(label_widget6);
 
-    if( volumeGroup->getLogVolMax() || volumeGroup->getPhysVolMax() ){
+    if( volumeGroup->getLVMax() || volumeGroup->getPVMax() ){
 
-	if(volumeGroup->getPhysVolMax())
-	    max_pv_label = new QLabel( i18n("Max pvs: %1", volumeGroup->getPhysVolMax()) );
+	if(volumeGroup->getPVMax())
+	    max_pv_label = new QLabel( i18n("Max pvs: %1", volumeGroup->getPVMax()) );
 	else
 	    max_pv_label = new QLabel( i18n("Max pvs: Unlimited") );
 
-	if(volumeGroup->getLogVolMax())
-	    max_lv_label = new QLabel( i18n("Max lvs: %1", volumeGroup->getLogVolMax()) );
+	if(volumeGroup->getLVMax())
+	    max_lv_label = new QLabel( i18n("Max lvs: %1", volumeGroup->getLVMax()) );
 	else
 	    max_lv_label = new QLabel( i18n("Max lvs: Unlimited") );
 
