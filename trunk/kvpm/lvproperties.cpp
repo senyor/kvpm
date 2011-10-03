@@ -48,7 +48,7 @@ LVProperties::LVProperties(LogVol *logicalVolume, int segment, QWidget *parent):
     else
         layout->addWidget( physicalVolumesFrame(segment) );
 
-    if( !m_lv->isSnapContainer() )
+    if( !m_lv->isSnapContainer() && ( (m_lv->getSegmentCount() == 1) || (segment == -1) ) )
         layout->addWidget( uuidFrame() );
 
     layout->addStretch();
@@ -159,6 +159,7 @@ QFrame *LVProperties::generalFrame(int segment)
 
     QFrame *frame = new QFrame();
     QVBoxLayout *layout = new QVBoxLayout();
+    QHBoxLayout *stripe_layout = new QHBoxLayout();
     frame->setLayout(layout);
     frame->setFrameStyle( QFrame::Sunken | QFrame::StyledPanel );
     frame->setLineWidth(2);
@@ -178,13 +179,14 @@ QFrame *LVProperties::generalFrame(int segment)
 	if( !m_lv->isMirror() ){
 
 	    if( stripes != 1 ){
-		layout->addWidget(new QLabel( i18n("Stripes: %1", stripes) ));
-                layout->addWidget(new QLabel( i18n("Stripe size: %1", stripe_size) ));
+		stripe_layout->addWidget(new QLabel( i18n("Stripes: %1", stripes) ));
+                stripe_layout->addWidget(new QLabel( i18n("Stripe size: %1", stripe_size) ));
 	    }
 	    else{
-		layout->addWidget(new QLabel( i18n("Stripes: none") ));
-		layout->addWidget(new QLabel( i18n("Stripe size: n/a") ));
+		stripe_layout->addWidget(new QLabel( i18n("Stripes: none") ));
 	    }
+
+            layout->addLayout(stripe_layout);
 	}
     }
     else if((segment >= 0) && (segment_count == 1)){
@@ -208,13 +210,14 @@ QFrame *LVProperties::generalFrame(int segment)
 	if( !m_lv->isMirror() ){
 
 	    if( stripes != 1 ){
-		layout->addWidget(new QLabel( i18n("Stripes: %1", stripes) ));
-                layout->addWidget(new QLabel( i18n("Stripe size: %1", stripe_size) ));
+		stripe_layout->addWidget(new QLabel( i18n("Stripes: %1", stripes) ));
+                stripe_layout->addWidget(new QLabel( i18n("Stripe size: %1", stripe_size) ));
 	    }
 	    else{
-		layout->addWidget(new QLabel( i18n("Stripes: none") ));
-		layout->addWidget(new QLabel( i18n("Stripe size: n/a") ));
+		stripe_layout->addWidget(new QLabel( i18n("Stripes: none") ));
 	    }
+
+            layout->addLayout(stripe_layout);
 	}
 	else if( !m_lv->isMirrorLog() || ( m_lv->isMirrorLog() && m_lv->isMirror() ) ){
             layout->addWidget(new QLabel( i18n("Total extents: %1", total_extents) ));
@@ -242,7 +245,7 @@ QFrame *LVProperties::generalFrame(int segment)
 
 	if( !( m_lv->isMirrorLeg() || m_lv->isMirrorLog() )){
 
-            layout->addWidget(new QLabel( i18n("Filesystem %1", m_lv->getFilesystem()) ));
+            layout->addWidget(new QLabel( i18n("Filesystem: %1", m_lv->getFilesystem()) ));
 
 	    if(m_lv->isWritable())
 	        layout->addWidget(new QLabel( i18n("Access: r/w") ));
