@@ -42,10 +42,11 @@ LVProperties::LVProperties(LogVol *logicalVolume, int segment, QWidget *parent):
         !m_lv->isSnapContainer() && ( (m_lv->getSegmentCount() == 1) || (segment == -1) ) ){
 
         layout->addWidget( mountPointsFrame() );
+        layout->addWidget( physicalVolumesFrame(segment) );
         layout->addWidget( fsFrame() );
     }
-
-    layout->addWidget( physicalVolumesFrame(segment) );
+    else
+        layout->addWidget( physicalVolumesFrame(segment) );
 
     if( !m_lv->isSnapContainer() )
         layout->addWidget( uuidFrame() );
