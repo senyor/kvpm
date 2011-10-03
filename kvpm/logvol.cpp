@@ -905,10 +905,7 @@ double LogVol::getSnapPercent()
 
 double LogVol::getCopyPercent()
 {
-    if( m_pvmove )
-        return m_copy_percent;
-    else
-        return 0.0;
+    return m_copy_percent;
 }
 
 QString LogVol::getUuid()
