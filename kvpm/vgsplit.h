@@ -46,16 +46,20 @@ Q_OBJECT
     QRegExpValidator *m_validator;
     VolGroup *m_vg;
 
-    QWidget *buildLVLists(QStringList mobileLVNames, QStringList immobileLVNames);
-    QWidget *buildPVLists(QStringList mobilePVNames, QStringList immobilePVNames);
+    QWidget *buildLVLists(const QStringList mobileLVNames, const QStringList immobileLVNames);
+    QWidget *buildPVLists(const QStringList mobilePVNames, const QStringList immobilePVNames);
+
     void volumeMobility(QStringList &mobileLVNames, QStringList &immobileLVNames, 
                         QStringList &mobilePVNames, QStringList &immobilePVNames);
 
     void pvState(QStringList &open, QStringList &closed );
-    void movesWithVolume(bool isLV, QString name, QStringList &movingPVNames, QStringList &movingLVNames);
-    void moveNames(bool isLVMove, 
-                   QListWidget *lvSource, QListWidget *lvTarget, 
-                   QListWidget *pvSource, QListWidget *pvTarget);
+
+    void movesWithVolume(const bool isLV, const QString name, 
+                         QStringList &movingPVNames, QStringList &movingLVNames);
+
+    void moveNames(const bool isLVMove, 
+                   KListWidget *const lvSource, KListWidget *const lvTarget, 
+                   KListWidget *const pvSource, KListWidget *const pvTarget);
 
  public:
     explicit VGSplitDialog(VolGroup *volumeGroup, QWidget *parent = 0);
@@ -69,8 +73,6 @@ Q_OBJECT
     void addLVList();
     void removeLVList();
     void validateOK();
-    void validateName(QString);
-    void adjustTables();
     void deactivate();     // active lvs must be deactivated before moving
 
 };
