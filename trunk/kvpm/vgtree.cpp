@@ -33,7 +33,7 @@ VGTree::VGTree(VolGroup *VolumeGroup) : QTreeWidget(), m_vg(VolumeGroup)
     m_init = true;
 
     header_labels << "Volume" << "Size" << "Remaining" << "Filesystem" << "type" << "Stripes" << "Stripe size" 
-		  << "Snap/Move" << "State" << "Access" << "Tags" << "Mount points";
+		  << "Snap/Copy" << "State" << "Access" << "Tags" << "Mount points";
 
     QTreeWidgetItem *item = new QTreeWidgetItem((QTreeWidgetItem *)0, header_labels);
 
@@ -179,7 +179,7 @@ QTreeWidgetItem *VGTree::loadItem(LogVol *lv, QTreeWidgetItem *item)
     item->setData(3, Qt::DisplayRole, lv->getFilesystem() );
     item->setData(4, Qt::DisplayRole, lv->getType());
 
-    if( lv->isPvmove() )
+    if( (lv->isPvmove() || lv->isMirror()) && !lv->isSnapContainer() )
         item->setData(7, Qt::DisplayRole, QString("%%1").arg(lv->getCopyPercent(), 1, 'f', 2));
     else if( lv->isSnap() || lv->isMerging() )
         item->setData(7, Qt::DisplayRole, QString("%%1").arg(lv->getSnapPercent(), 1, 'f', 2));
