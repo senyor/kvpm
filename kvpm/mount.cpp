@@ -430,11 +430,19 @@ void MountDialog::mountFilesystem()
 	    additional_options.append("data=writeback");
     }
 
-    if( acl_check->isChecked() )
-	additional_options.append("acl");
+    if( acl_check->isEnabled() ){
+        if( acl_check->isChecked() )
+            additional_options.append("acl");
+        else
+            additional_options.append("noacl");
+    }
 
-    if( user_xattr_check->isChecked() )
-	additional_options.append("user_xattr");
+    if( user_xattr_check->isEnabled() ){
+        if( user_xattr_check->isChecked() )
+            additional_options.append("user_xattr");
+        else
+            additional_options.append("nouser_xattr");
+    }
 
     if( !m_fs_specific_edit->text().trimmed().isEmpty() )
 	additional_options.append( (m_fs_specific_edit->text()).trimmed() );
@@ -485,7 +493,7 @@ void MountDialog::toggleAdditionalOptions(bool)
     else
         m_filesystem_journal_box->setEnabled(false);
 
-    if( ext2_button->isChecked() || ext3_button->isChecked() || 
+    if( ext2_button->isChecked() || ext3_button->isChecked() || ext4_button->isChecked() || 
 	reiserfs3_button->isChecked() || reiserfs4_button->isChecked() ){
 
 	acl_check->setEnabled(true);
