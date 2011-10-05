@@ -32,8 +32,10 @@ VGTree::VGTree(VolGroup *VolumeGroup) : QTreeWidget(), m_vg(VolumeGroup)
     QStringList header_labels;
     m_init = true;
 
-    header_labels << "Volume" << "Size" << "Remaining" << "Filesystem" << "type" << "Stripes" << "Stripe size" 
-		  << "Snap/Copy" << "State" << "Access" << "Tags" << "Mount points";
+    header_labels << i18n("Volume") << i18n("Size") << i18n("Remaining") 
+                  << i18n("Filesystem") << i18n("type") << i18n("Stripes") 
+                  << i18n("Stripe size") << i18n("Snap/Copy") << i18n("State") 
+                  << i18n("Access") << i18n("Tags") << i18n("Mount points");
 
     QTreeWidgetItem *item = new QTreeWidgetItem((QTreeWidgetItem *)0, header_labels);
 
@@ -47,7 +49,7 @@ VGTree::VGTree(VolGroup *VolumeGroup) : QTreeWidget(), m_vg(VolumeGroup)
     item->setToolTip(4, i18n("Type of logical volume"));
     item->setToolTip(5, i18n("Number of stripes if the volume is striped"));
     item->setToolTip(6, i18n("Size of stripes if the volume is striped"));
-    item->setToolTip(7, i18n("Percentage of pvmove completed or percentage of snapshot used up"));
+    item->setToolTip(7, i18n("Percentage of pvmove completed, of mirror synced or of snapshot used up"));
     item->setToolTip(8, i18n("Logical volume state"));
     item->setToolTip(9, i18n("Read and write or Read Only"));
     item->setToolTip(10, i18n("Optional tags for physical volume"));
