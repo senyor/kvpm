@@ -16,6 +16,8 @@
 #include "storagemodel.h"
 
 #include <KIcon>
+#include <KLocale>
+
 #include <QtGui>
 
 #include "misc.h"
@@ -29,8 +31,10 @@
 StorageModel::StorageModel(QList<StorageDevice *> devices, QObject *parent) : QAbstractItemModel(parent)
 {
     QList<QVariant> rootData;
-    rootData << "Device" << "Type" << "Capacity" << "Remaining" << "Usage" 
-	     << "Group" << "Flags" << "Mount point" ;
+
+    rootData << i18n("Device") << i18n("Type") << i18n("Capacity") 
+             << i18n("Remaining") << i18n("Usage") << i18n("Group")
+             << i18n("Flags") << i18n("Mount point") ;
     
     rootItem = new StorageItem(rootData, rootData);
     setupModelData(devices, rootItem);
