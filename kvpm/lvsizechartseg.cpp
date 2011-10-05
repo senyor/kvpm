@@ -13,6 +13,8 @@
  */
 
 
+#include "lvsizechartseg.h"
+
 #include <KConfigSkeleton>
 #include <KMenu>
 #include <KLocale>
@@ -20,7 +22,6 @@
 
 #include "logvol.h"
 #include "lvactionsmenu.h"
-#include "lvsizechartseg.h"
 #include "volgroup.h"
 
 
@@ -105,7 +106,6 @@ LVChartSeg::LVChartSeg(VolGroup *volumeGroup, LogVol *logicalVolume, QString use
     if( !m_vg->isExported() ){
 	
 	setContextMenuPolicy(Qt::CustomContextMenu);
-	m_context_menu = new LVActionsMenu(m_lv, -1, m_vg, this);
 
 	if( m_lv )
 	    setToolTip( m_lv->getName() );
@@ -119,6 +119,8 @@ LVChartSeg::LVChartSeg(VolGroup *volumeGroup, LogVol *logicalVolume, QString use
 
 void LVChartSeg::popupContextMenu(QPoint)
 {
+    m_context_menu = new LVActionsMenu(m_lv, -1, m_vg, this);
     m_context_menu->exec(QCursor::pos());
+    m_context_menu->deleteLater();
 }
 
