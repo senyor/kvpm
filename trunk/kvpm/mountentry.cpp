@@ -23,6 +23,7 @@
 #include <kde_file.h>
 
 #include "logvol.h"
+#include "fsprobe.h"
 #include "volgroup.h"
 
 const int BUFF_LEN = 2000;   // Enough?
@@ -226,33 +227,14 @@ QStringList getMountedDevices(QString mountPoint)
     return mounted_devices;
 }
 
-
 bool hasFstabEntry(QString device)
 {
-    QString name_entry;                // returned entry to compare to
-
-    const char mount_table[] = _PATH_FSTAB;
-    mntent *mount_entry;
-
-    FILE *fp = setmntent(mount_table, "r");
-    if(fp){
-	while( (mount_entry = getmntent(fp)) ){
-	    name_entry = QString( mount_entry->mnt_fsname );
-	    if(name_entry == device){
-		endmntent(fp);
-
-		return true;
-	    }
-	}
-	endmntent(fp);
-
-	return false;
-    }
-    else{
-	return false;
-    }
+    QString entry = getFstabEntry(device);
+    if( entry.isEmpty() )
+        return false;
+    else
+        return true;
 }
-
 
 QString getFstabEntry(QString device)
 {
@@ -273,10 +255,20 @@ QString getFstabEntry(QString device)
 	    endmntent(fp);
 	    return mount_dir;
 	}
+        else if( fsprobe_getfs_by_uuid(name_entry) == device ){
+	    mount_dir = QByteArray( mount_entry->mnt_dir );
+            endmntent(fp);
+	    return mount_dir;
+        }
+        else if( fsprobe_getfs_by_label(name_entry) == device ){
+	    mount_dir = QByteArray( mount_entry->mnt_dir );
+            endmntent(fp);
+	    return mount_dir;
+        }
     }
     endmntent(fp);
 
-    return NULL;
+    return QString();
 }
 
 mntent *copyMountEntry(mntent *mountEntry)

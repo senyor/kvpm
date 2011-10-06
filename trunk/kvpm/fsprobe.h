@@ -20,5 +20,7 @@
 QString fsprobe_getfstype2(QString devicePath);
 QString fsprobe_getfsuuid(QString devicePath);
 QString fsprobe_getfslabel(QString devicePath);
+QString fsprobe_getfs_by_uuid(QString uuid);
+QString fsprobe_getfs_by_label(QString label);
 
 #endif
