@@ -42,21 +42,24 @@ PVProperties::PVProperties(PhysVol *physicalVolume, QWidget *parent):QWidget(par
     QStringList pv_name_list;
     QString device_name = physicalVolume->getName();
 
+
+    QList<LogVol *>  top_lvs = vg->getLogicalVolumes();
+
     layout->setMargin(0);
     temp_label = new QLabel( "<b>" + device_name + "</b>");
     temp_label->setAlignment(Qt::AlignCenter);
     layout->addWidget(temp_label, 0, 0, 1, -1);
 
-    temp_label = new QLabel("Volume name");
+    temp_label = new QLabel( i18n("Volume name") );
     temp_label->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
     layout->addWidget(temp_label, 1, 0);
-    temp_label =  new QLabel("Start");
+    temp_label =  new QLabel( i18n("Start") );
     temp_label->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
     layout->addWidget(temp_label, 1, 1);
-    temp_label = new QLabel("End");
+    temp_label = new QLabel( i18n("End") );
     temp_label->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
     layout->addWidget(temp_label, 1, 2);
-    temp_label =  new QLabel("Extents");
+    temp_label =  new QLabel( i18n("Extents") );
     temp_label->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
     layout->addWidget(temp_label, 1, 3);
 
@@ -66,7 +69,7 @@ PVProperties::PVProperties(PhysVol *physicalVolume, QWidget *parent):QWidget(par
    with the physical volume */
 
     int row = 2;
-    
+
     for(int x = 0; x < lvs.size() ; x++){
 	lv = lvs[x];
 	for(int segment = 0; segment < lv->getSegmentCount(); segment++){

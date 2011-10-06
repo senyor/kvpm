@@ -461,10 +461,20 @@ QList<lv_t> LogVol::getLvmSnapshots(vg_t lvmVG)
     return lvm_snapshots;
 }
 
+// Finds logical volumes that are children of this volume by
+// removing physical volumes from the list along with pvmove
+// volumes. One pvmove can be under several lvs so isn't
+// really a child.  
+
 QStringList LogVol::removePVDevices(QStringList devices)
 {
     QList<PhysVol *> pvs;
     pvs = m_vg->getPhysicalVolumes();
+
+    for(int n = devices.size() - 1; n >= 0; n--){
+        if( devices[n].startsWith("pvmove") )
+            devices.removeAt(n);
+    }
 
     for(int x = pvs.size() - 1; x >= 0; x--){
         for(int y = devices.size() - 1; y >= 0; y--){
