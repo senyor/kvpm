@@ -95,7 +95,7 @@ class LogVol
     
     void countLegsAndLogs();
     void processSegments(lv_t lvmLV);
-    QStringList removePVDevices(QStringList devices);
+    QStringList removePVDevices(QStringList devices);  // list lv children that are lvs and not devices or pvmove*
     QList<lv_t> getLvmSnapshots(vg_t lvmVG);
     void insertChildren(lv_t lvmLV, vg_t lvmVG);
     void calculateTotalSize();
