@@ -19,6 +19,13 @@
 
 #include <QtGui>
 
+#include "logvol.h"
+#include "masterlist.h"
+#include "storagedevice.h"
+#include "storagepartition.h"
+#include "volgroup.h"
+
+extern MasterList *g_master_list;
 
 #define BLKID_EMPTY_CACHE       "/dev/null"
 
@@ -74,4 +81,64 @@ QString fsprobe_getfslabel(QString devicePath)
 	blkid_put_cache(blkid2);
 	return fs_label;
     }
+}
+
+QString fsprobe_getfs_by_uuid(QString uuid)
+{
+    QList<VolGroup *> vgs = g_master_list->getVolGroups();
+    QList<StorageDevice *> devs = g_master_list->getStorageDevices();
+    QList<StoragePartition *> parts;
+    QList<LogVol *> lvs;
+
+    uuid = uuid.trimmed();
+    if( uuid.startsWith("UUID=", Qt::CaseInsensitive) )
+        uuid = uuid.remove(0, 5);
+
+    for(int x = devs.size() - 1; x >= 0; x--){
+        parts = devs[x]->getStoragePartitions();
+        for(int y = parts.size() - 1; y >= 0; y--){
+            if( parts[y]->getFilesystemUuid() == uuid )
+                return parts[y]->getName();
+        }
+    }
+
+    for(int x = vgs.size() - 1; x >= 0; x--){
+        lvs = vgs[x]->getLogicalVolumes();
+        for(int y = lvs.size() - 1; y >= 0; y--){
+            if( lvs[y]->getFilesystemUuid() == uuid )
+                return lvs[y]->getMapperPath();
+        }
+    }
+
+    return QString();
+}
+
+QString fsprobe_getfs_by_label(QString label)
+{
+    QList<VolGroup *> vgs = g_master_list->getVolGroups();
+    QList<StorageDevice *> devs = g_master_list->getStorageDevices();
+    QList<StoragePartition *> parts;
+    QList<LogVol *> lvs;
+
+    label = label.trimmed();
+    if( label.startsWith("LABEL=", Qt::CaseInsensitive) )
+        label = label.remove(0, 6);
+
+    for(int x = devs.size() - 1; x >= 0; x--){
+        parts = devs[x]->getStoragePartitions();
+        for(int y = parts.size() - 1; y >= 0; y--){
+            if( parts[y]->getFilesystemLabel() == label )
+                return parts[y]->getName();
+        }
+    }
+
+    for(int x = vgs.size() - 1; x >= 0; x--){
+        lvs = vgs[x]->getLogicalVolumes();
+        for(int y = lvs.size() - 1; y >= 0; y--){
+            if( lvs[y]->getFilesystemLabel() == label )
+                return lvs[y]->getMapperPath();
+        }
+    }
+
+    return QString();
 }
