@@ -83,6 +83,7 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
     lv_change_action = lv_actions->addAction( "lvchange", this, SLOT(changeLogicalVolume()));
     lv_change_action->setText( i18n("Change attributes or tags...")); 
     lv_change_action->setIcon( KIcon("wrench") );
+    addSeparator();
 
     lv_mkfs_action     = new KAction( KIcon("lightning_add"), i18n("Make filesystem..."), this);
     lv_removefs_action = new KAction( KIcon("lightning_delete"), i18n("Remove filesystem..."), this);
