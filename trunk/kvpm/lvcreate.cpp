@@ -516,13 +516,15 @@ QWidget* LVCreateDialog::createAdvancedTab()
     layout->addWidget(m_zero_check);
 
     if( !m_snapshot && !m_extend ){
-        m_zero_check->setChecked(true);
-	m_readonly_check->setChecked(false);
     
 	connect(m_zero_check, SIGNAL(stateChanged(int)), 
 		this ,SLOT(zeroReadonlyCheck(int)));
 	connect(m_readonly_check, SIGNAL(stateChanged(int)), 
 		this ,SLOT(zeroReadonlyCheck(int)));
+
+        m_zero_check->setChecked(true);
+	m_readonly_check->setChecked(false);
+
     }
     else{
 	m_zero_check->setChecked(false);
@@ -532,19 +534,29 @@ QWidget* LVCreateDialog::createAdvancedTab()
     }
 
     m_monitor_check = new QCheckBox( i18n("Monitor with dmeventd") );
+    m_skip_sync_check = new QCheckBox( i18n("Skip initial synchronization of mirror") );
+
     if(m_snapshot){
         m_monitor_check->setChecked(true);
         m_monitor_check->setEnabled(true);
+        m_skip_sync_check->setChecked(false);
+        m_skip_sync_check->setEnabled(false);
 	layout->addWidget(m_monitor_check);
+        layout->addWidget(m_skip_sync_check);
     }
     else if(m_extend){
         m_monitor_check->setChecked(false);
         m_monitor_check->setEnabled(false);
+        m_skip_sync_check->setChecked(false);
+        m_skip_sync_check->setEnabled(false);
     }
     else{
         m_monitor_check->setChecked(false);
         m_monitor_check->setEnabled(false);
+        m_skip_sync_check->setChecked(false);
+        m_skip_sync_check->setEnabled(false);
 	layout->addWidget(m_monitor_check);
+        layout->addWidget(m_skip_sync_check);
     }
 
     QVBoxLayout *persistent_layout   = new QVBoxLayout;
@@ -654,10 +666,16 @@ void LVCreateDialog::enableMonitoring(bool checked)
     if(checked){
         m_monitor_check->setChecked(true);
         m_monitor_check->setEnabled(true);
+        m_skip_sync_check->setChecked(true);
+        m_skip_sync_check->setEnabled(true);
     }
-    else if(!m_snapshot){
-        m_monitor_check->setChecked(false);
-        m_monitor_check->setEnabled(false);
+    else{
+        if(!m_snapshot){
+            m_monitor_check->setChecked(false);
+            m_monitor_check->setEnabled(false);
+        }
+        m_skip_sync_check->setChecked(false);
+        m_skip_sync_check->setEnabled(false);
     }
 }
 
@@ -795,6 +813,9 @@ QStringList LVCreateDialog::argumentsLV()
 
 	    if( m_mirror_box->isChecked() ){
 		args << "--mirrors" << QString("%1").arg( mirrors - 1 );
+
+		if( m_skip_sync_check->isChecked() )
+                    args << "--nosync";
 
 		if( m_mirrored_log->isChecked() )
 		    args << "--mirrorlog" << "mirrored";

@@ -66,7 +66,8 @@ Q_OBJECT
 
      QCheckBox *m_zero_check, 
                *m_readonly_check,
-               *m_monitor_check;   // monitor with dmeventd
+               *m_skip_sync_check,   // don't synchronize empty mirror images when created  
+               *m_monitor_check;     // monitor with dmeventd
 
      QGroupBox *m_persistent_box,
 	       *m_mirror_box,
