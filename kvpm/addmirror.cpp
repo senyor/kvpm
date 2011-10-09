@@ -14,9 +14,10 @@
 
 #include "addmirror.h"
 
-#include <KIntSpinBox>
-#include <KLocale>
 #include <KComboBox>
+#include <KLocale>
+#include <KIntSpinBox>
+#include <KTabWidget>
 
 #include <QtGui>
 
@@ -165,8 +166,6 @@ void AddMirrorDialog::setupGeneralTab()
     connect(m_mirrored_log_button, SIGNAL(toggled(bool)),
             this, SLOT(comparePvsNeededPvsAvailable()));
 
-
-
     layout->addStretch();
 
     return;
@@ -246,8 +245,9 @@ void AddMirrorDialog::setupPhysicalTab()
             this, SLOT(comparePvsNeededPvsAvailable()));
 
     connect(m_add_mirror_box, SIGNAL(toggled(bool)), 
-            this, SLOT(comparePvsNeededPvsAvailable()));
+            this, SLOT(enableLogRadioButtons()));
 
+    enableLogRadioButtons();
     comparePvsNeededPvsAvailable();
     return;
 }
@@ -399,5 +399,37 @@ void AddMirrorDialog::comparePvsNeededPvsAvailable()
 
     enableButtonOk(false);
     return;
+}
+
+void AddMirrorDialog::enableLogRadioButtons()
+{
+    if( m_add_mirror_box->isChecked() ){
+        if( m_lv->getLogCount() == 2 ){
+            m_mirrored_log_button->setChecked(true);
+            m_mirrored_log_button->setEnabled(true);
+            m_disk_log_button->setEnabled(false);
+            m_core_log_button->setEnabled(false);
+        }
+        else if( m_lv->getLogCount() == 1 ){
+            if( m_core_log_button->isChecked() )
+                m_disk_log_button->setChecked(true);
+
+            m_mirrored_log_button->setEnabled(true);
+            m_disk_log_button->setEnabled(true);
+            m_core_log_button->setEnabled(false);
+        }
+        else{
+            m_mirrored_log_button->setEnabled(true);
+            m_disk_log_button->setEnabled(true);
+            m_core_log_button->setEnabled(true);
+        }
+    }
+    else{
+        m_mirrored_log_button->setEnabled(true);
+        m_disk_log_button->setEnabled(true);
+        m_core_log_button->setEnabled(true);
+    }
+
+    comparePvsNeededPvsAvailable();
 }
 

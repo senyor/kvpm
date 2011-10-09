@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -15,9 +15,8 @@
 #ifndef ADDMIRROR_H
 #define ADDMIRROR_H
 
-#include <KTabWidget>
-
 #include <KDialog>
+
 #include <QStringList>
 #include <QLabel>
 #include <QSpinBox>
@@ -26,10 +25,10 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 
-class KIntSpinBox;
 class KComboBox;
+class KIntSpinBox;
+class KTabWidget;
 class LogVol;
-class NoMungeCheck;
 class PVCheckBox;
 class VolGroup;
 
@@ -43,7 +42,7 @@ class AddMirrorDialog : public KDialog
 {
 Q_OBJECT
 
-    KTabWidget *m_tab_widget;
+    KTabWidget  *m_tab_widget;
     KIntSpinBox *m_add_mirrors_spin;
     KIntSpinBox *m_stripes_number_spin;
     QHBoxLayout *m_general_layout;
@@ -63,10 +62,9 @@ Q_OBJECT
 	         *anywhere_button, *inherited_button,  // the allocation policy
 	         *cling_button;
 
-    QRadioButton *m_core_log_button, *m_mirrored_log_button, *m_disk_log_button;
-
-    //    QList<NoMungeCheck *> m_pv_leg_checks;
-    //    QList<long long> m_pv_leg_size;
+    QRadioButton *m_core_log_button, 
+                 *m_mirrored_log_button, 
+                 *m_disk_log_button;
 
     void setupGeneralTab();
     void setupPhysicalTab();
@@ -78,6 +76,7 @@ public:
 
 private slots:
     void comparePvsNeededPvsAvailable();
+    void enableLogRadioButtons();
     
 };
 
