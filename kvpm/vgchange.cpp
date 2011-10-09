@@ -190,14 +190,12 @@ VGChangeDialog::VGChangeDialog(VolGroup *volumeGroup, QWidget *parent) :
     }
     for(int x = lv_list.size() - 1;x >=0 ;x--){
 	if( lv_list[x]->isMounted() ){
-            m_available_box->setEnabled(false);
-            m_available_yes->setEnabled(false);
+            m_available_yes->setChecked(true);
             m_available_no->setEnabled(false);
             break;
         }
     }
     
-
 // We don't want the limit set to less than the number already in existence!
 
     int lv_count = m_vg->getLVCount();
