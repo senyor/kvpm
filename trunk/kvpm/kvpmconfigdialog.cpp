@@ -250,7 +250,7 @@ void KvpmConfigDialog::updateSettings()
     m_device_column    = m_device_check->isChecked();
     m_partition_column = m_partition_check->isChecked();
     m_capacity_column  = m_capacity_check->isChecked();
-    m_used_column      = m_used_check->isChecked();
+    m_devremaining_column  = m_devremaining_check->isChecked();
     m_usage_column     = m_usage_check->isChecked();
     m_group_column     = m_group_check->isChecked();
     m_flags_column     = m_flags_check->isChecked();
@@ -317,7 +317,7 @@ void KvpmConfigDialog::updateWidgetsDefault()
     m_device_check->setChecked(true);
     m_partition_check->setChecked(true);
     m_capacity_check->setChecked(true);
-    m_used_check->setChecked(true);
+    m_devremaining_check->setChecked(true);
     m_usage_check->setChecked(true);
     m_group_check->setChecked(true);
     m_flags_check->setChecked(true);
@@ -403,7 +403,7 @@ QGroupBox *KvpmConfigDialog::deviceGroup()
     m_skeleton->addItemBool( "device",    m_device_column );
     m_skeleton->addItemBool( "partition", m_partition_column );
     m_skeleton->addItemBool( "capacity",  m_capacity_column );
-    m_skeleton->addItemBool( "used",      m_used_column );
+    m_skeleton->addItemBool( "remaining", m_devremaining_column );
     m_skeleton->addItemBool( "usage",     m_usage_column );
     m_skeleton->addItemBool( "group",     m_group_column );
     m_skeleton->addItemBool( "flags",     m_flags_column );
@@ -412,7 +412,7 @@ QGroupBox *KvpmConfigDialog::deviceGroup()
     m_device_check    = new QCheckBox("Device name");
     m_partition_check = new QCheckBox("Partition type");
     m_capacity_check  = new QCheckBox("Capacity");
-    m_used_check      = new QCheckBox("Space used");
+    m_devremaining_check = new QCheckBox("Remaining space");
     m_usage_check     = new QCheckBox("Usage of device");
     m_group_check     = new QCheckBox("Volume group");
     m_flags_check     = new QCheckBox("Partition flags");
@@ -420,7 +420,7 @@ QGroupBox *KvpmConfigDialog::deviceGroup()
     m_device_check->setChecked(m_device_column);
     m_partition_check->setChecked(m_partition_column);
     m_capacity_check->setChecked(m_capacity_column);
-    m_used_check->setChecked(m_used_column);
+    m_devremaining_check->setChecked(m_devremaining_column);
     m_usage_check->setChecked(m_usage_column);
     m_group_check->setChecked(m_group_column);
     m_flags_check->setChecked(m_flags_column);
@@ -429,7 +429,7 @@ QGroupBox *KvpmConfigDialog::deviceGroup()
     device_layout->addWidget(m_device_check);
     device_layout->addWidget(m_partition_check);
     device_layout->addWidget(m_capacity_check);
-    device_layout->addWidget(m_used_check);
+    device_layout->addWidget(m_devremaining_check);
     device_layout->addWidget(m_usage_check);
     device_layout->addWidget(m_group_check);
     device_layout->addWidget(m_flags_check);

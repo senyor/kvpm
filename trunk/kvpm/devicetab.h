@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2009, 2010 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -22,10 +22,10 @@
 #include <QScrollArea>
 #include <QVBoxLayout>
 					
-class StorageDevice;
-class StorageModel;
 class DeviceTreeView;
 class DeviceSizeChart;
+class StorageDevice;
+class StorageModel;
 
 class DeviceTab : public QWidget
 {

@@ -426,6 +426,8 @@ void VGTree::setHiddenColumns()
 {
     KConfigSkeleton skeleton;
 
+    bool changed = false;
+
     bool volume,      size,      remaining,
          filesystem,  type,
          stripes,     stripesize,
@@ -447,18 +449,34 @@ void VGTree::setHiddenColumns()
     skeleton.addItemBool( "tags",        tags );
     skeleton.addItemBool( "mountpoints", mountpoints );
 
-    setColumnHidden( 0, !volume );
-    setColumnHidden( 1, !size );
-    setColumnHidden( 2, !remaining );
-    setColumnHidden( 3, !filesystem );
-    setColumnHidden( 4, !type );
-    setColumnHidden( 5, !stripes );
-    setColumnHidden( 6, !stripesize );
-    setColumnHidden( 7, !snapmove );
-    setColumnHidden( 8, !state );
-    setColumnHidden( 9, !access );
-    setColumnHidden( 10, !tags );
-    setColumnHidden( 11, !mountpoints );
+    if( !( !volume == isColumnHidden(0)     && !size == isColumnHidden(1) &&
+           !remaining == isColumnHidden(2)  && !filesystem == isColumnHidden(3) &&
+           !type == isColumnHidden(4)       && !stripes == isColumnHidden(5) &&
+           !stripesize == isColumnHidden(6) && !snapmove == isColumnHidden(7) &&
+           !state == isColumnHidden(8)      && !access == isColumnHidden(9) &&
+           !tags == isColumnHidden(10)      && !mountpoints == isColumnHidden(11) ) )
+        changed = true;
+
+    if(changed){
+
+        setColumnHidden( 0, !volume );
+        setColumnHidden( 1, !size );
+        setColumnHidden( 2, !remaining );
+        setColumnHidden( 3, !filesystem );
+        setColumnHidden( 4, !type );
+        setColumnHidden( 5, !stripes );
+        setColumnHidden( 6, !stripesize );
+        setColumnHidden( 7, !snapmove );
+        setColumnHidden( 8, !state );
+        setColumnHidden( 9, !access );
+        setColumnHidden( 10, !tags );
+        setColumnHidden( 11, !mountpoints );
+
+        for(int column = 0; column < 11; column++){
+            if( !isColumnHidden(column) )
+                resizeColumnToContents(column);
+        }
+    }
 }
 
 void VGTree::adjustColumnWidth(QTreeWidgetItem *)

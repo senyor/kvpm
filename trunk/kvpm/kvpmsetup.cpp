@@ -40,7 +40,7 @@ bool setup_kvpm()
 {
     KConfigSkeleton *skeleton = new KConfigSkeleton();
 
-    bool configured, device, partition, capacity, used, usage, group, flags, mount,
+    bool configured, device, partition, capacity, devremaining, usage, group, flags, mount,
          volume, size, remaining, type, filesystem, stripes, stripesize, snapmove, 
          state, access, tags, mountpoints, pvname, pvsize, pvremaining, pvused, pvstate,
          pvallocate, pvtags, pvlvnames;
@@ -59,7 +59,7 @@ bool setup_kvpm()
     skeleton->addItemBool( "device",    device );
     skeleton->addItemBool( "partition", partition );
     skeleton->addItemBool( "capacity",  capacity );
-    skeleton->addItemBool( "used",      used );
+    skeleton->addItemBool( "remaining", devremaining );
     skeleton->addItemBool( "usage",     usage );
     skeleton->addItemBool( "group",     group );
     skeleton->addItemBool( "flags",     flags );
@@ -68,7 +68,7 @@ bool setup_kvpm()
     device = true;
     partition = true;
     capacity = true;
-    used = true;
+    devremaining = true;
     usage = true;
     group = true;
     flags = true;
@@ -77,7 +77,7 @@ bool setup_kvpm()
     skeleton->setCurrentGroup("VolumeTreeColumns");
     skeleton->addItemBool( "volume",     volume );
     skeleton->addItemBool( "size",       size );
-    skeleton->addItemBool( "remaining",   remaining );
+    skeleton->addItemBool( "remaining",  remaining );
     skeleton->addItemBool( "type",       type );
     skeleton->addItemBool( "filesystem", filesystem );
     skeleton->addItemBool( "stripes",    stripes );
