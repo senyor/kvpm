@@ -43,7 +43,7 @@ PVTree::PVTree(VolGroup *volumeGroup, QWidget *parent) : QTreeWidget(parent), m_
 
     header_labels << i18nc("The name of the device", "Name") << i18n("Size") 
 		  << i18nc("Unused space", "Free") << i18nc("Space used up", "Used")
-		  << i18n("Allocatable") 
+		  << i18n("State") << i18n("Allocatable") 
                   << i18n("Tags") 
 		  << i18n("Logical volumes");
 
@@ -58,9 +58,10 @@ PVTree::PVTree(VolGroup *volumeGroup, QWidget *parent) : QTreeWidget(parent), m_
     item->setToolTip(1, i18n("Total size of physical volume"));
     item->setToolTip(2, i18n("Free space on physical volume"));
     item->setToolTip(3, i18n("Space used on physical volume"));
-    item->setToolTip(4, i18n("If physical volume allows more extents to be allocated"));
-    item->setToolTip(5, i18n("Optional tags for physical volume"));
-    item->setToolTip(6, i18n("Logical volumes on physical volume"));
+    item->setToolTip(4, i18n("A physcial volume is active if it has logical volumes that are active"));
+    item->setToolTip(5, i18n("If physical volume allows more extents to be allocated"));
+    item->setToolTip(6, i18n("Optional tags for physical volume"));
+    item->setToolTip(7, i18n("Logical volumes on physical volume"));
 
     setHeaderItem(item);
 }
@@ -92,6 +93,11 @@ void PVTree::loadData()
 		<< sizeToString( pv->getSize() )
 		<< sizeToString( pv->getUnused() )
 		<< sizeToString( pv->getSize() - pv->getUnused() );
+
+	if( pv->isActive() )
+	    pv_data << "Active";
+	else
+	    pv_data << "Inactive";
 
 	if( pv->isAllocatable() )
 	    pv_data << "Yes";
@@ -133,11 +139,20 @@ void PVTree::loadData()
 	item->setData(2, Qt::UserRole, pv->getUnused());
 	item->setData(3, Qt::UserRole, (pv->getSize() - pv->getUnused()));
 
-        for(int column = 1; column < 5; column++)
+	if( pv->isActive() ){
+            item->setToolTip(4, i18n("Active"));
+            item->setIcon(4, KIcon("lightbulb"));
+        }
+	else{
+            item->setToolTip(4, i18n("Inactive"));
+            item->setIcon(4, KIcon("lightbulb_off"));
+        }
+
+        for(int column = 1; column < 6; column++)
             item->setTextAlignment(column, Qt::AlignRight);
 
-        item->setTextAlignment(5, Qt::AlignLeft);
         item->setTextAlignment(6, Qt::AlignLeft);
+        item->setTextAlignment(7, Qt::AlignLeft);
 
 	pv_tree_items.append(item);
     }
