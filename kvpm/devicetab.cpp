@@ -125,26 +125,26 @@ void DeviceTab::setHiddenColumns()
     bool device, 
          partition, 
          capacity, 
-         used, 
+         remaining, 
          usage,
          group,
          flags,
          mount;
 
     skeleton.setCurrentGroup("DeviceTreeColumns");
-    skeleton.addItemBool( "device",    device );
-    skeleton.addItemBool( "partition", partition );
-    skeleton.addItemBool( "capacity",  capacity );
-    skeleton.addItemBool( "used",      used );
-    skeleton.addItemBool( "usage",     usage );
-    skeleton.addItemBool( "group",     group );
-    skeleton.addItemBool( "flags",     flags );
-    skeleton.addItemBool( "mount",     mount );
+    skeleton.addItemBool( "device",       device );
+    skeleton.addItemBool( "partition",    partition );
+    skeleton.addItemBool( "capacity",     capacity );
+    skeleton.addItemBool( "remaining", remaining );
+    skeleton.addItemBool( "usage",        usage );
+    skeleton.addItemBool( "group",        group );
+    skeleton.addItemBool( "flags",        flags );
+    skeleton.addItemBool( "mount",        mount );
 
     m_tree->setColumnHidden( 0, !device );
     m_tree->setColumnHidden( 1, !partition );
     m_tree->setColumnHidden( 2, !capacity );
-    m_tree->setColumnHidden( 3, !used );
+    m_tree->setColumnHidden( 3, !remaining );
     m_tree->setColumnHidden( 4, !usage );
     m_tree->setColumnHidden( 5, !group );
     m_tree->setColumnHidden( 6, !flags );
