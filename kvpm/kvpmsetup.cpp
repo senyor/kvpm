@@ -13,12 +13,13 @@
  */
 
 
+#include "kvpmsetup.h" 
+
 #include <KConfigSkeleton>
 #include <KColorButton>
 
 #include <QtGui>
 
-#include "kvpmsetup.h" 
 
 bool isconfigured_kvpm()
 {
@@ -41,7 +42,9 @@ bool setup_kvpm()
 
     bool configured, device, partition, capacity, used, usage, group, flags, mount,
          volume, size, remaining, type, filesystem, stripes, stripesize, snapmove, 
-         state, access, tags, mountpoints;
+         state, access, tags, mountpoints, pvname, pvsize, pvremaining, pvused, pvstate,
+         pvallocate, pvtags, pvlvnames;
+
 
     QColor ext2, ext3, ext4, btrfs, reiser, reiser4, physvol, msdos,
            jfs, xfs, hfs, ntfs, none, free, swap;
@@ -97,6 +100,25 @@ bool setup_kvpm()
     access = false;
     tags = true;
     mountpoints = false;
+
+    skeleton->setCurrentGroup("PhysicalTreeColumns");
+    skeleton->addItemBool( "pvname",      pvname );
+    skeleton->addItemBool( "pvsize",      pvsize );
+    skeleton->addItemBool( "pvremaining", pvremaining );
+    skeleton->addItemBool( "pvused",      pvused );
+    skeleton->addItemBool( "pvstate",     pvstate );
+    skeleton->addItemBool( "pvallocate",  pvallocate );
+    skeleton->addItemBool( "pvtags",      pvtags );
+    skeleton->addItemBool( "pvlvnames",   pvlvnames );
+
+    pvname = true;
+    pvsize = true;
+    pvremaining = true;
+    pvused = false;
+    pvstate = false;
+    pvallocate = true;
+    pvtags = true;
+    pvlvnames = true;
 
     skeleton->setCurrentGroup("FilesystemColors");
     skeleton->addItemColor("ext2",    ext2);

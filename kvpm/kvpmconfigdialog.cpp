@@ -25,8 +25,6 @@
 #include <KSeparator>
 
 #include <QtGui>
-#include <QListWidgetItem>
-#include <QTableWidget>
 
 #include "executablefinder.h"
 
@@ -64,106 +62,15 @@ KvpmConfigDialog::~KvpmConfigDialog()
 void KvpmConfigDialog::buildGeneralPage()
 {
     QWidget *general = new QWidget;
-    QHBoxLayout *general_layout = new QHBoxLayout();
+    QVBoxLayout *general_layout = new QVBoxLayout();
+    general_layout->addWidget( new QLabel( i18n("<b>Set columns to show or hide in tables and tree views</b>") ) );
+    QHBoxLayout *horizontal_layout = new QHBoxLayout();
+    general_layout->addLayout(horizontal_layout);
     general->setLayout(general_layout);
 
-    QGroupBox *device_columns_group = new QGroupBox( i18n("Show these columns in device tree") );
-    QGroupBox *volume_columns_group = new QGroupBox( i18n("Show these columns in volume tree") );
-    general_layout->addWidget(device_columns_group);
-    general_layout->addWidget(volume_columns_group);
-    QVBoxLayout *device_layout = new QVBoxLayout();
-    QVBoxLayout *volume_layout = new QVBoxLayout();
-    device_columns_group->setLayout(device_layout);
-    volume_columns_group->setLayout(volume_layout);
-
-    m_skeleton->setCurrentGroup("DeviceTreeColumns");
-    m_skeleton->addItemBool( "device",    m_device_column );
-    m_skeleton->addItemBool( "partition", m_partition_column );
-    m_skeleton->addItemBool( "capacity",  m_capacity_column );
-    m_skeleton->addItemBool( "used",      m_used_column );
-    m_skeleton->addItemBool( "usage",     m_usage_column );
-    m_skeleton->addItemBool( "group",     m_group_column );
-    m_skeleton->addItemBool( "flags",     m_flags_column );
-    m_skeleton->addItemBool( "mount",     m_mount_column );
-
-    m_device_check    = new QCheckBox("Device name");
-    m_partition_check = new QCheckBox("Partition type");
-    m_capacity_check  = new QCheckBox("Capacity");
-    m_used_check      = new QCheckBox("Space used");
-    m_usage_check     = new QCheckBox("Usage of device");
-    m_group_check     = new QCheckBox("Volume group");
-    m_flags_check     = new QCheckBox("Partition flags");
-    m_mount_check     = new QCheckBox("Mount point");
-    m_device_check->setChecked(m_device_column);
-    m_partition_check->setChecked(m_partition_column);
-    m_capacity_check->setChecked(m_capacity_column);
-    m_used_check->setChecked(m_used_column);
-    m_usage_check->setChecked(m_usage_column);
-    m_group_check->setChecked(m_group_column);
-    m_flags_check->setChecked(m_flags_column);
-    m_mount_check->setChecked(m_mount_column);
-
-    device_layout->addWidget(m_device_check);
-    device_layout->addWidget(m_partition_check);
-    device_layout->addWidget(m_capacity_check);
-    device_layout->addWidget(m_used_check);
-    device_layout->addWidget(m_usage_check);
-    device_layout->addWidget(m_group_check);
-    device_layout->addWidget(m_flags_check);
-    device_layout->addWidget(m_mount_check);
-
-    m_skeleton->setCurrentGroup("VolumeTreeColumns");
-    m_skeleton->addItemBool( "volume",      m_volume_column );
-    m_skeleton->addItemBool( "size",        m_size_column );
-    m_skeleton->addItemBool( "remaining",   m_remaining_column );
-    m_skeleton->addItemBool( "type",        m_type_column );
-    m_skeleton->addItemBool( "filesystem",  m_filesystem_column );
-    m_skeleton->addItemBool( "stripes",     m_stripes_column );
-    m_skeleton->addItemBool( "stripesize",  m_stripesize_column );
-    m_skeleton->addItemBool( "snapmove",    m_snapmove_column );
-    m_skeleton->addItemBool( "state",       m_state_column );
-    m_skeleton->addItemBool( "access",      m_access_column );
-    m_skeleton->addItemBool( "tags",        m_tags_column );
-    m_skeleton->addItemBool( "mountpoints", m_mountpoints_column );
-
-    m_volume_check      = new QCheckBox("Volume name");
-    m_size_check        = new QCheckBox("Size");
-    m_remaining_check   = new QCheckBox("Remaining space");
-    m_type_check        = new QCheckBox("Volume type");
-    m_filesystem_check  = new QCheckBox("Filesystem type");
-    m_stripes_check     = new QCheckBox("Stripe count");
-    m_stripesize_check  = new QCheckBox("Stripe size");
-    m_snapmove_check    = new QCheckBox("(\%)Snap/PV move");
-    m_state_check       = new QCheckBox("Volume state");
-    m_access_check      = new QCheckBox("Volume access");
-    m_tags_check        = new QCheckBox("Tags");
-    m_mountpoints_check = new QCheckBox("Mount points");
-
-    m_volume_check->setChecked(m_volume_column);
-    m_size_check->setChecked(m_size_column);
-    m_remaining_check->setChecked(m_remaining_column);
-    m_type_check->setChecked(m_type_column);
-    m_filesystem_check->setChecked(m_filesystem_column);
-    m_stripes_check->setChecked(m_stripes_column);
-    m_stripesize_check->setChecked(m_stripesize_column);
-    m_snapmove_check->setChecked(m_snapmove_column);
-    m_state_check->setChecked(m_state_column);
-    m_access_check->setChecked(m_access_column);
-    m_tags_check->setChecked(m_tags_column);
-    m_mountpoints_check->setChecked(m_mountpoints_column);
-
-    volume_layout->addWidget(m_volume_check);
-    volume_layout->addWidget(m_size_check);
-    volume_layout->addWidget(m_remaining_check);
-    volume_layout->addWidget(m_type_check);
-    volume_layout->addWidget(m_filesystem_check);
-    volume_layout->addWidget(m_stripes_check);
-    volume_layout->addWidget(m_stripesize_check);
-    volume_layout->addWidget(m_snapmove_check);
-    volume_layout->addWidget(m_state_check);
-    volume_layout->addWidget(m_access_check);
-    volume_layout->addWidget(m_tags_check);
-    volume_layout->addWidget(m_mountpoints_check);
+    horizontal_layout->addWidget( deviceGroup() );
+    horizontal_layout->addWidget( logicalGroup() );
+    horizontal_layout->addWidget( physicalGroup() );
 
     KPageWidgetItem  *page_widget_item =  addPage( general, "General"); 
     page_widget_item->setIcon( KIcon("configure") );
@@ -362,6 +269,15 @@ void KvpmConfigDialog::updateSettings()
     m_tags_column        = m_tags_check->isChecked();
     m_mountpoints_column = m_mountpoints_check->isChecked();
 
+    m_pvname_column  = m_pvname_check->isChecked();
+    m_pvsize_column  = m_pvsize_check->isChecked();
+    m_pvremaining_column  = m_pvremaining_check->isChecked();
+    m_pvused_column  = m_pvused_check->isChecked();
+    m_pvstate_column = m_pvstate_check->isChecked();
+    m_pvallocate_column = m_pvallocate_check->isChecked();
+    m_pvtags_column     = m_pvtags_check->isChecked();
+    m_pvlvnames_column  = m_pvlvnames_check->isChecked();
+
     m_skeleton->writeConfig();
 
     g_executable_finder->reload();
@@ -419,6 +335,15 @@ void KvpmConfigDialog::updateWidgetsDefault()
     m_access_check->setChecked(false);
     m_tags_check->setChecked(true);
     m_mountpoints_check->setChecked(false);
+
+    m_pvname_check->setChecked(true);
+    m_pvsize_check->setChecked(true);
+    m_pvremaining_check->setChecked(true);
+    m_pvused_check->setChecked(false);
+    m_pvstate_check->setChecked(false);
+    m_pvallocate_check->setChecked(true);
+    m_pvtags_check->setChecked(true);
+    m_pvlvnames_check->setChecked(true);
 }
 
 void KvpmConfigDialog::fillExecutablesTable()
@@ -467,3 +392,160 @@ bool KvpmConfigDialog::hasChanged()
 {
     return true;     // This keeps the "apply" button enabled
 }
+
+QGroupBox *KvpmConfigDialog::deviceGroup()
+{
+    QGroupBox *device_group = new QGroupBox( i18n("Device tree") );
+    QVBoxLayout *device_layout = new QVBoxLayout();
+    device_group->setLayout(device_layout);
+
+    m_skeleton->setCurrentGroup("DeviceTreeColumns");
+    m_skeleton->addItemBool( "device",    m_device_column );
+    m_skeleton->addItemBool( "partition", m_partition_column );
+    m_skeleton->addItemBool( "capacity",  m_capacity_column );
+    m_skeleton->addItemBool( "used",      m_used_column );
+    m_skeleton->addItemBool( "usage",     m_usage_column );
+    m_skeleton->addItemBool( "group",     m_group_column );
+    m_skeleton->addItemBool( "flags",     m_flags_column );
+    m_skeleton->addItemBool( "mount",     m_mount_column );
+
+    m_device_check    = new QCheckBox("Device name");
+    m_partition_check = new QCheckBox("Partition type");
+    m_capacity_check  = new QCheckBox("Capacity");
+    m_used_check      = new QCheckBox("Space used");
+    m_usage_check     = new QCheckBox("Usage of device");
+    m_group_check     = new QCheckBox("Volume group");
+    m_flags_check     = new QCheckBox("Partition flags");
+    m_mount_check     = new QCheckBox("Mount point");
+    m_device_check->setChecked(m_device_column);
+    m_partition_check->setChecked(m_partition_column);
+    m_capacity_check->setChecked(m_capacity_column);
+    m_used_check->setChecked(m_used_column);
+    m_usage_check->setChecked(m_usage_column);
+    m_group_check->setChecked(m_group_column);
+    m_flags_check->setChecked(m_flags_column);
+    m_mount_check->setChecked(m_mount_column);
+
+    device_layout->addWidget(m_device_check);
+    device_layout->addWidget(m_partition_check);
+    device_layout->addWidget(m_capacity_check);
+    device_layout->addWidget(m_used_check);
+    device_layout->addWidget(m_usage_check);
+    device_layout->addWidget(m_group_check);
+    device_layout->addWidget(m_flags_check);
+    device_layout->addWidget(m_mount_check);
+    device_layout->addStretch();
+
+    return device_group;
+}
+
+QGroupBox *KvpmConfigDialog::physicalGroup()
+{
+    QGroupBox *physical_group = new QGroupBox( i18n("Physical volume table") );
+    QVBoxLayout *physical_layout = new QVBoxLayout();
+    physical_group->setLayout(physical_layout);
+
+    m_skeleton->setCurrentGroup("PhysicalTreeColumns");
+
+    m_skeleton->addItemBool( "pvname",     m_pvname_column );
+    m_skeleton->addItemBool( "pvsize",     m_pvsize_column );
+    m_skeleton->addItemBool( "pvremaining",     m_pvremaining_column );
+    m_skeleton->addItemBool( "pvused",     m_pvused_column );
+    m_skeleton->addItemBool( "pvstate",    m_pvstate_column );
+    m_skeleton->addItemBool( "pvallocate", m_pvallocate_column );
+    m_skeleton->addItemBool( "pvtags",     m_pvtags_column );
+    m_skeleton->addItemBool( "pvlvnames",  m_pvlvnames_column );
+
+    m_pvname_check  = new QCheckBox("Volume name");
+    m_pvsize_check  = new QCheckBox("Size");
+    m_pvremaining_check  = new QCheckBox("Remaining space");
+    m_pvused_check  = new QCheckBox("Used space");
+    m_pvstate_check = new QCheckBox("State");
+    m_pvallocate_check = new QCheckBox("Allocatable");
+    m_pvtags_check     = new QCheckBox("Tags");
+    m_pvlvnames_check  = new QCheckBox("Logical Volumes");
+
+    m_pvname_check->setChecked(m_pvname_column);
+    m_pvsize_check->setChecked(m_pvsize_column);
+    m_pvremaining_check->setChecked(m_pvremaining_column);
+    m_pvused_check->setChecked(m_pvused_column);
+    m_pvstate_check->setChecked(m_pvstate_column);
+    m_pvallocate_check->setChecked(m_pvallocate_column);
+    m_pvtags_check->setChecked(m_pvtags_column);
+    m_pvlvnames_check->setChecked(m_pvlvnames_column);
+
+    physical_layout->addWidget(m_pvname_check);
+    physical_layout->addWidget(m_pvsize_check);
+    physical_layout->addWidget(m_pvremaining_check);
+    physical_layout->addWidget(m_pvused_check);
+    physical_layout->addWidget(m_pvstate_check);
+    physical_layout->addWidget(m_pvallocate_check);
+    physical_layout->addWidget(m_pvtags_check);
+    physical_layout->addWidget(m_pvlvnames_check);
+    physical_layout->addStretch();
+
+    return physical_group;
+}
+
+QGroupBox *KvpmConfigDialog::logicalGroup()
+{
+    QGroupBox *logical_group = new QGroupBox( i18n("Logical volume tree") );
+    QVBoxLayout *logical_layout = new QVBoxLayout();
+    logical_group->setLayout(logical_layout);
+
+    m_skeleton->setCurrentGroup("VolumeTreeColumns");
+    m_skeleton->addItemBool( "volume",      m_volume_column );
+    m_skeleton->addItemBool( "size",        m_size_column );
+    m_skeleton->addItemBool( "remaining",   m_remaining_column );
+    m_skeleton->addItemBool( "type",        m_type_column );
+    m_skeleton->addItemBool( "filesystem",  m_filesystem_column );
+    m_skeleton->addItemBool( "stripes",     m_stripes_column );
+    m_skeleton->addItemBool( "stripesize",  m_stripesize_column );
+    m_skeleton->addItemBool( "snapmove",    m_snapmove_column );
+    m_skeleton->addItemBool( "state",       m_state_column );
+    m_skeleton->addItemBool( "access",      m_access_column );
+    m_skeleton->addItemBool( "tags",        m_tags_column );
+    m_skeleton->addItemBool( "mountpoints", m_mountpoints_column );
+
+    m_volume_check      = new QCheckBox("Volume name");
+    m_size_check        = new QCheckBox("Size");
+    m_remaining_check   = new QCheckBox("Remaining space");
+    m_type_check        = new QCheckBox("Volume type");
+    m_filesystem_check  = new QCheckBox("Filesystem type");
+    m_stripes_check     = new QCheckBox("Stripe count");
+    m_stripesize_check  = new QCheckBox("Stripe size");
+    m_snapmove_check    = new QCheckBox("(\%)Snap/PV move");
+    m_state_check       = new QCheckBox("Volume state");
+    m_access_check      = new QCheckBox("Volume access");
+    m_tags_check        = new QCheckBox("Tags");
+    m_mountpoints_check = new QCheckBox("Mount points");
+
+    m_volume_check->setChecked(m_volume_column);
+    m_size_check->setChecked(m_size_column);
+    m_remaining_check->setChecked(m_remaining_column);
+    m_type_check->setChecked(m_type_column);
+    m_filesystem_check->setChecked(m_filesystem_column);
+    m_stripes_check->setChecked(m_stripes_column);
+    m_stripesize_check->setChecked(m_stripesize_column);
+    m_snapmove_check->setChecked(m_snapmove_column);
+    m_state_check->setChecked(m_state_column);
+    m_access_check->setChecked(m_access_column);
+    m_tags_check->setChecked(m_tags_column);
+    m_mountpoints_check->setChecked(m_mountpoints_column);
+
+    logical_layout->addWidget(m_volume_check);
+    logical_layout->addWidget(m_size_check);
+    logical_layout->addWidget(m_remaining_check);
+    logical_layout->addWidget(m_type_check);
+    logical_layout->addWidget(m_filesystem_check);
+    logical_layout->addWidget(m_stripes_check);
+    logical_layout->addWidget(m_stripesize_check);
+    logical_layout->addWidget(m_snapmove_check);
+    logical_layout->addWidget(m_state_check);
+    logical_layout->addWidget(m_access_check);
+    logical_layout->addWidget(m_tags_check);
+    logical_layout->addWidget(m_mountpoints_check);
+
+    return logical_group;
+}
+

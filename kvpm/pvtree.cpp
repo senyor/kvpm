@@ -15,8 +15,10 @@
 
 #include "pvtree.h"
 
+#include <KConfigSkeleton>
 #include <KIcon>
 #include <KLocale>
+
 #include <QtGui>
 
 #include "logvol.h"
@@ -42,7 +44,7 @@ PVTree::PVTree(VolGroup *volumeGroup, QWidget *parent) : QTreeWidget(parent), m_
     QTreeWidgetItem * item;
 
     header_labels << i18nc("The name of the device", "Name") << i18n("Size") 
-		  << i18nc("Unused space", "Free") << i18nc("Space used up", "Used")
+		  << i18nc("Unused space", "Remaining") << i18nc("Space used up", "Used")
 		  << i18n("State") << i18n("Allocatable") 
                   << i18n("Tags") 
 		  << i18n("Logical volumes");
@@ -162,6 +164,7 @@ void PVTree::loadData()
 	setCurrentItem( pv_tree_items[0] );
 
     setSortingEnabled(true);
+    setHiddenColumns();
 
     return;
 }
@@ -272,3 +275,46 @@ void PVTree::changePhysicalVolume()
         }
     }
 }
+
+void PVTree::setHiddenColumns()
+{
+    KConfigSkeleton skeleton;
+
+    bool changed = false;
+
+    bool pvname, pvsize,  pvremaining,
+         pvused, pvstate, pvallocate,
+         pvtags, pvlvnames;
+
+    skeleton.setCurrentGroup("PhysicalTreeColumns");
+    skeleton.addItemBool( "pvname",     pvname );
+    skeleton.addItemBool( "pvsize",     pvsize );
+    skeleton.addItemBool( "pvremaining",     pvremaining );
+    skeleton.addItemBool( "pvused",     pvused );
+    skeleton.addItemBool( "pvstate",    pvstate );
+    skeleton.addItemBool( "pvallocate", pvallocate );
+    skeleton.addItemBool( "pvtags",     pvtags );
+    skeleton.addItemBool( "pvlvnames",  pvlvnames );
+
+    if( !( !pvname == isColumnHidden(0)      && !pvsize == isColumnHidden(1) && 
+           !pvremaining == isColumnHidden(2) && !pvused == isColumnHidden(3) &&
+           !pvstate == isColumnHidden(4)     && !pvallocate == isColumnHidden(5) &&
+           !pvtags == isColumnHidden(6)      && !pvlvnames == isColumnHidden(7) ) )
+        changed = true;
+
+    if(changed){
+        setColumnHidden( 0, !pvname );
+        setColumnHidden( 1, !pvsize );
+        setColumnHidden( 2, !pvremaining );
+        setColumnHidden( 3, !pvused );
+        setColumnHidden( 4, !pvstate );
+        setColumnHidden( 5, !pvallocate );
+        setColumnHidden( 6, !pvtags );
+        setColumnHidden( 7, !pvlvnames );
+
+        for(int column = 0; column < 7; column++)
+            if( !isColumnHidden(column) )
+                resizeColumnToContents(column);
+    }
+}
+

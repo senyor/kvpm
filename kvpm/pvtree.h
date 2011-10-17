@@ -40,6 +40,7 @@ Q_OBJECT
 
     QString m_pv_name;
 
+    void setHiddenColumns();
     void setupContextMenu();
     
 public:
