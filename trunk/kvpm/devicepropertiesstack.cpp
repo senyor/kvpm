@@ -13,11 +13,12 @@
  */
 
 
+#include "devicepropertiesstack.h"
+
 #include <QtGui>
 
-#include "storageitem.h"
-#include "devicepropertiesstack.h"
 #include "deviceproperties.h"
+#include "devicetree.h"
 #include "storagedevice.h"
 #include "storagepartition.h"
 
@@ -51,14 +52,9 @@ DevicePropertiesStack::DevicePropertiesStack( QList<StorageDevice *> Devices, QW
     setCurrentIndex(0);
 }
 
-void DevicePropertiesStack::changeDeviceStackIndex(QModelIndex Index)
+void DevicePropertiesStack::changeDeviceStackIndex(QTreeWidgetItem *item)
 {
-    QModelIndex model_index = Index;
-    StorageItem *device_item;
-
-    device_item = static_cast<StorageItem*> (model_index.internalPointer());
-
-    const QString device_path = device_item->data(0).toString();
+    const QString device_path = item->data(0, Qt::DisplayRole).toString();
     const int list_size = m_device_path_list.size();
     setCurrentIndex(0);
     

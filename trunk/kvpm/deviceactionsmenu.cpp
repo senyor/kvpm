@@ -13,12 +13,13 @@
  */
 
 
-#include <QtGui>
+#include "deviceactionsmenu.h"
+
 #include <KLocale>
 
+#include <QtGui>
+
 #include "fsck.h"
-#include "devicetreeview.h"
-#include "deviceactionsmenu.h"
 #include "devicesizechartseg.h"
 #include "mkfs.h"
 #include "maxfs.h"
@@ -30,7 +31,6 @@
 #include "partmoveresize.h"
 #include "physvol.h"
 #include "storagedevice.h"
-#include "storageitem.h"
 #include "storagepartition.h"
 #include "tablecreate.h"
 #include "topwindow.h"
@@ -43,7 +43,7 @@
 extern MasterList *g_master_list;
 
 
-DeviceActionsMenu::DeviceActionsMenu( StorageItem *item, QWidget *parent) : KMenu(parent) 
+DeviceActionsMenu::DeviceActionsMenu( QTreeWidgetItem *item, QWidget *parent) : KMenu(parent) 
 {
     setup(item);
 
@@ -64,9 +64,8 @@ DeviceActionsMenu::DeviceActionsMenu( StorageItem *item, QWidget *parent) : KMen
     connect(m_vgextend_menu, SIGNAL(triggered(QAction*)), this, SLOT(vgextendPartition(QAction*)));
 }
 
-void DeviceActionsMenu::setup(StorageItem *item)
+void DeviceActionsMenu::setup(QTreeWidgetItem *item)
 {
-    QStringList group_names;
     KMenu *filesystem_menu = new KMenu( i18n("Filesystem operations"), this);
     m_vgextend_menu       = new KMenu( i18n("Extend volume group"), this);
     m_maxfs_action      = new KAction( i18n("Extend filesystem to fill partition"), this);
@@ -103,9 +102,9 @@ void DeviceActionsMenu::setup(StorageItem *item)
     filesystem_menu->addAction(m_mkfs_action);
     filesystem_menu->addAction(m_removefs_action);
 
-    m_vg_name  = item->data(5).toString(); // only set if this is a pv in a vg
+    m_vg_name  = item->data(5, Qt::DisplayRole).toString(); // only set if this is a pv in a vg
 
-    group_names = g_master_list->getVolumeGroupNames();
+    const QStringList group_names = g_master_list->getVolumeGroupNames();
     for(int x = 0; x < group_names.size(); x++){
         vgextend_actions.append(new QAction(group_names[x], this));
         m_vgextend_menu->addAction(vgextend_actions[x]);
@@ -114,11 +113,11 @@ void DeviceActionsMenu::setup(StorageItem *item)
     if(item){
 
         setEnabled(true);
-        m_dev = (StorageDevice *) (( item->dataAlternate(1)).value<void *>() );
+        m_dev = (StorageDevice *) (( item->data(1, Qt::UserRole)).value<void *>() );
         filesystem_menu->setEnabled(false);
 
-        if( ( item->dataAlternate(0)).canConvert<void *>() ){  // its a partition
-            m_part = (StoragePartition *) (( item->dataAlternate(0)).value<void *>() );
+        if( ( item->data(0, Qt::UserRole)).canConvert<void *>() ){  // its a partition
+            m_part = (StoragePartition *) (( item->data(0, Qt::UserRole)).value<void *>() );
             m_maxpv_action->setText( i18n("Extend physical volume to fill partition") );
             m_tablecreate_action->setEnabled(false);
 	    m_mount_action->setEnabled( m_part->isMountable() );

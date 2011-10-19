@@ -17,7 +17,7 @@
 #define DEVICEPROPERTIESSTACK_H
 
 #include <QList>
-#include <QModelIndex>
+#include <QTreeWidgetItem>
 #include <QStackedWidget>
 #include <QStringList>
 
@@ -34,7 +34,7 @@ Q_OBJECT
      explicit DevicePropertiesStack(QList<StorageDevice *> Devices, QWidget *parent = 0);
 
  public slots:
-     void changeDeviceStackIndex(QModelIndex Index);
+     void changeDeviceStackIndex(QTreeWidgetItem *item);
 };
 
 #endif
