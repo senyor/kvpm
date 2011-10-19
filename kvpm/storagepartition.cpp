@@ -112,9 +112,9 @@ StoragePartition::StoragePartition(PedPartition *part,
 	m_fs_uuid  = fsprobe_getfsuuid(m_partition_path).trimmed();
 	m_fs_label = fsprobe_getfslabel(m_partition_path).trimmed();
 
-	if( m_fs_type == "swap" || m_is_pv )
+	if( m_fs_type == "swap" || m_is_pv || m_partition_type.contains("freespace", Qt::CaseInsensitive) )
 	    m_is_mountable = false;
-	else
+      	else
             m_is_mountable = true;
     }
 
