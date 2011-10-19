@@ -21,10 +21,11 @@
 
 #include <QList>
 #include <QString>
+#include <QTreeWidgetItem>
 
 class StoragePartition;
 class StorageDevice;
-class StorageItem;
+
 
 class DeviceActionsMenu : public KMenu
 {
@@ -51,10 +52,10 @@ Q_OBJECT
     StorageDevice *m_dev;
     QString m_vg_name;
 
-    void setup(StorageItem *item);
+    void setup(QTreeWidgetItem *item);
     
  public:
-    explicit DeviceActionsMenu( StorageItem *item, QWidget *parent = 0);
+    explicit DeviceActionsMenu( QTreeWidgetItem *item, QWidget *parent = 0);
 
  private slots:
     void fsckPartition();

@@ -13,17 +13,18 @@
  */
 
 
-#include <QtGui>
-#include <KLocale>
-#include <KConfigSkeleton>
-
-#include "storageitem.h"
 #include "devicesizechartseg.h"
+
+#include <KConfigSkeleton>
+#include <KLocale>
+
+#include <QtGui>
+
 #include "deviceactionsmenu.h"
 #include "storagepartition.h"
 
 
-DeviceChartSeg::DeviceChartSeg(StorageItem *storageItem, QWidget *parent) : 
+DeviceChartSeg::DeviceChartSeg(QTreeWidgetItem *storageItem, QWidget *parent) : 
     QFrame(parent),
     m_item(storageItem)
 {
@@ -55,11 +56,11 @@ DeviceChartSeg::DeviceChartSeg(StorageItem *storageItem, QWidget *parent) :
     skeleton.addItemColor("ntfs",    ntfs_color);
     skeleton.addItemColor("physvol", physical_color);
 
-    use = (m_item->data(4)).toString();
+    use = (m_item->data(4, Qt::DisplayRole)).toString();
 
     m_partition = NULL;
-    if( (m_item->dataAlternate(0)).canConvert<void *>() ){
-	m_partition = (StoragePartition *) (( m_item->dataAlternate(0)).value<void *>() );
+    if( (m_item->data(0, Qt::UserRole)).canConvert<void *>() ){
+	m_partition = (StoragePartition *) (( m_item->data(0, Qt::UserRole)).value<void *>() );
 
         if ( m_partition->getPedType() & 0x02 ){  // extended
             setFrameStyle(QFrame::Raised | QFrame::Box);
@@ -99,7 +100,7 @@ DeviceChartSeg::DeviceChartSeg(StorageItem *storageItem, QWidget *parent) :
                 colorset->setColor(QPalette::Window, swap_color);
             else if(use == "freespace")
                 colorset->setColor(QPalette::Window, free_color);
-            else if(use == "physical volume")
+            else if(use == "PV")
                 colorset->setColor(QPalette::Window, physical_color);
             else
                 colorset->setColor(QPalette::Window, none_color);
@@ -108,7 +109,7 @@ DeviceChartSeg::DeviceChartSeg(StorageItem *storageItem, QWidget *parent) :
     else{  // whole device, not a partition
         setFrameStyle( QFrame::Sunken | QFrame::Panel );
         setLineWidth( 2 );
-        if(use == "physical volume")
+        if(use == "PV")
             colorset->setColor(QPalette::Window, physical_color);
         else
             colorset->setColor(QPalette::Window, none_color);
@@ -130,8 +131,8 @@ void DeviceChartSeg::popupContextMenu(QPoint point)
 
     KMenu *context_menu;
 
-    if( (m_item->dataAlternate(0)).canConvert<void *>() )
-        m_partition = (StoragePartition *) (( m_item->dataAlternate(0)).value<void *>() );
+    if( (m_item->data(0, Qt::UserRole)).canConvert<void *>() )
+        m_partition = (StoragePartition *) (( m_item->data(0, Qt::UserRole)).value<void *>() );
 
     if(m_item){  // m_item = 0 if there is no item a that point
         context_menu = new DeviceActionsMenu(m_item, this);

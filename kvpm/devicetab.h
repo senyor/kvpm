@@ -22,18 +22,16 @@
 #include <QScrollArea>
 #include <QVBoxLayout>
 					
-class DeviceTreeView;
+class DeviceTree;
 class DeviceSizeChart;
 class StorageDevice;
-class StorageModel;
 
 class DeviceTab : public QWidget
 {
     QList<StorageDevice *> m_devs;
-    DeviceTreeView *m_tree;
-    StorageModel *m_model;
+    DeviceTree  *m_tree;
     QVBoxLayout *m_layout;
-    QSplitter *m_tree_properties_splitter;
+    QSplitter   *m_tree_properties_splitter;
     DeviceSizeChart *m_size_chart;
 
     QScrollArea *setupPropertyWidgets();

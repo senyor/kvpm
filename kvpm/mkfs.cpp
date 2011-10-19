@@ -79,7 +79,6 @@ bool make_fs(StoragePartition *partition)
             MkfsDialog dialog(partition);
             dialog.exec();
             if(dialog.result() == QDialog::Accepted){
-                qDebug() << "mkn fs ...";
                 ProcessProgress mkfs(dialog.arguments(), i18n("Writing filesystem..."), true);
                 return true;
             }

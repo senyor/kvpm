@@ -12,81 +12,78 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
+#include "devicesizechart.h"
+
 #include <KSeparator>
+
 #include <QtGui>
 
-#include "devicesizechart.h"
-#include "storageitem.h"
-#include "storagedevice.h"
-#include "storagemodel.h"
-#include "storagepartition.h"
 #include "devicesizechartseg.h"
+#include "devicetree.h"
+#include "storagedevice.h"
+#include "storagepartition.h"
 
 
-DeviceSizeChart::DeviceSizeChart(StorageModel *model, QWidget *parent) : QFrame(parent)
+DeviceSizeChart::DeviceSizeChart(QTreeWidget *tree, QWidget *parent) : QFrame(parent), m_tree(tree)
 {
-    m_device_model = model;
-    QModelIndex index;
-
     setFrameStyle( QFrame::Sunken | QFrame::Panel );
     setLineWidth(2);
 
-    index = model->index(0,0);
     m_layout = new QHBoxLayout();
     m_layout->setSpacing(0);
     m_layout->setMargin(0);
     m_layout->setSizeConstraint(QLayout::SetNoConstraint);
     setLayout(m_layout);
 
-    setNewDevice(index);
+    setNewDevice( tree->currentItem() );
     setMinimumHeight(45);
     setMaximumHeight(45);
 }
 
-void DeviceSizeChart::setNewDevice(QModelIndex index)
+void DeviceSizeChart::setNewDevice(QTreeWidgetItem *deviceItem)
 {
     QWidget *segment, *extended_segment;
     QString usage, path;
     double ratio;
-    StorageItem *device_item, *partition_item, *extended_item;
+    QTreeWidgetItem  *partition_item, *extended_item;
     StoragePartition *partition;
     StorageDevice    *device;
     long long part_size, device_size;
     int max_segment_width;
     unsigned int part_type;
 
-    for(int x = m_layout->count() - 1; x >= 0; x--){  // delete all the children
-	QWidget *old_widget = (m_layout->takeAt(x))->widget();
-	old_widget->setParent(0);
-	delete old_widget;
-    }
+    if(deviceItem == NULL)
+        return;
+
+    while( (deviceItem->parent() != NULL) && ( (QTreeWidget *)deviceItem->parent() != m_tree) )
+        deviceItem = deviceItem->parent();
+
+    for(int x = m_layout->count() - 1; x >= 0; x--)  // delete all the children
+	m_layout->takeAt(x)->widget()->deleteLater();
 
     m_segments.clear();
     m_ratios.clear();
     m_extended_segments.clear();
     m_extended_ratios.clear();
-    while(index.parent() != QModelIndex())
-	index = index.parent();
+    device = (StorageDevice *) (( deviceItem->data(1, Qt::UserRole).value<void *>() ));
 
-    device_item = static_cast<StorageItem*> (index.internalPointer());
+    if( !deviceItem->childCount() ){
 
-    if( !device_item->childCount() ){
-	device    = (StorageDevice *) (( device_item->dataAlternate(1)).value<void *>() );
         if( !device->isPhysicalVolume() )
             usage = "physical volume";
         else
             usage = "";
-        segment = new DeviceChartSeg(device_item);	
+
+        segment = new DeviceChartSeg(deviceItem);	
         m_segments.append(segment);
         m_ratios.append(1.0);
         m_layout->addWidget(segment);
     }
 
-    for(int x = 0; x < device_item->childCount(); x++){
-	partition_item = device_item->child(x);
+    for(int x = 0; x < deviceItem->childCount(); x++){
+	partition_item = deviceItem->child(x);
 
-        partition = (StoragePartition *) (( partition_item->dataAlternate(0)).value<void *>() );
-	device    = (StorageDevice *) (( partition_item->dataAlternate(1)).value<void *>() );
+        partition = (StoragePartition *) (( partition_item->data(0, Qt::UserRole)).value<void *>() );
 
 	part_type = partition->getPedType();
 	part_size = partition->getSize();
@@ -95,7 +92,7 @@ void DeviceSizeChart::setNewDevice(QModelIndex index)
 	if( partition->isPhysicalVolume() )
 	    usage = "physical volume";
 	else
-	    usage = (partition_item->data(3)).toString();
+	    usage = (partition_item->data(3, Qt::DisplayRole)).toString();
 
 	ratio = part_size / (double) device_size;
 	segment = new DeviceChartSeg(partition_item);	
@@ -109,15 +106,15 @@ void DeviceSizeChart::setNewDevice(QModelIndex index)
             if( ! partition->isEmpty() ){
                 for(int y = 0 ; y < partition_item->childCount(); y++){
                     extended_item = partition_item->child(y);
-                    partition = (StoragePartition *) (( extended_item->dataAlternate(0)).value<void *>() );
-                    device = (StorageDevice *) (( extended_item->dataAlternate(1)).value<void *>() );
+                    partition = (StoragePartition *) (( extended_item->data(0, Qt::UserRole)).value<void *>() );
+                    device = (StorageDevice *) (( extended_item->data(1, Qt::UserRole)).value<void *>() );
                     part_type = partition->getPedType();
                     part_size = partition->getSize();
                     device_size = device->getSize();
                     if( partition->isPhysicalVolume() )
                         usage = "physical volume";
                     else
-                        usage = (extended_item->data(3)).toString();
+                        usage = (extended_item->data(3, Qt::DisplayRole)).toString();
                     extended_segment = new DeviceChartSeg(extended_item);	
                     ratio = part_size / (double) device_size;
                     m_extended_segments.append(extended_segment);

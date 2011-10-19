@@ -19,19 +19,18 @@
 #include <KLocale>
 #include <KConfigSkeleton>
 
-#include "devicetreeview.h"
+#include "devicetree.h"
 #include "devicesizechart.h"
 #include "deviceproperties.h"
 #include "devicepropertiesstack.h"
 #include "storagedevice.h"
-#include "storagemodel.h"
 
 
 DeviceTab::DeviceTab(QWidget *parent) : QWidget(parent)
 {
     m_layout = new QVBoxLayout;
     m_tree_properties_splitter = NULL;
-    m_model = NULL;
+
     m_size_chart = NULL;
     m_tree = NULL;
     setLayout(m_layout);
@@ -41,31 +40,18 @@ void DeviceTab::rescan( QList<StorageDevice *> Devices )
 {
     m_devs = Devices;
 
-    if(m_model)
-        m_model->deleteLater();
-    m_model = new StorageModel(m_devs, this);
+    if(m_tree)
+        m_tree->deleteLater();
+    m_tree = new DeviceTree(m_devs, this);
 
     if(m_size_chart)
         m_size_chart->deleteLater();
-    m_size_chart = new DeviceSizeChart(m_model, this);
-
-    if(m_tree)
-        m_tree->deleteLater();
-    m_tree = new DeviceTreeView(this);
+    m_size_chart = new DeviceSizeChart(m_tree, this);
 
     if(m_tree_properties_splitter)
         m_tree_properties_splitter->deleteLater();
     m_tree_properties_splitter = new QSplitter(Qt::Horizontal);
 
-    m_tree->setModel(m_model);
-    m_tree->expandAll();
-    m_tree->setAlternatingRowColors(true); 
-    m_tree->resizeColumnToContents(0);
-    m_tree->resizeColumnToContents(3);
-    m_tree->resizeColumnToContents(5);
-    m_tree->setAllColumnsShowFocus(true);
-    m_tree->setExpandsOnDoubleClick(true);
-    m_tree->setSelectionBehavior(QAbstractItemView::SelectRows);
 
     m_layout->addWidget( m_size_chart );
     m_layout->addWidget(m_tree_properties_splitter);
@@ -75,15 +61,11 @@ void DeviceTab::rescan( QList<StorageDevice *> Devices )
     m_tree_properties_splitter->setStretchFactor( 0, 9 );
     m_tree_properties_splitter->setStretchFactor( 1, 2 );
     
-    connect(m_tree, SIGNAL(clicked(const QModelIndex)), 
-	    m_size_chart, SLOT(setNewDevice(const QModelIndex)));
+    connect(m_tree, SIGNAL(itemClicked(QTreeWidgetItem*, int)), 
+	    m_size_chart, SLOT(setNewDevice(QTreeWidgetItem*)));
 
-    connect(m_tree, SIGNAL(activated(const QModelIndex)), 
-	    m_size_chart, SLOT(setNewDevice(const QModelIndex)));
-
-    // initial index setting
-    m_tree->setCurrentIndex( m_model->index(0, 0) );
-    m_size_chart->setNewDevice( m_model->index(0, 0) );
+    connect(m_tree, SIGNAL(itemActivated(QTreeWidgetItem*, int)), 
+	    m_size_chart, SLOT(setNewDevice(QTreeWidgetItem*)));
 
     setHiddenColumns();
 
@@ -102,14 +84,14 @@ QScrollArea *DeviceTab::setupPropertyWidgets()
     device_scroll->setAutoFillBackground(true);
     device_scroll->setWidget(device_stack);
 
-    connect(m_tree, SIGNAL( clicked(const QModelIndex) ), 
-	    device_stack, SLOT( changeDeviceStackIndex(const QModelIndex) ));
+    connect(m_tree, SIGNAL( itemClicked(QTreeWidgetItem*, int) ), 
+	    device_stack, SLOT( changeDeviceStackIndex(QTreeWidgetItem*) ));
 
-    connect(m_tree, SIGNAL( activated(const QModelIndex) ), 
-	    device_stack, SLOT( changeDeviceStackIndex(const QModelIndex) ));
-    
-    // initial index setting
-    device_stack->changeDeviceStackIndex( m_model->index(0, 0) ); 
+    connect(m_tree, SIGNAL( itemActivated(QTreeWidgetItem*, int) ), 
+	    device_stack, SLOT( changeDeviceStackIndex(QTreeWidgetItem*) ));
+
+    if( m_tree->currentItem() )
+        device_stack->changeDeviceStackIndex( m_tree->currentItem() );
 
     device_scroll->setWidgetResizable(true);
     device_scroll->setBackgroundRole(QPalette::Base);
@@ -149,5 +131,4 @@ void DeviceTab::setHiddenColumns()
     m_tree->setColumnHidden( 5, !group );
     m_tree->setColumnHidden( 6, !flags );
     m_tree->setColumnHidden( 7, !mount );
-
 }
