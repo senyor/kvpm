@@ -30,8 +30,11 @@ Q_OBJECT
 
     QStringList m_device_path_list;  // full path of each device on the stack, in the same order
 
+    QWidget *getDefaultWidget();
+
  public:
-     explicit DevicePropertiesStack(QList<StorageDevice *> Devices, QWidget *parent = 0);
+     explicit DevicePropertiesStack(QWidget *parent = 0);
+     void loadData(QList<StorageDevice *> devices);
 
  public slots:
      void changeDeviceStackIndex(QTreeWidgetItem *item);

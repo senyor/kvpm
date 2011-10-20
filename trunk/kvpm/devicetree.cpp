@@ -27,7 +27,7 @@
 #include "volgroup.h"
 
 
-DeviceTree::DeviceTree(QList<StorageDevice *> devices, QWidget *parent) : QTreeWidget(parent)
+DeviceTree::DeviceTree(QWidget *parent) : QTreeWidget(parent)
 {
     QStringList header_labels;
 
@@ -49,14 +49,9 @@ DeviceTree::DeviceTree(QList<StorageDevice *> devices, QWidget *parent) : QTreeW
     item->setToolTip(6, i18n("Flags associated with device"));
     item->setToolTip(7, i18n("Mount points of filesystem if mounted"));
 
+    m_initial_run = true;
     setHeaderItem(item);
-    loadData(devices);
-
-    expandAll();
     setAlternatingRowColors(true); 
-    resizeColumnToContents(0);
-    resizeColumnToContents(3);
-    resizeColumnToContents(5);
     setAllColumnsShowFocus(true);
     setExpandsOnDoubleClick(true);
     setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -64,36 +59,51 @@ DeviceTree::DeviceTree(QList<StorageDevice *> devices, QWidget *parent) : QTreeW
 
 void DeviceTree::loadData(QList<StorageDevice *> devices)
 {
-
-    QTreeWidgetItem *parent, *child, *extended = 0;
-    StorageDevice *dev;
-    QStringList data;
+    QTreeWidgetItem  *parent, *child, *extended = 0;
     StoragePartition *part;
-    QString type;
-    QVariant part_variant;
-    QVariant dev_variant;
+    StorageDevice *dev;
     PhysVol *pv;
+    QStringList data, expanded_items;
+    QString dev_name, part_name, type, current_device;
+    QVariant part_variant, dev_variant;
     
     /* 
        item->data(x, Qt::UserRole)
        x = 0:  pointer to storagepartition if partition, else "" 
        x = 1:  pointer to storagedevice
     */
-    
-    clear();
+
+    if( currentItem() )
+        current_device = currentItem()->data(0, Qt::DisplayRole).toString();
+
+    for(int x = topLevelItemCount() - 1; x >= 0; x--){
+        parent = topLevelItem(x);
+
+        if( parent->isExpanded() )
+            expanded_items << parent->data(0, Qt::DisplayRole).toString();
+
+        for(int y = parent->childCount() - 1; y >= 0; y--){ 
+            if( parent->child(y)->isExpanded() )
+                expanded_items << parent->child(y)->data(0, Qt::DisplayRole).toString();
+        }
+
+        delete takeTopLevelItem(x);
+    }
 
     for(int x = 0; x < devices.size(); x++){
         data.clear();
         dev = devices[x];
         dev_variant.setValue( (void *) dev);
+        dev_name = dev->getName();
+
         if(dev->isPhysicalVolume()){
             pv = dev->getPhysicalVolume();
-            data << dev->getName() << "" << sizeToString(dev->getSize());
+            data << dev_name << "" << sizeToString(dev->getSize());
             data << QString("%1 (%%2) ").arg( sizeToString( (pv->getSize()) - (pv->getUnused()) )).arg(pv->getPercentUsed() );
             data << "PV" << pv->getVG()->getName();
         }
         else{
-            data << dev->getName() << "" << sizeToString(dev->getSize());
+            data << dev_name << "" << sizeToString(dev->getSize());
         }
         
         parent = new QTreeWidgetItem(data);
@@ -113,6 +123,14 @@ void DeviceTree::loadData(QList<StorageDevice *> devices)
         }
 
         addTopLevelItem(parent);
+
+        for(int n = expanded_items.size() - 1; n >= 0; n--){ // if the old item for this dev was expanded, expand new one
+            if(expanded_items[n] == dev_name){
+                parent->setExpanded(true);
+                expanded_items.removeAt(n);
+                break;
+            }
+        }
 
         for(int y = 0; y < dev->getPartitionCount(); y++){
             data.clear();
@@ -154,6 +172,15 @@ void DeviceTree::loadData(QList<StorageDevice *> devices)
                 extended->setTextAlignment(2, Qt::AlignRight);
                 extended->setTextAlignment(3, Qt::AlignRight);
                 parent->addChild(extended);
+                part_name = part->getName();
+    
+                for(int n = expanded_items.size() - 1; n >= 0; n--){ // if the old item for this part was expanded, expand new one
+                    if(expanded_items[n] == part_name){
+                        extended->setExpanded(true);
+                        expanded_items.removeAt(n);
+                        break;
+                    }
+                }
             }
             else if( !( (type == "logical") || (type == "freespace (logical)") ) ){
                 child = new QTreeWidgetItem(data);
@@ -218,7 +245,47 @@ void DeviceTree::loadData(QList<StorageDevice *> devices)
         }
     }
 
+    bool match = false;
+
+    if(m_initial_run){
+        m_initial_run = false;
+        expandAll();
+    }
+    else{
+        for(int x = topLevelItemCount() - 1; x >= 0; x--){
+            parent = topLevelItem(x);
+            if( parent->data(0, Qt::DisplayRole).toString() == current_device ){
+                match = true;
+                setCurrentItem(parent);
+                break;
+            }
+            for(int y = parent->childCount() - 1; y >= 0; y--){
+                child = parent->child(y);
+                if( child->data(0, Qt::DisplayRole).toString() == current_device ){
+                    match = true;
+                    setCurrentItem(child);
+                    break;
+                }
+                for(int z = child->childCount() - 1; z >= 0; z--){
+                    if( child->child(z)->data(0, Qt::DisplayRole).toString() == current_device ){
+                        match = true;
+                        setCurrentItem(child->child(z));
+                        break;
+                    }
+                }
+                if(match)
+                    break;
+            }
+            if(match)
+                break;
+        }
+    }
+
     setupContextMenu();
+    setHiddenColumns();
+    resizeColumnToContents(0);
+    resizeColumnToContents(3);
+    resizeColumnToContents(5);
 
     if( topLevelItemCount() && ( currentItem() == NULL ) )
         setCurrentItem( topLevelItem(0) );
@@ -254,59 +321,34 @@ void DeviceTree::popupContextMenu(QPoint point)
 }
 
 void DeviceTree::setHiddenColumns()
-{
+{  
     KConfigSkeleton skeleton;
 
-    bool changed = false;
+    bool device, 
+         partition, 
+         capacity, 
+         remaining, 
+         usage,
+         group,
+         flags,
+         mount;
 
-    bool volume,      size,      remaining,
-         filesystem,  type,
-         stripes,     stripesize,
-         snapmove,    state,
-         access,      tags,
-         mountpoints;
+    skeleton.setCurrentGroup("DeviceTreeColumns");
+    skeleton.addItemBool( "device",       device );
+    skeleton.addItemBool( "partition",    partition );
+    skeleton.addItemBool( "capacity",     capacity );
+    skeleton.addItemBool( "remaining", remaining );
+    skeleton.addItemBool( "usage",        usage );
+    skeleton.addItemBool( "group",        group );
+    skeleton.addItemBool( "flags",        flags );
+    skeleton.addItemBool( "mount",        mount );
 
-    skeleton.setCurrentGroup("VolumeTreeColumns");
-    skeleton.addItemBool( "volume",      volume );
-    skeleton.addItemBool( "size",        size );
-    skeleton.addItemBool( "remaining",   remaining );
-    skeleton.addItemBool( "filesystem",  filesystem );
-    skeleton.addItemBool( "type",        type );
-    skeleton.addItemBool( "stripes",     stripes );
-    skeleton.addItemBool( "stripesize",  stripesize );
-    skeleton.addItemBool( "snapmove",    snapmove );
-    skeleton.addItemBool( "state",       state );
-    skeleton.addItemBool( "access",      access );
-    skeleton.addItemBool( "tags",        tags );
-    skeleton.addItemBool( "mountpoints", mountpoints );
-
-    if( !( !volume == isColumnHidden(0)     && !size == isColumnHidden(1) &&
-           !remaining == isColumnHidden(2)  && !filesystem == isColumnHidden(3) &&
-           !type == isColumnHidden(4)       && !stripes == isColumnHidden(5) &&
-           !stripesize == isColumnHidden(6) && !snapmove == isColumnHidden(7) &&
-           !state == isColumnHidden(8)      && !access == isColumnHidden(9) &&
-           !tags == isColumnHidden(10)      && !mountpoints == isColumnHidden(11) ) )
-        changed = true;
-
-    if(changed){
-
-        setColumnHidden( 0, !volume );
-        setColumnHidden( 1, !size );
-        setColumnHidden( 2, !remaining );
-        setColumnHidden( 3, !filesystem );
-        setColumnHidden( 4, !type );
-        setColumnHidden( 5, !stripes );
-        setColumnHidden( 6, !stripesize );
-        setColumnHidden( 7, !snapmove );
-        setColumnHidden( 8, !state );
-        setColumnHidden( 9, !access );
-        setColumnHidden( 10, !tags );
-        setColumnHidden( 11, !mountpoints );
-
-        for(int column = 0; column < 11; column++){
-            if( !isColumnHidden(column) )
-                resizeColumnToContents(column);
-        }
-    }
+    setColumnHidden( 0, !device );
+    setColumnHidden( 1, !partition );
+    setColumnHidden( 2, !capacity );
+    setColumnHidden( 3, !remaining );
+    setColumnHidden( 4, !usage );
+    setColumnHidden( 5, !group );
+    setColumnHidden( 6, !flags );
+    setColumnHidden( 7, !mount );
 }
-

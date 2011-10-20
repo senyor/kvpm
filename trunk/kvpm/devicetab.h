@@ -23,19 +23,19 @@
 #include <QVBoxLayout>
 					
 class DeviceTree;
+class DevicePropertiesStack;
 class DeviceSizeChart;
 class StorageDevice;
 
 class DeviceTab : public QWidget
 {
-    QList<StorageDevice *> m_devs;
-    DeviceTree  *m_tree;
     QVBoxLayout *m_layout;
+    DeviceTree  *m_tree;
     QSplitter   *m_tree_properties_splitter;
     DeviceSizeChart *m_size_chart;
+    DevicePropertiesStack *m_device_stack;
 
-    QScrollArea *setupPropertyWidgets();
-    void setHiddenColumns();
+    QScrollArea *setupPropertyStack();
 
  public:
     DeviceTab(QWidget *parent = 0);

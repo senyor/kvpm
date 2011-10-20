@@ -28,38 +28,64 @@
    an empty widget is used.  */
 
 
-DevicePropertiesStack::DevicePropertiesStack( QList<StorageDevice *> Devices, QWidget *parent) : 
-    QStackedWidget(parent)
+DevicePropertiesStack::DevicePropertiesStack(QWidget *parent) : QStackedWidget(parent)
 {
-    int device_count = Devices.size();
-
-    QList<StoragePartition *> partitions;
-
-    for(int x = 0; x < device_count; x++){
-	m_device_path_list.append( Devices[x]->getName() );
-	addWidget( new DeviceProperties( Devices[x] ) );
-
-	partitions << Devices[x]->getStoragePartitions() ;
-
-	for(int n = 0; n < partitions.size(); n++ ){
-	    m_device_path_list.append( partitions[n]->getName() );
-	    addWidget( new DeviceProperties( partitions[n] ) );
-	}
-        partitions.clear();
-    }
-
-    addWidget( new QWidget(this) ); // empty default widget
+    addWidget( getDefaultWidget() );
     setCurrentIndex(0);
 }
 
 void DevicePropertiesStack::changeDeviceStackIndex(QTreeWidgetItem *item)
 {
+    setCurrentIndex(0);
+
+    if( !item )
+        return;
+
     const QString device_path = item->data(0, Qt::DisplayRole).toString();
     const int list_size = m_device_path_list.size();
-    setCurrentIndex(0);
     
     for(int x = 0; x < list_size; x++){
 	if( m_device_path_list[x] == device_path )
 	    setCurrentIndex (x);
     }
+}
+
+void DevicePropertiesStack::loadData( QList<StorageDevice *> devices)
+{
+    QWidget *stackWidget;
+    QList<StoragePartition *> partitions;
+
+    m_device_path_list.clear();
+
+    for(int x = count() - 1; x >= 0; x--){ // delete old member widgets
+        stackWidget = widget(x);
+        removeWidget(stackWidget);
+        delete stackWidget;
+    }
+
+    for(int x = devices.size() - 1; x >= 0; x--){
+	m_device_path_list.append( devices[x]->getName() );
+	addWidget( new DeviceProperties( devices[x] ) );
+	partitions << devices[x]->getStoragePartitions() ;
+
+	for(int n = 0; n < partitions.size(); n++ ){
+	    m_device_path_list.append( partitions[n]->getName() );
+	    addWidget( new DeviceProperties( partitions[n] ) );
+	}
+
+        partitions.clear();
+    }
+
+    addWidget( getDefaultWidget() );
+    setCurrentIndex(0);
+}
+
+QWidget *DevicePropertiesStack::getDefaultWidget()
+{
+    QWidget *dw = new QWidget();
+    QHBoxLayout *layout = new QHBoxLayout();
+
+    layout->addWidget( new QLabel("Random String So The Layout Works") );
+    dw->setLayout(layout);
+    return dw;
 }
