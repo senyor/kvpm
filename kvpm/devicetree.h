@@ -32,12 +32,13 @@ class DeviceTree : public QTreeWidget
 {
 Q_OBJECT
 
+    bool m_initial_run;
+
     void setupContextMenu();
-//QTreeWidgetItem *loadItem(LogVol *lv, QTreeWidgetItem *item);
     void setHiddenColumns();
 
 public:
-    DeviceTree(QList<StorageDevice *> devices, QWidget *parent = NULL);
+    DeviceTree(QWidget *parent = NULL);
     void loadData(QList<StorageDevice *> devices);
 
 private slots:    

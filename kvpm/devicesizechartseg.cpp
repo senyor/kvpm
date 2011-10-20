@@ -60,6 +60,7 @@ DeviceChartSeg::DeviceChartSeg(QTreeWidgetItem *storageItem, QWidget *parent) :
 
     m_partition = NULL;
     if( (m_item->data(0, Qt::UserRole)).canConvert<void *>() ){
+
 	m_partition = (StoragePartition *) (( m_item->data(0, Qt::UserRole)).value<void *>() );
 
         if ( m_partition->getPedType() & 0x02 ){  // extended
@@ -115,6 +116,7 @@ DeviceChartSeg::DeviceChartSeg(QTreeWidgetItem *storageItem, QWidget *parent) :
             colorset->setColor(QPalette::Window, none_color);
     }
 	
+    setToolTip( i18n("Device: %1", m_item->data(0, Qt::DisplayRole).toString()) );
     setPalette(*colorset);
     setAutoFillBackground(true);
 
