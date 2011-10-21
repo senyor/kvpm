@@ -40,14 +40,14 @@ DeviceTree::DeviceTree(QWidget *parent) : QTreeWidget(parent)
     for(int column = 0; column < item->columnCount() ; column++)
         item->setTextAlignment(column, Qt::AlignCenter);
 
-    item->setToolTip(0, i18n("Device name"));
-    item->setToolTip(1, i18n("Total size of the logical volume"));
-    item->setToolTip(2, i18n("Size of storage space"));
-    item->setToolTip(3, i18n("Remaining storage space"));
+    item->setToolTip(0, i18n("The device name"));
+    item->setToolTip(1, i18n("The type of partition"));
+    item->setToolTip(2, i18n("The amount of storage space"));
+    item->setToolTip(3, i18n("The remaining storage space"));
     item->setToolTip(4, i18n("How the device is being used"));
-    item->setToolTip(5, i18n("Name of volume group if device is a physical volume"));
-    item->setToolTip(6, i18n("Flags associated with device"));
-    item->setToolTip(7, i18n("Mount points of filesystem if mounted"));
+    item->setToolTip(5, i18n("The Name of the volume group if the device is a physical volume"));
+    item->setToolTip(6, i18n("Any flags associated with device"));
+    item->setToolTip(7, i18n("Mount points of the filesystem if it is mounted"));
 
     m_initial_run = true;
     setHeaderItem(item);
@@ -55,6 +55,7 @@ DeviceTree::DeviceTree(QWidget *parent) : QTreeWidget(parent)
     setAllColumnsShowFocus(true);
     setExpandsOnDoubleClick(true);
     setSelectionBehavior(QAbstractItemView::SelectRows);
+    setupContextMenu();
 }
 
 void DeviceTree::loadData(QList<StorageDevice *> devices)
@@ -281,7 +282,6 @@ void DeviceTree::loadData(QList<StorageDevice *> devices)
         }
     }
 
-    setupContextMenu();
     setHiddenColumns();
     resizeColumnToContents(0);
     resizeColumnToContents(3);
@@ -299,10 +299,10 @@ void DeviceTree::setupContextMenu()
 
     // disconnect the last connect, otherwise the following connect get repeated
     // and piles up.
-
+    /*
     disconnect(this, SIGNAL(customContextMenuRequested(QPoint)), 
                this, SLOT(popupContextMenu(QPoint)) );
-
+    */
     connect(this, SIGNAL(customContextMenuRequested(QPoint)), 
             this, SLOT(popupContextMenu(QPoint)) );
 
@@ -334,14 +334,14 @@ void DeviceTree::setHiddenColumns()
          mount;
 
     skeleton.setCurrentGroup("DeviceTreeColumns");
-    skeleton.addItemBool( "device",       device );
-    skeleton.addItemBool( "partition",    partition );
-    skeleton.addItemBool( "capacity",     capacity );
+    skeleton.addItemBool( "device",    device );
+    skeleton.addItemBool( "partition", partition );
+    skeleton.addItemBool( "capacity",  capacity );
     skeleton.addItemBool( "remaining", remaining );
-    skeleton.addItemBool( "usage",        usage );
-    skeleton.addItemBool( "group",        group );
-    skeleton.addItemBool( "flags",        flags );
-    skeleton.addItemBool( "mount",        mount );
+    skeleton.addItemBool( "usage",     usage );
+    skeleton.addItemBool( "group",     group );
+    skeleton.addItemBool( "flags",     flags );
+    skeleton.addItemBool( "mount",     mount );
 
     setColumnHidden( 0, !device );
     setColumnHidden( 1, !partition );
