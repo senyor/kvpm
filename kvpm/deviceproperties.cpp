@@ -25,7 +25,7 @@
 #include "storagepartition.h"
 
 
-DeviceProperties::DeviceProperties( StorageDevice *Device, QWidget *parent) : QWidget(parent) 
+DeviceProperties::DeviceProperties( StorageDevice *device, QWidget *parent) : QWidget(parent) 
 {
 
     QStringList mount_points;
@@ -44,21 +44,21 @@ DeviceProperties::DeviceProperties( StorageDevice *Device, QWidget *parent) : QW
     basic_info_frame->setFrameStyle( QFrame::Sunken | QFrame::StyledPanel );
     basic_info_frame->setLineWidth(2);   
 
-    temp_label = new QLabel( QString("<b>%1</b>").arg( Device->getName() ) );
+    temp_label = new QLabel( QString("<b>%1</b>").arg( device->getName() ) );
     temp_label->setAlignment( Qt::AlignCenter );
     basic_info_layout->addWidget( temp_label );
 
-    basic_info_layout->addWidget( new QLabel( i18n("Partition table: %1", Device->getDiskLabel() ) ) );
-    basic_info_layout->addWidget( new QLabel( i18n("Logical sector size: %1", Device->getSectorSize() ) ) );
-    basic_info_layout->addWidget( new QLabel( i18n("Physical sector size: %1", Device->getPhysicalSectorSize() ) ) );
-    basic_info_layout->addWidget( new QLabel( i18n("Sectors: %1", Device->getSize() / Device->getSectorSize() ) ) );
+    basic_info_layout->addWidget( new QLabel( i18n("Partition table: %1", device->getDiskLabel() ) ) );
+    basic_info_layout->addWidget( new QLabel( i18n("Logical sector size: %1", device->getSectorSize() ) ) );
+    basic_info_layout->addWidget( new QLabel( i18n("Physical sector size: %1", device->getPhysicalSectorSize() ) ) );
+    basic_info_layout->addWidget( new QLabel( i18n("Sectors: %1", device->getSize() / device->getSectorSize() ) ) );
 
-    if( !Device->isWritable() )
+    if( !device->isWritable() )
         basic_info_layout->addWidget( new QLabel( i18nc("May be read and not written", "Read only") ) );
     else
         basic_info_layout->addWidget( new QLabel( i18n("Read/write") ) );
 
-    if( Device->isBusy() )
+    if( device->isBusy() )
         basic_info_layout->addWidget( new QLabel( i18n("Busy: Yes") ) );
     else
         basic_info_layout->addWidget( new QLabel( i18n("Busy: No") ) );
@@ -75,14 +75,14 @@ DeviceProperties::DeviceProperties( StorageDevice *Device, QWidget *parent) : QW
     temp_label = new QLabel( i18n("<b>Hardware</b>") );
     temp_label->setAlignment( Qt::AlignCenter );
     hardware_info_layout->addWidget( temp_label );
-    temp_label = new QLabel( Device->getHardware() );
+    temp_label = new QLabel( device->getHardware() );
     temp_label->setWordWrap(true);
     hardware_info_layout->addWidget( temp_label );
 
     layout->addWidget(hardware_info_frame);
 
-    if( Device->isPhysicalVolume() ){
-        pv = Device->getPhysicalVolume();
+    if( device->isPhysicalVolume() ){
+        pv = device->getPhysicalVolume();
 
         QFrame *pv_info_frame = new QFrame;
         QVBoxLayout *pv_info_layout = new QVBoxLayout();
@@ -114,7 +114,7 @@ DeviceProperties::DeviceProperties( StorageDevice *Device, QWidget *parent) : QW
     layout->addStretch();
 }
 
-DeviceProperties::DeviceProperties( StoragePartition *Partition, QWidget *parent)
+DeviceProperties::DeviceProperties( StoragePartition *partition, QWidget *parent)
     : QWidget(parent) 
 {
     QStringList mount_points;
@@ -127,7 +127,7 @@ DeviceProperties::DeviceProperties( StoragePartition *Partition, QWidget *parent
     layout->setSpacing(0);
     layout->setMargin(0);
 
-    QString path = Partition->getName();
+    QString path = partition->getName();
 
     QFrame *basic_info_frame = new QFrame;
     QVBoxLayout *basic_info_layout = new QVBoxLayout();
@@ -140,8 +140,8 @@ DeviceProperties::DeviceProperties( StoragePartition *Partition, QWidget *parent
     temp_label->setAlignment( Qt::AlignCenter );
     basic_info_layout->addWidget( temp_label );
 
-    basic_info_layout->addWidget( new QLabel( i18n("First sector: %1", Partition->getFirstSector() ) ) );
-    basic_info_layout->addWidget( new QLabel( i18n("Last sector: %1", Partition->getLastSector() ) ) );
+    basic_info_layout->addWidget( new QLabel( i18n("First sector: %1", partition->getFirstSector() ) ) );
+    basic_info_layout->addWidget( new QLabel( i18n("Last sector: %1", partition->getLastSector() ) ) );
 
     QFrame *flag_info_frame = new QFrame;
     QVBoxLayout *flag_info_layout = new QVBoxLayout();
@@ -150,11 +150,11 @@ DeviceProperties::DeviceProperties( StoragePartition *Partition, QWidget *parent
     flag_info_frame->setLineWidth(2);   
 
     QStringList flags;
-    if( Partition->getType() == "logical" || Partition->getType() == "normal"){
+    if( partition->getType() == "logical" || partition->getType() == "normal"){
         temp_label = new QLabel( i18n("<b>Flags</b>") );
 	temp_label->setAlignment( Qt::AlignCenter );
 	flag_info_layout->addWidget(temp_label);
-	flags = Partition->getFlags();
+	flags = partition->getFlags();
 
 	if( flags.size() == 1)
 	    if( flags[0].isEmpty() )
@@ -167,16 +167,16 @@ DeviceProperties::DeviceProperties( StoragePartition *Partition, QWidget *parent
 
 	layout->addWidget(flag_info_frame);
     }
-
-    if( !Partition->isPhysicalVolume() ){
+    
+    if( !partition->isPhysicalVolume() && ( partition->getType() != "extended" ) && !partition->getType().contains("freespace") ){
         QFrame *mount_info_frame = new QFrame;
         QVBoxLayout *mount_info_layout = new QVBoxLayout();
         mount_info_frame->setLayout(mount_info_layout);
         mount_info_frame->setFrameStyle( QFrame::Sunken | QFrame::StyledPanel );
         mount_info_frame->setLineWidth(2);   
 
-	mount_points   = Partition->getMountPoints();
-	mount_position = Partition->getMountPosition();
+	mount_points   = partition->getMountPoints();
+	mount_position = partition->getMountPosition();
 
 	if( mount_points.size() <= 1 )
 	    temp_label = new QLabel( i18n("<b>Mount point</b>") );
@@ -199,9 +199,6 @@ DeviceProperties::DeviceProperties( StoragePartition *Partition, QWidget *parent
 	}
 
         layout->addWidget(mount_info_frame);
-    }
-
-    if( !Partition->isPhysicalVolume() ){
 
         QFrame *label_frame = new QFrame;
         QVBoxLayout *label_layout = new QVBoxLayout();
@@ -213,21 +210,21 @@ DeviceProperties::DeviceProperties( StoragePartition *Partition, QWidget *parent
         temp_label->setAlignment( Qt::AlignCenter );
         label_layout->addWidget(temp_label);
         
-        temp_label = new QLabel( Partition->getFilesystemLabel() );
+        temp_label = new QLabel( partition->getFilesystemLabel() );
         label_layout->addWidget(temp_label);
 
         temp_label = new QLabel( i18n("<b>Filesystem UUID</b>") );
         temp_label->setAlignment( Qt::AlignCenter );
         label_layout->addWidget(temp_label);
         
-        temp_label = new QLabel( Partition->getFilesystemUuid() );
+        temp_label = new QLabel( partition->getFilesystemUuid() );
         temp_label->setWordWrap(true);
         label_layout->addWidget(temp_label);
 
         layout->addWidget(label_frame);
     }
-    else{
-        pv = Partition->getPhysicalVolume();
+    else if( partition->isPhysicalVolume() ){
+        pv = partition->getPhysicalVolume();
         QFrame *pv_info_frame = new QFrame;
         QVBoxLayout *pv_info_layout = new QVBoxLayout();
         pv_info_frame->setLayout(pv_info_layout);
