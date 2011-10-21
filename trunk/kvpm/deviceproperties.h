@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2009 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -26,8 +26,8 @@ class DeviceProperties : public QWidget
 {
 
  public:
-     explicit DeviceProperties( StorageDevice *Device, QWidget *parent = 0);
-     explicit DeviceProperties( StoragePartition *Partition, QWidget *parent = 0);
+     explicit DeviceProperties(StorageDevice *device, QWidget *parent = 0);
+     explicit DeviceProperties(StoragePartition *partition, QWidget *parent = 0);
 };
 
 #endif
