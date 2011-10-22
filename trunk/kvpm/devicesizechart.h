@@ -37,7 +37,7 @@ class DeviceSizeChart : public QFrame
     
 
 public:
-    DeviceSizeChart(QTreeWidget *tree, QWidget *parent);
+    DeviceSizeChart(QWidget *parent);
     void resizeEvent(QResizeEvent *event);
     
 public slots:

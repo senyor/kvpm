@@ -28,11 +28,9 @@
 
 DeviceTab::DeviceTab(QWidget *parent) : QWidget(parent)
 {
-    m_tree = new DeviceTree(this);
-    m_size_chart = new DeviceSizeChart(m_tree, this);
-
-    connect(m_tree, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem *)), 
-            m_size_chart, SLOT(setNewDevice(QTreeWidgetItem*)));
+    m_size_chart   = new DeviceSizeChart(this);
+    m_device_stack = new DevicePropertiesStack(this);
+    m_tree = new DeviceTree(m_size_chart, m_device_stack, this);
 
     m_tree_properties_splitter = new QSplitter(Qt::Horizontal);
 
@@ -42,8 +40,8 @@ DeviceTab::DeviceTab(QWidget *parent) : QWidget(parent)
 
     m_tree_properties_splitter->addWidget(m_tree);
     m_tree_properties_splitter->addWidget( setupPropertyStack() );
-    m_tree_properties_splitter->setStretchFactor( 0, 9 );
-    m_tree_properties_splitter->setStretchFactor( 1, 2 );
+    m_tree_properties_splitter->setStretchFactor(0, 9);
+    m_tree_properties_splitter->setStretchFactor(1, 2);
 
     setLayout(m_layout);
 }
@@ -56,22 +54,12 @@ void DeviceTab::rescan( QList<StorageDevice *> devices )
 
 QScrollArea *DeviceTab::setupPropertyStack()
 {
-    m_device_stack = new DevicePropertiesStack();
-
     QScrollArea *device_scroll = new QScrollArea();
     device_scroll->setFrameStyle(QFrame::NoFrame);
     device_scroll->setBackgroundRole(QPalette::Base);
     device_scroll->setAutoFillBackground(true);
     device_scroll->setWidget(m_device_stack);
     device_scroll->setWidgetResizable(true);
-    device_scroll->setBackgroundRole(QPalette::Base);
-    device_scroll->setAutoFillBackground(true);
-
-    connect(m_tree, SIGNAL( currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*) ), 
-	    m_device_stack, SLOT( changeDeviceStackIndex(QTreeWidgetItem*) ));
-
-    if( m_tree->currentItem() )
-        m_device_stack->changeDeviceStackIndex( m_tree->currentItem() );
 
     return device_scroll;
 }

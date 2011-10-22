@@ -26,19 +26,22 @@
 
 
 class StorageDevice;
-
+class DeviceSizeChart;
+class DevicePropertiesStack;
 
 class DeviceTree : public QTreeWidget
 {
 Q_OBJECT
 
     bool m_initial_run;
+    DeviceSizeChart       *m_chart;
+    DevicePropertiesStack *m_stack;
 
     void setupContextMenu();
     void setHiddenColumns();
 
 public:
-    DeviceTree(QWidget *parent = NULL);
+    DeviceTree(DeviceSizeChart *chart, DevicePropertiesStack *stack, QWidget *parent = NULL);
     void loadData(QList<StorageDevice *> devices);
 
 private slots:    
