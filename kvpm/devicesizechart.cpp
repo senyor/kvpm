@@ -24,7 +24,7 @@
 #include "storagepartition.h"
 
 
-DeviceSizeChart::DeviceSizeChart(QTreeWidget *tree, QWidget *parent) : QFrame(parent), m_tree(tree)
+DeviceSizeChart::DeviceSizeChart(QWidget *parent) : QFrame(parent)
 {
     setFrameStyle( QFrame::Sunken | QFrame::Panel );
     setLineWidth(2);
@@ -35,7 +35,6 @@ DeviceSizeChart::DeviceSizeChart(QTreeWidget *tree, QWidget *parent) : QFrame(pa
     m_layout->setSizeConstraint(QLayout::SetNoConstraint);
     setLayout(m_layout);
 
-    setNewDevice( tree->currentItem() );
     setMinimumHeight(45);
     setMaximumHeight(45);
 }
@@ -133,7 +132,7 @@ void DeviceSizeChart::setNewDevice(QTreeWidgetItem *deviceItem)
 	max_segment_width = (int)( ( width() * m_ratios[x]) - 2 );
 	if( max_segment_width < 1 )
 	    max_segment_width = 1;
-	
+
 	m_segments[x]->setMaximumWidth(max_segment_width);
     }
     
@@ -157,7 +156,7 @@ void DeviceSizeChart::resizeEvent(QResizeEvent *event)
 	max_segment_width = (int)( (new_width * m_ratios[x]) - 2 );
 	if( max_segment_width < 1 )
 	    max_segment_width = 1;
-	
+
 	m_segments[x]->setMaximumWidth(max_segment_width);
     }
     

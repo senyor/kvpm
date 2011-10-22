@@ -20,6 +20,8 @@
 #include <QtGui>
 
 #include "deviceactionsmenu.h"
+#include "devicepropertiesstack.h"
+#include "devicesizechart.h"
 #include "misc.h"
 #include "physvol.h"
 #include "storagedevice.h"
@@ -27,7 +29,10 @@
 #include "volgroup.h"
 
 
-DeviceTree::DeviceTree(QWidget *parent) : QTreeWidget(parent)
+DeviceTree::DeviceTree(DeviceSizeChart *chart, DevicePropertiesStack *stack, QWidget *parent)
+ : QTreeWidget(parent), 
+   m_chart(chart),
+   m_stack(stack)
 {
     QStringList header_labels;
 
@@ -73,6 +78,13 @@ void DeviceTree::loadData(QList<StorageDevice *> devices)
        x = 0:  pointer to storagepartition if partition, else "" 
        x = 1:  pointer to storagedevice
     */
+
+    disconnect(this, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem *)), 
+               m_chart, SLOT(setNewDevice(QTreeWidgetItem*)));
+
+    disconnect(this, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)), 
+               m_stack, SLOT(changeDeviceStackIndex(QTreeWidgetItem*)));
+
 
     if( currentItem() )
         current_device = currentItem()->data(0, Qt::DisplayRole).toString();
@@ -247,6 +259,12 @@ void DeviceTree::loadData(QList<StorageDevice *> devices)
     }
 
     bool match = false;
+
+    connect(this, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem *)), 
+            m_chart, SLOT(setNewDevice(QTreeWidgetItem*)));
+
+    connect(this, SIGNAL( currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*) ), 
+	    m_stack, SLOT( changeDeviceStackIndex(QTreeWidgetItem*) ));
 
     if(m_initial_run){
         m_initial_run = false;
