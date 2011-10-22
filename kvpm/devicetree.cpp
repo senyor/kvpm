@@ -112,7 +112,7 @@ void DeviceTree::loadData(QList<StorageDevice *> devices)
         if(dev->isPhysicalVolume()){
             pv = dev->getPhysicalVolume();
             data << dev_name << "" << sizeToString(dev->getSize());
-            data << QString("%1 (%%2) ").arg( sizeToString( (pv->getSize()) - (pv->getUnused()) )).arg(pv->getPercentUsed() );
+            data << QString("%1 (%%2) ").arg( sizeToString( (pv->getUnused()) )).arg( 100 - pv->getPercentUsed() );
             data << "PV" << pv->getVG()->getName();
         }
         else{
