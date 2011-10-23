@@ -33,8 +33,6 @@ const int BUFF_LEN = 2000;   // Enough?
 
 bool addMountEntry(QString device, QString mountPoint, QString type, QString options, int dumpFreq, int pass)
 {
-    char mount_table_char[] = _PATH_MOUNTED;
-
     QByteArray device_array      = device.toLocal8Bit();
     QByteArray mount_point_array = mountPoint.toLocal8Bit();
     QByteArray type_array        = type.toLocal8Bit();
@@ -47,7 +45,7 @@ bool addMountEntry(QString device, QString mountPoint, QString type, QString opt
 					 dumpFreq, 
 					 pass };
     
-    FILE *fp = setmntent(mount_table_char, "a");
+    FILE *fp = setmntent(_PATH_MOUNTED, "a");
 
     if(fp){
 	if( addmntent(fp, &mount_entry) ){
@@ -138,9 +136,11 @@ bool removeMountEntry(QString mountPoint)
     QList<mntent *> mount_entry_list;
     mntent *mount_entry;
     mntent *temp_entry;
-    
+    QByteArray new_path(_PATH_MOUNTED);
+    new_path.append(".new");     
+
     const char *mount_table_old = _PATH_MOUNTED;
-    const char *mount_table_new = "/etc/mtab.new";
+    const char *mount_table_new = new_path.data();
     
     FILE *fp_old = setmntent(mount_table_old, "r");
 
@@ -168,7 +168,7 @@ bool removeMountEntry(QString mountPoint)
     }
     endmntent(fp_new);
 
-    KDE_rename("/etc/mtab.new", _PATH_MOUNTED);
+    KDE_rename(mount_table_new, mount_table_old);
     return true;
 }
 	    
@@ -179,11 +179,9 @@ bool removeMountEntry(QString mountPoint)
 bool hasMountEntry(QString device)
 {
     QString name_entry;        // returned entry to compare to
-
-    const char mount_table[] = _PATH_MOUNTED;
     mntent *mount_entry;
     
-    FILE *fp = setmntent(mount_table, "r");
+    FILE *fp = setmntent(_PATH_MOUNTED, "r");
     if(fp){
 	while( (mount_entry = getmntent(fp)) ){
 	    name_entry = QString( mount_entry->mnt_fsname );
@@ -208,12 +206,10 @@ bool hasMountEntry(QString device)
 
 QStringList getMountedDevices(QString mountPoint)
 {
-    const char mount_table[] = _PATH_MOUNTED;
     mntent *mount_entry;
-    
     QStringList mounted_devices;
 
-    FILE *fp = setmntent(mount_table, "r");
+    FILE *fp = setmntent(_PATH_MOUNTED, "r");
     if(fp){
 	while( (mount_entry = getmntent(fp)) ){
 
@@ -238,14 +234,12 @@ bool hasFstabEntry(QString device)
 
 QString getFstabEntry(QString device)
 {
-    const QByteArray mount_table = _PATH_FSTAB;
     QString name_entry;                // returned entry to compare to
     QString mount_dir;
-
     FILE *fp;
     mntent *mount_entry;
 
-    fp = setmntent(mount_table.data(), "r");
+    fp = setmntent(_PATH_FSTAB, "r");
 
     while( (mount_entry = getmntent(fp)) ){
 	name_entry = QByteArray( mount_entry->mnt_fsname );
@@ -297,8 +291,11 @@ bool rename_mount_entries(QString oldName, QString newName)
     mntent *mount_entry;
     mntent *temp_entry;
     
+    QByteArray new_path(_PATH_MOUNTED);
+    new_path.append(".new");     
+
     const char *mount_table_old = _PATH_MOUNTED;
-    const char *mount_table_new = "/etc/mtab.new";
+    const char *mount_table_new = new_path.data();
     
     FILE *fp_old = setmntent(mount_table_old, "r");
 
@@ -329,7 +326,7 @@ bool rename_mount_entries(QString oldName, QString newName)
     }
     endmntent(fp_new);
 
-    KDE_rename("/etc/mtab.new", _PATH_MOUNTED);
+    KDE_rename(mount_table_new, mount_table_old);
 
     return true;
 }
