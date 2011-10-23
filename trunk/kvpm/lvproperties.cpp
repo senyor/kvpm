@@ -104,6 +104,7 @@ QFrame *LVProperties::mountPointsFrame()
 
 QFrame *LVProperties::uuidFrame()
 {
+    QStringList uuid;
     QFrame *frame = new QFrame();
     QVBoxLayout *layout = new QVBoxLayout();
     frame->setLayout(layout);
@@ -113,9 +114,14 @@ QFrame *LVProperties::uuidFrame()
     QLabel *temp_label = new QLabel( i18n("<b>Logical volume UUID</b>") );
     temp_label->setAlignment(Qt::AlignCenter);
     layout->addWidget( temp_label );
-    temp_label = new QLabel( m_lv->getUuid() );
+
+    uuid = splitUuid( m_lv->getUuid() );
+    temp_label = new QLabel( uuid[0] );
     temp_label->setToolTip( m_lv->getUuid() );
-    temp_label->setWordWrap(true);
+    layout->addWidget( temp_label );
+
+    temp_label = new QLabel( uuid[1] );
+    temp_label->setToolTip( m_lv->getUuid() );
     layout->addWidget( temp_label );
 
     return frame;
@@ -123,6 +129,7 @@ QFrame *LVProperties::uuidFrame()
 
 QFrame *LVProperties::fsFrame()
 {
+    QStringList uuid;
     QFrame *frame = new QFrame();
     QVBoxLayout *layout = new QVBoxLayout();
     frame->setLayout(layout);
@@ -140,9 +147,13 @@ QFrame *LVProperties::fsFrame()
     temp_label = new QLabel( i18n("<b>Filesystem UUID</b>") );
     temp_label->setAlignment(Qt::AlignCenter);
     layout->addWidget( temp_label );
-    temp_label = new QLabel( m_lv->getFilesystemUuid() );
+
+    uuid = splitUuid( m_lv->getFilesystemUuid() );
+    temp_label = new QLabel( uuid[0] );
     temp_label->setToolTip( m_lv->getFilesystemUuid() );
-    temp_label->setWordWrap(true);
+    layout->addWidget( temp_label );
+    temp_label = new QLabel( uuid[1] );
+    temp_label->setToolTip( m_lv->getFilesystemUuid() );
     layout->addWidget( temp_label );
 
     return frame;
