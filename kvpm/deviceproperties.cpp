@@ -227,7 +227,7 @@ DeviceProperties::DeviceProperties( StoragePartition *partition, QWidget *parent
 	uuid = splitUuid( partition->getFilesystemUuid() );
 	label_layout->addWidget( new QLabel(uuid[0]) );
 	label_layout->addWidget( new QLabel(uuid[1]) );
-        qDebug() << partition->getFilesystemUuid();
+
         layout->addWidget(label_frame);
     }
     else if( partition->isPhysicalVolume() ){
