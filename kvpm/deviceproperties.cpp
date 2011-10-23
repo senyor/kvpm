@@ -20,6 +20,7 @@
 #include <KLocale>
 #include <KSeparator>
 
+#include "misc.h"
 #include "physvol.h"
 #include "storagedevice.h"
 #include "storagepartition.h"
@@ -30,6 +31,7 @@ DeviceProperties::DeviceProperties( StorageDevice *device, QWidget *parent) : QW
 
     QStringList mount_points;
     QList<int>  mount_position;
+    QStringList uuid;
     QLabel     *temp_label;
     PhysVol *pv;
 
@@ -48,7 +50,11 @@ DeviceProperties::DeviceProperties( StorageDevice *device, QWidget *parent) : QW
     temp_label->setAlignment( Qt::AlignCenter );
     basic_info_layout->addWidget( temp_label );
 
-    basic_info_layout->addWidget( new QLabel( i18n("Partition table: %1", device->getDiskLabel() ) ) );
+    if( device->isPhysicalVolume() )
+        basic_info_layout->addWidget( new QLabel( device->getDiskLabel() ) );
+    else
+        basic_info_layout->addWidget( new QLabel( i18n("Partition table: %1", device->getDiskLabel() ) ) );
+
     basic_info_layout->addWidget( new QLabel( i18n("Logical sector size: %1", device->getSectorSize() ) ) );
     basic_info_layout->addWidget( new QLabel( i18n("Physical sector size: %1", device->getPhysicalSectorSize() ) ) );
     basic_info_layout->addWidget( new QLabel( i18n("Sectors: %1", device->getSize() / device->getSectorSize() ) ) );
@@ -98,16 +104,16 @@ DeviceProperties::DeviceProperties( StorageDevice *device, QWidget *parent) : QW
             temp_label = new QLabel( i18n("State: active") );
         else
             temp_label = new QLabel( i18n("State: inactive") );
-
 	pv_info_layout->addWidget( temp_label );
 
 	temp_label =  new QLabel( i18n("<b>UUID</b>") );
 	temp_label->setAlignment( Qt::AlignCenter );
 	pv_info_layout->addWidget( temp_label );
 
-	temp_label =  new QLabel( pv->getUuid() );
-	temp_label->setWordWrap(true);
-	pv_info_layout->addWidget( temp_label );
+	uuid = splitUuid( pv->getUuid() );
+	pv_info_layout->addWidget( new QLabel(uuid[0]) );
+	pv_info_layout->addWidget( new QLabel(uuid[1]) );
+
 	layout->addWidget(pv_info_frame);
     }
 
@@ -119,6 +125,7 @@ DeviceProperties::DeviceProperties( StoragePartition *partition, QWidget *parent
 {
     QStringList mount_points;
     QList<int>  mount_position;
+    QStringList uuid;
     PhysVol *pv;
     QLabel *temp_label;
 
@@ -217,10 +224,10 @@ DeviceProperties::DeviceProperties( StoragePartition *partition, QWidget *parent
         temp_label->setAlignment( Qt::AlignCenter );
         label_layout->addWidget(temp_label);
         
-        temp_label = new QLabel( partition->getFilesystemUuid() );
-        temp_label->setWordWrap(true);
-        label_layout->addWidget(temp_label);
-
+	uuid = splitUuid( partition->getFilesystemUuid() );
+	label_layout->addWidget( new QLabel(uuid[0]) );
+	label_layout->addWidget( new QLabel(uuid[1]) );
+        qDebug() << partition->getFilesystemUuid();
         layout->addWidget(label_frame);
     }
     else if( partition->isPhysicalVolume() ){
@@ -246,9 +253,10 @@ DeviceProperties::DeviceProperties( StoragePartition *partition, QWidget *parent
 	temp_label->setAlignment( Qt::AlignCenter );
 	pv_info_layout->addWidget( temp_label );
 
-	temp_label =  new QLabel( pv->getUuid() );
-	temp_label->setWordWrap(true);
-	pv_info_layout->addWidget( temp_label );
+	uuid = splitUuid( pv->getUuid() );
+	pv_info_layout->addWidget( new QLabel(uuid[0]) );
+	pv_info_layout->addWidget( new QLabel(uuid[1]) );
+
 	layout->addWidget(pv_info_frame);
     }
 

@@ -21,11 +21,13 @@
 #include <QVariant>
 
 QString sizeToString(long long bytes);
+QStringList splitUuid(QString const uuid);
+
 
 class NoMungeCheck : public QCheckBox
 {
-    QString     m_unmunged_text;    // QCheckBox text() without amperands
-    QString     m_alternate_text;   // We can put anything we want in here
+    QString     m_unmunged_text;         // QCheckBox text() without amperands
+    QString     m_alternate_text;        // We can put anything we want in here
     QStringList m_alternate_text_list;   // Ditto
     QVariant    m_data;
 

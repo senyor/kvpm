@@ -115,3 +115,27 @@ QString sizeToString(long long bytes)
     return QString("%1 TiB").arg(size, 0, 'g', 3);
 }
 
+QStringList splitUuid(QString const uuid) // Turns a one line uuid into two shorter lines for veiwing
+{
+    int split_index = 0;
+
+    if( uuid.count('-') < 4 ){
+        return QStringList(uuid) << "";
+    }
+    else if( uuid.count('-') < 5 ){
+        for(int x = 0; x < 4; x++)
+            split_index = uuid.indexOf('-', split_index + 1);
+    }
+    else{
+        for(int x = 0; x < 5; x++)
+            split_index = uuid.indexOf('-', split_index + 1);
+    }
+    
+    if( split_index <= 0)
+        split_index = uuid.size() - 1;
+
+    QString const uuid_start = uuid.left(split_index + 1);
+    QString const uuid_end   = uuid.right((uuid.size() - split_index) - 1);
+
+    return QStringList(uuid_start)  << uuid_end;
+}
