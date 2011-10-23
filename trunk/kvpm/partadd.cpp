@@ -202,7 +202,7 @@ void PartitionAddDialog::commitPartition()
         return;
 
     PedAlignment *start_align  = ped_alignment_new( 0, sectors_1MiB); 
-    PedAlignment *end_align    = ped_alignment_new(-1, sectors_1MiB);
+    PedAlignment *end_align    = ped_alignment_new(-1, 1);
 
     PedGeometry *geom_1MiB = ped_geometry_new(device, m_max_part_start, m_max_part_size);
     first_sector = ped_alignment_align_down(start_align, geom_1MiB, first_sector);
@@ -373,7 +373,7 @@ void PartitionAddDialog::getMaximumPartition()
     PedGeometry *geom_1MiB = ped_geometry_new(ped_free_part->disk->dev, m_max_part_start, m_max_part_size);
     m_max_part_start = ped_alignment_align_nearest( align_1MiB, geom_1MiB, m_max_part_start);
 
-    PedAlignment *align_end = ped_alignment_new(-1, sectors_1MiB);
+    PedAlignment *align_end = ped_alignment_new(-1, 1);
     m_max_part_end = ped_alignment_align_nearest( align_end, geom_1MiB, m_max_part_end);
 
     m_max_part_size = 1 + m_max_part_end - m_max_part_start;
