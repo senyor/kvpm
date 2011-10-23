@@ -85,7 +85,7 @@ QWidget *DevicePropertiesStack::getDefaultWidget()
     QWidget *dw = new QWidget();
     QHBoxLayout *layout = new QHBoxLayout();
 
-    layout->addWidget( new QLabel("Random String So The Layout Works") );
+    layout->addWidget( new QLabel("Random String For The Layout") );
     dw->setLayout(layout);
     return dw;
 }
