@@ -25,7 +25,6 @@
 #include "lvsizechartseg.h"
 #include "topwindow.h"
 #include "addmirror.h"
-#include "lvactionsmenu.h"
 #include "lvsizechartseg.h"
 #include "lvcreate.h"
 #include "lvchange.h"

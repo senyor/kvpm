@@ -16,6 +16,7 @@
 #include "deviceactionsmenu.h"
 
 #include <KLocale>
+#include <KIcon>
 
 #include <QtGui>
 
@@ -67,20 +68,23 @@ DeviceActionsMenu::DeviceActionsMenu( QTreeWidgetItem *item, QWidget *parent) : 
 void DeviceActionsMenu::setup(QTreeWidgetItem *item)
 {
     KMenu *filesystem_menu = new KMenu( i18n("Filesystem operations"), this);
-    m_vgextend_menu       = new KMenu( i18n("Extend volume group"), this);
-    m_maxfs_action      = new KAction( i18n("Extend filesystem to fill partition"), this);
-    m_fsck_action       = new KAction( i18n("Run 'fsck -fp' on filesystem"), this);
-    m_maxpv_action      = new KAction( i18n("Extend physical volume to fill device"), this);
-    m_mkfs_action       = new KAction( i18n("Make filesystem"), this);
-    m_partadd_action    = new KAction( i18n("Add disk partition"), this);
+    m_vgextend_menu = new KMenu( i18n("Extend volume group"), this);
+    m_vgextend_menu->setIcon( KIcon("add") );
     m_partmoveresize_action = new KAction( i18n("Move or resize disk partition"), this);
-    m_partremove_action = new KAction( i18n("Remove disk partition"), this);
-    m_removefs_action   = new KAction( i18n("Remove filesystem"), this);
-    m_vgcreate_action   = new KAction( i18n("Create volume group"), this);
-    m_tablecreate_action= new KAction( i18n("Create or destroy partition table"), this);
-    m_vgreduce_action   = new KAction( i18n("Remove from volume group"), this);
-    m_mount_action      = new KAction( i18n("Mount filesystem"), this);
-    m_unmount_action    = new KAction( i18n("Unmount filesystem"), this);
+    m_maxpv_action       = new KAction( KIcon("resultset_last"), i18n("Extend physical volume to fill device"), this);
+    m_partadd_action     = new KAction( i18n("Add disk partition"), this);
+    m_partremove_action  = new KAction( i18n("Remove disk partition"), this);
+    m_vgcreate_action    = new KAction( KIcon("document-new"), i18n("Create volume group"), this);
+    m_tablecreate_action = new KAction( KIcon("exclamation"),  i18n("Create or remove a partition table"), this);
+    m_vgreduce_action    = new KAction( KIcon("delete"),       i18n("Remove from volume group"), this);
+
+    m_mount_action      = new KAction( KIcon("emblem-mounted"),   i18n("Mount filesystem"), this);
+    m_unmount_action    = new KAction( KIcon("emblem-unmounted"), i18n("Unmount filesystem"), this);
+    m_maxfs_action      = new KAction( KIcon("resultset_last"),   i18n("Extend filesystem to fill partition"), this);
+    m_fsck_action       = new KAction( i18n("Run 'fsck -fp' on filesystem"), this);
+    m_mkfs_action       = new KAction( KIcon("lightning_add"),    i18n("Make filesystem"), this);
+    m_removefs_action   = new KAction( KIcon("lightning_delete"), i18n("Remove filesystem"), this);
+
     addAction(m_tablecreate_action);
     addSeparator();
     addAction(m_partremove_action);
