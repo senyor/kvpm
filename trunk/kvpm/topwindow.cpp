@@ -15,10 +15,12 @@
 
 #include "topwindow.h"
 
-#include <KHelpMenu>
 #include <KAboutData>
-#include <KStandardAction>
+#include <KHelpMenu>
+#include <KIcon>
 #include <KLocale>
+#include <KStandardAction>
+
 #include <QtGui>
 
 #include "kvpmconfigdialog.h"

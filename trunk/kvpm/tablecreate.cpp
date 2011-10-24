@@ -28,9 +28,9 @@
 bool create_table(QString devicePath)
 {
 
-    QString warning_message = i18n("By writing a new partition table to this device, " 
-                                   "or destroying the old one, "
-                                   "any existing data on it will be lost!");
+    QString warning_message = i18n("Writing a new partition table to this device, " 
+                                   "or removing the old one, will cause "
+                                   "any existing data on it to be permanently lost!");
 
     if(KMessageBox::warningContinueCancel(0, warning_message) != KMessageBox::Continue)
         return false;
@@ -70,7 +70,7 @@ TableCreateDialog::TableCreateDialog(QString devicePath, QWidget *parent) :
 
     m_msdos_button   = new QRadioButton("MS-DOS");
     m_gpt_button     = new QRadioButton("GPT");
-    m_destroy_button = new QRadioButton("Destroy table");
+    m_destroy_button = new QRadioButton("Remove table");
     m_msdos_button->setChecked(true);
     radio_box_layout->addWidget( m_msdos_button );
     radio_box_layout->addWidget( m_gpt_button );
