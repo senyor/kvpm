@@ -85,6 +85,7 @@ void DeviceTree::loadData(QList<StorageDevice *> devices)
     disconnect(this, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)), 
                m_stack, SLOT(changeDeviceStackIndex(QTreeWidgetItem*)));
 
+    setHiddenColumns();
 
     if( currentItem() )
         current_device = currentItem()->data(0, Qt::DisplayRole).toString();
@@ -112,7 +113,14 @@ void DeviceTree::loadData(QList<StorageDevice *> devices)
         if(dev->isPhysicalVolume()){
             pv = dev->getPhysicalVolume();
             data << dev_name << "" << sizeToString(dev->getSize());
-            data << QString("%1 (%%2) ").arg( sizeToString( (pv->getUnused()) )).arg( 100 - pv->getPercentUsed() );
+
+            if(m_show_total && !m_show_percent)
+                data << sizeToString( pv->getUnused() );
+            else if(!m_show_total && m_show_percent)
+                data << QString("%%1").arg( 100 - pv->getPercentUsed() );
+            else
+                data << QString("%1 (%%2) ").arg( sizeToString( pv->getUnused() )).arg( 100 - pv->getPercentUsed() );
+
             data << "PV" << pv->getVG()->getName();
         }
         else{
@@ -156,15 +164,29 @@ void DeviceTree::loadData(QList<StorageDevice *> devices)
             
             if(part->isPhysicalVolume()){
                 pv = part->getPhysicalVolume();
-                data << QString("%1 (%%2) ").arg( sizeToString( (pv->getUnused()))).arg(100 - pv->getPercentUsed() )
-                     << "PV"
+
+                if(m_show_total && !m_show_percent)
+                    data << sizeToString( pv->getUnused() );
+                else if(!m_show_total && m_show_percent)
+                    data << QString("%%1").arg( 100 - pv->getPercentUsed() );
+                else
+                    data << QString("%1 (%%2) ").arg( sizeToString( pv->getUnused() )).arg( 100 - pv->getPercentUsed() );
+
+                data << "PV"
                      << pv->getVG()->getName()
                      << (part->getFlags()).join(", ") 
                      << "";
             }
             else{
-                if(part->getFilesystemSize() > -1 && part->getFilesystemUsed() > -1)
-                    data << QString("%1 (%%2) ").arg(sizeToString(part->getFilesystemSize() - part->getFilesystemUsed())).arg(100 - part->getPercentUsed() ); 
+                if(part->getFilesystemSize() > -1 && part->getFilesystemUsed() > -1){
+
+                if(m_show_total && !m_show_percent)
+                    data << sizeToString( part->getFilesystemRemaining() );
+                else if(!m_show_total && m_show_percent)
+                    data << QString("%%1").arg( 100 - part->getFilesystemPercentUsed() );
+                else
+                    data << QString("%1 (%%2) ").arg( sizeToString( part->getFilesystemRemaining() )).arg( 100 - part->getFilesystemPercentUsed() );
+                }
                 else
                     data << "";
                 
@@ -300,7 +322,6 @@ void DeviceTree::loadData(QList<StorageDevice *> devices)
         }
     }
 
-    setHiddenColumns();
     resizeColumnToContents(0);
     resizeColumnToContents(3);
     resizeColumnToContents(5);
@@ -315,12 +336,6 @@ void DeviceTree::setupContextMenu()
 {
     setContextMenuPolicy(Qt::CustomContextMenu);   
 
-    // disconnect the last connect, otherwise the following connect get repeated
-    // and piles up.
-    /*
-    disconnect(this, SIGNAL(customContextMenuRequested(QPoint)), 
-               this, SLOT(popupContextMenu(QPoint)) );
-    */
     connect(this, SIGNAL(customContextMenuRequested(QPoint)), 
             this, SLOT(popupContextMenu(QPoint)) );
 
@@ -360,6 +375,10 @@ void DeviceTree::setHiddenColumns()
     skeleton.addItemBool( "group",     group );
     skeleton.addItemBool( "flags",     flags );
     skeleton.addItemBool( "mount",     mount );
+
+    skeleton.setCurrentGroup("AllTreeColumns");
+    skeleton.addItemBool( "total",   m_show_total );
+    skeleton.addItemBool( "percent", m_show_percent );
 
     setColumnHidden( 0, !device );
     setColumnHidden( 1, !partition );

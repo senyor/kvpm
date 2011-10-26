@@ -33,7 +33,10 @@ class DeviceTree : public QTreeWidget
 {
 Q_OBJECT
 
-    bool m_initial_run;
+    bool m_initial_run,
+         m_show_total, 
+         m_show_percent;
+
     DeviceSizeChart       *m_chart;
     DevicePropertiesStack *m_stack;
 

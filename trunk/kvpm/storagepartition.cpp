@@ -227,12 +227,17 @@ long long StoragePartition::getFilesystemUsed()
     return m_fs_used;
 }
 
+long long StoragePartition::getFilesystemRemaining()
+{
+    return m_fs_size - m_fs_used;
+}
+
 long long StoragePartition::getFilesystemBlockSize()
 {
     return m_block_size;
 }
 
-int StoragePartition::getPercentUsed()
+int StoragePartition::getFilesystemPercentUsed()
 {
     int percent;
 

@@ -74,10 +74,11 @@ public:
     long long getSize();
     long long getFirstSector();
     long long getLastSector();
+    long long getFilesystemBlockSize();
     long long getFilesystemSize();
     long long getFilesystemUsed();
-    long long getFilesystemBlockSize();
-    int getPercentUsed();
+    long long getFilesystemRemaining();
+    int getFilesystemPercentUsed();
     bool isWritable();
     bool isPhysicalVolume();
     bool isMounted();
