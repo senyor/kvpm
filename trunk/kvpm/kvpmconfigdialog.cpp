@@ -63,7 +63,9 @@ void KvpmConfigDialog::buildGeneralPage()
 {
     QWidget *general = new QWidget;
     QVBoxLayout *general_layout = new QVBoxLayout();
-    general_layout->addWidget( new QLabel( i18n("<b>Set columns to show or hide in tables and tree views</b>") ) );
+    QLabel *banner = new QLabel( i18n("<b>Set columns to show in tables and tree views</b>") );
+    banner->setAlignment(Qt::AlignCenter);
+    general_layout->addWidget(banner);
     QHBoxLayout *horizontal_layout = new QHBoxLayout();
     general_layout->addLayout(horizontal_layout);
     general->setLayout(general_layout);
@@ -71,6 +73,7 @@ void KvpmConfigDialog::buildGeneralPage()
     horizontal_layout->addWidget( deviceGroup() );
     horizontal_layout->addWidget( logicalGroup() );
     horizontal_layout->addWidget( physicalGroup() );
+    horizontal_layout->addWidget( allGroup() );
 
     KPageWidgetItem  *page_widget_item =  addPage( general, "General"); 
     page_widget_item->setIcon( KIcon("configure") );
@@ -278,6 +281,19 @@ void KvpmConfigDialog::updateSettings()
     m_pvtags_column     = m_pvtags_check->isChecked();
     m_pvlvnames_column  = m_pvlvnames_check->isChecked();
 
+    if( m_percent_radio->isChecked() ){
+        m_show_percent = true;
+        m_show_total   = false;
+    }
+    else if( m_total_radio->isChecked() ){
+        m_show_percent = false;
+        m_show_total   = true;
+    }
+    else{
+        m_show_percent = true;
+        m_show_total   = true;
+    }
+
     m_skeleton->writeConfig();
 
     g_executable_finder->reload();
@@ -344,6 +360,8 @@ void KvpmConfigDialog::updateWidgetsDefault()
     m_pvallocate_check->setChecked(true);
     m_pvtags_check->setChecked(true);
     m_pvlvnames_check->setChecked(true);
+
+    m_both_radio->setChecked(true);
 }
 
 void KvpmConfigDialog::fillExecutablesTable()
@@ -547,5 +565,39 @@ QGroupBox *KvpmConfigDialog::logicalGroup()
     logical_layout->addWidget(m_mountpoints_check);
 
     return logical_group;
+}
+
+QGroupBox *KvpmConfigDialog::allGroup()
+{
+    QGroupBox *all_group = new QGroupBox( i18n("All trees and tables") );
+    QGroupBox *percent_group = new QGroupBox( i18n("Remaining and used space") );
+
+    QVBoxLayout *all_layout = new QVBoxLayout();
+    QVBoxLayout *percent_layout = new QVBoxLayout();
+    all_group->setLayout(all_layout);
+    percent_group->setLayout(percent_layout);
+
+    m_skeleton->setCurrentGroup("AllTreeColumns");
+    m_skeleton->addItemBool( "percent", m_show_percent );
+    m_skeleton->addItemBool( "total",   m_show_total );
+
+    m_percent_radio = new QRadioButton("Show percentage");
+    m_total_radio   = new QRadioButton("Show total");
+    m_both_radio    = new QRadioButton("Show both");
+
+    if(m_show_percent && !m_show_total)
+        m_percent_radio->setChecked(true);
+    else if(!m_show_percent && m_show_total)
+        m_total_radio->setChecked(true);
+    else
+        m_both_radio->setChecked(true);
+
+    percent_layout->addWidget(m_total_radio);
+    percent_layout->addWidget(m_percent_radio);
+    percent_layout->addWidget(m_both_radio);
+    all_layout->addWidget(percent_group);
+    all_layout->addStretch();
+
+    return all_group;
 }
 
