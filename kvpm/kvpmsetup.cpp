@@ -43,7 +43,7 @@ bool setup_kvpm()
     bool configured, device, partition, capacity, devremaining, usage, group, flags, mount,
          volume, size, remaining, type, filesystem, stripes, stripesize, snapmove, 
          state, access, tags, mountpoints, pvname, pvsize, pvremaining, pvused, pvstate,
-         pvallocate, pvtags, pvlvnames;
+         pvallocate, pvtags, pvlvnames, total, percent;
 
 
     QColor ext2, ext3, ext4, btrfs, reiser, reiser4, physvol, msdos,
@@ -119,6 +119,13 @@ bool setup_kvpm()
     pvallocate = true;
     pvtags = true;
     pvlvnames = true;
+
+    skeleton->setCurrentGroup("AllTreeColumns");
+    skeleton->addItemBool( "total",   total );
+    skeleton->addItemBool( "percent", percent );
+
+    total   = true;
+    percent = true;
 
     skeleton->setCurrentGroup("FilesystemColors");
     skeleton->addItemColor("ext2",    ext2);

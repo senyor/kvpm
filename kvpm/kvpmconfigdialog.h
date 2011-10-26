@@ -23,6 +23,7 @@
 #include <QColor>
 #include <QCheckBox>
 #include <QGroupBox>
+#include <QRadioButton>
 #include <QStringList>
 #include <QTableWidget>
 #include <QWidget>
@@ -94,13 +95,18 @@ Q_OBJECT
          m_group_column,        m_stripesize_column, m_pvallocate_column,
          m_flags_column,        m_snapmove_column,   m_pvtags_column,
          m_mount_column,        m_state_column,      m_pvlvnames_column,
-         m_tags_column,         m_access_column,
-         m_mountpoints_column,  m_remaining_column;
+         m_tags_column,         m_access_column,     m_show_percent,
+         m_mountpoints_column,  m_remaining_column,  m_show_total;
+
+    QRadioButton *m_percent_radio,
+                 *m_total_radio,
+                 *m_both_radio;
 
     void buildGeneralPage();
     void buildColorsPage();
     void buildProgramsPage();
 
+    QGroupBox *allGroup();
     QGroupBox *deviceGroup();
     QGroupBox *logicalGroup();
     QGroupBox *physicalGroup();
