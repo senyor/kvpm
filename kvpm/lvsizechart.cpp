@@ -42,12 +42,11 @@ LVSizeChart::LVSizeChart(VolGroup *VolumeGroup, QTreeWidget *vgTree, QWidget *pa
 
 void LVSizeChart::populateChart()
 {
-
     QList<LogVol *> logical_volumes;
     QTreeWidgetItem *item;
     LogVol *lv;
     QLayoutItem *child;
-    long item_count = m_vg_tree->topLevelItemCount(); 
+    const long item_count = m_vg_tree->topLevelItemCount(); 
 
     while( (child = m_layout->takeAt(0) ) != 0 )   // remove old children of layout
         delete child;
@@ -69,10 +68,9 @@ void LVSizeChart::populateChart()
     double seg_ratio;
     QWidget *widget;
 
-    long long free_extents  = m_vg->getFreeExtents();
-    long long total_extents = m_vg->getExtents();
-    
-    int lv_count = logical_volumes.size();
+    const long long free_extents  = m_vg->getFreeExtents();
+    const long long total_extents = m_vg->getExtents();
+    const int lv_count = logical_volumes.size();
 
     QString usage;                   // Filesystem: blank, ext2 etc. or freespace in vg
     int max_segment_width;
@@ -92,7 +90,7 @@ void LVSizeChart::populateChart()
             else
                 seg_ratio = m_lv->getExtents() / (double) total_extents;
 
-	   if( m_lv->isMirror() )
+            if( m_lv->isMirror() )
 	        seg_ratio *= m_lv->getMirrorCount();
 
 	    m_ratios.append(seg_ratio);
@@ -140,7 +138,7 @@ void LVSizeChart::populateChart()
 
 void LVSizeChart::resizeEvent(QResizeEvent *event)
 {
-    int new_width = (event->size()).width();
+    const int new_width = (event->size()).width();
     int max_segment_width = (int) (new_width * m_ratios[0]);  
 
     if( max_segment_width < 1 )

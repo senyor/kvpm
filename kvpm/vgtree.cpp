@@ -118,11 +118,9 @@ void VGTree::loadData()
     if( currentItem() != NULL )
         setCurrentItem( currentItem() );
 
-    resizeColumnToContents(0);
-    resizeColumnToContents(1);
-    resizeColumnToContents(2);
-    resizeColumnToContents(3);
-    resizeColumnToContents(4);
+    for(int x = 0; x < 10; x++)
+        resizeColumnToContents(x);
+
     setSortingEnabled(true);
     setupContextMenu();
     m_init = false;
