@@ -46,8 +46,8 @@ Q_OBJECT
 
     QStringList getAllNames();    // names of all pvs displayed in the box
     QStringList getNames();       // names of *selected* pvs
-    long long getUnusedSpace();   // total unused space on selected pvs
-    QList<long long> getUnusedSpaceList();  // ditto
+    long long getRemainingSpace();   // total unused space on selected pvs
+    QList<long long> getRemainingSpaceList();  // ditto
     void setExtentSize(long long extentSize);
     void disableOrigin(PhysVol *originVolume); // disable origin to prevent move from and to same pv
 

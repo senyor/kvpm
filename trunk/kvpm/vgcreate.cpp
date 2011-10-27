@@ -321,7 +321,7 @@ void VGCreateDialog::validateOK()
 {
     QString name = m_vg_name->text();
     int pos = 0;
-    long long space = m_pv_checkbox->getUnusedSpace();
+    long long space = m_pv_checkbox->getRemainingSpace();
 
     enableButtonOk(false);
 

@@ -388,7 +388,7 @@ void VolGroup::processPhysicalVolumes(vg_t lvmVG)
         
         for(int x = 0; x < m_member_pvs.size(); x++){
             if( m_member_pvs[x]->isAllocatable() )
-                m_allocatable_extents += m_member_pvs[x]->getUnused() / (long long) m_extent_size;
+                m_allocatable_extents += m_member_pvs[x]->getRemaining() / (long long) m_extent_size;
             m_mda_count += m_member_pvs[x]->getMDACount();
         }
 	

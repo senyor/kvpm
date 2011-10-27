@@ -55,7 +55,7 @@ VGReduceDialog::VGReduceDialog(VolGroup *volumeGroup, QWidget *parent) : KDialog
     m_unremovable_pvs_present = false;
 
     for(int x = pv_count - 1; x >= 0; x--){
-	if( member_pvs[x]->getSize() - member_pvs[x]->getUnused() ){ // only unused pvs can be removed
+	if( member_pvs[x]->getSize() - member_pvs[x]->getRemaining() ){ // only unused pvs can be removed
             member_pvs.removeAt(x);
             m_unremovable_pvs_present = true;
         }

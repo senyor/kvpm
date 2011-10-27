@@ -93,8 +93,8 @@ void PVTree::loadData()
 	
 	pv_data << device_name
 		<< sizeToString( pv->getSize() )
-		<< sizeToString( pv->getUnused() )
-		<< sizeToString( pv->getSize() - pv->getUnused() );
+		<< sizeToString( pv->getRemaining() )
+		<< sizeToString( pv->getSize() - pv->getRemaining() );
 
 	if( pv->isActive() )
 	    pv_data << "Active";
@@ -138,8 +138,8 @@ void PVTree::loadData()
 
 	item->setData(0, Qt::UserRole, pv->getUuid());
 	item->setData(1, Qt::UserRole, pv->getSize());
-	item->setData(2, Qt::UserRole, pv->getUnused());
-	item->setData(3, Qt::UserRole, (pv->getSize() - pv->getUnused()));
+	item->setData(2, Qt::UserRole, pv->getRemaining());
+	item->setData(3, Qt::UserRole, (pv->getSize() - pv->getRemaining()));
 
 	if( pv->isActive() ){
             item->setToolTip(4, i18n("Active"));
