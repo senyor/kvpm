@@ -16,6 +16,7 @@
 #include <KConfigSkeleton>
 #include <KIcon>
 #include <KLocale>
+
 #include <QtGui>
 
 #include "lvactionsmenu.h"
@@ -72,6 +73,7 @@ void VGTree::loadData()
 	    this, SLOT(adjustColumnWidth(QTreeWidgetItem *)));
 
     setSortingEnabled(false);
+    setViewConfig();
 
     for(int x = 0; x < m_vg->getLVCount(); x++){
 	
@@ -116,8 +118,11 @@ void VGTree::loadData()
     if( currentItem() != NULL )
         setCurrentItem( currentItem() );
 
-    setHiddenColumns();
     resizeColumnToContents(0);
+    resizeColumnToContents(1);
+    resizeColumnToContents(2);
+    resizeColumnToContents(3);
+    resizeColumnToContents(4);
     setSortingEnabled(true);
     setupContextMenu();
     m_init = false;
@@ -153,16 +158,16 @@ QTreeWidgetItem *VGTree::loadItem(LogVol *lv, QTreeWidgetItem *item)
     item->setData(0, Qt::DisplayRole, lv_name);
 
     if( lv->hasMissingVolume() ){
-        item->setIcon( 0, KIcon("exclamation") );
-        item->setToolTip( 0, i18n("one or more physical volumes are missing") );
+        item->setIcon(0, KIcon("exclamation"));
+        item->setToolTip(0, i18n("one or more physical volumes are missing"));
     }
     else if( !lv->isSnapContainer() && lv->isOrigin() ){
-        item->setIcon( 0, KIcon("bullet_star") );
-        item->setToolTip( 0, QString("origin") );
+        item->setIcon(0, KIcon("bullet_star"));
+        item->setToolTip(0, i18n("origin"));
     }
     else{
-        item->setIcon( 0, KIcon() );
-        item->setToolTip( 0, QString() );
+        item->setIcon(0, KIcon());
+        item->setToolTip(0, QString());
     }
 
     if(lv->isSnapContainer())
@@ -171,9 +176,25 @@ QTreeWidgetItem *VGTree::loadItem(LogVol *lv, QTreeWidgetItem *item)
         item->setData(1, Qt::DisplayRole, sizeToString(lv->getSize()));           
       
     if( lv->getFilesystemSize() > -1 &&  lv->getFilesystemUsed() > -1 ){
+
         fs_remaining = lv->getFilesystemSize() - lv->getFilesystemUsed();
         fs_percent = qRound( ((double)fs_remaining / (double)lv->getFilesystemSize()) * 100 );
-        item->setData(2, Qt::DisplayRole, QString(sizeToString(fs_remaining) + " (%%1)").arg(fs_percent) );
+
+        if(m_show_total && !m_show_percent)
+            item->setData(2, Qt::DisplayRole, sizeToString(fs_remaining));
+        else if(!m_show_total && m_show_percent)
+            item->setData(2, Qt::DisplayRole, QString("%%1").arg(fs_percent) );
+        else
+            item->setData(2, Qt::DisplayRole, QString(sizeToString(fs_remaining) + " (%%1)").arg(fs_percent) );
+
+        if( fs_percent <= m_fs_warn_percent ){
+            item->setIcon(2, KIcon("exclamation"));
+            item->setToolTip(0, i18n("This filesystem is running out of space"));
+        }
+        else{
+            item->setIcon(2, KIcon());
+            item->setToolTip(0, QString());
+        }
     }
     else
         item->setData(2, Qt::DisplayRole, QString(""));
@@ -422,7 +443,7 @@ void VGTree::popupContextMenu(QPoint point)
     }
 }
 
-void VGTree::setHiddenColumns()
+void VGTree::setViewConfig()
 {
     KConfigSkeleton skeleton;
 
@@ -434,6 +455,11 @@ void VGTree::setHiddenColumns()
          snapmove,    state,
          access,      tags,
          mountpoints;
+
+    skeleton.setCurrentGroup("AllTreeColumns");
+    skeleton.addItemBool( "percent", m_show_percent );
+    skeleton.addItemBool( "total",   m_show_total );
+    skeleton.addItemInt(  "fs_warn", m_fs_warn_percent );
 
     skeleton.setCurrentGroup("VolumeTreeColumns");
     skeleton.addItemBool( "volume",      volume );
