@@ -35,12 +35,14 @@ Q_OBJECT
 
     VolGroup *m_vg;
     bool m_init;        // is this the initial building of the tree or a reload?
+    bool m_show_percent, m_show_total;
+    int m_fs_warn_percent;
 
     void setupContextMenu();
     QTreeWidgetItem *loadItem(LogVol *lv, QTreeWidgetItem *item);
     void insertChildItems(LogVol *parentVolume, QTreeWidgetItem *parentItem);
     void insertSegmentItems(LogVol *logicalVolume, QTreeWidgetItem *item);
-    void setHiddenColumns();
+    void setViewConfig();
 
 public:
     VGTree(VolGroup *VolumeGroup);
