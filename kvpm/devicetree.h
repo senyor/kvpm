@@ -37,11 +37,14 @@ Q_OBJECT
          m_show_total, 
          m_show_percent;
 
+    int m_fs_warn_percent, 
+        m_pv_warn_percent;
+
     DeviceSizeChart       *m_chart;
     DevicePropertiesStack *m_stack;
 
     void setupContextMenu();
-    void setHiddenColumns();
+    void setViewConfig();
 
 public:
     DeviceTree(DeviceSizeChart *chart, DevicePropertiesStack *stack, QWidget *parent = NULL);

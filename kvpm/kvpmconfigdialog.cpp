@@ -16,6 +16,7 @@
 #include "kvpmconfigdialog.h"
 
 #include <KConfigSkeleton>
+#include <KIcon>
 #include <KIconLoader>
 #include <KLocale>
 #include <KEditListBox>
@@ -294,6 +295,9 @@ void KvpmConfigDialog::updateSettings()
         m_show_total   = true;
     }
 
+    m_fs_warn_percent = m_fs_warn_spin->value();
+    m_pv_warn_percent = m_pv_warn_spin->value();
+
     m_skeleton->writeConfig();
 
     g_executable_finder->reload();
@@ -362,6 +366,8 @@ void KvpmConfigDialog::updateWidgetsDefault()
     m_pvlvnames_check->setChecked(true);
 
     m_both_radio->setChecked(true);
+    m_fs_warn_spin->setValue(10);
+    m_pv_warn_spin->setValue(0);
 }
 
 void KvpmConfigDialog::fillExecutablesTable()
@@ -580,6 +586,8 @@ QGroupBox *KvpmConfigDialog::allGroup()
     m_skeleton->setCurrentGroup("AllTreeColumns");
     m_skeleton->addItemBool( "percent", m_show_percent );
     m_skeleton->addItemBool( "total",   m_show_total );
+    m_skeleton->addItemInt(  "fs_warn",    m_fs_warn_percent );
+    m_skeleton->addItemInt(  "pv_warn",    m_pv_warn_percent );
 
     m_percent_radio = new QRadioButton("Show percentage");
     m_total_radio   = new QRadioButton("Show total");
@@ -595,6 +603,41 @@ QGroupBox *KvpmConfigDialog::allGroup()
     percent_layout->addWidget(m_total_radio);
     percent_layout->addWidget(m_percent_radio);
     percent_layout->addWidget(m_both_radio);
+    percent_layout->addWidget(new KSeparator(Qt::Horizontal));
+
+    QHBoxLayout *warn_layout = new QHBoxLayout;
+    QHBoxLayout *fs_warn_layout = new QHBoxLayout;
+    QHBoxLayout *pv_warn_layout = new QHBoxLayout;
+    warn_layout->addWidget( new QLabel( i18n("Show warning icon") ) );
+    QLabel *warn_icon = new QLabel;
+    warn_icon->setPixmap( KIcon("exclamation").pixmap(16, 16) );
+    warn_layout->addWidget(warn_icon);
+    percent_layout->addLayout(warn_layout);
+    percent_layout->addWidget( new QLabel( i18n("when space falls to or below:") ) );
+
+    m_fs_warn_spin = new QSpinBox;
+    m_fs_warn_spin->setRange(0, 99);
+    m_fs_warn_spin->setSingleStep(1);
+    m_fs_warn_spin->setPrefix("% ");
+    m_fs_warn_spin->setSpecialValueText( i18n("Never") );
+    m_fs_warn_spin->setValue(m_fs_warn_percent);
+    fs_warn_layout->addWidget(m_fs_warn_spin);
+    fs_warn_layout->addWidget( new QLabel( i18n("on a filesystem") ) );
+    fs_warn_layout->addStretch();
+
+    m_pv_warn_spin = new QSpinBox;
+    m_pv_warn_spin->setRange(0, 99);
+    m_pv_warn_spin->setSingleStep(1);
+    m_pv_warn_spin->setPrefix("% ");
+    m_pv_warn_spin->setSpecialValueText( i18n("Never") );
+    m_pv_warn_spin->setValue(m_pv_warn_percent);
+    pv_warn_layout->addWidget(m_pv_warn_spin);
+    pv_warn_layout->addWidget( new QLabel( i18n("on a physical volume") ) );
+    pv_warn_layout->addStretch();
+
+    percent_layout->addLayout(fs_warn_layout);
+    percent_layout->addLayout(pv_warn_layout);
+
     all_layout->addWidget(percent_group);
     all_layout->addStretch();
 

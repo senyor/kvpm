@@ -72,7 +72,7 @@ void DeviceTree::loadData(QList<StorageDevice *> devices)
     QStringList data, expanded_items;
     QString dev_name, part_name, type, current_device;
     QVariant part_variant, dev_variant;
-    
+
     /* 
        item->data(x, Qt::UserRole)
        x = 0:  pointer to storagepartition if partition, else "" 
@@ -85,7 +85,7 @@ void DeviceTree::loadData(QList<StorageDevice *> devices)
     disconnect(this, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)), 
                m_stack, SLOT(changeDeviceStackIndex(QTreeWidgetItem*)));
 
-    setHiddenColumns();
+    setViewConfig();
 
     if( currentItem() )
         current_device = currentItem()->data(0, Qt::DisplayRole).toString();
@@ -133,6 +133,11 @@ void DeviceTree::loadData(QList<StorageDevice *> devices)
         parent->setTextAlignment(3, Qt::AlignRight);
 
         if( dev->isPhysicalVolume() ){
+            if( m_pv_warn_percent && ( m_pv_warn_percent >= (100 - dev->getPhysicalVolume()->getPercentUsed() ) ) ){
+                parent->setIcon(3, KIcon("exclamation"));
+                parent->setToolTip(3, i18n("Physical volume that is running out of space"));
+            }
+
             if( dev->getPhysicalVolume()->isActive() ){
                 parent->setIcon(4, KIcon("lightbulb"));
                 parent->setToolTip(4, i18n("Physical volume with active logical volumes"));
@@ -225,6 +230,11 @@ void DeviceTree::loadData(QList<StorageDevice *> devices)
                 child->setTextAlignment(3, Qt::AlignRight);
 
                 if( part->isPhysicalVolume() ){
+                    if( m_pv_warn_percent && ( m_pv_warn_percent >= (100 - part->getPhysicalVolume()->getPercentUsed() ) ) ){
+                        child->setIcon(3, KIcon("exclamation"));
+                        child->setToolTip(3, i18n("Physical volume that is running out of space"));
+                    }
+
                     if( part->getPhysicalVolume()->isActive() ){
                         child->setIcon(4, KIcon("lightbulb"));
                         child->setToolTip(4, i18n("Physical volume with active logical volumes"));
@@ -236,6 +246,11 @@ void DeviceTree::loadData(QList<StorageDevice *> devices)
                 }
                 else if( part->isMountable() ){
                     if( part->isMounted() ){
+                        if( m_fs_warn_percent && ( m_fs_warn_percent >= (100 - part->getFilesystemPercentUsed() ) ) ){
+                            child->setIcon(3, KIcon("exclamation"));
+                            child->setToolTip(3, i18n("Filesystem that is running out of space"));
+                        }
+
                         child->setIcon(4, KIcon("emblem-mounted"));
                         child->setToolTip(4, i18n("mounted filesystem") );
                     }
@@ -255,6 +270,11 @@ void DeviceTree::loadData(QList<StorageDevice *> devices)
                 child->setTextAlignment(3, Qt::AlignRight);
 
                 if( part->isPhysicalVolume() ){
+                    if( m_pv_warn_percent && ( m_pv_warn_percent >= (100 - part->getPhysicalVolume()->getPercentUsed() ) ) ){
+                        child->setIcon(3, KIcon("exclamation"));
+                        child->setToolTip(3, i18n("Physical volume that is running out of space"));
+                    }
+
                     if( part->getPhysicalVolume()->isActive() ){
                         child->setIcon(4, KIcon("lightbulb"));
                         child->setToolTip(4, i18n("Physical volume with active logical volumes"));
@@ -265,6 +285,11 @@ void DeviceTree::loadData(QList<StorageDevice *> devices)
                     }
                 }
                 else if( part->isMountable() ){
+                    if( m_fs_warn_percent && ( m_fs_warn_percent >= (100 - part->getFilesystemPercentUsed() ) ) ){
+                        child->setIcon(3, KIcon("exclamation"));
+                        child->setToolTip(3, i18n("Filesystem that is running out of space"));
+                    }
+
                     if( part->isMounted() ){
                         child->setIcon(4, KIcon("emblem-mounted"));
                         child->setToolTip(4, i18n("mounted filesystem") );
@@ -353,7 +378,7 @@ void DeviceTree::popupContextMenu(QPoint point)
     }
 }
 
-void DeviceTree::setHiddenColumns()
+void DeviceTree::setViewConfig()
 {  
     KConfigSkeleton skeleton;
 
@@ -379,6 +404,8 @@ void DeviceTree::setHiddenColumns()
     skeleton.setCurrentGroup("AllTreeColumns");
     skeleton.addItemBool( "total",   m_show_total );
     skeleton.addItemBool( "percent", m_show_percent );
+    skeleton.addItemInt(  "fs_warn", m_fs_warn_percent );
+    skeleton.addItemInt(  "pv_warn", m_pv_warn_percent );
 
     setColumnHidden( 0, !device );
     setColumnHidden( 1, !partition );
