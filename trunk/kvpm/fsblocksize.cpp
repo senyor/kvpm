@@ -12,21 +12,19 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
+#include "fsblocksize.h"
+
 #include <KLocale>
 #include <KMessageBox>
 
 #include <QtGui>
 
-#include "fsblocksize.h"
 #include "processprogress.h"
 
 
 long get_fs_block_size(QString path){
 
-    QStringList arguments, 
-                output,
-                temp_stringlist;
-
+    QStringList arguments;
     QString block_string;
 
     arguments << "dumpe2fs" 
@@ -34,9 +32,8 @@ long get_fs_block_size(QString path){
               << path;
 
     ProcessProgress blocksize_scan(arguments, i18n("Checking blocksize") );
-    output = blocksize_scan.programOutput();
-
-    temp_stringlist << output.filter("Block size", Qt::CaseInsensitive);
+    const QStringList output = blocksize_scan.programOutput();
+    const QStringList temp_stringlist = output.filter("Block size", Qt::CaseInsensitive);
 
     if( temp_stringlist.size() ){
         block_string = temp_stringlist[0];
