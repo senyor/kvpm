@@ -187,7 +187,7 @@ PVMoveDialog::PVMoveDialog(LogVol *logicalVolume, int segment, QWidget *parent) 
 void PVMoveDialog::removeFullTargets(){
 
     for(int x = (m_target_pvs.size() - 1); x >= 0; x--){
-        if( m_target_pvs[x]->getUnused() <= 0 )
+        if( m_target_pvs[x]->getRemaining() <= 0 )
             m_target_pvs.removeAt(x);
     }
 
@@ -254,7 +254,7 @@ void PVMoveDialog::buildDialog()
                 radio_button->setAlternateText( m_sources[x]->name );
             }
             else{
-                m_pv_used_space = m_vg->getPVByName(m_sources[x]->name)->getSize() - m_vg->getPVByName(m_sources[x]->name )->getUnused();
+                m_pv_used_space = m_vg->getPVByName(m_sources[x]->name)->getSize() - m_vg->getPVByName(m_sources[x]->name )->getRemaining();
                 radio_button = new NoMungeRadioButton( QString("%1  %2").arg(m_sources[x]->name).arg(sizeToString(m_pv_used_space)));
                 radio_button->setAlternateText( m_sources[x]->name );
             }
@@ -285,7 +285,7 @@ void PVMoveDialog::buildDialog()
             radio_layout->addWidget( new QLabel( QString("%1  %2").arg(m_sources[0]->name).arg(sizeToString(m_pv_used_space)) ) );
         }
 	else{
-            m_pv_used_space = m_vg->getPVByName( m_sources[0]->name )->getSize() - m_vg->getPVByName( m_sources[0]->name )->getUnused();
+            m_pv_used_space = m_vg->getPVByName( m_sources[0]->name )->getSize() - m_vg->getPVByName( m_sources[0]->name )->getRemaining();
             radio_layout->addWidget( new QLabel( QString("%1  %2").arg(m_sources[0]->name).arg(sizeToString(m_pv_used_space)) ) );
         }
     }
@@ -315,7 +315,7 @@ void PVMoveDialog::buildDialog()
 
 void PVMoveDialog::resetOkButton()
 {
-    long long free_space_total = m_pv_checkbox->getUnusedSpace();
+    long long free_space_total = m_pv_checkbox->getRemainingSpace();
     long long needed_space_total = 0;
     QString pv_name;
 

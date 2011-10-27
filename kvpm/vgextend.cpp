@@ -202,7 +202,7 @@ void VGExtendDialog::commitChanges()
 
 void VGExtendDialog::validateOK()
 {
-    long long space = m_pv_checkbox->getUnusedSpace();
+    long long space = m_pv_checkbox->getRemainingSpace();
 
     if(space)
         enableButtonOk(true);

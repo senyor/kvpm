@@ -115,11 +115,11 @@ void DeviceTree::loadData(QList<StorageDevice *> devices)
             data << dev_name << "" << sizeToString(dev->getSize());
 
             if(m_show_total && !m_show_percent)
-                data << sizeToString( pv->getUnused() );
+                data << sizeToString( pv->getRemaining() );
             else if(!m_show_total && m_show_percent)
                 data << QString("%%1").arg( 100 - pv->getPercentUsed() );
             else
-                data << QString("%1 (%%2) ").arg( sizeToString( pv->getUnused() )).arg( 100 - pv->getPercentUsed() );
+                data << QString("%1 (%%2) ").arg( sizeToString( pv->getRemaining() )).arg( 100 - pv->getPercentUsed() );
 
             data << "PV" << pv->getVG()->getName();
         }
@@ -171,11 +171,11 @@ void DeviceTree::loadData(QList<StorageDevice *> devices)
                 pv = part->getPhysicalVolume();
 
                 if(m_show_total && !m_show_percent)
-                    data << sizeToString( pv->getUnused() );
+                    data << sizeToString( pv->getRemaining() );
                 else if(!m_show_total && m_show_percent)
                     data << QString("%%1").arg( 100 - pv->getPercentUsed() );
                 else
-                    data << QString("%1 (%%2) ").arg( sizeToString( pv->getUnused() )).arg( 100 - pv->getPercentUsed() );
+                    data << QString("%1 (%%2) ").arg( sizeToString( pv->getRemaining() )).arg( 100 - pv->getPercentUsed() );
 
                 data << "PV"
                      << pv->getVG()->getName()

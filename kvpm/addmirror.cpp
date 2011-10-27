@@ -182,7 +182,7 @@ void AddMirrorDialog::setupPhysicalTab()
 // suitable for another so we remove those here
 
     for(int x = leg_physical_volumes.size() - 1; x >= 0; x--){
-        if( !leg_physical_volumes[x]->isAllocatable() || leg_physical_volumes[x]->getUnused() <= 0 ){
+        if( !leg_physical_volumes[x]->isAllocatable() || leg_physical_volumes[x]->getRemaining() <= 0 ){
             leg_physical_volumes.removeAt(x);
         }
         else{
@@ -338,7 +338,7 @@ QStringList AddMirrorDialog::arguments()
 
 void AddMirrorDialog::comparePvsNeededPvsAvailable()
 {
-    QList <long long> available_pv_bytes = m_pv_box->getUnusedSpaceList();;  
+    QList <long long> available_pv_bytes = m_pv_box->getRemainingSpaceList();;  
     QList <long long> stripe_pv_bytes;  
     int new_stripe_count = 1;
     int total_stripes = 0;   //  stripes per mirror * added mirrors

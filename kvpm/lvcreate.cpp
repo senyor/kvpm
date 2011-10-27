@@ -369,7 +369,7 @@ QWidget* LVCreateDialog::createPhysicalTab()
     
     physical_volumes = m_vg->getPhysicalVolumes();
     for(int x = physical_volumes.size() - 1; x >= 0; x--){
-        if( physical_volumes[x]->getUnused() < 1 )  // remove pvs with no free space
+        if( physical_volumes[x]->getRemaining() < 1 )  // remove pvs with no free space
             physical_volumes.removeAt(x);
     }
 
@@ -685,7 +685,7 @@ void LVCreateDialog::enableMonitoring(bool checked)
 
 long long LVCreateDialog::getLargestVolume() 
 {
-    QList <long long> available_pv_bytes = m_pv_checkbox->getUnusedSpaceList();  
+    QList <long long> available_pv_bytes = m_pv_checkbox->getRemainingSpaceList();  
     QList <long long> stripe_pv_bytes;  
     int total_stripes = getStripeCount() * getMirrorCount();
     int log_count;

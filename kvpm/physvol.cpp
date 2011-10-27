@@ -158,7 +158,7 @@ long long PhysVol::getDeviceSize()
     return m_device_size;
 }
 
-long long PhysVol::getUnused()
+long long PhysVol::getRemaining()
 {
     return m_unused;
 }

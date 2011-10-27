@@ -52,7 +52,7 @@ class PhysVol
     bool isActive();
     long long getSize();            // size of the physical volume in bytes    
     long long getDeviceSize();      // the physical volume might not take up all the device!    
-    long long getUnused();          // free space in bytes
+    long long getRemaining();          // free space in bytes
     long long getLastUsedExtent();  // needed for minimum shrink size determination
     void setLastUsedExtent(long long last);
     int getPercentUsed();           // 0 - 100
