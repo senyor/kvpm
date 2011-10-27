@@ -12,6 +12,8 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
+#include "fsck.h"
+
 #include <KLocale>
 #include <KMessageBox>
 
