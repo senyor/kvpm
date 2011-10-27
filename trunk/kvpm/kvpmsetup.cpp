@@ -40,6 +40,9 @@ bool setup_kvpm()
 {
     KConfigSkeleton *skeleton = new KConfigSkeleton();
 
+    int fs_warn_percent,
+        pv_warn_percent;
+
     bool configured, device, partition, capacity, devremaining, usage, group, flags, mount,
          volume, size, remaining, type, filesystem, stripes, stripesize, snapmove, 
          state, access, tags, mountpoints, pvname, pvsize, pvremaining, pvused, pvstate,
@@ -123,9 +126,13 @@ bool setup_kvpm()
     skeleton->setCurrentGroup("AllTreeColumns");
     skeleton->addItemBool( "total",   total );
     skeleton->addItemBool( "percent", percent );
+    skeleton->addItemInt( "fs_warn", fs_warn_percent );
+    skeleton->addItemInt( "pv_warn", pv_warn_percent );
 
     total   = true;
     percent = true;
+    fs_warn_percent = 10;
+    pv_warn_percent = 0;
 
     skeleton->setCurrentGroup("FilesystemColors");
     skeleton->addItemColor("ext2",    ext2);

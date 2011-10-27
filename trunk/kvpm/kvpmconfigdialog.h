@@ -25,6 +25,7 @@
 #include <QGroupBox>
 #include <QRadioButton>
 #include <QStringList>
+#include <QSpinBox>
 #include <QTableWidget>
 #include <QWidget>
 
@@ -41,6 +42,12 @@ Q_OBJECT
     KEditListBox    *m_edit_list;
     KConfigSkeleton *m_skeleton;
     QStringList      m_search_entries;
+
+    QSpinBox        *m_fs_warn_spin,
+                    *m_pv_warn_spin;
+
+    int m_fs_warn_percent, 
+        m_pv_warn_percent;
 
     KColorButton *m_ext2_button,
                  *m_ext3_button,
@@ -85,8 +92,6 @@ Q_OBJECT
               *m_tags_check,         *m_access_check,
               *m_mountpoints_check,  *m_type_check;
 
-
-    
     bool m_device_column,       m_volume_column,     m_pvname_column,
          m_partition_column,    m_size_column,       m_pvsize_column,
          m_capacity_column,     m_type_column,       m_pvremaining_column, 
@@ -96,7 +101,8 @@ Q_OBJECT
          m_flags_column,        m_snapmove_column,   m_pvtags_column,
          m_mount_column,        m_state_column,      m_pvlvnames_column,
          m_tags_column,         m_access_column,     m_show_percent,
-         m_mountpoints_column,  m_remaining_column,  m_show_total;
+         m_mountpoints_column,  m_remaining_column,  m_show_total,
+         m_remaining_warn;
 
     QRadioButton *m_percent_radio,
                  *m_total_radio,
