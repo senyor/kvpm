@@ -60,6 +60,7 @@ LogVol::~LogVol()
 
 void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)  // lv_t seems to change -- why?
 {
+    QString additional_state;
     QByteArray flags;
     lvm_property_value value;
     bool was_snap_container = m_snap_container;
@@ -119,11 +120,13 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)  // lv_t seems to change -- why?
 	m_under_conversion = true;
 	break;
     case 'I':
-	m_type = "un-synced mirror leg";
+	m_type = "mirror leg";
+        additional_state = "un-synced";
 	m_mirror_leg = true;
 	break;
     case 'i':
-	m_type = "synced mirror leg";
+	m_type = "mirror leg";
+        additional_state = "synced";
 	m_mirror_leg = true;
 	break;
     case 'L':
@@ -140,7 +143,8 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)  // lv_t seems to change -- why?
 	m_mirror = true;     // We split it below -- snap_containers are origins and the lv is a mirror
 	break;
     case 'O':
-	m_type = "origin (merging)";
+	m_type = "origin";
+        additional_state = "merging";
         m_is_origin = true;
         m_merging = true;
 	break;
@@ -158,7 +162,8 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)  // lv_t seems to change -- why?
 	break;
     case 'S':
         if( flags[4] != 'I' ){         // When 'S' stops getting used for Invalid and only merging - remove this
-            m_type = "snapshot (merging)";
+            m_type = "snapshot";
+            additional_state = "merging";
             m_snap = true;
             m_merging = true;
         }
@@ -233,31 +238,34 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)  // lv_t seems to change -- why?
     
     switch(flags[4]){
     case '-':
-	m_state = "Unavailable";
+	m_state = "inactive";
 	break;
     case 'a':
-	m_state = "Active";
+	m_state = "active";
 	m_active = true;
 	break;
     case 's':
-	m_state = "Suspended";
+	m_state = "suspended";
 	break;
     case 'I':
-	m_state = "Invalid";
+	m_state = "invalid";
         m_valid = false;
 	break;
     case 'S':
-	m_state = "Suspended";
+	m_state = "suspended";
 	break;
     case 'd':
-	m_state = "No table";
+	m_state = "no table";
 	break;
     case 'i':
-	m_state = "Inactive table";
+	m_state = "inactive table";
 	break;
     default:
-	m_state = "Other";
+	m_state = "unknown";
     }
+
+    if( !additional_state.isEmpty() )
+        m_state = additional_state + " / " + m_state;
 
     switch(flags[5]){
     case 'o':
