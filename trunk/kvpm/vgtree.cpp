@@ -33,10 +33,10 @@ VGTree::VGTree(VolGroup *VolumeGroup) : QTreeWidget(), m_vg(VolumeGroup)
     QStringList header_labels;
     m_init = true;
 
-    header_labels << i18n("Volume") << i18n("Size") << i18n("Remaining") 
-                  << i18n("Filesystem") << i18n("type") << i18n("Stripes") 
-                  << i18n("Stripe size") << i18n("Snap/Copy") << i18n("State") 
-                  << i18n("Access") << i18n("Tags") << i18n("Mount points");
+    header_labels << i18n("Volume")      << i18n("type")       << i18n("Size") 
+                  << i18n("Remaining")   << i18n("Filesystem") << i18n("Stripes") 
+                  << i18n("Stripe size") << i18n("Snap/Copy")  << i18n("State") 
+                  << i18n("Access")      << i18n("Tags")       << i18n("Mount points");
 
     QTreeWidgetItem *item = new QTreeWidgetItem((QTreeWidgetItem *)0, header_labels);
 
@@ -44,10 +44,10 @@ VGTree::VGTree(VolGroup *VolumeGroup) : QTreeWidget(), m_vg(VolumeGroup)
         item->setTextAlignment(column, Qt::AlignCenter);
 
     item->setToolTip(0, i18n("Logical volume name"));
-    item->setToolTip(1, i18n("Total size of the logical volume"));
-    item->setToolTip(2, i18n("Free space on logical volume"));
-    item->setToolTip(3, i18n("Filesystem type on logical volume, if any"));
-    item->setToolTip(4, i18n("Type of logical volume"));
+    item->setToolTip(1, i18n("Type of logical volume"));
+    item->setToolTip(2, i18n("Total size of the logical volume"));
+    item->setToolTip(3, i18n("Free space on logical volume"));
+    item->setToolTip(4, i18n("Filesystem type on logical volume, if any"));
     item->setToolTip(5, i18n("Number of stripes if the volume is striped"));
     item->setToolTip(6, i18n("Size of stripes if the volume is striped"));
     item->setToolTip(7, i18n("Percentage of pvmove completed, of mirror synced or of snapshot used up"));
@@ -168,10 +168,12 @@ QTreeWidgetItem *VGTree::loadItem(LogVol *lv, QTreeWidgetItem *item)
         item->setToolTip(0, QString());
     }
 
+    item->setData(1, Qt::DisplayRole, lv->getType());
+
     if(lv->isSnapContainer())
-        item->setData(1, Qt::DisplayRole, sizeToString(lv->getTotalSize()));           
+        item->setData(2, Qt::DisplayRole, sizeToString(lv->getTotalSize()));           
     else
-        item->setData(1, Qt::DisplayRole, sizeToString(lv->getSize()));           
+        item->setData(2, Qt::DisplayRole, sizeToString(lv->getSize()));           
       
     if( lv->getFilesystemSize() > -1 &&  lv->getFilesystemUsed() > -1 ){
 
@@ -179,26 +181,28 @@ QTreeWidgetItem *VGTree::loadItem(LogVol *lv, QTreeWidgetItem *item)
         fs_percent = qRound( ((double)fs_remaining / (double)lv->getFilesystemSize()) * 100 );
 
         if(m_show_total && !m_show_percent)
-            item->setData(2, Qt::DisplayRole, sizeToString(fs_remaining));
+            item->setData(3, Qt::DisplayRole, sizeToString(fs_remaining));
         else if(!m_show_total && m_show_percent)
-            item->setData(2, Qt::DisplayRole, QString("%%1").arg(fs_percent) );
+            item->setData(3, Qt::DisplayRole, QString("%%1").arg(fs_percent) );
         else
-            item->setData(2, Qt::DisplayRole, QString(sizeToString(fs_remaining) + " (%%1)").arg(fs_percent) );
+            item->setData(3, Qt::DisplayRole, QString(sizeToString(fs_remaining) + " (%%1)").arg(fs_percent) );
 
         if( fs_percent <= m_fs_warn_percent ){
-            item->setIcon(2, KIcon("exclamation"));
-            item->setToolTip(0, i18n("This filesystem is running out of space"));
+            item->setIcon(3, KIcon("exclamation"));
+            item->setToolTip(3, i18n("This filesystem is running out of space"));
         }
         else{
-            item->setIcon(2, KIcon());
-            item->setToolTip(0, QString());
+            item->setIcon(3, KIcon());
+            item->setToolTip(3, QString());
         }
     }
-    else
-        item->setData(2, Qt::DisplayRole, QString(""));
+    else{
+        item->setData(3, Qt::DisplayRole, QString(""));
+        item->setIcon(3, KIcon());
+        item->setToolTip(3, QString());
+    }
     
-    item->setData(3, Qt::DisplayRole, lv->getFilesystem() );
-    item->setData(4, Qt::DisplayRole, lv->getType());
+    item->setData(4, Qt::DisplayRole, lv->getFilesystem() );
 
     if( (lv->isPvmove() || lv->isMirror()) && !lv->isSnapContainer() )
         item->setData(7, Qt::DisplayRole, QString("%%1").arg(lv->getCopyPercent(), 1, 'f', 2));
@@ -348,8 +352,8 @@ void VGTree::insertSegmentItems(LogVol *lv, QTreeWidgetItem *item)
         }
 
         child_item->setData(0, Qt::DisplayRole, QString("Seg# %1").arg(x));
-        child_item->setData(1, Qt::DisplayRole, sizeToString(lv->getSegmentSize(x)));           
-        child_item->setData(2, Qt::DisplayRole, QString(""));
+        child_item->setData(1, Qt::DisplayRole, QString(""));
+        child_item->setData(2, Qt::DisplayRole, sizeToString(lv->getSegmentSize(x)));           
         child_item->setData(3, Qt::DisplayRole, QString(""));
         child_item->setData(4, Qt::DisplayRole, QString(""));
         child_item->setData(5, Qt::DisplayRole, QString("%1").arg(lv->getSegmentStripes(x)));
@@ -506,5 +510,7 @@ void VGTree::setViewConfig()
 void VGTree::adjustColumnWidth(QTreeWidgetItem *)
 {
     resizeColumnToContents(0);
+    resizeColumnToContents(1);
+    resizeColumnToContents(6);
 }
 
