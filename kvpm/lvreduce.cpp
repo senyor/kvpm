@@ -259,7 +259,7 @@ void LVReduceDialog::doShrink()
                      << QString("%1K").arg( new_size / 1024 )
                      << m_lv->getMapperPath();
 
-        ProcessProgress reduce_lv( lv_arguments, i18n("Reducing volume..."), true);
+        ProcessProgress reduce_lv(lv_arguments);
     }
 }
 

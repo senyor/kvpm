@@ -35,7 +35,7 @@ bool add_mirror(LogVol *logicalVolume)
     dialog.exec();
 
     if(dialog.result() == QDialog::Accepted){
-        ProcessProgress add_mirror(dialog.arguments(), i18n("Changing Mirror..."), true);
+        ProcessProgress add_mirror( dialog.arguments() );
         return true;
     }
 

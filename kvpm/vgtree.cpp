@@ -27,7 +27,6 @@
 #include "volgroup.h"
 
 
-
 VGTree::VGTree(VolGroup *VolumeGroup) : QTreeWidget(), m_vg(VolumeGroup)
 {
     QStringList header_labels;
@@ -488,10 +487,10 @@ void VGTree::setViewConfig()
     if(changed){
 
         setColumnHidden( 0, !volume );
-        setColumnHidden( 1, !size );
-        setColumnHidden( 2, !remaining );
-        setColumnHidden( 3, !filesystem );
-        setColumnHidden( 4, !type );
+        setColumnHidden( 1, !type );
+        setColumnHidden( 2, !size );
+        setColumnHidden( 3, !remaining );
+        setColumnHidden( 4, !filesystem );
         setColumnHidden( 5, !stripes );
         setColumnHidden( 6, !stripesize );
         setColumnHidden( 7, !snapmove );

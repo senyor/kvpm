@@ -12,13 +12,15 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
+#include "vgmerge.h"
+
 #include <KLocale>
 #include <KMessageBox>
+
 #include <QtGui>
 
 #include "logvol.h"
 #include "masterlist.h"
-#include "vgmerge.h"
 #include "volgroup.h"
 #include "processprogress.h"
 
@@ -26,8 +28,8 @@ extern MasterList *g_master_list;
 
 bool merge_vg(VolGroup *volumeGroup)
 {
-    QStringList vg_names = g_master_list->getVolumeGroupNames();
-    QStringList lv_names = volumeGroup->getLVNames();
+    const QStringList vg_names = g_master_list->getVolumeGroupNames();
+    const QStringList lv_names = volumeGroup->getLVNames();
 
     if( vg_names.size() < 2  ){
         KMessageBox::error(0, i18n("There is no other volume group to merge with") );
@@ -44,7 +46,7 @@ bool merge_vg(VolGroup *volumeGroup)
     VGMergeDialog dialog(volumeGroup);
     dialog.exec();
     if(dialog.result() == QDialog::Accepted){
-        ProcessProgress vgmerge(dialog.arguments(), i18n("Merging volume group"), true );
+        ProcessProgress vgmerge( dialog.arguments() );
         return true;
     }
     else

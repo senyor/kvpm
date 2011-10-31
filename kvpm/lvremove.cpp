@@ -29,10 +29,10 @@ bool remove_lv(LogVol *logicalVolume)
     full_name.remove('[').remove(']');
     QStringList args;
     
-    QString message = i18n("Are you certain you want to delete the logical volume named: %1 "
-			   "Any data on it will be lost.", "<b>" + full_name + "</b>");
+    const QString message = i18n("Are you certain you want to delete the logical volume named: %1 "
+                                 "Any data on it will be lost.", "<b>" + full_name + "</b>");
 
-    QString message2 = i18n("This volume has snapshots that must be deleted first");
+    const QString message2 = i18n("This volume has snapshots that must be deleted first");
 
     if( logicalVolume->isOrigin() ){
         KMessageBox::error( 0, message2);
@@ -44,13 +44,13 @@ bool remove_lv(LogVol *logicalVolume)
         if( logicalVolume->isActive() && !logicalVolume->isSnap() ){
             args << "lvchange" << "-an" << full_name;
 
-            ProcessProgress deactivate( args, i18n("Deactivating volume..."), true);
+            ProcessProgress deactivate(args);
         }
 
         args.clear();
         args << "lvremove" << "--force" << full_name;
         
-        ProcessProgress remove( args, i18n("Removing volume..."), true);
+        ProcessProgress remove(args);
         
         return true;
     }

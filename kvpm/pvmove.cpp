@@ -18,14 +18,15 @@
 #include <KPushButton>
 #include <KMessageBox>
 #include <KLocale>
+
 #include <QtGui>
 
 #include "logvol.h"
 #include "masterlist.h"
+#include "misc.h"
 #include "processprogress.h"
 #include "physvol.h"
 #include "pvcheckbox.h"
-#include "misc.h"
 #include "volgroup.h"
 
 
@@ -43,7 +44,7 @@ bool move_pv(PhysVol *physicalVolume)
     PVMoveDialog dialog(physicalVolume);
     dialog.exec();
     if(dialog.result() == QDialog::Accepted){
-        ProcessProgress move( dialog.arguments(), i18n("Moving extents..."), false );
+        ProcessProgress move( dialog.arguments() );
 	return true;
     }
     else
@@ -55,7 +56,7 @@ bool move_pv(LogVol *logicalVolume, int segment)
     PVMoveDialog dialog(logicalVolume, segment);
     dialog.exec();
     if(dialog.result() == QDialog::Accepted){
-        ProcessProgress move( dialog.arguments(), i18n("Moving extents..."), false );
+        ProcessProgress move( dialog.arguments() );
 	return true;
     }
     else
@@ -71,7 +72,7 @@ bool restart_pvmove()
 
         args << "pvmove";
 
-        ProcessProgress resize(args, i18n("Restarting pvmove...") );
+        ProcessProgress resize(args);
         return true;
     }
     else
@@ -89,7 +90,7 @@ bool stop_pvmove()
 
         args << "pvmove" << "--abort";
 
-        ProcessProgress resize(args, i18n("Stopping pvmove...") );
+        ProcessProgress resize(args);
         return true;
     }
     else

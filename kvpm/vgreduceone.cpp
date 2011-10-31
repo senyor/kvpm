@@ -24,12 +24,9 @@
 
 bool reduce_vg_one(QString volumeGroupName, QString physicalVolumeName)
 {
-
     QStringList args;
- 
-    QString message = i18n( "Remove physical volume: <b>%1</b> from volume " 
-			    "group: <b>%2</b>", physicalVolumeName, volumeGroupName );
-    
+    const QString message = i18n( "Remove physical volume: <b>%1</b> from volume " 
+                                  "group: <b>%2</b>", physicalVolumeName, volumeGroupName );
 
     int return_code =  KMessageBox::questionYesNo( 0, message);
 
@@ -39,7 +36,7 @@ bool reduce_vg_one(QString volumeGroupName, QString physicalVolumeName)
 	     << volumeGroupName
 	     << physicalVolumeName;
 
-	ProcessProgress remove( args, i18n("Reducing vg..."), true );
+	ProcessProgress remove(args);
 
 	return true;
     }

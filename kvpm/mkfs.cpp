@@ -49,7 +49,7 @@ bool make_fs(LogVol *logicalVolume)
             MkfsDialog dialog(logicalVolume);
             dialog.exec();
             if(dialog.result() == QDialog::Accepted){
-                ProcessProgress mkfs(dialog.arguments(), i18n("Writing filesystem..."), true);
+                ProcessProgress mkfs( dialog.arguments() );
                 return true;
             }
         }
@@ -79,7 +79,7 @@ bool make_fs(StoragePartition *partition)
             MkfsDialog dialog(partition);
             dialog.exec();
             if(dialog.result() == QDialog::Accepted){
-                ProcessProgress mkfs(dialog.arguments(), i18n("Writing filesystem..."), true);
+                ProcessProgress mkfs( dialog.arguments() );
                 return true;
             }
         }

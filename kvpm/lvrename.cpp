@@ -28,7 +28,7 @@ bool rename_lv(LogVol *logicalVolume)
     dialog.exec();
     
     if(dialog.result() == QDialog::Accepted){
-        ProcessProgress rename( dialog.arguments(), i18n("Renaming logical volume..."), false );
+        ProcessProgress rename( dialog.arguments() );
 
         if( ! rename.exitCode() && logicalVolume->isMounted() )
             rename_mount_entries( logicalVolume->getMapperPath(), dialog.getNewMapperPath() );

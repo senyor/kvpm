@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -13,12 +13,14 @@
  */
 
 
+#include "removemissing.h"
+
 #include <KMessageBox>
 #include <KLocale>
+
 #include <QtGui>
 
 #include "processprogress.h"
-#include "removemissing.h"
 #include "volgroup.h"
 
 bool remove_missing_pv(VolGroup *volumeGroup)
@@ -27,7 +29,7 @@ bool remove_missing_pv(VolGroup *volumeGroup)
     dialog.exec();
     
     if(dialog.result() == QDialog::Accepted){
-        ProcessProgress remove_missing(dialog.arguments(), i18n("Removing..."), true);
+        ProcessProgress remove_missing( dialog.arguments() );
         return true;
     }
     return false;

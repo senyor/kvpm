@@ -21,6 +21,7 @@
 #include <QTextEdit>
 #include <QProcess>
 #include <QStringList>
+#include <QProgressBar>
 
 class VolGroup;
 class LogVol;
@@ -36,7 +37,8 @@ Q_OBJECT
     QList<VolGroup *> m_volume_groups;
     QList<StorageDevice *> m_storage_devices;
     lvm_t m_lvm;
-    
+    QProgressBar *m_progress_bar;
+
     void scanVolumeGroups();
     void scanStorageDevices();
     bool determinePVState(PhysVol *pv, VolGroup *vg); 
@@ -46,6 +48,7 @@ public:
     ~MasterList();
     void rescan();    
     lvm_t getLVM();
+    QProgressBar *getProgressBar();
     const QList<VolGroup *> getVolGroups();
     const QList<StorageDevice *> getStorageDevices();
     int getVolGroupCount();

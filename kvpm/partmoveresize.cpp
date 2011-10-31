@@ -697,7 +697,7 @@ bool PartitionMoveResizeDialog::pedCommitAndWait(PedDisk *disk)
         return false;
 
     args << "udevadm" << "settle";
-    ProcessProgress wait_settle( args, i18n("Wating for udev..."), true);
+    ProcessProgress wait_settle(args);
 
     return true;
 }

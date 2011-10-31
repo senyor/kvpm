@@ -38,7 +38,7 @@ bool lv_create(VolGroup *volumeGroup)
     LVCreateDialog dialog(volumeGroup);
     dialog.exec();
     if(dialog.result() == QDialog::Accepted){
-        ProcessProgress create_lv(dialog.argumentsLV(), i18n("Creating volume..."), true);
+        ProcessProgress create_lv( dialog.argumentsLV() );
 	return true;
     }
     else
@@ -50,7 +50,7 @@ bool snapshot_create(LogVol *logicalVolume)
     LVCreateDialog dialog(logicalVolume, true);
     dialog.exec();
     if(dialog.result() == QDialog::Accepted){
-        ProcessProgress create_lv(dialog.argumentsLV(), i18n("Creating snapshot..."), true);
+        ProcessProgress create_lv( dialog.argumentsLV() );
 	return true;
     }
     else
@@ -95,17 +95,17 @@ bool lv_extend(LogVol *logicalVolume)
                 QStringList lvchange_args;
                 lvchange_args << "lvchange" << "-an" << logicalVolume->getMapperPath();
 
-                ProcessProgress deactivate_lv(lvchange_args, i18n("Deactivating volume..."), true);
+                ProcessProgress deactivate_lv(lvchange_args);
                 if( deactivate_lv.exitCode() ){
                     KMessageBox::error(0, i18n("Volume deactivation failed, volume not extended") );
                     return false;
                 }
 
-                ProcessProgress extend_origin(dialog.argumentsLV(), i18n("Extending volume..."), true);
+                ProcessProgress extend_origin( dialog.argumentsLV() );
 
                 lvchange_args.clear();
                 lvchange_args << "lvchange" << "-ay" << logicalVolume->getMapperPath();
-                ProcessProgress activate_lv(lvchange_args, i18n("Activating volume..."), true);
+                ProcessProgress activate_lv(lvchange_args);
                 if( (!activate_lv.exitCode()) && (!extend_origin.exitCode()) ){
                     fs_extend( logicalVolume->getMapperPath(), fs, true );		    
                     return true;
@@ -116,7 +116,7 @@ bool lv_extend(LogVol *logicalVolume)
                 }
             }
             else{
-                ProcessProgress extend_lv(dialog.argumentsLV(), i18n("Extending volume..."), true);
+                ProcessProgress extend_lv( dialog.argumentsLV() );
                 if( !extend_lv.exitCode() && !logicalVolume->isSnap() )
                     fs_extend( logicalVolume->getMapperPath(), fs, true );		    
                 return true;
@@ -131,7 +131,7 @@ bool lv_extend(LogVol *logicalVolume)
             LVCreateDialog dialog(logicalVolume, false);
             dialog.exec();
             if(dialog.result() == QDialog::Accepted){
-                ProcessProgress extend_lv(dialog.argumentsLV(), i18n("Extending volume..."), true);
+                ProcessProgress extend_lv( dialog.argumentsLV() );
                 if( !extend_lv.exitCode() )
                     return true;
             }

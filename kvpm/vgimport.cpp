@@ -13,29 +13,29 @@
  */
 
 
+#include "vgimport.h"
+
 #include <KMessageBox>
 #include <KLocale>
+
 #include <QtGui>
 
 #include "logvol.h"
 #include "processprogress.h"
-#include "vgimport.h"
 #include "volgroup.h"
 
 
 bool import_vg(VolGroup *volumeGroup)
 {
-
     QStringList args;
-
-    QString message = i18n("Import volume group: %1 ?", volumeGroup->getName());
+    const QString message = i18n("Import volume group: %1 ?", volumeGroup->getName());
     
     if(KMessageBox::questionYesNo( 0, message) == 3){      // 3 = "yes" button
 
 	args << "vgimport"
 	     << volumeGroup->getName();
 	
-	ProcessProgress remove(args, i18n("Importing volume group..."), true);
+	ProcessProgress remove(args);
 	return true;
     }
     else{

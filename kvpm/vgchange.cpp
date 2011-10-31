@@ -17,6 +17,7 @@
 
 #include <KLocale>
 #include <KSeparator>
+
 #include <QtGui>
 
 #include "logvol.h"
@@ -30,7 +31,7 @@ bool change_vg(VolGroup *volumeGroup)
     dialog.exec();
 
     if(dialog.result() == QDialog::Accepted){
-        ProcessProgress vgchange(dialog.arguments(), i18n("Changing volume group attributes..."));
+        ProcessProgress vgchange( dialog.arguments() );
         return true;
     }
     else

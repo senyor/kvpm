@@ -270,7 +270,7 @@ void PVTree::changePhysicalVolume()
         dialog.exec();
 
         if(dialog.result() == QDialog::Accepted){
-            ProcessProgress change_pv(dialog.arguments(), i18n("Changing physical volume...") );
+            ProcessProgress change_pv( dialog.arguments() );
             MainWindow->reRun();
         }
     }

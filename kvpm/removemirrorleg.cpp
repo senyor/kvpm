@@ -48,7 +48,7 @@ bool remove_mirror_leg(LogVol *mirrorLeg)
 	     << parent_mirror->getFullName()
 	     << pvs_to_remove;
 
-	ProcessProgress remove(args, i18n("Removing mirror leg..."), true);
+	ProcessProgress remove(args);
 	return true;
     }
     else{

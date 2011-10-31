@@ -31,7 +31,7 @@ bool fsck(QString path){
               << "-fp" 
               << path; 
 
-    ProcessProgress fsck_fs(arguments, i18n("Checking filesystem..."), true );
+    ProcessProgress fsck_fs(arguments);
     output = fsck_fs.programOutput();
 
     if ( fsck_fs.exitCode() > 1 )   // 0 means no errors 1 means minor errors fixed

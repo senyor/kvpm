@@ -17,21 +17,18 @@
 #include <KMessageBox>
 #include <KProcess>
 #include <KLocale>
+
 #include <QtGui>
 
 #include "executablefinder.h"
+#include "masterlist.h"
 
 extern ExecutableFinder *g_executable_finder;
+extern MasterList *g_master_list;
 
 
-ProcessProgress::ProcessProgress(QStringList arguments, 
-				 QString operation, 
-				 bool showProgress, 
-				 QWidget *parent) : 
-    QWidget(parent), 
-    m_show_progress(showProgress)
+ProcessProgress::ProcessProgress(QStringList arguments, QObject *parent) : QObject(parent)
 {
-    QProgressBar *progress_bar;
     QString executable, 
             executable_path,
             output_errors;
@@ -40,7 +37,6 @@ ProcessProgress::ProcessProgress(QStringList arguments,
 
     if(arguments.size() == 0){
 	qDebug() << "ProcessProgress given an empty arguments list";
-	close();
     }
     else{
 
@@ -53,23 +49,17 @@ ProcessProgress::ProcessProgress(QStringList arguments,
             environment << "LVM_SUPPRESS_FD_WARNINGS=1";
             m_process->setEnvironment(environment);
             m_loop = new QEventLoop(this);
-	
-            if(m_show_progress){
-                m_progress_dialog = new KProgressDialog(this, i18n("progress"), operation);
-                m_progress_dialog->setAllowCancel(false);
-                m_progress_dialog->setMinimumDuration( 250 ); 
-                progress_bar = m_progress_dialog->progressBar();
-                progress_bar->setRange(0,0);
-            }
+
+            g_master_list->getProgressBar()->setRange(0,0);
 	
             connect(m_process,  SIGNAL(finished(int, QProcess::ExitStatus)), 
                     this, SLOT(stopProgressLoop(int, QProcess::ExitStatus)));
 
             connect(m_process, SIGNAL(readyReadStandardOutput()),
-                    this, SLOT(readStandardOut()));
+                    this,      SLOT(readStandardOut()));
 
             connect(m_process, SIGNAL(readyReadStandardError()),
-                    this, SLOT(readStandardError()));
+                    this,      SLOT(readStandardError()));
 	
             m_process->setOutputChannelMode(KProcess::SeparateChannels);
             m_process->setReadChannel(QProcess::StandardOutput);
@@ -80,6 +70,8 @@ ProcessProgress::ProcessProgress(QStringList arguments,
             m_loop->exec(QEventLoop::ExcludeUserInputEvents);
             
             m_process->waitForFinished();
+            g_master_list->getProgressBar()->setRange(0,3);
+            g_master_list->getProgressBar()->setValue(3);
             m_exit_code = m_process->exitCode();
 
             if ( m_exit_code || ( m_process->exitStatus() == QProcess::CrashExit ) ){
@@ -88,25 +80,24 @@ ProcessProgress::ProcessProgress(QStringList arguments,
                     m_exit_code = 1;  // if it crashed without an exit code, set a non zero exit code
 
                 output_errors = m_output_all.join("");
+
                 if( m_process->exitStatus() != QProcess::CrashExit ) 
-                    KMessageBox::error(this, i18n("%1 produced this output: %2", executable_path, output_errors) );
+                    KMessageBox::error(NULL, i18n("%1 produced this output: %2", executable_path, output_errors) );
                 else
-                    KMessageBox::error(this, i18n("%1 <b>crashed</b> with this output: %2", executable_path, output_errors) );
+                    KMessageBox::error(NULL, i18n("%1 <b>crashed</b> with this output: %2", executable_path, output_errors) );
             }
         }
         else{
-            KMessageBox::error(this, i18n("Executable: '%1' not found", executable));
-            close();
+            KMessageBox::error(NULL, i18n("Executable: '%1' not found", executable));
         }
     }
 }
 
-
 void ProcessProgress::stopProgressLoop(int, QProcess::ExitStatus)
 {
     m_loop->exit();
-    if(m_show_progress)
-	m_progress_dialog->close();
+    g_master_list->getProgressBar()->setRange(0,3);
+    g_master_list->getProgressBar()->setValue(3);
 }
 
 QStringList ProcessProgress::programOutput()

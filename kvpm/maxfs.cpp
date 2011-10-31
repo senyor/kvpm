@@ -27,14 +27,14 @@
 
 bool max_fs(LogVol *logicalVolume)
 {
-    QString path = logicalVolume->getMapperPath();
+    const QString path = logicalVolume->getMapperPath();
+    const QString fs = logicalVolume->getFilesystem();
     QString full_name = logicalVolume->getFullName();
     full_name.remove('[').remove(']');
     QStringList args;
-    QString fs = logicalVolume->getFilesystem();
     
-    QString message = i18n("Extend the filesystem on: %1 to fill the entire volume?", "<b>"+full_name+"</b>");
-    QString error_message = i18n("Extending is only supported for ext2/3/4, jfs, xfs, ntfs and Reiserfs. ");
+    const QString message = i18n("Extend the filesystem on: %1 to fill the entire volume?", "<b>"+full_name+"</b>");
+    const QString error_message = i18n("Extending is only supported for ext2/3/4, jfs, xfs, ntfs and Reiserfs. ");
 
     if( ! ( fs == "ext2" || fs == "ext3" || fs == "ext4" || fs == "reiserfs" || 
             fs == "xfs"  || fs == "jfs" || fs == "ntfs" ) ){
@@ -82,10 +82,8 @@ bool max_fs(StoragePartition *partition)
 
 bool max_fs(StorageDevice *device)
 {
-
-    QString path = device->getName();
-
-    QString message = i18n("Extend the physical volume on: %1 to fill the entire partition?", "<b>"+path+"</b>");
+    const QString path = device->getName();
+    const QString message = i18n("Extend the physical volume on: %1 to fill the entire partition?", "<b>"+path+"</b>");
 
     if( ! device->isPhysicalVolume() )
         return false;

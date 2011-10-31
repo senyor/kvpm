@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2009 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2009, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -29,9 +29,7 @@
 
 long long pv_reduce(QString path, long long new_size)
 {
-
     QStringList arguments; 
-
     QString size_string;
 
     arguments << "pvresize" 
@@ -39,7 +37,8 @@ long long pv_reduce(QString path, long long new_size)
               << QString("%1m").arg( new_size / ( 1024 * 1024 ) )
               << path;
 
-    ProcessProgress pv_shrink(arguments, i18n("Shrinking pv..."), true );
+    ProcessProgress pv_shrink(arguments);
+
     if( pv_shrink.exitCode() )
         return 0;
     else

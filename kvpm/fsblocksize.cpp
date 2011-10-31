@@ -31,7 +31,7 @@ long get_fs_block_size(QString path){
               << "-h" 
               << path;
 
-    ProcessProgress blocksize_scan(arguments, i18n("Checking blocksize") );
+    ProcessProgress blocksize_scan(arguments);
     const QStringList output = blocksize_scan.programOutput();
     const QStringList temp_stringlist = output.filter("Block size", Qt::CaseInsensitive);
 
