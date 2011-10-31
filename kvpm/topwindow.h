@@ -52,6 +52,7 @@ Q_OBJECT
     
  public slots:
     void reRun();
+    void updateTrees();
  
  private slots:
     void cleanUp();
