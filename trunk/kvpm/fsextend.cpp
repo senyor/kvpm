@@ -69,7 +69,7 @@ bool fs_extend(QString path, QString fs, bool isLV){
         arguments << "resize2fs" 
                   << path; 
 
-        ProcessProgress fs_grow(arguments, i18n("Extending filesystem..."), true );
+        ProcessProgress fs_grow(arguments);
         output = fs_grow.programOutput();
 
         if ( fs_grow.exitCode() ){
@@ -86,7 +86,7 @@ bool fs_extend(QString path, QString fs, bool isLV){
                 arguments << "xfs_growfs" 
                           << "/tmp/kvpm_tmp_mount"; 
             
-                ProcessProgress fs_grow(arguments, i18n("Extending filesystem..."), true );
+                ProcessProgress fs_grow(arguments);
 
                 do_temp_unmount();
             
@@ -106,7 +106,7 @@ bool fs_extend(QString path, QString fs, bool isLV){
             arguments << "xfs_growfs" 
                       << mp; 
             
-            ProcessProgress fs_grow(arguments, i18n("Extending filesystem..."), true );
+            ProcessProgress fs_grow(arguments);
             
             if ( fs_grow.exitCode() ){
                 KMessageBox::error(0, error_message);
@@ -148,7 +148,7 @@ bool fs_extend(QString path, QString fs, bool isLV){
                   << "-fq"
                   << path; 
         
-        ProcessProgress fs_grow(arguments, i18n("Extending filesystem..."), true );
+        ProcessProgress fs_grow(arguments);
         output = fs_grow.programOutput();
         
         if ( fs_grow.exitCode() ){
@@ -165,7 +165,7 @@ bool fs_extend(QString path, QString fs, bool isLV){
                   << "--force"
                   << path; 
 
-        ProcessProgress fs_grow(arguments, i18n("Extending filesystem..."), true );
+        ProcessProgress fs_grow(arguments);
         output = fs_grow.programOutput();
         
         if ( fs_grow.exitCode() ){

@@ -13,12 +13,13 @@
  */
 
 
+#include "removefs.h"
+
 #include <KMessageBox>
 #include <KLocale>
 
 #include <QtGui>
 
-#include "removefs.h"
 #include "storagepartition.h"
 #include "logvol.h"
 

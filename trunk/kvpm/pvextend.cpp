@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2009 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2009, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -26,20 +26,16 @@
 
 bool pv_extend(QString path)
 {
-
     QStringList arguments; 
-
-    QString size_string;
 
     arguments << "pvresize" 
               << path;
 
-    ProcessProgress pv_grow( arguments, i18n("Growing pv..."), true );
+    ProcessProgress pv_grow(arguments);
 
     if( pv_grow.exitCode() )
         return false;
     else
         return true;
-
 }
 

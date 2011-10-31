@@ -16,6 +16,7 @@
 #include "removemirror.h"
 
 #include <KLocale>
+
 #include <QtGui>
 
 #include "logvol.h"
@@ -29,7 +30,7 @@ bool remove_mirror(LogVol *logicalVolume)
     dialog.exec();
 
     if(dialog.result() == QDialog::Accepted){
-        ProcessProgress remove_mirror(dialog.arguments(), i18n("Removing mirror...") );
+        ProcessProgress remove_mirror( dialog.arguments() );
         return true;
     }
     else{

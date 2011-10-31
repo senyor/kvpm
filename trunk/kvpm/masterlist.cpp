@@ -38,6 +38,9 @@ MasterList::MasterList() : QObject()
 {
     ped_exception_set_handler(my_handler);
     m_lvm = lvm_init(NULL);
+
+    m_progress_bar = new QProgressBar();
+    m_progress_bar->setTextVisible(false);
 }
 
 /* We can't just clear the lists, we need to delete 
@@ -46,7 +49,6 @@ MasterList::MasterList() : QObject()
 
 MasterList::~MasterList()
 {
-
     lvm_quit(m_lvm);
 
     for(int x = 0; x < m_volume_groups.size(); x++)
@@ -58,36 +60,29 @@ MasterList::~MasterList()
 
 void MasterList::rescan()
 {
-
-    KProgressDialog *progress_dialog = new KProgressDialog(NULL, i18n("progress"), i18n("scanning LVM"));
-    progress_dialog->setAllowCancel(false);
-    progress_dialog->setMinimumDuration(250); 
-    QProgressBar *progress_bar = progress_dialog->progressBar();
-    progress_bar->setRange(0,3);
-    progress_dialog->show();
-    progress_dialog->ensurePolished();
+    m_progress_bar->setRange(0,3);
     qApp->processEvents();
 
     lvm_scan(m_lvm);
     lvm_config_reload(m_lvm);    
 
-    progress_bar->setValue(1);
-    progress_dialog->setLabelText( i18n("scanning volume groups") );
-    progress_dialog->ensurePolished();
+    m_progress_bar->setValue(1);
     qApp->processEvents();
     scanVolumeGroups();
 
-    progress_bar->setValue(2);
-    progress_dialog->setLabelText( i18n("scanning storage devices") );
-    progress_dialog->ensurePolished();
+    m_progress_bar->setValue(2);
     qApp->processEvents();
     scanStorageDevices();
 
+    m_progress_bar->setValue(3);
     qApp->processEvents();
-    progress_dialog->close();
-    progress_dialog->delayedDestruct();
 
     return;
+}
+
+QProgressBar *MasterList::getProgressBar()
+{
+    return m_progress_bar;
 }
 
 void MasterList::scanVolumeGroups()

@@ -29,7 +29,7 @@ bool change_lv(LogVol *logicalVolume)
     dialog.exec();
 
     if(dialog.result() == QDialog::Accepted){
-        ProcessProgress change_lv(dialog.arguments(), i18n("Changing lv attributes"), true );
+        ProcessProgress change_lv( dialog.arguments() );
 	return true;
     }
     else

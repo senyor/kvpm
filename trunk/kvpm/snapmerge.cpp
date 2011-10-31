@@ -14,6 +14,7 @@
 
 #include <KMessageBox>
 #include <KLocale>
+
 #include <QtGui>
 
 #include "logvol.h"
@@ -33,7 +34,7 @@ bool merge_snap(LogVol *snapshot)
 	     << "--background"
 	     << snapshot->getFullName();
 
-	ProcessProgress merge(args, i18n("Merging with origin..."), true);
+	ProcessProgress merge(args);
 	return true;
     }
     else{

@@ -13,29 +13,29 @@
  */
 
 
-#include <KMessageBox>
+#include "vgexport.h"
+
 #include <KLocale>
+#include <KMessageBox>
+
 #include <QtGui>
 
 #include "logvol.h"
 #include "processprogress.h"
-#include "vgexport.h"
 #include "volgroup.h"
 
 
 bool export_vg(VolGroup *volumeGroup)
 {
-
     QStringList args;
-
-    QString message = i18n("Export volume group: %1 ?", volumeGroup->getName() );
+    const QString message = i18n("Export volume group: %1 ?", volumeGroup->getName() );
     
     if(KMessageBox::questionYesNo( 0, message) == 3){      // 3 = "yes" button
 
 	args << "vgexport"
 	     << volumeGroup->getName();
 	
-	ProcessProgress remove(args, i18n("Exporting volume group..."), true);
+	ProcessProgress remove(args);
 	return true;
     }
     else

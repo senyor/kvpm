@@ -41,7 +41,7 @@ bool split_vg(VolGroup *volumeGroup)
     VGSplitDialog dialog(volumeGroup);
     dialog.exec();
     if(dialog.result() == QDialog::Accepted){
-        ProcessProgress vgsplit(dialog.arguments(), i18n("Splitting volume group"), true );
+        ProcessProgress vgsplit( dialog.arguments() );
         return true;
     }
     else

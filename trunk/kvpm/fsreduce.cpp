@@ -57,7 +57,7 @@ long long fs_reduce(QString path, long long new_size, QString fs)
               << path
               << QString("%1K").arg( new_size / 1024 );
 
-    ProcessProgress fs_shrink(arguments, i18n("Shrinking filesystem..."), true );
+    ProcessProgress fs_shrink(arguments);
     output = fs_shrink.programOutputAll();
 
     success_stringlist = output.filter("is now");      // it worked
@@ -91,7 +91,7 @@ long long fs_reduce(QString path, long long new_size, QString fs)
                   << "-M"
                   << path;
 
-        ProcessProgress fs_shrink(arguments, i18n("Shrinking filesystem..."), true );
+        ProcessProgress fs_shrink(arguments);
         output = fs_shrink.programOutput();
         success_stringlist = output.filter("is now");
 
@@ -126,7 +126,7 @@ long long get_min_fs_size(QString path, QString fs){
         long block_size = get_fs_block_size(path);
         if( block_size ){                        // if blocksize failed skip this part
             
-            ProcessProgress fs_scan(arguments, i18n("Checking minimum shrink size") );
+            ProcessProgress fs_scan(arguments);
             output = fs_scan.programOutput();
             
             if( output.size() > 0 ){

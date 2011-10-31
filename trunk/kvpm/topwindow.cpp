@@ -174,12 +174,19 @@ TopWindow::TopWindow(QWidget *parent):KMainWindow(parent)
     m_tab_widget->appendDeviceTab(m_device_tab, i18n("Storage devices") );
 
     g_master_list = new MasterList(); // creates *empty* masterlist
+    menuBar()->setCornerWidget( g_master_list->getProgressBar() );
 
     connect(qApp, SIGNAL(aboutToQuit()), 
 	    this, SLOT(cleanUp()));
 
-
     reRun();    // reRun also does the initial run
+}
+
+void TopWindow::reRun()
+{
+    g_master_list->rescan(); // loads the list with data
+
+    updateTrees();
 }
 
 void TopWindow::updateTrees()
@@ -236,13 +243,6 @@ void TopWindow::updateTrees()
     connect(m_tab_widget, SIGNAL(currentIndexChanged()), 
 	    this, SLOT(setupMenus()));
 
-}
-
-void TopWindow::reRun()
-{
-    g_master_list->rescan(); // loads the list with data
-
-    updateTrees();
 }
 
 void TopWindow::setupMenus()

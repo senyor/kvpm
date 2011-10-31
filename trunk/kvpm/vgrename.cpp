@@ -34,7 +34,7 @@ bool rename_vg(VolGroup *volumeGroup)
     dialog.exec();
 
     if(dialog.result() == QDialog::Accepted){
-        ProcessProgress rename( dialog.arguments(), i18n("Renaming volume group..."), false );
+        ProcessProgress rename( dialog.arguments() );
 
         if( ! rename.exitCode() ){
             lvs = volumeGroup->getLogicalVolumes();
