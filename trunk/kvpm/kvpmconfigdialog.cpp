@@ -33,19 +33,8 @@
 extern ExecutableFinder *g_executable_finder;
 
 
-bool config_kvpm()
-{
-  KConfigSkeleton *skeleton = new KConfigSkeleton();
-  KvpmConfigDialog *dialog  = new KvpmConfigDialog( NULL, "settings", skeleton );
-
-  dialog->exec();
-
-  return false;
-}
- 
-
 KvpmConfigDialog::KvpmConfigDialog( QWidget *parent, QString name, KConfigSkeleton *skeleton ) 
-  : KConfigDialog(  parent, name, skeleton), m_skeleton(skeleton) 
+  : KConfigDialog(parent, name, skeleton), m_skeleton(skeleton) 
 {
     setFaceType(KPageDialog::List);
 
@@ -56,8 +45,7 @@ KvpmConfigDialog::KvpmConfigDialog( QWidget *parent, QString name, KConfigSkelet
 
 KvpmConfigDialog::~KvpmConfigDialog()
 {
-    delete m_kvpm_config;
-    delete m_system_paths_group;
+    return;
 }
 
 void KvpmConfigDialog::buildGeneralPage()
@@ -374,16 +362,15 @@ void KvpmConfigDialog::fillExecutablesTable()
 {
     QTableWidgetItem *table_widget_item = NULL;
 
-    QStringList all_names = g_executable_finder->getAllNames();
-    QStringList all_paths = g_executable_finder->getAllPaths();
-    QStringList not_found = g_executable_finder->getNotFound();
-    int not_found_length = not_found.size();
+    const QStringList all_names = g_executable_finder->getAllNames();
+    const QStringList all_paths = g_executable_finder->getAllPaths();
+    const QStringList not_found = g_executable_finder->getNotFound();
 
     m_executables_table->clear();
     m_executables_table->setColumnCount(2);
-    m_executables_table->setRowCount( all_names.size() + not_found_length );
+    m_executables_table->setRowCount( all_names.size() + not_found.size() );
 
-    for(int x = 0; x < not_found_length; x++){
+    for(int x = 0; x < not_found.size(); x++){
         table_widget_item = new QTableWidgetItem( not_found[x] );
 	m_executables_table->setItem(x, 0, table_widget_item);
 
@@ -396,10 +383,10 @@ void KvpmConfigDialog::fillExecutablesTable()
     for(int x = 0; (x < all_names.size()) && (x < all_paths.size()); x++){
 
         table_widget_item = new QTableWidgetItem( all_names[x] );
-	m_executables_table->setItem(x + not_found_length, 0, table_widget_item);
+	m_executables_table->setItem(x + not_found.size(), 0, table_widget_item);
 
 	table_widget_item = new QTableWidgetItem( all_paths[x] );
-	m_executables_table->setItem(x + not_found_length, 1, table_widget_item);
+	m_executables_table->setItem(x + not_found.size(), 1, table_widget_item);
 
     }
     m_executables_table->resizeColumnsToContents();

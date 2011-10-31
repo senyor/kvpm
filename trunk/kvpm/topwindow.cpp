@@ -182,14 +182,11 @@ TopWindow::TopWindow(QWidget *parent):KMainWindow(parent)
     reRun();    // reRun also does the initial run
 }
 
-void TopWindow::reRun()
+void TopWindow::updateTrees()
 {
-
     VolumeGroupTab *tab;
     QList<VolGroup *> groups;
     bool vg_exists;
-
-    g_master_list->rescan(); // loads the list with data
 
     disconnect(m_tab_widget, SIGNAL(currentIndexChanged()), 
 	    this, SLOT(setupMenus()));
@@ -241,6 +238,13 @@ void TopWindow::reRun()
 
 }
 
+void TopWindow::reRun()
+{
+    g_master_list->rescan(); // loads the list with data
+
+    updateTrees();
+}
+
 void TopWindow::setupMenus()
 {
     int index = m_tab_widget->getCurrentIndex();
@@ -265,12 +269,10 @@ void TopWindow::setupMenus()
 
     if(m_vg){                                     
 
-	if( lvs.size() || m_vg->isPartial() || m_vg->isExported() ){             
+	if( lvs.size() || m_vg->isPartial() || m_vg->isExported() )             
 	    remove_vg_action->setEnabled(false);
-        }   
-	else{
+	else
 	    remove_vg_action->setEnabled(true);   
-        }
 
 	if( m_vg->isPartial() )
 	    remove_missing_action->setEnabled(true);
@@ -403,8 +405,18 @@ void TopWindow::stopPhysicalVolumeMove()
 
 void TopWindow::configKvpm()
 {
-    if( config_kvpm() )
-        reRun();
+    KvpmConfigDialog *const dialog  = new KvpmConfigDialog( this, "settings", new KConfigSkeleton() );
+
+    connect(dialog, SIGNAL(applyClicked()), 
+	    this,   SLOT(updateTrees()));
+
+    dialog->exec();
+
+    disconnect(dialog, SIGNAL(applyClicked()), 
+               this,   SLOT(updateTrees()));
+
+    dialog->deleteLater();
+    updateTrees();
 }
 
 void TopWindow::cleanUp()

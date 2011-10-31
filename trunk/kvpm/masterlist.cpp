@@ -82,7 +82,7 @@ void MasterList::rescan()
     progress_dialog->ensurePolished();
     qApp->processEvents();
     scanStorageDevices();
-        
+
     qApp->processEvents();
     progress_dialog->close();
     progress_dialog->delayedDestruct();
