@@ -7,6 +7,7 @@ find_package(KDE4 REQUIRED)
 include_directories( ${KDE4_INCLUDES} ${QT4_INCLUDES} )
 add_subdirectory( kvpm )
 add_subdirectory( docbook )
+add_subdirectory( images )
 add_subdirectory( icons/local )
 add_subdirectory( icons/app )
  

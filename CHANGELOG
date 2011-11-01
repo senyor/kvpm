@@ -1,3 +1,10 @@
+version 0.8.2
+Added a splash screen and moved the progressbar to the mainwindow
+menubar. 
+
+version 0.8.1
+Improved and added to the kvpm config options.
+
 version 0.8.0
 Added icons for most menus. Added several more for the Tree lists
 of physical volumes, logical volumes and devices to show mount state,
