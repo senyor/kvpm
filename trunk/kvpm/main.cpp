@@ -15,8 +15,11 @@
 #include <KApplication>
 #include <KAboutData>
 #include <KCmdLineArgs>
-#include <KMessageBox>
 #include <KLocale>
+#include <KMessageBox>
+#include <KSplashScreen>
+#include <KStandardDirs>
+
 #include <QtGui>
 #include <QString>
 
@@ -39,7 +42,7 @@ int main(int argc, char **argv)
 {
     
     KAboutData aboutData( "kvpm", 0,
-			  ki18n("kvpm"), "0.8.1",
+			  ki18n("kvpm"), "0.8.2",
 			  ki18n( "Linux volume and partition manager for KDE"),
 			  KAboutData::License_GPL_V3,
 			  ki18n("Copyright (c) 2008, 2009, 2010, 2011 Benjamin Scott") );
@@ -56,6 +59,10 @@ int main(int argc, char **argv)
 	return 0;
     }
 
+    QPixmap splashImage(KGlobal::dirs()->findResource("data", "kvpm/images/splash.png"));
+    KSplashScreen splash(splashImage);
+    splash.show();
+
     if( ! isconfigured_kvpm() )
         setup_kvpm();
 
@@ -64,6 +71,8 @@ int main(int argc, char **argv)
     MainWindow = new TopWindow(NULL);
     MainWindow->setAutoSaveSettings();
     MainWindow->show();
+    splash.finish(MainWindow);
+
     return kvpm.exec();
 }
 
