@@ -15,9 +15,9 @@
 
 #include "partmoveresize.h"
 
+#include <KApplication>
 #include <KLocale>
 #include <KMessageBox>
-#include <KProgressDialog>
 #include <KPushButton>
 #include <KButtonGroup>
 
@@ -26,6 +26,7 @@
 
 #include "fsextend.h"
 #include "fsreduce.h"
+#include "masterlist.h"
 #include "pedexceptions.h"
 #include "partaddgraphic.h"
 #include "physvol.h"
@@ -36,6 +37,8 @@
 #include "storagepartition.h"
 #include "misc.h"
 #include "volgroup.h"
+
+extern MasterList *g_master_list;
 
 
 bool moveresize_partition(StoragePartition *partition)
@@ -363,12 +366,10 @@ bool PartitionMoveResizeDialog::movefs(long long from_start, long long to_start,
 
     ped_device_open(device);
 
-    KProgressDialog *progress_dialog = new KProgressDialog(this, i18n("progress"), i18n("moving data...") );
-    progress_dialog->setAllowCancel(false);
-    progress_dialog->show();
-    QProgressBar *progress_bar = progress_dialog->progressBar();
+    QProgressBar *progress_bar = g_master_list->getProgressBar();
     progress_bar->setRange(0, blockcount);
     int event_timer = 0;
+    qApp->setOverrideCursor(Qt::WaitCursor);
     qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
 
     if( to_start < from_start ){                       // moving left
@@ -379,36 +380,36 @@ bool PartitionMoveResizeDialog::movefs(long long from_start, long long to_start,
                 event_timer = 0;
             }
             if( ! ped_device_read( device, buff, from_start + (x * blocksize), blocksize) ){
-                progress_dialog->close();
+                qApp->restoreOverrideCursor();
                 KMessageBox::error( 0, i18n("Move failed: could not read from device") );
                 return false;
             }
             if( ! ped_device_write(device, buff, to_start   + (x * blocksize), blocksize) ){
-                progress_dialog->close();
+                qApp->restoreOverrideCursor();
                 KMessageBox::error( 0, i18n("Move failed: could not write to device") );
                 return false;
             }
             progress_bar->setValue( x );
         }
         if( ! ped_device_read(device,  buff, from_start + (blockcount * blocksize), extra) ){
-            progress_dialog->close();
+            qApp->restoreOverrideCursor();
             KMessageBox::error( 0, i18n("Move failed: could not read from device") );
             return false;
         }
         if( ! ped_device_write(device, buff, to_start   + (blockcount * blocksize), extra) ){
-            progress_dialog->close();
+            qApp->restoreOverrideCursor();
             KMessageBox::error( 0, i18n("Move failed: could not write to device") );
             return false;
         }
     }
     else{                                              // moving right
         if( ! ped_device_read(device,  buff, from_start + (blockcount * blocksize), extra) ){
-            progress_dialog->close();
+            qApp->restoreOverrideCursor();
             KMessageBox::error( 0, i18n("Move failed: could not read from device") );
             return false;
         }
         if( ! ped_device_write(device, buff, to_start   + (blockcount * blocksize), extra) ){
-            progress_dialog->close();
+            qApp->restoreOverrideCursor();
             KMessageBox::error( 0, i18n("Move failed: could not write to device") );
             return false;
         }
@@ -419,25 +420,25 @@ bool PartitionMoveResizeDialog::movefs(long long from_start, long long to_start,
                 event_timer = 0;
             }
             if( ! ped_device_read( device, buff, from_start + (x * blocksize), blocksize) ){
-                progress_dialog->close();
+                qApp->restoreOverrideCursor();
                 KMessageBox::error( 0, i18n("Move failed: could not read from device") );
                 return false;
             }
             if( ! ped_device_write(device, buff, to_start   + (x * blocksize), blocksize) ){
-                progress_dialog->close();
+                qApp->restoreOverrideCursor();
                 KMessageBox::error( 0, i18n("Move failed: could not write to device") );
                 return false;
             }
             progress_bar->setValue( blockcount - x );
         }
     }
-    progress_dialog->close();
 
     qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
     ped_device_sync( device );
     qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
     ped_device_close( device );
     qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
+    qApp->restoreOverrideCursor();
 
     return true;
 }
@@ -497,12 +498,18 @@ bool PartitionMoveResizeDialog::shrinkPartition()
         maximum_size = reduced_size + sectors_1MiB;
     }
 
+    qApp->setOverrideCursor(Qt::WaitCursor);
+    qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
+
     PedConstraint *constraint = ped_constraint_new( start_alignment, end_alignment,
                                                     start_range, end_range,
                                                     minimum_size, maximum_size );
 
     int success = ped_disk_set_partition_geom( m_ped_disk, m_existing_part, constraint, 
                                                current_start, current_start + maximum_size );
+
+    qApp->restoreOverrideCursor();
+    qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
 
     if( ! success ){  
         KMessageBox::error( 0, i18n("Partition shrink failed") );
@@ -541,6 +548,9 @@ bool PartitionMoveResizeDialog::growPartition()
 
     min_new_size = max_new_size - sectors_1MiB;
 
+    qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
+    qApp->setOverrideCursor(Qt::WaitCursor);
+
     PedGeometry *start_range = ped_geometry_new(device, current_start, 1);
     PedGeometry *end_range   = ped_geometry_new(device, current_start + min_new_size - 1, sectors_1MiB);
 
@@ -548,13 +558,18 @@ bool PartitionMoveResizeDialog::growPartition()
                                                     start_range, end_range,
                                                     min_new_size, max_new_size);
 
+
     /* if constraint solves to NULL then the new part will fail, so just bail out */
     if( ped_constraint_solve_max( constraint ) == NULL ){
+        qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
+        qApp->restoreOverrideCursor();
         KMessageBox::error( 0, i18n("Partition extension failed") );
         return false;
     }
 
     success = ped_disk_set_partition_geom(m_ped_disk, m_existing_part, constraint, max_start, max_end);
+    qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
+    qApp->restoreOverrideCursor();
 
     if( ! success ){  
         KMessageBox::error( 0, i18n("Partition extension failed") );
@@ -646,6 +661,9 @@ bool PartitionMoveResizeDialog::movePartition()
 
     }
 
+    qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
+    qApp->setOverrideCursor(Qt::WaitCursor);
+
     PedAlignment *start_alignment = ped_alignment_new(0, sectors_1MiB); 
     PedAlignment *end_alignment   = ped_alignment_new(0, 1);
 
@@ -671,6 +689,8 @@ bool PartitionMoveResizeDialog::movePartition()
 
     ped_exception_set_handler(my_handler);
     current_start = m_existing_part->geom.start;
+    qApp->restoreOverrideCursor();
+    qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
 
     if( !success ){  
         KMessageBox::error( 0, i18n("Repartitioning failed: data not moved") );
@@ -693,13 +713,21 @@ bool PartitionMoveResizeDialog::pedCommitAndWait(PedDisk *disk)
 {
     QStringList args;
 
-    if( !ped_disk_commit(disk) )
+    qApp->setOverrideCursor(Qt::WaitCursor);
+    qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
+
+    if( !ped_disk_commit(disk) ){
+        qApp->restoreOverrideCursor();
+        qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
         return false;
-
-    args << "udevadm" << "settle";
-    ProcessProgress wait_settle(args);
-
-    return true;
+    }
+    else{
+        args << "udevadm" << "settle";
+        ProcessProgress wait_settle(args);
+        qApp->restoreOverrideCursor();
+        qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
+        return true;
+    }
 }
 
 void PartitionMoveResizeDialog::getMaximumPartition()
