@@ -35,6 +35,8 @@ ProcessProgress::ProcessProgress(QStringList arguments, QObject *parent) : QObje
 
     m_exit_code = 127;  // command not found
 
+    qApp->setOverrideCursor(Qt::WaitCursor);
+
     if(arguments.size() == 0){
 	qDebug() << "ProcessProgress given an empty arguments list";
     }
@@ -91,6 +93,7 @@ ProcessProgress::ProcessProgress(QStringList arguments, QObject *parent) : QObje
             KMessageBox::error(NULL, i18n("Executable: '%1' not found", executable));
         }
     }
+    qApp->restoreOverrideCursor();
 }
 
 void ProcessProgress::stopProgressLoop(int, QProcess::ExitStatus)
