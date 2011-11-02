@@ -74,6 +74,7 @@ ProcessProgress::ProcessProgress(QStringList arguments, QObject *parent) : QObje
             m_process->waitForFinished();
             g_master_list->getProgressBar()->setRange(0,3);
             g_master_list->getProgressBar()->setValue(3);
+            qApp->restoreOverrideCursor();
             m_exit_code = m_process->exitCode();
 
             if ( m_exit_code || ( m_process->exitStatus() == QProcess::CrashExit ) ){
@@ -93,7 +94,6 @@ ProcessProgress::ProcessProgress(QStringList arguments, QObject *parent) : QObje
             KMessageBox::error(NULL, i18n("Executable: '%1' not found", executable));
         }
     }
-    qApp->restoreOverrideCursor();
 }
 
 void ProcessProgress::stopProgressLoop(int, QProcess::ExitStatus)
