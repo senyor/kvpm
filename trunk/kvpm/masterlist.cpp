@@ -61,6 +61,7 @@ MasterList::~MasterList()
 void MasterList::rescan()
 {
     m_progress_bar->setRange(0,3);
+    qApp->setOverrideCursor(Qt::WaitCursor);
     qApp->processEvents();
 
     lvm_scan(m_lvm);
@@ -75,6 +76,7 @@ void MasterList::rescan()
     scanStorageDevices();
 
     m_progress_bar->setValue(3);
+    qApp->restoreOverrideCursor();
     qApp->processEvents();
 
     return;
