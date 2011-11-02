@@ -18,6 +18,5 @@
 #include <parted/parted.h>
 
 PedExceptionOption my_handler(PedException *exception);
-PedExceptionOption my_constraint_handler(PedException *exception);
 
 #endif

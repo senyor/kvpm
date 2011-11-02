@@ -12,18 +12,20 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
+#include "pedexceptions.h"
+
 #include <parted/parted.h>
 
 #include <KMessageBox>
 
 #include <QtGui>
 
-#include "pedexceptions.h"
 
 
 PedExceptionOption my_handler(PedException *exception)
 {
     QString error_message;
+    qApp->restoreOverrideCursor(); // reset the cursor to not-busy
 
     if (exception->type == PED_EXCEPTION_INFORMATION)
         KMessageBox::information( 0, exception->message );
@@ -35,20 +37,3 @@ PedExceptionOption my_handler(PedException *exception)
 
     return PED_EXCEPTION_UNHANDLED;
 }
-
-
-PedExceptionOption my_constraint_handler(PedException *exception)
-{
-    QString error_message;
-
-    if (exception->type == PED_EXCEPTION_INFORMATION)
-        KMessageBox::information( 0, exception->message );
-    else{
-        error_message = QString( exception->message );
-        if( !error_message.contains( "constraint") )
-            KMessageBox::error( 0, exception->message );
-    }
-
-    return PED_EXCEPTION_UNHANDLED;
-}
-
