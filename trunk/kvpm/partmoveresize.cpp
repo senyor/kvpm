@@ -31,6 +31,7 @@
 #include "partaddgraphic.h"
 #include "physvol.h"
 #include "processprogress.h"
+#include "progressbox.h"
 #include "pvextend.h"
 #include "pvreduce.h"
 #include "sizeselectorbox.h"
@@ -366,8 +367,9 @@ bool PartitionMoveResizeDialog::movefs(long long from_start, long long to_start,
 
     ped_device_open(device);
 
-    QProgressBar *progress_bar = g_master_list->getProgressBar();
-    progress_bar->setRange(0, blockcount);
+    ProgressBox *progress_box = g_master_list->getProgressBox();
+    progress_box->setRange(0, blockcount);
+    progress_box->setText("Moving data");
     int event_timer = 0;
     qApp->setOverrideCursor(Qt::WaitCursor);
     qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
@@ -389,7 +391,7 @@ bool PartitionMoveResizeDialog::movefs(long long from_start, long long to_start,
                 KMessageBox::error( 0, i18n("Move failed: could not write to device") );
                 return false;
             }
-            progress_bar->setValue( x );
+            progress_box->setValue(x);
         }
         if( ! ped_device_read(device,  buff, from_start + (blockcount * blocksize), extra) ){
             qApp->restoreOverrideCursor();
@@ -429,7 +431,7 @@ bool PartitionMoveResizeDialog::movefs(long long from_start, long long to_start,
                 KMessageBox::error( 0, i18n("Move failed: could not write to device") );
                 return false;
             }
-            progress_bar->setValue( blockcount - x );
+            progress_box->setValue( blockcount - x );
         }
     }
 

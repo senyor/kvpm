@@ -22,6 +22,7 @@
 
 #include "executablefinder.h"
 #include "masterlist.h"
+#include "progressbox.h"
 
 extern ExecutableFinder *g_executable_finder;
 extern MasterList *g_master_list;
@@ -52,7 +53,8 @@ ProcessProgress::ProcessProgress(QStringList arguments, QObject *parent) : QObje
             m_process->setEnvironment(environment);
             m_loop = new QEventLoop(this);
 
-            g_master_list->getProgressBar()->setRange(0,0);
+            g_master_list->getProgressBox()->setRange(0,0);
+            g_master_list->getProgressBox()->setText(executable);
 	
             connect(m_process,  SIGNAL(finished(int, QProcess::ExitStatus)), 
                     this, SLOT(stopProgressLoop(int, QProcess::ExitStatus)));
@@ -72,8 +74,9 @@ ProcessProgress::ProcessProgress(QStringList arguments, QObject *parent) : QObje
             m_loop->exec(QEventLoop::ExcludeUserInputEvents);
             
             m_process->waitForFinished();
-            g_master_list->getProgressBar()->setRange(0,3);
-            g_master_list->getProgressBar()->setValue(3);
+            g_master_list->getProgressBox()->setRange(0,3);
+            g_master_list->getProgressBox()->setValue(3);
+            g_master_list->getProgressBox()->setText("");
             qApp->restoreOverrideCursor();
             m_exit_code = m_process->exitCode();
 
@@ -99,8 +102,9 @@ ProcessProgress::ProcessProgress(QStringList arguments, QObject *parent) : QObje
 void ProcessProgress::stopProgressLoop(int, QProcess::ExitStatus)
 {
     m_loop->exit();
-    g_master_list->getProgressBar()->setRange(0,3);
-    g_master_list->getProgressBar()->setValue(3);
+    g_master_list->getProgressBox()->setText("");
+    g_master_list->getProgressBox()->setRange(0,3);
+    g_master_list->getProgressBox()->setValue(3);
 }
 
 QStringList ProcessProgress::programOutput()
