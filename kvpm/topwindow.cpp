@@ -30,6 +30,7 @@
 #include "maintabwidget.h"
 #include "physvol.h"
 #include "processprogress.h"
+#include "progressbox.h"
 #include "pvmove.h"
 #include "removemissing.h"
 #include "vgcreate.h"
@@ -174,7 +175,7 @@ TopWindow::TopWindow(QWidget *parent):KMainWindow(parent)
     m_tab_widget->appendDeviceTab(m_device_tab, i18n("Storage devices") );
 
     g_master_list = new MasterList(); // creates *empty* masterlist
-    menuBar()->setCornerWidget( g_master_list->getProgressBar() );
+    menuBar()->setCornerWidget( g_master_list->getProgressBox() );
 
     connect(qApp, SIGNAL(aboutToQuit()), 
 	    this, SLOT(cleanUp()));

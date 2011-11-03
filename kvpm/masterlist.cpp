@@ -18,7 +18,6 @@
 #include <parted/parted.h>
 
 #include <KLocale>
-#include <KProgressDialog>
 #include <KMessageBox>
 
 #include <QtGui>
@@ -30,6 +29,7 @@
 #include "pedexceptions.h"
 #include "physvol.h"
 #include "processprogress.h"
+#include "progressbox.h"
 #include "storagedevice.h"
 #include "volgroup.h"
 
@@ -39,8 +39,7 @@ MasterList::MasterList() : QObject()
     ped_exception_set_handler(my_handler);
     m_lvm = lvm_init(NULL);
 
-    m_progress_bar = new QProgressBar();
-    m_progress_bar->setTextVisible(false);
+    m_progress_box = new ProgressBox();
 }
 
 /* We can't just clear the lists, we need to delete 
@@ -60,31 +59,34 @@ MasterList::~MasterList()
 
 void MasterList::rescan()
 {
-    m_progress_bar->setRange(0,3);
+    m_progress_box->setRange(0,3);
+    m_progress_box->setText("Scan lvm");
     qApp->setOverrideCursor(Qt::WaitCursor);
     qApp->processEvents();
 
     lvm_scan(m_lvm);
     lvm_config_reload(m_lvm);    
 
-    m_progress_bar->setValue(1);
+    m_progress_box->setValue(1);
+    m_progress_box->setText("Scan vgs");
     qApp->processEvents();
     scanVolumeGroups();
 
-    m_progress_bar->setValue(2);
+    m_progress_box->setValue(2);
     qApp->processEvents();
+    m_progress_box->setText("Scan devs");
     scanStorageDevices();
 
-    m_progress_bar->setValue(3);
+    m_progress_box->setValue(3);
     qApp->restoreOverrideCursor();
     qApp->processEvents();
 
     return;
 }
 
-QProgressBar *MasterList::getProgressBar()
+ProgressBox *MasterList::getProgressBox()
 {
-    return m_progress_bar;
+    return m_progress_box;
 }
 
 void MasterList::scanVolumeGroups()
