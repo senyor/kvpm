@@ -18,10 +18,11 @@
  
 #include <KMessageBox>
 #include <KLocale>
-#include <KProgressDialog>
+
 #include <QtGui>
 
 #include "masterlist.h"
+#include "progressbox.h"
 #include "volgroup.h"
 
 extern MasterList *g_master_list;
@@ -29,30 +30,20 @@ extern MasterList *g_master_list;
 bool remove_vg(VolGroup *volumeGroup)
 {
     const QByteArray vg_name = volumeGroup->getName().toLocal8Bit();
-    QString message;
     lvm_t  lvm = g_master_list->getLVM();
     vg_t vg_dm = NULL;
-    KProgressDialog *progress_dialog;
+    ProgressBox *const progress_box = g_master_list->getProgressBox();
     bool success = true;
-
-    message = i18n("Are you certain you want to "
-		   "delete volume group: <b>%1</b>", volumeGroup->getName());
+    const QString message = i18n("Are you certain you want to delete volume group: <b>%1</b>?", volumeGroup->getName());
 
     if(KMessageBox::questionYesNo( 0, message) == 3){      // 3 = "yes" button
 
-        progress_dialog = new KProgressDialog(NULL, i18n("progress"), i18n("deleting group"));
-        progress_dialog->setAllowCancel(false);
-        progress_dialog->setMinimumDuration(250); 
-        QProgressBar *progress_bar = progress_dialog->progressBar();
-        progress_bar->setRange(0,3);
-        progress_bar->setValue(1);
-        progress_dialog->show();
+        progress_box->setRange(0,3);
+        progress_box->setValue(1);
         qApp->processEvents();
-                
-        progress_bar->setValue(2);
-        qApp->processEvents();
+
         if( (vg_dm = lvm_vg_open(lvm, vg_name.data(), "w", 0)) ){
-            progress_bar->setValue(2);
+            progress_box->setValue(2);
             qApp->processEvents();
             if( lvm_vg_remove(vg_dm) ){ 
                 KMessageBox::error(0, QString(lvm_errmsg(lvm)));
@@ -65,21 +56,20 @@ bool remove_vg(VolGroup *volumeGroup)
                 }
             }
             lvm_vg_close(vg_dm);
-            progress_bar->setValue(3);
+            progress_box->setValue(3);
             qApp->processEvents();
         }
         else{
             KMessageBox::error(0, QString(lvm_errmsg(lvm)));
             success = false;
         }
-        progress_dialog->close();
-        progress_dialog->delayedDestruct();
     }
     else{
         KMessageBox::error(0, QString(lvm_errmsg(lvm)));
         success = false;
     }
 
+    progress_box->setValue(3);
     qApp->processEvents();
     return success;
 }
