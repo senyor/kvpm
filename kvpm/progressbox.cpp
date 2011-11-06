@@ -37,18 +37,25 @@ void ProgressBox::setText(const QString text)
     if( !text.isEmpty() )
         m_message->setText(text + " >>");
     else
-        m_message->setText("");
+        m_message->clear();
 }
 
 void ProgressBox::setRange(const int start, const int end)
 {
     m_progressbar->setRange(start, end);
-    m_message->setText("");
+    m_message->clear();
 }
 
 void ProgressBox::setValue(const int value)
 {
     m_progressbar->setValue(value);
     if( value >= m_progressbar->maximum() )
-        m_message->setText("");
+        m_message->clear();
+}
+
+void ProgressBox::reset()
+{
+    m_progressbar->setRange(0, 1);
+    m_progressbar->setValue(1);
+    m_message->clear();
 }

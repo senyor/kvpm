@@ -20,7 +20,6 @@
 #include <KComboBox>
 
 #include <QLabel>
-#include <QProgressBar>
 #include <QStringList>
 #include <QCheckBox>
 #include <QRegExpValidator>
@@ -58,7 +57,7 @@ Q_OBJECT
               *m_extent_suffix;
 
     QRegExpValidator *m_validator;
-    QProgressBar *m_progress_bar;
+    //    QProgressBar *m_progress_bar;
 
     void limitExtentSize(int);
     

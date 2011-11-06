@@ -29,6 +29,7 @@ class ProgressBox : public QFrame
 
  public:
     explicit ProgressBox(QWidget *parent = NULL);
+    void reset();
     void setText(const QString text);
     void setRange(const int start, const int end);
     void setValue(const int value);
