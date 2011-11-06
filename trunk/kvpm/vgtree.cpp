@@ -169,8 +169,17 @@ QTreeWidgetItem *VGTree::loadItem(LogVol *lv, QTreeWidgetItem *item)
 
     item->setData(1, Qt::DisplayRole, lv->getType());
 
-    if(lv->isSnapContainer())
+    if(lv->isSnapContainer()){
         item->setData(2, Qt::DisplayRole, sizeToString(lv->getTotalSize()));           
+
+        for(int x = 3; x < 12; x++)
+            item->setData(x, Qt::DisplayRole, QVariant());
+
+        item->setIcon(3, KIcon());
+        item->setToolTip(3, QString());
+        item->setIcon(8, KIcon());
+        item->setToolTip(8, QString());
+    }
     else{
         item->setData(2, Qt::DisplayRole, sizeToString(lv->getSize()));           
       
