@@ -130,7 +130,7 @@ void VGTree::loadData()
 
 QTreeWidgetItem *VGTree::loadItem(LogVol *lv, QTreeWidgetItem *item)
 {
-    const QString old_type = item->data(4, Qt::DisplayRole).toString();  // lv type before reload or "" if new item
+    const QString old_type = item->data(1, Qt::DisplayRole).toString();  // lv type before reload or "" if new item
     const QString lv_name = lv->getName();
     const bool was_sc = old_type.contains("origin", Qt::CaseInsensitive);
     const bool is_sc  = lv->isSnapContainer();
@@ -171,71 +171,73 @@ QTreeWidgetItem *VGTree::loadItem(LogVol *lv, QTreeWidgetItem *item)
 
     if(lv->isSnapContainer())
         item->setData(2, Qt::DisplayRole, sizeToString(lv->getTotalSize()));           
-    else
+    else{
         item->setData(2, Qt::DisplayRole, sizeToString(lv->getSize()));           
       
-    if( lv->getFilesystemSize() > -1 &&  lv->getFilesystemUsed() > -1 ){
+        if( lv->getFilesystemSize() > -1 &&  lv->getFilesystemUsed() > -1 ){
 
-        fs_remaining = lv->getFilesystemSize() - lv->getFilesystemUsed();
-        fs_percent = qRound( ((double)fs_remaining / (double)lv->getFilesystemSize()) * 100 );
-
-        if(m_show_total && !m_show_percent)
-            item->setData(3, Qt::DisplayRole, sizeToString(fs_remaining));
-        else if(!m_show_total && m_show_percent)
-            item->setData(3, Qt::DisplayRole, QString("%%1").arg(fs_percent) );
-        else
-            item->setData(3, Qt::DisplayRole, QString(sizeToString(fs_remaining) + " (%%1)").arg(fs_percent) );
-
-        if( fs_percent <= m_fs_warn_percent ){
-            item->setIcon(3, KIcon("exclamation"));
-            item->setToolTip(3, i18n("This filesystem is running out of space"));
+            fs_remaining = lv->getFilesystemSize() - lv->getFilesystemUsed();
+            fs_percent = qRound( ((double)fs_remaining / (double)lv->getFilesystemSize()) * 100 );
+            
+            if(m_show_total && !m_show_percent)
+                item->setData(3, Qt::DisplayRole, sizeToString(fs_remaining));
+            else if(!m_show_total && m_show_percent)
+                item->setData(3, Qt::DisplayRole, QString("%%1").arg(fs_percent) );
+            else
+                item->setData(3, Qt::DisplayRole, QString(sizeToString(fs_remaining) + " (%%1)").arg(fs_percent) );
+            
+            if( fs_percent <= m_fs_warn_percent ){
+                item->setIcon(3, KIcon("exclamation"));
+                item->setToolTip(3, i18n("This filesystem is running out of space"));
+            }
+            else{
+                item->setIcon(3, KIcon());
+                item->setToolTip(3, QString());
+            }
         }
         else{
+            item->setData(3, Qt::DisplayRole, QString(""));
             item->setIcon(3, KIcon());
             item->setToolTip(3, QString());
         }
-    }
-    else{
-        item->setData(3, Qt::DisplayRole, QString(""));
-        item->setIcon(3, KIcon());
-        item->setToolTip(3, QString());
-    }
-    
-    item->setData(4, Qt::DisplayRole, lv->getFilesystem() );
-
-    if( (lv->isPvmove() || lv->isMirror()) && !lv->isSnapContainer() )
-        item->setData(7, Qt::DisplayRole, QString("%%1").arg(lv->getCopyPercent(), 1, 'f', 2));
-    else if( lv->isSnap() || lv->isMerging() )
-        item->setData(7, Qt::DisplayRole, QString("%%1").arg(lv->getSnapPercent(), 1, 'f', 2));
-    else
-        item->setData(7, Qt::DisplayRole, QString(""));
-
-    item->setData(8, Qt::DisplayRole, lv->getState());
-
-    if( !lv->isSnapContainer() && !lv->isMirrorLog() && !lv->isMirrorLeg() && !lv->isVirtual() ){
-        if( lv->isMounted() ){
-            item->setIcon( 8, KIcon("emblem-mounted") );
-            item->setToolTip( 8, i18n("mounted filesystem") );
+        
+        item->setData(4, Qt::DisplayRole, lv->getFilesystem() );
+        
+        if( (lv->isPvmove() || lv->isMirror()) && !lv->isSnapContainer() )
+            item->setData(7, Qt::DisplayRole, QString("%%1").arg(lv->getCopyPercent(), 1, 'f', 2));
+        else if( lv->isSnap() || lv->isMerging() )
+            item->setData(7, Qt::DisplayRole, QString("%%1").arg(lv->getSnapPercent(), 1, 'f', 2));
+        else
+            item->setData(7, Qt::DisplayRole, QString(""));
+        
+        item->setData(8, Qt::DisplayRole, lv->getState());
+        
+        if( !lv->isSnapContainer() && !lv->isMirrorLog() && !lv->isMirrorLeg() && !lv->isVirtual() ){
+            if( lv->isMounted() ){
+                item->setIcon( 8, KIcon("emblem-mounted") );
+                item->setToolTip( 8, i18n("mounted filesystem") );
+            }
+            else{
+                item->setIcon( 8, KIcon("emblem-unmounted") );
+                item->setToolTip( 8, i18n("unmounted filesystem") );
+            }
         }
-        else{
-            item->setIcon( 8, KIcon("emblem-unmounted") );
-            item->setToolTip( 8, i18n("unmounted filesystem") );
-        }
+        
+        if(lv->isWritable())
+            item->setData(9, Qt::DisplayRole, QString("r/w"));
+        else
+            item->setData(9, Qt::DisplayRole, QString("r/o"));
+        
+        item->setData(10, Qt::DisplayRole, lv->getTags().join(",")); 
+        item->setData(11, Qt::DisplayRole, lv->getMountPoints().join(","));
     }
 
-    if(lv->isWritable())
-        item->setData(9, Qt::DisplayRole, QString("r/w"));
-    else
-        item->setData(9, Qt::DisplayRole, QString("r/o"));
-
-    item->setData(10, Qt::DisplayRole, lv->getTags().join(",")); 
-    item->setData(11, Qt::DisplayRole, lv->getMountPoints().join(","));
     item->setData(0, Qt::UserRole, lv_name);
     item->setData(2, Qt::UserRole, lv->getUuid());
-
+    
     if( lv->getSegmentCount() == 1 ) {
         item->setData(1, Qt::UserRole, 0);            // 0 means segment 0 data present
-
+        
         if( lv->isMirror() ){
             item->setData(5, Qt::DisplayRole, QString(""));
             item->setData(6, Qt::DisplayRole, QString(""));
@@ -244,33 +246,33 @@ QTreeWidgetItem *VGTree::loadItem(LogVol *lv, QTreeWidgetItem *item)
             item->setData(5, Qt::DisplayRole, QString("%1").arg(lv->getSegmentStripes(0)) );
             item->setData(6, Qt::DisplayRole, sizeToString(lv->getSegmentStripeSize(0)) );
         }
-
+        
         if( !is_sc && old_type.contains("origin", Qt::CaseInsensitive) ){
             for(int x = 0; x < old_child_count; x++){
                 if( item->child(x)->data(0, Qt::DisplayRole) == lv->getName() )
                     item->setExpanded( item->child(x)->isExpanded() );
             }
         }
-
+        
         insertChildItems(lv, item);
     }
     else {
         item->setData(1, Qt::UserRole, -1);            // -1 means not segment data
         item->setData(5, Qt::DisplayRole, QString(""));
         item->setData(6, Qt::DisplayRole, QString(""));
-       
+        
         insertSegmentItems(lv, item);
     }
     
     new_child_count = item->childCount();
 
-    if( is_sc ){   // expand the item if it is a new snap container or snap count is different
+    if(is_sc){   // expand the item if it is a new snap container or snap count is different
 
         if(m_init){
             item->setExpanded(true);
         }
         else{
-            if( !was_sc || old_child_count != new_child_count){
+            if( !was_sc || old_child_count != new_child_count ){
                 item->setExpanded(true);
                 if( !was_sc ){
                     for(int x = 0; x < new_child_count; x++){
