@@ -19,10 +19,12 @@
 #include <KMessageBox>
 #include <KLocale>
 #include <KPushButton>
+
 #include <QtGui>
 
 #include "masterlist.h"
 #include "misc.h"
+#include "progressbox.h"
 #include "pvcheckbox.h"
 #include "storagedevice.h"
 #include "storagepartition.h"
@@ -35,12 +37,14 @@ bool extend_vg(QString volumeGroupName, StorageDevice *device, StoragePartition 
 {
     const QByteArray vg_name = volumeGroupName.toLocal8Bit();
     QByteArray pv_name;
-    QString message, error_message;
+    QString message;
     long long size;
     lvm_t lvm = g_master_list->getLVM();
     vg_t  vg_dm;
     VolGroup *const vg = g_master_list->getVolGroupByName(volumeGroupName);
     const long long extent_size = vg->getExtentSize();
+    ProgressBox *const progress_box = g_master_list->getProgressBox();
+    const QString error_message = i18n("This physical volume <b>%1</b> is smaller than the extent size", QString(pv_name));
 
     if(device){
         size = device->getSize();
@@ -50,8 +54,6 @@ bool extend_vg(QString volumeGroupName, StorageDevice *device, StoragePartition 
         size = partition->getSize();
         pv_name = partition->getName().toLocal8Bit();
     }
-
-    error_message = i18n("This physical volume <b>%1</b> is smaller than the extent size", QString(pv_name));
 
     if(extent_size > size){
         KMessageBox::error(0, error_message);
@@ -65,21 +67,29 @@ bool extend_vg(QString volumeGroupName, StorageDevice *device, StoragePartition 
 
         if( KMessageBox::questionYesNo(0, message) == 3 ){     // 3 is the "yes" button
 
+            progress_box->setRange(0, 1);
+            progress_box->setValue(0);
+            progress_box->setText("Extending VG");
+
             if( (vg_dm = lvm_vg_open(lvm, vg_name.data(), "w", 0)) ){
                 if( ! lvm_vg_extend(vg_dm, pv_name.data()) ){
                     if( lvm_vg_write(vg_dm) )
                         KMessageBox::error(0, QString(lvm_errmsg(lvm)));;
                     lvm_vg_close(vg_dm);
+                    progress_box->reset();
                     return true;
                 }
                 KMessageBox::error(0, QString(lvm_errmsg(lvm))); 
                 lvm_vg_close(vg_dm);
+                progress_box->reset();
                 return true;
             }
             KMessageBox::error(0, QString(lvm_errmsg(lvm))); 
+            progress_box->reset();
             return true;
         }
         KMessageBox::error(0, QString(lvm_errmsg(lvm)));
+        progress_box->reset();
         return true;
     }   
 
@@ -172,17 +182,19 @@ void VGExtendDialog::commitChanges()
     QByteArray pv_name;
     lvm_t lvm = g_master_list->getLVM();
     vg_t  vg_dm;
-
     QEventLoop *loop = new QEventLoop(this);
-    QProgressBar *progress_bar = new QProgressBar();
-    progress_bar->setRange(0, pv_names.size());
-    m_layout->addWidget(progress_bar);
+    ProgressBox *const progress_box = g_master_list->getProgressBox();
+    progress_box->setRange(0, pv_names.size());
+    progress_box->setText("Extending VG");
+
+    hide();
+
     loop->processEvents();
 
     if( (vg_dm = lvm_vg_open(lvm, vg_name.data(), "w", 0 )) ){
         
         for(int x = 0; x < pv_names.size(); x++){
-            progress_bar->setValue(x);
+            progress_box->setValue(x);
             loop->processEvents();
             pv_name = pv_names[x].toLocal8Bit();
             if( lvm_vg_extend(vg_dm, pv_name.data()) )
@@ -193,18 +205,18 @@ void VGExtendDialog::commitChanges()
             KMessageBox::error(0, QString(lvm_errmsg(lvm)));
 
         lvm_vg_close(vg_dm);
+        progress_box->reset();
         return;
     }
 
     KMessageBox::error(0, QString(lvm_errmsg(lvm))); 
+    progress_box->reset();
     return;
 }
 
 void VGExtendDialog::validateOK()
 {
-    long long space = m_pv_checkbox->getRemainingSpace();
-
-    if(space)
+    if( m_pv_checkbox->getRemainingSpace() )
         enableButtonOk(true);
     else
         enableButtonOk(false);

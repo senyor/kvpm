@@ -18,12 +18,13 @@
 
 #include <KLocale>
 #include <KMessageBox>
-#include <KProgressDialog>
 #include <KPushButton>
 #include <KSeparator>
+
 #include <QtGui>
 
 #include "masterlist.h"
+#include "progressbox.h"
 #include "pvcheckbox.h"
 #include "storagedevice.h"
 #include "storagepartition.h"
@@ -194,8 +195,6 @@ VGCreateDialog::VGCreateDialog(QList<StorageDevice *> devices, QList<StoragePart
     m_layout->addWidget(m_clustered);
     m_layout->addWidget(m_auto_backup);
     m_layout->addWidget(new KSeparator);
-    m_progress_bar = new QProgressBar();
-    m_layout->addWidget(m_progress_bar, Qt::AlignCenter);
 
     enableButtonOk(false);
 
@@ -267,7 +266,10 @@ void VGCreateDialog::commitChanges()
     uint32_t new_extent_size = m_extent_size->currentText().toULong();
     const QStringList pv_names = m_pv_checkbox->getNames();
     const QByteArray vg_name_array = m_vg_name->text().toLocal8Bit();
+    ProgressBox *const progress_box = g_master_list->getProgressBox();
     QByteArray pv_name_array;
+
+    hide();
 
     new_extent_size *= 1024;
     if( m_extent_suffix->currentIndex() > 0 )
@@ -276,7 +278,8 @@ void VGCreateDialog::commitChanges()
         new_extent_size *= 1024;
 
     QEventLoop *loop = new QEventLoop(this);
-    m_progress_bar->setRange(0, pv_names.size());
+    progress_box->setRange(0, pv_names.size());
+    progress_box->setText("Creating VG");
     loop->processEvents();
 
     if( (vg_dm = lvm_vg_create(lvm, vg_name_array.data())) ){
@@ -285,7 +288,7 @@ void VGCreateDialog::commitChanges()
             KMessageBox::error(0, QString(lvm_errmsg(lvm)));
         
         for(int x = 0; x < pv_names.size(); x++){
-            m_progress_bar->setValue(x);
+            progress_box->setValue(x);
             loop->processEvents();
             pv_name_array = pv_names[x].toLocal8Bit();
             if( lvm_vg_extend(vg_dm, pv_name_array.data()) )
@@ -303,11 +306,13 @@ void VGCreateDialog::commitChanges()
             KMessageBox::error(0, QString(lvm_errmsg(lvm)));
         
         lvm_vg_close(vg_dm);
+        progress_box->reset();
         delete loop;
         return;
     }
         
     KMessageBox::error(0, QString(lvm_errmsg(lvm))); 
+    progress_box->reset();
     delete loop;
     return;
 }

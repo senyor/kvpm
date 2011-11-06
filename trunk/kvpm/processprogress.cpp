@@ -74,9 +74,7 @@ ProcessProgress::ProcessProgress(QStringList arguments, QObject *parent) : QObje
             m_loop->exec(QEventLoop::ExcludeUserInputEvents);
             
             m_process->waitForFinished();
-            g_master_list->getProgressBox()->setRange(0,3);
-            g_master_list->getProgressBox()->setValue(3);
-            g_master_list->getProgressBox()->setText("");
+            g_master_list->getProgressBox()->reset();
             qApp->restoreOverrideCursor();
             m_exit_code = m_process->exitCode();
 
