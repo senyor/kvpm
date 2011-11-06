@@ -33,11 +33,11 @@
 
 extern MasterList *g_master_list;
 
+
 bool extend_vg(QString volumeGroupName, StorageDevice *device, StoragePartition *partition)
 {
     const QByteArray vg_name = volumeGroupName.toLocal8Bit();
     QByteArray pv_name;
-    QString message;
     long long size;
     lvm_t lvm = g_master_list->getLVM();
     vg_t  vg_dm;
@@ -55,16 +55,16 @@ bool extend_vg(QString volumeGroupName, StorageDevice *device, StoragePartition 
         pv_name = partition->getName().toLocal8Bit();
     }
 
+    const QString message = i18n("Do you want to extend volume group: <b>%1</b> with "
+                                 "physical volume: <b>%2</b> (size: %3)", 
+                                 volumeGroupName, 
+                                 QString(pv_name), 
+                                 sizeToString(size));
+
     if(extent_size > size){
         KMessageBox::error(0, error_message);
     }
     else{
-        message = i18n("Do you want to extend volume group: <b>%1</b> with "
-                       "physical volume: <b>%2</b> (size: %3)", 
-                       volumeGroupName, 
-                       QString(pv_name), 
-                       sizeToString(size));
-
         if( KMessageBox::questionYesNo(0, message) == 3 ){     // 3 is the "yes" button
 
             progress_box->setRange(0, 1);
@@ -98,7 +98,7 @@ bool extend_vg(QString volumeGroupName, StorageDevice *device, StoragePartition 
 
 bool extend_vg(VolGroup *volumeGroup)
 {
-    QList<StorageDevice *> all_devices = g_master_list->getStorageDevices();   
+    const QList<StorageDevice *> all_devices = g_master_list->getStorageDevices();   
     QList<StorageDevice *> usable_devices;
     QStringList device_names;
     QList<StoragePartition *> all_partitions;
@@ -112,7 +112,7 @@ bool extend_vg(VolGroup *volumeGroup)
         }
         else if( all_devices[x]->getRealPartitionCount() > 0 ){
             all_partitions = all_devices[x]->getStoragePartitions();
-            for(int y = 0; y <all_partitions.size(); y++){
+            for(int y = 0; y < all_partitions.size(); y++){
                 if( (! all_partitions[y]->isBusy() ) &&
                     (! all_partitions[y]->isPhysicalVolume() ) &&
                     (( all_partitions[y]->isNormal() ) ||  
