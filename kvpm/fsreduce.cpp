@@ -46,7 +46,7 @@ long long fs_reduce(QString path, long long new_size, QString fs)
     if( ! fsck( path ) )
         return 0;
 
-    long block_size = get_fs_block_size( path );
+    const long block_size = get_fs_block_size(path);
 
     if( block_size <= 0 ){
         KMessageBox::error( 0, i18n("Shrink failed: could not determine filesystem block size"));
