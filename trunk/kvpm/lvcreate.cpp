@@ -735,13 +735,9 @@ int LVCreateDialog::getStripeCount()
 
 int LVCreateDialog::getMirrorCount()
 {
-    if(m_extend){
-        if(m_lv->isMirror())
-            return m_lv->getMirrorCount();
-        else
-            return 1;
-    }
-    else if(m_mirror_box->isChecked())
+    if(m_extend)
+        return m_lv->getMirrorCount();
+    else if( m_mirror_box->isChecked() )
 	return m_mirror_count_spin->value();
     else
 	return 1;
