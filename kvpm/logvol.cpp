@@ -432,7 +432,7 @@ void LogVol::insertChildren(lv_t lvmLV, vg_t lvmVG)
 
 void LogVol::countLegsAndLogs()
 {
-    m_mirror_count = 1; // linear volumes count as mirror = 1;
+    m_mirror_count = 0;
     m_log_count = 0;
     QList<LogVol *> all_lvs_flat = getAllChildrenFlat();
     LogVol *lv;
@@ -448,6 +448,8 @@ void LogVol::countLegsAndLogs()
                 m_log_count++;
         }
     }
+    else
+        m_mirror_count = 1;  // linear volumes count as mirror = 1;
 }
 
 QList<lv_t> LogVol::getLvmSnapshots(vg_t lvmVG)
