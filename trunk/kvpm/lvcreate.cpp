@@ -687,7 +687,7 @@ long long LVCreateDialog::getLargestVolume()
 {
     QList <long long> available_pv_bytes = m_pv_checkbox->getRemainingSpaceList();  
     QList <long long> stripe_pv_bytes;  
-    int total_stripes = getStripeCount() * getMirrorCount();
+    const int total_stripes = getStripeCount() * getMirrorCount();
     int log_count;
 
     for(int x = 0; x < total_stripes; x++)
@@ -846,11 +846,18 @@ QStringList LVCreateDialog::argumentsLV()
     if(m_extend)
         extents -= m_lv->getExtents();
 
-    if( extents % ( stripes * mirrors )){  // make the number of extents divivsible by the stripe X mirror count then round up
-        extents = extents / ( stripes * mirrors );
-        extents = extents * ( stripes * mirrors );
-        if(extents + ( stripes * mirrors ) <= max_extents)
-            extents += ( stripes * mirrors );
+    // The next part should only need to reference stripes, not the mirror count
+    // but a bug in lvm requires it. Remove this when fixed.
+
+    // make the number of extents divivsible by the stripe X mirror count then round up
+
+    if( stripes > 1 ){  
+        if( extents % ( stripes * mirrors )){  
+            extents = extents / ( stripes * mirrors );
+            extents = extents * ( stripes * mirrors );
+            if(extents + ( stripes * mirrors ) <= max_extents)
+                extents += ( stripes * mirrors );
+        }
     }
 
     args << "--extents" << QString("+%1").arg(extents);
