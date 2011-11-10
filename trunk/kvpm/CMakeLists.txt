@@ -1,5 +1,5 @@
  
-set(kvpm_SRCS addmirror.cpp kvpmconfigdialog.cpp deviceproperties.cpp 
+set(kvpm_SRCS changemirror.cpp kvpmconfigdialog.cpp deviceproperties.cpp 
               devicepropertiesstack.cpp devicesizechart.cpp devicesizechartseg.cpp 
 	      devicetree.cpp
 	      devicetab.cpp executablefinder.cpp deviceactionsmenu.cpp fsck.cpp

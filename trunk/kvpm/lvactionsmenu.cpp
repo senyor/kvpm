@@ -15,16 +15,17 @@
 
 #include "lvactionsmenu.h"
 
-#include <QtGui>
 #include <KLocale>
 #include <KActionCollection>
+
+#include <QtGui>
 
 #include "fsck.h"
 #include "logvol.h"
 #include "vgtree.h"
 #include "lvsizechartseg.h"
 #include "topwindow.h"
-#include "addmirror.h"
+#include "changemirror.h"
 #include "lvsizechartseg.h"
 #include "lvcreate.h"
 #include "lvchange.h"
@@ -90,7 +91,8 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
     lv_fsck_action     = new KAction( i18n("Run 'fsck -fp' on filesystem..."), this);
     mount_filesystem_action   = new KAction( KIcon("emblem-mounted"), i18n("Mount filesystem..."), this);
     unmount_filesystem_action = new KAction( KIcon("emblem-unmounted"), i18n("Unmount filesystem..."), this);
-    add_mirror_action  = new KAction( i18n("Add leg or change mirror..."), this);
+    add_mirror_legs_action    = new KAction( i18n("Add mirror legs to volume..."), this);
+    change_mirror_log_action  = new KAction( i18n("Change mirror log..."), this);
     remove_mirror_action      = new KAction( i18n("Remove mirror leg..."), this);
     remove_mirror_leg_action  = new KAction( i18n("Remove this mirror leg..."), this);
 
@@ -106,8 +108,11 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
     connect(lv_maxfs_action, SIGNAL(triggered()), 
 	    this, SLOT(maxfsLogicalVolume()));
 
-    connect(add_mirror_action, SIGNAL(triggered()), 
-	    this, SLOT(addMirror()));
+    connect(add_mirror_legs_action, SIGNAL(triggered()), 
+	    this, SLOT(addMirrorLegs()));
+
+    connect(change_mirror_log_action, SIGNAL(triggered()), 
+	    this, SLOT(changeMirrorLog()));
 
     connect(mount_filesystem_action, SIGNAL(triggered()), 
 	    this, SLOT(mountFilesystem()));
@@ -124,7 +129,8 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
     KMenu *mirror_menu = new KMenu( i18n("Mirror operations"), this);
     mirror_menu->setIcon( KIcon("document-multiple") );
     addMenu(mirror_menu);
-    mirror_menu->addAction(add_mirror_action);
+    mirror_menu->addAction(add_mirror_legs_action);
+    mirror_menu->addAction(change_mirror_log_action);
     mirror_menu->addAction(remove_mirror_action);
     mirror_menu->addAction(remove_mirror_leg_action);
 
@@ -173,18 +179,20 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
             if( m_lv->isOrigin() ){
 
                 if( m_lv->isMirror() ){
-                    add_mirror_action->setEnabled(false);
+                    add_mirror_legs_action->setEnabled(false);
+                    change_mirror_log_action->setEnabled(true);
                     remove_mirror_action->setEnabled(true);
                 }
                 else{
-                    add_mirror_action->setEnabled(true);
+                    add_mirror_legs_action->setEnabled(true);
+                    change_mirror_log_action->setEnabled(false);
                     remove_mirror_action->setEnabled(false);
 		}
 
                 if( m_lv->isMerging() ){
                     lv_extend_action->setEnabled(false);
                     snap_create_action->setEnabled(false);
-                    add_mirror_action->setEnabled(false);
+                    add_mirror_legs_action->setEnabled(false);
                 }
                 else{
                     lv_extend_action->setEnabled(true);
@@ -195,8 +203,9 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
                 pv_move_action->setEnabled(false);
             }
             else if( m_lv->isSnap() ){
-                add_mirror_action->setEnabled(false);
+                add_mirror_legs_action->setEnabled(false);
                 remove_mirror_action->setEnabled(false);
+                change_mirror_log_action->setEnabled(false);
                 mirror_menu->setEnabled(false);
                 lv_maxfs_action->setEnabled(false);
                 snap_create_action->setEnabled(false);
@@ -224,22 +233,25 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
                 }
             }
             else if( m_lv->isMirror() ){
-                add_mirror_action->setEnabled(true);
 		remove_mirror_action->setEnabled(true);
+                change_mirror_log_action->setEnabled(true);
                 pv_move_action->setEnabled(false);
 
                 if( m_lv->isUnderConversion() ){
+                    add_mirror_legs_action->setEnabled(false);
                     lv_extend_action->setEnabled(false);
                     lv_reduce_action->setEnabled(false);
                 }
                 else{
+                    add_mirror_legs_action->setEnabled(true);
                     lv_extend_action->setEnabled(true);
                     lv_reduce_action->setEnabled(true);
                 }
             }
 	    else{
-                add_mirror_action->setEnabled(true);
+                add_mirror_legs_action->setEnabled(true);
 		remove_mirror_action->setEnabled(false);
+                change_mirror_log_action->setEnabled(false);
                 pv_move_action->setEnabled(true);
                 snap_create_action->setEnabled(true);
             }
@@ -264,13 +276,14 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
 	    lv_remove_action->setEnabled(true);
 	    unmount_filesystem_action->setEnabled(false);
 	    mount_filesystem_action->setEnabled(false);
-	    add_mirror_action->setEnabled(false);
+	    add_mirror_legs_action->setEnabled(false);
 	    lv_change_action->setEnabled(false);
 	    lv_extend_action->setEnabled(false);
 	    lv_reduce_action->setEnabled(false);
 	    lv_rename_action->setEnabled(false);
 	    pv_move_action->setEnabled(false);
 	    remove_mirror_action->setEnabled(false);
+            change_mirror_log_action->setEnabled(false);
 	    remove_mirror_leg_action->setEnabled(false);
 	    snap_create_action->setEnabled(false);
 	    filesystem_menu->setEnabled(false);
@@ -282,13 +295,14 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
 	    lv_remove_action->setEnabled(false);
 	    unmount_filesystem_action->setEnabled(false);
 	    mount_filesystem_action->setEnabled(false);
-	    add_mirror_action->setEnabled(false);
+	    add_mirror_legs_action->setEnabled(false);
 	    lv_change_action->setEnabled(false);
 	    lv_extend_action->setEnabled(false);
 	    lv_reduce_action->setEnabled(false);
 	    lv_rename_action->setEnabled(false);
 	    pv_move_action->setEnabled(false);
 	    remove_mirror_action->setEnabled(false);
+            change_mirror_log_action->setEnabled(false);
 	    remove_mirror_leg_action->setEnabled(false);
 	    snap_create_action->setEnabled(false);
 	    filesystem_menu->setEnabled(false);
@@ -300,12 +314,13 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
 	    lv_remove_action->setEnabled(false);
             unmount_filesystem_action->setEnabled(false);
 	    mount_filesystem_action->setEnabled(false);
-	    add_mirror_action->setEnabled(false);
+	    add_mirror_legs_action->setEnabled(false);
 	    lv_change_action->setEnabled(false);
 	    lv_extend_action->setEnabled(false);
 	    lv_reduce_action->setEnabled(false);
 	    pv_move_action->setEnabled(false);
 	    remove_mirror_action->setEnabled(false);
+            change_mirror_log_action->setEnabled(false);
 	    lv_rename_action->setEnabled(false);
 	    snap_create_action->setEnabled(false);
 	    filesystem_menu->setEnabled(false);
@@ -329,13 +344,14 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
 	    lv_mkfs_action->setEnabled(false);
 	    lv_maxfs_action->setEnabled(false);
 	    lv_remove_action->setEnabled(false);
-	    add_mirror_action->setEnabled(false);
+	    add_mirror_legs_action->setEnabled(false);
 	    lv_change_action->setEnabled(true);
 	    lv_extend_action->setEnabled(false);
 	    lv_reduce_action->setEnabled(false);
             lv_rename_action->setEnabled(false);
 	    pv_move_action->setEnabled(false);
 	    remove_mirror_action->setEnabled(false);
+            change_mirror_log_action->setEnabled(false);
 	    remove_mirror_leg_action->setEnabled(false);
 	    snap_create_action->setEnabled(false);
 	    filesystem_menu->setEnabled(true);
@@ -352,12 +368,13 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
 	    lv_mkfs_action->setEnabled(true);
 	    lv_remove_action->setEnabled(false);
             lv_rename_action->setEnabled(false);
-	    add_mirror_action->setEnabled(false);
+	    add_mirror_legs_action->setEnabled(false);
 	    lv_change_action->setEnabled(true);
 	    lv_extend_action->setEnabled(false);
 	    lv_reduce_action->setEnabled(false);
 	    pv_move_action->setEnabled(false);
 	    remove_mirror_action->setEnabled(false);
+            change_mirror_log_action->setEnabled(false);
 	    remove_mirror_leg_action->setEnabled(false);
 	    snap_create_action->setEnabled(false);
 	    filesystem_menu->setEnabled(true);
@@ -373,8 +390,9 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
 	    }
 
             if( m_lv->isSnap() || m_lv->isOrigin() ){
-                add_mirror_action->setEnabled(false);
+                add_mirror_legs_action->setEnabled(false);
 		remove_mirror_action->setEnabled(false);
+                change_mirror_log_action->setEnabled(false);
                 pv_move_action->setEnabled(false);
 
                 if( m_lv->isSnap() )
@@ -385,14 +403,16 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
                 mirror_menu->setEnabled(false);
             }
             else if( m_lv->isMirror() ){
-                add_mirror_action->setEnabled(true);
+                add_mirror_legs_action->setEnabled(true);
 		remove_mirror_action->setEnabled(true);
+                change_mirror_log_action->setEnabled(true);
                 pv_move_action->setEnabled(false);
                 snap_create_action->setEnabled(false);
             }
 	    else{
-                add_mirror_action->setEnabled(true);
+                add_mirror_legs_action->setEnabled(true);
 		remove_mirror_action->setEnabled(false);
+                change_mirror_log_action->setEnabled(false);
                 pv_move_action->setEnabled(true);
                 snap_create_action->setEnabled(true);
             }
@@ -437,19 +457,21 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
 	lv_remove_action->setEnabled(false);
 	unmount_filesystem_action->setEnabled(false);
 	mount_filesystem_action->setEnabled(false);
-	add_mirror_action->setEnabled(false);
+	add_mirror_legs_action->setEnabled(false);
 	lv_change_action->setEnabled(false);
 	lv_extend_action->setEnabled(false);
 	lv_reduce_action->setEnabled(false);
 	lv_rename_action->setEnabled(false);
 	pv_move_action->setEnabled(false);
 	remove_mirror_action->setEnabled(false);
+        change_mirror_log_action->setEnabled(false);
 	remove_mirror_leg_action->setEnabled(false);
 	snap_create_action->setEnabled(false);
 	filesystem_menu->setEnabled(false);
     }
 
-    if(!add_mirror_action->isEnabled() && !remove_mirror_action->isEnabled() && !remove_mirror_leg_action->isEnabled())
+    if(!add_mirror_legs_action->isEnabled()   && !remove_mirror_action->isEnabled() && 
+       !remove_mirror_leg_action->isEnabled() && !change_mirror_log_action->isEnabled()) 
         mirror_menu->setEnabled(false);
 }
 
@@ -471,9 +493,21 @@ void LVActionsMenu::extendLogicalVolume()
 	MainWindow->reRun();
 }
 
-void LVActionsMenu::addMirror()
+void LVActionsMenu::addMirrorLegs()
 {
-    if( add_mirror(m_lv) )
+    ChangeMirrorDialog dialog(m_lv, false);
+    dialog.exec();
+
+    if(dialog.result() == QDialog::Accepted)
+	MainWindow->reRun();
+}
+
+void LVActionsMenu::changeMirrorLog()
+{
+    ChangeMirrorDialog dialog(m_lv, true);
+    dialog.exec();
+
+    if(dialog.result() == QDialog::Accepted)
 	MainWindow->reRun();
 }
 
