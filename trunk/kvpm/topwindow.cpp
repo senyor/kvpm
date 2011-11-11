@@ -64,7 +64,10 @@ TopWindow::TopWindow(QWidget *parent):KMainWindow(parent)
 					     QByteArray("0.8.2"),
 					     ki18n("Linux volume and partition manager for KDE.\n"
 						   "This program is still under development,\n"
-						   "bug reports and any comments are welcomed.\n"),
+						   "bug reports and any comments are welcomed.\n \n"
+                                                   "Additional icons taken from Silk icon set by\n"
+                                                   "Mark James http://www.famfamfam.com/lab/icons/silk/\n"
+                                                   "under the Creative Commons Attribution 2.5 License"),
 					     KAboutData::License_GPL_V3, 
 					     ki18n("(c) 2008, 2009, 2010, 2011 Benjamin Scott"),
 					     ki18n(" "),

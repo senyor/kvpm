@@ -1,6 +1,7 @@
 version 0.8.2
 Added a splash screen and moved the progressbar to the mainwindow
-menubar. 
+menubar. Improved the dialog for adding a mirror leg or changing
+a mirror log.
 
 version 0.8.1
 Improved and added to the kvpm config options.
