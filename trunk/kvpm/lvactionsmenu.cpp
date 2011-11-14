@@ -477,7 +477,11 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
 
 void LVActionsMenu::createLogicalVolume()
 {
-    if( lv_create(m_vg) )
+    LVCreateDialog dialog(m_vg);
+    if( !dialog.bailout() )
+        dialog.exec();
+
+    if(dialog.result() == QDialog::Accepted)
 	MainWindow->reRun();
 } 
 
@@ -489,7 +493,11 @@ void LVActionsMenu::reduceLogicalVolume()
 
 void LVActionsMenu::extendLogicalVolume()
 {
-    if(lv_extend(m_lv))
+    LVCreateDialog dialog(m_lv, false);
+    if( !dialog.bailout() )
+        dialog.exec();
+
+    if(dialog.result() == QDialog::Accepted)
 	MainWindow->reRun();
 }
 
@@ -567,7 +575,11 @@ void LVActionsMenu::renameLogicalVolume()
 
 void LVActionsMenu::createSnapshot()
 {
-    if(snapshot_create(m_lv))
+    LVCreateDialog dialog(m_lv, true);
+    if( !dialog.bailout() )
+        dialog.exec();
+
+    if(dialog.result() == QDialog::Accepted)
 	MainWindow->reRun();
 }
 
