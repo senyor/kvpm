@@ -182,20 +182,19 @@ void VGExtendDialog::commitChanges()
     QByteArray pv_name;
     lvm_t lvm = g_master_list->getLVM();
     vg_t  vg_dm;
-    QEventLoop *loop = new QEventLoop(this);
+
     ProgressBox *const progress_box = g_master_list->getProgressBox();
     progress_box->setRange(0, pv_names.size());
     progress_box->setText("Extending VG");
 
     hide();
-
-    loop->processEvents();
+    qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
 
     if( (vg_dm = lvm_vg_open(lvm, vg_name.data(), "w", 0 )) ){
         
         for(int x = 0; x < pv_names.size(); x++){
             progress_box->setValue(x);
-            loop->processEvents();
+            qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
             pv_name = pv_names[x].toLocal8Bit();
             if( lvm_vg_extend(vg_dm, pv_name.data()) )
                 KMessageBox::error(0, QString(lvm_errmsg(lvm)));
@@ -211,6 +210,7 @@ void VGExtendDialog::commitChanges()
 
     KMessageBox::error(0, QString(lvm_errmsg(lvm))); 
     progress_box->reset();
+    qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
     return;
 }
 

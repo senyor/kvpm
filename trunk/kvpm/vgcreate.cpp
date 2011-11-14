@@ -277,10 +277,9 @@ void VGCreateDialog::commitChanges()
     if( m_extent_suffix->currentIndex() > 1 )
         new_extent_size *= 1024;
 
-    QEventLoop *loop = new QEventLoop(this);
     progress_box->setRange(0, pv_names.size());
     progress_box->setText("Creating VG");
-    loop->processEvents();
+    qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
 
     if( (vg_dm = lvm_vg_create(lvm, vg_name_array.data())) ){
 
@@ -289,7 +288,7 @@ void VGCreateDialog::commitChanges()
         
         for(int x = 0; x < pv_names.size(); x++){
             progress_box->setValue(x);
-            loop->processEvents();
+            qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
             pv_name_array = pv_names[x].toLocal8Bit();
             if( lvm_vg_extend(vg_dm, pv_name_array.data()) )
                 KMessageBox::error(0, QString(lvm_errmsg(lvm)));
@@ -307,13 +306,13 @@ void VGCreateDialog::commitChanges()
         
         lvm_vg_close(vg_dm);
         progress_box->reset();
-        delete loop;
+        qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
         return;
     }
         
     KMessageBox::error(0, QString(lvm_errmsg(lvm))); 
     progress_box->reset();
-    delete loop;
+    qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
     return;
 }
 
