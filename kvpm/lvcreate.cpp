@@ -14,13 +14,10 @@
 
 #include "lvcreate.h"
 
-#include <sys/mount.h>
-#include <errno.h>
-#include <cmath>
-
-#include <QtGui>
 #include <KMessageBox>
 #include <KLocale>
+
+#include <QtGui>
 
 #include "fsextend.h"
 #include "logvol.h"
@@ -33,112 +30,6 @@
 #include "volgroup.h"
 
 
-bool lv_create(VolGroup *volumeGroup)
-{
-    LVCreateDialog dialog(volumeGroup);
-    dialog.exec();
-    if(dialog.result() == QDialog::Accepted){
-        ProcessProgress create_lv( dialog.argumentsLV() );
-	return true;
-    }
-    else
-	return false;
-}
-
-bool snapshot_create(LogVol *logicalVolume)
-{
-    LVCreateDialog dialog(logicalVolume, true);
-    dialog.exec();
-    if(dialog.result() == QDialog::Accepted){
-        ProcessProgress create_lv( dialog.argumentsLV() );
-	return true;
-    }
-    else
-	return false;
-}
-
-bool lv_extend(LogVol *logicalVolume)
-{
-    QString fs = logicalVolume->getFilesystem();
-
-    QString warning_message = i18n("Currently only the ext2/3/4, xfs, jfs, " 
-				   "ntfs and reiserfs file systems are "
-				   "supported for file system extension. If this logical "
-				   "volume has a filesystem or data, it will need to be " 
-				   "extended separately!");
-
-    if( logicalVolume->isOrigin() ){
-
-        if( logicalVolume->isOpen() ){
-            KMessageBox::error(0, i18n("Snapshot origins cannot be extended while open or mounted") );
-            return false;
-        }
-
-        QList<LogVol *> snap_shots = logicalVolume->getSnapshots();
-
-        for(int x = 0; x < snap_shots.size(); x++){
-            if( snap_shots[x]->isOpen() ){
-                KMessageBox::error(0, i18n("Volumes cannot be extended with open or mounted snapshots") );
-                return false;
-            }
-        }
-    }
-
-    if( fs == "xfs"  || fs == "jfs"  || fs == "reiserfs" || fs == "ntfs" || 
-        fs == "ext2" || fs == "ext3" || fs == "ext4"     || logicalVolume->isSnap() ){
-
-        LVCreateDialog dialog(logicalVolume, false);
-        dialog.exec();
-
-        if( dialog.result() == QDialog::Accepted ){
-            if( logicalVolume->isOrigin() ){
-                QStringList lvchange_args;
-                lvchange_args << "lvchange" << "-an" << logicalVolume->getMapperPath();
-
-                ProcessProgress deactivate_lv(lvchange_args);
-                if( deactivate_lv.exitCode() ){
-                    KMessageBox::error(0, i18n("Volume deactivation failed, volume not extended") );
-                    return false;
-                }
-
-                ProcessProgress extend_origin( dialog.argumentsLV() );
-
-                lvchange_args.clear();
-                lvchange_args << "lvchange" << "-ay" << logicalVolume->getMapperPath();
-                ProcessProgress activate_lv(lvchange_args);
-                if( (!activate_lv.exitCode()) && (!extend_origin.exitCode()) ){
-                    fs_extend( logicalVolume->getMapperPath(), fs, true );		    
-                    return true;
-                }
-                else{
-                    KMessageBox::error(0, i18n("Filesystem not extended") );
-                    return false;
-                }
-            }
-            else{
-                ProcessProgress extend_lv( dialog.argumentsLV() );
-                if( !extend_lv.exitCode() && !logicalVolume->isSnap() )
-                    fs_extend( logicalVolume->getMapperPath(), fs, true );		    
-                return true;
-            }
-        }
-	else
-            return false;
-    }
-    else{
-        if(KMessageBox::warningContinueCancel(0, warning_message) == KMessageBox::Continue){
-
-            LVCreateDialog dialog(logicalVolume, false);
-            dialog.exec();
-            if(dialog.result() == QDialog::Accepted){
-                ProcessProgress extend_lv( dialog.argumentsLV() );
-                if( !extend_lv.exitCode() )
-                    return true;
-            }
-        }
-        return false;
-    }
-}
 
 /* This class handles both the creation and extension of logical
    volumes and snapshots since both processes are so similar. */
@@ -147,23 +38,27 @@ LVCreateDialog::LVCreateDialog(VolGroup *volumeGroup, QWidget *parent):
     KDialog(parent),
     m_vg(volumeGroup)
 {
-
     m_lv = NULL;
     m_extend = false;
     m_snapshot = false;
-    
-    setCaption( i18n("Create Logical Volume") );
-    m_tab_widget = new KTabWidget(this);
-    m_physical_tab = createPhysicalTab();
-    m_advanced_tab = createAdvancedTab();
-    m_general_tab  = createGeneralTab();
-    m_tab_widget->addTab(m_general_tab,  i18nc("The standard common options", "General") );
-    m_tab_widget->addTab(m_physical_tab, i18n("Physical layout") );
-    m_tab_widget->addTab(m_advanced_tab, i18nc("Less used, dangerous or complex options", "Advanced options") );
+    m_bailout  = hasInitialErrors();
 
-    setMainWidget(m_tab_widget);
-    makeConnections();
-    setMaxSize();
+    if ( !m_bailout ){
+        show();
+        setCaption( i18n("Create Logical Volume") );
+
+        m_tab_widget = new KTabWidget(this);
+        m_physical_tab = createPhysicalTab();
+        m_advanced_tab = createAdvancedTab();
+        m_general_tab  = createGeneralTab();
+        m_tab_widget->addTab(m_general_tab,  i18nc("The standard common options", "General") );
+        m_tab_widget->addTab(m_physical_tab, i18n("Physical layout") );
+        m_tab_widget->addTab(m_advanced_tab, i18nc("Less used, dangerous or complex options", "Advanced options") );
+        
+        setMainWidget(m_tab_widget);
+        makeConnections();
+        setMaxSize();
+    }
 }
 
 LVCreateDialog::LVCreateDialog(LogVol *logicalVolume, bool snapshot, QWidget *parent):
@@ -171,30 +66,37 @@ LVCreateDialog::LVCreateDialog(LogVol *logicalVolume, bool snapshot, QWidget *pa
     m_snapshot(snapshot),
     m_lv(logicalVolume)
 {
-
     m_extend = !m_snapshot;
     m_vg = m_lv->getVG();
+    m_bailout  = hasInitialErrors();
 
-    if(m_snapshot)
-	setCaption( i18n("Create snapshot Volume") );
-    else
-	setCaption( i18n("Extend Logical Volume") );
-    
-    m_tab_widget = new KTabWidget(this);
-    m_physical_tab = createPhysicalTab();  // this order is important
-    m_advanced_tab = createAdvancedTab();
-    m_general_tab  = createGeneralTab();
-    m_tab_widget->addTab(m_general_tab,  i18nc("The standard common options", "General") );
-    m_tab_widget->addTab(m_physical_tab, i18n("Physical layout") );
-    m_tab_widget->addTab(m_advanced_tab, i18nc("Less used, dangerous or complex options", "Advanced options") );
+    if ( !m_bailout ){
+        show();
 
-    setMainWidget(m_tab_widget);
-    makeConnections();
-    setMaxSize();
+        if(m_snapshot)
+            setCaption( i18n("Create snapshot Volume") );
+        else
+            setCaption( i18n("Extend Logical Volume") );
+        
+        m_tab_widget = new KTabWidget(this);
+        m_physical_tab = createPhysicalTab();  // this order is important
+        m_advanced_tab = createAdvancedTab();
+        m_general_tab  = createGeneralTab();
+        m_tab_widget->addTab(m_general_tab,  i18nc("The standard common options", "General") );
+        m_tab_widget->addTab(m_physical_tab, i18n("Physical layout") );
+        m_tab_widget->addTab(m_advanced_tab, i18nc("Less used, dangerous or complex options", "Advanced options") );
+        
+        setMainWidget(m_tab_widget);
+        makeConnections();
+        setMaxSize();
+    }
 }
 
 void LVCreateDialog::makeConnections()
 {
+    connect(this, SIGNAL(okClicked()), 
+            this, SLOT(commitChanges()));
+
     connect(m_pv_checkbox, SIGNAL(stateChanged()), 
             this, SLOT(setMaxSize()));
 
@@ -493,7 +395,6 @@ QWidget* LVCreateDialog::createPhysicalTab()
 
 QWidget* LVCreateDialog::createAdvancedTab()
 {
-
     QHBoxLayout *advanced_layout = new QHBoxLayout;
     m_advanced_tab = new QWidget(this);
     m_advanced_tab->setLayout(advanced_layout);
@@ -641,7 +542,7 @@ void LVCreateDialog::validateVolumeName(QString name)
 void LVCreateDialog::resetOkButton()
 {
     const long long max_extents = getLargestVolume() / m_vg->getExtentSize();
-    const long long volume_extents = m_size_selector->getCurrentSize();
+    const long long volume_extents = roundExtentsToStripes( m_size_selector->getCurrentSize() );
 
     if(m_size_selector->isValid()){
         if(!m_extend){
@@ -774,7 +675,6 @@ QStringList LVCreateDialog::argumentsLV()
     QVariant stripe_size;
     const int stripes = getStripeCount();
     const int mirrors = getMirrorCount();
-    const long long max_extents = getLargestVolume() / m_vg->getExtentSize();
     long long extents = m_size_selector->getCurrentSize();
 
     if(m_tag_edit){
@@ -846,19 +746,7 @@ QStringList LVCreateDialog::argumentsLV()
     if(m_extend)
         extents -= m_lv->getExtents();
 
-    // The next part should only need to reference stripes, not the mirror count
-    // but a bug in lvm requires it. Remove this when fixed.
-
-    // make the number of extents divivsible by the stripe X mirror count then round up
-
-    if( stripes > 1 ){  
-        if( extents % ( stripes * mirrors )){  
-            extents = extents / ( stripes * mirrors );
-            extents = extents * ( stripes * mirrors );
-            if(extents + ( stripes * mirrors ) <= max_extents)
-                extents += ( stripes * mirrors );
-        }
-    }
+    extents = roundExtentsToStripes(extents);
 
     args << "--extents" << QString("+%1").arg(extents);
 
@@ -888,5 +776,126 @@ QStringList LVCreateDialog::argumentsLV()
 
     args.prepend(program_to_run);
     return args;
+}
+
+// make the number of extents divivsible by the stripe X mirror count then round up
+
+long long LVCreateDialog::roundExtentsToStripes(long long extents)
+{
+    const int stripes = getStripeCount();
+    const int mirrors = getMirrorCount();
+    const long long max_extents = getLargestVolume() / m_vg->getExtentSize();
+
+    // The next part should only need to reference stripes, not the mirror count
+    // but a bug in lvm requires it. Remove this when fixed.
+
+    if( stripes > 1 ){  
+        if( extents % ( stripes * mirrors )){  
+            extents = extents / ( stripes * mirrors );
+            extents = extents * ( stripes * mirrors );
+            if(extents + ( stripes * mirrors ) <= max_extents)
+                extents += ( stripes * mirrors );
+        }
+    }
+
+    return extents;
+}
+
+// This function checks for problems that would make showing this dialog pointless
+// returns true if there are problems and is used to set m_bailout.
+
+bool LVCreateDialog::hasInitialErrors()
+{
+    if( !m_vg->getFreeExtents() ){
+        KMessageBox::error(this, i18n("There is no free space left in the volume group") );
+        return true;
+    }
+
+    if(m_extend){
+        const QString fs = m_lv->getFilesystem();
+
+        const QString warning_message = i18n("Currently only the ext2, ext3, ext4, xfs, jfs, ntfs and reiserfs file systems are "
+                                             "supported for extension. If this logical volume has a filesystem "
+                                             "or data, it will need to be extended separately!");
+        
+        if( m_lv->isOrigin() ){
+            if( m_lv->isOpen() ){
+                KMessageBox::error(this, i18n("Snapshot origins cannot be extended while open or mounted") );
+                return true;
+            }
+            
+            const QList<LogVol *> snap_shots = m_lv->getSnapshots();
+            
+            for(int x = 0; x < snap_shots.size(); x++){
+                if( snap_shots[x]->isOpen() ){
+                    KMessageBox::error(this, i18n("Volumes cannot be extended with open or mounted snapshots") );
+                    return true;
+                }
+            }
+        }
+        
+        if( !( fs == "xfs"  || fs == "jfs"  || fs == "reiserfs" || fs == "ntfs" || 
+               fs == "ext2" || fs == "ext3" || fs == "ext4"     || m_lv->isSnap() ) ){
+
+            if(KMessageBox::warningContinueCancel(this, warning_message) != KMessageBox::Continue){
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+bool LVCreateDialog::bailout()
+{
+    return m_bailout;
+}
+
+void LVCreateDialog::commitChanges()
+{
+    QStringList lvchange_args;
+
+    if( !m_extend ){
+        ProcessProgress create_lv( argumentsLV() );
+        return;
+    }
+    else{
+        const QString mapper_path = m_lv->getMapperPath();
+        const QString fs = m_lv->getFilesystem();
+
+        if( m_lv->isOrigin() ){
+
+            lvchange_args << "lvchange" << "-an" << mapper_path;
+            
+            ProcessProgress deactivate_lv(lvchange_args);
+            if( deactivate_lv.exitCode() ){
+                KMessageBox::error(0, i18n("Volume deactivation failed, volume not extended") );
+                return;
+            }
+            
+            ProcessProgress extend_origin( argumentsLV() );
+            if( extend_origin.exitCode() ){
+                KMessageBox::error(0, i18n("Volume extention failed") );
+                return;
+            }
+            
+            lvchange_args.clear();
+            lvchange_args << "lvchange" << "-ay" << mapper_path;
+            ProcessProgress activate_lv(lvchange_args);
+            if( activate_lv.exitCode() ){
+                KMessageBox::error(0, i18n("Volume activation failed, filesystem not extended") );
+                return;
+            }
+
+            fs_extend( m_lv->getMapperPath(), fs, true );		    
+            return;
+        }
+        else{
+            ProcessProgress extend_lv( argumentsLV() );
+            if( !extend_lv.exitCode() && !m_lv->isSnap() )
+                fs_extend( mapper_path, fs, true );		    
+            return;
+        }
+    }
 }
 

@@ -36,9 +36,6 @@ class QDoubleValidator;
 class PVCheckBox;
 class SizeSelectorBox;
 
-bool lv_create(VolGroup *volumeGroup);
-bool lv_extend(LogVol *logicalVolume);
-bool snapshot_create(LogVol *logicalVolume);
 
 class LVCreateDialog : public KDialog
 {
@@ -47,6 +44,7 @@ Q_OBJECT
      bool m_snapshot;        // TRUE if a snapshot
      bool m_extend;          // TRUE if extending a volume
      bool m_name_is_valid;   // TRUE if the new name is acceptable
+     bool m_bailout;         // TRUE if we should not bother to execute this dialog
 
      SizeSelectorBox *m_size_selector;
 
@@ -102,19 +100,21 @@ Q_OBJECT
      int getMirrorCount();
      void resetOkButton();
      void makeConnections();
+     long long roundExtentsToStripes(long long extents);
+     bool hasInitialErrors();
+     QStringList argumentsLV();
 
  public:
      explicit LVCreateDialog(VolGroup *volumeGroup, QWidget *parent = 0);
      LVCreateDialog(LogVol *logicalVolume, bool snapshot, QWidget *parent = 0);
-     
-     QStringList argumentsLV();
+     bool bailout();
 
  private slots:
      void setMaxSize();
      void validateVolumeName(QString name);
      void zeroReadonlyCheck(int state);
      void enableMonitoring(bool checked);
-
+     void commitChanges();
 };
 
 #endif

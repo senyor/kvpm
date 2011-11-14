@@ -85,19 +85,19 @@ TopWindow::TopWindow(QWidget *parent):KMainWindow(parent)
 
     quit_action =  KStandardAction::quit(qApp, SLOT( quit() ), file_menu );
 
-    remove_vg_action       = new KAction( KIcon("cross"),        i18n("Delete Volume Group..."), this);
-    reduce_vg_action       = new KAction( KIcon("delete"),       i18n("Reduce Volume Group..."), this);
-    extend_vg_action       = new KAction( KIcon("add"),          i18n("Extend Volume Group..."), this);
-    rename_vg_action       = new KAction( KIcon("edit-rename"),  i18n("Rename Volume Group..."), this);
-    rescan_action          = new KAction( KIcon("view-refresh"), i18n("Rescan System"), this);
-    restart_pvmove_action  = new KAction( KIcon("system-restart"), i18n("Restart interrupted pvmove"), this);
-    stop_pvmove_action     = new KAction( KIcon("process-stop"),   i18n("Abort pvmove"), this);
-    remove_missing_action  = new KAction( KIcon("error_go"),       i18n("Remove Missing Physcial Volumes..."), this);
+    remove_vg_action       = new KAction( KIcon("cross"),         i18n("Delete Volume Group..."), this);
+    reduce_vg_action       = new KAction( KIcon("delete"),        i18n("Reduce Volume Group..."), this);
+    extend_vg_action       = new KAction( KIcon("add"),           i18n("Extend Volume Group..."), this);
+    rename_vg_action       = new KAction( KIcon("edit-rename"),   i18n("Rename Volume Group..."), this);
+    rescan_action          = new KAction( KIcon("view-refresh"),  i18n("Rescan System"), this);
+    restart_pvmove_action  = new KAction( KIcon("system-reboot"), i18n("Restart interrupted pvmove"), this);
+    stop_pvmove_action     = new KAction( KIcon("process-stop"),  i18n("Abort pvmove"), this);
+    remove_missing_action  = new KAction( KIcon("error_go"),      i18n("Remove Missing Physcial Volumes..."), this);
     export_vg_action       = new KAction( KIcon("document-export"), i18n("Export Volume Group..."), this);
     import_vg_action       = new KAction( KIcon("document-import"), i18n("Import Volume Group..."), this);
     merge_vg_action        = new KAction( KIcon("arrow_join"),   i18n("Merge Volume Group..."), this);
     split_vg_action        = new KAction( KIcon("arrow_divide"), i18n("Split Volume Group..."), this);
-    change_vg_action       = new KAction( KIcon("wrench"), i18n("Change Volume Group Attributes..."), this);
+    change_vg_action       = new KAction( KIcon("wrench"),       i18n("Change Volume Group Attributes..."), this);
     create_vg_action       = new KAction( KIcon("document-new"), i18n("Create Volume Group..."), this);
     config_kvpm_action     = new KAction( KIcon("configure"),    i18n("Configure kvpm..."), this);
 
