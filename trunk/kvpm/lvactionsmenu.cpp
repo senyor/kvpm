@@ -603,6 +603,10 @@ void LVActionsMenu::unmountFilesystem()
 
 void LVActionsMenu::movePhysicalExtents()
 {
-    if( move_pv(m_lv, m_segment) )
-        MainWindow->reRun();
+    PVMoveDialog dialog(m_lv, m_segment);
+    if( !dialog.bailout() )
+        dialog.exec();
+
+    if(dialog.result() == QDialog::Accepted)
+	MainWindow->reRun();
 }

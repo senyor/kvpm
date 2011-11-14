@@ -39,34 +39,10 @@ struct NameAndRange
 };
 
 
-bool move_pv(PhysVol *physicalVolume)
-{
-    PVMoveDialog dialog(physicalVolume);
-    dialog.exec();
-    if(dialog.result() == QDialog::Accepted){
-        ProcessProgress move( dialog.arguments() );
-	return true;
-    }
-    else
-	return false;
-}
-
-bool move_pv(LogVol *logicalVolume, int segment)
-{
-    PVMoveDialog dialog(logicalVolume, segment);
-    dialog.exec();
-    if(dialog.result() == QDialog::Accepted){
-        ProcessProgress move( dialog.arguments() );
-	return true;
-    }
-    else
-	return false;
-}
-
 bool restart_pvmove()
 {
     QStringList args;
-    QString message = i18n("Do you wish to restart all interrupted physical volume moves?");
+    const QString message = i18n("Do you wish to restart all interrupted physical volume moves?");
 
     if(KMessageBox::questionYesNo( 0, message) == 3){      // 3 = "yes" button
 
@@ -81,10 +57,8 @@ bool restart_pvmove()
 
 bool stop_pvmove()
 {
-
     QStringList args;
-    QString message = i18n("Do you wish to abort all physical volume moves " 
-			   "currently in progress?");
+    const QString message = i18n("Do you wish to abort all physical volume moves currently in progress?");
     
     if(KMessageBox::questionYesNo( 0, message) == 3){      // 3 = "yes" button
 
@@ -103,11 +77,12 @@ PVMoveDialog::PVMoveDialog(PhysVol *physicalVolume, QWidget *parent) : KDialog(p
     m_target_pvs = m_vg->getPhysicalVolumes();
     m_move_lv = false;
     m_move_segment = false;
+    m_bailout = false;
 
-    QString name = physicalVolume->getName(); 
+    const QString name = physicalVolume->getName(); 
+    const QList<LogVol *> lvs = m_vg->getLogicalVolumes();
     QStringList forbidden_targets;  // A whole pv can't be moved to a pv it is striped with along any segment
     QStringList striped_targets;
-    QList<LogVol *> lvs = m_vg->getLogicalVolumes();
 
     NameAndRange *nar = new NameAndRange;
     nar->name = name;
@@ -139,7 +114,12 @@ PVMoveDialog::PVMoveDialog(PhysVol *physicalVolume, QWidget *parent) : KDialog(p
     }
 
     removeFullTargets();
-    buildDialog();
+
+    if( !m_bailout )
+        buildDialog();
+
+    connect(this, SIGNAL(okClicked()), 
+            this, SLOT(commitMove()));
 }
 
 PVMoveDialog::PVMoveDialog(LogVol *logicalVolume, int segment, QWidget *parent) : 
@@ -149,6 +129,7 @@ PVMoveDialog::PVMoveDialog(LogVol *logicalVolume, int segment, QWidget *parent) 
     m_vg = m_lv->getVG();
     m_move_lv = true;
     m_target_pvs = m_vg->getPhysicalVolumes();
+    m_bailout = false;
 
     if( segment >= 0 ){
         setupSegmentMove(segment);
@@ -182,7 +163,12 @@ PVMoveDialog::PVMoveDialog(LogVol *logicalVolume, int segment, QWidget *parent) 
     }
 
     removeFullTargets();
-    buildDialog();
+
+    if( !m_bailout )
+        buildDialog();
+
+    connect(this, SIGNAL(okClicked()), 
+            this, SLOT(commitMove()));
 }
 
 void PVMoveDialog::removeFullTargets(){
@@ -196,10 +182,8 @@ void PVMoveDialog::removeFullTargets(){
        all full then a pv move will have no place to go */
 
     if(m_target_pvs.size() < 1){
-	KMessageBox::error(this, i18n("There are no available physical volumes with space to move to"));
-	QEventLoop loop(this);
-	loop.exec();
-	reject();
+	KMessageBox::error(NULL, i18n("There are no available physical volumes with space to move to"));
+        m_bailout = true;
     }
 }
 
@@ -316,7 +300,7 @@ void PVMoveDialog::buildDialog()
 
 void PVMoveDialog::resetOkButton()
 {
-    long long free_space_total = m_pv_checkbox->getRemainingSpace();
+    const long long free_space_total = m_pv_checkbox->getRemainingSpace();
     long long needed_space_total = 0;
     QString pv_name;
 
@@ -399,10 +383,10 @@ QStringList PVMoveDialog::arguments()
 
 void PVMoveDialog::setupSegmentMove(int segment)
 {
-    QStringList names = m_lv->getPVNames(segment);                   // source pv name
-    int stripes = m_lv->getSegmentStripes(segment);                     // source pv stripe count
-    long long extents = m_lv->getSegmentExtents(segment);               // extent count
-    QList<long long> starts = m_lv->getSegmentStartingExtent(segment);  // lv's first extent on pv 
+    const QStringList names = m_lv->getPVNames(segment);                      // source pv name
+    const int stripes = m_lv->getSegmentStripes(segment);                     // source pv stripe count
+    const long long extents = m_lv->getSegmentExtents(segment);               // extent count
+    const QList<long long> starts = m_lv->getSegmentStartingExtent(segment);  // lv's first extent on pv 
     NameAndRange *nar;
     
     for(int x = 0; x < names.size(); x++){
@@ -417,7 +401,7 @@ void PVMoveDialog::setupSegmentMove(int segment)
 
 void PVMoveDialog::setupFullMove()
 {
-    QStringList names = m_lv->getPVNamesAllFlat();
+    const QStringList names = m_lv->getPVNamesAllFlat();
     NameAndRange *nar;
 
     for(int x = names.size() - 1; x >= 0; x--){
@@ -427,3 +411,16 @@ void PVMoveDialog::setupFullMove()
         m_sources.append(nar);
     }
 }
+
+bool PVMoveDialog::bailout()
+{
+    return m_bailout;
+}
+
+void PVMoveDialog::commitMove()
+{
+    hide();
+    ProcessProgress move( arguments() );
+    return;
+}
+

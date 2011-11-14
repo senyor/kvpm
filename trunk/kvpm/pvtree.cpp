@@ -250,8 +250,14 @@ void PVTree::popupContextMenu(QPoint point)
 void PVTree::movePhysicalExtents()
 {
     PhysVol *pv = m_vg->getPVByName(m_pv_name);
+
     if(pv){
-        if( move_pv(pv) )
+        PVMoveDialog dialog(pv);
+
+        if( !dialog.bailout() )
+            dialog.exec();
+        
+        if(dialog.result() == QDialog::Accepted)
             MainWindow->reRun();
     }
 }

@@ -854,6 +854,7 @@ bool LVCreateDialog::bailout()
 void LVCreateDialog::commitChanges()
 {
     QStringList lvchange_args;
+    hide();
 
     if( !m_extend ){
         ProcessProgress create_lv( argumentsLV() );

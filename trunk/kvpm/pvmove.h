@@ -32,8 +32,6 @@ class PVCheckBox;
 class VolGroup;
 
 
-bool move_pv(PhysVol *physicalVolume);
-bool move_pv(LogVol *logicalVolume, int segment);
 bool restart_pvmove();
 bool stop_pvmove();
 
@@ -46,6 +44,7 @@ Q_OBJECT
     LogVol   *m_lv;
     bool      m_move_lv;
     bool      m_move_segment;
+    bool      m_bailout;       // if TRUE, a move is impossible so don't even call up the dialog
     long long m_pv_used_space;
 
     QList<NameAndRange *> m_sources; 
@@ -61,16 +60,18 @@ Q_OBJECT
     void removeFullTargets();
     void setupSegmentMove(int segment);
     void setupFullMove();
+    QStringList arguments();
     
 public:
     explicit PVMoveDialog(PhysVol *physicalVolume, QWidget *parent = 0);
     explicit PVMoveDialog(LogVol *logicalVolume, int segment, QWidget *parent = 0);
     ~PVMoveDialog();
-    QStringList arguments();
-    
+    bool bailout();    
+
 private slots:
     void resetOkButton();
     void disableSource();
+    void commitMove();
 
 };
 
