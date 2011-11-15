@@ -19,17 +19,37 @@
 
 #include <QtGui>
 
-#include "processprogress.h"
+#include "executablefinder.h"
 #include "fsblocksize.h"
 #include "fsck.h"
+#include "processprogress.h"
+
+
+extern ExecutableFinder *g_executable_finder;
+
+
+bool fs_can_reduce(const QString fs)
+{
+    const QString executable = "resize2fs";
+
+    if(fs == "ext2" || fs == "ext3" || fs == "ext4"){
+        if( g_executable_finder->getExecutablePath(executable).isEmpty() ){
+            KMessageBox::error(NULL, i18n("Executable: '%1' not found, this filesystem cannot be reduced", executable));
+            return false;
+        }
+        else
+            return true;
+    }
+    else
+        return false;
+}
 
 
 // Returns new fs size in bytes or 0 if no shrinking was done
 // Returns -1 if fs isn't one of ext2, ext3 or ext4 (not shrinkable)
 // Takes new_size in bytes.
 
-
-long long fs_reduce(QString path, long long new_size, QString fs)
+long long fs_reduce(const QString path, const long long new_size, const QString fs)
 {
 
     QStringList arguments, 
@@ -40,7 +60,7 @@ long long fs_reduce(QString path, long long new_size, QString fs)
 
     QString size_string;
 
-    if( fs != "ext2" && fs != "ext3" && fs != "ext4" )
+    if( !fs_can_reduce(fs) )
         return -1;
 
     if( ! fsck( path ) )
@@ -113,14 +133,14 @@ long long fs_reduce(QString path, long long new_size, QString fs)
 // Returns estimated minimum size of filesystem after shrinking, in bytes
 // Returns 0 on failure
 
-long long get_min_fs_size(QString path, QString fs){
+long long get_min_fs_size(const QString path, const QString fs){
 
     QStringList arguments, 
                 output;
 
     QString size_string;
 
-    if( fs == "ext2" || fs == "ext3" || fs == "ext4" ){
+    if( fs_can_reduce(fs) ){
         arguments << "resize2fs" << "-P" << path;
 
         long block_size = get_fs_block_size(path);

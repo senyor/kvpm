@@ -45,6 +45,7 @@ Q_OBJECT
      bool m_extend;          // TRUE if extending a volume
      bool m_name_is_valid;   // TRUE if the new name is acceptable
      bool m_bailout;         // TRUE if we should not bother to execute this dialog
+     bool m_fs_can_extend;
 
      SizeSelectorBox *m_size_selector;
 

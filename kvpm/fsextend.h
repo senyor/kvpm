@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2009 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2009, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -19,6 +19,7 @@
 
 
 bool fs_extend(QString path, QString fs, bool isLV = false);
+bool fs_can_extend(const QString fs);
 
 
 #endif
