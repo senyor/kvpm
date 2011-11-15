@@ -45,7 +45,6 @@ LVCreateDialog::LVCreateDialog(VolGroup *volumeGroup, QWidget *parent):
     m_fs_can_extend = false;
 
     if ( !m_bailout ){
-        show();
         setCaption( i18n("Create Logical Volume") );
 
         m_tab_widget = new KTabWidget(this);
@@ -72,7 +71,6 @@ LVCreateDialog::LVCreateDialog(LogVol *logicalVolume, bool snapshot, QWidget *pa
     m_bailout  = hasInitialErrors();
 
     if ( !m_bailout ){
-        show();
 
         if(m_snapshot)
             setCaption( i18n("Create snapshot Volume") );
