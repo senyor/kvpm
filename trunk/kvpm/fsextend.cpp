@@ -23,13 +23,46 @@
 
 #include <QtGui>
 
+#include "executablefinder.h"
+#include "fsck.h"
 #include "mountinfo.h"
 #include "mountinfolist.h"
 #include "processprogress.h"
-#include "fsck.h"
+
+
+extern ExecutableFinder *g_executable_finder;
 
 bool do_temp_mount(QString path, QString fs);
 void do_temp_unmount();
+
+
+bool fs_can_extend(const QString fs){
+
+    QString executable;
+
+    if(fs == "ext2" || fs == "ext3" || fs == "ext4" || fs == "reiserfs" || fs == "ntfs" || fs == "xfs"){
+
+        if(fs == "ext2" || fs == "ext3" || fs == "ext4")
+            executable = "resize2fs";
+        else if(fs == "reiserfs")
+            executable = "resize_reiserfs";
+        else if(fs == "ntfs")
+            executable = "ntfsresize";
+        else if(fs == "xfs")
+            executable = "xfs_growfs";
+
+        if( !g_executable_finder->getExecutablePath(executable).isEmpty() )
+            return true;
+        else{
+            KMessageBox::error(NULL, i18n("Executable: '%1' not found, this filesystem cannot be extended", executable));
+            return false;
+        }
+    }
+    else if(fs == "jfs")
+        return true;
+    else
+        return false;
+}
 
 // path is the device path, not mount point
 

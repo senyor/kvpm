@@ -22,7 +22,6 @@
 #include <KButtonGroup>
 
 #include <QtGui>
-#include <QThread>
 
 #include "fsextend.h"
 #include "fsreduce.h"
@@ -45,19 +44,16 @@ extern MasterList *g_master_list;
 bool moveresize_partition(StoragePartition *partition)
 {
     PartitionMoveResizeDialog dialog(partition);
-    QString fs = partition->getFilesystem();
+    const QString fs = partition->getFilesystem();
 
-    QString message = i18n("Currently only the ext2/3/4 file systems "
-                           "are supported for file system shrinking. "
-                           "Growing is supported for ext2/3/4, jfs, xfs, ntfs and Reiserfs. "
-                           "Moving a partition is supported for any filesystem. "
-                           "Physical volumes may also be grown, shrunk or moved");
+    const QString message = i18n("Currently only the ext2, ext3 and ext4 file systems "
+                                 "are supported for file system shrinking. "
+                                 "Growing is supported for ext2/3/4, jfs, xfs, ntfs and Reiserfs. "
+                                 "Moving a partition is supported for any filesystem. "
+                                 "Physical volumes may also be grown, shrunk or moved");
 
-    if( ! ( fs == "ext2" || fs == "ext3" || fs == "ext4" || fs == "reiserfs" ||
-            fs == "xfs"  || fs == "jfs"  || fs == "ntfs" || partition->isPhysicalVolume() ) ){
-
+    if( ! ( fs == "ext2" || fs == "ext3" || fs == "ext4" || partition->isPhysicalVolume() ) )
         KMessageBox::information(0, message);
-    }
 
     dialog.exec();
     
@@ -80,23 +76,10 @@ PartitionMoveResizeDialog::PartitionMoveResizeDialog(StoragePartition *partition
     const long long max_offset = m_max_part_size - m_min_shrink_size;
     long long max_size;
 
-    /*
-      !!!!!!! ADD TEST FOR SHRINK PROGS !!!!!!
-
-      Global function  canShrink() ?
-      Global function  canMove() ?
-
-    */
-
-
-    if( ! ( fs == "ext2" || fs == "ext3" || fs == "ext4" || fs == "reiserfs" || 
-            fs == "xfs"  || fs == "jfs"  || fs == "ntfs" || partition->isPhysicalVolume() ) )
-        {
-            max_size = m_existing_part->geom.length;
-        }
+    if( ! ( fs_can_extend(fs) || partition->isPhysicalVolume() ) )
+        max_size = m_existing_part->geom.length;
     else
         max_size = m_max_part_size;
-
 
     setButtons( KDialog::Ok | KDialog::Cancel | KDialog::Reset );
     setWindowTitle( i18n("Move or resize a partition") );
@@ -310,7 +293,7 @@ void PartitionMoveResizeDialog::resetSelectors()
 
 void PartitionMoveResizeDialog::setup()
 {
-    QString fs = m_old_storage_part->getFilesystem();
+    const QString fs = m_old_storage_part->getFilesystem();
 
     m_existing_part = m_old_storage_part->getPedPartition();
     m_ped_disk = m_existing_part->disk;   
@@ -347,7 +330,10 @@ void PartitionMoveResizeDialog::setup()
         m_min_shrink_size /= m_sector_size;
     }
     else{
-        m_min_shrink_size = get_min_fs_size(ped_partition_get_path(m_existing_part), fs) / m_sector_size;
+        if( fs_can_reduce(fs) )
+            m_min_shrink_size = get_min_fs_size(ped_partition_get_path(m_existing_part), fs) / m_sector_size;
+        else
+            m_min_shrink_size = m_existing_part->geom.length;
     }
 
     if( m_min_shrink_size == 0 )                 // 0 means we can't shrink it 

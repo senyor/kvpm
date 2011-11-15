@@ -13,11 +13,13 @@
  */
 
 
+#include "maxfs.h"
+
 #include <KMessageBox>
 #include <KLocale>
+
 #include <QtGui>
 
-#include "maxfs.h"
 #include "fsextend.h"
 #include "logvol.h"
 #include "processprogress.h"
@@ -28,22 +30,21 @@
 bool max_fs(LogVol *logicalVolume)
 {
     const QString path = logicalVolume->getMapperPath();
-    const QString fs = logicalVolume->getFilesystem();
-    QString full_name = logicalVolume->getFullName();
+    const QString fs   = logicalVolume->getFilesystem();
+    QString full_name  = logicalVolume->getFullName();
     full_name.remove('[').remove(']');
-    QStringList args;
     
     const QString message = i18n("Extend the filesystem on: %1 to fill the entire volume?", "<b>"+full_name+"</b>");
-    const QString error_message = i18n("Extending is only supported for ext2/3/4, jfs, xfs, ntfs and Reiserfs. ");
+    const QString error_message = i18n("Extending is only supported for ext2, ext3, ext4, jfs, xfs, ntfs and Reiserfs. "
+                                       "The correct executables for file system extention must also be present");
 
-    if( ! ( fs == "ext2" || fs == "ext3" || fs == "ext4" || fs == "reiserfs" || 
-            fs == "xfs"  || fs == "jfs" || fs == "ntfs" ) ){
+    if( !fs_can_extend(fs) ){
         KMessageBox::error(0, error_message );
         return false;
     }
 
-    if(KMessageBox::warningYesNo( 0, message) == 3){  // 3 = yes button
-        return fs_extend( path, fs, true); 
+    if(KMessageBox::warningYesNo(0, message) == 3){  // 3 = yes button
+        return fs_extend(path, fs, true); 
     }
     else
         return false;
@@ -51,21 +52,21 @@ bool max_fs(LogVol *logicalVolume)
 
 bool max_fs(StoragePartition *partition)
 {
+    const QString path = partition->getName();
+    const QString fs = partition->getFilesystem();
+    const QString error_message = i18n("Filesystem extending is only supported for ext2, ext3, ext4, jfs, xfs, ntfs and Reiserfs. "
+                                       "Physical volumes can also be extended. "
+                                       "The correct executables for file system extention must be present");
 
-    QString path = partition->getName();
-    QString fs = partition->getFilesystem();
-    QString message, error_message;
+    QString message;
 
     if( partition->isPhysicalVolume() )
         message = i18n("Extend the physical volume on: %1 to fill the entire partition?", "<b>"+path+"</b>");
     else
         message = i18n("Extend the filesystem on: %1 to fill the entire partition?", "<b>"+path+"</b>");
 
-    error_message = i18n("Extending is only supported for ext2/3/4, jfs, xfs, Reiserfs, ntfs and physical volumes. ");
 
-    if( ! ( fs == "ext2" || fs == "ext3" || fs == "ext4" || fs == "reiserfs" ||
-            fs == "xfs"  || fs == "jfs"  || fs == "ntfs" || partition->isPhysicalVolume() ) ){
-
+    if( ! ( fs_can_extend(fs) || partition->isPhysicalVolume() ) ){
         KMessageBox::error(0, error_message );
         return false;
     }

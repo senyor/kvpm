@@ -42,6 +42,7 @@ LVCreateDialog::LVCreateDialog(VolGroup *volumeGroup, QWidget *parent):
     m_extend = false;
     m_snapshot = false;
     m_bailout  = hasInitialErrors();
+    m_fs_can_extend = false;
 
     if ( !m_bailout ){
         show();
@@ -812,11 +813,10 @@ bool LVCreateDialog::hasInitialErrors()
     }
 
     if(m_extend){
-        const QString fs = m_lv->getFilesystem();
 
-        const QString warning_message = i18n("Currently only the ext2, ext3, ext4, xfs, jfs, ntfs and reiserfs file systems are "
-                                             "supported for extension. If this logical volume has a filesystem "
-                                             "or data, it will need to be extended separately!");
+        const QString warning_message = i18n("If this volume has a filesystem or data, it will need to be extended <b>separately</b>. "
+                                             "Currently, only the ext2, ext3, ext4, xfs, jfs, ntfs and reiserfs file systems are "
+                                             "supported for extension. The correct executable for extention must also be present. "); 
         
         if( m_lv->isOrigin() ){
             if( m_lv->isOpen() ){
@@ -833,10 +833,10 @@ bool LVCreateDialog::hasInitialErrors()
                 }
             }
         }
-        
-        if( !( fs == "xfs"  || fs == "jfs"  || fs == "reiserfs" || fs == "ntfs" || 
-               fs == "ext2" || fs == "ext3" || fs == "ext4"     || m_lv->isSnap() ) ){
 
+        m_fs_can_extend = fs_can_extend( m_lv->getFilesystem() );
+
+        if( !( m_fs_can_extend || m_lv->isSnap() ) ){
             if(KMessageBox::warningContinueCancel(this, warning_message) != KMessageBox::Continue){
                 return true;
             }
@@ -866,8 +866,7 @@ void LVCreateDialog::commitChanges()
 
         if( m_lv->isOrigin() ){
 
-            lvchange_args << "lvchange" << "-an" << mapper_path;
-            
+            lvchange_args << "lvchange" << "-an" << mapper_path;            
             ProcessProgress deactivate_lv(lvchange_args);
             if( deactivate_lv.exitCode() ){
                 KMessageBox::error(0, i18n("Volume deactivation failed, volume not extended") );
@@ -888,12 +887,13 @@ void LVCreateDialog::commitChanges()
                 return;
             }
 
-            fs_extend( m_lv->getMapperPath(), fs, true );		    
+            if(m_fs_can_extend)
+                fs_extend( m_lv->getMapperPath(), fs, true );		    
             return;
         }
         else{
             ProcessProgress extend_lv( argumentsLV() );
-            if( !extend_lv.exitCode() && !m_lv->isSnap() )
+            if( !extend_lv.exitCode() && !m_lv->isSnap() && m_fs_can_extend )
                 fs_extend( mapper_path, fs, true );		    
             return;
         }

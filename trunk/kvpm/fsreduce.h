@@ -18,7 +18,8 @@
 #include <QString>
 
 
-long long fs_reduce(QString path, long long new_size, QString fs);
-long long get_min_fs_size(QString path, QString fs);
+bool fs_can_reduce(const QString fs);
+long long fs_reduce(const QString path, const long long new_size, const QString fs);
+long long get_min_fs_size(const QString path, const QString fs);
 
 #endif
