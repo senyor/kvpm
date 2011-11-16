@@ -478,27 +478,34 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
 void LVActionsMenu::createLogicalVolume()
 {
     LVCreateDialog dialog(m_vg);
-    if( !dialog.bailout() )
-        dialog.exec();
 
-    if(dialog.result() == QDialog::Accepted)
-	MainWindow->reRun();
+    if( !dialog.bailout() ){
+        dialog.exec();
+        if(dialog.result() == QDialog::Accepted)
+            MainWindow->reRun();
+    }
 } 
 
 void LVActionsMenu::reduceLogicalVolume()
 {
-    if(lv_reduce(m_lv))
-	MainWindow->reRun();
+    LVReduceDialog dialog(m_lv);
+
+    if( !dialog.bailout() ){
+        dialog.exec();
+        if(dialog.result() == QDialog::Accepted)
+            MainWindow->reRun();
+    }
 }
 
 void LVActionsMenu::extendLogicalVolume()
 {
     LVCreateDialog dialog(m_lv, false);
-    if( !dialog.bailout() )
-        dialog.exec();
 
-    if(dialog.result() == QDialog::Accepted)
-	MainWindow->reRun();
+    if( !dialog.bailout() ){
+        dialog.exec();
+        if(dialog.result() == QDialog::Accepted)
+            MainWindow->reRun();
+    }
 }
 
 void LVActionsMenu::addMirrorLegs()
@@ -576,11 +583,12 @@ void LVActionsMenu::renameLogicalVolume()
 void LVActionsMenu::createSnapshot()
 {
     LVCreateDialog dialog(m_lv, true);
-    if( !dialog.bailout() )
-        dialog.exec();
 
-    if(dialog.result() == QDialog::Accepted)
-	MainWindow->reRun();
+    if( !dialog.bailout() ){
+        dialog.exec();
+        if(dialog.result() == QDialog::Accepted)
+            MainWindow->reRun();
+    }
 }
 
 void LVActionsMenu::changeLogicalVolume()
@@ -604,9 +612,10 @@ void LVActionsMenu::unmountFilesystem()
 void LVActionsMenu::movePhysicalExtents()
 {
     PVMoveDialog dialog(m_lv, m_segment);
-    if( !dialog.bailout() )
-        dialog.exec();
 
-    if(dialog.result() == QDialog::Accepted)
-	MainWindow->reRun();
+    if( !dialog.bailout() ){
+        dialog.exec();
+        if(dialog.result() == QDialog::Accepted)
+            MainWindow->reRun();
+    }
 }
