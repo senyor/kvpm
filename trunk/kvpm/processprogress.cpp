@@ -36,8 +36,6 @@ ProcessProgress::ProcessProgress(QStringList arguments, QObject *parent) : QObje
 
     m_exit_code = 127;  // command not found
 
-    qApp->setOverrideCursor(Qt::WaitCursor);
-
     if(arguments.size() == 0){
 	qDebug() << "ProcessProgress given an empty arguments list";
     }
@@ -47,6 +45,8 @@ ProcessProgress::ProcessProgress(QStringList arguments, QObject *parent) : QObje
 	executable_path = g_executable_finder->getExecutablePath( executable );
 
         if( !executable_path.isEmpty() ){
+
+            qApp->setOverrideCursor(Qt::WaitCursor);
             m_process = new KProcess(this);
             QStringList environment = QProcess::systemEnvironment();
             environment << "LVM_SUPPRESS_FD_WARNINGS=1";
