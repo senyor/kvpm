@@ -16,76 +16,37 @@
 
 #include <KMessageBox>
 #include <KLocale>
+
 #include <QtGui>
 
 #include "logvol.h"
 #include "processprogress.h"
 #include "fsreduce.h"
 #include "misc.h"
+#include "sizeselectorbox.h"
 #include "volgroup.h"
 
 
 bool lv_reduce(LogVol *logicalVolume)
 {
-    QString fs, state;
-    QStringList fs_args, lv_args;
-    
-    fs = logicalVolume->getFilesystem();
+    LVReduceDialog dialog(logicalVolume);
 
-    QString warning_message = i18n("Only the ext2, ext3 and ext4 file systems "
-				   "are supported for file system reduction. If this " 
-				   "logical volume is reduced any <b>data</b> it contains "
-				   "<b>will be lost!</b>");
+    if( !dialog.bailout() )
+        dialog.exec();
+    else
+        return false;
 
-    QString warning_message2 = i18n("If this <b>Inactive</b> logical volume is reduced "
-				    "any <b>data</b> it contains <b>will be lost!</b>");
+    if(dialog.result() == QDialog::Accepted)
+        return true;
+    else
+        return false;
 
-    if( !logicalVolume->isActive() && !logicalVolume->isSnap() ){
-	if(KMessageBox::warningContinueCancel(0, warning_message2) != KMessageBox::Continue)
-	    return false;
-	else{
-	    LVReduceDialog dialog(logicalVolume);
-	    dialog.exec();
-	    if(dialog.result() == QDialog::Accepted){
-		return true;
-	    }
-	    else
-		return false;
-	}
-    }
-    else if( logicalVolume->isMounted() ){
-      KMessageBox::error(0, i18n("The filesystem must be unmounted first") );
-      return false;
-    }
-    else if( (fs != "ext2") && (fs != "ext3") && (fs != "ext4") && ( !logicalVolume->isSnap() ) ){
-	if(KMessageBox::warningContinueCancel(0, warning_message) != KMessageBox::Continue)
-	    return false;
-	else{
-	    LVReduceDialog dialog(logicalVolume);
-	    dialog.exec();
-
-	    if(dialog.result() == QDialog::Accepted)
-		return true;
-	    else
-		return false;
-	}
-    }
-    else{
-	LVReduceDialog dialog(logicalVolume);
-	dialog.exec();
-
-	if(dialog.result() == QDialog::Accepted)
-	    return true;
-	else
-	    return false;
-    }
 }
 
-LVReduceDialog::LVReduceDialog(LogVol *logicalVolume, QWidget *parent) : 
+LVReduceDialog::LVReduceDialog(LogVol *const logicalVolume, QWidget *parent) : 
     KDialog(parent),
     m_lv(logicalVolume)
 {
-
     m_vg = m_lv->getVG();
     setWindowTitle( i18n("Reduce Logical Volume") );
 
@@ -94,163 +55,90 @@ LVReduceDialog::LVReduceDialog(LogVol *logicalVolume, QWidget *parent) :
     QVBoxLayout *layout = new QVBoxLayout();
     dialog_body->setLayout(layout);
 
-    m_current_lv_size = m_lv->getSize();
+    const long long extent_size = m_vg->getExtentSize();
+    const long long current_lv_extents = m_lv->getExtents();
+    const QString fs = m_lv->getFilesystem();
+    long long min_lv_extents;
+    bool force = false;
+    m_bailout = false;
 
-    if( !m_lv->isSnap() )
-        m_min_lv_size = get_min_fs_size( m_lv->getMapperPath(), m_lv->getFilesystem() );
-    else
-        m_min_lv_size = m_vg->getExtentSize();
+    const QString warning_message1 = i18n("If this <b>Inactive</b> logical volume is reduced "
+                                          "any <b>data</b> it contains <b>will be lost!</b>");
 
-    QLabel *lv_name_label  = new QLabel( i18n("<b>Volume: %1</b>", m_lv->getName() ));
-    lv_name_label->setAlignment(Qt::AlignCenter);
-    QLabel *ext_size_label = new QLabel( i18n("Extent size: %1", sizeToString(m_vg->getExtentSize())) );
+    const QString warning_message2 = i18n("Only the ext2, ext3 and ext4 file systems "
+                                          "are supported for file system reduction. If this " 
+                                          "logical volume is reduced any <b>data</b> it contains "
+                                          "<b>will be lost!</b>");
 
-    QLabel *current_lv_size_label = new QLabel( i18n("Current size: %1", sizeToString(m_current_lv_size)) );
-
-    QLabel *min_lv_size_label = new QLabel( i18n("Minimum size: %1", sizeToString(m_min_lv_size)) );
-
-    layout->addWidget(lv_name_label);
-    layout->addWidget(ext_size_label);
-    layout->addWidget(current_lv_size_label);
-    if( !m_lv->isSnap() )
-        layout->addWidget(min_lv_size_label);
-    QHBoxLayout *size_layout = new QHBoxLayout();
-    size_layout->addWidget(new QLabel( i18n("New size: ") ));
-    
-    m_size_edit = new KLineEdit();
-    m_size_validator = new KDoubleValidator(m_size_edit);
-    m_size_edit->setValidator(m_size_validator);
-
-    connect(m_size_edit, SIGNAL(textEdited(QString)),
-	    this, SLOT(validateInput(QString)));
-    
-    m_size_combo = new KComboBox();
-
-    connect(m_size_combo, SIGNAL(currentIndexChanged(int)), 
-	    this, SLOT(sizeComboAdjust(int)));
-
-    connect(this, SIGNAL(okClicked()),
-            this, SLOT(doShrink()));
-
-    m_size_combo->insertItem(0,"Extents");
-    m_size_combo->insertItem(1,"MiB");
-    m_size_combo->insertItem(2,"GiB");
-    m_size_combo->insertItem(3,"TiB");
-    m_size_combo->setInsertPolicy(QComboBox::NoInsert);
-    m_size_combo->setCurrentIndex(0);
-
-    m_size_edit->setText( QString("%1").arg( m_current_lv_size / m_vg->getExtentSize() ));
-
-    if(m_current_lv_size / (1024 * 1024) > (1024 * 1024))
-	m_size_combo->setCurrentIndex(3);
-    else if(m_current_lv_size / (1024 * 1024) > 1024 )
-	m_size_combo->setCurrentIndex(2);
-    else
-	m_size_combo->setCurrentIndex(1);
-    
-    m_size_combo_last_index = m_size_combo->currentIndex();
-    size_layout->addWidget(m_size_edit);
-    size_layout->addWidget(m_size_combo);
-    layout->addLayout(size_layout);
-}
-
-void LVReduceDialog::validateInput(QString text)
-{
-    int pos = 0;
-
-    if(m_size_validator->validate(text , pos) == QValidator::Acceptable)
-	enableButtonOk(true);
-    else
-	enableButtonOk(false);
-}
-
-void LVReduceDialog::sizeComboAdjust(int index)
-{
-    long long extent_size;
-    unsigned long long extents;
-    long double sized;
-
-    extent_size = m_vg->getExtentSize();
-    extents     = getSizeEditExtents(m_size_combo_last_index);
-
-    if(index){
-	sized = (long double)extents * extent_size;
-	if(index == 1){
-	    m_size_validator->setTop(m_current_lv_size / (long double)0x100000);
-	    m_size_validator->setBottom(m_min_lv_size / (long double)0x100000);
-	    sized /= (long double)0x100000;
-	}
-	if(index == 2){
-	    m_size_validator->setTop(m_current_lv_size / (long double)0x40000000);
-	    m_size_validator->setBottom(m_min_lv_size / (long double)0x40000000);
-	    sized /= (long double)0x40000000; 
-	}
-	if(index == 3){
-	    m_size_validator->setTop(m_current_lv_size / ((long double)0x100000 * 0x100000));
-	    m_size_validator->setBottom(m_min_lv_size / ((long double)0x100000 * 0x100000));
-	    sized /= (long double)(0x100000);
-	    sized /= (long double)(0x100000);
-	}
-	m_size_edit->setText(QString("%1").arg((double)sized));
+    if( !m_lv->isActive() && !m_lv->isSnap() ){
+	if(KMessageBox::warningContinueCancel(0, warning_message1) == KMessageBox::Continue)
+            force = true;
+	else
+            m_bailout = true;
     }
-    else{
-	m_size_validator->setTop(m_current_lv_size / extent_size);
-	m_size_validator->setBottom(m_min_lv_size / extent_size);
-	m_size_edit->setText(QString("%1").arg(extents));
+    else if( logicalVolume->isMounted() ){
+        KMessageBox::error(0, i18n("The filesystem must be unmounted first") );
+        m_bailout = true;
+    }
+    else if( !fs_can_reduce(fs) && !logicalVolume->isSnap() ){
+	if(KMessageBox::warningContinueCancel(0, warning_message2) == KMessageBox::Continue)
+	    force = true;
+	else
+            m_bailout = true;
     }
 
-    m_size_combo_last_index = index;
+    if( !m_bailout && !force && !m_lv->isSnap() ){
+
+        const long long min_fs_size = get_min_fs_size( m_lv->getMapperPath(), m_lv->getFilesystem() );
+
+        if( min_fs_size % extent_size )
+            min_lv_extents = 1 + (min_fs_size / extent_size);
+        else
+            min_lv_extents = min_fs_size / extent_size;
+        
+        if( min_fs_size == 0 || min_lv_extents >= m_lv->getExtents() ){
+            KMessageBox::error(0, i18n("The filesystem is already as small as it can be") );
+            m_bailout = true;
+        }
+    }
+    else
+        min_lv_extents = 1;
+
+    if(!m_bailout){                
+
+        QLabel *lv_name_label  = new QLabel( i18n("<b>Volume: %1</b>", m_lv->getName() ));
+        lv_name_label->setAlignment(Qt::AlignCenter);
+        
+        m_size_selector = new SizeSelectorBox(extent_size, min_lv_extents, current_lv_extents, current_lv_extents, true, false, true);
+                
+        layout->addWidget(lv_name_label);
+        layout->addWidget(m_size_selector);
+        
+        connect(this, SIGNAL(okClicked()),
+                this, SLOT(doShrink()));
+    }
 }
 
-long long LVReduceDialog::getSizeEditExtents(int index)
+bool LVReduceDialog::bailout()
 {
-    long long extent_size = m_vg->getExtentSize();
-    long long extents;
-    long double sized;
-
-    if(index){  
-	sized = (m_size_edit->displayText()).toDouble();
-
-	if(m_size_combo_last_index == 1){      // combo index = Megabytes
-	    sized *= (long double)0x100000;
-	}
-	else if(m_size_combo_last_index == 2){ // combo index = Gigabytes
-	    sized *= (long double)0x40000000;
-	}
-	else{                                  // combo index = Terabytes
-	    sized *= (long double)(0x100000);
-	    sized *= (long double)(0x100000);
-	}
-
-	sized /= extent_size;
-
-	if (sized < 0)
-	    sized = 0;
-
-	extents = qRound64(sized);
-    }
-    else                                       // combo index = Extents
-	extents =  ( m_size_edit->displayText() ).toLongLong();
-
-    return extents;
+    return m_bailout;
 }
 
 void LVReduceDialog::doShrink()
 {
-
     QStringList lv_arguments;
-    long long target_size = getSizeEditExtents(m_size_combo->currentIndex()) * m_vg->getExtentSize();
+    const QString fs =  m_lv->getFilesystem();
+    const long long target_size = m_size_selector->getCurrentSize() * m_vg->getExtentSize();
     long long new_size;
 
     hide();
 
-    if( !m_lv->isSnap() )  // never reduce the fs of a snap!
-        new_size = fs_reduce( m_lv->getMapperPath(), target_size, m_lv->getFilesystem() );
+    if( m_lv->isSnap() || !m_lv->isActive() )   // never reduce the fs of a snap!
+        new_size = target_size;
+    else if( fs_can_reduce(fs) )
+        new_size = fs_reduce( m_lv->getMapperPath(), target_size, fs );
     else
         new_size = target_size;
-
-    if( new_size == -1 )         // means the fs or data can't be reduced (not ext2/3/4) 
-        new_size = target_size;  // Go ahead and shrink lv -- we warned the user about data loss!
 
     if( new_size ){
         lv_arguments << "lvreduce" 
@@ -262,4 +150,3 @@ void LVReduceDialog::doShrink()
         ProcessProgress reduce_lv(lv_arguments);
     }
 }
-
