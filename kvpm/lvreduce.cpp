@@ -27,22 +27,6 @@
 #include "volgroup.h"
 
 
-bool lv_reduce(LogVol *logicalVolume)
-{
-    LVReduceDialog dialog(logicalVolume);
-
-    if( !dialog.bailout() )
-        dialog.exec();
-    else
-        return false;
-
-    if(dialog.result() == QDialog::Accepted)
-        return true;
-    else
-        return false;
-
-}
-
 LVReduceDialog::LVReduceDialog(LogVol *const logicalVolume, QWidget *parent) : 
     KDialog(parent),
     m_lv(logicalVolume)

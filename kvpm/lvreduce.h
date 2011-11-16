@@ -24,7 +24,6 @@ class LogVol;
 class SizeSelectorBox;
 class VolGroup;
 
-bool lv_reduce(LogVol *logicalVolume);
 
 
 class LVReduceDialog : public KDialog
