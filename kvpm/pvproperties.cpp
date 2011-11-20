@@ -42,15 +42,86 @@ PVProperties::PVProperties(PhysVol *physicalVolume, QWidget *parent) :
     QWidget(parent),
     m_pv(physicalVolume)
 {
-    QGridLayout *layout = new QGridLayout;
+    setBackgroundRole(QPalette::Base);
+    setAutoFillBackground(true);
+
+    QVBoxLayout *const top_layout = new QVBoxLayout;
+    top_layout->setSpacing(2);
+    top_layout->setMargin(2);
+    top_layout->addWidget( buildLVBox() );
+    top_layout->addWidget( buildMDABox() );
+    top_layout->addWidget( buildUUIDBox() );
+    setLayout(top_layout);
+} 
+
+QList<LVSegmentExtent *> PVProperties::sortByExtent()
+{
+    const QString pv_name = m_pv->getName();
+    VolGroup *const vg = m_pv->getVG();
+    const QList<LogVol *>  lvs = vg->getLogicalVolumesFlat();
+    QList<long long> first_extent_list;
+    QStringList pv_name_list;
+    QList<LVSegmentExtent *> lv_extents;
+    LVSegmentExtent *temp;
+    LogVol *lv;
+
+    for(int x = 0; x < lvs.size() ; x++){
+	lv = lvs[x];
+        if( !lv->isSnapContainer() ){
+            for(int segment = lv->getSegmentCount() - 1; segment >= 0; segment--){
+                pv_name_list = lv->getPVNames(segment);
+                first_extent_list = lv->getSegmentStartingExtent(segment);
+                for(int y = pv_name_list.size() - 1; y >= 0; y--){
+                    if( pv_name_list[y] == pv_name ){
+                        temp = new LVSegmentExtent;
+                        temp->lv_name = lv->getName();
+                        temp->first_extent = first_extent_list[y];
+                        temp->last_extent = temp->first_extent - 1 + (lv->getSegmentExtents(segment) / (lv->getSegmentStripes(segment)));
+                        lv_extents.append(temp);
+                    }
+                }
+            }
+        }
+    }
+
+    qSort( lv_extents.begin() , lv_extents.end(), isLessThan );
+
+    return lv_extents;
+}
+
+QFrame *PVProperties::buildMDABox()
+{
+    QLabel *temp_label;
+    QHBoxLayout *const layout = new QHBoxLayout;
+    QFrame *const frame = new QFrame;
+    frame->setFrameStyle( QFrame::Sunken | QFrame::StyledPanel );
+    frame->setLineWidth(2);
+    frame->setLayout(layout);
+
+    temp_label = new QLabel( "<b>MDA</b>" );
+    temp_label->setAlignment( Qt::AlignVCenter | Qt::AlignLeft );
+    layout->addWidget(temp_label);
+    temp_label = new QLabel( QString("Total: %1").arg( m_pv->getMDACount() ) );
+    layout->addWidget(temp_label);
+    temp_label = new QLabel( QString("In use: %1").arg( m_pv->getMDAUsed() ) );
+    layout->addWidget(temp_label);
+    temp_label = new QLabel( QString("Size: %1").arg( sizeToString( m_pv->getMDASize() ) ) );
+    layout->addWidget(temp_label);
+
+    return frame;
+}
+
+QFrame *PVProperties::buildLVBox()
+{
+    QGridLayout *const layout = new QGridLayout;
     QLabel *temp_label;
     long long first_extent;
     long long last_extent;
 
-    layout->setMargin(0);
-    temp_label = new QLabel( "<b>" + m_pv->getName() + "</b>");
-    temp_label->setAlignment(Qt::AlignCenter);
-    layout->addWidget(temp_label, 0, 0, 1, -1);
+    QFrame *const frame = new QFrame;
+    frame->setFrameStyle( QFrame::Sunken | QFrame::StyledPanel );
+    frame->setLineWidth(2);
+    frame->setLayout(layout);
 
     temp_label = new QLabel( i18n("Volume name") );
     temp_label->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
@@ -128,76 +199,30 @@ PVProperties::PVProperties(PhysVol *physicalVolume, QWidget *parent) :
     }
 
     layout->setRowStretch(row, 10);
+    temp_label = new QLabel( i18n("Total extents: %1", m_pv->getSize() / m_pv->getVG()->getExtentSize() ) );
+    layout->addWidget(temp_label, row + 1, 0, 1, -1 );
 
-    KSeparator *uuid_separator = new KSeparator(Qt::Horizontal);
-    uuid_separator->setFrameStyle(QFrame::Plain | QFrame::Box);
-    uuid_separator->setLineWidth(2);
-    uuid_separator->setMaximumHeight(2);
-    layout->addWidget(uuid_separator, row + 1, 0, 1, -1 );
- 
-    temp_label = new QLabel( "<b>Physical volume UUID</b>" );
-    temp_label->setAlignment( Qt::AlignCenter );
-    layout->addWidget(temp_label, row + 2, 0, 1, -1 );
+    return frame;
+}
+
+QFrame *PVProperties::buildUUIDBox()
+{
+    QLabel *temp_label;
+    QHBoxLayout *const layout = new QHBoxLayout;
+    QFrame *const frame = new QFrame;
+    frame->setFrameStyle( QFrame::Sunken | QFrame::StyledPanel );
+    frame->setLineWidth(2);
+    frame->setLayout(layout);
+
+    temp_label = new QLabel( "<b>UUID</b>" );
+    temp_label->setAlignment( Qt::AlignVCenter | Qt::AlignLeft );
+    layout->addWidget(temp_label);
 
     temp_label = new QLabel( m_pv->getUuid() );
     temp_label->setAlignment( Qt::AlignCenter );
     temp_label->setWordWrap(true);
-    layout->addWidget(temp_label, row + 3, 0, 1, -1 );
+    layout->addWidget(temp_label);
 
-    layout->setRowStretch(row + 4, 10);
-
-    KSeparator *mda_separator = new KSeparator(Qt::Horizontal);
-    mda_separator->setFrameStyle(QFrame::Plain | QFrame::Box);
-    mda_separator->setLineWidth(2);
-    mda_separator->setMaximumHeight(2);
-    layout->addWidget(mda_separator, row + 5, 0, 1, -1 );
- 
-    temp_label = new QLabel( "<b>Metadata Areas</b>" );
-    temp_label->setAlignment( Qt::AlignCenter );
-    layout->addWidget(temp_label, row + 6, 0, 1, -1 );
-
-    temp_label = new QLabel( QString("Total: %1").arg( m_pv->getMDACount() ) );
-    layout->addWidget(temp_label, row + 7, 0, 1, 1 );
-
-    temp_label = new QLabel( QString("In use: %1").arg( m_pv->getMDAUsed() ) );
-    layout->addWidget(temp_label, row + 7, 1, 1, 1 );
-
-    temp_label = new QLabel( QString("Size: %1").arg( sizeToString( m_pv->getMDASize() ) ) );
-    layout->addWidget(temp_label, row + 7, 3, 1, 1, Qt::AlignRight);
-
-    layout->setRowStretch(row + 8, 10);
-    setLayout(layout);
-} 
-
-QList<LVSegmentExtent *> PVProperties::sortByExtent()
-{
-    const QString pv_name = m_pv->getName();
-    VolGroup *vg = m_pv->getVG();
-    QList<LogVol *>  lvs = vg->getLogicalVolumesFlat();
-    QList<long long> first_extent_list;
-    QStringList pv_name_list;
-    QList<LVSegmentExtent *> lv_extents;
-    LVSegmentExtent *temp;
-    LogVol *lv;
-
-    for(int x = 0; x < lvs.size() ; x++){
-	lv = lvs[x];
-	for(int segment = lv->getSegmentCount() - 1; segment >= 0; segment--){
-            pv_name_list = lv->getPVNames(segment);
-            first_extent_list = lv->getSegmentStartingExtent(segment);
-            for(int y = pv_name_list.size() - 1; y >= 0; y--){
-                if( pv_name_list[y] == pv_name ){
-                    temp = new LVSegmentExtent;
-                    temp->lv_name = lv->getName();
-                    temp->first_extent = first_extent_list[y];
-                    temp->last_extent = temp->first_extent - 1 + (lv->getSegmentExtents(segment) / (lv->getSegmentStripes(segment)));
-                    lv_extents.append(temp);
-                }
-            }
-        }
-    }
-
-    qSort( lv_extents.begin() , lv_extents.end(), isLessThan );
-
-    return lv_extents;
+    return frame;
 }
+

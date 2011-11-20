@@ -15,14 +15,17 @@
 #ifndef PVPROPERTIESSTACK_H
 #define PVPROPERTIESSTACK_H
 
-#include <QStackedWidget>
-#include <QTreeWidget>
+#include <QLabel>
 #include <QList>
+#include <QStackedWidget>
+#include <QTreeWidgetItem>
+#include <QScrollArea>
+
  
 class PhysVol;
 class VolGroup;
 
-class PVPropertiesStack : public QWidget
+class PVPropertiesStack : public QScrollArea
 {
 Q_OBJECT
 
@@ -30,9 +33,12 @@ Q_OBJECT
     bool m_is_pv;
     VolGroup *m_vg;
     QList<QStackedWidget *> m_pv_stack_list;
-    
+    QLabel *m_pv_label;       // The name of the device
+    QScrollArea *m_vscroll;    
+
  public:
     explicit PVPropertiesStack(VolGroup *volumeGroup, QWidget *parent = 0);
+    void loadData();
  
  public slots:
     void changePVStackIndex(QTreeWidgetItem *item, QTreeWidgetItem*);
