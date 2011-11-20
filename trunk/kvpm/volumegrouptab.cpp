@@ -59,18 +59,19 @@ VolumeGroupTab::VolumeGroupTab(VolGroup *volumeGroup, QWidget *parent) : QWidget
     m_lv_properties_scroll->setBackgroundRole(QPalette::Base);
     m_lv_properties_scroll->setAutoFillBackground(true);
 
-    m_pv_properties_scroll = new QScrollArea();
-    m_pv_properties_scroll->setWidgetResizable(true);
-    m_pv_properties_scroll->setFrameStyle(QFrame::NoFrame);
-    m_pv_properties_scroll->setBackgroundRole(QPalette::Base);
-    m_pv_properties_scroll->setAutoFillBackground(true);
-
     lv_splitter->setStretchFactor(0, 3);
     lv_splitter->setStretchFactor(1, 1);
     lv_splitter->addWidget(m_lv_properties_scroll);
-    pv_splitter->setStretchFactor(0, 7);
-    pv_splitter->setStretchFactor(1, 3);
-    pv_splitter->addWidget(m_pv_properties_scroll);
+
+    m_pv_properties_stack = new PVPropertiesStack(m_vg);
+    m_pv_properties_stack->setFrameStyle( m_vg_tree->frameStyle() );
+
+    QList<int> size_list;
+    size_list << 600 << 500;
+
+    pv_splitter->setSizes(size_list);
+
+    pv_splitter->addWidget(m_pv_properties_stack);
 
     return;
 }
@@ -82,10 +83,8 @@ void VolumeGroupTab::rescan()
                    m_lv_properties_stack, SLOT(changeLVStackIndex(QTreeWidgetItem*, QTreeWidgetItem*)));
     }
 
-    if(m_pv_properties_stack){
-        disconnect(m_pv_tree, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)), 
-                   m_pv_properties_stack, SLOT(changePVStackIndex(QTreeWidgetItem*, QTreeWidgetItem*)));
-    }
+    disconnect(m_pv_tree, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)), 
+               m_pv_properties_stack, SLOT(changePVStackIndex(QTreeWidgetItem*, QTreeWidgetItem*)));
 
     if(m_vg_info_labels){
         m_layout->removeWidget(m_vg_info_labels);
@@ -103,13 +102,8 @@ void VolumeGroupTab::rescan()
     m_lv_properties_stack = new LVPropertiesStack(m_vg);
     m_lv_properties_scroll->setWidget(m_lv_properties_stack);
 
-    if(m_pv_properties_stack){
-        m_pv_properties_scroll->takeWidget();
-        m_pv_properties_stack->setParent(NULL);
-        m_pv_properties_stack->deleteLater();
-    }
-    m_pv_properties_stack = new PVPropertiesStack(m_vg);
-    m_pv_properties_scroll->setWidget(m_pv_properties_stack);
+
+    m_pv_properties_stack->loadData();
 
     connect(m_vg_tree, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)), 
 	    m_lv_properties_stack, SLOT(changeLVStackIndex(QTreeWidgetItem*, QTreeWidgetItem*)));
@@ -118,7 +112,7 @@ void VolumeGroupTab::rescan()
 	    m_pv_properties_stack, SLOT(changePVStackIndex(QTreeWidgetItem*, QTreeWidgetItem*)));
 
     m_vg_tree->loadData(); // This needs to be done after the lv property stack is built
-    m_pv_tree->loadData(); // This needs to be done after the pv property stack is built
+    m_pv_tree->loadData(); // This needs to be done after the pv property stack is loaded
 
     if(m_lv_size_chart){   // This needs to be after the vgtree is loaded
         m_layout->removeWidget(m_lv_size_chart);
