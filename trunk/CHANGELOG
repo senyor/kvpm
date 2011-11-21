@@ -1,3 +1,8 @@
+version 0.8.3
+Added new configuration options and made showing some panels optional.
+Improved the appearance of the properties panels and made them look
+more consistant with the overall look.
+
 version 0.8.2
 Added a splash screen and moved the progressbar to the mainwindow
 menubar. Improved the dialog for adding a mirror leg or changing

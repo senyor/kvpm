@@ -15,6 +15,8 @@
 
 #include "volumegrouptab.h"
 
+#include <KConfigSkeleton>
+
 #include <QtGui>
 
 #include "lvpropertiesstack.h"
@@ -109,6 +111,8 @@ void VolumeGroupTab::rescan()
     m_lv_size_chart  = new LVSizeChart(m_vg, m_vg_tree);
     m_layout->insertWidget(1, m_lv_size_chart);
 
+    readConfig();
+
     return;
 }
 
@@ -116,4 +120,26 @@ VolGroup* VolumeGroupTab::getVG()
 {
     return m_vg;   
 }
+
+void VolumeGroupTab::readConfig()
+{
+    KConfigSkeleton skeleton;
+    bool show_vg_info, show_lv_bar;
+
+    skeleton.setCurrentGroup("General");
+    skeleton.addItemBool( "show_vg_info", show_vg_info );
+    skeleton.addItemBool( "show_lv_bar",  show_lv_bar );
+
+    if(show_vg_info)
+        m_vg_info_labels->show();
+    else
+        m_vg_info_labels->hide();
+
+    if(show_lv_bar)
+        m_lv_size_chart->show();
+    else
+        m_lv_size_chart->hide();
+}
+
+
 
