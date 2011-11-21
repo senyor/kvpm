@@ -259,6 +259,16 @@ void DeviceTree::loadData(QList<StorageDevice *> devices)
                         child->setToolTip(4, i18n("unmounted filesystem"));
                     }
                 }
+                else if( part->getFilesystem() == "swap" ){
+                    if( part->isBusy() ){
+                        child->setIcon(4, KIcon("task-recurring"));
+                        child->setToolTip(4, i18n("Active swap area") );
+                    }
+                    else{
+                        child->setIcon(4, KIcon("emblem-unmounted"));
+                        child->setToolTip(4, i18n("Inactive swap area"));
+                    }
+                }
 
                 parent->addChild(child);
             }
@@ -297,6 +307,16 @@ void DeviceTree::loadData(QList<StorageDevice *> devices)
                     else{
                         child->setIcon(4, KIcon("emblem-unmounted"));
                         child->setToolTip(4, i18n("unmounted filesystem"));
+                    }
+                }
+                else if( part->getFilesystem() == "swap" ){
+                    if( part->isBusy() ){
+                        child->setIcon(4, KIcon("task-recurring"));
+                        child->setToolTip(4, i18n("Active swap area") );
+                    }
+                    else{
+                        child->setIcon(4, KIcon("emblem-unmounted"));
+                        child->setToolTip(4, i18n("Inactive swap area"));
                     }
                 }
 
