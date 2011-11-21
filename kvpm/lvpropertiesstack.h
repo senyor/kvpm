@@ -15,22 +15,30 @@
 #ifndef LVPROPERTIESSTACK_H
 #define LVPROPERTIESSTACK_H
 
+#include <QFrame>
+#include <QLabel>
+#include <QList>
+#include <QScrollArea>
 #include <QStackedWidget>
 #include <QTreeWidget>
-#include <QList>
  
 class VolGroup;
 
-class LVPropertiesStack : public QStackedWidget
+
+class LVPropertiesStack : public QFrame
 {
 Q_OBJECT
 
     VolGroup *m_vg;
+    QStackedWidget *m_stack_widget;
     QList<QStackedWidget *> m_lv_stack_list;
+    QScrollArea *m_vscroll;
+    QLabel *m_lv_label;
     
  public:
     explicit LVPropertiesStack(VolGroup *Group, QWidget *parent = 0);
- 
+    void loadData();
+
  public slots:
     void changeLVStackIndex(QTreeWidgetItem *item, QTreeWidgetItem*);
     

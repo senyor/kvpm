@@ -51,6 +51,7 @@ PVProperties::PVProperties(PhysVol *physicalVolume, QWidget *parent) :
     top_layout->addWidget( buildLVBox() );
     top_layout->addWidget( buildMDABox() );
     top_layout->addWidget( buildUUIDBox() );
+    top_layout->addStretch();
     setLayout(top_layout);
 } 
 
@@ -198,9 +199,10 @@ QFrame *PVProperties::buildLVBox()
         row++;
     }
 
-    layout->setRowStretch(row, 10);
-    temp_label = new QLabel( i18n("Total extents: %1", m_pv->getSize() / m_pv->getVG()->getExtentSize() ) );
+    temp_label = new QLabel();
     layout->addWidget(temp_label, row + 1, 0, 1, -1 );
+    temp_label = new QLabel( i18n("Total extents: %1", m_pv->getSize() / m_pv->getVG()->getExtentSize() ) );
+    layout->addWidget(temp_label, row + 2, 0, 1, -1 );
 
     return frame;
 }

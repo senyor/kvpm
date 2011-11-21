@@ -15,6 +15,7 @@
 #ifndef PVPROPERTIESSTACK_H
 #define PVPROPERTIESSTACK_H
 
+#include <QFrame>
 #include <QLabel>
 #include <QList>
 #include <QStackedWidget>
@@ -25,7 +26,7 @@
 class PhysVol;
 class VolGroup;
 
-class PVPropertiesStack : public QScrollArea
+class PVPropertiesStack : public QFrame
 {
 Q_OBJECT
 
