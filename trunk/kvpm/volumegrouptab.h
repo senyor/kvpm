@@ -34,7 +34,6 @@ Q_OBJECT
     LVSizeChart  *m_lv_size_chart;
     VGInfoLabels *m_vg_info_labels;
     QVBoxLayout  *m_layout;
-    QScrollArea  *m_lv_properties_scroll;
     VolGroup     *m_vg;
     LVPropertiesStack *m_lv_properties_stack;
     PVPropertiesStack *m_pv_properties_stack;

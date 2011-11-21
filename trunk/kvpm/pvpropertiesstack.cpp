@@ -24,16 +24,11 @@
 
 
 PVPropertiesStack::PVPropertiesStack(VolGroup *volumeGroup, QWidget *parent) 
-    : QScrollArea(parent), 
+    : QFrame(parent), 
       m_vg(volumeGroup)
 {
-    QWidget *const base_widget = new QWidget();
-
     m_vscroll = new QScrollArea;
     m_stack_widget = NULL;
-
-    setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    setWidgetResizable(true);
 
     QVBoxLayout *const vlayout = new QVBoxLayout();
     QHBoxLayout *const hlayout = new QHBoxLayout();
@@ -49,31 +44,27 @@ PVPropertiesStack::PVPropertiesStack(VolGroup *volumeGroup, QWidget *parent)
     vlayout->addWidget(m_vscroll);
     vlayout->addLayout(hlayout);
 
-    base_widget->setLayout(vlayout);
-    setWidget(base_widget);
-
+    setLayout(vlayout);
     m_vscroll->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     m_vscroll->setBackgroundRole(QPalette::Base);
     m_vscroll->setAutoFillBackground(true);
+    m_vscroll->verticalScrollBar()->setBackgroundRole(QPalette::Window);
+    m_vscroll->verticalScrollBar()->setAutoFillBackground(true);
 }
 
 
-/* If *item points to a volume we set the widget stack to the
-   widget with that volume's information.
-   If *item points to nothing but volumes exist we go to the
-   first stack widget.
+/* If *item points to a volume we set the widget stack to the widget with that volume's information.
    Else we set the stack widget index to -1, nothing */ 
 
 void PVPropertiesStack::changePVStackIndex(QTreeWidgetItem *item, QTreeWidgetItem*)
 {
-    QString pv_uuid;
     const QList<PhysVol *> devices  = m_vg->getPhysicalVolumes();
 
     if( !m_stack_widget )
         return;
 
     if(item){
-	pv_uuid = QVariant( item->data(0, Qt::UserRole ) ).toString();
+	const QString pv_uuid = QVariant( item->data(0, Qt::UserRole ) ).toString();
 
 	for(int x = devices.size() - 1; x >= 0; x--){
 	    if( pv_uuid == devices[x]->getUuid() ){
@@ -82,19 +73,15 @@ void PVPropertiesStack::changePVStackIndex(QTreeWidgetItem *item, QTreeWidgetIte
             }
 	}
     }
-    else if( devices.size() )
-	m_stack_widget->setCurrentIndex(0);
-    else
+    else{
 	m_stack_widget->setCurrentIndex(-1);
+        m_pv_label->setText("");
+    }
 }
 
 void PVPropertiesStack::loadData()
 {
-    QWidget *const old_stack = m_vscroll->takeWidget();
     const QList<PhysVol *> devices  = m_vg->getPhysicalVolumes();
-
-    if( old_stack != NULL )
-        old_stack->deleteLater();
 
     m_stack_widget = new QStackedWidget;
 
@@ -105,7 +92,7 @@ void PVPropertiesStack::loadData()
 	m_stack_widget->setCurrentIndex(0);
 
     m_vscroll->setWidget(m_stack_widget);
-    m_vscroll->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Expanding);
+    m_vscroll->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding);
     m_vscroll->setWidgetResizable(true);
     m_vscroll->setFrameShape(QFrame::NoFrame);
 }

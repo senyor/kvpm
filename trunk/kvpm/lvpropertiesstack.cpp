@@ -14,6 +14,8 @@
 
 #include "lvpropertiesstack.h"
 
+#include <KLocale>
+
 #include <QtGui>
 
 #include "lvproperties.h"
@@ -25,62 +27,109 @@
    widget for each line (segment) on the tree. The stacks are in turn
    loaded onto a stack for the whole group. */ 
 
-LVPropertiesStack::LVPropertiesStack(VolGroup *Group, QWidget *parent) : QStackedWidget(parent)
+LVPropertiesStack::LVPropertiesStack(VolGroup *Group, QWidget *parent) 
+    : QFrame(parent),
+      m_vg(Group)
 {
-    m_vg = Group;
-    QList<LogVol *> members  = m_vg->getLogicalVolumesFlat();
+    m_vscroll = new QScrollArea;
+    m_stack_widget = NULL;
+
+    QVBoxLayout *const vlayout = new QVBoxLayout();
+    QHBoxLayout *const hlayout = new QHBoxLayout();
+    vlayout->setMargin(0);
+    vlayout->setSpacing(0);
+
+    m_lv_label = new QLabel;
+    m_lv_label->setAlignment(Qt::AlignCenter);
+
+    vlayout->addSpacing(2);
+    vlayout->addWidget(m_lv_label);
+    vlayout->addSpacing(2);
+    vlayout->addWidget(m_vscroll);
+    vlayout->addLayout(hlayout);
+
+    setLayout(vlayout);
+
+    m_vscroll->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    m_vscroll->setBackgroundRole(QPalette::Base);
+    m_vscroll->setAutoFillBackground(true);
+    m_vscroll->verticalScrollBar()->setBackgroundRole(QPalette::Window);
+    m_vscroll->verticalScrollBar()->setAutoFillBackground(true);
+}
+
+
+/* If *item points to a logical volume we set the widget stack to the widget with that volume's information.
+   Else we set the stack widget index to -1, nothing  */ 
+
+void LVPropertiesStack::changeLVStackIndex(QTreeWidgetItem *item, QTreeWidgetItem*)
+{
+    QString lv_name;
+    const QList<LogVol *> members  = m_vg->getLogicalVolumesFlat();
+
+    if(item && ( members.size() == m_lv_stack_list.size() ) ){  // These *should* be equal
+	const QString lv_uuid = QVariant(item->data(2, Qt::UserRole)).toString();
+
+	for(int x = members.size() - 1; x >= 0; x--){
+            if(lv_uuid == ( members[x])->getUuid() ){
+
+		m_stack_widget->setCurrentIndex(x);
+		const int segment = QVariant(item->data(1, Qt::UserRole)).toInt();
+                
+		if(segment == -1){
+		    m_lv_stack_list[x]->setCurrentIndex(0);
+                    lv_name = item->data(0, Qt::UserRole).toString();
+                }
+                else{
+		    m_lv_stack_list[x]->setCurrentIndex(segment + 1);
+                    if( item->data(3, Qt::UserRole).toString() == "segment")
+                        lv_name = QString("%1 (%2 %3)").arg( item->data(0, Qt::UserRole).toString() ).arg( i18n("segment") ).arg(segment);
+                    else
+                        lv_name = item->data(0, Qt::UserRole).toString();
+                }
+                if( item->data(4, Qt::UserRole).toBool() )   
+                    m_lv_label->setText( "<b>" + lv_name + QString(" + %1").arg( i18n("Snapshots") ) + "</b>" );
+                else
+                    m_lv_label->setText( "<b>" + lv_name + "</b>" );
+            }
+        }
+    }
+    else{
+	m_stack_widget->setCurrentIndex(-1);
+        m_lv_label->setText("");
+    }
+}
+
+void LVPropertiesStack::loadData()
+{
+    const QList<LogVol *> members  = m_vg->getLogicalVolumesFlat();
+
+    m_stack_widget = new QStackedWidget;
+    m_lv_stack_list.clear();
 
     for(int x = 0; x < members.size(); x++){
-	QStackedWidget *segment_properties_stack = new QStackedWidget();
-	m_lv_stack_list.append(segment_properties_stack);
-	addWidget(segment_properties_stack);
+
+	QStackedWidget *const segment_properties_stack = new QStackedWidget();
   
 	if(members[x]->getSegmentCount() > 1){
 	    segment_properties_stack->addWidget(new LVProperties(members[x], -1));
 	    for(int segment = 0; segment < members[x]->getSegmentCount(); segment++)
 		segment_properties_stack->addWidget(new LVProperties(members[x], segment));
 	}
-	else{
+	else
 	    segment_properties_stack->addWidget(new LVProperties(members[x], 0));
-	    addWidget(segment_properties_stack);  
-	}
 
+	m_lv_stack_list.append(segment_properties_stack);
+	m_stack_widget->addWidget(segment_properties_stack);
     }
+
     if( members.size() )
-	setCurrentIndex(0);
-}
+	m_stack_widget->setCurrentIndex(0);
 
-void LVPropertiesStack::changeLVStackIndex(QTreeWidgetItem *item, QTreeWidgetItem*)
-{
+    m_vscroll->setWidget(m_stack_widget);
+    m_vscroll->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding);
+    m_vscroll->setWidgetResizable(true);
+    m_vscroll->setFrameShape(QFrame::NoFrame);
 
-/* If *item points to a logical volume we set the widget stack to the
-   widget with that volume's information.
-   If *item points to nothing but volumes exist we go to the
-   first stack widget.
-   Else we set the stack widget index to -1, nothing  */ 
-
-    QString lv_uuid;
-    int segment;
-    QList<LogVol *> members  = m_vg->getLogicalVolumesFlat();
-
-    if(item && ( members.size() == m_lv_stack_list.size() ) ){  // These *should* be equal
-	lv_uuid = QVariant(item->data(2, Qt::UserRole)).toString();
-
-	for(int x = members.size() - 1; x >= 0; x--){
-            if(lv_uuid == ( members[x])->getUuid() ){
-
-		setCurrentIndex(x);
-		segment = QVariant(item->data(1, Qt::UserRole)).toInt();
-
-		if(segment == -1)
-		    m_lv_stack_list[x]->setCurrentIndex(0);
-		else
-		    m_lv_stack_list[x]->setCurrentIndex(segment + 1);
-	    }
-        }
-    }
-    else if( members.size() )
-	setCurrentIndex(0);
-    else
-	setCurrentIndex(-1);
+    const QSize min_size_hint = minimumSizeHint();
+    setMinimumWidth( min_size_hint.width() + 18 );
 }

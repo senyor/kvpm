@@ -32,8 +32,8 @@ LVProperties::LVProperties(LogVol *logicalVolume, int segment, QWidget *parent):
     m_lv(logicalVolume)
 {
     QVBoxLayout *layout = new QVBoxLayout();
-    layout->setSpacing(0);
-    layout->setMargin(0);
+    layout->setSpacing(2);
+    layout->setMargin(2);
 
     layout->addWidget( generalFrame(segment) );
 
@@ -166,7 +166,6 @@ QFrame *LVProperties::generalFrame(int segment)
     long long extents, total_size, total_extents;
     int stripes, stripe_size;
     QStringList pv_list;
-    QLabel *temp_label;
 
     QFrame *frame = new QFrame();
     QVBoxLayout *layout = new QVBoxLayout();
@@ -176,10 +175,6 @@ QFrame *LVProperties::generalFrame(int segment)
     frame->setLineWidth(2);
 
     if((segment >= 0) && (segment_count > 1)){
-
-        temp_label = new QLabel( "<b>" + m_lv->getName() + QString("[%1]").arg(segment) + "</b>" );
-	temp_label->setAlignment(Qt::AlignCenter);
-	layout->addWidget(temp_label);
 
 	extents = m_lv->getSegmentExtents(segment);
 	stripes = m_lv->getSegmentStripes(segment);
@@ -202,13 +197,6 @@ QFrame *LVProperties::generalFrame(int segment)
     }
     else if((segment >= 0) && (segment_count == 1)){
 
-        if(m_lv->isSnapContainer())
-            temp_label = new QLabel( "<b>" + m_lv->getName() + " + Snapshots </b>" );
-        else
-            temp_label = new QLabel( "<b>" + m_lv->getName() + "</b>" );
-
-	temp_label->setAlignment(Qt::AlignCenter);
-	layout->addWidget(temp_label);
 	extents = m_lv->getSegmentExtents(segment);
         total_size = m_lv->getTotalSize();
         total_extents = total_size / extent_size;
@@ -248,9 +236,6 @@ QFrame *LVProperties::generalFrame(int segment)
 	}
     }
     else{
-	temp_label = new QLabel( "<b> " + m_lv->getName() + "</b>" );
-	temp_label->setAlignment(Qt::AlignCenter);
-	layout->addWidget(temp_label);
 	extents = m_lv->getExtents();
 	layout->addWidget(new QLabel( i18n("Extents: %1", extents) ));
 
