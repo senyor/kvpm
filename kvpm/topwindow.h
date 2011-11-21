@@ -15,10 +15,11 @@
 #ifndef TOPWINDOW_H
 #define TOPWINDOW_H
 
+#include <KAction>
 #include <KMainWindow>
 #include <KMenu>
 #include <KMenuBar>
-#include <KAction>
+#include <KToggleAction>
 
 #include <QVBoxLayout>
 
@@ -36,27 +37,33 @@ class TopWindow : public KMainWindow
 Q_OBJECT
     MainTabWidget *m_tab_widget;          // The current tab widget we are using 
 
-    KAction *quit_action,            *remove_vg_action,       *rename_vg_action, 
-            *reduce_vg_action,       *rescan_action,          *create_vg_action,
-            *change_vg_action,	     *remove_missing_action,  *config_kvpm_action,
-            *restart_pvmove_action,  *stop_pvmove_action,     *extend_vg_action,
-	    *export_vg_action,       *import_vg_action,
-            *split_vg_action,        *merge_vg_action;
-    
+    KAction *m_remove_vg_action,      *m_rename_vg_action, 
+            *m_reduce_vg_action,      *m_create_vg_action,      *m_extend_vg_action,
+            *m_change_vg_action,      *m_remove_missing_action, *m_merge_vg_action,
+            *m_export_vg_action,      *m_import_vg_action,      *m_split_vg_action;
+            
     DeviceTab *m_device_tab;
     VolGroup  *m_vg;
+
     void closeEvent(QCloseEvent *);
+    KMenu *buildFileMenu();
+    KMenu *buildGroupsMenu();
+    KMenu *buildHelpMenu();
+    KMenu *buildSettingsMenu();
+    KMenu *buildToolsMenu();
 
  public:
     TopWindow(QWidget *parent);
     
  public slots:
     void reRun();
-    void updateTrees();
+    void updateTabs();
  
  private slots:
     void cleanUp();
     void setupMenus();
+    void showVolumeGroupInfo(bool show);
+    void showVolumeGroupBar(bool show);
     void changeVolumeGroup();
     void createVolumeGroup();
     void removeVolumeGroup();

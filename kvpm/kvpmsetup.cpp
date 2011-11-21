@@ -48,6 +48,7 @@ bool setup_kvpm()
          state, access, tags, mountpoints, pvname, pvsize, pvremaining, pvused, pvstate,
          pvallocate, pvtags, pvlvnames, total, percent;
 
+    bool show_vg_info, show_lv_bar;
 
     QColor ext2, ext3, ext4, btrfs, reiser, reiser4, physvol, msdos,
            jfs, xfs, hfs, ntfs, none, free, swap;
@@ -57,6 +58,13 @@ bool setup_kvpm()
     skeleton->addItemBool( "isconfigured", configured );
 
     configured = true;
+
+    skeleton->setCurrentGroup("General");
+    skeleton->addItemBool( "show_vg_info", show_vg_info );
+    skeleton->addItemBool( "show_lv_bar",  show_lv_bar );
+
+    show_vg_info = true;
+    show_lv_bar  = true;
 
     skeleton->setCurrentGroup("DeviceTreeColumns");
     skeleton->addItemBool( "device",    device );

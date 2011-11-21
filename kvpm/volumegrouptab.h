@@ -41,6 +41,8 @@ Q_OBJECT
     VGTree *m_vg_tree;
     QString m_group_name;
 
+    void readConfig();
+
  public:
     explicit VolumeGroupTab(VolGroup *volumeGroup, QWidget *parent = 0);
     VolGroup* getVG();
