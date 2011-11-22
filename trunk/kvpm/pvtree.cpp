@@ -81,6 +81,11 @@ void PVTree::loadData()
     PhysVol *pv;
     QStringList pv_data;
     QTreeWidgetItem *item;
+    
+    QString old_current_pv_name;
+
+    if( currentItem() )
+        old_current_pv_name = currentItem()->data(0, 0).toString();
 
     clear();
     setupContextMenu();
@@ -160,11 +165,28 @@ void PVTree::loadData()
     }
     insertTopLevelItems(0, pv_tree_items);
 
-    if( pv_tree_items.size() )
-	setCurrentItem( pv_tree_items[0] );
 
     setSortingEnabled(true);
     setHiddenColumns();
+
+    if( !pv_tree_items.isEmpty() && !old_current_pv_name.isEmpty() ){
+        bool match = false;
+        for(int x = pv_tree_items.size() - 1; x >= 0; x--){ 
+            if( old_current_pv_name == pv_tree_items[x]->data(0, 0).toString() ){ 
+                setCurrentItem( pv_tree_items[x] );
+                match = true;
+                break;
+            }
+        }
+        if(!match){
+            setCurrentItem( pv_tree_items[0] );
+            scrollToItem(pv_tree_items[0], QAbstractItemView::EnsureVisible);
+        }
+    }
+    else{
+        setCurrentItem( pv_tree_items[0] );
+        scrollToItem(pv_tree_items[0], QAbstractItemView::EnsureVisible);
+    }
 
     return;
 }
