@@ -67,7 +67,7 @@ DeviceActionsMenu::DeviceActionsMenu( QTreeWidgetItem *item, QWidget *parent) : 
 
 void DeviceActionsMenu::setup(QTreeWidgetItem *item)
 {
-    KMenu *filesystem_menu = new KMenu( i18n("Filesystem operations"), this);
+    KMenu *const filesystem_menu = new KMenu( i18n("Filesystem operations"), this);
     m_vgextend_menu = new KMenu( i18n("Extend volume group"), this);
     m_vgextend_menu->setIcon( KIcon("add") );
     m_partmoveresize_action = new KAction( i18n("Move or resize disk partition"), this);
@@ -126,7 +126,7 @@ void DeviceActionsMenu::setup(QTreeWidgetItem *item)
             m_tablecreate_action->setEnabled(false);
 	    m_mount_action->setEnabled( m_part->isMountable() );
             m_unmount_action->setEnabled( m_part->isMounted() );
-            m_fsck_action->setEnabled( !m_part->isMounted() );
+            m_fsck_action->setEnabled( !m_part->isMounted() && !m_part->isBusy() );
 
             if( m_part->getPedType() & 0x04 ){    // freespace
                 m_maxfs_action->setEnabled(false);
