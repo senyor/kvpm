@@ -242,6 +242,16 @@ QTreeWidgetItem *VGTree::loadItem(LogVol *lv, QTreeWidgetItem *item)
                 item->setIcon( 8, KIcon("emblem-mounted") );
                 item->setToolTip( 8, i18n("mounted filesystem") );
             }
+            else if( lv->getFilesystem() == "swap" ){
+                if( lv->isOpen() ){
+                    item->setIcon(8, KIcon("task-recurring"));
+                    item->setToolTip(8, i18n("Active swap area") );
+                }
+                else{
+                    item->setIcon(8, KIcon("emblem-unmounted"));
+                    item->setToolTip(8, i18n("Inactive swap area"));
+                }
+            }
             else{
                 item->setIcon( 8, KIcon("emblem-unmounted") );
                 item->setToolTip( 8, i18n("unmounted filesystem") );

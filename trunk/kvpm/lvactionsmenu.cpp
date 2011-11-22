@@ -166,6 +166,17 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
 		unmount_filesystem_action->setEnabled(true);
 		mount_filesystem_action->setEnabled(true);
 	    }
+	    else if( m_lv->isOpen() && m_lv->getFilesystem() == "swap" ){
+		lv_fsck_action->setEnabled(false);
+		lv_mkfs_action->setEnabled(false);
+		lv_removefs_action->setEnabled(false);
+		lv_reduce_action->setEnabled(false);
+                lv_extend_action->setEnabled(false);
+		lv_remove_action->setEnabled(false);
+                lv_maxfs_action->setEnabled(false);
+		unmount_filesystem_action->setEnabled(false);
+		mount_filesystem_action->setEnabled(false);
+	    }
 	    else{
 		lv_mkfs_action->setEnabled(true);
 		lv_removefs_action->setEnabled(true);
