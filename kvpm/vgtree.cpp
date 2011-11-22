@@ -111,16 +111,19 @@ void VGTree::loadData()
     connect(this, SIGNAL(itemCollapsed(QTreeWidgetItem *)), 
 	    this, SLOT(adjustColumnWidth(QTreeWidgetItem *)));
 
+    setSortingEnabled(true);
+
     if( currentItem() == NULL && topLevelItemCount() > 0 )
         setCurrentItem( topLevelItem(0) );
 
-    if( currentItem() != NULL )
+    if( currentItem() != NULL ){
         setCurrentItem( currentItem() );
+        scrollToItem(currentItem(), QAbstractItemView::EnsureVisible);
+    }
 
     for(int x = 0; x < 10; x++)
         resizeColumnToContents(x);
 
-    setSortingEnabled(true);
     setupContextMenu();
     m_init = false;
     emit currentItemChanged(currentItem(), currentItem());
