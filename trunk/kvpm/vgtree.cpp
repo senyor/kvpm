@@ -66,10 +66,10 @@ void VGTree::loadData()
     QTreeWidgetItem *new_item;
 
     disconnect(this, SIGNAL(itemExpanded(QTreeWidgetItem *)), 
-	    this, SLOT(adjustColumnWidth(QTreeWidgetItem *)));
+               this, SLOT(adjustColumnWidth(QTreeWidgetItem *)));
 
     disconnect(this, SIGNAL(itemCollapsed(QTreeWidgetItem *)), 
-	    this, SLOT(adjustColumnWidth(QTreeWidgetItem *)));
+               this, SLOT(adjustColumnWidth(QTreeWidgetItem *)));
 
     setSortingEnabled(false);
     setViewConfig();
@@ -92,9 +92,8 @@ void VGTree::loadData()
 
     }
 
-    bool match;
     for(int y = topLevelItemCount() - 1; y >= 0; y--){ // remove top level lv items of deleted lvs
-        match = false;
+        bool match = false;
         for(int x = 0; x < logical_volumes.size(); x++){
 
             if(topLevelItem(y)->data(0, Qt::DisplayRole).toString() == logical_volumes[x]->getName() )
@@ -140,7 +139,6 @@ QTreeWidgetItem *VGTree::loadItem(LogVol *lv, QTreeWidgetItem *item)
     const int old_child_count = item->childCount();
     bool was_expanded = false;
 
-    int new_child_count;
     QList<LogVol *> temp_kids;
     long long fs_remaining;       // remaining space on fs -- if known
     int fs_percent;               // percentage of space remaining
@@ -302,7 +300,7 @@ QTreeWidgetItem *VGTree::loadItem(LogVol *lv, QTreeWidgetItem *item)
         insertSegmentItems(lv, item);
     }
     
-    new_child_count = item->childCount();
+    const int new_child_count = item->childCount();
 
     if(is_sc){   // expand the item if it is a new snap container or snap count is different
 
@@ -358,7 +356,6 @@ void VGTree::insertSegmentItems(LogVol *lv, QTreeWidgetItem *item)
     const int segment_count = lv->getSegmentCount();
     const int child_count = item->childCount();
 
-    QStringList segment_data;
     QTreeWidgetItem *child_item;
     QList<QTreeWidgetItem *> segment_children;
 
@@ -412,15 +409,12 @@ void VGTree::insertSegmentItems(LogVol *lv, QTreeWidgetItem *item)
 
 void VGTree::insertChildItems(LogVol *parentVolume, QTreeWidgetItem *parentItem)
 {
-    QTreeWidgetItem *child_item;
-    QStringList child_data;
     LogVol *child_volume;
+    const QList<LogVol *>  immediate_children = parentVolume->getChildren();
 
-    QList<LogVol *>  immediate_children = parentVolume->getChildren();
-    long lv_child_count = immediate_children.size();
+    for(int x = 0; x < immediate_children.size(); x++){
 
-    for(int x = 0; x < lv_child_count; x++){
-        child_item = NULL;
+        QTreeWidgetItem *child_item = NULL;
 	child_volume = immediate_children[x];
 
         for(int y = parentItem->childCount() - 1; y >= 0; y--){
@@ -428,30 +422,27 @@ void VGTree::insertChildItems(LogVol *parentVolume, QTreeWidgetItem *parentItem)
                 child_item = loadItem(child_volume, parentItem->child(y));
         }
 
-        if(child_item == NULL){
+        if(child_item == NULL)
             child_item = loadItem(child_volume, new QTreeWidgetItem(parentItem));
-        }
 
         for(int column = 1; column < child_item->columnCount() ; column++)
             child_item->setTextAlignment(column, Qt::AlignRight);
     }
 
-    bool match;     // Remove child items for logical volumes that no longer exist
+    // Remove child items for logical volumes that no longer exist
     for(int y = parentItem->childCount() - 1; y >= 0; y--){
 
-        match = false;
+        bool match = false;
 
         for(int x = 0; x < immediate_children.size(); x++){
             child_volume = immediate_children[x];
 
-            if(parentItem->child(y)->data(0, Qt::DisplayRole).toString() == child_volume->getName() ){
+            if(parentItem->child(y)->data(0, Qt::DisplayRole).toString() == child_volume->getName() )
                 match = true;
-            }
         }
 
-        if( !match ){
+        if( !match )
             delete parentItem->takeChild(y);
-        }
     }
 
     return;
@@ -459,16 +450,13 @@ void VGTree::insertChildItems(LogVol *parentVolume, QTreeWidgetItem *parentItem)
 
 void VGTree::popupContextMenu(QPoint point)
 {
-    QTreeWidgetItem *item;
-    KMenu *context_menu;
-    LogVol *lv;
-    QString lv_name;
-    int segment;    // segment = -1 means whole lv
+    KMenu *context_menu = NULL;
+    const QTreeWidgetItem *const item = itemAt(point);
 
-    item = itemAt(point);
     if(item){                                 //item = 0 if there is no item a that point
-	lv_name = QVariant(item->data(0, Qt::UserRole)).toString();
-	lv = m_vg->getLVByName(lv_name);
+
+        LogVol *const lv = m_vg->getLVByName( QVariant(item->data(0, Qt::UserRole)).toString() );
+        int segment;    // segment = -1 means whole lv
 
         if( QVariant(item->data(3, Qt::UserRole) ).toString() == "segment" )
             segment = QVariant(item->data(1, Qt::UserRole)).toInt();
@@ -482,6 +470,9 @@ void VGTree::popupContextMenu(QPoint point)
 	context_menu = new LVActionsMenu(NULL, 0, m_vg, this);
 	context_menu->exec(QCursor::pos());
     }
+
+    if(context_menu != NULL)
+        context_menu->deleteLater();
 }
 
 void VGTree::setViewConfig()
