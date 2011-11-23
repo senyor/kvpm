@@ -56,8 +56,8 @@ TopWindow::TopWindow(QWidget *parent):KMainWindow(parent)
     m_tab_widget = NULL;
 
     menuBar()->addMenu( buildFileMenu() );
-    menuBar()->addMenu( buildToolsMenu() );
     menuBar()->addMenu( buildGroupsMenu() );
+    menuBar()->addMenu( buildToolsMenu() );
     menuBar()->addMenu( buildSettingsMenu() );
     menuBar()->addMenu( buildHelpMenu() );
 
