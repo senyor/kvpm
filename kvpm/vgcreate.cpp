@@ -260,7 +260,7 @@ void VGCreateDialog::limitExtentSize(int index){
 
 void VGCreateDialog::commitChanges()
 {
-    lvm_t lvm = MasterList::getLVM();
+    lvm_t lvm = MasterList::getLvm();
     vg_t vg_dm;
     uint32_t new_extent_size = m_extent_size->currentText().toULong();
     const QStringList pv_names = m_pv_checkbox->getNames();

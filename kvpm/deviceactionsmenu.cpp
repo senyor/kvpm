@@ -107,7 +107,7 @@ void DeviceActionsMenu::setup(QTreeWidgetItem *item)
 
     m_vg_name  = item->data(5, Qt::DisplayRole).toString(); // only set if this is a pv in a vg
 
-    const QStringList group_names = MasterList::getVolumeGroupNames();
+    const QStringList group_names = MasterList::getVgNames();
     for(int x = 0; x < group_names.size(); x++){
         vgextend_actions.append(new QAction(group_names[x], this));
         m_vgextend_menu->addAction(vgextend_actions[x]);

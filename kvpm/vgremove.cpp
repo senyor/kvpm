@@ -30,7 +30,7 @@
 bool remove_vg(VolGroup *volumeGroup)
 {
     const QByteArray vg_name = volumeGroup->getName().toLocal8Bit();
-    lvm_t  lvm = MasterList::getLVM();
+    lvm_t  lvm = MasterList::getLvm();
     vg_t vg_dm = NULL;
     ProgressBox *const progress_box = TopWindow::getProgressBox();
     bool success = true;

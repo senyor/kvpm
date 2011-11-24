@@ -137,7 +137,7 @@ void VGSplitDialog::deactivate()
 {
     QStringList moving_lvs;
     const QByteArray vg_name = m_vg->getName().toLocal8Bit();
-    lvm_t lvm = MasterList::getLVM();
+    lvm_t lvm = MasterList::getLvm();
     vg_t vg_dm;
     dm_list *lv_dm_list;
     lvm_lv_list *lv_list;

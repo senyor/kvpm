@@ -25,9 +25,6 @@
 class VolGroup;
 class LogVol;
 class PhysVol;
-class MountInformation;
-class MountInformationList;
-class ProgressBox;
 class StorageDevice;
 
 
@@ -41,18 +38,17 @@ Q_OBJECT
 
     void scanVolumeGroups();
     void scanStorageDevices();
-    //    bool determinePVState(PhysVol *const pv, VolGroup *const vg); 
 
 public:
     MasterList();
     ~MasterList();
     void rescan();    
-    static lvm_t getLVM();
+    static lvm_t getLvm();
     static const QList<VolGroup *> getVolGroups();
     static const QList<StorageDevice *> getStorageDevices();
-    static int getVolGroupCount();
-    static VolGroup *getVolGroupByName(QString name);
-    static QStringList getVolumeGroupNames();
+    static int getVgCount();
+    static VolGroup *getVgByName(QString name);
+    static QStringList getVgNames();
 };
 
 #endif

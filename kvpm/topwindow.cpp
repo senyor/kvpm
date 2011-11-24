@@ -152,7 +152,7 @@ void TopWindow::setupMenus()
     QList<LogVol *> lvs;
 
     if(index){
-        m_vg = MasterList::getVolGroupByName( m_tab_widget->getUnmungedText(index) );
+        m_vg = MasterList::getVgByName( m_tab_widget->getUnmungedText(index) );
         if( m_vg != NULL ){
             lvs = m_vg->getLogicalVolumes();
             for( int x = lvs.size() - 1; x >= 0 ;x-- ){
