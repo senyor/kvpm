@@ -244,7 +244,7 @@ void PVTree::popupContextMenu(QPoint point)
 
             pv_move_action->setEnabled(false);
             
-            if(m_vg->getPVCount() > 1)
+            if(m_vg->getPvCount() > 1)
                 vg_reduce_action->setEnabled(true);
             else
                 vg_reduce_action->setEnabled(false);  // can't remove last pv from group
@@ -253,7 +253,7 @@ void PVTree::popupContextMenu(QPoint point)
 	    m_pv_name = QVariant(item->data(0, 0)).toString();
 	    vg_reduce_action->setEnabled(false);
 
-	    if(m_vg->getPVCount() > 1){     // can't move extents if there isn't another volume to put them on
+	    if(m_vg->getPvCount() > 1){     // can't move extents if there isn't another volume to put them on
                 if( QVariant(item->data(6, 0)).toString().contains("pvmove") ) // can't have more than one pvmove
                     pv_move_action->setEnabled(false);                      // See physvol.cpp about removing this
                 else

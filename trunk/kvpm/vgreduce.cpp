@@ -51,7 +51,7 @@ VGReduceDialog::VGReduceDialog(VolGroup *volumeGroup, QWidget *parent) : KDialog
     QString vg_name = m_vg->getName();
 
     QList<PhysVol *> member_pvs = m_vg->getPhysicalVolumes();
-    int pv_count = m_vg->getPVCount(); 
+    int pv_count = m_vg->getPvCount(); 
     m_unremovable_pvs_present = false;
 
     for(int x = pv_count - 1; x >= 0; x--){

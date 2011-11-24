@@ -299,7 +299,7 @@ QWidget* LVCreateDialog::createPhysicalTab()
     QLabel *stripe_size = new QLabel( i18n("Stripe Size: ") );
     m_stripe_count_spin = new QSpinBox();
     m_stripe_count_spin->setMinimum(2);
-    m_stripe_count_spin->setMaximum(m_vg->getPVCount());
+    m_stripe_count_spin->setMaximum(m_vg->getPvCount());
     stripe_size_layout->addWidget(stripe_size);
     stripe_size_layout->addWidget(stripe_size_combo);
     QLabel *stripes_number = new QLabel( i18n("Number of stripes: ") );
@@ -369,7 +369,7 @@ QWidget* LVCreateDialog::createPhysicalTab()
     
     m_mirror_count_spin = new QSpinBox();
     m_mirror_count_spin->setMinimum(2);
-    m_mirror_count_spin->setMaximum(m_vg->getPVCount());
+    m_mirror_count_spin->setMaximum(m_vg->getPvCount());
     QLabel *mirrors_number_label  = new QLabel( i18n("Number of mirror legs: ") );
     mirrors_spin_layout->addWidget(mirrors_number_label);
     mirrors_spin_layout->addWidget(m_mirror_count_spin);

@@ -205,7 +205,7 @@ QWidget *ChangeMirrorDialog::buildPhysicalTab()
         QLabel *const stripe_size = new QLabel( i18n("Stripe Size: ") );
         m_stripes_number_spin = new KIntSpinBox();
         m_stripes_number_spin->setMinimum(2);
-        m_stripes_number_spin->setMaximum(m_lv->getVg()->getPVCount());
+        m_stripes_number_spin->setMaximum(m_lv->getVg()->getPvCount());
         QHBoxLayout *const stripe_size_layout = new QHBoxLayout();
         stripe_size_layout->addWidget(stripe_size);
         stripe_size_layout->addWidget(m_stripe_size_combo);
