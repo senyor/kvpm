@@ -112,7 +112,6 @@ void MasterList::scanVolumeGroups()
 
 void MasterList::scanStorageDevices()
 {
-    PedDevice *dev = NULL;
     QList<PhysVol *>  physical_volumes;
 
     for(int x = 0; x < m_volume_groups.size(); x++)
@@ -127,6 +126,7 @@ void MasterList::scanStorageDevices()
     ped_device_probe_all();
 
     MountInformationList *mount_info_list = new MountInformationList();
+    PedDevice *dev = NULL;
 
     while( ( dev = ped_device_get_next(dev) ) ){
         if( !QString("%1").arg(dev->path).contains("/dev/mapper") )
@@ -134,7 +134,7 @@ void MasterList::scanStorageDevices()
     }
 }
 
-int MasterList::getVolGroupCount()
+int MasterList::getVgCount()
 {
       return m_volume_groups.size();
 }
@@ -149,12 +149,12 @@ const QList<StorageDevice *> MasterList::getStorageDevices()
     return m_storage_devices;
 }
 
-lvm_t MasterList::getLVM()
+lvm_t MasterList::getLvm()
 {
     return m_lvm;
 }
 
-VolGroup* MasterList::getVolGroupByName(QString name)
+VolGroup* MasterList::getVgByName(QString name)
 {
     name = name.trimmed();
 
@@ -166,7 +166,7 @@ VolGroup* MasterList::getVolGroupByName(QString name)
     return NULL;
 }
 
-QStringList MasterList::getVolumeGroupNames()
+QStringList MasterList::getVgNames()
 {
     QStringList names;
 

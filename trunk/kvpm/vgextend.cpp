@@ -39,9 +39,9 @@ bool extend_vg(QString volumeGroupName, StorageDevice *device, StoragePartition 
     const QByteArray vg_name = volumeGroupName.toLocal8Bit();
     QByteArray pv_name;
     long long size;
-    lvm_t lvm = MasterList::getLVM();
+    lvm_t lvm = MasterList::getLvm();
     vg_t  vg_dm;
-    VolGroup *const vg = MasterList::getVolGroupByName(volumeGroupName);
+    VolGroup *const vg = MasterList::getVgByName(volumeGroupName);
     const long long extent_size = vg->getExtentSize();
     ProgressBox *const progress_box = TopWindow::getProgressBox();
     const QString error_message = i18n("This physical volume <b>%1</b> is smaller than the extent size", QString(pv_name));
@@ -180,7 +180,7 @@ void VGExtendDialog::commitChanges()
     const QByteArray vg_name   = m_vg->getName().toLocal8Bit();
     const QStringList pv_names = m_pv_checkbox->getNames();
     QByteArray pv_name;
-    lvm_t lvm = MasterList::getLVM();
+    lvm_t lvm = MasterList::getLvm();
     vg_t  vg_dm;
 
     ProgressBox *const progress_box = TopWindow::getProgressBox();

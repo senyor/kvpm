@@ -28,7 +28,7 @@
 
 bool merge_vg(VolGroup *volumeGroup)
 {
-    const QStringList vg_names = MasterList::getVolumeGroupNames();
+    const QStringList vg_names = MasterList::getVgNames();
     const QStringList lv_names = volumeGroup->getLVNames();
 
     if( vg_names.size() < 2  ){
@@ -71,7 +71,7 @@ VGMergeDialog::VGMergeDialog(VolGroup *volumeGroup, QWidget *parent) : KDialog(p
     layout->addWidget(target_group);
     m_target_combo = new KComboBox();
 
-    QStringList vg_names = MasterList::getVolumeGroupNames();
+    QStringList vg_names = MasterList::getVgNames();
     for(int x = 0; x < vg_names.size(); x++){  // remove this groups own name from list
         if( m_vg->getName() != vg_names[x] )
             m_target_combo->addItem( vg_names[x] );

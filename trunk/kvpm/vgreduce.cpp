@@ -90,7 +90,7 @@ void VGReduceDialog::commitChanges()
     const QByteArray vg_name = m_vg->getName().toLocal8Bit();
     QByteArray pv_name;
     vg_t vg_dm = NULL;
-    lvm_t lvm = MasterList::getLVM();
+    lvm_t lvm = MasterList::getLvm();
 
     QStringList pv_list; // pvs to remove by name
     pv_list << m_pv_checkbox->getNames();
