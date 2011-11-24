@@ -58,7 +58,7 @@ PVProperties::PVProperties(PhysVol *physicalVolume, QWidget *parent) :
 QList<LVSegmentExtent *> PVProperties::sortByExtent()
 {
     const QString pv_name = m_pv->getName();
-    VolGroup *const vg = m_pv->getVG();
+    VolGroup *const vg = m_pv->getVg();
     const QList<LogVol *>  lvs = vg->getLogicalVolumesFlat();
     QList<long long> first_extent_list;
     QStringList pv_name_list;
@@ -70,7 +70,7 @@ QList<LVSegmentExtent *> PVProperties::sortByExtent()
 	lv = lvs[x];
         if( !lv->isSnapContainer() ){
             for(int segment = lv->getSegmentCount() - 1; segment >= 0; segment--){
-                pv_name_list = lv->getPVNames(segment);
+                pv_name_list = lv->getPvNames(segment);
                 first_extent_list = lv->getSegmentStartingExtent(segment);
                 for(int y = pv_name_list.size() - 1; y >= 0; y--){
                     if( pv_name_list[y] == pv_name ){
@@ -102,11 +102,11 @@ QFrame *PVProperties::buildMDABox()
     temp_label = new QLabel( "<b>MDA</b>" );
     temp_label->setAlignment( Qt::AlignVCenter | Qt::AlignLeft );
     layout->addWidget(temp_label);
-    temp_label = new QLabel( QString("Total: %1").arg( m_pv->getMDACount() ) );
+    temp_label = new QLabel( QString("Total: %1").arg( m_pv->getMdaCount() ) );
     layout->addWidget(temp_label);
-    temp_label = new QLabel( QString("In use: %1").arg( m_pv->getMDAUsed() ) );
+    temp_label = new QLabel( QString("In use: %1").arg( m_pv->getMdaUsed() ) );
     layout->addWidget(temp_label);
-    temp_label = new QLabel( QString("Size: %1").arg( sizeToString( m_pv->getMDASize() ) ) );
+    temp_label = new QLabel( QString("Size: %1").arg( sizeToString( m_pv->getMdaSize() ) ) );
     layout->addWidget(temp_label);
 
     return frame;
@@ -201,7 +201,7 @@ QFrame *PVProperties::buildLVBox()
 
     temp_label = new QLabel();
     layout->addWidget(temp_label, row + 1, 0, 1, -1 );
-    temp_label = new QLabel( i18n("Total extents: %1", m_pv->getSize() / m_pv->getVG()->getExtentSize() ) );
+    temp_label = new QLabel( i18n("Total extents: %1", m_pv->getSize() / m_pv->getVg()->getExtentSize() ) );
     layout->addWidget(temp_label, row + 2, 0, 1, -1 );
 
     return frame;

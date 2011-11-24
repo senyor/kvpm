@@ -59,12 +59,12 @@ public:
     VolGroup(lvm_t lvm, const char *vgname);
     ~VolGroup();
     void rescan(lvm_t lvm);
-    const QList<LogVol *>  getLogicalVolumes();   // *TOP LEVEL ONLY* snapcontainers returned not snaps and origin 
-    const QList<LogVol *>  getLogicalVolumesFlat(); // un-nest the volumes, snapshots and mirror legs
-    const QList<PhysVol *> getPhysicalVolumes();
-    LogVol* getLVByName(QString shortName);  // lv name without the vg name and "/" -- skips snap containers
-    LogVol* getLVByUuid(QString uuid);       // also skips snap containers
-    PhysVol* getPVByName(QString name);     //   /dev/something
+    QList<LogVol *>  getLogicalVolumes();     // *TOP LEVEL ONLY* snapcontainers returned not snaps and origin 
+    QList<LogVol *>  getLogicalVolumesFlat(); // un-nest the volumes, snapshots and mirror legs
+    QList<PhysVol *> getPhysicalVolumes();
+    LogVol* getLvByName(QString shortName);   // lv name without the vg name and "/" -- skips snap containers
+    LogVol* getLvByUuid(QString uuid);        // also skips snap containers
+    PhysVol* getPvByName(QString name);       //   /dev/something
     long long getExtents();
     long long getFreeExtents();
     long long getAllocatableExtents();
@@ -77,12 +77,12 @@ public:
     int getLVMax();
     int getPVCount();
     int getPVMax();
-    int getMDACount();
+    int getMdaCount();
     QString getName();
     QString getUuid();
     QString getPolicy();
     QString getFormat();
-    QStringList getLVNames();
+    QStringList getLvNames();
     bool isWritable();
     bool isResizable();
     bool isClustered();

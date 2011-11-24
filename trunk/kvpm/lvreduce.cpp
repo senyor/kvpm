@@ -31,7 +31,7 @@ LVReduceDialog::LVReduceDialog(LogVol *const logicalVolume, QWidget *parent) :
     KDialog(parent),
     m_lv(logicalVolume)
 {
-    m_vg = m_lv->getVG();
+    m_vg = m_lv->getVg();
     setWindowTitle( i18n("Reduce Logical Volume") );
 
     QWidget *dialog_body = new QWidget(this);

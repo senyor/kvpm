@@ -45,12 +45,12 @@ PVChangeDialog::PVChangeDialog(PhysVol *physicalVolume, QWidget *parent):
         m_allocation_box->setChecked(true);
     attrib_box_layout->addWidget(m_allocation_box);
     m_mda_box = new QCheckBox( i18n("Use metadata areas on this volume") );
-    if( m_pv->getMDAUsed() )
+    if( m_pv->getMdaUsed() )
         m_mda_box->setChecked(true);
     attrib_box_layout->addWidget(m_mda_box);
     m_uuid_box = new QCheckBox( i18n("Generate new UUID for this volume") );
     m_uuid_box->setChecked(false);
-    if( m_pv->getVG()->isActive() )
+    if( m_pv->getVg()->isActive() )
         m_uuid_box->setEnabled(false);
     attrib_box_layout->addWidget(m_uuid_box);
 
@@ -99,7 +99,7 @@ void PVChangeDialog::resetOkButton()
     if( m_allocation_box->isChecked() != m_pv->isAllocatable() )
         enableButtonOk(true);
 
-    if( m_mda_box->isChecked() != m_pv->getMDAUsed() )
+    if( m_mda_box->isChecked() != m_pv->getMdaUsed() )
         enableButtonOk(true);   
 
     if( m_uuid_box->isChecked() )
@@ -120,9 +120,9 @@ QStringList PVChangeDialog::arguments()
     else if( !m_allocation_box->isChecked() && m_pv->isAllocatable() )
 	args << "--allocatable" << "n";
 
-    if( m_mda_box->isChecked() && !m_pv->getMDAUsed() )
+    if( m_mda_box->isChecked() && !m_pv->getMdaUsed() )
         args << "--metadataignore" << "n";
-    else if( !m_mda_box->isChecked() && m_pv->getMDAUsed() )
+    else if( !m_mda_box->isChecked() && m_pv->getMdaUsed() )
         args << "--metadataignore" << "y";
 
     if( m_uuid_box->isChecked() )

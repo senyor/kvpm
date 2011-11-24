@@ -161,7 +161,7 @@ QFrame *LVProperties::fsFrame()
 
 QFrame *LVProperties::generalFrame(int segment)
 {
-    const long long extent_size = m_lv->getVG()->getExtentSize();
+    const long long extent_size = m_lv->getVg()->getExtentSize();
     const int segment_count = m_lv->getSegmentCount();
     long long extents, total_size, total_extents;
     int stripes, stripe_size;
@@ -273,7 +273,7 @@ QFrame *LVProperties::physicalVolumesFrame(int segment)
     layout->addWidget(temp_label);
 
     if( m_lv->isMirror() || m_lv->isSnapContainer() ){
-	pv_list = m_lv->getPVNamesAllFlat();
+	pv_list = m_lv->getPvNamesAllFlat();
 	for(int pv = 0; pv < pv_list.size(); pv++){
 	    temp_label = new QLabel( pv_list[pv] );
 	    temp_label->setToolTip( pv_list[pv] );
@@ -281,7 +281,7 @@ QFrame *LVProperties::physicalVolumesFrame(int segment)
 	}
     } 
     else if(segment > -1){
-	pv_list = m_lv->getPVNames(segment);
+	pv_list = m_lv->getPvNames(segment);
 	for(int pv = 0; pv < pv_list.size(); pv++){
 	    temp_label = new QLabel( pv_list[pv] );
 	    temp_label->setToolTip( pv_list[pv] );
@@ -289,7 +289,7 @@ QFrame *LVProperties::physicalVolumesFrame(int segment)
 	}
     }
     else{
-	pv_list = m_lv->getPVNamesAll();
+	pv_list = m_lv->getPvNamesAll();
 	for(int pv = 0; pv < pv_list.size(); pv++){
 	    temp_label = new QLabel( pv_list[pv] );
 	    temp_label->setToolTip( pv_list[pv] );

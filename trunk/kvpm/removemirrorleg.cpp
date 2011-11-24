@@ -36,7 +36,7 @@ bool remove_mirror_leg(LogVol *mirrorLeg)
             parent_mirror = parent_mirror->getParent();
     }
 
-    QStringList pvs_to_remove  = mirrorLeg->getPVNamesAll();
+    QStringList pvs_to_remove  = mirrorLeg->getPvNamesAll();
 
     QString message = i18n("Remove mirror leg: %1 ?", mirrorLeg->getName());
     

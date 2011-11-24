@@ -121,7 +121,7 @@ void DeviceTree::loadData(QList<StorageDevice *> devices)
             else
                 data << QString("%1 (%%2) ").arg( sizeToString( pv->getRemaining() )).arg( 100 - pv->getPercentUsed() );
 
-            data << "PV" << pv->getVG()->getName();
+            data << "PV" << pv->getVg()->getName();
         }
         else{
             data << dev_name << "" << sizeToString(dev->getSize());
@@ -178,7 +178,7 @@ void DeviceTree::loadData(QList<StorageDevice *> devices)
                     data << QString("%1 (%%2) ").arg( sizeToString( pv->getRemaining() )).arg( 100 - pv->getPercentUsed() );
 
                 data << "PV"
-                     << pv->getVG()->getName()
+                     << pv->getVg()->getName()
                      << (part->getFlags()).join(", ") 
                      << "";
             }

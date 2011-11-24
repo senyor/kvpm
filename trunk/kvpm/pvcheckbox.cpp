@@ -46,7 +46,7 @@ PVCheckBox::PVCheckBox(QList<PhysVol *> physicalVolumes, QWidget *parent):
         layout->addWidget(pv_label);
     }
     else if(pv_check_count < 2){
-        m_extent_size = m_pvs[0]->getVG()->getExtentSize();
+        m_extent_size = m_pvs[0]->getVg()->getExtentSize();
         QLabel *pv_label = new QLabel( m_pvs[0]->getName() + "  " + sizeToString( m_pvs[0]->getRemaining() ) );
         layout->addWidget(pv_label, 0, 0, 1, -1);
         layout->addWidget(m_space_label,   layout->rowCount(), 0, 1, -1);
@@ -54,7 +54,7 @@ PVCheckBox::PVCheckBox(QList<PhysVol *> physicalVolumes, QWidget *parent):
         calculateSpace();
     }
     else{
-        m_extent_size = m_pvs[0]->getVG()->getExtentSize();
+        m_extent_size = m_pvs[0]->getVg()->getExtentSize();
         for(int x = 0; x < pv_check_count; x++){
 	    temp_check = new NoMungeCheck( m_pvs[x]->getName() + "  " + sizeToString( m_pvs[x]->getRemaining() ) );
 	    temp_check->setAlternateText( m_pvs[x]->getName() );

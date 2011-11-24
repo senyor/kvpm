@@ -73,7 +73,7 @@ bool stop_pvmove()
 
 PVMoveDialog::PVMoveDialog(PhysVol *physicalVolume, QWidget *parent) : KDialog(parent) 
 {
-    m_vg = physicalVolume->getVG();
+    m_vg = physicalVolume->getVg();
     m_target_pvs = m_vg->getPhysicalVolumes();
     m_move_lv = false;
     m_move_segment = false;
@@ -94,7 +94,7 @@ PVMoveDialog::PVMoveDialog(PhysVol *physicalVolume, QWidget *parent) : KDialog(p
     for(int x = lvs.size() - 1; x >= 0; x--){
         for(int seg = lvs[x]->getSegmentCount() - 1; seg >= 0; seg--){
             if( lvs[x]->getSegmentStripes(seg) > 1 ){
-                striped_targets = lvs[x]->getPVNames(seg);
+                striped_targets = lvs[x]->getPvNames(seg);
                 if( striped_targets.contains(name) )
                     forbidden_targets.append(striped_targets); 
             }
@@ -126,7 +126,7 @@ PVMoveDialog::PVMoveDialog(LogVol *logicalVolume, int segment, QWidget *parent) 
     KDialog(parent), 
     m_lv(logicalVolume)
 {
-    m_vg = m_lv->getVG();
+    m_vg = m_lv->getVg();
     m_move_lv = true;
     m_target_pvs = m_vg->getPhysicalVolumes();
     m_bailout = false;
@@ -234,12 +234,12 @@ void PVMoveDialog::buildDialog()
                 radio_button->setAlternateText( m_sources[x]->name );
             }
 	    else if(m_move_lv){
-	        m_pv_used_space = m_lv->getSpaceUsedOnPV(m_sources[x]->name);
+	        m_pv_used_space = m_lv->getSpaceUsedOnPv(m_sources[x]->name);
                 radio_button = new NoMungeRadioButton( QString("%1  %2").arg(m_sources[x]->name).arg(sizeToString(m_pv_used_space)));
                 radio_button->setAlternateText( m_sources[x]->name );
             }
             else{
-                m_pv_used_space = m_vg->getPVByName(m_sources[x]->name)->getSize() - m_vg->getPVByName(m_sources[x]->name )->getRemaining();
+                m_pv_used_space = m_vg->getPvByName(m_sources[x]->name)->getSize() - m_vg->getPvByName(m_sources[x]->name )->getRemaining();
                 radio_button = new NoMungeRadioButton( QString("%1  %2").arg(m_sources[x]->name).arg(sizeToString(m_pv_used_space)));
                 radio_button->setAlternateText( m_sources[x]->name );
             }
@@ -266,11 +266,11 @@ void PVMoveDialog::buildDialog()
             radio_layout->addWidget( new QLabel( QString("%1  %2").arg(m_sources[0]->name_range).arg(sizeToString(m_pv_used_space)) ) );
         }
 	else if(m_move_lv){
-	    m_pv_used_space = m_lv->getSpaceUsedOnPV(m_sources[0]->name);
+	    m_pv_used_space = m_lv->getSpaceUsedOnPv(m_sources[0]->name);
             radio_layout->addWidget( new QLabel( QString("%1  %2").arg(m_sources[0]->name).arg(sizeToString(m_pv_used_space)) ) );
         }
 	else{
-            m_pv_used_space = m_vg->getPVByName( m_sources[0]->name )->getSize() - m_vg->getPVByName( m_sources[0]->name )->getRemaining();
+            m_pv_used_space = m_vg->getPvByName( m_sources[0]->name )->getSize() - m_vg->getPvByName( m_sources[0]->name )->getRemaining();
             radio_layout->addWidget( new QLabel( QString("%1  %2").arg(m_sources[0]->name).arg(sizeToString(m_pv_used_space)) ) );
         }
     }
@@ -309,13 +309,13 @@ void PVMoveDialog::resetOkButton()
 	    for(int x = 0; x < m_radio_buttons.size(); x++){
 		if(m_radio_buttons[x]->isChecked()){
 		    pv_name = m_radio_buttons[x]->getAlternateText();
-		    needed_space_total = m_lv->getSpaceUsedOnPV(pv_name);
+		    needed_space_total = m_lv->getSpaceUsedOnPv(pv_name);
 		}
 	    }
 	}
 	else{
 	    pv_name = m_sources[0]->name;
-	    needed_space_total = m_lv->getSpaceUsedOnPV(pv_name);
+	    needed_space_total = m_lv->getSpaceUsedOnPv(pv_name);
 	}
     }
     else
@@ -333,7 +333,7 @@ void PVMoveDialog::disableSource()  // don't allow source and target to be the s
     
     for(int x = m_radio_buttons.size() - 1; x>= 0; x--){
 	if(m_radio_buttons[x]->isChecked())
-	    source_pv = m_vg->getPVByName( m_sources[x]->name );
+	    source_pv = m_vg->getPvByName( m_sources[x]->name );
     }
 
     m_pv_checkbox->disableOrigin(source_pv);
@@ -383,7 +383,7 @@ QStringList PVMoveDialog::arguments()
 
 void PVMoveDialog::setupSegmentMove(int segment)
 {
-    const QStringList names = m_lv->getPVNames(segment);                      // source pv name
+    const QStringList names = m_lv->getPvNames(segment);                      // source pv name
     const int stripes = m_lv->getSegmentStripes(segment);                     // source pv stripe count
     const long long extents = m_lv->getSegmentExtents(segment);               // extent count
     const QList<long long> starts = m_lv->getSegmentStartingExtent(segment);  // lv's first extent on pv 
@@ -401,7 +401,7 @@ void PVMoveDialog::setupSegmentMove(int segment)
 
 void PVMoveDialog::setupFullMove()
 {
-    const QStringList names = m_lv->getPVNamesAllFlat();
+    const QStringList names = m_lv->getPvNamesAllFlat();
     NameAndRange *nar;
 
     for(int x = names.size() - 1; x >= 0; x--){
