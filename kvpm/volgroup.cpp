@@ -173,12 +173,12 @@ lv_t VolGroup::findOrphan(QList<lv_t> &childList)
     return NULL;
 }
 
-const QList<LogVol *>  VolGroup::getLogicalVolumes()
+QList<LogVol *>  VolGroup::getLogicalVolumes()
 {
     return m_member_lvs;
 }
 
-const QList<LogVol *>  VolGroup::getLogicalVolumesFlat()
+QList<LogVol *>  VolGroup::getLogicalVolumesFlat()
 {
     QList<LogVol *> tree_list = m_member_lvs;
     QList<LogVol *> flat_list;
@@ -192,12 +192,12 @@ const QList<LogVol *>  VolGroup::getLogicalVolumesFlat()
     return flat_list;
 }
 
-const QList<PhysVol *> VolGroup::getPhysicalVolumes()
+QList<PhysVol *> VolGroup::getPhysicalVolumes()
 {
     return m_member_pvs;
 }
 
-LogVol* VolGroup::getLVByName(QString shortName)  // Do not return snap container, just the "real" lv
+LogVol* VolGroup::getLvByName(QString shortName)  // Do not return snap container, just the "real" lv
 {
     QList<LogVol *> all_lvs = getLogicalVolumesFlat();
     const int lv_count = all_lvs.size();
@@ -211,13 +211,12 @@ LogVol* VolGroup::getLVByName(QString shortName)  // Do not return snap containe
     return NULL;
 }
 
-LogVol* VolGroup::getLVByUuid(QString uuid)
+LogVol* VolGroup::getLvByUuid(QString uuid)
 {
-    QList<LogVol *> all_lvs = getLogicalVolumesFlat();
-    const int lv_count = all_lvs.size();
+    const QList<LogVol *> all_lvs = getLogicalVolumesFlat();
     uuid = uuid.trimmed();
 
-    for(int x = 0; x < lv_count; x++){
+    for(int x = 0; x < all_lvs.size(); x++){
 	if(uuid == all_lvs[x]->getUuid() && !all_lvs[x]->isSnapContainer() )
 	    return all_lvs[x];
     }
@@ -225,7 +224,7 @@ LogVol* VolGroup::getLVByUuid(QString uuid)
     return NULL;
 }
 
-PhysVol* VolGroup::getPVByName(QString name)
+PhysVol* VolGroup::getPvByName(QString name)
 {
     for(int x = 0; x < m_member_pvs.size(); x++){
 	if(name.trimmed() == m_member_pvs[x]->getName() && !name.contains("unknown device"))
@@ -295,7 +294,7 @@ int VolGroup::getPVMax()
     return m_pv_max;
 }
 
-int VolGroup::getMDACount()
+int VolGroup::getMdaCount()
 {
     return m_mda_count;
 }
@@ -320,12 +319,12 @@ QString VolGroup::getFormat()
     return m_lvm_format;
 }
 
-QStringList VolGroup::getLVNames()
+QStringList VolGroup::getLvNames()
 {
     QStringList names;
 
     for(int x = m_member_lvs.size() - 1; x >= 0; x--)
-        names << (m_member_lvs[x])->getName();
+        names << m_member_lvs[x]->getName();
 
     return names;
 }
@@ -389,7 +388,7 @@ void VolGroup::processPhysicalVolumes(vg_t lvmVG)
         for(int x = 0; x < m_member_pvs.size(); x++){
             if( m_member_pvs[x]->isAllocatable() )
                 m_allocatable_extents += m_member_pvs[x]->getRemaining() / (long long) m_extent_size;
-            m_mda_count += m_member_pvs[x]->getMDACount();
+            m_mda_count += m_member_pvs[x]->getMdaCount();
         }
 	
     }
@@ -495,10 +494,10 @@ void VolGroup::setActivePhysicalVolumes()
     for(int x = all_lvs.size() - 1; x >= 0; x--){
         if( all_lvs[x]->isActive() ){
             m_active = true;
-	    pv_name_list = all_lvs[x]->getPVNamesAllFlat();
+	    pv_name_list = all_lvs[x]->getPvNamesAllFlat();
 
 	    for(int x = pv_name_list.size() - 1; x >= 0; x--){
-	        if( (pv = getPVByName(pv_name_list[x])) )
+	        if( (pv = getPvByName(pv_name_list[x])) )
 		    pv->setActive();
 	    }
 
@@ -524,7 +523,7 @@ void VolGroup::setLastUsedExtent()
         for(int x = m_member_lvs.size() - 1; x >= 0; x--){
             lv = m_member_lvs[x];
             for(int segment = lv->getSegmentCount() - 1; segment >= 0; segment--){
-                pv_name_list = lv->getPVNames(segment);
+                pv_name_list = lv->getPvNames(segment);
                 starting_extent = lv->getSegmentStartingExtent(segment);
                 for(int y = pv_name_list.size() - 1; y >= 0; y--){
                     if( pv_name == pv_name_list[y] ){

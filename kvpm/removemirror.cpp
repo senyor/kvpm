@@ -45,7 +45,7 @@ RemoveMirrorDialog::RemoveMirrorDialog(LogVol *logicalVolume, QWidget *parent):
     NoMungeCheck *temp_check;
     QStringList   pv_names;
     
-    m_vg = m_lv->getVG();
+    m_vg = m_lv->getVg();
     QList<LogVol *> lvs = m_lv->getChildren();
 
     setWindowTitle( i18n("Remove mirrors") );
@@ -62,7 +62,7 @@ RemoveMirrorDialog::RemoveMirrorDialog(LogVol *logicalVolume, QWidget *parent):
 	if( lvs[x]->isMirrorLeg() ){
 
 	    temp_check = new NoMungeCheck( lvs[x]->getName() );
-	    pv_names = lvs[x]->getPVNamesAll();
+	    pv_names = lvs[x]->getPvNamesAll();
 	    temp_check->setAlternateTextList( pv_names );
 	    m_mirror_leg_checks.append(temp_check);
 	    layout->addWidget(temp_check);

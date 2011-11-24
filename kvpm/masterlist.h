@@ -44,8 +44,8 @@ public:
     ~MasterList();
     void rescan();    
     static lvm_t getLvm();
-    static const QList<VolGroup *> getVolGroups();
-    static const QList<StorageDevice *> getStorageDevices();
+    static QList<VolGroup *> getVolGroups();
+    static QList<StorageDevice *> getStorageDevices();
     static int getVgCount();
     static VolGroup *getVgByName(QString name);
     static QStringList getVgNames();

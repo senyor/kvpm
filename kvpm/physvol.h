@@ -46,7 +46,7 @@ class PhysVol
     QString getName();       // eg: /dev/hde4
     QString getUuid();
     QStringList getTags();
-    VolGroup* getVG(); 
+    VolGroup* getVg(); 
     bool isAllocatable();
     void setActive();               // If any lv is active on the pv, the pv is active
     bool isActive();
@@ -56,9 +56,9 @@ class PhysVol
     long long getLastUsedExtent();  // needed for minimum shrink size determination
     void setLastUsedExtent(long long last);
     int getPercentUsed();           // 0 - 100
-    long getMDACount();    
-    long getMDAUsed();              // Meta Data areas in use    
-    long long getMDASize();         // Meta Data Area size in bytes    
+    long getMdaCount();    
+    long getMdaUsed();              // Meta Data areas in use    
+    long long getMdaSize();         // Meta Data Area size in bytes    
 };
 
 #endif

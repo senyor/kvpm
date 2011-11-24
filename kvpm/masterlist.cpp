@@ -139,12 +139,12 @@ int MasterList::getVgCount()
       return m_volume_groups.size();
 }
 
-const QList<VolGroup *> MasterList::getVolGroups()
+QList<VolGroup *> MasterList::getVolGroups()
 {
       return m_volume_groups;
 }
 
-const QList<StorageDevice *> MasterList::getStorageDevices()
+QList<StorageDevice *> MasterList::getStorageDevices()
 {
     return m_storage_devices;
 }

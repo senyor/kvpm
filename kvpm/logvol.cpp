@@ -417,7 +417,7 @@ void LogVol::insertChildren(lv_t lvmLV, vg_t lvmVG)
         m_lv_children.append( new LogVol(lvmLV, lvmVG, m_vg, this) );
     }
     else{
-        child_name_list = removePVDevices( getPVNamesAll() );
+        child_name_list = removePVDevices( getPvNamesAll() );
 
         if( m_mirror && (! m_log.isEmpty()) )
                 child_name_list.append( m_log );
@@ -639,12 +639,12 @@ QList<long long> LogVol::getSegmentStartingExtent(int segment)
     return m_segments[segment]->m_starting_extent;
 }
 
-QStringList LogVol::getPVNames(int segment)
+QStringList LogVol::getPvNames(int segment)
 {
     return m_segments[segment]->m_device_path;
 }
 
-QStringList LogVol::getPVNamesAll()
+QStringList LogVol::getPvNamesAll()
 {
     QStringList devices;
     
@@ -657,7 +657,7 @@ QStringList LogVol::getPVNamesAll()
     return devices;
 }
 
-QStringList LogVol::getPVNamesAllFlat()
+QStringList LogVol::getPvNamesAllFlat()
 {
     QStringList devices;
     QList<LogVol *> children;
@@ -666,7 +666,7 @@ QStringList LogVol::getPVNamesAllFlat()
         children = getChildren();
 
         for(int x = children.size() - 1; x >= 0; x--)
-            devices.append( children[x]->getPVNamesAllFlat() );
+            devices.append( children[x]->getPvNamesAllFlat() );
 
         devices.sort();
         devices.removeDuplicates();
@@ -674,10 +674,10 @@ QStringList LogVol::getPVNamesAllFlat()
         return devices;
     }
     else
-        return getPVNamesAll();
+        return getPvNamesAll();
 }
 
-VolGroup* LogVol::getVG()
+VolGroup* LogVol::getVg()
 {
     return m_vg;
 }
@@ -697,7 +697,7 @@ QString LogVol::getMapperPath()
     return m_lv_mapper_path;
 }
 
-long long LogVol::getSpaceUsedOnPV(QString physicalVolume)
+long long LogVol::getSpaceUsedOnPv(QString physicalVolume)
 {
     long long space_used = 0;
     for(int x = getSegmentCount() - 1; x >= 0; x--){
@@ -935,5 +935,5 @@ QString LogVol::getUuid()
 
 bool LogVol::hasMissingVolume()
 {
-    return getPVNamesAllFlat().contains("unknown device");
+    return getPvNamesAllFlat().contains("unknown device");
 }

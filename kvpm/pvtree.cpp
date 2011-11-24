@@ -118,7 +118,7 @@ void PVTree::loadData()
 
 	lv_name_list.clear();
 	for(int x = 0; x < lvs.size() ; x++){
-	    pv_name_list = lvs[x]->getPVNamesAll();
+	    pv_name_list = lvs[x]->getPvNamesAll();
 	    for(int y = 0; y < pv_name_list.size() ; y++)
 		if( device_name == pv_name_list[y] ) 
 		    lv_name_list.append( lvs[x]->getName() );
@@ -271,7 +271,7 @@ void PVTree::popupContextMenu(QPoint point)
 
 void PVTree::movePhysicalExtents()
 {
-    PhysVol *pv = m_vg->getPVByName(m_pv_name);
+    PhysVol *pv = m_vg->getPvByName(m_pv_name);
 
     if(pv){
         PVMoveDialog dialog(pv);
@@ -292,7 +292,7 @@ void PVTree::reduceVolumeGroup()
 
 void PVTree::changePhysicalVolume()
 {
-    PhysVol *pv = m_vg->getPVByName(m_pv_name);
+    PhysVol *pv = m_vg->getPvByName(m_pv_name);
     if(pv){
         PVChangeDialog dialog(pv);
         dialog.exec();

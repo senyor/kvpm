@@ -67,7 +67,7 @@ LVCreateDialog::LVCreateDialog(LogVol *logicalVolume, bool snapshot, QWidget *pa
     m_lv(logicalVolume)
 {
     m_extend = !m_snapshot;
-    m_vg = m_lv->getVG();
+    m_vg = m_lv->getVg();
     m_bailout  = hasInitialErrors();
 
     if ( !m_bailout ){

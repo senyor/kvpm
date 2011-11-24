@@ -45,7 +45,7 @@ Q_OBJECT
 
  public:
     explicit VolumeGroupTab(VolGroup *volumeGroup, QWidget *parent = 0);
-    VolGroup* getVG();
+    VolGroup* getVg();
     void rescan();
 };
 

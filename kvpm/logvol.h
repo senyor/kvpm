@@ -110,7 +110,7 @@ class LogVol
     QList<LogVol *> getAllChildrenFlat();  // All children, grandchildren etc. un-nested.
     QList<LogVol *> getSnapshots();        // This will work the same for snapcontainers or the real lv 
     LogVol *getParent();                   // NULL if this is a "top level" lv
-    VolGroup* getVG();
+    VolGroup* getVg();
     QString getName();
     QString getFullName();
     QString getFilesystem();
@@ -128,13 +128,13 @@ class LogVol
     long long getSegmentSize(int segment);
     long long getSegmentExtents(int segment);
     QList<long long> getSegmentStartingExtent(int segment);
-    QStringList getPVNames(int segment);     
-    QStringList getPVNamesAll();         // full path of physical volumes for all segments
-    QStringList getPVNamesAllFlat();     // full path of physical volumes including child lvs, un-nested
+    QStringList getPvNames(int segment);     
+    QStringList getPvNamesAll();         // full path of physical volumes for all segments
+    QStringList getPvNamesAllFlat();     // full path of physical volumes including child lvs, un-nested
     QStringList getMountPoints();
     QStringList getTags();
     QList<int>  getMountPosition();
-    long long getSpaceUsedOnPV(QString physicalVolume);
+    long long getSpaceUsedOnPv(QString physicalVolume);
     long long getExtents();
     long long getSize();
     long long getTotalSize();

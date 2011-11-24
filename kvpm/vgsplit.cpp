@@ -433,7 +433,7 @@ void VGSplitDialog::volumeMobility(QStringList &mobileLVNames, QStringList &immo
     while(growing){
         for(int x = lvs.size() - 1; x >= 0 ; x--){
 
-            all_pv_names = lvs[x]->getPVNamesAllFlat();
+            all_pv_names = lvs[x]->getPvNamesAllFlat();
             movable = true;
 
             for(int y = all_pv_names.size() - 1; y >= 0; y--){
@@ -450,12 +450,12 @@ void VGSplitDialog::volumeMobility(QStringList &mobileLVNames, QStringList &immo
         }
         
         for(int x = immobileLVNames.size() - 1; x >= 0; x--){
-            temp = m_vg->getLVByName( immobileLVNames[x] );
+            temp = m_vg->getLvByName( immobileLVNames[x] );
 
             if( temp->isOrigin() && ( temp->getParent() != NULL ) )
-                immobilePVNames.append( temp->getParent()->getPVNamesAllFlat() );
+                immobilePVNames.append( temp->getParent()->getPvNamesAllFlat() );
             else
-                immobilePVNames.append( temp->getPVNamesAllFlat() );
+                immobilePVNames.append( temp->getPvNamesAllFlat() );
         }
 
         immobilePVNames.removeDuplicates();
@@ -508,13 +508,13 @@ void VGSplitDialog::pvState(QStringList &open, QStringList &closed )
 
     for(int x = lvs.size() - 1; x >=0; x--){
         if( lvs[x]->isOpen() ){
-            open.append( lvs[x]->getPVNamesAllFlat() );
+            open.append( lvs[x]->getPvNamesAllFlat() );
         }
         else if( lvs[x]->isSnapContainer() || lvs[x]->isOrigin() ){
             snaps = lvs[x]->getSnapshots();
             for(int y = snaps.size() - 1; y >= 0; y--){
                 if( snaps[y]->isOpen() ){
-                    open.append( lvs[x]->getPVNamesAllFlat() ); // if any snap is open the whole container is open
+                    open.append( lvs[x]->getPvNamesAllFlat() ); // if any snap is open the whole container is open
                     break;
                 }
             }
@@ -557,12 +557,12 @@ void VGSplitDialog::movesWithVolume(const bool isLV, const QString name,
     if(isLV){
         moving_lv_count = 1;
         moving_pv_count = 0;
-        temp = m_vg->getLVByName(name);
+        temp = m_vg->getLvByName(name);
 
         if( temp->isOrigin() && ( temp->getParent() != NULL ) )
-            movingPVNames = temp->getParent()->getPVNamesAllFlat();
+            movingPVNames = temp->getParent()->getPvNamesAllFlat();
         else
-            movingPVNames = temp->getPVNamesAllFlat();
+            movingPVNames = temp->getPvNamesAllFlat();
     }
     else{
         moving_lv_count = 0;
@@ -574,9 +574,9 @@ void VGSplitDialog::movesWithVolume(const bool isLV, const QString name,
         for(int x = lvs.size() - 1; x >= 0 ; x--){
 
             if( lvs[x]->isOrigin() && ( lvs[x]->getParent() != NULL ) )
-                all_pv_names = lvs[x]->getParent()->getPVNamesAllFlat();
+                all_pv_names = lvs[x]->getParent()->getPvNamesAllFlat();
             else
-                all_pv_names = lvs[x]->getPVNamesAllFlat();
+                all_pv_names = lvs[x]->getPvNamesAllFlat();
 
             moving = false;
 
@@ -593,12 +593,12 @@ void VGSplitDialog::movesWithVolume(const bool isLV, const QString name,
         }
         
         for(int x = movingLVNames.size() - 1; x >= 0; x--){
-            temp = m_vg->getLVByName( movingLVNames[x] );
+            temp = m_vg->getLvByName( movingLVNames[x] );
 
             if( temp->isOrigin() && ( temp->getParent() != NULL ) )
-                movingPVNames.append( temp->getParent()->getPVNamesAllFlat() );
+                movingPVNames.append( temp->getParent()->getPvNamesAllFlat() );
             else
-                movingPVNames.append( temp->getPVNamesAllFlat() );
+                movingPVNames.append( temp->getPvNamesAllFlat() );
         }
 
         movingLVNames.removeDuplicates();

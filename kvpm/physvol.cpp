@@ -98,7 +98,7 @@ void PhysVol::rescan(pv_t lvm_pv)
     return;
 }
 
-VolGroup* PhysVol::getVG()
+VolGroup* PhysVol::getVg()
 {
     return m_vg;
 }
@@ -133,17 +133,17 @@ void PhysVol::setActive()
     m_active = true;
 }
 
-long PhysVol::getMDACount()
+long PhysVol::getMdaCount()
 {
     return m_mda_count;
 }
 
-long PhysVol::getMDAUsed()
+long PhysVol::getMdaUsed()
 {
     return m_mda_used;
 }
 
-long long PhysVol::getMDASize()
+long long PhysVol::getMdaSize()
 {
     return m_mda_size;   // size in bytes
 }
