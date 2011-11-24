@@ -22,17 +22,17 @@
 #include <QtGui>
 
 #include "masterlist.h"
+#include "topwindow.h"
 #include "progressbox.h"
 #include "volgroup.h"
 
-extern MasterList *g_master_list;
 
 bool remove_vg(VolGroup *volumeGroup)
 {
     const QByteArray vg_name = volumeGroup->getName().toLocal8Bit();
-    lvm_t  lvm = g_master_list->getLVM();
+    lvm_t  lvm = MasterList::getLVM();
     vg_t vg_dm = NULL;
-    ProgressBox *const progress_box = g_master_list->getProgressBox();
+    ProgressBox *const progress_box = TopWindow::getProgressBox();
     bool success = true;
     const QString message = i18n("Are you certain you want to delete volume group: <b>%1</b>?", volumeGroup->getName());
 

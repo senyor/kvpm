@@ -31,77 +31,64 @@
 #include "processprogress.h"
 #include "progressbox.h"
 #include "storagedevice.h"
+#include "topwindow.h"
 #include "volgroup.h"
+
+
+// These are static being variables initialized here
+
+QList<VolGroup *> MasterList::m_volume_groups = QList<VolGroup *>();
+QList<StorageDevice *> MasterList::m_storage_devices = QList<StorageDevice *>();
+lvm_t MasterList::m_lvm = lvm_init(NULL);
 
 
 MasterList::MasterList() : QObject()
 {
     ped_exception_set_handler(my_handler);
-    m_lvm = lvm_init(NULL);
-
-    m_progress_box = new ProgressBox();
 }
-
-/* We can't just clear the lists, we need to delete 
-   all the objects they point to  before we can 
-   create a brand new list */
 
 MasterList::~MasterList()
 {
     lvm_quit(m_lvm);
-
-    for(int x = 0; x < m_volume_groups.size(); x++)
-	delete m_volume_groups[x];
-
-    for(int x = 0; x < m_storage_devices.size(); x++)
-	delete m_storage_devices[x];
 }
 
 void MasterList::rescan()
 {
-    m_progress_box->setRange(0,3);
-    m_progress_box->setText("Scan lvm");
+    ProgressBox *progress_box = TopWindow::getProgressBox();
+
+    progress_box->setRange(0,3);
+    progress_box->setText("Scan lvm");
     qApp->setOverrideCursor(Qt::WaitCursor);
     qApp->processEvents();
 
     lvm_scan(m_lvm);
     lvm_config_reload(m_lvm);    
 
-    m_progress_box->setValue(1);
-    m_progress_box->setText("Scan vgs");
+    progress_box->setValue(1);
+    progress_box->setText("Scan vgs");
     qApp->processEvents();
     scanVolumeGroups();
 
-    m_progress_box->setValue(2);
+    progress_box->setValue(2);
     qApp->processEvents();
-    m_progress_box->setText("Scan devs");
+    progress_box->setText("Scan devs");
     scanStorageDevices();
 
-    m_progress_box->setValue(3);
+    progress_box->setValue(3);
     qApp->restoreOverrideCursor();
     qApp->processEvents();
 
     return;
 }
 
-ProgressBox *MasterList::getProgressBox()
-{
-    return m_progress_box;
-}
-
 void MasterList::scanVolumeGroups()
 {
-    QStringList vg_output;
-    QStringList arguments;
-    bool existing_vg;
-    bool deleted_vg;
-
     dm_list *vgnames;
     lvm_str_list *strl;
 
     vgnames = lvm_list_vg_names(m_lvm);
     dm_list_iterate_items(strl, vgnames){ // rescan() existing VolGroup, don't create a new one
-        existing_vg = false;
+        bool existing_vg = false;
         for(int x = 0; x < m_volume_groups.size(); x++){
             if( QString(strl->str).trimmed() == m_volume_groups[x]->getName() ){
                 existing_vg = true;
@@ -111,15 +98,15 @@ void MasterList::scanVolumeGroups()
         if( !existing_vg )
             m_volume_groups.append( new VolGroup(m_lvm, strl->str) );
     }
+
     for(int x = m_volume_groups.size() - 1; x >= 0; x--){ // delete VolGroup if the vg is gone
-        deleted_vg = true;
+        bool deleted_vg = true;
         dm_list_iterate_items(strl, vgnames){ 
             if( QString(strl->str).trimmed() == m_volume_groups[x]->getName() )
                 deleted_vg = false;
         }
-        if(deleted_vg){
+        if(deleted_vg)
             delete m_volume_groups.takeAt(x);
-        }
     }
 }
 

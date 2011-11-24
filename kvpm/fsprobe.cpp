@@ -25,7 +25,6 @@
 #include "storagepartition.h"
 #include "volgroup.h"
 
-extern MasterList *g_master_list;
 
 #define BLKID_EMPTY_CACHE       "/dev/null"
 
@@ -85,8 +84,8 @@ QString fsprobe_getfslabel(QString devicePath)
 
 QString fsprobe_getfs_by_uuid(QString uuid)
 {
-    QList<VolGroup *> vgs = g_master_list->getVolGroups();
-    QList<StorageDevice *> devs = g_master_list->getStorageDevices();
+    QList<VolGroup *> vgs = MasterList::getVolGroups();
+    QList<StorageDevice *> devs = MasterList::getStorageDevices();
     QList<StoragePartition *> parts;
     QList<LogVol *> lvs;
 
@@ -115,8 +114,8 @@ QString fsprobe_getfs_by_uuid(QString uuid)
 
 QString fsprobe_getfs_by_label(QString label)
 {
-    QList<VolGroup *> vgs = g_master_list->getVolGroups();
-    QList<StorageDevice *> devs = g_master_list->getStorageDevices();
+    QList<VolGroup *> vgs = MasterList::getVolGroups();
+    QList<StorageDevice *> devs = MasterList::getStorageDevices();
     QList<StoragePartition *> parts;
     QList<LogVol *> lvs;
 

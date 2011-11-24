@@ -35,10 +35,10 @@
 #include "pvreduce.h"
 #include "sizeselectorbox.h"
 #include "storagepartition.h"
+#include "topwindow.h"
 #include "misc.h"
 #include "volgroup.h"
 
-extern MasterList *g_master_list;
 
 
 bool moveresize_partition(StoragePartition *partition)
@@ -353,7 +353,7 @@ bool PartitionMoveResizeDialog::movefs(long long from_start, long long to_start,
 
     ped_device_open(device);
 
-    ProgressBox *progress_box = g_master_list->getProgressBox();
+    ProgressBox *const progress_box = TopWindow::getProgressBox();
     progress_box->setRange(0, blockcount);
     progress_box->setText("Moving data");
     int event_timer = 0;

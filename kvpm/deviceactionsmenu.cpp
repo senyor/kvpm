@@ -41,7 +41,6 @@
 #include "vgcreate.h"
 #include "vgextend.h"
 
-extern MasterList *g_master_list;
 
 
 DeviceActionsMenu::DeviceActionsMenu( QTreeWidgetItem *item, QWidget *parent) : KMenu(parent) 
@@ -108,7 +107,7 @@ void DeviceActionsMenu::setup(QTreeWidgetItem *item)
 
     m_vg_name  = item->data(5, Qt::DisplayRole).toString(); // only set if this is a pv in a vg
 
-    const QStringList group_names = g_master_list->getVolumeGroupNames();
+    const QStringList group_names = MasterList::getVolumeGroupNames();
     for(int x = 0; x < group_names.size(); x++){
         vgextend_actions.append(new QAction(group_names[x], this));
         m_vgextend_menu->addAction(vgextend_actions[x]);
@@ -285,19 +284,19 @@ void DeviceActionsMenu::maxfsPartition()
 
 void DeviceActionsMenu::removePartition()
 {
-  if( remove_partition(m_part) )
-	MainWindow->reRun();
+    if( remove_partition(m_part) )
+        MainWindow->reRun();
 }
 
 void DeviceActionsMenu::addPartition()
 {
-  if( add_partition(m_part) )
+    if( add_partition(m_part) )
 	MainWindow->reRun();
 }
 
 void DeviceActionsMenu::moveresizePartition()
 {
-  if( moveresize_partition(m_part) )
+    if( moveresize_partition(m_part) )
 	MainWindow->reRun();
 }
 

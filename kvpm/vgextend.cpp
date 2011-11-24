@@ -28,10 +28,10 @@
 #include "pvcheckbox.h"
 #include "storagedevice.h"
 #include "storagepartition.h"
+#include "topwindow.h"
 #include "vgcreate.h"
 #include "volgroup.h"
 
-extern MasterList *g_master_list;
 
 
 bool extend_vg(QString volumeGroupName, StorageDevice *device, StoragePartition *partition)
@@ -39,11 +39,11 @@ bool extend_vg(QString volumeGroupName, StorageDevice *device, StoragePartition 
     const QByteArray vg_name = volumeGroupName.toLocal8Bit();
     QByteArray pv_name;
     long long size;
-    lvm_t lvm = g_master_list->getLVM();
+    lvm_t lvm = MasterList::getLVM();
     vg_t  vg_dm;
-    VolGroup *const vg = g_master_list->getVolGroupByName(volumeGroupName);
+    VolGroup *const vg = MasterList::getVolGroupByName(volumeGroupName);
     const long long extent_size = vg->getExtentSize();
-    ProgressBox *const progress_box = g_master_list->getProgressBox();
+    ProgressBox *const progress_box = TopWindow::getProgressBox();
     const QString error_message = i18n("This physical volume <b>%1</b> is smaller than the extent size", QString(pv_name));
 
     if(device){
@@ -98,7 +98,7 @@ bool extend_vg(QString volumeGroupName, StorageDevice *device, StoragePartition 
 
 bool extend_vg(VolGroup *volumeGroup)
 {
-    const QList<StorageDevice *> all_devices = g_master_list->getStorageDevices();   
+    const QList<StorageDevice *> all_devices = MasterList::getStorageDevices();   
     QList<StorageDevice *> usable_devices;
     QStringList device_names;
     QList<StoragePartition *> all_partitions;
@@ -180,10 +180,10 @@ void VGExtendDialog::commitChanges()
     const QByteArray vg_name   = m_vg->getName().toLocal8Bit();
     const QStringList pv_names = m_pv_checkbox->getNames();
     QByteArray pv_name;
-    lvm_t lvm = g_master_list->getLVM();
+    lvm_t lvm = MasterList::getLVM();
     vg_t  vg_dm;
 
-    ProgressBox *const progress_box = g_master_list->getProgressBox();
+    ProgressBox *const progress_box = TopWindow::getProgressBox();
     progress_box->setRange(0, pv_names.size());
     progress_box->setText("Extending VG");
 
