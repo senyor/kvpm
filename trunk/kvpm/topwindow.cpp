@@ -47,13 +47,16 @@
 #include "volgroup.h"
 #include "volumegrouptab.h"
 
-extern MasterList *g_master_list;
+
+ProgressBox* TopWindow::m_progress_box = NULL;   // Static initializing
 
 
-TopWindow::TopWindow(QWidget *parent):KMainWindow(parent)
+TopWindow::TopWindow(MasterList *const masterList, QWidget *parent) 
+    : KMainWindow(parent),
+      m_master_list(masterList)
 {
-    g_master_list = NULL;
     m_tab_widget = NULL;
+    m_progress_box = new ProgressBox(); // make sure this stays *before* master_list->rescan() gets called!
 
     menuBar()->addMenu( buildFileMenu() );
     menuBar()->addMenu( buildGroupsMenu() );
@@ -67,8 +70,7 @@ TopWindow::TopWindow(QWidget *parent):KMainWindow(parent)
     m_device_tab = new DeviceTab();
     m_tab_widget->appendDeviceTab(m_device_tab, i18n("Storage devices") );
 
-    g_master_list = new MasterList(); // creates *empty* masterlist
-    menuBar()->setCornerWidget( g_master_list->getProgressBox() );
+    menuBar()->setCornerWidget(m_progress_box);
 
     connect(qApp, SIGNAL(aboutToQuit()), 
 	    this, SLOT(cleanUp()));
@@ -78,9 +80,13 @@ TopWindow::TopWindow(QWidget *parent):KMainWindow(parent)
 
 void TopWindow::reRun()
 {
-    g_master_list->rescan(); // loads the list with new data
-
+    m_master_list->rescan(); // loads the list with new data
     updateTabs();
+}
+
+ProgressBox* TopWindow::getProgressBox()
+{
+    return m_progress_box;
 }
 
 void TopWindow::updateTabs()
@@ -92,9 +98,9 @@ void TopWindow::updateTabs()
     disconnect(m_tab_widget, SIGNAL(currentIndexChanged()), 
 	    this, SLOT(setupMenus()));
 
-    m_device_tab->rescan( g_master_list->getStorageDevices() );
+    m_device_tab->rescan( MasterList::getStorageDevices() );
 
-    groups = g_master_list->getVolGroups();
+    groups = MasterList::getVolGroups();
     // if there is a tab for a deleted vg then delete the tab
 
     for(int x = 1; x < m_tab_widget->getCount(); x++){
@@ -146,7 +152,7 @@ void TopWindow::setupMenus()
     QList<LogVol *> lvs;
 
     if(index){
-        m_vg = g_master_list->getVolGroupByName( m_tab_widget->getUnmungedText(index) );
+        m_vg = MasterList::getVolGroupByName( m_tab_widget->getUnmungedText(index) );
         if( m_vg != NULL ){
             lvs = m_vg->getLogicalVolumes();
             for( int x = lvs.size() - 1; x >= 0 ;x-- ){
@@ -315,7 +321,7 @@ void TopWindow::configKvpm()
 
 void TopWindow::cleanUp()
 {
-    delete g_master_list;  // This calls lvm_quit() on destruct
+    delete m_master_list;  // This calls lvm_quit() on destruct
 }
 
 void TopWindow::closeEvent(QCloseEvent *)

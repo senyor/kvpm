@@ -28,13 +28,12 @@
 #include "pvcheckbox.h"
 #include "storagedevice.h"
 #include "storagepartition.h"
+#include "topwindow.h"
 
-
-extern MasterList *g_master_list;
 
 bool create_vg()
 {
-    QList<StorageDevice *> storage_devices = g_master_list->getStorageDevices();   
+    QList<StorageDevice *> storage_devices = MasterList::getStorageDevices();   
     QList<StorageDevice *> usable_devices;
     QList<StoragePartition *> storage_partitions;
     QList<StoragePartition *> usable_partitions;
@@ -261,12 +260,12 @@ void VGCreateDialog::limitExtentSize(int index){
 
 void VGCreateDialog::commitChanges()
 {
-    lvm_t lvm = g_master_list->getLVM();
+    lvm_t lvm = MasterList::getLVM();
     vg_t vg_dm;
     uint32_t new_extent_size = m_extent_size->currentText().toULong();
     const QStringList pv_names = m_pv_checkbox->getNames();
     const QByteArray vg_name_array = m_vg_name->text().toLocal8Bit();
-    ProgressBox *const progress_box = g_master_list->getProgressBox();
+    ProgressBox *const progress_box = TopWindow::getProgressBox();
     QByteArray pv_name_array;
 
     hide();

@@ -29,7 +29,7 @@
 #include "processprogress.h"
 #include "volgroup.h"
 
-extern MasterList *g_master_list;
+
 
 bool split_vg(VolGroup *volumeGroup)
 {
@@ -137,7 +137,7 @@ void VGSplitDialog::deactivate()
 {
     QStringList moving_lvs;
     const QByteArray vg_name = m_vg->getName().toLocal8Bit();
-    lvm_t lvm = g_master_list->getLVM();
+    lvm_t lvm = MasterList::getLVM();
     vg_t vg_dm;
     dm_list *lv_dm_list;
     lvm_lv_list *lv_list;

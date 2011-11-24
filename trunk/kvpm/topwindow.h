@@ -23,14 +23,17 @@
 
 #include <QVBoxLayout>
 
+class DeviceTab;
+class MainTabWidget;
+class MasterList;
 class StorageDevice;
 class TopWindow;
 class VolGroup;
 class VolumeGroupTab;
-class DeviceTab;
-class MainTabWidget;
+class ProgressBox;
 
 extern TopWindow *MainWindow;
+
 
 class TopWindow : public KMainWindow
 {
@@ -42,8 +45,11 @@ Q_OBJECT
             *m_change_vg_action,      *m_remove_missing_action, *m_merge_vg_action,
             *m_export_vg_action,      *m_import_vg_action,      *m_split_vg_action;
             
-    DeviceTab *m_device_tab;
-    VolGroup  *m_vg;
+    DeviceTab   *m_device_tab;
+    VolGroup    *m_vg;
+    MasterList  *m_master_list;
+
+    static ProgressBox *m_progress_box; 
 
     void closeEvent(QCloseEvent *);
     KMenu *buildFileMenu();
@@ -53,7 +59,8 @@ Q_OBJECT
     KMenu *buildToolsMenu();
 
  public:
-    TopWindow(QWidget *parent);
+    TopWindow(MasterList *const masterList, QWidget *parent = NULL);
+    static ProgressBox *getProgressBox();
     
  public slots:
     void reRun();

@@ -21,9 +21,7 @@
 
 #include "lvactionsmenu.h"
 #include "logvol.h"
-#include "masterlist.h"
 #include "misc.h"
-#include "topwindow.h"
 #include "volgroup.h"
 
 

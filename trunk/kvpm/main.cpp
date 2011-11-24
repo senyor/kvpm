@@ -21,22 +21,19 @@
 #include <KStandardDirs>
 
 #include <QtGui>
-#include <QString>
 
 #include "executablefinder.h"
-#include "topwindow.h"
 #include "kvpmsetup.h"
+#include "masterlist.h"
+#include "topwindow.h"
 
 class VolGroup;
 class PhysVol;
 class LogVol;
-class MasterList;
 
 
-TopWindow *MainWindow;
-MasterList *g_master_list;
 ExecutableFinder *g_executable_finder;
-
+TopWindow *MainWindow;
 
 int main(int argc, char **argv)
 {
@@ -68,10 +65,14 @@ int main(int argc, char **argv)
 
     g_executable_finder = new ExecutableFinder();
     
-    MainWindow = new TopWindow(NULL);
-    MainWindow->setAutoSaveSettings();
-    MainWindow->show();
-    splash.finish(MainWindow);
+    MasterList *master_list = new MasterList();
+    TopWindow  *top_window  = new TopWindow(master_list, NULL);
+
+    MainWindow = top_window;
+
+    top_window->setAutoSaveSettings();
+    top_window->show();
+    splash.finish(top_window);
 
     return kvpm.exec();
 }

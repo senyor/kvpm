@@ -18,9 +18,9 @@
 #include <lvm2app.h>
 
 #include <QList>
-#include <QTextEdit>
 #include <QProcess>
 #include <QStringList>
+#include <QTextEdit>
 
 class VolGroup;
 class LogVol;
@@ -34,26 +34,25 @@ class StorageDevice;
 class MasterList : public QObject
 {
 Q_OBJECT
-    QList<VolGroup *> m_volume_groups;
-    QList<StorageDevice *> m_storage_devices;
-    lvm_t m_lvm;
-    ProgressBox *m_progress_box;
+
+    static QList<VolGroup *> m_volume_groups;
+    static QList<StorageDevice *> m_storage_devices;
+    static lvm_t m_lvm;
 
     void scanVolumeGroups();
     void scanStorageDevices();
-    bool determinePVState(PhysVol *pv, VolGroup *vg); 
+    //    bool determinePVState(PhysVol *const pv, VolGroup *const vg); 
 
 public:
     MasterList();
     ~MasterList();
     void rescan();    
-    lvm_t getLVM();
-    ProgressBox *getProgressBox();
-    const QList<VolGroup *> getVolGroups();
-    const QList<StorageDevice *> getStorageDevices();
-    int getVolGroupCount();
-    VolGroup *getVolGroupByName(QString name);
-    QStringList getVolumeGroupNames();
+    static lvm_t getLVM();
+    static const QList<VolGroup *> getVolGroups();
+    static const QList<StorageDevice *> getStorageDevices();
+    static int getVolGroupCount();
+    static VolGroup *getVolGroupByName(QString name);
+    static QStringList getVolumeGroupNames();
 };
 
 #endif

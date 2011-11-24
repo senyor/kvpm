@@ -32,9 +32,9 @@
 
 VolumeGroupTab::VolumeGroupTab(VolGroup *volumeGroup, QWidget *parent) : QWidget(parent), m_vg(volumeGroup) 
 {
-    QSplitter *tree_splitter = new QSplitter(Qt::Vertical);
-    QSplitter *lv_splitter   = new QSplitter();
-    QSplitter *pv_splitter   = new QSplitter();
+    QSplitter *const tree_splitter = new QSplitter(Qt::Vertical);
+    QSplitter *const lv_splitter   = new QSplitter();
+    QSplitter *const pv_splitter   = new QSplitter();
     m_vg_info_labels = NULL;
     m_lv_size_chart  = NULL;
     m_lv_properties_stack = NULL;
