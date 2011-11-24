@@ -75,8 +75,8 @@ public:
     long long getUsedSpace();
     int getLVCount();
     int getLVMax();
-    int getPVCount();
-    int getPVMax();
+    int getPvCount();
+    int getPvMax();
     int getMdaCount();
     QString getName();
     QString getUuid();

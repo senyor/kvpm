@@ -417,7 +417,7 @@ void LogVol::insertChildren(lv_t lvmLV, vg_t lvmVG)
         m_lv_children.append( new LogVol(lvmLV, lvmVG, m_vg, this) );
     }
     else{
-        child_name_list = removePVDevices( getPvNamesAll() );
+        child_name_list = removePvDevices( getPvNamesAll() );
 
         if( m_mirror && (! m_log.isEmpty()) )
                 child_name_list.append( m_log );
@@ -476,7 +476,7 @@ QList<lv_t> LogVol::getLvmSnapshots(vg_t lvmVG)
 // volumes. One pvmove can be under several lvs so isn't
 // really a child.  
 
-QStringList LogVol::removePVDevices(QStringList devices)
+QStringList LogVol::removePvDevices(QStringList devices)
 {
     QList<PhysVol *> pvs;
     pvs = m_vg->getPhysicalVolumes();

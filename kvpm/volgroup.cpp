@@ -284,12 +284,12 @@ int VolGroup::getLVMax()
     return m_lv_max;
 }
 
-int VolGroup::getPVCount()
+int VolGroup::getPvCount()
 {
     return m_member_pvs.size();
 }
 
-int VolGroup::getPVMax()
+int VolGroup::getPvMax()
 {
     return m_pv_max;
 }
