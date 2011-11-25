@@ -417,7 +417,7 @@ void LogVol::insertChildren(lv_t lvmLV, vg_t lvmVG)
         m_lv_children.append( new LogVol(lvmLV, lvmVG, m_vg, this) );
     }
     else{
-        child_name_list = removePvDevices( getPvNamesAll() );
+        child_name_list = removePvNames( getPvNamesAll() );
 
         if( m_mirror && (! m_log.isEmpty()) )
                 child_name_list.append( m_log );
@@ -476,24 +476,26 @@ QList<lv_t> LogVol::getLvmSnapshots(vg_t lvmVG)
 // volumes. One pvmove can be under several lvs so isn't
 // really a child.  
 
-QStringList LogVol::removePvDevices(QStringList devices)
+QStringList LogVol::removePvNames(QStringList names)
 {
-    QList<PhysVol *> pvs;
-    pvs = m_vg->getPhysicalVolumes();
-
-    for(int n = devices.size() - 1; n >= 0; n--){
-        if( devices[n].startsWith("pvmove") )
-            devices.removeAt(n);
+    for(int x = names.size() - 1; x >= 0; x--){
+        if( names[x].startsWith("pvmove") )
+            names.removeAt(x);
     }
 
-    for(int x = pvs.size() - 1; x >= 0; x--){
-        for(int y = devices.size() - 1; y >= 0; y--){
-            if( pvs[x]->getName() == devices[y] )
-                devices.removeAt(y);
+    QListIterator<PhysVol *> pv_itr( m_vg->getPhysicalVolumes() );
+
+    while( pv_itr.hasNext() ){
+        PhysVol *const pv = pv_itr.next(); 
+
+        for(int y = names.size() - 1; y >= 0; y--){
+            if( pv->getName() == names[y] )
+                names.removeAt(y);
         }
+
     }
 
-    return devices;
+    return names;
 }
 
 void LogVol::calculateTotalSize()
@@ -614,64 +616,64 @@ int LogVol::getSegmentCount()
     return m_seg_total;
 }
 
-int LogVol::getSegmentStripes(int segment)
+int LogVol::getSegmentStripes(const int segment)
 {
     return m_segments[segment]->m_stripes;
 }
 
-int LogVol::getSegmentStripeSize(int segment)
+int LogVol::getSegmentStripeSize(const int segment)
 {
     return m_segments[segment]->m_stripe_size;
 }
 
-long long LogVol::getSegmentSize(int segment)
+long long LogVol::getSegmentSize(const int segment)
 {
     return m_segments[segment]->m_size;
 }
 
-long long LogVol::getSegmentExtents(int segment)
+long long LogVol::getSegmentExtents(const int segment)
 {
     return (m_segments[segment]->m_size / m_vg->getExtentSize());
 }
 
-QList<long long> LogVol::getSegmentStartingExtent(int segment)
+QList<long long> LogVol::getSegmentStartingExtent(const int segment)
 {
     return m_segments[segment]->m_starting_extent;
 }
 
-QStringList LogVol::getPvNames(int segment)
+QStringList LogVol::getPvNames(const int segment)
 {
     return m_segments[segment]->m_device_path;
 }
 
 QStringList LogVol::getPvNamesAll()
 {
-    QStringList devices;
-    
-    for (int seg = 0; seg < m_seg_total; seg++)
-	devices << m_segments[seg]->m_device_path;
+    QStringList pv_names;
+    QListIterator<Segment *> seg_itr(m_segments);
 
-    devices.sort();
-    devices.removeDuplicates();
+    while( seg_itr.hasNext() )
+	pv_names << seg_itr.next()->m_device_path;
 
-    return devices;
+    pv_names.sort();
+    pv_names.removeDuplicates();
+
+    return pv_names;
 }
 
 QStringList LogVol::getPvNamesAllFlat()
 {
-    QStringList devices;
-    QList<LogVol *> children;
-
     if( m_snap_container || m_mirror ){
-        children = getChildren();
 
-        for(int x = children.size() - 1; x >= 0; x--)
-            devices.append( children[x]->getPvNamesAllFlat() );
+        QListIterator<LogVol *> child_itr( getChildren() );
+        QStringList pv_names;
 
-        devices.sort();
-        devices.removeDuplicates();
+        while( child_itr.hasNext() )
+            pv_names << child_itr.next()->getPvNamesAllFlat();
 
-        return devices;
+        pv_names.sort();
+        pv_names.removeDuplicates();
+
+        return pv_names;
     }
     else
         return getPvNamesAll();
@@ -697,16 +699,23 @@ QString LogVol::getMapperPath()
     return m_lv_mapper_path;
 }
 
-long long LogVol::getSpaceUsedOnPv(QString physicalVolume)
+long long LogVol::getSpaceUsedOnPv(const QString physicalVolume)
 {
     long long space_used = 0;
-    for(int x = getSegmentCount() - 1; x >= 0; x--){
-	for(int y = m_segments[x]->m_device_path.size() - 1; y >= 0; y--){
-	    if(physicalVolume == (m_segments[x])->m_device_path[y]){
-		space_used += (m_segments[x]->m_size) / (m_segments[x]->m_stripes) ;
-	    }
+    QListIterator<Segment *> seg_itr(m_segments);
+
+    while( seg_itr.hasNext() ){
+
+        Segment *const seg = seg_itr.next();
+        QListIterator<QString> path_itr(seg->m_device_path);
+        
+        while( path_itr.hasNext() ){
+	    if(physicalVolume == path_itr.next())
+		space_used += (seg->m_size) / (seg->m_stripes) ;
 	}
+
     }
+
     return space_used;
 }
 
@@ -930,7 +939,7 @@ double LogVol::getCopyPercent()
 
 QString LogVol::getUuid()
 {
-  return m_uuid;
+    return m_uuid;
 }
 
 bool LogVol::hasMissingVolume()

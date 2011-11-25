@@ -95,7 +95,7 @@ class LogVol
     
     void countLegsAndLogs();
     void processSegments(lv_t lvmLV);
-    QStringList removePvDevices(QStringList devices);  // list lv children that are lvs and not devices or pvmove*
+    QStringList removePvNames(QStringList names);  // list lv children that are lvs and not devices or pvmove*
     QList<lv_t> getLvmSnapshots(vg_t lvmVG);
     void insertChildren(lv_t lvmLV, vg_t lvmVG);
     void calculateTotalSize();
@@ -123,18 +123,18 @@ class LogVol
     QString getOrigin();        // The name of the parent volume to a snapshot
     QString getUuid();
     int getSegmentCount();
-    int getSegmentStripes(int segment);
-    int getSegmentStripeSize(int segment);
-    long long getSegmentSize(int segment);
-    long long getSegmentExtents(int segment);
-    QList<long long> getSegmentStartingExtent(int segment);
-    QStringList getPvNames(int segment);     
+    int getSegmentStripes(const int segment);
+    int getSegmentStripeSize(const int segment);
+    long long getSegmentSize(const int segment);
+    long long getSegmentExtents(const int segment);
+    QList<long long> getSegmentStartingExtent(const int segment);
+    QStringList getPvNames(const int segment);     
     QStringList getPvNamesAll();         // full path of physical volumes for all segments
     QStringList getPvNamesAllFlat();     // full path of physical volumes including child lvs, un-nested
     QStringList getMountPoints();
     QStringList getTags();
     QList<int>  getMountPosition();
-    long long getSpaceUsedOnPv(QString physicalVolume);
+    long long getSpaceUsedOnPv(const QString physicalVolume);
     long long getExtents();
     long long getSize();
     long long getTotalSize();
