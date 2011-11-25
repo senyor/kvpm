@@ -29,15 +29,18 @@
 #include <QTableWidget>
 #include <QWidget>
 
+class ExecutableFinder;
+
 
 class KvpmConfigDialog: public KConfigDialog
 {
 Q_OBJECT
 
-    QTableWidget    *m_executables_table;
-    KEditListBox    *m_edit_list;
-    KConfigSkeleton *m_skeleton;
-    QStringList      m_search_entries;
+    QTableWidget     *m_executables_table;
+    KEditListBox     *m_edit_list;
+    KConfigSkeleton  *m_skeleton;
+    QStringList       m_search_entries;
+    ExecutableFinder *m_executable_finder;
 
     QSpinBox        *m_fs_warn_spin,
                     *m_pv_warn_spin;
@@ -115,7 +118,7 @@ Q_OBJECT
 
 public:
 
-    KvpmConfigDialog( QWidget *parent, QString name, KConfigSkeleton *skeleton  );
+    KvpmConfigDialog( QWidget *parent, QString name, KConfigSkeleton *const skeleton, ExecutableFinder *const executableFinder );
     ~KvpmConfigDialog();
 
 public slots:

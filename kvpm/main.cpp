@@ -32,7 +32,6 @@ class PhysVol;
 class LogVol;
 
 
-ExecutableFinder *g_executable_finder;
 TopWindow *MainWindow;
 
 int main(int argc, char **argv)
@@ -63,10 +62,9 @@ int main(int argc, char **argv)
     if( ! isconfigured_kvpm() )
         setup_kvpm();
 
-    g_executable_finder = new ExecutableFinder();
-    
+    ExecutableFinder *executable_finder = new ExecutableFinder();
     MasterList *master_list = new MasterList();
-    TopWindow  *top_window  = new TopWindow(master_list, NULL);
+    TopWindow  *top_window  = new TopWindow(master_list, executable_finder, NULL);
 
     MainWindow = top_window;
 

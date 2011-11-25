@@ -28,15 +28,15 @@ Q_OBJECT
     QStringList m_default_search_paths;
     QStringList m_keys;                       // Names of the executables we are looking for
     QStringList m_not_found;                  // The ones we didn't find
-    QMap<QString, QString> m_path_map;
+    static QMap<QString, QString> m_path_map;
     
  public:
     ExecutableFinder(QObject *parent = 0);
-    QString getExecutablePath(QString name);
+    static QString getPath(QString name);
+    void reload();                            // rescan the system for needed executables
     QStringList getAllPaths();
     QStringList getAllNames();
     QStringList getNotFound();
-    void reload();                            // rescan the system for needed executables
 };
 
 #endif

@@ -26,6 +26,7 @@
 
 #include "kvpmconfigdialog.h"
 #include "devicetab.h"
+#include "executablefinder.h"
 #include "logvol.h"
 #include "masterlist.h"
 #include "maintabwidget.h"
@@ -51,9 +52,10 @@
 ProgressBox* TopWindow::m_progress_box = NULL;   // Static initializing
 
 
-TopWindow::TopWindow(MasterList *const masterList, QWidget *parent) 
+TopWindow::TopWindow(MasterList *const masterList, ExecutableFinder *const executableFinder, QWidget *parent) 
     : KMainWindow(parent),
-      m_master_list(masterList)
+      m_master_list(masterList),
+      m_executable_finder(executableFinder)
 {
     m_tab_widget = NULL;
     m_progress_box = new ProgressBox(); // make sure this stays *before* master_list->rescan() gets called!
@@ -305,7 +307,7 @@ void TopWindow::stopPhysicalVolumeMove()
 
 void TopWindow::configKvpm()
 {
-    KvpmConfigDialog *const dialog  = new KvpmConfigDialog( this, "settings", new KConfigSkeleton() );
+    KvpmConfigDialog *const dialog  = new KvpmConfigDialog( this, "settings", new KConfigSkeleton(), m_executable_finder );
 
     connect(dialog, SIGNAL(applyClicked()), 
 	    this,   SLOT(updateTabs()));

@@ -25,15 +25,13 @@
 #include "processprogress.h"
 
 
-extern ExecutableFinder *g_executable_finder;
-
 
 bool fs_can_reduce(const QString fs)
 {
     const QString executable = "resize2fs";
 
     if(fs == "ext2" || fs == "ext3" || fs == "ext4"){
-        if( g_executable_finder->getExecutablePath(executable).isEmpty() ){
+        if( ExecutableFinder::getPath(executable).isEmpty() ){
             KMessageBox::error(NULL, i18n("Executable: '%1' not found, this filesystem cannot be reduced", executable));
             return false;
         }

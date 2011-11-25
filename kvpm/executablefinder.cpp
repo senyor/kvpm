@@ -21,6 +21,9 @@
 #include <QtGui>
 
 
+QMap<QString, QString> ExecutableFinder::m_path_map = QMap<QString, QString>(); // Static initialization
+
+
 /* The purpoise of this class is to map the name of a program
    with the full path of the executable */
 
@@ -72,7 +75,7 @@ ExecutableFinder::ExecutableFinder(QObject *parent) : QObject(parent)
 
 }
 
-QString ExecutableFinder::getExecutablePath(QString name)
+QString ExecutableFinder::getPath(const QString name)
 {
     QString path = m_path_map.value(name);
 
@@ -84,12 +87,8 @@ QString ExecutableFinder::getExecutablePath(QString name)
 
 void ExecutableFinder::reload()
 {
-
-    QByteArray path_array;
-    const char *path;
     KDE_struct_stat buf;
-
-    int key_length = m_keys.size();
+    const int key_length = m_keys.size();
 
     // Read the kvpmrc files and get the search paths or use the default
     // if none are found, then write out the default. 
@@ -100,7 +99,7 @@ void ExecutableFinder::reload()
     QStringList search_paths = system_paths_group.readEntry( "SearchPath", QStringList() );
     if( search_paths.isEmpty() ){
         search_paths = m_default_search_paths ;
-        system_paths_group.writeEntry( "SearchPath",    search_paths );
+        system_paths_group.writeEntry( "SearchPath", search_paths );
         system_paths_group.sync();
     }
 
@@ -108,8 +107,10 @@ void ExecutableFinder::reload()
 
     for(int y = 0; y < key_length; y++){
 	for(int x = 0; x < search_paths.size(); x++){
-            path_array = QString( search_paths[x] + m_keys[y] ).toLocal8Bit();
-            path = path_array.data(); 
+
+            QByteArray path_qba = QString( search_paths[x] + m_keys[y] ).toLocal8Bit();
+            const char *path = path_qba.data(); 
+
             if( KDE_lstat(path, &buf) == 0 ){
 		m_path_map.insert( m_keys[y], search_paths[x] + m_keys[y] );
 		break;
@@ -123,7 +124,6 @@ void ExecutableFinder::reload()
 	    m_not_found.append( m_keys[x] );
     }
 }
-
 
 QStringList ExecutableFinder::getAllPaths()
 {
