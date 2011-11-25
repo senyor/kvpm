@@ -42,7 +42,6 @@ class StoragePartition
     long long m_last_sector;
     long long m_fs_size;
     long long m_fs_used;
-    long long m_block_size;   // filesystem block size
     bool m_is_writable;
     bool m_is_pv;
     bool m_is_mounted;
@@ -74,7 +73,6 @@ public:
     long long getSize();
     long long getFirstSector();
     long long getLastSector();
-    long long getFilesystemBlockSize();
     long long getFilesystemSize();
     long long getFilesystemUsed();
     long long getFilesystemRemaining();

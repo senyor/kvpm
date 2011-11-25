@@ -66,7 +66,7 @@ SizeSelectorBox::SizeSelectorBox(long long unitSize, long long minSize, long lon
     if(m_is_volume){
         setTitle( i18n("Volume size") );
         if( !m_is_new ){
-            m_size_box = new QCheckBox( i18n("Lock volume size") );
+            m_size_box = new QCheckBox( i18n("Lock selected size") );
             m_size_box->setChecked(false);
             layout->addWidget(m_size_box);
             setConstraints(false);
@@ -87,7 +87,7 @@ SizeSelectorBox::SizeSelectorBox(long long unitSize, long long minSize, long lon
     }
     else{
         setTitle( i18n("Partition size") );
-        m_size_box = new QCheckBox( i18n("Lock partition size") );
+        m_size_box = new QCheckBox( i18n("Lock selected size") );
         m_size_box->setChecked(false);
         layout->addWidget(m_size_box);
 
@@ -108,6 +108,9 @@ SizeSelectorBox::SizeSelectorBox(long long unitSize, long long minSize, long lon
         }
     }
 
+    QLabel *const edit_label = new QLabel( i18n("New size:") );
+    edit_label->setBuddy(m_size_edit);
+    upper_layout->addWidget(edit_label);
     upper_layout->addWidget(m_size_edit);
     upper_layout->addWidget(m_suffix_combo);
     layout->addLayout(upper_layout);

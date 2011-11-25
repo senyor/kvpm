@@ -121,14 +121,12 @@ StoragePartition::StoragePartition(PedPartition *part,
     QString mp;
     if(m_is_mounted){
         mp = m_device_mount_info_list[0]->getMountPoint();
-        FSData *fs_data = get_fs_data(mp);
-        m_block_size = fs_data->block_size;
-        m_fs_size = fs_data->size * m_block_size;
-        m_fs_used = fs_data->used * m_block_size;
+        FSData *const fs_data = get_fs_data(mp);
+        m_fs_size = fs_data->size * fs_data->block_size; 
+        m_fs_used = fs_data->used * fs_data->block_size;
         delete fs_data;
     }
     else{
-        m_block_size = -1;
         m_fs_size = -1;
         m_fs_used = -1;
     }
@@ -230,11 +228,6 @@ long long StoragePartition::getFilesystemUsed()
 long long StoragePartition::getFilesystemRemaining()
 {
     return m_fs_size - m_fs_used;
-}
-
-long long StoragePartition::getFilesystemBlockSize()
-{
-    return m_block_size;
 }
 
 int StoragePartition::getFilesystemPercentUsed()
