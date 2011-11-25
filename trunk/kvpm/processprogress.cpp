@@ -24,7 +24,6 @@
 #include "topwindow.h"
 #include "progressbox.h"
 
-extern ExecutableFinder *g_executable_finder;
 
 
 ProcessProgress::ProcessProgress(QStringList arguments, QObject *parent) : QObject(parent)
@@ -41,7 +40,7 @@ ProcessProgress::ProcessProgress(QStringList arguments, QObject *parent) : QObje
     else{
 
         executable = arguments.takeFirst();
-	executable_path = g_executable_finder->getExecutablePath( executable );
+	executable_path = ExecutableFinder::getPath( executable );
 
         if( !executable_path.isEmpty() ){
 

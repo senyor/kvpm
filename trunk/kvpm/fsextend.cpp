@@ -30,8 +30,6 @@
 #include "processprogress.h"
 
 
-extern ExecutableFinder *g_executable_finder;
-
 bool do_temp_mount(QString path, QString fs);
 void do_temp_unmount();
 
@@ -51,7 +49,7 @@ bool fs_can_extend(const QString fs){
         else if(fs == "xfs")
             executable = "xfs_growfs";
 
-        if( !g_executable_finder->getExecutablePath(executable).isEmpty() )
+        if( !ExecutableFinder::getPath(executable).isEmpty() )
             return true;
         else{
             KMessageBox::error(NULL, i18n("Executable: '%1' not found, this filesystem cannot be extended", executable));

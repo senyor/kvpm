@@ -30,11 +30,15 @@
 #include "executablefinder.h"
 
 
-extern ExecutableFinder *g_executable_finder;
 
 
-KvpmConfigDialog::KvpmConfigDialog( QWidget *parent, QString name, KConfigSkeleton *skeleton ) 
-  : KConfigDialog(parent, name, skeleton), m_skeleton(skeleton) 
+
+KvpmConfigDialog::KvpmConfigDialog( QWidget *parent, QString name, 
+                                    KConfigSkeleton *const skeleton, 
+                                    ExecutableFinder *const executableFinder ) 
+    : KConfigDialog(parent, name, skeleton), 
+      m_skeleton(skeleton),
+      m_executable_finder(executableFinder) 
 {
     setFaceType(KPageDialog::List);
 
@@ -288,7 +292,7 @@ void KvpmConfigDialog::updateSettings()
 
     m_skeleton->writeConfig();
 
-    g_executable_finder->reload();
+    m_executable_finder->reload();
     fillExecutablesTable();
 }
 
@@ -362,9 +366,9 @@ void KvpmConfigDialog::fillExecutablesTable()
 {
     QTableWidgetItem *table_widget_item = NULL;
 
-    const QStringList all_names = g_executable_finder->getAllNames();
-    const QStringList all_paths = g_executable_finder->getAllPaths();
-    const QStringList not_found = g_executable_finder->getNotFound();
+    const QStringList all_names = m_executable_finder->getAllNames();
+    const QStringList all_paths = m_executable_finder->getAllPaths();
+    const QStringList not_found = m_executable_finder->getNotFound();
 
     m_executables_table->clear();
     m_executables_table->setColumnCount(2);

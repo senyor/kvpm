@@ -24,13 +24,14 @@
 #include <QVBoxLayout>
 
 class DeviceTab;
+class ExecutableFinder;
 class MainTabWidget;
 class MasterList;
+class ProgressBox;
 class StorageDevice;
 class TopWindow;
 class VolGroup;
 class VolumeGroupTab;
-class ProgressBox;
 
 extern TopWindow *MainWindow;
 
@@ -48,6 +49,7 @@ Q_OBJECT
     DeviceTab   *m_device_tab;
     VolGroup    *m_vg;
     MasterList  *m_master_list;
+    ExecutableFinder *m_executable_finder;
 
     static ProgressBox *m_progress_box; 
 
@@ -59,7 +61,7 @@ Q_OBJECT
     KMenu *buildToolsMenu();
 
  public:
-    TopWindow(MasterList *const masterList, QWidget *parent = NULL);
+    TopWindow(MasterList *const masterList, ExecutableFinder *const executableFinder, QWidget *parent = NULL);
     static ProgressBox *getProgressBox();
     
  public slots:
