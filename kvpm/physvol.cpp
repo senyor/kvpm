@@ -184,7 +184,7 @@ long long PhysVol::getLastUsedExtent()
     return m_last_used_extent;
 }
 
-void PhysVol::setLastUsedExtent(long long last)
+void PhysVol::setLastUsedExtent(const long long last)
 {
     m_last_used_extent = last;
 }

@@ -54,7 +54,7 @@ class PhysVol
     long long getDeviceSize();      // the physical volume might not take up all the device!    
     long long getRemaining();          // free space in bytes
     long long getLastUsedExtent();  // needed for minimum shrink size determination
-    void setLastUsedExtent(long long last);
+    void setLastUsedExtent(const long long last);
     int getPercentUsed();           // 0 - 100
     long getMdaCount();    
     long getMdaUsed();              // Meta Data areas in use    

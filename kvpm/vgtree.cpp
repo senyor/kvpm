@@ -346,6 +346,7 @@ void VGTree::setupContextMenu()
 		this, SLOT(popupContextMenu(QPoint)) );
 
     }
+
     return;
 }
 
