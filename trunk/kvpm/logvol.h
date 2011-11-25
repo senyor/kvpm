@@ -63,7 +63,6 @@ class LogVol
     long long m_size;            // size in bytes
     long long m_total_size;      // size in bytes, size of all children (mirror legs/logs and snaps) added together
     long long m_extents;         // size in extents
-    long long m_block_size;      // block size of fs
     long long m_fs_size;         // fs size in bytes 
     long long m_fs_used;         // bytes used up in fs
 
@@ -140,7 +139,6 @@ class LogVol
     long long getTotalSize();
     long long getFilesystemSize();
     long long getFilesystemUsed();
-    long long getFilesystemBlockSize();
     double getSnapPercent();
     double getCopyPercent();
     unsigned long getMinorDevice();
