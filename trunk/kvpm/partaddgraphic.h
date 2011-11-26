@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2009 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2009, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -30,9 +30,9 @@ Q_OBJECT
 
 public:
     PartAddGraphic(QWidget *parent = 0);
-    void setPrecedingSectors(long long precedingSectors);
-    void setFollowingSectors(long long followingSectors);
-    void setPartitionSectors(long long partitionSectors);
+    void setPrecedingSectors(const long long precedingSectors);
+    void setFollowingSectors(const long long followingSectors);
+    void setPartitionSectors(const long long partitionSectors);
 
 };
 

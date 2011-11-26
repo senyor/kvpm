@@ -1,12 +1,25 @@
+/*
+ *
+ * 
+ * Copyright (C) 2009, 2011 Benjamin Scott   <benscott@nwlink.com>
+ *
+ * This file is part of the Kvpm project.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License,  version 3, as 
+ * published by the Free Software Foundation.
+ * 
+ * See the file "COPYING" for the exact licensing terms.
+ */
 
-#include <QtGui>
 
 #include "partaddgraphic.h"
+
+#include <QtGui>
 
 
 PartAddGraphic::PartAddGraphic(QWidget *parent) : QFrame(parent)
 {
-
       setFixedWidth(200);
       setMinimumHeight(30);
 
@@ -20,14 +33,9 @@ void PartAddGraphic::paintEvent(QPaintEvent *){
      QPainter painter(this);
      painter.setPen(Qt::blue);
 
-     double offset;
-     double length;
-     long double total_sectors;
-
-     total_sectors =  m_preceding_sectors + m_following_sectors + m_partition_sectors;
-
-     offset = 0;
-     length = (m_preceding_sectors / total_sectors) * 199;
+     long double total_sectors =  m_preceding_sectors + m_following_sectors + m_partition_sectors;
+     double offset = 0;
+     double length = (m_preceding_sectors / total_sectors) * 199;
      QRectF preceding_rectangle(offset, 0.0, length, 29.0);
 
      offset += length;
@@ -48,19 +56,17 @@ void PartAddGraphic::paintEvent(QPaintEvent *){
      painter.fillRect( partition_rectangle, partition_brush );
 }
 
-void PartAddGraphic::setPrecedingSectors(long long precedingSectors)
+void PartAddGraphic::setPrecedingSectors(const long long precedingSectors)
 {
   m_preceding_sectors = precedingSectors;
 }
 
-void PartAddGraphic::setFollowingSectors(long long followingSectors)
+void PartAddGraphic::setFollowingSectors(const long long followingSectors)
 {
   m_following_sectors = followingSectors;
-
 }
 
-void PartAddGraphic::setPartitionSectors(long long partitionSectors)
+void PartAddGraphic::setPartitionSectors(const long long partitionSectors)
 {
   m_partition_sectors = partitionSectors;
-
 }
