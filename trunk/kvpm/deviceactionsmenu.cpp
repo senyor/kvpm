@@ -355,7 +355,7 @@ void DeviceActionsMenu::mountPartition()
 
 void DeviceActionsMenu::removefsPartition()
 {
-    if( remove_fs(m_part) )
+    if( remove_fs( m_part->getName() ) )
 	MainWindow->reRun();
 }
 
