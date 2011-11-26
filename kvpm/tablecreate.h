@@ -20,21 +20,21 @@
 #include <QRadioButton>
 #include <QString>
 
-bool create_table(QString devicePath);
+bool create_table(const QString devicePath);
 
 
 class TableCreateDialog : public KDialog
 {
 Q_OBJECT
 
-    QString   m_device_path;
+    QString m_device_path;
 
     QRadioButton *m_msdos_button, 
                  *m_gpt_button,
                  *m_destroy_button;
     
  public:
-    explicit TableCreateDialog(QString devicePath, QWidget *parent = 0);
+    explicit TableCreateDialog(const QString devicePath, QWidget *parent = 0);
     
  private slots:
     void commitTable();
