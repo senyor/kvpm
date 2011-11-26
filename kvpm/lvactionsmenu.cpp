@@ -563,7 +563,7 @@ void LVActionsMenu::fsckLogicalVolume()
 
 void LVActionsMenu::removefsLogicalVolume()
 {
-    if( remove_fs(m_lv) )
+    if( remove_fs( m_lv->getMapperPath() ) )
 	MainWindow->reRun();
 }
 

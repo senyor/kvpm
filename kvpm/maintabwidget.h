@@ -35,15 +35,15 @@ Q_OBJECT
 
  public:
     MainTabWidget(QWidget *parent = 0);
-    QString getUnmungedText(int index);
-    void appendVolumeGroupTab(VolumeGroupTab *page, const QIcon &icon, const QString &label);
-    void appendDeviceTab(DeviceTab *page, const QString & label);
-    void deleteTab(int index);
-    QWidget *getWidget(int index);
+    QString getUnmungedText(const int index);
+    void appendVolumeGroupTab(VolumeGroupTab *const page, const QIcon &icon, const QString &label);
+    void appendDeviceTab(DeviceTab *const page, const QString & label);
+    void deleteTab(const int index);
+    QWidget *getWidget(const int index);
     int getCount();
     int getCurrentIndex();
-    VolumeGroupTab *getVolumeGroupTab(int index);
-    void setIcon(int index, const QIcon &icon);
+    VolumeGroupTab *getVolumeGroupTab(const int index);
+    void setIcon(const int index, const QIcon &icon);
  
  public slots:
     void indexChanged(int index);

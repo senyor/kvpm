@@ -15,11 +15,8 @@
 #ifndef REMOVEFS_H
 #define REMOVEFS_H
 
+#include "QString" 
 
-class StoragePartition;
-class LogVol;
-
-bool remove_fs(StoragePartition *partition);
-bool remove_fs(LogVol *logicalVolume);
+bool remove_fs(const QString name);
 
 #endif

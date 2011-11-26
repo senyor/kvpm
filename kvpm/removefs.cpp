@@ -23,55 +23,38 @@
 #include "storagepartition.h"
 #include "logvol.h"
 
+
+
 // Removes all traces of any filesystem on a partition or volume
 
-
-bool remove_fs(StoragePartition *partition)
+bool remove_fs(const QString name)
 {
+    const QString warning_message = i18n("Are you sure you want delete the filesystem on <b>%1</b>? "
+                                         "Any data on it will be lost.", name);
 
-    QString message = i18n("Are you sure you want delete this filesystem? "
-                           "Any data on it will be lost!");
+    const QString error_message = i18n("Error writing to device %1", name);
 
-    QByteArray zero_array(128 * 1024, '\0');
-    QString path = partition->getName();
-    QFile *device;
+    if(KMessageBox::warningContinueCancel(0, warning_message) == KMessageBox::Continue){
 
-    if(KMessageBox::warningContinueCancel(0, message) == KMessageBox::Continue){
-
-        device = new QFile(path);
+        QByteArray zero_array(128 * 1024, '\0');
+        QFile *const device = new QFile(name);
+        bool error = false;
 
         if( device->open(QIODevice::ReadWrite) ){
-            device->write(zero_array);
-            device->flush();
+            if( device->write(zero_array) < 0 )
+                error = true;
+            if( !device->flush() )
+                error = true;
+
             device->close();
 
-            return(true);
+            if(error)
+                KMessageBox::error(0, error_message);
         }
-    }
-    return(false);
-}
+        else
+            KMessageBox::error(0, error_message);
 
-bool remove_fs(LogVol *logicalVolume)
-{
-
-    QString message = i18n("Are you sure you want delete this filesystem? "
-                           "Any data on it will be lost!");
-
-    QByteArray zero_array(128 * 1024, '\0');
-    QString path = logicalVolume->getMapperPath();
-    QFile *device;
-
-    if(KMessageBox::warningContinueCancel(0, message) == KMessageBox::Continue){
-
-        device = new QFile(path);
-
-        if( device->open(QIODevice::ReadWrite) ){
-            device->write(zero_array);
-            device->flush();
-            device->close();
-
-            return(true);
-        }
+        return(true);
     }
     return(false);
 }
