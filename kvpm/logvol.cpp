@@ -372,9 +372,15 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)  // lv_t seems to change -- why?
 
     if(m_mounted){
         FSData *const fs_data = get_fs_data(m_mount_points[0]);
-        m_fs_size = fs_data->size * fs_data->block_size; 
-        m_fs_used = fs_data->used * fs_data->block_size;
-        delete fs_data;
+        if(fs_data != NULL){ 
+            m_fs_size = fs_data->size * fs_data->block_size; 
+            m_fs_used = fs_data->used * fs_data->block_size;
+            delete fs_data;
+        }
+        else{
+            m_fs_size = -1;
+            m_fs_used = -1;
+        }
     }
     else{
         m_fs_size = -1;
