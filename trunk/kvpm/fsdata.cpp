@@ -25,32 +25,26 @@
 
 #include "misc.h"
 
+
 FSData *get_fs_data(QString path){
 
-    long long total_blocks, frag_size, block_size;
-    int error;
-
-    FSData *fs_data = new FSData();
-    fs_data->size = -1;
-    fs_data->used = -1;
-    fs_data->block_size = -1;
-
-    struct statvfs *buf;
-    buf = new struct statvfs;
+    struct statvfs *buff = new struct statvfs;
 
     QByteArray path_array = path.toLocal8Bit();
     const char *mp = path_array.data();
-    error =  statvfs(mp, buf);
+    const int error = statvfs(mp, buff);
  
-    if(!error){  // We use "long long" intermediate variables here
-        block_size = buf->f_bsize;
-        frag_size = buf->f_frsize;
-        total_blocks = (frag_size * buf->f_blocks) / block_size;
+    if( !error ){
+        const long long block_size = buff->f_bsize;
+        const long long frag_size  = buff->f_frsize;
+        const long long total_blocks = (frag_size * buff->f_blocks) / block_size;
 
+        FSData *fs_data = new FSData();
         fs_data->block_size = block_size; 
         fs_data->size = total_blocks;
-        fs_data->used = total_blocks - buf->f_bavail;
+        fs_data->used = total_blocks - buff->f_bavail;
+        return fs_data;
     }
-
-    return fs_data;
+    else
+        return NULL;
 }
