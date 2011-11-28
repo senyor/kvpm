@@ -551,8 +551,13 @@ void LVActionsMenu::removeMirrorLeg()
 
 void LVActionsMenu::mkfsLogicalVolume()
 {
-    if( make_fs(m_lv) )
-	MainWindow->reRun();
+    MkfsDialog dialog(m_lv);
+
+    if( !dialog.bailout() ){
+        dialog.exec();
+        if(dialog.result() == QDialog::Accepted)
+            MainWindow->reRun();
+    }
 }
 
 void LVActionsMenu::fsckLogicalVolume()

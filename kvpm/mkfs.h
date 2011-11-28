@@ -31,23 +31,22 @@ class VolGroup;
 class LogVol;
 class StoragePartition;
 
-bool make_fs(LogVol *logicalVolume);
-bool make_fs(StoragePartition *partition);
 
 class MkfsDialog : public KDialog
 {
 Q_OBJECT
 
     KTabWidget  *m_tab_widget;
-    QGroupBox   *radio_box, *m_stripe_box, *m_misc_box, 
-                *m_base_options_box, *m_ext4_options_box;
+
+    QGroupBox   *m_stripe_box,       *m_base_options_box, 
+                *m_ext4_options_box, *m_misc_options_box;
 
     QRadioButton *ext2, *ext3, *ext4, *reiser, *reiser4, *ntfs,
                  *jfs,  *xfs,  *vfat, *swap,   *btrfs;
 
     KComboBox *m_block_combo;      // blocksize
     KComboBox *m_inode_combo;      // inode size
-    KLineEdit *m_volume_edit;      // volume name
+    KLineEdit *m_name_edit;        // volume name
     KLineEdit *m_inode_edit;       // bytes / inode
     KLineEdit *m_total_edit;       // total inode count
     KLineEdit *m_stride_edit;      // stride size
@@ -69,20 +68,28 @@ Q_OBJECT
     QCheckBox *m_lazy_itable_init_check;
 
     QString m_path;
-
-    int m_stride_size, m_stride_count;
+    bool m_bailout;
 
     QWidget *generalTab();
-    QWidget *advancedTab();
+    QWidget *advancedTab(const long strideSize, const long strideCount);
+    QWidget *ext4Tab();
+    QGroupBox *miscOptionsBox();
+    QGroupBox *baseOptionsBox();
+    QGroupBox *ext4OptionsBox();
+    QGroupBox *stripeBox(const long strideSize, const long strideCount);
+    void clobberFilesystem();
+    bool hasInitialErrors(const bool mounted);
+    void buildDialog(const long strideSize, const long strideCount);
 
  private slots:
-    void clobberFS();
-    void setAdvancedTab(bool);
+    void enableOptions(bool);
+    void commitFilesystem();
 
  public:
-    explicit MkfsDialog(LogVol *logicalVolume, QWidget *parent = 0);
-    explicit MkfsDialog(StoragePartition *partition, QWidget *parent = 0);
-    QStringList arguments();
+    explicit MkfsDialog(LogVol *const logicalVolume, QWidget *parent = 0);
+    explicit MkfsDialog(StoragePartition *const partition, QWidget *parent = 0);
+    bool bailout();
+
 };
 
 #endif
