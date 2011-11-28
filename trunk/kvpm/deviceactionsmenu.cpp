@@ -354,7 +354,10 @@ void DeviceActionsMenu::vgextendPartition(QAction *action)
 
 void DeviceActionsMenu::mountPartition()
 {
-    if( mount_filesystem(m_part) )
+    MountDialog dialog(m_part);
+    dialog.exec();
+
+    if(dialog.result() == QDialog::Accepted)
 	MainWindow->reRun();
 }
 

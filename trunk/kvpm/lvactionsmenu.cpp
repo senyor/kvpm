@@ -615,7 +615,10 @@ void LVActionsMenu::changeLogicalVolume()
 
 void LVActionsMenu::mountFilesystem()
 {
-    if( mount_filesystem(m_lv) )
+    MountDialog dialog(m_lv);
+    dialog.exec();
+
+    if(dialog.result() == QDialog::Accepted)
 	MainWindow->reRun();
 }
 
