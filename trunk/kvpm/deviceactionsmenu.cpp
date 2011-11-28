@@ -260,8 +260,13 @@ void DeviceActionsMenu::setup(QTreeWidgetItem *item)
 
 void DeviceActionsMenu::mkfsPartition()
 {
-    if( make_fs(m_part) )
-	    MainWindow->reRun();
+    MkfsDialog dialog(m_part);
+
+    if( !dialog.bailout() ){
+        dialog.exec();
+        if(dialog.result() == QDialog::Accepted)
+            MainWindow->reRun();
+    }
 }
 
 void DeviceActionsMenu::fsckPartition()

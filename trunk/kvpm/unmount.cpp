@@ -21,6 +21,7 @@
 
 #include <KMessageBox>
 #include <KLocale>
+
 #include <QtGui>
 
 #include "logvol.h"
@@ -78,6 +79,7 @@ UnmountDialog::UnmountDialog(QString device, QStringList mountPoints,
 	mount_group_layout->addWidget(temp_check);
 	m_check_list.append(temp_check);
     }
+
     if( checks_disabled ){
         QLabel *position_message_label = new QLabel();
 	position_message_label->setText(position_message);
@@ -92,23 +94,21 @@ UnmountDialog::UnmountDialog(QString device, QStringList mountPoints,
 
 void UnmountDialog::unmountFilesystems()
 {
-    QByteArray mount_point;
-    QString error_string, error_message;
+    NoMungeCheck *cb;
+    QListIterator<NoMungeCheck *> cb_itr(m_check_list);
 
-    for(int x = 0; x < m_check_list.size(); x++){
-	if( m_check_list[x]->isChecked() ) {
-	    
-	    mount_point = m_check_list[x]->getUnmungedText().toLocal8Bit();
-	    if( umount2( mount_point.data() , 0) ){
-		error_string =  strerror( errno );
+    while( cb_itr.hasNext() ){
+        cb = cb_itr.next();
 
-		error_message = i18n("Unmounting %1 failed with error number: %2 "
-				     "%3", QString(mount_point), errno, error_string );
+	if( cb->isChecked() ) {
+	    QByteArray mp = cb->getUnmungedText().toLocal8Bit();
 
-		KMessageBox::error(0, error_message);
+	    if(umount2(mp.data() , 0)){
+		KMessageBox::error(0, i18n("Unmounting <b>%1</b> failed with error number: %2 %3", 
+                                           QString(mp), errno, QString(strerror(errno))));
 	    }
 	    else
-		removeMountEntry(mount_point);
+		removeMountEntry(mp);
 	} 
     }
 }
