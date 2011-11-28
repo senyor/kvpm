@@ -25,6 +25,7 @@
 #include <KMessageBox>
 #include <KUrl>
 #include <KLocale>
+
 #include <QtGui>
 
 #include "logvol.h"
@@ -35,20 +36,43 @@
 const int BUFF_LEN = 2000;   // Enough?
 
 
-MountDialog::MountDialog(QString deviceToMount, QString filesystemType, bool writable, QWidget *parent) : 
-    KDialog(parent),
-    m_device_to_mount(deviceToMount),
-    m_filesystem_type(filesystemType),
-    m_is_writable(writable)
+MountDialog::MountDialog(LogVol *const volume, QWidget *parent) : KDialog(parent)
 {
+    m_device_to_mount = volume->getMapperPath();
+    m_filesystem_type = volume->getFilesystem();
+    m_is_writable = volume->isWritable();
 
-    KTabWidget *dialog_body = new KTabWidget(this);
+    if( hasFstabEntry(m_device_to_mount) )
+	m_mount_point = getFstabEntry(m_device_to_mount);
+    else
+	m_mount_point = "";
+
+    buildDialog();
+}
+
+MountDialog::MountDialog(StoragePartition *const partition, QWidget *parent) : KDialog(parent)
+{
+    m_device_to_mount = partition->getName();
+    m_filesystem_type = partition->getFilesystem();
+    m_is_writable = partition->isWritable();
+
+    if( hasFstabEntry(m_device_to_mount) )
+	m_mount_point = getFstabEntry(m_device_to_mount);
+    else
+	m_mount_point = "";
+
+    buildDialog();
+}
+
+void MountDialog::buildDialog()
+{
+    KTabWidget *const dialog_body = new KTabWidget(this);
     setMainWidget(dialog_body);
 
-    QWidget *main_tab    = new QWidget(this);
-    QVBoxLayout *main_layout = new QVBoxLayout();
+    QWidget *const main_tab    = new QWidget(this);
+    QVBoxLayout *const main_layout = new QVBoxLayout();
     main_tab->setLayout(main_layout);
-    QLabel *device_label = new QLabel( "<b>" + deviceToMount + "</b>");
+    QLabel *const device_label = new QLabel( "<b>" + m_device_to_mount + "</b>");
     device_label->setAlignment(Qt::AlignCenter);    
     main_layout->addWidget( device_label );
     main_layout->addWidget( filesystemBox() );
@@ -507,28 +531,3 @@ void MountDialog::toggleAdditionalOptions(bool)
     }
 }
 
-bool mount_filesystem(LogVol *volumeToMount)
-{
-    MountDialog dialog(volumeToMount->getMapperPath(), volumeToMount->getFilesystem(), volumeToMount->isWritable());
-    dialog.exec();
-
-    if (dialog.result() == QDialog::Accepted)
-	return true;
-    else
-	return false;
-}
-
-bool mount_filesystem(StoragePartition *partition)
-{
-    QString device = partition->getName();
-    QString filesystem = partition->getFilesystem();
-    bool writable = partition->isWritable();
-
-    MountDialog dialog(device, filesystem, writable);
-    dialog.exec();
-
-    if (dialog.result() == QDialog::Accepted)
-	return true;
-    else
-	return false;
-}

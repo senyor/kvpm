@@ -27,8 +27,6 @@
 class LogVol;
 class StoragePartition;
 
-bool mount_filesystem(StoragePartition *partition);
-bool mount_filesystem(LogVol *volumeToMount);
 
 class MountDialog : public KDialog
 {
@@ -58,9 +56,12 @@ Q_OBJECT
     QWidget* filesystemBox();
     QWidget* optionsTab();
     QWidget* mountPointBox();
+    void buildDialog();
     
  public:
-    MountDialog(QString deviceToMount, QString filesystemType, bool writable, QWidget *parent = 0);
+    MountDialog(LogVol *const volume, QWidget *parent = NULL);
+    MountDialog(StoragePartition *const partition, QWidget *parent = NULL);
+
     
  private slots:
     void selectMountPoint(bool);
