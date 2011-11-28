@@ -58,16 +58,16 @@ PVProperties::PVProperties(PhysVol *physicalVolume, QWidget *parent) :
 QList<LVSegmentExtent *> PVProperties::sortByExtent()
 {
     const QString pv_name = m_pv->getName();
-    VolGroup *const vg = m_pv->getVg();
-    const QList<LogVol *>  lvs = vg->getLogicalVolumesFlat();
     QList<long long> first_extent_list;
     QStringList pv_name_list;
     QList<LVSegmentExtent *> lv_extents;
     LVSegmentExtent *temp;
     LogVol *lv;
 
-    for(int x = 0; x < lvs.size() ; x++){
-	lv = lvs[x];
+    QListIterator<LogVol *> lv_itr( m_pv->getVg()->getLogicalVolumesFlat() );
+
+    while( lv_itr.hasNext() ){
+        lv = lv_itr.next();
         if( !lv->isSnapContainer() ){
             for(int segment = lv->getSegmentCount() - 1; segment >= 0; segment--){
                 pv_name_list = lv->getPvNames(segment);
@@ -203,6 +203,9 @@ QFrame *PVProperties::buildLVBox()
     layout->addWidget(temp_label, row + 1, 0, 1, -1 );
     temp_label = new QLabel( i18n("Total extents: %1", m_pv->getSize() / m_pv->getVg()->getExtentSize() ) );
     layout->addWidget(temp_label, row + 2, 0, 1, -1 );
+
+    for(int x = 0; x < lv_extents.size(); x++)
+        delete lv_extents[x];
 
     return frame;
 }
