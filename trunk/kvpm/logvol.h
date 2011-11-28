@@ -122,7 +122,7 @@ class LogVol
     QString getOrigin();        // The name of the parent volume to a snapshot
     QString getUuid();
     int getSegmentCount();
-    int getSegmentStripes(const int segment);
+    int getSegmentStripes(const int segment);     // The number of stipes in the segment
     int getSegmentStripeSize(const int segment);
     long long getSegmentSize(const int segment);
     long long getSegmentExtents(const int segment);
