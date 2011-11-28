@@ -41,7 +41,7 @@ struct Segment
                                           // for this segment
 };
 
-LogVol::LogVol(lv_t lvmLV, vg_t lvmVG, VolGroup *vg, LogVol *lvParent, bool orphan):
+LogVol::LogVol(lv_t lvmLV, vg_t lvmVG, VolGroup *vg, LogVol *lvParent, bool orphan) :
     m_vg(vg),
     m_lv_parent(lvParent),
     m_orphan(orphan)
@@ -56,6 +56,9 @@ LogVol::~LogVol()
 
     while( children.size() )
         delete children.takeAt(0);
+
+    while( m_segments.size() )
+        delete m_segments.takeAt(0);
 }
 
 void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)  // lv_t seems to change -- why?
@@ -540,14 +543,21 @@ void LogVol::processSegments(lv_t lvmLV)
 
             segment = new Segment();
 
-            value = lvm_lvseg_get_property(lvm_lvseg, "stripes");
-            segment->m_stripes = value.value.integer; 
-
-            value = lvm_lvseg_get_property(lvm_lvseg, "stripesize");
-            segment->m_stripe_size = value.value.integer;
-
-            value = lvm_lvseg_get_property(lvm_lvseg, "seg_size");
-            segment->m_size = value.value.integer;
+            if(m_mirror){
+                segment->m_stripes = 1;
+                segment->m_stripe_size = 1;
+                segment->m_size = 1;
+            }
+            else{
+                value = lvm_lvseg_get_property(lvm_lvseg, "stripes");
+                segment->m_stripes = value.value.integer; 
+                
+                value = lvm_lvseg_get_property(lvm_lvseg, "stripesize");
+                segment->m_stripe_size = value.value.integer;
+                
+                value = lvm_lvseg_get_property(lvm_lvseg, "seg_size");
+                segment->m_size = value.value.integer;
+            }
 
             value = lvm_lvseg_get_property(lvm_lvseg, "devices");
             if( value.is_valid ){
