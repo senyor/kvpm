@@ -42,10 +42,7 @@ MountDialog::MountDialog(LogVol *const volume, QWidget *parent) : KDialog(parent
     m_filesystem_type = volume->getFilesystem();
     m_is_writable = volume->isWritable();
 
-    if( hasFstabEntry(m_device_to_mount) )
-	m_mount_point = getFstabEntry(m_device_to_mount);
-    else
-	m_mount_point = "";
+    m_mount_point = getFstabEntry(volume);
 
     buildDialog();
 }
@@ -56,10 +53,7 @@ MountDialog::MountDialog(StoragePartition *const partition, QWidget *parent) : K
     m_filesystem_type = partition->getFilesystem();
     m_is_writable = partition->isWritable();
 
-    if( hasFstabEntry(m_device_to_mount) )
-	m_mount_point = getFstabEntry(m_device_to_mount);
-    else
-	m_mount_point = "";
+    m_mount_point = getFstabEntry(partition);
 
     buildDialog();
 }
@@ -303,11 +297,6 @@ QWidget* MountDialog::optionsTab()
 
 QWidget* MountDialog::mountPointBox()
 {
-    if( hasFstabEntry(m_device_to_mount) )
-	m_mount_point = getFstabEntry(m_device_to_mount);
-    else
-	m_mount_point = "";
-
     QGroupBox *mount_point_box = new QGroupBox( i18n("Mount point") );
     QHBoxLayout *mount_point_layout = new QHBoxLayout();
     mount_point_box->setLayout(mount_point_layout);

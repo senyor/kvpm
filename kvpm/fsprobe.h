@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -17,10 +17,8 @@
 
 #include <QString>
 
-QString fsprobe_getfstype2(QString devicePath);
-QString fsprobe_getfsuuid(QString devicePath);
-QString fsprobe_getfslabel(QString devicePath);
-QString fsprobe_getfs_by_uuid(QString uuid);
-QString fsprobe_getfs_by_label(QString label);
+QString fsprobe_getfstype2(const QString devicePath);
+QString fsprobe_getfsuuid(const QString devicePath);
+QString fsprobe_getfslabel(const QString devicePath);
 
 #endif
