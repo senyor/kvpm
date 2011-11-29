@@ -108,7 +108,13 @@ SizeSelectorBox::SizeSelectorBox(long long unitSize, long long minSize, long lon
         }
     }
 
-    QLabel *const edit_label = new QLabel( i18n("New size:") );
+    QLabel *const edit_label = new QLabel();
+
+    if(m_is_offset)
+        edit_label->setText( i18n("New start:") );
+    else
+        edit_label->setText( i18n("New size:") );
+
     edit_label->setBuddy(m_size_edit);
     upper_layout->addWidget(edit_label);
     upper_layout->addWidget(m_size_edit);
