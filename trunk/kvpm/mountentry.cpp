@@ -20,11 +20,13 @@
 #include <stdio.h>
 
 #include <QtGui>
+
 #include <kde_file.h>
 
 #include "logvol.h"
-#include "fsprobe.h"
+#include "storagepartition.h"
 #include "volgroup.h"
+
 
 const int BUFF_LEN = 2000;   // Enough?
 
@@ -130,7 +132,6 @@ bool addMountEntryOptions(QString mountPoint, QString newOptions)
     return false;
 }
 
-
 bool removeMountEntry(QString mountPoint)
 {
     QList<mntent *> mount_entry_list;
@@ -220,49 +221,8 @@ QStringList getMountedDevices(QString mountPoint)
 	}
 	endmntent(fp);
     }
+
     return mounted_devices;
-}
-
-bool hasFstabEntry(QString device)
-{
-    QString entry = getFstabEntry(device);
-    if( entry.isEmpty() )
-        return false;
-    else
-        return true;
-}
-
-QString getFstabEntry(QString device)
-{
-    QString name_entry;                // returned entry to compare to
-    QString mount_dir;
-    FILE *fp;
-    mntent *mount_entry;
-
-    fp = setmntent(_PATH_FSTAB, "r");
-
-    while( (mount_entry = getmntent(fp)) ){
-	name_entry = QByteArray( mount_entry->mnt_fsname );
-
-	if(name_entry == device){
-	    mount_dir = QByteArray( mount_entry->mnt_dir );
-	    endmntent(fp);
-	    return mount_dir;
-	}
-        else if( fsprobe_getfs_by_uuid(name_entry) == device ){
-	    mount_dir = QByteArray( mount_entry->mnt_dir );
-            endmntent(fp);
-	    return mount_dir;
-        }
-        else if( fsprobe_getfs_by_label(name_entry) == device ){
-	    mount_dir = QByteArray( mount_entry->mnt_dir );
-            endmntent(fp);
-	    return mount_dir;
-        }
-    }
-    endmntent(fp);
-
-    return QString();
 }
 
 mntent *copyMountEntry(mntent *mountEntry)
@@ -331,3 +291,65 @@ bool rename_mount_entries(QString oldName, QString newName)
     return true;
 }
 
+QString getFstabEntry(LogVol *const lv)
+{
+    const QString lv_name  = lv->getMapperPath();
+    const QString fs_label = lv->getFilesystemLabel();
+    const QString fs_uuid  = lv->getFilesystemUuid();
+
+    QString entry;                // returned entry to compare to
+    QString mount_dir;
+    mntent *mount_entry;
+
+    FILE *const fp = setmntent(_PATH_FSTAB, "r");
+
+    while( (mount_entry = getmntent(fp)) ){
+	entry = QByteArray( mount_entry->mnt_fsname );
+        entry = entry.trimmed();
+
+        if( entry.startsWith("UUID=", Qt::CaseInsensitive) )
+            entry = entry.remove(0, 5);
+        else if( entry.startsWith("LABEL=", Qt::CaseInsensitive) )
+            entry = entry.remove(0, 6);
+
+	if(entry == lv_name || entry == fs_uuid || entry == fs_label){
+	    mount_dir = QByteArray( mount_entry->mnt_dir );
+	    endmntent(fp);
+	    return mount_dir;
+	}
+    }
+    endmntent(fp);
+
+    return QString();
+}
+
+QString getFstabEntry(StoragePartition *const partition)
+{
+    const QString part_name  = partition->getName();
+    const QString fs_label   = partition->getFilesystemLabel();
+    const QString fs_uuid    = partition->getFilesystemUuid();
+
+    QString entry;                // returned entry to compare to
+    QString mount_dir;
+    mntent *mount_entry;
+
+    FILE *const fp = setmntent(_PATH_FSTAB, "r");
+
+    while( (mount_entry = getmntent(fp)) ){
+	entry = QByteArray( mount_entry->mnt_fsname );
+
+        if( entry.startsWith("UUID=", Qt::CaseInsensitive) )
+            entry = entry.remove(0, 5);
+        else if( entry.startsWith("LABEL=", Qt::CaseInsensitive) )
+            entry = entry.remove(0, 6);
+
+	if(entry == part_name || entry == fs_uuid || entry == fs_label){
+	    mount_dir = QByteArray( mount_entry->mnt_dir );
+	    endmntent(fp);
+	    return mount_dir;
+	}
+    }
+    endmntent(fp);
+
+    return QString();
+}

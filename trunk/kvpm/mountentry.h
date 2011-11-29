@@ -18,6 +18,8 @@
 #include <QString>
 
 class mntent;
+class LogVol;
+class StoragePartition;
 
 bool addMountEntry(QString device, QString mountPoint, QString type, 
 		  QString options, int dumpFreq, int pass);
@@ -28,13 +30,13 @@ mntent* buildMountEntry(QString device, QString mountPoint, QString type,
 bool addMountEntryOptions(QString mountPoint, QString newOptions);
 
 bool removeMountEntry(QString mountPoint);
+bool hasMountEntry(QString device);
 mntent *copyMountEntry(mntent *mountEntry);
 
-bool hasMountEntry(QString device);
-bool hasFstabEntry(QString device);
-
 QStringList getMountedDevices(QString mountPoint); // Returns devices mounted to mountPoint
-QString getFstabEntry(QString device);
+
+QString getFstabEntry(LogVol *const lv);
+QString getFstabEntry(StoragePartition *const partition);
 
 bool rename_mount_entries(QString oldName, QString newName);
 
