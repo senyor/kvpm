@@ -50,17 +50,16 @@ UnmountDialog::UnmountDialog(QString device, QStringList mountPoints,
     QVBoxLayout *layout    = new QVBoxLayout();
     dialog_body->setLayout(layout);
 
-    QString unmount_message = i18n( "<b>%1</b> is mounted at multiple locatations. "
-				    "Check the boxes for any you "
-				    "wish to unmount.", device);
+    const QString unmount_message = i18n( "<b>%1</b> is mounted at multiple locatations. "
+                                          "Check the boxes for any you "
+                                          "wish to unmount.", device);
 
-    QString position_message = i18n( "One or more unmount selections have been disabled. "
-				     "Another device or volume is mounted over the same "
-				     "mount point and must be unmounted first" );
+    const QString position_message = i18n( "One or more unmount selections have been disabled. "
+                                           "Another device or volume is mounted over the same "
+                                           "mount point and must be unmounted first" );
 
 
-    QLabel *unmount_message_label = new QLabel();
-    unmount_message_label->setText(unmount_message);
+    QLabel *unmount_message_label = new QLabel(unmount_message);
     unmount_message_label->setWordWrap(true);
     layout->addWidget(unmount_message_label);
 

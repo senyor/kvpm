@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2009 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2009, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -20,6 +20,6 @@
 
 class StoragePartition;
 
-bool remove_partition( StoragePartition *partition);
+bool remove_partition(StoragePartition *const partition);
 
 #endif
