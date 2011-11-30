@@ -23,7 +23,7 @@
 #include "processprogress.h"
 #include "storagepartition.h"
 
-bool fsck(QString path){
+bool fsck(const QString path){
 
     QStringList arguments, output;
 
@@ -34,29 +34,29 @@ bool fsck(QString path){
     ProcessProgress fsck_fs(arguments);
     output = fsck_fs.programOutput();
 
-    if ( fsck_fs.exitCode() > 1 )   // 0 means no errors 1 means minor errors fixed
+    if ( fsck_fs.exitCode() > 1 )   // 0 means no errors, 1 means minor errors fixed
         return false;
     else
         return true;
 }
 
-bool manual_fsck(LogVol *logicalVolume){
+bool manual_fsck(LogVol *const logicalVolume){
 
     const QString path = logicalVolume->getMapperPath();
-    const QString message = i18n("<b>Run 'fsck -fp' on %1?</b>", path);
+    const QString message = i18n("Run <b>'fsck -fp'</b> to check the filesystem on volume <b>%1?</b>", path);
 
-    if(KMessageBox::warningYesNo( 0, message) == 3)  // 3 = yes button
+    if(KMessageBox::questionYesNo(0, message) == KMessageBox::Yes)
         return fsck(path);
     else
         return false;
 }
 
-bool manual_fsck(StoragePartition *partition){
+bool manual_fsck(StoragePartition *const partition){
 
     const QString path = partition->getName();
-    const QString message = i18n("<b>Run 'fsck -fp' on %1?</b>", path);
+    const QString message = i18n("Run <b>'fsck -fp'</b> to check the filesystem on partition <b>%1?</b>", path);
 
-    if(KMessageBox::warningYesNo( 0, message) == 3)  // 3 = yes button
+    if(KMessageBox::questionYesNo(0, message) == KMessageBox::Yes)
         return fsck(path);
     else
         return false;
