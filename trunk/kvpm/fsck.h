@@ -20,8 +20,8 @@ class StoragePartition;
 
 #include <QString>
 
-bool fsck(QString path);
-bool manual_fsck(LogVol *logicalVolume);
-bool manual_fsck(StoragePartition *partition);
+bool fsck(const QString path);
+bool manual_fsck(LogVol *const logicalVolume);
+bool manual_fsck(StoragePartition *const partition);
 
 #endif
