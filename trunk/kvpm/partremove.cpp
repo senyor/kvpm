@@ -16,32 +16,40 @@
 
 #include <KLocale>
 #include <KMessageBox>
+
 #include <QtGui>
 
 #include "partremove.h"
 #include "storagepartition.h"
 
 
-bool remove_partition( StoragePartition *partition )
+bool remove_partition(StoragePartition *const partition)
 {
-    QStringList args;
     QString message;
-    PedPartition *ped_partition;
+    PedPartition *const ped_partition = partition->getPedPartition();
 
-    if( partition->getType() != "extended" )
-        message = i18n("Remove partition: <b>%1</b>? any data on that partition will be lost!", partition->getName() );
-    else
-        message = i18n("Remove partition: <b>%1</b>?", partition->getName() );
+    if( partition->getType() != "extended" ){
+        message = i18n("Remove partition: <b>%1?</b> Any data on that partition will be lost.", partition->getName() );
 
-    ped_partition = partition->getPedPartition();
+        if(KMessageBox::warningYesNo(0, message) == KMessageBox::Yes){
 
-    if(KMessageBox::warningContinueCancel( 0, message) == 5){  // 5 = "continue" button
-
-        if(ped_disk_delete_partition( ped_partition->disk, ped_partition ) )
-	    ped_disk_commit(ped_partition->disk);
-
-        return true;
+            if( ped_disk_delete_partition( ped_partition->disk, ped_partition ) )
+                ped_disk_commit( ped_partition->disk );
+            
+            return true;
+        }
     }
-    else
-        return false;
+    else{
+        message = i18n("Remove partition: <b>%1?</b>", partition->getName() );
+
+        if(KMessageBox::questionYesNo(0, message) == KMessageBox::Yes){
+            
+            if( ped_disk_delete_partition( ped_partition->disk, ped_partition ) )
+                ped_disk_commit( ped_partition->disk );
+            
+            return true;
+        }
+    }
+
+    return false;
 }
