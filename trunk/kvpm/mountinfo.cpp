@@ -55,6 +55,31 @@ MountInformation::MountInformation(mntent *mountTableEntry, QObject *parent) : Q
 
 }
 
+
+/* This function looks at the mount table and returns the
+   filesystem's mount point if the device is has an entry
+   in the table. It returns NULL on failure */
+
+QStringList MountInformation::getMountedDevices(QString mountPoint)
+{
+    mntent *mount_entry;
+    QStringList mounted_devices;
+
+    FILE *fp = setmntent(_PATH_MOUNTED, "r");
+    if(fp){
+	while( (mount_entry = getmntent(fp)) ){
+
+	    if( QString( mount_entry->mnt_dir ) == mountPoint ){
+	       mounted_devices.append( QString( mount_entry->mnt_fsname ) );
+
+	    }
+	}
+	endmntent(fp);
+    }
+
+    return mounted_devices;
+}
+
 QString MountInformation::getDeviceName()
 {
     return m_device_name;

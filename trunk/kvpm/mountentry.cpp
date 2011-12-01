@@ -30,6 +30,12 @@
 
 const int BUFF_LEN = 2000;   // Enough?
 
+mntent *copyMountEntry(mntent *mountEntry);
+
+mntent *buildMountEntry(QString device, QString mountPoint, QString type, 
+			QString options, int dumpFreq, int pass);
+
+
 
 // Adds an entry into the mount table file, usually /etc/mtab.
 
@@ -173,57 +179,6 @@ bool removeMountEntry(QString mountPoint)
     return true;
 }
 	    
-/* here we compare the complete path to a logical volume
-   to a series of entries in _PATH_MOUNTED (probably "/etc/mtab") 
-   to see if any of them match. Returns false on error*/
-
-bool hasMountEntry(QString device)
-{
-    QString name_entry;        // returned entry to compare to
-    mntent *mount_entry;
-    
-    FILE *fp = setmntent(_PATH_MOUNTED, "r");
-    if(fp){
-	while( (mount_entry = getmntent(fp)) ){
-	    name_entry = QString( mount_entry->mnt_fsname );
-	    if(name_entry == device){
-		endmntent(fp);
-		return true;
-	    }
-	}
-	endmntent(fp);
-	return false;
-    }
-    else{
-	return false;
-    }
-}
-
-
-/* This function looks at the mount table and returns the
-   filesystem's mount point if the device is has an entry
-   in the table. It returns NULL on failure */
-
-
-QStringList getMountedDevices(QString mountPoint)
-{
-    mntent *mount_entry;
-    QStringList mounted_devices;
-
-    FILE *fp = setmntent(_PATH_MOUNTED, "r");
-    if(fp){
-	while( (mount_entry = getmntent(fp)) ){
-
-	    if( QString( mount_entry->mnt_dir ) == mountPoint ){
-	       mounted_devices.append( QString( mount_entry->mnt_fsname ) );
-
-	    }
-	}
-	endmntent(fp);
-    }
-
-    return mounted_devices;
-}
 
 mntent *copyMountEntry(mntent *mountEntry)
 {
