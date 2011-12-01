@@ -18,19 +18,26 @@
 #include <QString>
 #include <QList>
 
+class LogVol;
+class StoragePartition;
+
 #ifndef MOUNTINFO_H
 class MountInformation;
 #endif
 
 class MountInformationList
 {
-
     QList<MountInformation *> m_list;
+    QList<MountInformation *> m_fstab_list;
+    QString getFstabMountPoint(const QString name, const QString label, const QString uuid);
     
  public:
     MountInformationList();
     ~MountInformationList();
-    QList<MountInformation *> getMountInformation(QString deviceName);
+    QList<MountInformation *> getMountInformation(const QString deviceName);
+    QString getFstabMountPoint(LogVol *const lv);
+    QString getFstabMountPoint(StoragePartition *const partition);
+
 };
 
 #endif

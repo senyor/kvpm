@@ -24,13 +24,7 @@ class StoragePartition;
 bool addMountEntry(QString device, QString mountPoint, QString type, 
 		  QString options, int dumpFreq, int pass);
 
-bool addMountEntryOptions(QString mountPoint, QString newOptions);
-
 bool removeMountEntry(QString mountPoint);
-
-QString getFstabEntry(LogVol *const lv);
-QString getFstabEntry(StoragePartition *const partition);
-
 bool rename_mount_entries(QString oldName, QString newName);
 
 #endif

@@ -359,7 +359,7 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)  // lv_t seems to change -- why?
     m_mount_info_list = mountInformationList->getMountInformation(m_lv_mapper_path);
 
 /* To Do: get all the rest of the mount info, not just mount points */
-
+    m_fstab_mount_point = mountInformationList->getFstabMountPoint(this);
     m_mount_points.clear();
     m_mount_position.clear();
 
@@ -931,6 +931,11 @@ QStringList LogVol::getMountPoints()
 QList<int> LogVol::getMountPosition()
 {
     return m_mount_position;
+}
+
+QString LogVol::getFstabMountPoint()
+{
+    return m_fstab_mount_point;
 }
 
 double LogVol::getSnapPercent()

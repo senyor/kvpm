@@ -28,6 +28,7 @@ class MountInformationList;
 class StoragePartition 
 {
     QList<MountInformation *> m_device_mount_info_list;
+    QString m_fstab_mount_point;
     PhysVol *m_pv;
     PedPartition *m_ped_partition;
     QString m_partition_path;
@@ -67,6 +68,7 @@ public:
     PhysVol *getPhysicalVolume();
     QString getType();
     unsigned int getPedType();
+    QString getFstabMountPoint();
     QStringList getMountPoints();
     QStringList getFlags();
     QList<int> getMountPosition();
