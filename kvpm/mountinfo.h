@@ -39,6 +39,9 @@ Q_OBJECT
                                   // this mount point. Otherwise numbers go in reverse 
                                   // of mount order. 1 is the *last* one mounted, highest 
                                   // number is the first one mounted. 
+
+    QStringList getMountedDevices(const QString mountPoint); // Returns devices mounted to mountPoint
+
  public:
     explicit MountInformation(mntent *mountTableEntry, QObject *parent = 0);
     QString getDeviceName();
