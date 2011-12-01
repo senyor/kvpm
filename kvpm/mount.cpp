@@ -41,8 +41,7 @@ MountDialog::MountDialog(LogVol *const volume, QWidget *parent) : KDialog(parent
     m_device_to_mount = volume->getMapperPath();
     m_filesystem_type = volume->getFilesystem();
     m_is_writable = volume->isWritable();
-
-    m_mount_point = getFstabEntry(volume);
+    m_mount_point = volume->getFstabMountPoint();
 
     buildDialog();
 }
@@ -52,8 +51,7 @@ MountDialog::MountDialog(StoragePartition *const partition, QWidget *parent) : K
     m_device_to_mount = partition->getName();
     m_filesystem_type = partition->getFilesystem();
     m_is_writable = partition->isWritable();
-
-    m_mount_point = getFstabEntry(partition);
+    m_mount_point = partition->getFstabMountPoint();
 
     buildDialog();
 }

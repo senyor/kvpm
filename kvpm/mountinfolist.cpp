@@ -16,6 +16,7 @@
 
 
 #include <mntent.h>
+#include <fstab.h>
 #include <stdio.h>
 
 #include <QtGui>
@@ -23,19 +24,27 @@
 #include "logvol.h"
 #include "mountentry.h"
 #include "mountinfo.h"
+#include "storagepartition.h"
 #include "volgroup.h"
 
 
 MountInformationList::MountInformationList()
 {
-    const char mount_table[] = _PATH_MOUNTED;
     mntent *mount_entry;
-    
-    FILE *fp = setmntent(mount_table, "r");
+    FILE *fp = setmntent(_PATH_MOUNTED, "r");
 
     if(fp){
 	while( (mount_entry = getmntent(fp)) )
 	    m_list.append( new MountInformation(mount_entry) );
+
+	endmntent(fp);
+    }
+
+    fp = setmntent(_PATH_FSTAB, "r");
+
+    if(fp){
+	while( (mount_entry = getmntent(fp)) )
+	    m_fstab_list.append( new MountInformation(mount_entry) );
 
 	endmntent(fp);
     }
@@ -57,4 +66,41 @@ QList<MountInformation *> MountInformationList::getMountInformation(QString devi
     }
 
     return device_mounts;
+}
+
+QString MountInformationList::getFstabMountPoint(LogVol *const lv)
+{
+    return getFstabMountPoint( lv->getMapperPath(), lv->getFilesystemLabel(), lv->getFilesystemUuid() );
+}
+
+QString MountInformationList::getFstabMountPoint(StoragePartition *const partition)
+{
+    return getFstabMountPoint( partition->getName(), partition->getFilesystemLabel(), partition->getFilesystemUuid() );
+}
+
+QString MountInformationList::getFstabMountPoint(const QString name, const QString label, const QString uuid)
+{
+    QString entry_name;
+    MountInformation *entry;
+
+    QListIterator<MountInformation *> entry_itr(m_fstab_list);
+    while( entry_itr.hasNext() ){
+        entry = entry_itr.next();
+        entry_name = entry->getDeviceName();
+
+        if( entry_name.startsWith("UUID=", Qt::CaseInsensitive) ){
+            entry_name = entry_name.remove(0, 5);
+            if( entry_name == uuid )
+                return entry->getMountPoint();
+        }
+        else if( entry_name.startsWith("LABEL=", Qt::CaseInsensitive) ){
+            entry_name = entry_name.remove(0, 6);
+            if( entry_name == label )
+                return entry->getMountPoint();
+        }
+        else if( entry_name == name )
+            return entry->getMountPoint();
+    }
+
+    return QString();
 }

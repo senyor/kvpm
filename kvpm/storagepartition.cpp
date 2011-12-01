@@ -96,13 +96,6 @@ StoragePartition::StoragePartition(PedPartition *part,
 	    m_flags << "";
     }
 
-    m_device_mount_info_list = mountInfoList->getMountInformation(m_partition_path);
-
-    if( m_device_mount_info_list.size() )
-	m_is_mounted = true;
-    else
-	m_is_mounted = false;
-
     if( m_partition_type == "extended" ){
 	m_is_mountable = false;
 	m_fs_type = "";
@@ -117,6 +110,14 @@ StoragePartition::StoragePartition(PedPartition *part,
       	else
             m_is_mountable = true;
     }
+
+    m_device_mount_info_list = mountInfoList->getMountInformation(m_partition_path);
+    m_fstab_mount_point = mountInfoList->getFstabMountPoint(this);
+
+    if( m_device_mount_info_list.size() )
+	m_is_mounted = true;
+    else
+	m_is_mounted = false;
 
     QString mp;
     if(m_is_mounted){
@@ -293,6 +294,11 @@ bool StoragePartition::isMountable()
 bool StoragePartition::isPhysicalVolume()
 {
     return m_is_pv;
+}
+
+QString StoragePartition::getFstabMountPoint()
+{
+    return m_fstab_mount_point;
 }
 
 QStringList StoragePartition::getMountPoints()
