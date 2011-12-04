@@ -27,8 +27,6 @@
 #include "logvol.h"
 #include "mountentry.h"
 #include "storagepartition.h"
-#include "volgroup.h"
-
 
 
 const int BUFF_LEN = 2000;   // Enough?
@@ -215,7 +213,6 @@ bool MountTables::renameEntries(const QString oldName, const QString newName)
 {
     QList<mntent *> mount_entry_list;
     mntent *mount_entry;
-    mntent *temp_entry;
     
     QByteArray new_path(_PATH_MOUNTED);
     new_path.append(".new");     
@@ -225,21 +222,20 @@ bool MountTables::renameEntries(const QString oldName, const QString newName)
     
     FILE *fp_old = setmntent(mount_table_old, "r");
 
-    while( (mount_entry = getmntent(fp_old)) ){
-	temp_entry = copyMntent(mount_entry);
+    while( (mount_entry = copyMntent( getmntent(fp_old)) ) ){
 
-	if( QString(temp_entry->mnt_fsname) != oldName ){
-	    mount_entry_list.append(temp_entry);
+	if( QString(mount_entry->mnt_fsname) != oldName ){
+	    mount_entry_list.append(mount_entry);
 	}
 	else{
-	    temp_entry = buildMntent( newName, 
-                                      temp_entry->mnt_dir,
-                                      temp_entry->mnt_type,	 
-                                      temp_entry->mnt_opts,
-                                      temp_entry->mnt_freq,
-                                      temp_entry->mnt_passno );
+	    mount_entry = buildMntent( newName, 
+                                       temp_entry->mnt_dir,
+                                       temp_entry->mnt_type,	 
+                                       temp_entry->mnt_opts,
+                                       temp_entry->mnt_freq,
+                                       temp_entry->mnt_passno );
 	    
-	    mount_entry_list.append(temp_entry);
+	    mount_entry_list.append(mount_entry);
 	}
     }
     
