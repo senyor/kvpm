@@ -158,10 +158,12 @@ bool MountTables::addMountEntry(const QString device, const QString mountPoint, 
 
     if(fp){
 	if( addmntent(fp, &mount_entry) ){
+            fsync( fileno(fp) );
 	    endmntent(fp);
 	    return false;
 	}
 	else{              // success
+            fsync( fileno(fp) );
 	    endmntent(fp);
 	    return true;
 	}
@@ -202,6 +204,7 @@ bool MountTables::removeMountEntry(const QString mountPoint)
 	const mntent *entry = mount_entry_list[x];
 	addmntent(fp_new, entry);
     }
+    fsync( fileno(fp_new) );
     endmntent(fp_new);
 
     KDE_rename(mount_table_new, mount_table_old);
