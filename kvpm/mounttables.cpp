@@ -250,6 +250,7 @@ bool MountTables::renameMountEntries(const QString oldName, const QString newNam
 	const mntent *entry = mount_entry_list[x];
 	addmntent(fp_new, entry);
     }
+    fsync( fileno(fp_new) );
     endmntent(fp_new);
 
     KDE_rename(mount_table_new, mount_table_old);
