@@ -19,7 +19,7 @@
 #include <QtGui>
 
 #include "logvol.h"
-#include "mountentry.h"
+#include "mounttables.h"
 #include "processprogress.h"
 #include "volgroup.h"
 
@@ -45,7 +45,7 @@ bool rename_vg(VolGroup *volumeGroup)
                 if( lvs[x]->isMounted() ){
                     old_path = lvs[x]->getMapperPath();
                     new_path = lvs[x]->getMapperPath().replace(old_path.lastIndexOf(old_name), old_name.size(), new_name);
-                    rename_mount_entries(old_path, new_path);
+                    MountTables::renameMountEntries(old_path, new_path);
                 }
             }
         }

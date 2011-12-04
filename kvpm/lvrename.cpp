@@ -18,7 +18,7 @@
 #include <QtGui>
 
 #include "logvol.h"
-#include "mountentry.h"
+#include "mounttables.h"
 #include "volgroup.h" 
 #include "processprogress.h"
 
@@ -31,7 +31,7 @@ bool rename_lv(LogVol *logicalVolume)
         ProcessProgress rename( dialog.arguments() );
 
         if( ! rename.exitCode() && logicalVolume->isMounted() )
-            rename_mount_entries( logicalVolume->getMapperPath(), dialog.getNewMapperPath() );
+            MountTables::renameMountEntries( logicalVolume->getMapperPath(), dialog.getNewMapperPath() );
 
 	return true;
     }

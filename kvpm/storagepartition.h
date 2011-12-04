@@ -22,12 +22,12 @@
 #include <QStringList>
 
 class PhysVol;
-class MountInformation;
+class MountEntry;
 class MountTables;
 
 class StoragePartition 
 {
-    QList<MountInformation *> m_device_mount_info_list;
+    QList<MountEntry *> m_device_mount_info_list;
     QString m_fstab_mount_point;
     PhysVol *m_pv;
     PedPartition *m_ped_partition;

@@ -18,11 +18,14 @@
 #include <QtGui>
 
 #include "logvol.h"
+#include "mounttables.h"
 #include "physvol.h"
 
-VolGroup::VolGroup(lvm_t lvm, const char *vgname)
+
+VolGroup::VolGroup(lvm_t lvm, const char *vgname, MountTables *const tables)
 {
     m_vg_name = QString(vgname).trimmed();
+    m_tables = tables;
     rescan(lvm);
 }
 
@@ -464,7 +467,7 @@ void VolGroup::processLogicalVolumes(vg_t lvmVG)
             }
 
             if(is_new){
-                m_member_lvs.append( new LogVol( lvm_lvs_all_top[y], lvmVG, this, NULL ) );
+                m_member_lvs.append( new LogVol( lvm_lvs_all_top[y], lvmVG, this, NULL, m_tables ) );
             }
         }
 
@@ -474,7 +477,7 @@ void VolGroup::processLogicalVolumes(vg_t lvmVG)
 
         lv_t lvm_lv_orphan;                // non-top lvm logical volume handle with no home
         while( (lvm_lv_orphan = findOrphan(lvm_lvs_all_children)) )
-            m_member_lvs.append( new LogVol( lvm_lv_orphan, lvmVG, this, NULL, true ) );
+            m_member_lvs.append( new LogVol( lvm_lv_orphan, lvmVG, this, NULL, m_tables, true ) );
     }
     else{      // lv_dm_list is empty so clean up member lvs 
         for(int x = m_member_lvs.size() - 1; x >= 0; x--) 

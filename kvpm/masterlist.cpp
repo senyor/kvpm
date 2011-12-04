@@ -45,6 +45,7 @@ lvm_t MasterList::m_lvm = lvm_init(NULL);
 MasterList::MasterList() : QObject()
 {
     ped_exception_set_handler(my_handler);
+    m_mount_tables = new MountTables();
 }
 
 MasterList::~MasterList()
@@ -55,6 +56,7 @@ MasterList::~MasterList()
 void MasterList::rescan()
 {
     ProgressBox *progress_box = TopWindow::getProgressBox();
+    m_mount_tables->loadData();
 
     progress_box->setRange(0,3);
     progress_box->setText("Scan lvm");
@@ -96,7 +98,7 @@ void MasterList::scanVolumeGroups()
             }
         }
         if( !existing_vg )
-            m_volume_groups.append( new VolGroup(m_lvm, strl->str) );
+            m_volume_groups.append( new VolGroup(m_lvm, strl->str, m_mount_tables) );
     }
 
     for(int x = m_volume_groups.size() - 1; x >= 0; x--){ // delete VolGroup if the vg is gone
@@ -125,12 +127,11 @@ void MasterList::scanStorageDevices()
     ped_device_free_all();
     ped_device_probe_all();
 
-    MountTables *mount_info_list = new MountTables();
     PedDevice *dev = NULL;
 
     while( ( dev = ped_device_get_next(dev) ) ){
         if( !QString("%1").arg(dev->path).contains("/dev/mapper") )
-            m_storage_devices.append( new StorageDevice(dev, physical_volumes, mount_info_list ) );
+            m_storage_devices.append( new StorageDevice(dev, physical_volumes, m_mount_tables) );
     }
 }
 

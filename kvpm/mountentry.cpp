@@ -3,7 +3,7 @@
  * 
  * Copyright (C) 2008, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
- * This file is part of the kvpm project.
+ * This file is part of the Kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License,  version 3, as 
@@ -12,193 +12,110 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
+
 #include "mountentry.h"
 
 #include <mntent.h>
-#include <fstab.h>
-#include <string.h>
 #include <stdio.h>
 
 #include <QtGui>
 
-#include <kde_file.h>
-
 #include "logvol.h"
-#include "storagepartition.h"
 #include "volgroup.h"
 
 
-const int BUFF_LEN = 2000;   // Enough?
-
-mntent *buildMountEntry(QString device, QString mountPoint, QString type, 
-			QString options, int dumpFreq, int pass);
-
-
-
-// Adds an entry into the mount table file, usually /etc/mtab.
-
-bool addMountEntry(QString device, QString mountPoint, QString type, QString options, int dumpFreq, int pass)
+MountEntry::MountEntry(mntent *const mountTableEntry, QObject *parent) : QObject(parent)
 {
-    QByteArray device_array      = device.toLocal8Bit();
-    QByteArray mount_point_array = mountPoint.toLocal8Bit();
-    QByteArray type_array        = type.toLocal8Bit();
-    QByteArray options_array     = options.toLocal8Bit();
+    m_device_name     = QString( mountTableEntry->mnt_fsname );
+    m_mount_point     = QString( mountTableEntry->mnt_dir );
+    m_filesystem_type = QString( mountTableEntry->mnt_type );
+    m_mount_options   = QString( mountTableEntry->mnt_opts );
 
-    const struct mntent mount_entry  = { device_array.data(), 
-					 mount_point_array.data(), 
-					 type_array.data(), 
-					 options_array.data(), 
-					 dumpFreq, 
-					 pass };
-    
-    FILE *fp = setmntent(_PATH_MOUNTED, "a");
+    m_dump_frequency = mountTableEntry->mnt_freq;
+    m_dump_passno    = mountTableEntry->mnt_passno;
+    m_mount_position = 0;
+}
 
-    if(fp){
-	if( addmntent(fp, &mount_entry) ){
-	    endmntent(fp);
-	    return false;
-	}
-	else{              // success
-	    endmntent(fp);
-	    return true;
+MountEntry::MountEntry(mntent *const mountTableEntry, const QList<mntent *> mountTable, QObject *parent) : QObject(parent)
+{
+    QStringList mounted_devices;
+
+    m_device_name     = QString( mountTableEntry->mnt_fsname );
+    m_mount_point     = QString( mountTableEntry->mnt_dir );
+    m_filesystem_type = QString( mountTableEntry->mnt_type );
+    m_mount_options   = QString( mountTableEntry->mnt_opts );
+
+    m_dump_frequency = mountTableEntry->mnt_freq;
+    m_dump_passno    = mountTableEntry->mnt_passno;
+    m_mount_position = 0;
+
+    mounted_devices = getMountedDevices(m_mount_point, mountTable);
+    if( mounted_devices.size() > 1 ){
+        m_mount_position = 1;
+        for( int x = mounted_devices.size() - 1; x >= 0; x-- ){
+	    if( m_device_name == mounted_devices[x] )
+	        break;
+	    else
+	        m_mount_position++;
 	}
     }
     else{
-	return false;
+        m_mount_position = 0;
     }
+
 }
 
+/* This function looks at the mount table and returns the
+   filesystem's mount point if the device is has an entry
+   in the table. */
 
-/* This function generates an mntent structure from its parameters
-and returns it  */
-
-mntent* buildMountEntry(QString device, QString mountPoint, QString type, QString options, int dumpFreq, int pass)
+QStringList MountEntry::getMountedDevices(const QString mountPoint,  const QList<mntent *> mountTable)
 {
-    QByteArray device_array      = device.toLocal8Bit();
-    QByteArray mount_point_array = mountPoint.toLocal8Bit();
-    QByteArray type_array        = type.toLocal8Bit();
-    QByteArray options_array     = options.toLocal8Bit();
-
-    mntent *mount_entry = new mntent;
-    
-    mount_entry->mnt_fsname = device_array.data();
-    mount_entry->mnt_dir    = mount_point_array.data();
-    mount_entry->mnt_type   = type_array.data();
-    mount_entry->mnt_opts   = options_array.data();
-    mount_entry->mnt_freq   = dumpFreq;
-    mount_entry->mnt_passno = pass;
-
-    return mount_entry;
-}
-
-bool removeMountEntry(QString mountPoint)
-{
-    QList<mntent *> mount_entry_list;
     mntent *mount_entry;
-    mntent *temp_entry;
-    QByteArray new_path(_PATH_MOUNTED);
-    new_path.append(".new");     
+    QStringList mounted_devices;
+    QListIterator<mntent *> entry_itr(mountTable);
 
-    const char *mount_table_old = _PATH_MOUNTED;
-    const char *mount_table_new = new_path.data();
-    
-    FILE *fp_old = setmntent(mount_table_old, "r");
+    while( entry_itr.hasNext() ){
+        mount_entry = entry_itr.next();
 
-
-/* Multiple devices can be mounted on a directory but only the
-   last one mounted will be unmounted at one time. So only the
-   last mtab entry gets deleted upon unmounting  */
-
-    while( (mount_entry = getmntent(fp_old)) ){
-	temp_entry = copyMountEntry(mount_entry);
-	mount_entry_list.append(temp_entry);
+        if( QString( mount_entry->mnt_dir ) == mountPoint )
+            mounted_devices.append( QString( mount_entry->mnt_fsname ) );
     }
-    for( int x = mount_entry_list.size() - 1; x >= 0; x--){
-        if( QString( (mount_entry_list[x])->mnt_dir ) == mountPoint ){
-	    mount_entry_list.removeAt(x);
-	    break;
-	}
-    }
-    endmntent(fp_old);
 
-    FILE *fp_new = setmntent(mount_table_new, "w");
-    for(int x = 0; x < mount_entry_list.size(); x++){
-	const mntent *entry = mount_entry_list[x];
-	addmntent(fp_new, entry);
-    }
-    endmntent(fp_new);
-
-    KDE_rename(mount_table_new, mount_table_old);
-    return true;
+    return mounted_devices;
 }
-	    
 
-mntent *copyMountEntry(mntent *mountEntry)
+QString MountEntry::getDeviceName()
 {
-    if( mountEntry == NULL )
-        return NULL;
-
-    mntent *new_entry = new mntent;
-
-    new_entry->mnt_fsname = new char[BUFF_LEN]; 
-    new_entry->mnt_dir    = new char[BUFF_LEN];
-    new_entry->mnt_type   = new char[BUFF_LEN];
-    new_entry->mnt_opts   = new char[BUFF_LEN];
-    
-    strncpy(new_entry->mnt_fsname, mountEntry->mnt_fsname, BUFF_LEN);
-    strncpy(new_entry->mnt_dir,    mountEntry->mnt_dir,    BUFF_LEN);
-    strncpy(new_entry->mnt_type,   mountEntry->mnt_type,   BUFF_LEN);
-    strncpy(new_entry->mnt_opts,   mountEntry->mnt_opts,   BUFF_LEN);
-    
-    new_entry->mnt_freq   = mountEntry->mnt_freq;
-    new_entry->mnt_passno = mountEntry->mnt_passno;
-    
-    return new_entry;
+    return m_device_name;
 }
 
-bool rename_mount_entries(QString oldName, QString newName)
+QString MountEntry::getMountPoint()
 {
-    QList<mntent *> mount_entry_list;
-    mntent *mount_entry;
-    mntent *temp_entry;
-    
-    QByteArray new_path(_PATH_MOUNTED);
-    new_path.append(".new");     
-
-    const char *mount_table_old = _PATH_MOUNTED;
-    const char *mount_table_new = new_path.data();
-    
-    FILE *fp_old = setmntent(mount_table_old, "r");
-
-    while( (mount_entry = getmntent(fp_old)) ){
-	temp_entry = copyMountEntry(mount_entry);
-
-	if( QString(temp_entry->mnt_fsname) != oldName ){
-	    mount_entry_list.append(temp_entry);
-	}
-	else{
-	    temp_entry = buildMountEntry( newName, 
-					  temp_entry->mnt_dir,
-					  temp_entry->mnt_type,	 
-					  temp_entry->mnt_opts,
-					  temp_entry->mnt_freq,
-					  temp_entry->mnt_passno );
-	    
-	    mount_entry_list.append(temp_entry);
-	}
-    }
-    
-    endmntent(fp_old);
-
-    FILE *fp_new = setmntent(mount_table_new, "w");
-    for(int x = 0; x < mount_entry_list.size(); x++){
-	const mntent *entry = mount_entry_list[x];
-	addmntent(fp_new, entry);
-    }
-    endmntent(fp_new);
-
-    KDE_rename(mount_table_new, mount_table_old);
-
-    return true;
+    return m_mount_point;
 }
 
+QString MountEntry::getFilesystemType()
+{
+    return m_filesystem_type;
+}
+
+QString MountEntry::getMountOptions()
+{
+    return m_mount_options;
+}
+
+int MountEntry::getDumpFrequency()
+{
+    return m_dump_frequency;
+}
+
+int MountEntry::getDumpPassNumber()
+{
+    return m_dump_passno;
+}
+
+int MountEntry::getMountPosition()
+{
+    return m_mount_position;
+}
