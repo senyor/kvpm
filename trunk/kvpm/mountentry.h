@@ -40,11 +40,11 @@ Q_OBJECT
                                   // of mount order. 1 is the *last* one mounted, highest 
                                   // number is the first one mounted. 
 
-    QStringList getMountedDevices(const QString mountPoint, const QList<mntent *> mountTable); // Returns devices mounted to mountPoint
+    QStringList getMountedDevices(const QString mountPoint, const QList<mntent *> table); // Returns devices mounted to mountPoint
 
  public:
-    explicit MountEntry(mntent *const mountTableEntry, const QList<mntent *> mountTable, QObject *parent = 0);
-    explicit MountEntry(mntent *const mountTableEntry, QObject *parent = 0);
+    explicit MountEntry(mntent *const entry, const QList<mntent *> table, QObject *parent = 0);
+    explicit MountEntry(mntent *const entry, QObject *parent = 0);
     QString getDeviceName();
     QString getMountPoint();
     QString getFilesystemType();

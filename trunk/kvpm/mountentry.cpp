@@ -23,33 +23,35 @@
 #include "logvol.h"
 #include "volgroup.h"
 
+// MountEntry provides a thin wrapper for 'mntent' structs by providing
+// QStrings rather than const char arrays and a 'mount position' property
 
-MountEntry::MountEntry(mntent *const mountTableEntry, QObject *parent) : QObject(parent)
+MountEntry::MountEntry(mntent *const entry, QObject *parent) : QObject(parent)
 {
-    m_device_name     = QString( mountTableEntry->mnt_fsname );
-    m_mount_point     = QString( mountTableEntry->mnt_dir );
-    m_filesystem_type = QString( mountTableEntry->mnt_type );
-    m_mount_options   = QString( mountTableEntry->mnt_opts );
+    m_device_name     = QString( entry->mnt_fsname );
+    m_mount_point     = QString( entry->mnt_dir );
+    m_filesystem_type = QString( entry->mnt_type );
+    m_mount_options   = QString( entry->mnt_opts );
 
-    m_dump_frequency = mountTableEntry->mnt_freq;
-    m_dump_passno    = mountTableEntry->mnt_passno;
+    m_dump_frequency = entry->mnt_freq;
+    m_dump_passno    = entry->mnt_passno;
     m_mount_position = 0;
 }
 
-MountEntry::MountEntry(mntent *const mountTableEntry, const QList<mntent *> mountTable, QObject *parent) : QObject(parent)
+MountEntry::MountEntry(mntent *const entry, const QList<mntent *> table, QObject *parent) : QObject(parent)
 {
     QStringList mounted_devices;
 
-    m_device_name     = QString( mountTableEntry->mnt_fsname );
-    m_mount_point     = QString( mountTableEntry->mnt_dir );
-    m_filesystem_type = QString( mountTableEntry->mnt_type );
-    m_mount_options   = QString( mountTableEntry->mnt_opts );
+    m_device_name     = QString( entry->mnt_fsname );
+    m_mount_point     = QString( entry->mnt_dir );
+    m_filesystem_type = QString( entry->mnt_type );
+    m_mount_options   = QString( entry->mnt_opts );
 
-    m_dump_frequency = mountTableEntry->mnt_freq;
-    m_dump_passno    = mountTableEntry->mnt_passno;
+    m_dump_frequency = entry->mnt_freq;
+    m_dump_passno    = entry->mnt_passno;
     m_mount_position = 0;
 
-    mounted_devices = getMountedDevices(m_mount_point, mountTable);
+    mounted_devices = getMountedDevices(m_mount_point, table);
     if( mounted_devices.size() > 1 ){
         m_mount_position = 1;
         for( int x = mounted_devices.size() - 1; x >= 0; x-- ){
@@ -59,21 +61,19 @@ MountEntry::MountEntry(mntent *const mountTableEntry, const QList<mntent *> moun
 	        m_mount_position++;
 	}
     }
-    else{
+    else
         m_mount_position = 0;
-    }
-
 }
 
 /* This function looks at the mount table and returns the
    filesystem's mount point if the device is has an entry
    in the table. */
 
-QStringList MountEntry::getMountedDevices(const QString mountPoint,  const QList<mntent *> mountTable)
+QStringList MountEntry::getMountedDevices(const QString mountPoint,  const QList<mntent *> table)
 {
     mntent *mount_entry;
     QStringList mounted_devices;
-    QListIterator<mntent *> entry_itr(mountTable);
+    QListIterator<mntent *> entry_itr(table);
 
     while( entry_itr.hasNext() ){
         mount_entry = entry_itr.next();
