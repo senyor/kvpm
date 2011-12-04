@@ -474,10 +474,9 @@ void MountDialog::mountFilesystem()
     int error = mount( device.data(), mount_point.data(), fs_type.data(), options, fs_options.data() );
 
     if( !error )
-        MountTables::addMountEntry( m_device_to_mount, m_mount_point, m_filesystem_type, all_options, 0, 0);
+        MountTables::addEntry(m_device_to_mount, m_mount_point, m_filesystem_type, all_options, 0, 0);
     else
 	KMessageBox::error(0, QString("Error number: %1  %2").arg(errno).arg(strerror(errno)));
-
 }
 
 void MountDialog::toggleOKButton()

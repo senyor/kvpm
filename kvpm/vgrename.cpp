@@ -45,7 +45,7 @@ bool rename_vg(VolGroup *volumeGroup)
                 if( lvs[x]->isMounted() ){
                     old_path = lvs[x]->getMapperPath();
                     new_path = lvs[x]->getMapperPath().replace(old_path.lastIndexOf(old_name), old_name.size(), new_name);
-                    MountTables::renameMountEntries(old_path, new_path);
+                    MountTables::renameEntries(old_path, new_path);
                 }
             }
         }

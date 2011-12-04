@@ -31,7 +31,7 @@ bool rename_lv(LogVol *logicalVolume)
         ProcessProgress rename( dialog.arguments() );
 
         if( ! rename.exitCode() && logicalVolume->isMounted() )
-            MountTables::renameMountEntries( logicalVolume->getMapperPath(), dialog.getNewMapperPath() );
+            MountTables::renameEntries( logicalVolume->getMapperPath(), dialog.getNewMapperPath() );
 
 	return true;
     }
