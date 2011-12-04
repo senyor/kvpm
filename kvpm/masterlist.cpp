@@ -25,7 +25,7 @@
 #include "fsprobe.h"
 #include "logvol.h"
 #include "mountentry.h"
-#include "mountinfolist.h"
+#include "mounttables.h"
 #include "pedexceptions.h"
 #include "physvol.h"
 #include "processprogress.h"
@@ -125,7 +125,7 @@ void MasterList::scanStorageDevices()
     ped_device_free_all();
     ped_device_probe_all();
 
-    MountInformationList *mount_info_list = new MountInformationList();
+    MountTables *mount_info_list = new MountTables();
     PedDevice *dev = NULL;
 
     while( ( dev = ped_device_get_next(dev) ) ){

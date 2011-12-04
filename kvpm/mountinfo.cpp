@@ -25,9 +25,20 @@
 #include "volgroup.h"
 
 
-MountInformation::MountInformation(mntent *mountTableEntry, QObject *parent) : QObject(parent)
+MountInformation::MountInformation(mntent *const mountTableEntry, QObject *parent) : QObject(parent)
 {
+    m_device_name     = QString( mountTableEntry->mnt_fsname );
+    m_mount_point     = QString( mountTableEntry->mnt_dir );
+    m_filesystem_type = QString( mountTableEntry->mnt_type );
+    m_mount_options   = QString( mountTableEntry->mnt_opts );
 
+    m_dump_frequency = mountTableEntry->mnt_freq;
+    m_dump_passno    = mountTableEntry->mnt_passno;
+    m_mount_position = 0;
+}
+
+MountInformation::MountInformation(mntent *const mountTableEntry, const QList<mntent *> mountTable, QObject *parent) : QObject(parent)
+{
     QStringList mounted_devices;
 
     m_device_name     = QString( mountTableEntry->mnt_fsname );
@@ -39,7 +50,7 @@ MountInformation::MountInformation(mntent *mountTableEntry, QObject *parent) : Q
     m_dump_passno    = mountTableEntry->mnt_passno;
     m_mount_position = 0;
 
-    mounted_devices = getMountedDevices(m_mount_point);
+    mounted_devices = getMountedDevices(m_mount_point, mountTable);
     if( mounted_devices.size() > 1 ){
         m_mount_position = 1;
         for( int x = mounted_devices.size() - 1; x >= 0; x-- ){
@@ -55,26 +66,21 @@ MountInformation::MountInformation(mntent *mountTableEntry, QObject *parent) : Q
 
 }
 
-
 /* This function looks at the mount table and returns the
    filesystem's mount point if the device is has an entry
-   in the table. It returns NULL on failure */
+   in the table. */
 
-QStringList MountInformation::getMountedDevices(QString mountPoint)
+QStringList MountInformation::getMountedDevices(const QString mountPoint,  const QList<mntent *> mountTable)
 {
     mntent *mount_entry;
     QStringList mounted_devices;
+    QListIterator<mntent *> entry_itr(mountTable);
 
-    FILE *fp = setmntent(_PATH_MOUNTED, "r");
-    if(fp){
-	while( (mount_entry = getmntent(fp)) ){
+    while( entry_itr.hasNext() ){
+        mount_entry = entry_itr.next();
 
-	    if( QString( mount_entry->mnt_dir ) == mountPoint ){
-	       mounted_devices.append( QString( mount_entry->mnt_fsname ) );
-
-	    }
-	}
-	endmntent(fp);
+        if( QString( mount_entry->mnt_dir ) == mountPoint )
+            mounted_devices.append( QString( mount_entry->mnt_fsname ) );
     }
 
     return mounted_devices;

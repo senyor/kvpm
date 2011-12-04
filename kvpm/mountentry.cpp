@@ -30,8 +30,6 @@
 
 const int BUFF_LEN = 2000;   // Enough?
 
-mntent *copyMountEntry(mntent *mountEntry);
-
 mntent *buildMountEntry(QString device, QString mountPoint, QString type, 
 			QString options, int dumpFreq, int pass);
 
@@ -137,6 +135,9 @@ bool removeMountEntry(QString mountPoint)
 
 mntent *copyMountEntry(mntent *mountEntry)
 {
+    if( mountEntry == NULL )
+        return NULL;
+
     mntent *new_entry = new mntent;
 
     new_entry->mnt_fsname = new char[BUFF_LEN]; 

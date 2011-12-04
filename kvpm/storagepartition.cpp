@@ -22,13 +22,13 @@
 #include "misc.h"
 #include "mountentry.h"
 #include "mountinfo.h"
-#include "mountinfolist.h"
+#include "mounttables.h"
 #include "physvol.h"
 
 StoragePartition::StoragePartition(PedPartition *part,
 				   int freespaceCount,
 				   QList<PhysVol *> pvList, 
-				   MountInformationList *mountInfoList):
+				   MountTables *mountInfoList):
     m_ped_partition (part)
 
 {

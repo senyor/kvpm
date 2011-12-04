@@ -23,7 +23,7 @@
 
 class PhysVol;
 class MountInformation;
-class MountInformationList;
+class MountTables;
 
 class StoragePartition 
 {
@@ -56,7 +56,7 @@ public:
     StoragePartition(PedPartition *part,
 		     int freespaceCount,
 		     QList<PhysVol *> pvList, 
-		     MountInformationList *mountInfoList);
+		     MountTables *mountInfoList);
 
     ~StoragePartition();
 

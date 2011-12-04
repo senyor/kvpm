@@ -12,8 +12,8 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
-#include "mountinfolist.h"
 
+#include "mounttables.h"
 
 #include <mntent.h>
 #include <fstab.h>
@@ -28,35 +28,42 @@
 #include "volgroup.h"
 
 
-MountInformationList::MountInformationList()
+MountTables::MountTables()
 {
-    mntent *mount_entry;
-    FILE *fp = setmntent(_PATH_MOUNTED, "r");
-
-    if(fp){
-	while( (mount_entry = getmntent(fp)) )
-	    m_list.append( new MountInformation(mount_entry) );
-
-	endmntent(fp);
+    mntent *entry;
+    FILE *fp;
+    QList<mntent *> entries;
+    
+    if( (fp = setmntent(_PATH_MOUNTED, "r")) ){
+        while( (entry = copyMountEntry(getmntent(fp))) )
+            entries.append(entry);
+        
+        endmntent(fp);
+        
+        QListIterator<mntent *> entry_itr(entries);
+        while( entry_itr.hasNext() ) 
+            m_list.append( new MountInformation(entry_itr.next(), entries) );
     }
-
-    fp = setmntent(_PATH_FSTAB, "r");
-
-    if(fp){
-	while( (mount_entry = getmntent(fp)) )
-	    m_fstab_list.append( new MountInformation(mount_entry) );
-
-	endmntent(fp);
+    
+    if( (fp = setmntent(_PATH_FSTAB, "r") ) ){
+        while( (entry = copyMountEntry(getmntent(fp))) ){
+            entries.append(entry);
+            m_fstab_list.append( new MountInformation(entry) );
+        }
+        endmntent(fp);
     }
+    
+    for(int x = entries.size() - 1 ; x >= 0; x--)
+        delete entries[x];
 }
 
-MountInformationList::~MountInformationList()
+MountTables::~MountTables()
 {
     for(int x = 0; x < m_list.size(); x++)
 	delete (m_list[x]);
 }
 
-QList<MountInformation *> MountInformationList::getMountInformation(QString deviceName)
+QList<MountInformation *> MountTables::getMountInformation(QString deviceName)
 {
     QList<MountInformation *> device_mounts;
     
@@ -68,17 +75,17 @@ QList<MountInformation *> MountInformationList::getMountInformation(QString devi
     return device_mounts;
 }
 
-QString MountInformationList::getFstabMountPoint(LogVol *const lv)
+QString MountTables::getFstabMountPoint(LogVol *const lv)
 {
     return getFstabMountPoint( lv->getMapperPath(), lv->getFilesystemLabel(), lv->getFilesystemUuid() );
 }
 
-QString MountInformationList::getFstabMountPoint(StoragePartition *const partition)
+QString MountTables::getFstabMountPoint(StoragePartition *const partition)
 {
     return getFstabMountPoint( partition->getName(), partition->getFilesystemLabel(), partition->getFilesystemUuid() );
 }
 
-QString MountInformationList::getFstabMountPoint(const QString name, const QString label, const QString uuid)
+QString MountTables::getFstabMountPoint(const QString name, const QString label, const QString uuid)
 {
     QString entry_name;
     MountInformation *entry;
