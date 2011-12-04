@@ -35,7 +35,7 @@ class MountTables
     ~MountTables();
 
     void loadData();
-    QList<MountEntry *> getMountInformation(const QString deviceName);
+    QList<MountEntry *> getMtabEntries(const QString deviceName);
     QString getFstabMountPoint(LogVol *const lv);
     QString getFstabMountPoint(StoragePartition *const partition);
 

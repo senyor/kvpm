@@ -67,7 +67,7 @@ bool fs_can_extend(const QString fs){
 bool fs_extend(QString path, QString fs, bool isLV){
 
     MountTables mount_info_list;
-    QList<MountEntry *> mounts = mount_info_list.getMountInformation( path );
+    QList<MountEntry *> mounts = mount_info_list.getMtabEntries(path);
     QString mp;               // mount point
     bool isMounted = false;
     const QByteArray path_array = path.toLocal8Bit();
