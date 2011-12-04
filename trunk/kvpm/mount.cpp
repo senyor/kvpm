@@ -30,6 +30,7 @@
 
 #include "logvol.h"
 #include "mountentry.h"
+#include "mounttables.h"
 #include "storagepartition.h"
 
 
@@ -473,7 +474,7 @@ void MountDialog::mountFilesystem()
     int error = mount( device.data(), mount_point.data(), fs_type.data(), options, fs_options.data() );
 
     if( !error )
-	addMountEntry( m_device_to_mount, m_mount_point, m_filesystem_type, all_options, 0, 0);
+        MountTables::addMountEntry( m_device_to_mount, m_mount_point, m_filesystem_type, all_options, 0, 0);
     else
 	KMessageBox::error(0, QString("Error number: %1  %2").arg(errno).arg(strerror(errno)));
 

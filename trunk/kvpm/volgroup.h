@@ -21,11 +21,14 @@
 #include <QWidget>
 #include <QStringList>
 
-class PhysVol;
 class LogVol;
+class MountTables;
+class PhysVol;
 
 class VolGroup
 {
+    MountTables *m_tables;
+
     long m_extent_size;
     int m_lv_max;          // maximum number of logical volumes
     int m_pv_max;
@@ -56,7 +59,7 @@ class VolGroup
     void setLastUsedExtent();
 
 public:
-    VolGroup(lvm_t lvm, const char *vgname);
+    VolGroup(lvm_t lvm, const char *vgname, MountTables *const tables);
     ~VolGroup();
     void rescan(lvm_t lvm);
     QList<LogVol *>  getLogicalVolumes();     // *TOP LEVEL ONLY* snapcontainers returned not snaps and origin 

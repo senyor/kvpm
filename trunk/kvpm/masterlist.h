@@ -24,6 +24,7 @@
 
 class VolGroup;
 class LogVol;
+class MountTables;
 class PhysVol;
 class StorageDevice;
 
@@ -32,6 +33,7 @@ class MasterList : public QObject
 {
 Q_OBJECT
 
+    MountTables *m_mount_tables;
     static QList<VolGroup *> m_volume_groups;
     static QList<StorageDevice *> m_storage_devices;
     static lvm_t m_lvm;

@@ -21,7 +21,6 @@
 #include "fsprobe.h"
 #include "misc.h"
 #include "mountentry.h"
-#include "mountinfo.h"
 #include "mounttables.h"
 #include "physvol.h"
 

@@ -21,7 +21,6 @@
 #include "storagepartition.h"
 
 #include "physvol.h"
-#include "mountentry.h"
 #include "mounttables.h"
 
 StorageDevice::StorageDevice( PedDevice *pedDevice,

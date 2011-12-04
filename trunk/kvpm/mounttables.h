@@ -18,26 +18,31 @@
 #include <QString>
 #include <QList>
 
+
 class LogVol;
 class StoragePartition;
+class MountEntry;
 
-#ifndef MOUNTINFO_H
-class MountInformation;
-#endif
 
 class MountTables
 {
-    QList<MountInformation *> m_list;
-    QList<MountInformation *> m_fstab_list;
+    QList<MountEntry *> m_list;
+    QList<MountEntry *> m_fstab_list;
     QString getFstabMountPoint(const QString name, const QString label, const QString uuid);
     
  public:
     MountTables();
     ~MountTables();
-    QList<MountInformation *> getMountInformation(const QString deviceName);
+
+    void loadData();
+    QList<MountEntry *> getMountInformation(const QString deviceName);
     QString getFstabMountPoint(LogVol *const lv);
     QString getFstabMountPoint(StoragePartition *const partition);
 
+    static bool addMountEntry(const QString device, const QString mountPoint, const QString type, 
+                              const QString options, const int dumpFreq, const int pass);
+    static bool renameMountEntries(const QString oldName, const QString newName);
+    static bool removeMountEntry(const QString mountPoint);
 };
 
 #endif

@@ -20,7 +20,6 @@
 #include "fsdata.h"
 #include "fsprobe.h"
 #include "mountentry.h"
-#include "mountinfo.h"
 #include "mounttables.h"
 #include "physvol.h"
 #include "storagedevice.h"
@@ -41,12 +40,13 @@ struct Segment
                                           // for this segment
 };
 
-LogVol::LogVol(lv_t lvmLV, vg_t lvmVG, VolGroup *vg, LogVol *lvParent, bool orphan) :
+LogVol::LogVol(lv_t lvmLV, vg_t lvmVG, VolGroup *vg, LogVol *lvParent, MountTables *const tables, bool orphan) :
     m_vg(vg),
     m_lv_parent(lvParent),
     m_orphan(orphan)
 {
     m_snap_container   = false;
+    m_tables = tables;
     rescan(lvmLV, lvmVG);
 }
 
@@ -354,12 +354,10 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)  // lv_t seems to change -- why?
     QString tag = value.value.string;
     m_tags = tag.split(',', QString::SkipEmptyParts);
 
-    MountTables *mountInformationList = new MountTables();
-
-    m_mount_info_list = mountInformationList->getMountInformation(m_lv_mapper_path);
+    m_mount_info_list = m_tables->getMountInformation(m_lv_mapper_path);
 
 /* To Do: get all the rest of the mount info, not just mount points */
-    m_fstab_mount_point = mountInformationList->getFstabMountPoint(this);
+    m_fstab_mount_point = m_tables->getFstabMountPoint(this);
     m_mount_points.clear();
     m_mount_position.clear();
 
@@ -369,7 +367,6 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)  // lv_t seems to change -- why?
 	delete m_mount_info_list[x];
     }
     m_mount_info_list.clear();
-    delete mountInformationList;
 
     m_mounted = !m_mount_points.isEmpty();
 
@@ -419,9 +416,9 @@ void LogVol::insertChildren(lv_t lvmLV, vg_t lvmVG)
 
     if( m_snap_container ){
         for(int x = lvm_child_snapshots.size() - 1; x >= 0; x--)
-            m_lv_children.append( new LogVol(lvm_child_snapshots[x], lvmVG, m_vg, this) );
+            m_lv_children.append( new LogVol(lvm_child_snapshots[x], lvmVG, m_vg, this, m_tables) );
 
-        m_lv_children.append( new LogVol(lvmLV, lvmVG, m_vg, this) );
+        m_lv_children.append( new LogVol(lvmLV, lvmVG, m_vg, this, m_tables) );
     }
     else{
         child_name_list = removePvNames( getPvNamesAll() );
@@ -432,7 +429,7 @@ void LogVol::insertChildren(lv_t lvmLV, vg_t lvmVG)
         for(int x = child_name_list.size() - 1; x >= 0; x--){
             child_name = child_name_list[x].toLocal8Bit();
             lvm_child = lvm_lv_from_name(lvmVG, child_name.data());
-            m_lv_children.append( new LogVol(lvm_child, lvmVG, m_vg, this) );
+            m_lv_children.append( new LogVol(lvm_child, lvmVG, m_vg, this, m_tables) );
         }
     }
 }
@@ -920,7 +917,7 @@ QString LogVol::getOrigin()
 
 /* TO DO: Merge these next two lists in a single
    list of objects containing mount point and relevant
-   mount position. See "mountinfo.h" for more on mount 
+   mount position. See "mountentry.h" for more on mount 
    position. */
 
 QStringList LogVol::getMountPoints()

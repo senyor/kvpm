@@ -25,7 +25,7 @@
 #include <QtGui>
 
 #include "logvol.h"
-#include "mountentry.h"
+#include "mounttables.h"
 #include "misc.h"
 #include "storagepartition.h"
 #include "volgroup.h"
@@ -107,7 +107,7 @@ void UnmountDialog::unmountFilesystems()
                                            QString(mp), errno, QString(strerror(errno))));
 	    }
 	    else
-		removeMountEntry(mp);
+                MountTables::removeMountEntry(mp);
 	} 
     }
 }
@@ -220,7 +220,7 @@ bool unmount_filesystem(const QString mountPoint)
 	return false;
     }
     else{
-	removeMountEntry(mountPoint);
+        MountTables::removeMountEntry(mountPoint);
 	return true;
     }
 }

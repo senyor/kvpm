@@ -20,8 +20,8 @@
 #include <QWidget>
 #include <QStringList>
 
-class MountInformation;
-class MountInformationList;
+class MountEntry;
+class MountTables;
 class VolGroup;
 class Segment;
 
@@ -34,10 +34,11 @@ class LogVol
 {
     VolGroup *m_vg;
     QList<Segment *> m_segments;
-    QList<MountInformation *> m_mount_info_list;
+    QList<MountEntry *> m_mount_info_list;
     QList<LogVol *> m_lv_children;  // For a mirror the children are the legs and log
                                     // Snapshots are also children -- see m_snap_container
 
+    MountTables *m_tables;
     LogVol *m_lv_parent;       // NULL if this is the 'top' lv
     QString m_lv_full_name;    // volume_group/logical_volume
     QString m_lv_name;         // name of this logical volume
@@ -101,7 +102,7 @@ class LogVol
     void calculateTotalSize();
 
  public:
-    LogVol(lv_t lvmLV, vg_t lvmVG, VolGroup *vg, LogVol *lvParent, bool orphan = false);
+    LogVol(lv_t lvmLV, vg_t lvmVG, VolGroup *vg, LogVol *lvParent, MountTables *const tables, bool orphan = false);
     ~LogVol();
 
     void rescan(lv_t lvmLV, vg_t lvmVG);
