@@ -39,10 +39,10 @@ class MountTables
     QString getFstabMountPoint(LogVol *const lv);
     QString getFstabMountPoint(StoragePartition *const partition);
 
-    static bool addMountEntry(const QString device, const QString mountPoint, const QString type, 
+    static bool addEntry(const QString device, const QString mountPoint, const QString type, 
                               const QString options, const int dumpFreq, const int pass);
-    static bool renameMountEntries(const QString oldName, const QString newName);
-    static bool removeMountEntry(const QString mountPoint);
+    static bool renameEntries(const QString oldName, const QString newName);
+    static bool removeEntry(const QString mountPoint);
 };
 
 #endif

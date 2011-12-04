@@ -107,7 +107,7 @@ void UnmountDialog::unmountFilesystems()
                                            QString(mp), errno, QString(strerror(errno))));
 	    }
 	    else
-                MountTables::removeMountEntry(mp);
+                MountTables::removeEntry(mp);
 	} 
     }
 }
@@ -220,7 +220,7 @@ bool unmount_filesystem(const QString mountPoint)
 	return false;
     }
     else{
-        MountTables::removeMountEntry(mountPoint);
+        MountTables::removeEntry(mountPoint);
 	return true;
     }
 }

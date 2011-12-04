@@ -137,10 +137,10 @@ QString MountTables::getFstabMountPoint(const QString name, const QString label,
     return QString();
 }
 
-// Adds an entry into the mount table file, usually /etc/mtab.
+// Adds an entry (a mntent struct) into the mount table file, usually /etc/mtab.
 
-bool MountTables::addMountEntry(const QString device, const QString mountPoint, const QString type, 
-                                const QString options, const int dumpFreq, const int pass)
+bool MountTables::addEntry(const QString device, const QString mountPoint, const QString type, 
+                           const QString options, const int dumpFreq, const int pass)
 {
     QByteArray device_array      = device.toLocal8Bit();
     QByteArray mount_point_array = mountPoint.toLocal8Bit();
@@ -172,7 +172,7 @@ bool MountTables::addMountEntry(const QString device, const QString mountPoint, 
 	return false;
 }
 
-bool MountTables::removeMountEntry(const QString mountPoint)
+bool MountTables::removeEntry(const QString mountPoint)
 {
     QList<mntent *> mount_entry_list;
     mntent *mount_entry;
@@ -211,7 +211,7 @@ bool MountTables::removeMountEntry(const QString mountPoint)
     return true;
 }
 	    
-bool MountTables::renameMountEntries(const QString oldName, const QString newName)
+bool MountTables::renameEntries(const QString oldName, const QString newName)
 {
     QList<mntent *> mount_entry_list;
     mntent *mount_entry;
