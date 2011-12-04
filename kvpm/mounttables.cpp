@@ -34,8 +34,8 @@
 const int BUFF_LEN = 2000;   // Enough?
 
 
-mntent *buildMountEntry(const QString device, const QString mountPoint, const QString type, 
-			const QString options, const int dumpFreq, const int pass);
+mntent *buildMntent(const QString device, const QString mountPoint, const QString type, 
+                    const QString options, const int dumpFreq, const int pass);
 
 mntent *copyMntent(mntent *const entry);
 
@@ -55,10 +55,16 @@ MountTables::~MountTables()
 
 void MountTables::loadData()
 {
+    for(int x = m_list.size() - 1; x >= 0; x--)
+	delete ( m_list.takeAt(x) );
+
+    for(int x = m_fstab_list.size() - 1; x >= 0; x--)
+	delete ( m_fstab_list.takeAt(x) );
+    
     mntent *entry;
     FILE *fp;
     QList<mntent *> entries;
-    
+
     if( (fp = setmntent(_PATH_MOUNTED, "r")) ){
         while( (entry = copyMntent(getmntent(fp))) )
             entries.append(entry);
@@ -82,7 +88,7 @@ void MountTables::loadData()
         delete entries[x];
 }
 
-QList<MountEntry *> MountTables::getMountInformation(QString deviceName)
+QList<MountEntry *> MountTables::getMountInformation(const QString deviceName)
 {
     QList<MountEntry *> device_mounts;
     
@@ -223,12 +229,12 @@ bool MountTables::renameMountEntries(const QString oldName, const QString newNam
 	    mount_entry_list.append(temp_entry);
 	}
 	else{
-	    temp_entry = buildMountEntry( newName, 
-					  temp_entry->mnt_dir,
-					  temp_entry->mnt_type,	 
-					  temp_entry->mnt_opts,
-					  temp_entry->mnt_freq,
-					  temp_entry->mnt_passno );
+	    temp_entry = buildMntent( newName, 
+                                      temp_entry->mnt_dir,
+                                      temp_entry->mnt_type,	 
+                                      temp_entry->mnt_opts,
+                                      temp_entry->mnt_freq,
+                                      temp_entry->mnt_passno );
 	    
 	    mount_entry_list.append(temp_entry);
 	}
@@ -251,7 +257,8 @@ bool MountTables::renameMountEntries(const QString oldName, const QString newNam
 /* This function generates an mntent structure from its parameters
 and returns it  */
 
-mntent* buildMountEntry(QString device, QString mountPoint, QString type, QString options, int dumpFreq, int pass)
+mntent* buildMntent(const QString device, const QString mountPoint, const QString type, 
+                    const QString options, const int dumpFreq, const int pass)
 {
     QByteArray device_array      = device.toLocal8Bit();
     QByteArray mount_point_array = mountPoint.toLocal8Bit();
@@ -270,7 +277,7 @@ mntent* buildMountEntry(QString device, QString mountPoint, QString type, QStrin
     return mount_entry;
 }
 
-mntent *copyMntent(mntent *entry)
+mntent *copyMntent(mntent *const entry)
 {
     if( entry == NULL )
         return NULL;
