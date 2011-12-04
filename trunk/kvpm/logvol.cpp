@@ -21,7 +21,7 @@
 #include "fsprobe.h"
 #include "mountentry.h"
 #include "mountinfo.h"
-#include "mountinfolist.h"
+#include "mounttables.h"
 #include "physvol.h"
 #include "storagedevice.h"
 #include "volgroup.h"
@@ -354,7 +354,7 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)  // lv_t seems to change -- why?
     QString tag = value.value.string;
     m_tags = tag.split(',', QString::SkipEmptyParts);
 
-    MountInformationList *mountInformationList = new MountInformationList();
+    MountTables *mountInformationList = new MountTables();
 
     m_mount_info_list = mountInformationList->getMountInformation(m_lv_mapper_path);
 

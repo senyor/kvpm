@@ -22,11 +22,11 @@
 
 #include "physvol.h"
 #include "mountentry.h"
-#include "mountinfolist.h"
+#include "mounttables.h"
 
 StorageDevice::StorageDevice( PedDevice *pedDevice,
 			      QList<PhysVol *> pvList, 
-			      MountInformationList *mountInformationList) : QObject()
+			      MountTables *mountInformationList) : QObject()
 {
 
     PedPartition *part = NULL;

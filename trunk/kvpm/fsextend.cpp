@@ -26,7 +26,7 @@
 #include "executablefinder.h"
 #include "fsck.h"
 #include "mountinfo.h"
-#include "mountinfolist.h"
+#include "mounttables.h"
 #include "processprogress.h"
 
 
@@ -66,7 +66,7 @@ bool fs_can_extend(const QString fs){
 
 bool fs_extend(QString path, QString fs, bool isLV){
 
-    MountInformationList mount_info_list;
+    MountTables mount_info_list;
     QList<MountInformation *> mounts = mount_info_list.getMountInformation( path );
     QString mp;               // mount point
     bool isMounted = false;

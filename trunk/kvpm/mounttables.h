@@ -12,8 +12,8 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
-#ifndef MOUNTINFOLIST_H
-#define MOUNTINFOLIST_H
+#ifndef MOUNTTABLES_H
+#define MOUNTTABLES_H
 
 #include <QString>
 #include <QList>
@@ -25,15 +25,15 @@ class StoragePartition;
 class MountInformation;
 #endif
 
-class MountInformationList
+class MountTables
 {
     QList<MountInformation *> m_list;
     QList<MountInformation *> m_fstab_list;
     QString getFstabMountPoint(const QString name, const QString label, const QString uuid);
     
  public:
-    MountInformationList();
-    ~MountInformationList();
+    MountTables();
+    ~MountTables();
     QList<MountInformation *> getMountInformation(const QString deviceName);
     QString getFstabMountPoint(LogVol *const lv);
     QString getFstabMountPoint(StoragePartition *const partition);

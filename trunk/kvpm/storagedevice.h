@@ -21,7 +21,7 @@
 
 #include <parted/parted.h>
 
-class MountInformationList;
+class MountTables;
 class PhysVol;
 class StoragePartition;
 
@@ -46,7 +46,7 @@ Q_OBJECT
  public:
     StorageDevice(PedDevice *pedDevice,
 		  QList<PhysVol *> pvList, 
-		  MountInformationList *mountInformationList);
+		  MountTables *mountInformationList);
 
     QString getName();
     QString getDiskLabel();
