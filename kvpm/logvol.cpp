@@ -354,7 +354,7 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)  // lv_t seems to change -- why?
     QString tag = value.value.string;
     m_tags = tag.split(',', QString::SkipEmptyParts);
 
-    m_mount_info_list = m_tables->getMountInformation(m_lv_mapper_path);
+    m_mount_info_list = m_tables->getMtabEntries(m_lv_mapper_path);
 
 /* To Do: get all the rest of the mount info, not just mount points */
     m_fstab_mount_point = m_tables->getFstabMountPoint(this);

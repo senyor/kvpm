@@ -110,7 +110,7 @@ StoragePartition::StoragePartition(PedPartition *part,
             m_is_mountable = true;
     }
 
-    m_device_mount_info_list = mountInfoList->getMountInformation(m_partition_path);
+    m_device_mount_info_list = mountInfoList->getMtabEntries(m_partition_path);
     m_fstab_mount_point = mountInfoList->getFstabMountPoint(this);
 
     if( m_device_mount_info_list.size() )

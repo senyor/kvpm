@@ -88,7 +88,7 @@ void MountTables::loadData()
         delete entries[x];
 }
 
-QList<MountEntry *> MountTables::getMountInformation(const QString deviceName)
+QList<MountEntry *> MountTables::getMtabEntries(const QString deviceName)
 {
     QList<MountEntry *> device_mounts;
     
