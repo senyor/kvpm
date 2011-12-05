@@ -88,7 +88,7 @@ Q_OBJECT
               *m_group_check,        *m_stripesize_check,  *m_pvallocate_check,
               *m_flags_check,        *m_snapmove_check,    *m_pvtags_check,
               *m_mount_check,        *m_state_check,       *m_pvlvnames_check,
-              *m_tags_check,         *m_access_check,
+              *m_tags_check,         *m_access_check,      *m_expandparts_check, 
               *m_mountpoints_check,  *m_type_check;
 
     bool m_device_column,       m_volume_column,     m_pvname_column,
@@ -101,16 +101,15 @@ Q_OBJECT
          m_mount_column,        m_state_column,      m_pvlvnames_column,
          m_tags_column,         m_access_column,     m_show_percent,
          m_mountpoints_column,  m_remaining_column,  m_show_total,
-         m_remaining_warn;
+         m_remaining_warn,      m_expand_parts;
 
     QRadioButton *m_percent_radio,
                  *m_total_radio,
                  *m_both_radio;
 
-    void buildGeneralPage();
-    void buildColorsPage();
-    void buildProgramsPage();
-
+    QWidget *generalPage();
+    QWidget *colorsPage();
+    QWidget *programsPage();
     QGroupBox *allGroup();
     QGroupBox *deviceGroup();
     QGroupBox *logicalGroup();
@@ -118,7 +117,7 @@ Q_OBJECT
 
 public:
 
-    KvpmConfigDialog( QWidget *parent, QString name, KConfigSkeleton *const skeleton, ExecutableFinder *const executableFinder );
+    KvpmConfigDialog( QWidget *parent, const QString name, KConfigSkeleton *const skeleton, ExecutableFinder *const executableFinder );
     ~KvpmConfigDialog();
 
 public slots:

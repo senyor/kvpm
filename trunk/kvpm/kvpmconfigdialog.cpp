@@ -31,20 +31,24 @@
 
 
 
-
-
-KvpmConfigDialog::KvpmConfigDialog( QWidget *parent, QString name, 
+KvpmConfigDialog::KvpmConfigDialog( QWidget *parent, 
+                                    const QString name, 
                                     KConfigSkeleton *const skeleton, 
                                     ExecutableFinder *const executableFinder ) 
     : KConfigDialog(parent, name, skeleton), 
       m_skeleton(skeleton),
       m_executable_finder(executableFinder) 
 {
-    setFaceType(KPageDialog::List);
+    setFaceType(KPageDialog::Auto);
 
-    buildGeneralPage();
-    buildColorsPage();
-    buildProgramsPage();
+    KPageWidgetItem *item;
+
+    item = addPage(generalPage(), i18nc("The standard common options", "General") );
+    item->setIcon( KIcon("configure") );
+    item = addPage(colorsPage(), i18n("Colors") ); 
+    item->setIcon( KIcon("color-picker") );
+    item = addPage(programsPage(), i18n("Programs") ); 
+    item->setIcon( KIcon("applications-system") );
 }
 
 KvpmConfigDialog::~KvpmConfigDialog()
@@ -52,14 +56,14 @@ KvpmConfigDialog::~KvpmConfigDialog()
     return;
 }
 
-void KvpmConfigDialog::buildGeneralPage()
+QWidget *KvpmConfigDialog::generalPage()
 {
-    QWidget *general = new QWidget;
-    QVBoxLayout *general_layout = new QVBoxLayout();
-    QLabel *banner = new QLabel( i18n("<b>Set columns to show in tables and tree views</b>") );
+    QWidget *const general = new QWidget;
+    QVBoxLayout *const general_layout = new QVBoxLayout();
+    QLabel *const banner = new QLabel( i18n("<b>Set columns to show in tables and tree views</b>") );
     banner->setAlignment(Qt::AlignCenter);
     general_layout->addWidget(banner);
-    QHBoxLayout *horizontal_layout = new QHBoxLayout();
+    QHBoxLayout *const horizontal_layout = new QHBoxLayout();
     general_layout->addLayout(horizontal_layout);
     general->setLayout(general_layout);
 
@@ -68,31 +72,11 @@ void KvpmConfigDialog::buildGeneralPage()
     horizontal_layout->addWidget( physicalGroup() );
     horizontal_layout->addWidget( allGroup() );
 
-    KPageWidgetItem  *page_widget_item =  addPage( general, "General"); 
-    page_widget_item->setIcon( KIcon("configure") );
+    return general;
 }
 
-void KvpmConfigDialog::buildColorsPage()
+QWidget *KvpmConfigDialog::colorsPage()
 {
-    QWidget *colors = new QWidget;
-    QVBoxLayout *colors_layout = new QVBoxLayout();
-    colors->setLayout(colors_layout);
-
-    QGroupBox *selection_box = new QGroupBox( i18n("Filesystem types") );
-    QGridLayout *selection_layout = new QGridLayout();
-    selection_box->setLayout(selection_layout);
-    colors_layout->addWidget(selection_box);
-
-    KSeparator *left_separator  = new KSeparator( Qt::Vertical );
-    KSeparator *right_separator = new KSeparator( Qt::Vertical );
-    left_separator->setLineWidth(2);
-    right_separator->setLineWidth(2);
-    left_separator->setFrameStyle(  QFrame::Sunken | QFrame::StyledPanel );
-    right_separator->setFrameStyle( QFrame::Sunken | QFrame::StyledPanel );
-
-    selection_layout->addWidget( left_separator,  0, 2, 5, 1 );
-    selection_layout->addWidget( right_separator, 0, 5, 5, 1 );
-
     m_skeleton->setCurrentGroup("FilesystemColors");
     m_skeleton->addItemColor("ext2",   m_ext2_color);
     m_skeleton->addItemColor("ext3",   m_ext3_color);
@@ -110,99 +94,130 @@ void KvpmConfigDialog::buildColorsPage()
     m_skeleton->addItemColor("swap",  m_swap_color);
     m_skeleton->addItemColor("physvol",  m_physical_color);
 
+    QWidget *const colors = new QWidget;
+    QVBoxLayout *const colors_layout = new QVBoxLayout();
+
+    QGroupBox *const selection_box = new QGroupBox( i18n("Volume and Partition Colors") );
+    QGridLayout *const selection_layout = new QGridLayout();
+
+    QLabel *const message_label = new QLabel( i18n("These are the colors used to show the filesystem type \n"
+                                                   "on a partition or volume in any graphical display. Colors\n"
+                                                   "may also be selected for swap and unpartitioned space.") );
+
+    KSeparator *const left_separator  = new KSeparator(Qt::Vertical);
+    KSeparator *const right_separator = new KSeparator(Qt::Vertical);
+
+    selection_layout->addWidget(left_separator,  1, 4, 5, 1);
+    selection_layout->addWidget(right_separator, 1, 9, 5, 1);
+
+    selection_layout->addWidget(message_label, 0, 0, 1, -1, Qt::AlignHCenter);
+
     QLabel *ext2_label = new QLabel("ext2");
-    selection_layout->addWidget(ext2_label, 0, 0, Qt::AlignRight);
+    selection_layout->addWidget(ext2_label, 1, 1, Qt::AlignRight);
     m_ext2_button = new KColorButton( m_ext2_color );
-    selection_layout->addWidget(m_ext2_button, 0, 1, Qt::AlignLeft);
+    selection_layout->addWidget(m_ext2_button, 1, 2, Qt::AlignLeft);
 
     QLabel *ext3_label = new QLabel("ext3");
-    selection_layout->addWidget(ext3_label, 1, 0, Qt::AlignRight);
+    selection_layout->addWidget(ext3_label, 2, 1, Qt::AlignRight);
     m_ext3_button = new KColorButton( m_ext3_color );
-    selection_layout->addWidget(m_ext3_button, 1, 1, Qt::AlignLeft);
+    selection_layout->addWidget(m_ext3_button, 2, 2, Qt::AlignLeft);
 
     QLabel *ext4_label = new QLabel("ext4");
-    selection_layout->addWidget(ext4_label, 2, 0, Qt::AlignRight);
+    selection_layout->addWidget(ext4_label, 3, 1, Qt::AlignRight);
     m_ext4_button = new KColorButton( m_ext4_color );
-    selection_layout->addWidget(m_ext4_button, 2, 1, Qt::AlignLeft);
+    selection_layout->addWidget(m_ext4_button, 3, 2, Qt::AlignLeft);
 
     QLabel *btrfs_label = new QLabel("btrfs");
-    selection_layout->addWidget(btrfs_label, 3, 0, Qt::AlignRight);
+    selection_layout->addWidget(btrfs_label, 4, 1, Qt::AlignRight);
     m_btrfs_button = new KColorButton( m_btrfs_color );
-    selection_layout->addWidget(m_btrfs_button, 3, 1, Qt::AlignLeft);
+    selection_layout->addWidget(m_btrfs_button, 4, 2, Qt::AlignLeft);
 
     QLabel *reiser_label = new QLabel("reiser");
-    selection_layout->addWidget(reiser_label, 0, 3, Qt::AlignRight);
+    selection_layout->addWidget(reiser_label, 1, 6, Qt::AlignRight);
     m_reiser_button = new KColorButton( m_reiser_color );
-    selection_layout->addWidget(m_reiser_button, 0, 4, Qt::AlignLeft);
+    selection_layout->addWidget(m_reiser_button, 1, 7, Qt::AlignLeft);
 
     QLabel *reiser4_label = new QLabel("reiser4");
-    selection_layout->addWidget(reiser4_label, 1, 3, Qt::AlignRight);
+    selection_layout->addWidget(reiser4_label, 2, 6, Qt::AlignRight);
     m_reiser4_button = new KColorButton( m_reiser4_color );
-    selection_layout->addWidget(m_reiser4_button, 1, 4, Qt::AlignLeft);
+    selection_layout->addWidget(m_reiser4_button, 2, 7, Qt::AlignLeft);
 
     QLabel *msdos_label = new QLabel("ms-dos");
-    selection_layout->addWidget(msdos_label, 2, 3, Qt::AlignRight);
+    selection_layout->addWidget(msdos_label, 3, 6, Qt::AlignRight);
     m_msdos_button = new KColorButton( m_msdos_color );
-    selection_layout->addWidget(m_msdos_button, 2, 4, Qt::AlignLeft);
+    selection_layout->addWidget(m_msdos_button, 3, 7, Qt::AlignLeft);
 
     QLabel *jfs_label = new QLabel("jfs");
-    selection_layout->addWidget(jfs_label, 0, 6, Qt::AlignRight);
+    selection_layout->addWidget(jfs_label, 1, 11, Qt::AlignRight);
     m_jfs_button = new KColorButton( m_jfs_color );
-    selection_layout->addWidget(m_jfs_button, 0, 7, Qt::AlignLeft);
+    selection_layout->addWidget(m_jfs_button, 1, 12, Qt::AlignLeft);
 
     QLabel *xfs_label = new QLabel("xfs");
-    selection_layout->addWidget(xfs_label, 1, 6, Qt::AlignRight);
+    selection_layout->addWidget(xfs_label, 2, 11, Qt::AlignRight);
     m_xfs_button = new KColorButton( m_xfs_color );
-    selection_layout->addWidget(m_xfs_button, 1, 7, Qt::AlignLeft);
+    selection_layout->addWidget(m_xfs_button, 2, 12, Qt::AlignLeft);
 
-    QLabel *swap_label = new QLabel("linux swap");
-    selection_layout->addWidget(swap_label, 2, 6, Qt::AlignRight);
+    QLabel *swap_label = new QLabel("linux \nswap");
+    selection_layout->addWidget(swap_label, 3, 11, Qt::AlignRight);
     m_swap_button = new KColorButton( m_swap_color );
-    selection_layout->addWidget(m_swap_button, 2, 7, Qt::AlignLeft);
+    selection_layout->addWidget(m_swap_button, 3, 12, Qt::AlignLeft);
 
     QLabel *none_label = new QLabel("none");
-    selection_layout->addWidget(none_label, 3, 3,  Qt::AlignRight);
+    selection_layout->addWidget(none_label, 4, 6,  Qt::AlignRight);
     m_none_button = new KColorButton( m_none_color );
-    selection_layout->addWidget(m_none_button, 3, 4, Qt::AlignLeft);
+    selection_layout->addWidget(m_none_button, 4, 7, Qt::AlignLeft);
 
-    QLabel *free_label = new QLabel("free space");
-    selection_layout->addWidget(free_label, 4, 3, Qt::AlignRight);
+    QLabel *free_label = new QLabel("free \nspace");
+    selection_layout->addWidget(free_label, 5, 6, Qt::AlignRight);
     m_free_button = new KColorButton( m_free_color );
-    selection_layout->addWidget(m_free_button, 4, 4, Qt::AlignLeft);
+    selection_layout->addWidget(m_free_button, 5, 7, Qt::AlignLeft);
 
     QLabel *hfs_label = new QLabel("hfs");
-    selection_layout->addWidget(hfs_label, 3, 6,  Qt::AlignRight);
+    selection_layout->addWidget(hfs_label, 4, 11,  Qt::AlignRight);
     m_hfs_button = new KColorButton( m_hfs_color );
-    selection_layout->addWidget(m_hfs_button, 3, 7, Qt::AlignLeft);
+    selection_layout->addWidget(m_hfs_button, 4, 12, Qt::AlignLeft);
 
     QLabel *ntfs_label = new QLabel("ntfs");
-    selection_layout->addWidget(ntfs_label, 4, 6,  Qt::AlignRight);
+    selection_layout->addWidget(ntfs_label, 5, 11,  Qt::AlignRight);
     m_ntfs_button = new KColorButton( m_ntfs_color );
-    selection_layout->addWidget(m_ntfs_button, 4, 7, Qt::AlignLeft);
+    selection_layout->addWidget(m_ntfs_button, 5, 12, Qt::AlignLeft);
 
-    QLabel *physical_label = new QLabel("physical volumes");
-    selection_layout->addWidget(physical_label, 4, 0,  Qt::AlignRight);
+    QLabel *physical_label = new QLabel("physical \nvolumes");
+    selection_layout->addWidget(physical_label, 5, 1,  Qt::AlignRight);
     m_physical_button = new KColorButton( m_physical_color );
-    selection_layout->addWidget(m_physical_button, 4, 1, Qt::AlignLeft);
+    selection_layout->addWidget(m_physical_button, 5, 2, Qt::AlignLeft);
 
-    KPageWidgetItem  *page_widget_item =  addPage( colors, "Colors"); 
-    page_widget_item->setIcon( KIcon("color-picker") );
+    for(int row = 1; row < selection_layout->rowCount(); row++)
+        selection_layout->setRowStretch(row, 1);
+
+    selection_layout->setColumnStretch(0, 30);
+    selection_layout->setColumnStretch(3, 30);
+    selection_layout->setColumnStretch(5, 30);
+    selection_layout->setColumnStretch(8, 30);
+    selection_layout->setColumnStretch(10, 30);
+    selection_layout->setColumnStretch(13, 30);
+
+    selection_box->setLayout(selection_layout);
+    colors_layout->addWidget(selection_box);
+    colors->setLayout(colors_layout);
+
+    return colors;
 }
 
-void KvpmConfigDialog::buildProgramsPage()
+QWidget *KvpmConfigDialog::programsPage()
 {
     m_executables_table = new QTableWidget();
 
-    KTabWidget  *programs = new KTabWidget;
-    QVBoxLayout *programs1_layout = new QVBoxLayout();
-    QVBoxLayout *programs2_layout = new QVBoxLayout();
-    QWidget *programs1 = new QWidget();
-    QWidget *programs2 = new QWidget();
+    KTabWidget  *const programs = new KTabWidget;
+    QVBoxLayout *const programs1_layout = new QVBoxLayout();
+    QVBoxLayout *const programs2_layout = new QVBoxLayout();
+    QWidget *const programs1 = new QWidget();
+    QWidget *const programs2 = new QWidget();
     programs1->setLayout(programs1_layout);
     programs2->setLayout(programs2_layout);
 
     m_skeleton->setCurrentGroup("SystemPaths");
-    m_skeleton->addItemStringList("SearchPath", m_search_entries, QStringList() );
+    m_skeleton->addItemStringList("SearchPath", m_search_entries, QStringList());
 
     m_edit_list = new KEditListBox();
     programs1_layout->addWidget(m_edit_list);
@@ -215,8 +230,7 @@ void KvpmConfigDialog::buildProgramsPage()
 
     fillExecutablesTable();
 
-    KPageWidgetItem  *page_widget_item =  addPage( programs, "Programs"); 
-    page_widget_item->setIcon( KIcon("applications-system") );
+    return programs;
 } 
 
 void KvpmConfigDialog::updateSettings()
@@ -251,6 +265,7 @@ void KvpmConfigDialog::updateSettings()
     m_group_column     = m_group_check->isChecked();
     m_flags_column     = m_flags_check->isChecked();
     m_mount_column     = m_mount_check->isChecked();
+    m_expand_parts     = m_expandparts_check->isChecked();
 
     m_volume_column      = m_volume_check->isChecked();
     m_size_column        = m_size_check->isChecked();
@@ -334,6 +349,7 @@ void KvpmConfigDialog::updateWidgetsDefault()
     m_group_check->setChecked(true);
     m_flags_check->setChecked(true);
     m_mount_check->setChecked(true);
+    m_expandparts_check->setChecked(true);
 
     m_volume_check->setChecked(true);
     m_size_check->setChecked(true);
@@ -410,28 +426,42 @@ bool KvpmConfigDialog::hasChanged()
 
 QGroupBox *KvpmConfigDialog::deviceGroup()
 {
-    QGroupBox *device_group = new QGroupBox( i18n("Device tree") );
-    QVBoxLayout *device_layout = new QVBoxLayout();
+    QGroupBox *const device_group = new QGroupBox( i18n("Device tree") );
+    QVBoxLayout *const device_layout = new QVBoxLayout();
     device_group->setLayout(device_layout);
 
     m_skeleton->setCurrentGroup("DeviceTreeColumns");
-    m_skeleton->addItemBool( "device",    m_device_column );
-    m_skeleton->addItemBool( "partition", m_partition_column );
-    m_skeleton->addItemBool( "capacity",  m_capacity_column );
-    m_skeleton->addItemBool( "remaining", m_devremaining_column );
-    m_skeleton->addItemBool( "usage",     m_usage_column );
-    m_skeleton->addItemBool( "group",     m_group_column );
-    m_skeleton->addItemBool( "flags",     m_flags_column );
-    m_skeleton->addItemBool( "mount",     m_mount_column );
+    m_skeleton->addItemBool( "device",      m_device_column );
+    m_skeleton->addItemBool( "partition",   m_partition_column );
+    m_skeleton->addItemBool( "capacity",    m_capacity_column );
+    m_skeleton->addItemBool( "remaining",   m_devremaining_column );
+    m_skeleton->addItemBool( "usage",       m_usage_column );
+    m_skeleton->addItemBool( "group",       m_group_column );
+    m_skeleton->addItemBool( "flags",       m_flags_column );
+    m_skeleton->addItemBool( "mount",       m_mount_column );
+    m_skeleton->addItemBool( "expandparts", m_expand_parts );
 
-    m_device_check    = new QCheckBox("Device name");
-    m_partition_check = new QCheckBox("Partition type");
-    m_capacity_check  = new QCheckBox("Capacity");
-    m_devremaining_check = new QCheckBox("Remaining space");
-    m_usage_check     = new QCheckBox("Usage of device");
-    m_group_check     = new QCheckBox("Volume group");
-    m_flags_check     = new QCheckBox("Partition flags");
-    m_mount_check     = new QCheckBox("Mount point");
+    m_device_check      = new QCheckBox( i18n("Device name") );
+    m_partition_check   = new QCheckBox( i18n("Partition type") );
+    m_capacity_check    = new QCheckBox( i18n("Capacity") );
+    m_devremaining_check = new QCheckBox( i18n("Remaining space") );
+    m_usage_check       = new QCheckBox( i18n("Usage of device") );
+    m_group_check       = new QCheckBox( i18n("Volume group") );
+    m_flags_check       = new QCheckBox( i18n("Partition flags") );
+    m_mount_check       = new QCheckBox( i18n("Mount point") );
+    m_expandparts_check = new QCheckBox( i18n("Expand device tree") );
+
+    m_device_check->setToolTip( i18n("Show the path to the device, /dev/sda1 for example.") );
+    m_partition_check->setToolTip( i18n("Show the type of partition, 'extended' for example.") );
+    m_capacity_check->setToolTip( i18n("Show the storage capacity in megabytes, gigabytes or terabytes.") );
+    m_devremaining_check->setToolTip( i18n("Show the remaining storage in megabytes, gigabytes or terabytes.") );
+    m_usage_check->setToolTip( i18n("Show how the partition is being used. Usually the type of filesystem, such as ext4, \n"
+                                    "swap space or as a physcial volume.") );
+    m_group_check->setToolTip( i18n("If the partition is a physical volume this column shows the volume group it is in.") );
+    m_flags_check->setToolTip( i18n("Show any flags, such a 'boot.'") );
+    m_mount_check->setToolTip( i18n("Show the mount point if the partition has a mounted filesystem.") );
+    m_expandparts_check->setToolTip( i18n("This determines if all partitions of all devices get shown at start up. \n "
+                                          "The user can still expand or collapse the items by clicking on them.") );
     m_device_check->setChecked(m_device_column);
     m_partition_check->setChecked(m_partition_column);
     m_capacity_check->setChecked(m_capacity_column);
@@ -440,6 +470,7 @@ QGroupBox *KvpmConfigDialog::deviceGroup()
     m_group_check->setChecked(m_group_column);
     m_flags_check->setChecked(m_flags_column);
     m_mount_check->setChecked(m_mount_column);
+    m_expandparts_check->setChecked(m_expand_parts);
 
     device_layout->addWidget(m_device_check);
     device_layout->addWidget(m_partition_check);
@@ -449,6 +480,11 @@ QGroupBox *KvpmConfigDialog::deviceGroup()
     device_layout->addWidget(m_group_check);
     device_layout->addWidget(m_flags_check);
     device_layout->addWidget(m_mount_check);
+    device_layout->addWidget(new KSeparator(Qt::Horizontal));
+    QLabel *const label = new QLabel( i18n("At start up:") );
+    label->setAlignment(Qt::AlignCenter);
+    device_layout->addWidget(label);
+    device_layout->addWidget(m_expandparts_check);
     device_layout->addStretch();
 
     return device_group;
@@ -456,29 +492,38 @@ QGroupBox *KvpmConfigDialog::deviceGroup()
 
 QGroupBox *KvpmConfigDialog::physicalGroup()
 {
-    QGroupBox *physical_group = new QGroupBox( i18n("Physical volume table") );
-    QVBoxLayout *physical_layout = new QVBoxLayout();
+    QGroupBox *const physical_group = new QGroupBox( i18n("Physical volume table") );
+    QVBoxLayout *const physical_layout = new QVBoxLayout();
     physical_group->setLayout(physical_layout);
 
     m_skeleton->setCurrentGroup("PhysicalTreeColumns");
 
-    m_skeleton->addItemBool( "pvname",     m_pvname_column );
-    m_skeleton->addItemBool( "pvsize",     m_pvsize_column );
-    m_skeleton->addItemBool( "pvremaining",     m_pvremaining_column );
-    m_skeleton->addItemBool( "pvused",     m_pvused_column );
-    m_skeleton->addItemBool( "pvstate",    m_pvstate_column );
-    m_skeleton->addItemBool( "pvallocate", m_pvallocate_column );
-    m_skeleton->addItemBool( "pvtags",     m_pvtags_column );
-    m_skeleton->addItemBool( "pvlvnames",  m_pvlvnames_column );
+    m_skeleton->addItemBool( "pvname",      m_pvname_column );
+    m_skeleton->addItemBool( "pvsize",      m_pvsize_column );
+    m_skeleton->addItemBool( "pvremaining", m_pvremaining_column );
+    m_skeleton->addItemBool( "pvused",      m_pvused_column );
+    m_skeleton->addItemBool( "pvstate",     m_pvstate_column );
+    m_skeleton->addItemBool( "pvallocate",  m_pvallocate_column );
+    m_skeleton->addItemBool( "pvtags",      m_pvtags_column );
+    m_skeleton->addItemBool( "pvlvnames",   m_pvlvnames_column );
 
-    m_pvname_check  = new QCheckBox("Volume name");
-    m_pvsize_check  = new QCheckBox("Size");
-    m_pvremaining_check  = new QCheckBox("Remaining space");
-    m_pvused_check  = new QCheckBox("Used space");
-    m_pvstate_check = new QCheckBox("State");
-    m_pvallocate_check = new QCheckBox("Allocatable");
-    m_pvtags_check     = new QCheckBox("Tags");
-    m_pvlvnames_check  = new QCheckBox("Logical Volumes");
+    m_pvname_check  = new QCheckBox( i18n("Volume name") );
+    m_pvsize_check  = new QCheckBox( i18n("Size") );
+    m_pvremaining_check  = new QCheckBox( i18n("Remaining space") );
+    m_pvused_check  = new QCheckBox( i18n("Used space") );
+    m_pvstate_check = new QCheckBox( i18n("State") );
+    m_pvallocate_check = new QCheckBox( i18n("Allocatable") );
+    m_pvtags_check     = new QCheckBox( i18n("Tags") );
+    m_pvlvnames_check  = new QCheckBox( i18n("Logical Volumes") );
+
+    m_pvname_check->setToolTip( i18n("Show the path to the device, /dev/sda1 for example.") );
+    m_pvsize_check->setToolTip( i18n("Show the storage capacity in megabytes, gigabytes or terabytes.") );
+    m_pvremaining_check->setToolTip( i18n("Show the remaining storage in megabytes, gigabytes or terabytes.") );
+    m_pvused_check->setToolTip( i18n("Show the used storage in megabytes, gigabytes or terabytes.") );
+    m_pvstate_check->setToolTip( i18n("Show the state, either 'active' or 'inactive.'") );
+    m_pvallocate_check->setToolTip( i18n("Shows whether or not the physical volume can have its extents allocated.") );
+    m_pvtags_check->setToolTip( i18n("List any tags associated with the physical volume.") );
+    m_pvlvnames_check->setToolTip( i18n("List any logical volumes associated with the physical volume.") );
 
     m_pvname_check->setChecked(m_pvname_column);
     m_pvsize_check->setChecked(m_pvsize_column);
@@ -504,8 +549,8 @@ QGroupBox *KvpmConfigDialog::physicalGroup()
 
 QGroupBox *KvpmConfigDialog::logicalGroup()
 {
-    QGroupBox *logical_group = new QGroupBox( i18n("Logical volume tree") );
-    QVBoxLayout *logical_layout = new QVBoxLayout();
+    QGroupBox *const logical_group = new QGroupBox( i18n("Logical volume tree") );
+    QVBoxLayout *const logical_layout = new QVBoxLayout();
     logical_group->setLayout(logical_layout);
 
     m_skeleton->setCurrentGroup("VolumeTreeColumns");
@@ -522,18 +567,33 @@ QGroupBox *KvpmConfigDialog::logicalGroup()
     m_skeleton->addItemBool( "tags",        m_tags_column );
     m_skeleton->addItemBool( "mountpoints", m_mountpoints_column );
 
-    m_volume_check      = new QCheckBox("Volume name");
-    m_size_check        = new QCheckBox("Size");
-    m_remaining_check   = new QCheckBox("Remaining space");
-    m_type_check        = new QCheckBox("Volume type");
-    m_filesystem_check  = new QCheckBox("Filesystem type");
-    m_stripes_check     = new QCheckBox("Stripe count");
-    m_stripesize_check  = new QCheckBox("Stripe size");
-    m_snapmove_check    = new QCheckBox("(\%)Snap/PV move");
-    m_state_check       = new QCheckBox("Volume state");
-    m_access_check      = new QCheckBox("Volume access");
-    m_tags_check        = new QCheckBox("Tags");
-    m_mountpoints_check = new QCheckBox("Mount points");
+    m_volume_check      = new QCheckBox( i18n("Volume name") );
+    m_size_check        = new QCheckBox( i18n("Size") );
+    m_remaining_check   = new QCheckBox( i18n("Remaining space") );
+    m_type_check        = new QCheckBox( i18n("Volume type") );
+    m_filesystem_check  = new QCheckBox( i18n("Filesystem type") );
+    m_stripes_check     = new QCheckBox( i18n("Stripe count") );
+    m_stripesize_check  = new QCheckBox( i18n("Stripe size") );
+    m_snapmove_check    = new QCheckBox( i18n("(\%)Snap/Copy") );
+    m_state_check       = new QCheckBox( i18n("Volume state") );
+    m_access_check      = new QCheckBox( i18n("Volume access") );
+    m_tags_check        = new QCheckBox( i18n("Tags") );
+    m_mountpoints_check = new QCheckBox( i18n("Mount point") );
+
+    m_volume_check->setToolTip( i18n("Show the volume name.") );
+    m_size_check->setToolTip( i18n("Show the storage capacity in megabytes, gigabytes or terabytes.") );
+    m_remaining_check->setToolTip( i18n("Show the remaining storage in megabytes, gigabytes or terabytes.") );
+    m_type_check->setToolTip( i18n("Show the type of volume, 'mirror' or 'linear,' for example.") );
+    m_filesystem_check->setToolTip( i18n("Show the filesystem type on the volume, 'ext3' or 'swap,' for example.") );
+    m_stripes_check->setToolTip( i18n("Show the number of stripes on the volume, if it is striped") );
+    m_stripesize_check->setToolTip( i18n("Show the size of the stripes, if it is striped") );
+    m_snapmove_check->setToolTip( i18n("For a mirror, show the percentage of the mirror synced. \n"
+                                       "For a snapshot, show the percentage of the snapshot used. \n"
+                                       "For a pvmove, show the percentage of the move completed.") );
+    m_state_check->setToolTip( i18n("Show the state, 'active' or 'invalid,' for example.") );
+    m_access_check->setToolTip( i18n("Show access, either read only or read and write.") );
+    m_tags_check->setToolTip( i18n("List any tags associated with the volume") );
+    m_mountpoints_check->setToolTip( i18n("Show the mount point if the partition has a mounted filesystem.") );
 
     m_volume_check->setChecked(m_volume_column);
     m_size_check->setChecked(m_size_column);
@@ -566,23 +626,23 @@ QGroupBox *KvpmConfigDialog::logicalGroup()
 
 QGroupBox *KvpmConfigDialog::allGroup()
 {
-    QGroupBox *all_group = new QGroupBox( i18n("All trees and tables") );
-    QGroupBox *percent_group = new QGroupBox( i18n("Remaining and used space") );
+    QGroupBox *const all_group = new QGroupBox( i18n("All trees and tables") );
+    QGroupBox *const percent_group = new QGroupBox( i18n("Remaining and used space") );
 
-    QVBoxLayout *all_layout = new QVBoxLayout();
-    QVBoxLayout *percent_layout = new QVBoxLayout();
+    QVBoxLayout *const all_layout = new QVBoxLayout();
+    QVBoxLayout *const percent_layout = new QVBoxLayout();
     all_group->setLayout(all_layout);
     percent_group->setLayout(percent_layout);
 
     m_skeleton->setCurrentGroup("AllTreeColumns");
-    m_skeleton->addItemBool( "percent", m_show_percent );
-    m_skeleton->addItemBool( "total",   m_show_total );
-    m_skeleton->addItemInt(  "fs_warn",    m_fs_warn_percent );
-    m_skeleton->addItemInt(  "pv_warn",    m_pv_warn_percent );
+    m_skeleton->addItemBool("percent", m_show_percent);
+    m_skeleton->addItemBool("total",   m_show_total);
+    m_skeleton->addItemInt("fs_warn",  m_fs_warn_percent);
+    m_skeleton->addItemInt("pv_warn",  m_pv_warn_percent);
 
-    m_percent_radio = new QRadioButton("Show percentage");
-    m_total_radio   = new QRadioButton("Show total");
-    m_both_radio    = new QRadioButton("Show both");
+    m_percent_radio = new QRadioButton( i18n("Show percentage") );
+    m_total_radio   = new QRadioButton( i18n("Show total") );
+    m_both_radio    = new QRadioButton( i18n("Show both") );
 
     if(m_show_percent && !m_show_total)
         m_percent_radio->setChecked(true);
@@ -596,11 +656,11 @@ QGroupBox *KvpmConfigDialog::allGroup()
     percent_layout->addWidget(m_both_radio);
     percent_layout->addWidget(new KSeparator(Qt::Horizontal));
 
-    QHBoxLayout *warn_layout = new QHBoxLayout;
-    QHBoxLayout *fs_warn_layout = new QHBoxLayout;
-    QHBoxLayout *pv_warn_layout = new QHBoxLayout;
+    QHBoxLayout *const warn_layout = new QHBoxLayout;
+    QHBoxLayout *const fs_warn_layout = new QHBoxLayout;
+    QHBoxLayout *const pv_warn_layout = new QHBoxLayout;
     warn_layout->addWidget( new QLabel( i18n("Show warning icon") ) );
-    QLabel *warn_icon = new QLabel;
+    QLabel *const warn_icon = new QLabel;
     warn_icon->setPixmap( KIcon("exclamation").pixmap(16, 16) );
     warn_layout->addWidget(warn_icon);
     percent_layout->addLayout(warn_layout);
