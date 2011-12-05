@@ -201,6 +201,7 @@ bool MountTables::removeEntry(const QString mountPoint)
     for(int x = 0; x < mount_entry_list.size(); x++){
 	const mntent *entry = mount_entry_list[x];
 	addmntent(fp_new, entry);
+        delete entry;
     }
     fsync( fileno(fp_new) );
     endmntent(fp_new);
@@ -213,6 +214,7 @@ bool MountTables::renameEntries(const QString oldName, const QString newName)
 {
     QList<mntent *> mount_entry_list;
     mntent *mount_entry;
+    mntent *temp_entry;
     
     QByteArray new_path(_PATH_MOUNTED);
     new_path.append(".new");     
@@ -228,14 +230,14 @@ bool MountTables::renameEntries(const QString oldName, const QString newName)
 	    mount_entry_list.append(mount_entry);
 	}
 	else{
-	    mount_entry = buildMntent( newName, 
-                                       temp_entry->mnt_dir,
-                                       temp_entry->mnt_type,	 
-                                       temp_entry->mnt_opts,
-                                       temp_entry->mnt_freq,
-                                       temp_entry->mnt_passno );
-	    
-	    mount_entry_list.append(mount_entry);
+	    temp_entry = buildMntent( newName, 
+                                      mount_entry->mnt_dir,
+                                      mount_entry->mnt_type,	 
+                                      mount_entry->mnt_opts,
+                                      mount_entry->mnt_freq,
+                                      mount_entry->mnt_passno );
+	    delete mount_entry;
+	    mount_entry_list.append(temp_entry);
 	}
     }
     
@@ -245,6 +247,7 @@ bool MountTables::renameEntries(const QString oldName, const QString newName)
     for(int x = 0; x < mount_entry_list.size(); x++){
 	const mntent *entry = mount_entry_list[x];
 	addmntent(fp_new, entry);
+        delete entry;
     }
     fsync( fileno(fp_new) );
     endmntent(fp_new);
