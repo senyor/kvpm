@@ -114,6 +114,11 @@ Q_OBJECT
     QGroupBox *deviceGroup();
     QGroupBox *logicalGroup();
     QGroupBox *physicalGroup();
+    QGroupBox *pvPropertiesGroup();
+    QGroupBox *lvPropertiesGroup();
+    QGroupBox *devicePropertiesGroup();
+    QWidget *treesTab();
+    QWidget *propertiesTab();
 
 public:
 
