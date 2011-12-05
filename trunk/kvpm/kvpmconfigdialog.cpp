@@ -58,21 +58,51 @@ KvpmConfigDialog::~KvpmConfigDialog()
 
 QWidget *KvpmConfigDialog::generalPage()
 {
-    QWidget *const general = new QWidget;
-    QVBoxLayout *const general_layout = new QVBoxLayout();
+    KTabWidget *const general = new KTabWidget;
+
+    general->insertTab(1 ,treesTab(), "Tree Views");
+    general->insertTab(1 ,propertiesTab(), "Property Panels");
+
+    return general;
+}
+
+QWidget *KvpmConfigDialog::treesTab()
+{
+    QWidget *const trees = new QWidget;
+    QVBoxLayout *const layout = new QVBoxLayout();
     QLabel *const banner = new QLabel( i18n("<b>Set columns to show in tables and tree views</b>") );
     banner->setAlignment(Qt::AlignCenter);
-    general_layout->addWidget(banner);
-    QHBoxLayout *const horizontal_layout = new QHBoxLayout();
-    general_layout->addLayout(horizontal_layout);
-    general->setLayout(general_layout);
+    layout->addWidget(banner);
 
+    QHBoxLayout *const horizontal_layout = new QHBoxLayout();
     horizontal_layout->addWidget( deviceGroup() );
     horizontal_layout->addWidget( logicalGroup() );
     horizontal_layout->addWidget( physicalGroup() );
     horizontal_layout->addWidget( allGroup() );
 
-    return general;
+    layout->addLayout(horizontal_layout);
+    trees->setLayout(layout);
+
+    return trees;
+}
+
+QWidget *KvpmConfigDialog::propertiesTab()
+{
+    QWidget *const properties = new QWidget();
+    QVBoxLayout *const layout = new QVBoxLayout();
+    QLabel *const banner = new QLabel( i18n("<b>Set information to show in property panels</b>") );
+    banner->setAlignment(Qt::AlignCenter);
+    layout->addWidget(banner);
+
+    QHBoxLayout *const horizontal_layout = new QHBoxLayout();
+    horizontal_layout->addWidget( devicePropertiesGroup() );
+    horizontal_layout->addWidget( lvPropertiesGroup() );
+    horizontal_layout->addWidget( pvPropertiesGroup() );
+
+    layout->addLayout(horizontal_layout);
+    properties->setLayout(layout);
+
+    return properties;
 }
 
 QWidget *KvpmConfigDialog::colorsPage()
@@ -620,6 +650,7 @@ QGroupBox *KvpmConfigDialog::logicalGroup()
     logical_layout->addWidget(m_access_check);
     logical_layout->addWidget(m_tags_check);
     logical_layout->addWidget(m_mountpoints_check);
+    logical_layout->addStretch();
 
     return logical_group;
 }
@@ -693,5 +724,36 @@ QGroupBox *KvpmConfigDialog::allGroup()
     all_layout->addStretch();
 
     return all_group;
+}
+
+QGroupBox *KvpmConfigDialog::devicePropertiesGroup()
+{
+    QGroupBox *const properties = new QGroupBox( i18n("Device Property Panel") );
+    QVBoxLayout *const layout = new QVBoxLayout();
+    properties->setLayout(layout);
+    layout->addStretch();
+
+    return properties;
+}
+
+QGroupBox *KvpmConfigDialog::pvPropertiesGroup()
+{
+    QGroupBox *const properties = new QGroupBox( i18n("Physical Volume Property Panel") );
+    QVBoxLayout *const layout = new QVBoxLayout();
+    properties->setLayout(layout);
+    layout->addStretch();
+
+    return properties;
+}
+
+
+QGroupBox *KvpmConfigDialog::lvPropertiesGroup()
+{
+    QGroupBox *const properties = new QGroupBox( i18n("Logical Volume Property Panel") );
+    QVBoxLayout *const layout = new QVBoxLayout();
+    properties->setLayout(layout);
+    layout->addStretch();
+
+    return properties;
 }
 
