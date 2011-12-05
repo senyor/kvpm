@@ -29,7 +29,7 @@
 #include "volgroup.h"
 
 
-DeviceTree::DeviceTree(DeviceSizeChart *chart, DevicePropertiesStack *stack, QWidget *parent)
+DeviceTree::DeviceTree(DeviceSizeChart *const chart, DevicePropertiesStack *const stack, QWidget *parent)
  : QTreeWidget(parent), 
    m_chart(chart),
    m_stack(stack)
@@ -335,7 +335,8 @@ void DeviceTree::loadData(QList<StorageDevice *> devices)
 
     if(m_initial_run){
         m_initial_run = false;
-        expandAll();
+        if(m_expand_parts)
+            expandAll();
     }
     else{
         for(int x = topLevelItemCount() - 1; x >= 0; x--){
@@ -412,14 +413,15 @@ void DeviceTree::setViewConfig()
          mount;
 
     skeleton.setCurrentGroup("DeviceTreeColumns");
-    skeleton.addItemBool( "device",    device );
-    skeleton.addItemBool( "partition", partition );
-    skeleton.addItemBool( "capacity",  capacity );
-    skeleton.addItemBool( "remaining", remaining );
-    skeleton.addItemBool( "usage",     usage );
-    skeleton.addItemBool( "group",     group );
-    skeleton.addItemBool( "flags",     flags );
-    skeleton.addItemBool( "mount",     mount );
+    skeleton.addItemBool( "device",      device );
+    skeleton.addItemBool( "partition",   partition );
+    skeleton.addItemBool( "capacity",    capacity );
+    skeleton.addItemBool( "remaining",   remaining );
+    skeleton.addItemBool( "usage",       usage );
+    skeleton.addItemBool( "group",       group );
+    skeleton.addItemBool( "flags",       flags );
+    skeleton.addItemBool( "mount",       mount );
+    skeleton.addItemBool( "expandparts", m_expand_parts );
 
     skeleton.setCurrentGroup("AllTreeColumns");
     skeleton.addItemBool( "total",   m_show_total );

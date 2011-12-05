@@ -35,7 +35,8 @@ Q_OBJECT
 
     bool m_initial_run,
          m_show_total, 
-         m_show_percent;
+         m_show_percent,
+         m_expand_parts;
 
     int m_fs_warn_percent, 
         m_pv_warn_percent;
@@ -47,7 +48,7 @@ Q_OBJECT
     void setViewConfig();
 
 public:
-    DeviceTree(DeviceSizeChart *chart, DevicePropertiesStack *stack, QWidget *parent = NULL);
+    DeviceTree(DeviceSizeChart *const chart, DevicePropertiesStack *const stack, QWidget *parent = NULL);
     void loadData(QList<StorageDevice *> devices);
 
 private slots:    
