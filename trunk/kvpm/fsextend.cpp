@@ -20,6 +20,7 @@
 
 #include <KLocale>
 #include <KMessageBox>
+#include <KTempDir>
 
 #include <QtGui>
 
@@ -30,12 +31,13 @@
 #include "processprogress.h"
 
 
-bool do_temp_mount(QString path, QString fs);
-void do_temp_unmount();
+
+bool do_temp_mount(const QString dev, const QString fs, const QString mp); // device path, filesystem and mount point
+void do_temp_unmount(const QString mp);
 
 
-bool fs_can_extend(const QString fs){
-
+bool fs_can_extend(const QString fs)
+{
     QString executable;
 
     if(fs == "ext2" || fs == "ext3" || fs == "ext4" || fs == "reiserfs" || fs == "ntfs" || fs == "xfs"){
@@ -62,145 +64,141 @@ bool fs_can_extend(const QString fs){
         return false;
 }
 
-// path is the device path, not mount point
-
-bool fs_extend(QString path, QString fs, bool isLV){
-
+// dev is the full dev to the device or volume
+bool fs_extend(const QString dev, const QString fs, const bool isLV)
+{
     MountTables mount_info_list;
-    QList<MountEntry *> mounts = mount_info_list.getMtabEntries(path);
+    QList<MountEntry *> mounts = mount_info_list.getMtabEntries(dev);
     QString mp;               // mount point
     bool isMounted = false;
-    const QByteArray path_array = path.toLocal8Bit();
-    const QByteArray fs_array = fs.toLocal8Bit();
 
     if( mounts.size() ){
         mp = mounts[0]->getMountPoint();
         isMounted = true;
     }
 
-    const QByteArray mp_array = mp.toLocal8Bit();
-    QStringList arguments, output;
+    const QByteArray dev_qba = dev.toLocal8Bit();
+    const QByteArray  fs_qba = fs.toLocal8Bit();
+    const QByteArray  mp_qba = mp.toLocal8Bit();
+    QStringList args;
     unsigned long options = 0;
 
-    if( ( ! isLV) && ( isMounted ) ){               
-        KMessageBox::error(0, "only logical volumes may be mounted during resize, not partitions");
+    if( ( !isLV ) && ( isMounted ) ){               
+        KMessageBox::error(0, i18n("only logical volumes may be mounted during resize, not partitions"));
         return false;
     }
 
-    QString error_message = i18n("It appears that the filesystem was not extended. "
+    const QString err_msg = i18n("It appears that the filesystem on the device or volume was not extended. "
                                  "It will need to be extended before the additional space can be used.");
 
-    if( fs == "ext2" || fs == "ext3" || fs == "ext4" ){
+    if(fs == "ext2" || fs == "ext3" || fs == "ext4"){
 
-        if( ! isMounted ){
-            if( ! fsck( path ) )
+        if( !isMounted ){
+            if( !fsck(dev) )
                 return false;
         }
 
-        arguments << "resize2fs" 
-                  << path; 
-
-        ProcessProgress fs_grow(arguments);
-        output = fs_grow.programOutput();
+        args << "resize2fs" << dev; 
+        ProcessProgress fs_grow(args);
 
         if ( fs_grow.exitCode() ){
-            KMessageBox::error(0, error_message);
+            KMessageBox::error(0, err_msg);
             return false;
         }
         else
             return true;
     }
-    else if( fs == "xfs" ){
-        if( mp.isEmpty() ){
-            if( do_temp_mount(path, fs) ){
+    else if(fs == "xfs"){
 
-                arguments << "xfs_growfs" 
-                          << "/tmp/kvpm_tmp_mount"; 
-            
-                ProcessProgress fs_grow(arguments);
+        if(isMounted){
 
-                do_temp_unmount();
-            
-                if ( fs_grow.exitCode() ){
-                    KMessageBox::error(0, error_message);
-                    return false;
-                }
-                else
-                    return true;
-            }
-            do_temp_unmount();
-            KMessageBox::error(0, error_message);
-            return false;
-        }
-        else{
-
-            arguments << "xfs_growfs" 
-                      << mp; 
-            
-            ProcessProgress fs_grow(arguments);
+            args << "xfs_growfs" << mp; 
+            ProcessProgress fs_grow(args);
             
             if ( fs_grow.exitCode() ){
-                KMessageBox::error(0, error_message);
+                KMessageBox::error(0, err_msg);
                 return false;
             }
             else
                 return true;
         }
+        else{
+
+            KTempDir temp_mp;
+
+            if( do_temp_mount(dev, fs, temp_mp.name()) ){
+
+                args << "xfs_growfs" << temp_mp.name();
+                ProcessProgress fs_grow(args);
+                do_temp_unmount( temp_mp.name() );
+            
+                if ( fs_grow.exitCode() ){
+                    KMessageBox::error(0, err_msg);
+                    return false;
+                }
+                else
+                    return true;
+            }
+            else{
+                KMessageBox::error(0, err_msg);
+                return false;
+            }
+        }
     }
-    else if( fs == "jfs" ){
+    else if(fs == "jfs"){
 
         options = MS_REMOUNT;
 
-        if( ! isMounted ){
-            if( do_temp_mount(path, fs) ){
-                if( ! mount( path_array.data(), "/tmp/kvpm_tmp_mount", NULL, options, "resize" )){
-                    do_temp_unmount();
-                    return true;
-                }
-                else{
-                    KMessageBox::error(0, i18n("Error number: %1 %2", errno, strerror(errno)));
-                    do_temp_unmount();                
-                }                
-            }
-            return false;
-        }
-        else{
-            if(mount( path_array.data(), mp_array.data(), NULL, options, "resize" )){
+        if(isMounted){
+
+            if(mount( dev_qba.data(), mp_qba.data(), NULL, options, "resize" )){
                 KMessageBox::error(0, i18n("Error number: %1 %2", errno, strerror(errno)));
                 return false;
             }
             else
                 return true;
         }
-    }
-    else if( fs == "reiserfs" ){
+        else{
 
-        arguments << "resize_reiserfs" 
-                  << "-fq"
-                  << path; 
-        
-        ProcessProgress fs_grow(arguments);
-        output = fs_grow.programOutput();
+            KTempDir temp_mp;
+            const QByteArray temp_mp_qba = temp_mp.name().toLocal8Bit();
+ 
+            if( do_temp_mount(dev, fs, temp_mp.name()) ){
+                if( ! mount( dev_qba.data(), temp_mp_qba.data(), NULL, options, "resize" ) ){
+                    do_temp_unmount( temp_mp.name() );
+                    return true;
+                }
+                else{
+                    KMessageBox::error(0, i18n("Error number: %1 %2", errno, strerror(errno)));
+                    do_temp_unmount( temp_mp.name() );                
+                }                
+            }
+            return false;
+        }
+    }
+    else if(fs == "reiserfs"){
+
+        args << "resize_reiserfs" << "-fq" << dev; 
+        ProcessProgress fs_grow(args);
         
         if ( fs_grow.exitCode() ){
-            KMessageBox::error(0, error_message);
+            KMessageBox::error(0, err_msg);
             return false;
         }
         else
             return true;
     }
-    else if( fs == "ntfs" ){
+    else if(fs == "ntfs"){
 
-        arguments << "ntfsresize" 
-                  << "--no-progress-bar"
-                  << "--force"
-                  << path; 
+        args << "ntfsresize" 
+             << "--no-progress-bar"
+             << "--force"
+             << dev; 
 
-        ProcessProgress fs_grow(arguments);
-        output = fs_grow.programOutput();
+        ProcessProgress fs_grow(args);
         
         if ( fs_grow.exitCode() ){
-            KMessageBox::error(0, error_message);
+            KMessageBox::error(0, err_msg);
             return false;
         }
         else
@@ -210,19 +208,14 @@ bool fs_extend(QString path, QString fs, bool isLV){
     return false;
 }
 
-bool do_temp_mount(QString path, QString fs){
+bool do_temp_mount(const QString dev, const QString fs, const QString mp)
+{
+    const unsigned long options = 0;
+    const QByteArray dev_qba = dev.toLocal8Bit();
+    const QByteArray fs_qba  = fs.toLocal8Bit();
+    const QByteArray mp_qba  = mp.toLocal8Bit();
 
-    QDir temp_dir( "/tmp/kvpm_tmp_mount" );
-    unsigned long options = 0;
-    const QByteArray path_array = path.toLocal8Bit();
-    const QByteArray fs_array = fs.toLocal8Bit();
-
-    if( ! temp_dir.exists() ){
-        temp_dir.cdUp();
-        temp_dir.mkdir("kvpm_tmp_mount");
-    }
-
-    int error = mount( path_array.data(), "/tmp/kvpm_tmp_mount", fs_array.data(), options, NULL );
+    const int error = mount( dev_qba.data(), mp_qba.data(), fs_qba.data(), options, NULL );
 
     if( error ){
         KMessageBox::error(0, QString("Error number: %1 %2").arg(errno).arg(strerror(errno)));
@@ -232,12 +225,9 @@ bool do_temp_mount(QString path, QString fs){
     return true;
 }
 
-void do_temp_unmount(){
-
-    umount2("/tmp/kvpm_tmp_mount", 0);
-
-    QDir temp_dir( "/tmp" );
-
-    temp_dir.rmdir("kvpm_tmp_mount");
-
+void do_temp_unmount(const QString mp)
+{
+    const QByteArray mp_qba = mp.toLocal8Bit();
+    umount2(mp_qba, 0);
 }
+
