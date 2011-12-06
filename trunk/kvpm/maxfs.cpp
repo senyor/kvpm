@@ -44,7 +44,7 @@ bool max_fs(LogVol *logicalVolume)
     }
 
     if(KMessageBox::warningYesNo(0, message) == 3){  // 3 = yes button
-        return fs_extend(path, fs, true); 
+        return fs_extend(path, fs, logicalVolume->getMountPoints(), true); 
     }
     else
         return false;
@@ -75,7 +75,7 @@ bool max_fs(StoragePartition *partition)
         if( partition->isPhysicalVolume() )
             return pv_extend(path); 
         else
-            return fs_extend(path, fs, true); 
+            return fs_extend(path, fs, partition->getMountPoints(), false); 
     }
 
     return false;

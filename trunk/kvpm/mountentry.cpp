@@ -28,10 +28,10 @@
 
 MountEntry::MountEntry(mntent *const entry, QObject *parent) : QObject(parent)
 {
-    m_device_name     = QString( entry->mnt_fsname );
-    m_mount_point     = QString( entry->mnt_dir );
-    m_filesystem_type = QString( entry->mnt_type );
-    m_mount_options   = QString( entry->mnt_opts );
+    m_device_name     = QString( entry->mnt_fsname ).trimmed();
+    m_mount_point     = QString( entry->mnt_dir ).trimmed();
+    m_filesystem_type = QString( entry->mnt_type ).trimmed();
+    m_mount_options   = QString( entry->mnt_opts ).trimmed();
 
     m_dump_frequency = entry->mnt_freq;
     m_dump_passno    = entry->mnt_passno;
@@ -42,10 +42,10 @@ MountEntry::MountEntry(mntent *const entry, const QList<mntent *> table, QObject
 {
     QStringList mounted_devices;
 
-    m_device_name     = QString( entry->mnt_fsname );
-    m_mount_point     = QString( entry->mnt_dir );
-    m_filesystem_type = QString( entry->mnt_type );
-    m_mount_options   = QString( entry->mnt_opts );
+    m_device_name     = QString( entry->mnt_fsname ).trimmed();
+    m_mount_point     = QString( entry->mnt_dir ).trimmed();
+    m_filesystem_type = QString( entry->mnt_type ).trimmed();
+    m_mount_options   = QString( entry->mnt_opts ).trimmed();
 
     m_dump_frequency = entry->mnt_freq;
     m_dump_passno    = entry->mnt_passno;
