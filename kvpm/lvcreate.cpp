@@ -885,13 +885,15 @@ void LVCreateDialog::commitChanges()
             }
 
             if(m_fs_can_extend)
-                fs_extend( m_lv->getMapperPath(), fs, true );		    
+                fs_extend( m_lv->getMapperPath(), fs, m_lv->getMountPoints(), true );
+
             return;
         }
         else{
             ProcessProgress extend_lv( argumentsLV() );
             if( !extend_lv.exitCode() && !m_lv->isSnap() && m_fs_can_extend )
-                fs_extend( mapper_path, fs, true );		    
+                fs_extend( mapper_path, fs, m_lv->getMountPoints(), true );		   
+
             return;
         }
     }

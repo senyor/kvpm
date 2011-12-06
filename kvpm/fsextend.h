@@ -18,7 +18,7 @@
 #include <QString>
 
 
-bool fs_extend(const QString dev, const QString fs, const bool isLV = false);
+bool fs_extend(const QString dev, const QString fs, const QStringList mps, const bool isLV = false);
 bool fs_can_extend(const QString fs);
 
 

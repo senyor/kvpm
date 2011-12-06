@@ -89,7 +89,7 @@ void MountTables::loadData()
 QList<MountEntry *> MountTables::getMtabEntries(const QString deviceName)
 {
     QList<MountEntry *> device_mounts;
-    
+
     for(int x = m_list.size() - 1; x >= 0; x--){
 	if( deviceName == m_list[x]->getDeviceName() )
 	    device_mounts.append( m_list.takeAt(x) );

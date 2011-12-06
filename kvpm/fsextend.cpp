@@ -64,18 +64,16 @@ bool fs_can_extend(const QString fs)
         return false;
 }
 
-// dev is the full dev to the device or volume
-bool fs_extend(const QString dev, const QString fs, const bool isLV)
+// dev is the full path to the device or volume, fs == filesystem, mps == mountpoints
+bool fs_extend(const QString dev, const QString fs, const QStringList mps, const bool isLV)
 {
-    MountTables mount_info_list;
-    QList<MountEntry *> mounts = mount_info_list.getMtabEntries(dev);
-    QString mp;               // mount point
-    bool isMounted = false;
+    bool isMounted = true;
+    QString mp;
 
-    if( mounts.size() ){
-        mp = mounts[0]->getMountPoint();
-        isMounted = true;
-    }
+    if( mps.isEmpty() )
+        isMounted = false;
+    else
+        mp = mps[0];
 
     const QByteArray dev_qba = dev.toLocal8Bit();
     const QByteArray  fs_qba = fs.toLocal8Bit();

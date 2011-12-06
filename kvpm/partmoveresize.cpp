@@ -576,7 +576,7 @@ bool PartitionMoveResizeDialog::growPartition()
                 return false;
         }
         else{
-            if( fs_extend( ped_partition_get_path(m_existing_part), fs ) )
+            if( fs_extend( ped_partition_get_path(m_existing_part), fs, m_old_storage_part->getMountPoints() ) )
                 return true;
             else
                 return false;
