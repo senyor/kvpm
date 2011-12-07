@@ -25,12 +25,12 @@ class LVProperties : public QWidget
     LogVol *m_lv;
     QFrame *mountPointsFrame();
     QFrame *uuidFrame();
-    QFrame *fsFrame();
+    QFrame *fsFrame(const bool showFsUuid, const bool showFsLabel);
     QFrame *generalFrame(int segment);
     QFrame *physicalVolumesFrame(int segment);
 
  public:
-    LVProperties(LogVol *logicalVolume, int segment, QWidget *parent = 0);
+    LVProperties(LogVol *const logicalVolume, const int segment, QWidget *parent = 0);
 
 };
 

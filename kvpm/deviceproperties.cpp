@@ -15,10 +15,13 @@
 
 #include "deviceproperties.h"
 
-#include <QtGui>
+
+#include <KConfigSkeleton>
 #include <KGlobal>
 #include <KLocale>
 #include <KSeparator>
+
+#include <QtGui>
 
 #include "misc.h"
 #include "physvol.h"
@@ -28,7 +31,6 @@
 
 DeviceProperties::DeviceProperties( StorageDevice *device, QWidget *parent) : QWidget(parent) 
 {
-
     QStringList mount_points;
     QList<int>  mount_position;
     QStringList uuid;
@@ -174,6 +176,17 @@ DeviceProperties::DeviceProperties( StoragePartition *partition, QWidget *parent
 
 	layout->addWidget(flag_info_frame);
     }
+
+    KConfigSkeleton skeleton;
+
+    bool show_mount, 
+         show_fsuuid, 
+         show_fslabel;
+
+    skeleton.setCurrentGroup("DeviceProperties");
+    skeleton.addItemBool("mount",   show_mount,   true);
+    skeleton.addItemBool("fsuuid",  show_fsuuid,  false);
+    skeleton.addItemBool("fslabel", show_fslabel, false);
     
     if( !partition->isPhysicalVolume() && ( partition->getType() != "extended" ) && !partition->getType().contains("freespace") ){
         QFrame *mount_info_frame = new QFrame;
@@ -205,7 +218,8 @@ DeviceProperties::DeviceProperties( StoragePartition *partition, QWidget *parent
 	    mount_info_layout->addWidget( new QLabel( i18n("Not mounted") ) );
 	}
 
-        layout->addWidget(mount_info_frame);
+        if(show_mount)
+            layout->addWidget(mount_info_frame);
 
         QFrame *label_frame = new QFrame;
         QVBoxLayout *label_layout = new QVBoxLayout();
@@ -213,22 +227,27 @@ DeviceProperties::DeviceProperties( StoragePartition *partition, QWidget *parent
         label_frame->setFrameStyle( QFrame::Sunken | QFrame::StyledPanel );
         label_frame->setLineWidth(2);   
 
-        temp_label = new QLabel( i18n("<b>Filesystem LABEL</b>") );
-        temp_label->setAlignment( Qt::AlignCenter );
-        label_layout->addWidget(temp_label);
-        
-        temp_label = new QLabel( partition->getFilesystemLabel() );
-        label_layout->addWidget(temp_label);
+        if(show_fslabel){
+            temp_label = new QLabel( i18n("<b>Filesystem LABEL</b>") );
+            temp_label->setAlignment( Qt::AlignCenter );
+            label_layout->addWidget(temp_label);
+            
+            temp_label = new QLabel( partition->getFilesystemLabel() );
+            label_layout->addWidget(temp_label);
+        }
 
-        temp_label = new QLabel( i18n("<b>Filesystem UUID</b>") );
-        temp_label->setAlignment( Qt::AlignCenter );
-        label_layout->addWidget(temp_label);
-        
-	uuid = splitUuid( partition->getFilesystemUuid() );
-	label_layout->addWidget( new QLabel(uuid[0]) );
-	label_layout->addWidget( new QLabel(uuid[1]) );
+        if(show_fsuuid){
+            temp_label = new QLabel( i18n("<b>Filesystem UUID</b>") );
+            temp_label->setAlignment( Qt::AlignCenter );
+            label_layout->addWidget(temp_label);
+            
+            uuid = splitUuid( partition->getFilesystemUuid() );
+            label_layout->addWidget( new QLabel(uuid[0]) );
+            label_layout->addWidget( new QLabel(uuid[1]) );
+        }
 
-        layout->addWidget(label_frame);
+        if(show_fsuuid || show_fslabel)
+            layout->addWidget(label_frame);
     }
     else if( partition->isPhysicalVolume() ){
         pv = partition->getPhysicalVolume();
