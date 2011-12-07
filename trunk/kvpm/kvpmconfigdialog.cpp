@@ -60,8 +60,8 @@ QWidget *KvpmConfigDialog::generalPage()
 {
     KTabWidget *const general = new KTabWidget;
 
-    general->insertTab(1 ,treesTab(), "Tree Views");
-    general->insertTab(1 ,propertiesTab(), "Property Panels");
+    general->insertTab(1 ,treesTab(), i18n("Tree Views") );
+    general->insertTab(1 ,propertiesTab(), i18n("Property Panels") );
 
     return general;
 }
@@ -319,6 +319,15 @@ void KvpmConfigDialog::updateSettings()
     m_pvtags_column     = m_pvtags_check->isChecked();
     m_pvlvnames_column  = m_pvlvnames_check->isChecked();
 
+    m_lvprop_mp      = m_lvprop_mp_check->isChecked();
+    m_lvprop_fsuuid  = m_lvprop_fsuuid_check->isChecked();
+    m_lvprop_fslabel = m_lvprop_fslabel_check->isChecked();
+    m_lvprop_lvuuid  = m_lvprop_lvuuid_check->isChecked();
+
+    m_devprop_mp      = m_devprop_mp_check->isChecked();
+    m_devprop_fsuuid  = m_devprop_fsuuid_check->isChecked();
+    m_devprop_fslabel = m_devprop_fslabel_check->isChecked();
+
     if( m_percent_radio->isChecked() ){
         m_show_percent = true;
         m_show_total   = false;
@@ -339,6 +348,7 @@ void KvpmConfigDialog::updateSettings()
 
     m_executable_finder->reload();
     fillExecutablesTable();
+
 }
 
 void KvpmConfigDialog::updateWidgetsDefault()
@@ -406,6 +416,16 @@ void KvpmConfigDialog::updateWidgetsDefault()
     m_both_radio->setChecked(true);
     m_fs_warn_spin->setValue(10);
     m_pv_warn_spin->setValue(0);
+
+    // Property panels
+    m_lvprop_mp_check->setChecked(true);
+    m_lvprop_fsuuid_check->setChecked(false);
+    m_lvprop_fslabel_check->setChecked(false);
+    m_lvprop_lvuuid_check->setChecked(false);
+
+    m_devprop_mp_check->setChecked(true);
+    m_devprop_fsuuid_check->setChecked(false);
+    m_devprop_fslabel_check->setChecked(false);
 }
 
 void KvpmConfigDialog::fillExecutablesTable()
@@ -456,7 +476,7 @@ bool KvpmConfigDialog::hasChanged()
 
 QGroupBox *KvpmConfigDialog::deviceGroup()
 {
-    QGroupBox *const device_group = new QGroupBox( i18n("Device tree") );
+    QGroupBox *const device_group = new QGroupBox( i18n("Device Tree") );
     QVBoxLayout *const device_layout = new QVBoxLayout();
     device_group->setLayout(device_layout);
 
@@ -522,7 +542,7 @@ QGroupBox *KvpmConfigDialog::deviceGroup()
 
 QGroupBox *KvpmConfigDialog::physicalGroup()
 {
-    QGroupBox *const physical_group = new QGroupBox( i18n("Physical volume table") );
+    QGroupBox *const physical_group = new QGroupBox( i18n("Physical Volume Table") );
     QVBoxLayout *const physical_layout = new QVBoxLayout();
     physical_group->setLayout(physical_layout);
 
@@ -730,8 +750,27 @@ QGroupBox *KvpmConfigDialog::devicePropertiesGroup()
 {
     QGroupBox *const properties = new QGroupBox( i18n("Device Property Panel") );
     QVBoxLayout *const layout = new QVBoxLayout();
-    properties->setLayout(layout);
+
+    m_skeleton->setCurrentGroup("DeviceProperties");
+    m_skeleton->addItemBool("mount",   m_devprop_mp, true);
+    m_skeleton->addItemBool("fsuuid",  m_devprop_fsuuid,  false);
+    m_skeleton->addItemBool("fslabel", m_devprop_fslabel, false);
+
+    m_devprop_mp_check = new QCheckBox( i18n("Mount points") );
+    m_devprop_mp_check->setToolTip( i18n("Show the filesystem mount points for the device") );
+    m_devprop_mp_check->setChecked(m_devprop_mp);
+    m_devprop_fsuuid_check = new QCheckBox( i18n("Filesystem uuid") );
+    m_devprop_fsuuid_check->setToolTip( i18n("Show the filesytem UUID") );
+    m_devprop_fsuuid_check->setChecked(m_devprop_fsuuid);
+    m_devprop_fslabel_check = new QCheckBox( i18n("Filesystem label") );
+    m_devprop_fslabel_check->setToolTip( i18n("Show the filesystem label") );
+    m_devprop_fslabel_check->setChecked(m_devprop_fslabel);
+
+    layout->addWidget(m_devprop_mp_check);
+    layout->addWidget(m_devprop_fsuuid_check);
+    layout->addWidget(m_devprop_fslabel_check);
     layout->addStretch();
+    properties->setLayout(layout);
 
     return properties;
 }
@@ -746,11 +785,34 @@ QGroupBox *KvpmConfigDialog::pvPropertiesGroup()
     return properties;
 }
 
-
 QGroupBox *KvpmConfigDialog::lvPropertiesGroup()
 {
     QGroupBox *const properties = new QGroupBox( i18n("Logical Volume Property Panel") );
     QVBoxLayout *const layout = new QVBoxLayout();
+
+    m_skeleton->setCurrentGroup("LogicalVolumeProperties");
+    m_skeleton->addItemBool("mount",   m_lvprop_mp, true);
+    m_skeleton->addItemBool("fsuuid",  m_lvprop_fsuuid,  false);
+    m_skeleton->addItemBool("fslabel", m_lvprop_fslabel, false);
+    m_skeleton->addItemBool("uuid",  m_lvprop_lvuuid,  false);
+
+    m_lvprop_mp_check = new QCheckBox( i18n("Mount points") );
+    m_lvprop_mp_check->setToolTip( i18n("Show the filesystem mount points for the device") );
+    m_lvprop_mp_check->setChecked(m_lvprop_mp);
+    m_lvprop_fsuuid_check = new QCheckBox( i18n("Filesystem uuid") );
+    m_lvprop_fsuuid_check->setToolTip( i18n("Show the filesytem UUID") );
+    m_lvprop_fsuuid_check->setChecked(m_lvprop_fsuuid);
+    m_lvprop_fslabel_check = new QCheckBox( i18n("Filesystem label") );
+    m_lvprop_fslabel_check->setToolTip( i18n("Show the filesystem label") );
+    m_lvprop_fslabel_check->setChecked(m_lvprop_fslabel);
+    m_lvprop_lvuuid_check = new QCheckBox( i18n("Logical volume uuid") );
+    m_lvprop_lvuuid_check->setToolTip( i18n("Show the logical volume UUID") );
+    m_lvprop_lvuuid_check->setChecked(m_lvprop_lvuuid);
+
+    layout->addWidget(m_lvprop_mp_check);
+    layout->addWidget(m_lvprop_fsuuid_check);
+    layout->addWidget(m_lvprop_fslabel_check);
+    layout->addWidget(m_lvprop_lvuuid_check);
     properties->setLayout(layout);
     layout->addStretch();
 

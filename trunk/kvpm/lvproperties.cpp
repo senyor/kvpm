@@ -16,6 +16,8 @@
 #include "lvproperties.h"
 
 #include <KLocale>
+#include <KConfigSkeleton>
+
 #include <QtGui>
 
 #include "logvol.h"
@@ -27,7 +29,7 @@
    we are not focused on any one segment. Therefor stripes and
    stripe size have no meaning */
 
-LVProperties::LVProperties(LogVol *logicalVolume, int segment, QWidget *parent):
+LVProperties::LVProperties(LogVol *const logicalVolume, const int segment, QWidget *parent):
     QWidget(parent),
     m_lv(logicalVolume)
 {
@@ -35,20 +37,37 @@ LVProperties::LVProperties(LogVol *logicalVolume, int segment, QWidget *parent):
     layout->setSpacing(2);
     layout->setMargin(2);
 
+    KConfigSkeleton skeleton;
+
+    bool show_mount, 
+         show_fsuuid, 
+         show_fslabel, 
+         show_uuid;
+
+    skeleton.setCurrentGroup("LogicalVolumeProperties");
+    skeleton.addItemBool("mount",   show_mount,   true);
+    skeleton.addItemBool("fsuuid",  show_fsuuid,  false);
+    skeleton.addItemBool("fslabel", show_fslabel, false);
+    skeleton.addItemBool("uuid",    show_uuid,    false);
+
     layout->addWidget( generalFrame(segment) );
 
     if( !m_lv->isMirrorLeg() && !m_lv->isMirrorLog() &&
 	!m_lv->isPvmove()    && !m_lv->isVirtual() &&
         !m_lv->isSnapContainer() && ( (m_lv->getSegmentCount() == 1) || (segment == -1) ) ){
 
-        layout->addWidget( mountPointsFrame() );
+        if(show_mount)
+            layout->addWidget( mountPointsFrame() );
+
         layout->addWidget( physicalVolumesFrame(segment) );
-        layout->addWidget( fsFrame() );
+
+        if(show_fsuuid || show_fslabel)
+            layout->addWidget( fsFrame(show_fsuuid, show_fslabel) );
     }
     else
         layout->addWidget( physicalVolumesFrame(segment) );
 
-    if( !m_lv->isSnapContainer() && ( (m_lv->getSegmentCount() == 1) || (segment == -1) ) )
+    if( show_uuid && !m_lv->isSnapContainer() && ( (m_lv->getSegmentCount() == 1) || (segment == -1) ) )
         layout->addWidget( uuidFrame() );
 
     layout->addStretch();
@@ -127,7 +146,7 @@ QFrame *LVProperties::uuidFrame()
     return frame;
 }
 
-QFrame *LVProperties::fsFrame()
+QFrame *LVProperties::fsFrame(const bool showFsUuid, const bool showFsLabel)
 {
     QStringList uuid;
     QFrame *frame = new QFrame();
@@ -135,26 +154,31 @@ QFrame *LVProperties::fsFrame()
     frame->setLayout(layout);
     frame->setFrameStyle( QFrame::Sunken | QFrame::StyledPanel );
     frame->setLineWidth(2);
+    QLabel *temp_label;
 
-    QLabel *temp_label = new QLabel( i18n("<b>Filesystem label</b>") );
-    temp_label->setAlignment(Qt::AlignCenter);
-    layout->addWidget( temp_label );
-    temp_label = new QLabel( m_lv->getFilesystemLabel() );
-    temp_label->setToolTip( m_lv->getFilesystemLabel() );
-    temp_label->setWordWrap(true);
-    layout->addWidget( temp_label );
+    if(showFsLabel){
+        temp_label = new QLabel( i18n("<b>Filesystem label</b>") );
+        temp_label->setAlignment(Qt::AlignCenter);
+        layout->addWidget( temp_label );
+        temp_label = new QLabel( m_lv->getFilesystemLabel() );
+        temp_label->setToolTip( m_lv->getFilesystemLabel() );
+        temp_label->setWordWrap(true);
+        layout->addWidget( temp_label );
+    }
 
-    temp_label = new QLabel( i18n("<b>Filesystem UUID</b>") );
-    temp_label->setAlignment(Qt::AlignCenter);
-    layout->addWidget( temp_label );
-
-    uuid = splitUuid( m_lv->getFilesystemUuid() );
-    temp_label = new QLabel( uuid[0] );
-    temp_label->setToolTip( m_lv->getFilesystemUuid() );
-    layout->addWidget( temp_label );
-    temp_label = new QLabel( uuid[1] );
-    temp_label->setToolTip( m_lv->getFilesystemUuid() );
-    layout->addWidget( temp_label );
+    if(showFsUuid){
+        temp_label = new QLabel( i18n("<b>Filesystem UUID</b>") );
+        temp_label->setAlignment(Qt::AlignCenter);
+        layout->addWidget( temp_label );
+        
+        uuid = splitUuid( m_lv->getFilesystemUuid() );
+        temp_label = new QLabel( uuid[0] );
+        temp_label->setToolTip( m_lv->getFilesystemUuid() );
+        layout->addWidget( temp_label );
+        temp_label = new QLabel( uuid[1] );
+        temp_label->setToolTip( m_lv->getFilesystemUuid() );
+        layout->addWidget( temp_label );
+    }
 
     return frame;
 }
