@@ -34,27 +34,28 @@ DeviceChartSeg::DeviceChartSeg(QTreeWidgetItem *storageItem, QWidget *parent) :
 
     KConfigSkeleton skeleton;
 
-    QColor  ext2_color,   ext3_color,    ext4_color,
-            reiser_color, reiser4_color, msdos_color,
-            jfs_color,    xfs_color,     none_color,
-            free_color,   swap_color,    hfs_color,
-            physical_color, ntfs_color;
+    QColor  ext2_color,     ext3_color,    ext4_color,
+            reiser_color,   reiser4_color, msdos_color,
+            jfs_color,      xfs_color,     none_color,
+            free_color,     swap_color,    hfs_color,
+            physical_color, ntfs_color ,   btrfs_color;
 
     skeleton.setCurrentGroup("FilesystemColors");
-    skeleton.addItemColor("ext2",    ext2_color);
-    skeleton.addItemColor("ext3",    ext3_color);
-    skeleton.addItemColor("ext4",    ext4_color);
-    skeleton.addItemColor("reiser",  reiser_color);
-    skeleton.addItemColor("reiser4", reiser4_color);
-    skeleton.addItemColor("msdos",   msdos_color);
-    skeleton.addItemColor("jfs",     jfs_color);
-    skeleton.addItemColor("xfs",     xfs_color);
-    skeleton.addItemColor("none",    none_color);
-    skeleton.addItemColor("free",    free_color);
-    skeleton.addItemColor("swap",    swap_color);
-    skeleton.addItemColor("hfs",     hfs_color);
-    skeleton.addItemColor("ntfs",    ntfs_color);
-    skeleton.addItemColor("physvol", physical_color);
+    skeleton.addItemColor("ext2",    ext2_color,  Qt::blue);
+    skeleton.addItemColor("ext3",    ext3_color,  Qt::darkBlue);
+    skeleton.addItemColor("ext4",    ext4_color,  Qt::cyan);
+    skeleton.addItemColor("btrfs",   btrfs_color,   Qt::yellow);
+    skeleton.addItemColor("reiser",  reiser_color,  Qt::red);
+    skeleton.addItemColor("reiser4", reiser4_color, Qt::darkRed);
+    skeleton.addItemColor("msdos",   msdos_color, Qt::darkYellow);
+    skeleton.addItemColor("jfs",     jfs_color,   Qt::magenta);
+    skeleton.addItemColor("xfs",     xfs_color,   Qt::darkCyan);
+    skeleton.addItemColor("hfs",     hfs_color,   Qt::darkMagenta);
+    skeleton.addItemColor("ntfs",    ntfs_color,  Qt::darkGray);
+    skeleton.addItemColor("none",    none_color,  Qt::black);
+    skeleton.addItemColor("free",    free_color,  Qt::green);
+    skeleton.addItemColor("swap",    swap_color,  Qt::lightGray);
+    skeleton.addItemColor("physvol",  physical_color, Qt::darkGreen);
 
     use = (m_item->data(4, Qt::DisplayRole)).toString();
 
@@ -97,6 +98,8 @@ DeviceChartSeg::DeviceChartSeg(QTreeWidgetItem *storageItem, QWidget *parent) :
                 colorset->setColor(QPalette::Window, jfs_color);
             else if(use == "xfs")
                 colorset->setColor(QPalette::Window, xfs_color);
+            else if(use == "btrfs")
+                colorset->setColor(QPalette::Window, btrfs_color);
             else if(use == "swap")
                 colorset->setColor(QPalette::Window, swap_color);
             else if(use == "freespace")
