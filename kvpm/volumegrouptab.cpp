@@ -127,8 +127,8 @@ void VolumeGroupTab::readConfig()
     bool show_vg_info, show_lv_bar;
 
     skeleton.setCurrentGroup("General");
-    skeleton.addItemBool( "show_vg_info", show_vg_info );
-    skeleton.addItemBool( "show_lv_bar",  show_lv_bar );
+    skeleton.addItemBool( "show_vg_info", show_vg_info, true );
+    skeleton.addItemBool( "show_lv_bar",  show_lv_bar,  true );
 
     if(show_vg_info)
         m_vg_info_labels->show();

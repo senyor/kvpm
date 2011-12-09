@@ -488,23 +488,23 @@ void VGTree::setViewConfig()
          mountpoints;
 
     skeleton.setCurrentGroup("AllTreeColumns");
-    skeleton.addItemBool( "percent", m_show_percent );
-    skeleton.addItemBool( "total",   m_show_total );
-    skeleton.addItemInt(  "fs_warn", m_fs_warn_percent );
+    skeleton.addItemBool( "percent", m_show_percent, true );
+    skeleton.addItemBool( "total",   m_show_total,   true );
+    skeleton.addItemInt(  "fs_warn", m_fs_warn_percent, 10 );
 
     skeleton.setCurrentGroup("VolumeTreeColumns");
-    skeleton.addItemBool( "volume",      volume );
-    skeleton.addItemBool( "size",        size );
-    skeleton.addItemBool( "remaining",   remaining );
-    skeleton.addItemBool( "filesystem",  filesystem );
-    skeleton.addItemBool( "type",        type );
-    skeleton.addItemBool( "stripes",     stripes );
-    skeleton.addItemBool( "stripesize",  stripesize );
-    skeleton.addItemBool( "snapmove",    snapmove );
-    skeleton.addItemBool( "state",       state );
-    skeleton.addItemBool( "access",      access );
-    skeleton.addItemBool( "tags",        tags );
-    skeleton.addItemBool( "mountpoints", mountpoints );
+    skeleton.addItemBool( "volume",      volume,      true );
+    skeleton.addItemBool( "size",        size,        true );
+    skeleton.addItemBool( "remaining",   remaining,   true );
+    skeleton.addItemBool( "filesystem",  filesystem,  true );
+    skeleton.addItemBool( "type",        type,        false );
+    skeleton.addItemBool( "stripes",     stripes,     false );
+    skeleton.addItemBool( "stripesize",  stripesize,  false );
+    skeleton.addItemBool( "snapmove",    snapmove,    true );
+    skeleton.addItemBool( "state",       state,       true );
+    skeleton.addItemBool( "access",      access,      false );
+    skeleton.addItemBool( "tags",        tags,        true );
+    skeleton.addItemBool( "mountpoints", mountpoints, false );
 
     if( !( !volume == isColumnHidden(0)     && !size == isColumnHidden(1) &&
            !remaining == isColumnHidden(2)  && !filesystem == isColumnHidden(3) &&

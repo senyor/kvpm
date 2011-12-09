@@ -108,21 +108,21 @@ QWidget *KvpmConfigDialog::propertiesTab()
 QWidget *KvpmConfigDialog::colorsPage()
 {
     m_skeleton->setCurrentGroup("FilesystemColors");
-    m_skeleton->addItemColor("ext2",   m_ext2_color);
-    m_skeleton->addItemColor("ext3",   m_ext3_color);
-    m_skeleton->addItemColor("ext4",   m_ext4_color);
-    m_skeleton->addItemColor("btrfs",   m_btrfs_color);
-    m_skeleton->addItemColor("reiser",  m_reiser_color);
-    m_skeleton->addItemColor("reiser4", m_reiser4_color);
-    m_skeleton->addItemColor("msdos", m_msdos_color);
-    m_skeleton->addItemColor("jfs",   m_jfs_color);
-    m_skeleton->addItemColor("xfs",   m_xfs_color);
-    m_skeleton->addItemColor("hfs",   m_hfs_color);
-    m_skeleton->addItemColor("ntfs",  m_ntfs_color);
-    m_skeleton->addItemColor("none",  m_none_color);
-    m_skeleton->addItemColor("free",  m_free_color);
-    m_skeleton->addItemColor("swap",  m_swap_color);
-    m_skeleton->addItemColor("physvol",  m_physical_color);
+    m_skeleton->addItemColor("ext2",    m_ext2_color,  Qt::blue);
+    m_skeleton->addItemColor("ext3",    m_ext3_color,  Qt::darkBlue);
+    m_skeleton->addItemColor("ext4",    m_ext4_color,  Qt::cyan);
+    m_skeleton->addItemColor("btrfs",   m_btrfs_color,   Qt::yellow);
+    m_skeleton->addItemColor("reiser",  m_reiser_color,  Qt::red);
+    m_skeleton->addItemColor("reiser4", m_reiser4_color, Qt::darkRed);
+    m_skeleton->addItemColor("msdos",   m_msdos_color, Qt::darkYellow);
+    m_skeleton->addItemColor("jfs",     m_jfs_color,   Qt::magenta);
+    m_skeleton->addItemColor("xfs",     m_xfs_color,   Qt::darkCyan);
+    m_skeleton->addItemColor("hfs",     m_hfs_color,   Qt::darkMagenta);
+    m_skeleton->addItemColor("ntfs",    m_ntfs_color,  Qt::darkGray);
+    m_skeleton->addItemColor("none",    m_none_color,  Qt::black);
+    m_skeleton->addItemColor("free",    m_free_color,  Qt::green);
+    m_skeleton->addItemColor("swap",    m_swap_color,  Qt::lightGray);
+    m_skeleton->addItemColor("physvol", m_physical_color, Qt::darkGreen);
 
     QWidget *const colors = new QWidget;
     QVBoxLayout *const colors_layout = new QVBoxLayout();
@@ -246,10 +246,22 @@ QWidget *KvpmConfigDialog::programsPage()
     programs1->setLayout(programs1_layout);
     programs2->setLayout(programs2_layout);
 
+    QStringList default_entries;
+
+    default_entries << "/sbin/" 
+                    << "/usr/sbin/" 
+                    << "/bin/" 
+                    << "/usr/bin/" 
+                    << "/usr/local/bin/"
+                    << "/usr/local/sbin/";
+
     m_skeleton->setCurrentGroup("SystemPaths");
-    m_skeleton->addItemStringList("SearchPath", m_search_entries, QStringList());
+    m_skeleton->addItemStringList("SearchPath", m_search_entries, default_entries);
 
     m_edit_list = new KEditListBox();
+    QLabel *search_label = new QLabel( i18n("<b>Set the search path for support programs</b>") );
+    search_label->setAlignment(Qt::AlignCenter);
+    programs1_layout->addWidget(search_label);
     programs1_layout->addWidget(m_edit_list);
 
     programs->insertTab( 1, programs1, "Search path");
@@ -481,15 +493,15 @@ QGroupBox *KvpmConfigDialog::deviceGroup()
     device_group->setLayout(device_layout);
 
     m_skeleton->setCurrentGroup("DeviceTreeColumns");
-    m_skeleton->addItemBool( "device",      m_device_column );
-    m_skeleton->addItemBool( "partition",   m_partition_column );
-    m_skeleton->addItemBool( "capacity",    m_capacity_column );
-    m_skeleton->addItemBool( "remaining",   m_devremaining_column );
-    m_skeleton->addItemBool( "usage",       m_usage_column );
-    m_skeleton->addItemBool( "group",       m_group_column );
-    m_skeleton->addItemBool( "flags",       m_flags_column );
-    m_skeleton->addItemBool( "mount",       m_mount_column );
-    m_skeleton->addItemBool( "expandparts", m_expand_parts );
+    m_skeleton->addItemBool( "device",      m_device_column,       true );
+    m_skeleton->addItemBool( "partition",   m_partition_column,    true );
+    m_skeleton->addItemBool( "capacity",    m_capacity_column,     true );
+    m_skeleton->addItemBool( "remaining",   m_devremaining_column, true );
+    m_skeleton->addItemBool( "usage",       m_usage_column, true );
+    m_skeleton->addItemBool( "group",       m_group_column, true );
+    m_skeleton->addItemBool( "flags",       m_flags_column, true );
+    m_skeleton->addItemBool( "mount",       m_mount_column, true );
+    m_skeleton->addItemBool( "expandparts", m_expand_parts, true );
 
     m_device_check      = new QCheckBox( i18n("Device name") );
     m_partition_check   = new QCheckBox( i18n("Partition type") );
@@ -548,14 +560,14 @@ QGroupBox *KvpmConfigDialog::physicalGroup()
 
     m_skeleton->setCurrentGroup("PhysicalTreeColumns");
 
-    m_skeleton->addItemBool( "pvname",      m_pvname_column );
-    m_skeleton->addItemBool( "pvsize",      m_pvsize_column );
-    m_skeleton->addItemBool( "pvremaining", m_pvremaining_column );
-    m_skeleton->addItemBool( "pvused",      m_pvused_column );
-    m_skeleton->addItemBool( "pvstate",     m_pvstate_column );
-    m_skeleton->addItemBool( "pvallocate",  m_pvallocate_column );
-    m_skeleton->addItemBool( "pvtags",      m_pvtags_column );
-    m_skeleton->addItemBool( "pvlvnames",   m_pvlvnames_column );
+    m_skeleton->addItemBool( "pvname",      m_pvname_column,      true );
+    m_skeleton->addItemBool( "pvsize",      m_pvsize_column,      true );
+    m_skeleton->addItemBool( "pvremaining", m_pvremaining_column, true );
+    m_skeleton->addItemBool( "pvused",      m_pvused_column,      false );
+    m_skeleton->addItemBool( "pvstate",     m_pvstate_column,     false );
+    m_skeleton->addItemBool( "pvallocate",  m_pvallocate_column,  true );
+    m_skeleton->addItemBool( "pvtags",      m_pvtags_column,      true );
+    m_skeleton->addItemBool( "pvlvnames",   m_pvlvnames_column,   true );
 
     m_pvname_check  = new QCheckBox( i18n("Volume name") );
     m_pvsize_check  = new QCheckBox( i18n("Size") );
@@ -604,18 +616,18 @@ QGroupBox *KvpmConfigDialog::logicalGroup()
     logical_group->setLayout(logical_layout);
 
     m_skeleton->setCurrentGroup("VolumeTreeColumns");
-    m_skeleton->addItemBool( "volume",      m_volume_column );
-    m_skeleton->addItemBool( "size",        m_size_column );
-    m_skeleton->addItemBool( "remaining",   m_remaining_column );
-    m_skeleton->addItemBool( "type",        m_type_column );
-    m_skeleton->addItemBool( "filesystem",  m_filesystem_column );
-    m_skeleton->addItemBool( "stripes",     m_stripes_column );
-    m_skeleton->addItemBool( "stripesize",  m_stripesize_column );
-    m_skeleton->addItemBool( "snapmove",    m_snapmove_column );
-    m_skeleton->addItemBool( "state",       m_state_column );
-    m_skeleton->addItemBool( "access",      m_access_column );
-    m_skeleton->addItemBool( "tags",        m_tags_column );
-    m_skeleton->addItemBool( "mountpoints", m_mountpoints_column );
+    m_skeleton->addItemBool( "volume",      m_volume_column,      true );
+    m_skeleton->addItemBool( "size",        m_size_column,        true );
+    m_skeleton->addItemBool( "remaining",   m_remaining_column,   true );
+    m_skeleton->addItemBool( "type",        m_type_column,        true );
+    m_skeleton->addItemBool( "filesystem",  m_filesystem_column,  false );
+    m_skeleton->addItemBool( "stripes",     m_stripes_column,     false );
+    m_skeleton->addItemBool( "stripesize",  m_stripesize_column,  false );
+    m_skeleton->addItemBool( "snapmove",    m_snapmove_column,    true );
+    m_skeleton->addItemBool( "state",       m_state_column,       true );
+    m_skeleton->addItemBool( "access",      m_access_column,      false );
+    m_skeleton->addItemBool( "tags",        m_tags_column,        true );
+    m_skeleton->addItemBool( "mountpoints", m_mountpoints_column, false );
 
     m_volume_check      = new QCheckBox( i18n("Volume name") );
     m_size_check        = new QCheckBox( i18n("Size") );
@@ -686,10 +698,10 @@ QGroupBox *KvpmConfigDialog::allGroup()
     percent_group->setLayout(percent_layout);
 
     m_skeleton->setCurrentGroup("AllTreeColumns");
-    m_skeleton->addItemBool("percent", m_show_percent);
-    m_skeleton->addItemBool("total",   m_show_total);
-    m_skeleton->addItemInt("fs_warn",  m_fs_warn_percent);
-    m_skeleton->addItemInt("pv_warn",  m_pv_warn_percent);
+    m_skeleton->addItemBool("percent", m_show_percent,  true);
+    m_skeleton->addItemBool("total",   m_show_total,    true);
+    m_skeleton->addItemInt("fs_warn",  m_fs_warn_percent, 10);
+    m_skeleton->addItemInt("pv_warn",  m_pv_warn_percent,  0);
 
     m_percent_radio = new QRadioButton( i18n("Show percentage") );
     m_total_radio   = new QRadioButton( i18n("Show total") );
@@ -791,10 +803,10 @@ QGroupBox *KvpmConfigDialog::lvPropertiesGroup()
     QVBoxLayout *const layout = new QVBoxLayout();
 
     m_skeleton->setCurrentGroup("LogicalVolumeProperties");
-    m_skeleton->addItemBool("mount",   m_lvprop_mp, true);
+    m_skeleton->addItemBool("mount",   m_lvprop_mp,      true);
     m_skeleton->addItemBool("fsuuid",  m_lvprop_fsuuid,  false);
     m_skeleton->addItemBool("fslabel", m_lvprop_fslabel, false);
-    m_skeleton->addItemBool("uuid",  m_lvprop_lvuuid,  false);
+    m_skeleton->addItemBool("uuid",  m_lvprop_lvuuid,    false);
 
     m_lvprop_mp_check = new QCheckBox( i18n("Mount points") );
     m_lvprop_mp_check->setToolTip( i18n("Show the filesystem mount points for the device") );

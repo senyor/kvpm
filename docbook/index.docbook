@@ -1,5 +1,6 @@
 <?xml version="1.0" ?>
 <!DOCTYPE book PUBLIC "-//KDE//DTD DocBook XML V4.2-Based Variant V1.1//EN" "dtd/kdex.dtd" [
+  <!ENTITY kappname "&kvpm;">
   <!ENTITY kvpm "<application>kvpm</application>">
   <!ENTITY Benjamin.Scott "<personname><firstname>Benjamin</firstname><surname>Scott</surname></personname>">
   <!ENTITY benscott.email "<email>benscott@nwlink.com</email>">
@@ -124,13 +125,35 @@ ext3 or vfat for instance, in use on the device.</para>
 	  </textobject>
 	</mediaobject>
 </screenshot>
-<para>Across the top is an information window about the volume group as a whole. It shows the size of the group and the amount of space used up and still left. There are also entries for the uuid, clustering status, default allocation policy, metadata areas, whether resizing is allowed and the extent size.</para> 
 
+<sect2 id="typical-volume-group-info">
+<title>Volume Group Information</title>
+<para>Across the top of the window is an information panel about the volume group as a whole. 
+It shows the size of the group, the amount of space used up and how much is still left. 
+There are also entries for the uuid, clustering status, default allocation policy, 
+metadata areas, whether resizing is allowed and the extent size.</para> 
+</sect2>
+
+<sect2 id="typical-volume-group-colors">
+<title>Colors</title>
 <para>Below that is a graphical representation of the group. There are four logical volumes in this group. Each volume is shown according to its relative size and has a color representing the filesystem, if it has one. The first two and last are light blue for ext4 and the third one is red for Reiserfs. The end of the bar is green and shows the free space remaining. Right clicking on the bar calls a <link linkend="logical-volume-menu">context menu</link> of actions that can be taken on logical volumes.</para>
+</sect2>
 
-<para>The large window at center left is a list of the logical volumes by name, along with some information about them. Selecting a name in the list window shows additional information about that volume in the window to its right. Here, the volume Vol03 is selected. Right clicking the name of a volume calls a <link linkend="logical-volume-menu">context menu</link> of actions that can be taken on logical volumes.</para>
+<sect2 id="typical-volume-group-vgtree">
+<title>Logical Volume Information</title>
+<para>The large tree list at center left show the logical volumes by name, 
+along with some information about them. Selecting a name in the list window shows 
+additional information about that volume in the pane to its right. Here, the
+ volume Vol03 is selected. Right clicking the name of a volume calls a 
+<link linkend="logical-volume-menu">context menu</link> of actions that can be taken on logical volumes.</para>
+</sect2>
 
-<para>The last two windows at the bottom deal with physical volumes. The left window lists them by name while the right window gives more detailed information. Right clicking the name list brings up a context menu of actions that can be taken on physical volumes.</para>
+<sect2 id="typical-volume-group-pvtree">
+<title>Physcial Volume Information</title>
+<para>The last two panels at the bottom deal with physical volumes. The left tree list 
+shows the physical volumes by name while the right window gives more detailed information. Right
+ clicking the name list brings up a context menu of actions that can be taken on physical volumes.</para>
+</sect2>
 </sect1>
 
 <sect1 id="menu-vgchange">
@@ -143,7 +166,7 @@ ext3 or vfat for instance, in use on the device.</para>
 <guimenu>Volume Groups</guimenu>
 <guimenuitem>Create volume group</guimenuitem>
 </menuchoice></term>
-<listitem><para>Create a new volume group with a dialog.</para></listitem>
+<listitem><para>Create a new volume group using a dialog.</para></listitem>
 </varlistentry>
 
 <varlistentry>
@@ -175,7 +198,7 @@ ext3 or vfat for instance, in use on the device.</para>
 <guimenu>Volume Groups</guimenu>
 <guimenuitem>Extend volume group</guimenuitem>
 </menuchoice></term>
-<listitem><para>Extend the volume group by adding new physical volumes with a dialog.</para></listitem>
+<listitem><para>Extend the volume group by adding new physical volumes using a dialog.</para></listitem>
 </varlistentry>
 
 <varlistentry>
@@ -183,7 +206,7 @@ ext3 or vfat for instance, in use on the device.</para>
 <guimenu>Volume Groups</guimenu>
 <guimenuitem>Reduce volume group</guimenuitem>
 </menuchoice></term>
-<listitem><para>Reduce the volume group by removing physical volumes with a dialog.</para></listitem>
+<listitem><para>Reduce the volume group by removing physical volumes using a dialog.</para></listitem>
 </varlistentry>
 
 <varlistentry>
@@ -191,7 +214,7 @@ ext3 or vfat for instance, in use on the device.</para>
 <guimenu>Volume Groups</guimenu>
 <guimenuitem>Split volume group</guimenuitem>
 </menuchoice></term>
-<listitem><para>Split the volume group into two groups with a dialog.</para></listitem>
+<listitem><para>Split the volume group into two groups using a dialog.</para></listitem>
 </varlistentry>
 
 <varlistentry>
@@ -199,7 +222,7 @@ ext3 or vfat for instance, in use on the device.</para>
 <guimenu>Volume Groups</guimenu>
 <guimenuitem>Merge volume group</guimenuitem>
 </menuchoice></term>
-<listitem><para>Merge the volume group and another with a dialog.</para></listitem>
+<listitem><para>Merge the volume group and another using a dialog.</para></listitem>
 </varlistentry>
 
 <varlistentry>
@@ -484,11 +507,114 @@ Here I have selected MyVolumeGroup/VolumeOne for a new ext4 filesystem.
 </sect2>
 
 <sect2 id="writing-a-filesystem-advanced">
-<title>Advanced options</title>
+<title>Advanced Options</title>
 <para>The <guibutton>Advanced</guibutton> tab has many options for the creation of ext2, ext3 and ext4 filesystems. Options for other filesystem types are not supported.</para>
 </sect2>
 </sect1>
 
+</chapter>
+
+<chapter id="config-options-kvpm">
+<title>Configuring Kvpm</title>
+<sect1>
+<title>The Configuration Dialog</title>
+<para>There are many aspects of kvpm that may be configured or customized. To access the configuration dialog select 
+
+<menuchoice><guimenu>Settings</guimenu><guimenuitem>Configure kvpm</guimenuitem></menuchoice></para>
+<para>The dialog has three pages:</para>
+
+
+<variablelist>  
+  <varlistentry>
+    <term><guimenu>General</guimenu></term>
+    <listitem><para>Configures the data to display or hide.</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><guimenu>Colors</guimenu></term>
+    <listitem><para>Configures the colors used to represent diffent types of filesystem</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term><guimenu>Programs</guimenu></term>
+    <listitem><para>Configures the places to look for support programs</para></listitem>
+  </varlistentry>
+</variablelist>
+</sect1>
+
+<sect1 id="general">
+<title>General</title>
+<para>The <guimenuitem>General</guimenuitem> page is the largest of the three pages and has 
+two tabs. The first tab <guimenuitem>Tree Views</guimenuitem> is for configuring the tree 
+and table views. The second tab <guimenuitem>Property Panels</guimenuitem> deals
+with the property panel that each tree or table has associated with it. See 
+<link linkend="typical-volume-group">here</link>
+ for more detail on the layout of the trees and panels. Any changes made to the configuration
+may be reverted to the default simply by pressing the <guimenuitem>Defaults</guimenuitem> 
+button at the bottom of the dialog.</para>
+
+<sect2 id="general-trees">
+<title>Tree Views</title>
+<para>The columns of each tree my be hidden or shown as desired by clicking on the appropriate
+ checkbox. For example, to hide the mount point column in the device tree, find the section
+titled <guimenuitem>Device Tree</guimenuitem> and uncheck the check box labed 
+<guimenuitem>Mount point</guimenuitem>. Some information, such as stripe size, is duplicated
+in the property panel and may be hidden by default in the tree view. The amount of space left
+on a device or volume may be set to show as a percentage of the the total space, in Mega/Giga/Tera
+bytes or both. There is also an option to enable a warning icon in the 
+<quote>remaining</quote> column when the amount of space left drops below a user set level. </para>
+</sect2>
+
+<sect2 id="general-panels">
+<title>Property Panels</title>
+<para>The panels are divided into sections which may be, optionally, shown or hidden. Checking
+a box enables showing the section while unchecking it will hide the section.</para>
+</sect2>
+
+</sect1>
+
+<sect1 id="colors">
+<title>Colors</title>
+<para>The <guimenuitem>Colors</guimenuitem> page is for customizing the colors used where 
+<link linkend="typical-volume-group-colors">filesystems are shown graphically</link>. 
+Each filesystem type is associated with a labeled color button. By pressing the button a 
+standard color picker dialog is called that allows the user to select any desired color 
+for that filesystem. Swap space, physical volumes and unused space also have colors
+associated with them that may be changed here.</para>
+</sect1>
+
+<sect1 id="programs">
+<title>Programs</title>
+
+<para>The <guimenuitem>Programs</guimenuitem> page has two tabs. The first tab sets the 
+search path for needed support programs. The second tab contains a list of the programs 
+that are needed and where, or if, they were found.</para>
+<sect2 id="programs-search">
+<title>Search Path</title>
+
+<para>Most of the functionality of kvpm comes from standard LVM and system programs such 
+as lvcreate and mkfs. The search path is a list of locations in the system where kvpm 
+should look to find the needed programs. The standard locations in the list are: </para>
+
+<simplelist>
+<member>/sbin</member>
+<member>/usr/sbin</member>
+<member>/bin</member>
+<member>/usr/bin</member>
+<member>/usr/local/sbin</member>
+<member>/usr/local/bin</member>
+</simplelist>
+
+<para>Using the provided list box it is possible to add new locations or to remove 
+unwanted ones. The search is done from top to bottom so moving items up or down in 
+the list will change their search order. The <guimenuitem>Defaults</guimenuitem> 
+button will restore the standard list.</para>
+</sect2>
+
+<sect2 id="programs-found">
+<title>Program List</title>
+<para>The second tab has a list of all the needed executables and the location where 
+they were found. If a program could not be found an error message will be displayed.</para>
+</sect2>
+</sect1>
 </chapter>
 
 <chapter id="credits">
@@ -523,4 +649,3 @@ sgml-indent-step:0
 sgml-indent-data:nil
 End:
 -->
-

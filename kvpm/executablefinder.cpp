@@ -14,9 +14,8 @@
 
 #include "executablefinder.h"
 
-#include <KSharedConfig>
 #include <kde_file.h>
-#include <KConfigGroup>
+#include <KConfigSkeleton>
 
 #include <QtGui>
 
@@ -90,18 +89,11 @@ void ExecutableFinder::reload()
     KDE_struct_stat buf;
     const int key_length = m_keys.size();
 
-    // Read the kvpmrc files and get the search paths or use the default
-    // if none are found, then write out the default. 
+    KConfigSkeleton skeleton;
+    QStringList search_paths;
 
-    KConfig kvpm_config( "kvpmrc", KConfig::SimpleConfig );
-    KConfigGroup system_paths_group( &kvpm_config, "SystemPaths" );
-
-    QStringList search_paths = system_paths_group.readEntry( "SearchPath", QStringList() );
-    if( search_paths.isEmpty() ){
-        search_paths = m_default_search_paths ;
-        system_paths_group.writeEntry( "SearchPath", search_paths );
-        system_paths_group.sync();
-    }
+    skeleton.setCurrentGroup("SystemPaths");
+    skeleton.addItemStringList("SearchPath", search_paths, m_default_search_paths);
 
     m_path_map.clear();
 

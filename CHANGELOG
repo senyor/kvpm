@@ -1,3 +1,7 @@
+version 0.8.4
+Added too and improved the configuration dialog. Property panels can now
+be configured.
+
 version 0.8.3
 Added new configuration options and made showing some panels optional.
 Improved the appearance of the properties panels and made them look
