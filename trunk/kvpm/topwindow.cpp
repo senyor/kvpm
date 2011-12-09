@@ -337,7 +337,7 @@ void TopWindow::showVolumeGroupInfo(bool show)
     bool show_vg_info;
 
     skeleton.setCurrentGroup("General");
-    skeleton.addItemBool( "show_vg_info", show_vg_info );
+    skeleton.addItemBool( "show_vg_info", show_vg_info, true );
     show_vg_info = show;
     skeleton.writeConfig();
     updateTabs();
@@ -349,7 +349,7 @@ void TopWindow::showVolumeGroupBar(bool show)
     bool show_lv_bar;
 
     skeleton.setCurrentGroup("General");
-    skeleton.addItemBool( "show_lv_bar", show_lv_bar );
+    skeleton.addItemBool( "show_lv_bar", show_lv_bar, true );
     show_lv_bar = show;
     skeleton.writeConfig();
     updateTabs();
@@ -370,8 +370,8 @@ KMenu *TopWindow::buildSettingsMenu()
     bool show_vg_info, show_lv_bar;
 
     skeleton.setCurrentGroup("General");
-    skeleton.addItemBool( "show_vg_info", show_vg_info );
-    skeleton.addItemBool( "show_lv_bar",  show_lv_bar );
+    skeleton.addItemBool( "show_vg_info", show_vg_info, true );
+    skeleton.addItemBool( "show_lv_bar",  show_lv_bar,  true );
 
     // This must be *before* the following connect() statements
     if(show_vg_info)
@@ -425,7 +425,7 @@ KMenu *TopWindow::buildHelpMenu()
     KAboutData *const about_data = new KAboutData( QByteArray("kvpm"),
                                                    QByteArray(""),
                                                    ki18n("kvpm"),
-                                                   QByteArray("0.8.3"),
+                                                   QByteArray("0.8.4"),
                                                    ki18n("Linux volume and partition manager for KDE.\n"
                                                          "This program is still under development,\n"
                                                          "bug reports and any comments are welcomed.\n \n"

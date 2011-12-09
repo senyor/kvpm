@@ -23,7 +23,6 @@
 #include <QtGui>
 
 #include "executablefinder.h"
-#include "kvpmsetup.h"
 #include "masterlist.h"
 #include "topwindow.h"
 
@@ -38,7 +37,7 @@ int main(int argc, char **argv)
 {
     
     KAboutData aboutData( "kvpm", 0,
-			  ki18n("kvpm"), "0.8.3",
+			  ki18n("kvpm"), "0.8.4",
 			  ki18n( "Linux volume and partition manager for KDE"),
 			  KAboutData::License_GPL_V3,
 			  ki18n("Copyright (c) 2008, 2009, 2010, 2011 Benjamin Scott") );
@@ -58,9 +57,6 @@ int main(int argc, char **argv)
     QPixmap splashImage(KGlobal::dirs()->findResource("data", "kvpm/images/splash.png"));
     KSplashScreen splash(splashImage);
     splash.show();
-
-    if( ! isconfigured_kvpm() )
-        setup_kvpm();
 
     ExecutableFinder *executable_finder = new ExecutableFinder();
     MasterList *master_list = new MasterList();

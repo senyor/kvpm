@@ -413,21 +413,21 @@ void DeviceTree::setViewConfig()
          mount;
 
     skeleton.setCurrentGroup("DeviceTreeColumns");
-    skeleton.addItemBool( "device",      device );
-    skeleton.addItemBool( "partition",   partition );
-    skeleton.addItemBool( "capacity",    capacity );
-    skeleton.addItemBool( "remaining",   remaining );
-    skeleton.addItemBool( "usage",       usage );
-    skeleton.addItemBool( "group",       group );
-    skeleton.addItemBool( "flags",       flags );
-    skeleton.addItemBool( "mount",       mount );
-    skeleton.addItemBool( "expandparts", m_expand_parts );
+    skeleton.addItemBool( "device",      device,    true );
+    skeleton.addItemBool( "partition",   partition, true );
+    skeleton.addItemBool( "capacity",    capacity,  true );
+    skeleton.addItemBool( "remaining",   remaining, true );
+    skeleton.addItemBool( "usage",       usage,     true );
+    skeleton.addItemBool( "group",       group,     true );
+    skeleton.addItemBool( "flags",       flags,     true );
+    skeleton.addItemBool( "mount",       mount,     true );
+    skeleton.addItemBool( "expandparts", m_expand_parts, true );
 
     skeleton.setCurrentGroup("AllTreeColumns");
-    skeleton.addItemBool( "total",   m_show_total );
-    skeleton.addItemBool( "percent", m_show_percent );
-    skeleton.addItemInt(  "fs_warn", m_fs_warn_percent );
-    skeleton.addItemInt(  "pv_warn", m_pv_warn_percent );
+    skeleton.addItemBool( "total",   m_show_total,     true );
+    skeleton.addItemBool( "percent", m_show_percent,   true );
+    skeleton.addItemInt(  "fs_warn", m_fs_warn_percent, 10 );
+    skeleton.addItemInt(  "pv_warn", m_pv_warn_percent,  0 );
 
     setColumnHidden( 0, !device );
     setColumnHidden( 1, !partition );

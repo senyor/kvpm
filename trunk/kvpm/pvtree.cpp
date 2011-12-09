@@ -315,14 +315,14 @@ void PVTree::setHiddenColumns()
          pvtags, pvlvnames;
 
     skeleton.setCurrentGroup("PhysicalTreeColumns");
-    skeleton.addItemBool( "pvname",     pvname );
-    skeleton.addItemBool( "pvsize",     pvsize );
-    skeleton.addItemBool( "pvremaining",     pvremaining );
-    skeleton.addItemBool( "pvused",     pvused );
-    skeleton.addItemBool( "pvstate",    pvstate );
-    skeleton.addItemBool( "pvallocate", pvallocate );
-    skeleton.addItemBool( "pvtags",     pvtags );
-    skeleton.addItemBool( "pvlvnames",  pvlvnames );
+    skeleton.addItemBool( "pvname",      pvname,      true );
+    skeleton.addItemBool( "pvsize",      pvsize,      true );
+    skeleton.addItemBool( "pvremaining", pvremaining, true );
+    skeleton.addItemBool( "pvused",      pvused,      false );
+    skeleton.addItemBool( "pvstate",     pvstate,     false );
+    skeleton.addItemBool( "pvallocate",  pvallocate,  true );
+    skeleton.addItemBool( "pvtags",      pvtags,      true );
+    skeleton.addItemBool( "pvlvnames",   pvlvnames,   true );
 
     if( !( !pvname == isColumnHidden(0)      && !pvsize == isColumnHidden(1) && 
            !pvremaining == isColumnHidden(2) && !pvused == isColumnHidden(3) &&

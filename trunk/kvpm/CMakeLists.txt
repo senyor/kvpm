@@ -1,11 +1,9 @@
  
 set(kvpm_SRCS changemirror.cpp kvpmconfigdialog.cpp deviceproperties.cpp 
               devicepropertiesstack.cpp devicesizechart.cpp devicesizechartseg.cpp 
-	      devicetree.cpp
-	      devicetab.cpp executablefinder.cpp deviceactionsmenu.cpp fsck.cpp
+	      devicetree.cpp devicetab.cpp executablefinder.cpp deviceactionsmenu.cpp fsck.cpp
 	      fsblocksize.cpp fsdata.cpp fsextend.cpp dualselectorbox.cpp
-	      fsprobe.cpp fsreduce.cpp  kvpmsetup.cpp
-	      logvol.cpp lvactionsmenu.cpp lvchange.cpp lvrename.cpp
+	      fsprobe.cpp fsreduce.cpp logvol.cpp lvactionsmenu.cpp lvchange.cpp lvrename.cpp
 	      lvcreate.cpp lvproperties.cpp lvpropertiesstack.cpp lvreduce.cpp 
 	      lvremove.cpp lvsizechart.cpp main.cpp maxfs.cpp mkfs.cpp masterlist.cpp  mount.cpp 
 	      lvsizechartseg.cpp mountentry.cpp mounttables.cpp maintabwidget.cpp 
