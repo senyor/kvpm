@@ -16,18 +16,24 @@
 #ifndef DEVICEPROPERTIES_H
 #define DEVICEPROPERTIES_H
 
-#include <QWidget>
+#include <QFrame>
 
 class StorageDevice;
 class StoragePartition;
-
+class PhysVol;
 
 class DeviceProperties : public QWidget
 {
+    QFrame *hardwareFrame(StorageDevice *const device);
+    QFrame *pvFrame(PhysVol *const pv);
+    QFrame *mpFrame(StoragePartition *const partition);
+    QFrame *fsFrame(StoragePartition *const partition, const bool showFsUuid, const bool showFsLabel);
+    QFrame *generalFrame(StorageDevice *const device);
+    QFrame *generalFrame(StoragePartition *const partition);
 
  public:
-     explicit DeviceProperties(StorageDevice *device, QWidget *parent = 0);
-     explicit DeviceProperties(StoragePartition *partition, QWidget *parent = 0);
+     explicit DeviceProperties(StorageDevice *const device, QWidget *parent = 0);
+     explicit DeviceProperties(StoragePartition *const partition, QWidget *parent = 0);
 };
 
 #endif
