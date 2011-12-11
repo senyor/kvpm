@@ -97,10 +97,10 @@ will look something like this:</para>
 	</mediaobject>
 </screenshot>
 
-<para>The devices found are listed in the large table. Most kvpm
-functions can be accessed by simply right-clicking on the line
+<para>The devices found are listed in the large tree list to the left. Most kvpm
+functions can be accessed by right-clicking on the line
 representing the device you wish to change. Left-clicking to select a
-device brings up additional information on the pane to the right and
+device brings up additional information on the properties pane to the right and
 the colored bar across the top of the tab gives a visual of the
 partitoning of the device. The color indicates the filesystem type,
 ext3 or vfat for instance, in use on the device.</para>
@@ -136,7 +136,13 @@ metadata areas, whether resizing is allowed and the extent size.</para>
 
 <sect2 id="typical-volume-group-colors">
 <title>Colors</title>
-<para>Below that is a graphical representation of the group. There are four logical volumes in this group. Each volume is shown according to its relative size and has a color representing the filesystem, if it has one. The first two and last are light blue for ext4 and the third one is red for Reiserfs. The end of the bar is green and shows the free space remaining. Right clicking on the bar calls a <link linkend="logical-volume-menu">context menu</link> of actions that can be taken on logical volumes.</para>
+<para>Below that is a graphical representation of the group. There are four logical volumes 
+in this group. Each volume is shown according to its relative size and has a color 
+representing the filesystem, if it has one. The first two and last are light blue for 
+ext4 and the third one is red for Reiserfs. The end of the bar is green and shows the 
+free space remaining. Right clicking on the bar calls a 
+<link linkend="logical-volume-menu">context menu</link> 
+of actions that can be taken on logical volumes.</para>
 </sect2>
 
 <sect2 id="typical-volume-group-vgtree">
@@ -151,8 +157,9 @@ additional information about that volume in the pane to its right. Here, the
 <sect2 id="typical-volume-group-pvtree">
 <title>Physcial Volume Information</title>
 <para>The last two panels at the bottom deal with physical volumes. The left tree list 
-shows the physical volumes by name while the right window gives more detailed information. Right
- clicking the name list brings up a context menu of actions that can be taken on physical volumes.</para>
+shows the physical volumes by name with basic information, while the right panel gives 
+more detailed information. Right clicking the name list brings up a context menu of 
+actions that can be taken on physical volumes.</para>
 </sect2>
 </sect1>
 
@@ -254,13 +261,13 @@ shows the physical volumes by name while the right window gives more detailed in
 <sect1 id="creating-group">
 <title>Creating a Volume Group</title>
 
-<para>To create a new volume group select <guibutton>Volume
-Groups</guibutton> and then <guilabel>Create Volume
-Group</guilabel>. A dialog box will ask which devices to use, its name
+<para>To create a new volume group select <menuchoice><guimenu>Volume
+Groups</guimenu><guimenuitem>Create Volume
+Group</guimenuitem></menuchoice>. A dialog box will ask which devices to use, its name
 and other pertinent questions about the new group. I have selected
 /dev/sdd as the device and the name MyVolumeGroup. After the
 dialog's <guibutton>OK</guibutton> button has been pressed notice the
-new tab titled MyVolumeGroup.</para>
+new tab titled MyVolumeGroup is now present on the main window.</para>
 
 <screenshot>
 <screeninfo>This is a screenshot of &kvpm; creating a new volume group.</screeninfo>
@@ -273,15 +280,21 @@ new tab titled MyVolumeGroup.</para>
 	  </textobject>
 	</mediaobject>
 </screenshot>
-<note><para>Because kvpm uses the lvm2app library to create volume groups, not all options of the command "lvcreate" are available here yet. Some, such a clustering, need to be selected from the <menuchoice><guimenu>Volume Groups</guimenu><guimenuitem>Change volume group attributes</guimenuitem></menuchoice> dialog discussed later.</para></note>
-
+<note><para>Because kvpm uses the lvm2app library to create volume groups, 
+not all options of the command "lvcreate" are available here yet. Some, 
+such a clustering, need to be selected from the 
+<menuchoice><guimenu>Volume Groups</guimenu><guimenuitem>Change volume group attributes</guimenuitem></menuchoice> 
+dialog discussed later.</para></note>
 </sect1>
 
 <sect1 id="volume-group-changes">
 <title>Changing a Volume Group</title>
-<para> By first selecting the tab called MyVolumeGroup and then <guibutton>Volume Groups</guibutton> a wide variety of changes can be made to the group. It is also possible, and sometimes more convenient, to create a new group from this menu</para>
+<para> By first selecting the tab called MyVolumeGroup and then <guibutton>Volume Groups</guibutton> 
+a wide variety of changes can be made to the group. It is also possible, and sometimes 
+more convenient, to create a new group from this menu</para>
 
-<para>Except for <guimenu>Create volume group</guimenu> all of the following menu choices act on the current volume group. The current group is the one inside the tab selected on the main window.</para>
+<para>Except for <guimenu>Create volume group</guimenu> all of the following menu choices act on 
+the current volume group. The current group is the one inside the tab selected on the main window.</para>
 
 <screenshot>
 <screeninfo>This is a screenshot of the volume group change dialog.</screeninfo>
@@ -294,18 +307,24 @@ new tab titled MyVolumeGroup.</para>
 	  </textobject>
 	</mediaobject>
 </screenshot>
-<note><para>Most Volume group attributes may be changed here with some restrictions. For example: changes in the extent size depend on the alignment of allocated extents, so some sizes my not be possible. A volume group can not be made unavailable if it contains mounted or otherwise busy volumes and the allocation policy is only a default and can be overridden by most commands. </para></note>
-
+<note><para>Most Volume group attributes may be changed here with some restrictions. 
+For example: changes in the extent size depend on the alignment of allocated extents, 
+so some sizes my not be possible. A volume group can not be made unavailable if it 
+contains mounted or otherwise busy volumes and the allocation policy is only a default 
+and can be overridden by most commands. </para></note>
 </sect1>
 </chapter>
 
 
 <chapter id="logical-volumes-kvpm">
 <title>Logical Volumes</title>
-
 <sect1 id="logical-volume-intro">
 <title>Working With Logical Volumes</title>
-<para>Nearly any action that can be taken on a logical volume is done from the logical volume context menu discussed next. It has menu entries for the creation, deletion, extention and reduction of logical volumes and a variety of other changes that can be made to a volume. There are also two sub menus, one for changes in mirroring and another for handling or writing filesystems on the volume. </para>
+<para>Nearly any action that can be taken on a logical volume is done from the 
+logical volume context menu discussed next. It has menu entries for the creation, 
+deletion, extention and reduction of logical volumes and a variety of other changes 
+that can be made to a volume. There are also two sub menus, one for changes 
+in mirroring and another for handling or writing filesystems on the volume. </para>
 </sect1>
 
 <sect1 id="logical-volume-menu">
