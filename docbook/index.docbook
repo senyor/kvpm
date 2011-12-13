@@ -27,8 +27,8 @@
 
 <legalnotice>&FDLNotice;</legalnotice>
 
-<date>2011-5-29</date>
-<releaseinfo>0.01.00</releaseinfo>
+<date>2011-12-13</date>
+<releaseinfo>0.02.00</releaseinfo>
 
 <abstract>
 <para>
@@ -49,20 +49,19 @@ created by lvm2.
 
 <chapter id="introduction">
 <title>Introduction</title>
-<para>The KDE Logical Volume and Partition Manager can manipulate
-logical volumes, physical volumes and volume groups as defined by the
-Linux Logical Volume Manager, LVM2. It can also write a partion table
-or modify an existing one to add, delete or resize partitions. This
-guide assumes a basic knowlege of LVM2 operation and disk
-partitioning. The following is a good starting point for learning the
-basics of
-LVM2: <ulink url="http://tldp.org/HOWTO/LVM-HOWTO">http://tldp.org/HOWTO/LVM-HOWTO/</ulink></para>
 
-<para>Currently most LVM functions are implemented by the standard lvm
-command line programs. KDE dialog boxes are used to determine the
-parameters to pass the program. If you are already using lvm on the
-command line the dialogs will probably seem familiar. For example this
-is the dialog to change a logical volume's attributes:
+<para>The KDE Logical Volume and Partition Manager can manipulate logical
+volumes, physical volumes and volume groups as defined by the Linux Logical
+Volume Manager, LVM2. It can also write a partion table or modify an existing
+one to add, delete or resize partitions. This guide assumes a basic knowlege of
+LVM2 operation and disk partitioning. The following is a good starting point for
+learning the basics of LVM2: <ulink url="http://tldp.org/HOWTO/LVM-HOWTO">http://tldp.org/HOWTO/LVM-HOWTO/</ulink></para>
+
+<para>Currently most LVM functions are implemented by the standard lvm command
+line programs. KDE dialog boxes are used to determine the parameters to pass the
+program. If you are already using lvm on the command line the dialogs will
+probably seem familiar. For example this is the dialog to change a logical
+volume's attributes:
 
 <screenshot>
 <screeninfo>Logical volume change attributes dialog</screeninfo>
@@ -82,6 +81,9 @@ is the dialog to change a logical volume's attributes:
 <chapter id="getting-started-kvpm">
 <title>Getting Started</title>
 
+<sect1 id="getting-started-kvpm-device">
+<title>The <guilabel>Storage Devices</guilabel> Tab</title>
+
 <para>When first started on a system with no volume groups the screen
 will look something like this:</para>
 
@@ -97,25 +99,24 @@ will look something like this:</para>
 	</mediaobject>
 </screenshot>
 
-<para>The devices found are listed in the large tree list to the left. 
-Left-clicking to select a device brings up additional information on 
-the properties pane to the right. The colored bar across the top of 
-the tab gives a visual of the partitoning of the device. The colors 
-indicate the filesystem type, ext4 or swap for instance, in use on 
-the partition. In the upper right corner is a progress bar.</para>
+<para>The devices found are listed in the large tree list to the left.
+Clicking the &LMB; to select a device brings up additional information on the
+properties pane to the right. The colored bar across the top of the tab gives a
+visual of the partitoning of the device. The colors indicate the filesystem
+type, ext4 or swap for instance, in use on the partition. In the upper right
+corner is a progress bar.</para>
 
-<para>Most kvpm device related functions can be accessed from a pop-up 
-context menu. Right-clicking on a device in the tree list of devices 
-will call up the context menu.</para>
+<para>Most &kvpm; device related functions can be accessed from a context
+menu. Right-clicking on a device in the tree list of devices will call up the
+context menu.</para>
+</sect1>
 
-</chapter>
+<sect1 id="getting-started-kvpm-group">
+<title>A Volume Group Tab</title>
 
-
-<chapter id="volume-group-kvpm">
-<title>Volume Groups</title>
-
-<sect1 id="typical-volume-group">
-<title>An Example Volume Group Tab</title>
+<para>Below in an example of a volume group called <quote>MyVolumeGroup.</quote>
+If more than one group exists additional tabs are used, one for each
+group, with the group name on the tab.</para>
 
 <screenshot>
 <screeninfo>This is a screenshot of a typical volume group.</screeninfo>
@@ -130,54 +131,69 @@ will call up the context menu.</para>
 </screenshot>
 
 <sect2 id="typical-volume-group-info">
-<title>Volume Group Information</title>
-<para>Across the top of the window is an information panel about the volume group as a whole. 
-It shows the size of the group, the amount of space used up and how much is still left. 
-There are also entries for the uuid, clustering status, default allocation policy, 
-metadata areas, whether resizing is allowed and the extent size.</para> 
+<title>Volume Group Information Panel</title>
+
+<para>Across the top of the window is an information panel about the volume
+group as a whole.  It shows the size of the group, the amount of space used up
+and how much is still left.  There are also entries for the uuid, clustering
+status, default allocation policy, metadata areas, whether resizing is allowed
+and the extent size.</para>
 </sect2>
 
 <sect2 id="typical-volume-group-colors">
-<title>Colors</title>
-<para>Below that is a graphical representation of the group. There are four logical volumes 
-in this group. Each volume is shown according to its relative size and has a color 
-representing the filesystem, if it has one. The end of the bar is green and shows the 
-free space remaining. Right clicking on the bar calls the 
-<link linkend="logical-volume-menu">context menu</link> 
-of actions that can be taken on logical volumes.</para>
+<title>The Logical Volume Bar</title>
+
+<para>Below the volume group information panel is a graphical representation of
+the group in the form of a bar divided into segments. There are four logical
+volumes in this group. Each volume is represented by a bar segment according to
+its relative size and has a color representing the filesystem, if it has
+one. The last segment of the bar is green and depicts the free space
+remaining. Clicking the &RMB; on a segment of the bar calls the <link
+linkend="logical-volume-menu">context menu</link> of actions that can be taken
+on the logical volume that was clicked. The menu also has an entry for creating
+new volumes.</para>
 </sect2>
 
 <sect2 id="typical-volume-group-vgtree">
-<title>Logical Volume Information</title>
-<para>The large tree list at center left show the logical volumes by name, 
-along with some information about them. Selecting a name in the list window shows 
-additional information about that volume in the pane to its right. Here, the
- volume Vol02 is selected. Right clicking the name of a volume calls the 
-<link linkend="logical-volume-menu">context menu</link> of actions that can 
-be taken on logical volumes.</para>
+<title>Logical Volume Tree</title>
 
-<para>Because volumes often have an underlying structure, such a segments or
-mirror legs, the logical volumes are listed in tree form. Clicking on an item in  
-the tree will expand or collapse the branch if the item has more items under it.</para>
+<para>The large tree list at center left show the logical volumes by name, along
+with some information about them. Selecting a name in the list window shows
+additional information about that volume in the pane to its right. Here, the
+volume Vol02 is selected. Clicking the &RMB; over the name of a volume calls the
+<link linkend="logical-volume-menu">context menu</link> of actions that can be
+taken on that logical volume. There is also an entry in the menu for creating
+new volumes.</para>
+
+<para>Because volumes often have an underlying structure, such as segments or
+mirror legs, the logical volumes are listed in tree form. Snapshots are also
+grouped under their origin volume. Clicking on an item in the tree will expand
+or collapse the branch if the item has more items under it.</para>
 </sect2>
 
 <sect2 id="typical-volume-group-pvtree">
-<title>Physcial Volume Information</title>
-<para>The last two panels at the bottom deal with physical volumes. The left tree list 
-shows the physical volumes by name with basic information, while the right panel gives 
-more detailed information. Right clicking the name list brings up a context menu of 
-actions that can be taken on physical volumes.</para>
+<title>Physcial Volume Information</title> <para>The last two panels at the
+bottom deal with physical volumes. The left tree list shows the physical volumes
+by name with basic information, while the right panel gives more detailed
+information. Clicking the &RMB; on the name list brings up a context menu of
+actions that can be taken on the physical volume.</para>
 </sect2>
 </sect1>
+
+</chapter>
+
+<chapter id="volume-group-kvpm">
+<title>Volume Groups</title>
 
 <sect1 id="menu-vgchange">
 <title>The <guimenu>Volume Groups</guimenu> Menu</title>
 
-<para>The <guimenu>Volume Groups</guimenu> Menu is located at the top of the main program window. 
-Except for <guimenu>Create volume group</guimenu> all of the following menu choices act on 
-the current volume group. The current group is the one inside the tab selected on the main window. 
-If the <quote>Storage devices</quote> tab is selected, only the <guimenu>Create volume group</guimenu> 
-choice will be availabe.</para>
+<para>The <guimenu>Volume Groups</guimenu> Menu is located at the top of the
+main program window.  Except for <guimenu>Create volume group</guimenu> all of
+the following menu choices act on the current volume group. The current group is
+the one inside the tab selected on the main window. If the <guilabel>Storage
+devices</guilabel> tab is selected, only the <guimenu>Create volume
+group</guimenu> choice will be availabe.</para>
 
 <variablelist>
 <varlistentry>
@@ -274,12 +290,12 @@ choice will be availabe.</para>
 <title>Creating a Volume Group</title>
 
 <para>To create a new volume group select <menuchoice><guimenu>Volume
-Groups</guimenu><guimenuitem>Create Volume
-Group</guimenuitem></menuchoice>. A dialog box will ask which devices to use, its name
-and other pertinent questions about the new group. I have checked several devices and 
-entered the name MyVolumeGroup. After the dialog's <guibutton>OK</guibutton> button has 
-been pressed notice the new tab titled <quote>MyVolumeGroup</quote> is now present on the 
-main window.</para>
+Groups</guimenu><guimenuitem>Create Volume Group</guimenuitem></menuchoice>. A
+dialog box will ask which devices to use, its name and other pertinent questions
+about the new group. I have checked several devices and entered the name
+MyVolumeGroup. After the dialog's <guibutton>OK</guibutton> button has been
+pressed notice the new tab titled <guilabel>MyVolumeGroup</guilabel> is now
+present on the main window.</para>
 
 <screenshot>
 <screeninfo>This is a screenshot of &kvpm; creating a new volume group.</screeninfo>
@@ -292,18 +308,19 @@ main window.</para>
 	  </textobject>
 	</mediaobject>
 </screenshot>
-<note><para>Because kvpm uses the lvm2app library to create volume groups, 
-not all options of the command "lvcreate" are available here yet. Some, 
-such a clustering, need to be selected from the 
-<menuchoice><guimenu>Volume Groups</guimenu><guimenuitem>Change volume group attributes</guimenuitem></menuchoice> 
-dialog discussed later.</para></note>
+
+<note><para>Because &kvpm; uses the lvm2app library to create volume groups, not
+all options of the command "lvcreate" are available here yet. Some, such a
+clustering, need to be selected from the <menuchoice><guimenu>Volume
+Groups</guimenu><guimenuitem>Change volume group
+attributes</guimenuitem></menuchoice> dialog discussed later.</para></note>
 </sect1>
 
 <sect1 id="volume-group-changes">
-<title>Changing a Volume Group</title>
-<para> By first selecting the tab called MyVolumeGroup and then <guibutton>Volume Groups</guibutton> 
-a wide variety of changes can be made to the group. It is also possible, and sometimes 
-more convenient, to create a new group from this menu</para>
+<title>Changing a Volume Group</title> <para> By first selecting the tab called
+MyVolumeGroup and then <guibutton>Volume Groups</guibutton> a wide variety of
+changes can be made to the group. It is also possible, and sometimes more
+convenient, to create a new group from this menu</para>
 
 <screenshot>
 <screeninfo>This is a screenshot of the volume group change dialog.</screeninfo>
@@ -316,30 +333,37 @@ more convenient, to create a new group from this menu</para>
 	  </textobject>
 	</mediaobject>
 </screenshot>
-<note><para>Most Volume group attributes may be changed here with some restrictions. 
-For example: changes in the extent size depend on the alignment of allocated extents, 
-so some sizes my not be possible. A volume group can not be made unavailable if it 
-contains mounted or otherwise busy volumes and the allocation policy is only a default 
-and can be overridden by most commands. </para></note>
+
+<note><para>Most Volume group attributes may be changed here with some
+restrictions. For example: changes in the extent size depend on the alignment
+of allocated extents, so some sizes my not be possible. A volume group can not
+be made unavailable if it contains mounted or otherwise busy volumes and the
+allocation policy is only a default and can be overridden by most
+commands. </para></note>
 </sect1>
 </chapter>
 
-
 <chapter id="logical-volumes-kvpm">
 <title>Logical Volumes</title>
+
 <sect1 id="logical-volume-intro">
 <title>Working With Logical Volumes</title>
-<para>Nearly any action that can be taken on a logical volume is done from the 
-logical volume context menu discussed next. It has menu entries for the creation, 
-deletion, extention and reduction of logical volumes and a variety of other changes 
-that can be made to a volume. There are also two sub menus, one for changes 
-in mirroring and another for handling or writing filesystems on the volume. </para>
+
+<para>Nearly any action that can be taken on a logical volume is done from the
+logical volume context menu discussed next. It has menu entries for the creation,
+deletion, extention and reduction of logical volumes and a variety of other
+changes that can be made to a volume. There are also two sub menus, one for
+changes in mirroring and another for handling or writing filesystems on the
+volume.</para>
 </sect1>
 
 <sect1 id="logical-volume-menu">
 <title>The Logical Volume Context Menu</title>
 
-<note><para>See <link linkend="typical-volume-group">An Example Volume Group Tab</link> for information on calling this context menu</para></note>
+<note><para>This is a popup menu activated with the &RMB;. See <link
+linkend="typical-volume-group-colors">The Logical Volume Bar</link> and <link
+linkend="typical-volume-group-vgtree">The Logical Volume Tree</link> for
+information on calling this context menu</para></note>
 
 <variablelist>
 <varlistentry>
@@ -409,8 +433,10 @@ in mirroring and another for handling or writing filesystems on the volume. </pa
 
 <sect2 id="logical-volume-mirror-menu">
 <title>Mirror Operations on Volumes</title>
-<para>The following three menu choices allow converting an existing volume into a mirror, 
-changing a mirror or converting a mirror back into a linear volume.</para>
+
+<para>The following three menu choices allow converting an existing volume into
+a mirror, changing a mirror or converting a mirror back into a linear
+volume.</para>
 
 <variablelist>
 <varlistentry>
@@ -503,7 +529,12 @@ for working with a filesystem.</para>
 <sect1 id="logical-volume-creation">
 <title>Creating a Logical Volume</title>
 
-<para>If a volume group exists and has free space, a logical volume can be created in it. Select the tab titled with the name of the volume group you wish to work with first. Then a dialog can be called up by right clicking on the long green bar or the (still empty) table below it. selecting <guibutton>Create logical lolume</guibutton>. I have called it VolumeOne and it will take %50 of the available space</para>
+<para>If a volume group exists and has free space, a logical volume can be
+created in it. Select the tab titled with the name of the volume group you wish
+to work with first. Then a dialog can be called up by right clicking on the long
+green bar or the (still empty) table below it. selecting <guibutton>Create
+logical lolume</guibutton>. I have called it VolumeOne and it will take %50 of
+the available space</para>
 
 <screenshot>
 <screeninfo>This is the volume group</screeninfo>
@@ -521,12 +552,22 @@ for working with a filesystem.</para>
 <sect1 id="mirrors">
 <title>Mirrors</title>
 
-<para>To create a mirror simply bring up the Logical Volume Context Menu on a linear volume and select 
-<menuchoice><guimenu>Mirror operations</guimenu><guimenuitem>Add leg or change mirror</guimenuitem></menuchoice>.
-Then select the physical volumes and other options from the dialog. A mirror may be created with multiple legs or as few as two and the legs can be striped. When the dialog is finished the data on the original linear volume will be copied to the new mirror leg or legs and synchronized. 
-</para>
-<note><para>Remember to account for the space the mirror log takes when selecting physical volumes.</para></note>
-<para>A mirror can be returned to a linear volume by removing all but one of its mirror legs. This can be a convenient way to move data on a mounted volume. Simply create a new mirror leg on the destination physical volume and wait for the mirror to sync. When finished, remove the source mirror leg and the remaining leg will have all the original data.</para>
+<para>To create a mirror simply bring up the Logical Volume Context Menu on a
+linear volume and select <menuchoice><guimenu>Mirror
+operations</guimenu><guimenuitem>Add leg or change
+mirror</guimenuitem></menuchoice>.  Then select the physical volumes and other
+options from the dialog. A mirror may be created with multiple legs or as few as
+two and the legs can be striped. When the dialog is finished the data on the
+original linear volume will be copied to the new mirror leg or legs and
+synchronized.</para>
+
+<note><para>Remember to account for the space the mirror log takes when
+selecting physical volumes.</para></note> <para>A mirror can be returned to a
+linear volume by removing all but one of its mirror legs. This can be a
+convenient way to move data on a mounted volume. Simply create a new mirror leg
+on the destination physical volume and wait for the mirror to sync. When
+finished, remove the source mirror leg and the remaining leg will have all the
+original data.</para>
 </sect1>
 
 </chapter>
@@ -536,9 +577,9 @@ Then select the physical volumes and other options from the dialog. A mirror may
 <sect1 id="filesystems-menu">
 <title>Filesystem Operations</title>
 
-<para>The Filesystem Operations menu is available under the 
-<link linkend="logical-volume-menu">Logical Volume</link> 
- context menu and the Device context menu.</para>
+<para>The Filesystem Operations menu is available under the <link
+linkend="logical-volume-menu">Logical Volume</link> context menu and the Device
+context menu.</para>
 
 <variablelist>
 <varlistentry>
@@ -597,13 +638,14 @@ Then select the physical volumes and other options from the dialog. A mirror may
 
 <sect2 id="filesystems-mount-type">
 <title>Filesystem Type</title>
+
 <para>The main tab of the filesystem mount dialog provives a list of the most
-common filesystem types that may be selected. The dialog attempts to identify 
-the type and check the correct radio button in advance. If needed the user may 
-select <guimenuitem>Specify other</guimenuitem> and write the correct type into the dialog. 
-There is also a place to enter the desired mount point and a 
-<guimenuitem>Browse</guimenuitem> button for convenience. It is possible to mount
-a filesystem at multiple locations.</para>
+common filesystem types that may be selected. The dialog attempts to identify
+the type and check the correct radio button in advance. If needed the user may
+select <guimenuitem>Specify other</guimenuitem> and write the correct type into
+the dialog.  There is also a place to enter the desired mount point and a
+<guimenuitem>Browse</guimenuitem> button for convenience. It is possible to
+mount a filesystem at multiple locations.</para>
 
 <screenshot>
 <screeninfo>Mounting a filesystem</screeninfo>
@@ -620,9 +662,11 @@ a filesystem at multiple locations.</para>
 
 <sect2 id="filesystems-mount-options">
 <title>Mount Options</title>
-<para>The options tab of the filesystem mount dialog provives a list of the most 
-common mount options and a place to write in a comma separated list of any additional 
-options required. If unsure, it is generally safe to leave these at the default.</para>
+
+<para>The options tab of the filesystem mount dialog provives a list of the most
+common mount options and a place to write in a comma separated list of any
+additional options required. If unsure, it is generally safe to leave these at
+the default.</para>
 <screenshot>
 <screeninfo>Mounting a filesystem</screeninfo>
 	<mediaobject>
@@ -639,9 +683,11 @@ options required. If unsure, it is generally safe to leave these at the default.
 
 <sect1 id="filesystems-mkfs">
 <title>Writing a Filesystem</title>
-<para>In the following dialog the device <quote>/dev/sdc1</quote> has been selected 
-to write a new filesystem on. The type <quote>ext4</quote> has been chosen and the 
-begining of the volume will be zeroed out to erase the old filestem.</para>
+
+<para>In the following dialog the device <quote>/dev/sdc1</quote> has been
+selected to write a new filesystem on. The type <quote>ext4</quote> has been
+chosen and the begining of the volume will be zeroed out to erase the old
+filestem.</para>
 
 <screenshot>
 <screeninfo>Writing a filesystem</screeninfo>
@@ -655,20 +701,20 @@ begining of the volume will be zeroed out to erase the old filestem.</para>
 	</mediaobject>
 </screenshot>
 
-<para>If ext2, ext3 or ex4 are selected the <quote>Standard Ext Options</quote> 
-tab will be enabled. Selecting ext4 also enables the tab labeled 
-<quote>Additional Ext4 Options.</quote> This dialog may also be used to create
-linux swap space. Most filesystem types also allow an optional short text label
-which can be supplied here.</para>
+<para>If ext2, ext3 or ex4 are selected the <guilabel>Standard Ext
+Options</guilabel> tab will be enabled. Selecting ext4 also enables the tab
+labeled <guilabel>Additional Ext4 Options.</guilabel> This dialog may also be
+used to create linux swap space. Most filesystem types also allow an optional
+short text label which can be supplied here.</para>
 
 <note><para>It is not necessary to erase the old filesystem but doing so
 is recommended. If the old filesystem is of a different type, the remaining traces
-of it can fool kvpm and other programs into misidentifying the new filesystem.</para></note>
+of it can fool &kvpm; and other programs into misidentifying the new filesystem.</para></note>
 
-<note><para>Kvpm uses the standard system programs to write filesystems. If
-a filesystem type is chosen for which the needed program is missing, kvpm
-will generate an error message and otherwise do nothing. See also, 
-<link linkend="programs">Programs</link>. </para></note>
+<note><para>&kvpm; uses the standard system programs to write filesystems. If a
+filesystem type is chosen for which the needed program is missing, &kvpm; will
+generate an error message and otherwise do nothing. See also, <link
+linkend="programs">Programs</link>. </para></note>
 
 </sect1>
 
@@ -705,12 +751,12 @@ will generate an error message and otherwise do nothing. See also,
 </chapter>
 
 <chapter id="config-options-kvpm">
-<title>Configuring Kvpm</title>
+<title>Configuring &kvpm;</title>
 <sect1>
 <title>The Configuration Dialog</title>
-<para>There are many aspects of kvpm that may be configured or customized. To access the configuration dialog select 
+<para>There are many aspects of &kvpm; that may be configured or customized. To access the configuration dialog select 
 
-<menuchoice><guimenu>Settings</guimenu><guimenuitem>Configure kvpm</guimenuitem></menuchoice></para>
+<menuchoice><guimenu>Settings</guimenu><guimenuitem>Configure &kvpm;</guimenuitem></menuchoice></para>
 <para>The dialog has three pages:</para>
 
 
@@ -732,57 +778,66 @@ will generate an error message and otherwise do nothing. See also,
 
 <sect1 id="general">
 <title>General</title>
-<para>The <guimenuitem>General</guimenuitem> page is the largest of the three pages and has 
-two tabs. The first tab <guimenuitem>Tree Views</guimenuitem> is for configuring the tree 
-and table views. The second tab <guimenuitem>Property Panels</guimenuitem> deals
-with the property panel that each tree or table has associated with it. See 
-<link linkend="typical-volume-group">here</link>
- for more detail on the layout of the trees and panels. Any changes made to the configuration
-may be reverted to the default simply by pressing the <guimenuitem>Defaults</guimenuitem> 
-button at the bottom of the dialog.</para>
+
+<para>The <guimenuitem>General</guimenuitem> page is the largest of the three
+pages and has two tabs. The first tab <guimenuitem>Tree Views</guimenuitem> is
+for configuring the tree and table views. The second tab <guimenuitem>Property
+Panels</guimenuitem> deals with the property panel that each tree or table has
+associated with it. See <link linkend="getting-started-kvpm-group">here</link>
+for more detail on the layout of the trees and panels. Any changes made to the
+configuration may be reverted to the default simply by pressing the
+<guimenuitem>Defaults</guimenuitem> button at the bottom of the dialog.</para>
 
 <sect2 id="general-trees">
 <title>Tree Views</title>
-<para>The columns of each tree my be hidden or shown as desired by clicking on the appropriate
- checkbox. For example, to hide the mount point column in the device tree, find the section
-titled <guimenuitem>Device Tree</guimenuitem> and uncheck the check box labed 
-<guimenuitem>Mount point</guimenuitem>. Some information, such as stripe size, is duplicated
-in the property panel and may be hidden by default in the tree view. The amount of space left
-on a device or volume may be set to show as a percentage of the the total space, in Mega/Giga/Tera
-bytes or both. There is also an option to enable a warning icon in the 
-<quote>remaining</quote> column when the amount of space left drops below a user set level. </para>
+
+<para>The columns of each tree my be hidden or shown as desired by clicking on
+the appropriate checkbox. For example, to hide the mount point column in the
+device tree, find the section titled <guimenuitem>Device Tree</guimenuitem> and
+uncheck the check box labed <guimenuitem>Mount point</guimenuitem>. Some
+information, such as stripe size, is duplicated in the property panel and may be
+hidden by default in the tree view. The amount of space left on a device or
+volume may be set to show as a percentage of the the total space, in
+Mega/Giga/Tera bytes or both. There is also an option to enable a warning icon
+in the <guilabel>remaining</guilabel> column when the amount of space left drops
+below a user set level. </para>
 </sect2>
 
 <sect2 id="general-panels">
 <title>Property Panels</title>
-<para>The panels are divided into sections which may be, optionally, shown or hidden. Checking
-a box enables showing the section while unchecking it will hide the section.</para>
+
+<para>The panels are divided into sections which may be, optionally, shown or
+hidden. Checking a box enables showing the section while unchecking it will hide
+the section.</para>
 </sect2>
 
 </sect1>
 
 <sect1 id="colors">
 <title>Colors</title>
-<para>The <guimenuitem>Colors</guimenuitem> page is for customizing the colors used where 
-<link linkend="typical-volume-group-colors">filesystems are shown graphically</link>. 
-Each filesystem type is associated with a labeled color button. By pressing the button a 
-standard color picker dialog is called that allows the user to select any desired color 
-for that filesystem. Swap space, physical volumes and unused space also have colors
-associated with them that may be changed here.</para>
+
+<para>The <guimenuitem>Colors</guimenuitem> page is for customizing the colors
+used where <link linkend="typical-volume-group-colors">filesystems are shown
+graphically</link>.  Each filesystem type is associated with a labeled color
+button. By pressing the button a standard color picker dialog is called that
+allows the user to select any desired color for that filesystem. Swap space,
+physical volumes and unused space also have colors associated with them that may
+be changed here.</para>
 </sect1>
 
 <sect1 id="programs">
 <title>Programs</title>
 
-<para>The <guimenuitem>Programs</guimenuitem> page has two tabs. The first tab sets the 
-search path for needed support programs. The second tab contains a list of the programs 
-that are needed and where, or if, they were found.</para>
+<para>The <guimenuitem>Programs</guimenuitem> page has two tabs. The first tab
+sets the search path for needed support programs. The second tab contains a list
+of the programs that are needed and where, or if, they were found.</para>
 <sect2 id="programs-search">
 <title>Search Path</title>
 
-<para>Most of the functionality of kvpm comes from standard LVM and system programs such 
-as lvcreate and mkfs. The search path is a list of locations in the system where kvpm 
-should look to find the needed programs. The standard locations in the list are: </para>
+<para>Most of the functionality of &kvpm; comes from standard LVM and system
+programs such as lvcreate and mkfs. The search path is a list of locations in
+the system where &kvpm; should look to find the needed programs. The standard
+locations in the list are: </para>
 
 <simplelist>
 <member>/sbin</member>
@@ -793,16 +848,17 @@ should look to find the needed programs. The standard locations in the list are:
 <member>/usr/local/bin</member>
 </simplelist>
 
-<para>Using the provided list box it is possible to add new locations or to remove 
-unwanted ones. The search is done from top to bottom so moving items up or down in 
-the list will change their search order. The <guimenuitem>Defaults</guimenuitem> 
-button will restore the standard list.</para>
+<para>Using the provided list box it is possible to add new locations or to
+remove unwanted ones. The search is done from top to bottom so moving items up
+or down in the list will change their search order. The
+<guimenuitem>Defaults</guimenuitem> button will restore the standard
+list.</para>
 </sect2>
 
 <sect2 id="programs-found">
-<title>Program List</title>
-<para>The second tab has a list of all the needed executables and the location where 
-they were found. If a program could not be found an error message will be displayed.</para>
+<title>Program List</title> <para>The second tab has a list of all the needed
+executables and the location where they were found. If a program could not be
+found an error message will be displayed.</para>
 </sect2>
 </sect1>
 </chapter>
