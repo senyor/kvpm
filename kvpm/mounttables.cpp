@@ -38,6 +38,20 @@ mntent *buildMntent(const QString device, const QString mountPoint, const QStrin
 mntent *copyMntent(mntent *const entry);
 
 
+bool isMtabWritable(QString mtab)
+{
+    QFileInfo fi = QFileInfo(mtab);
+
+    if( fi.isSymLink() )
+        return false;
+    else
+        return fi.isWritable();
+}
+
+// Static init
+bool MountTables::can_write_mtab = isMtabWritable(_PATH_MOUNTED);
+
+
 MountTables::MountTables()
 {
 }
@@ -140,6 +154,9 @@ QString MountTables::getFstabMountPoint(const QString name, const QString label,
 bool MountTables::addEntry(const QString device, const QString mountPoint, const QString type, 
                            const QString options, const int dumpFreq, const int pass)
 {
+    if(!can_write_mtab)
+        return true;
+
     QByteArray device_array      = device.toLocal8Bit();
     QByteArray mount_point_array = mountPoint.toLocal8Bit();
     QByteArray type_array        = type.toLocal8Bit();
@@ -172,6 +189,9 @@ bool MountTables::addEntry(const QString device, const QString mountPoint, const
 
 bool MountTables::removeEntry(const QString mountPoint)
 {
+    if(!can_write_mtab)
+        return true;
+
     QList<mntent *> mount_entry_list;
     mntent *mount_entry;
     QByteArray new_path(_PATH_MOUNTED);
@@ -212,10 +232,13 @@ bool MountTables::removeEntry(const QString mountPoint)
 	    
 bool MountTables::renameEntries(const QString oldName, const QString newName)
 {
+    if(!can_write_mtab)
+        return true;
+
     QList<mntent *> mount_entry_list;
     mntent *mount_entry;
     mntent *temp_entry;
-    
+    qDebug() << "Read only" << ! can_write_mtab;     
     QByteArray new_path(_PATH_MOUNTED);
     new_path.append(".new");     
 
