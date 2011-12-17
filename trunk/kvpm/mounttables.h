@@ -29,6 +29,7 @@ class MountTables
     QList<MountEntry *> m_list;
     QList<MountEntry *> m_fstab_list;
     QString getFstabMountPoint(const QString name, const QString label, const QString uuid);
+    static bool can_write_mtab;
     
  public:
     MountTables();
