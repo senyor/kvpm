@@ -1,6 +1,8 @@
 version 0.8.4
-Added too and improved the configuration dialog. Property panels can now
-be configured.
+Added to, and improved, the configuration dialog. Property panels can now
+be configured. Changed the detection of mounted filesystems to use
+/proc/self/mountinfo rather than the depracated /etc/mtab file. Fixed
+a bug that deleted symlinked mtab and replaced it with a real file.
 
 version 0.8.3
 Added new configuration options and made showing some panels optional.

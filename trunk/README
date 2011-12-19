@@ -31,6 +31,8 @@ kdelibs version 4
 <sys/mount.h>
 <linux/fs.h>
 
+The file: /proc/self/mountinfo must also be present. It was introduced
+in linux kernel version 2.6.26.
 
 NOTE: If you compile a new version of lvm and devmapper, libparted 
 also links to libdevmapper and may need to recompiled. I have been 
