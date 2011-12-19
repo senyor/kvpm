@@ -182,18 +182,28 @@ actions that can be taken on the physical volume.</para>
 
 </chapter>
 
-<chapter id="volume-group-kvpm">
+<chapter id="volume-group">
 <title>Volume Groups</title>
 
-<sect1 id="menu-vgchange">
-<title>The <guimenu>Volume Groups</guimenu> Menu</title>
+<sect1 id="volume-group-intro">
+<title>Working With Volume Groups</title>
+
+<para>Most actions that can be taken on a Volume Group are done from the
+<guimenu>Volume Groups</guimenu> menu discussed next. It has menu entries for
+the creation, deletion, extention and reduction of Volume Groups and a variety
+of other changes that can be made.</para>
 
 <para>The <guimenu>Volume Groups</guimenu> Menu is located at the top of the
 main program window.  Except for <guimenu>Create volume group</guimenu> all of
-the following menu choices act on the current volume group. The current group is
-the one inside the tab selected on the main window. If the <guilabel>Storage
+the menu choices act on the current volume group. The current group is the one
+inside the tab selected on the main window. If the <guilabel>Storage
 devices</guilabel> tab is selected, only the <guimenu>Create volume
 group</guimenu> choice will be availabe.</para>
+
+</sect1>
+
+<sect1 id="menu-vgchange">
+<title>The <guimenu>Volume Groups</guimenu> Menu</title>
 
 <variablelist>
 <varlistentry>
@@ -470,6 +480,7 @@ volume.</para>
 
 <para>The Filesystem operations sub-menu provides six common menu selections
 for working with a filesystem.</para>
+<para>Details are provided under <link linkend="filesystems-menu">Filesystem Operations</link>.</para>
 
 <variablelist>
 <varlistentry>
@@ -522,7 +533,6 @@ for working with a filesystem.</para>
 
 </variablelist>
 
-<para>Details are provided under <link linkend="filesystems-menu">Filesystem Operations</link>.</para>
 </sect2>
 </sect1>
 

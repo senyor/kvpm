@@ -29,10 +29,8 @@ Q_OBJECT
     QString m_device_name,        // for example: "/dev/sda1"
 	    m_mount_point, 
 	    m_filesystem_type,    // ext3, reiserfs, swap etcetera 
-	    m_mount_options;      // options, such as "noatime," set when mounting a filesystem 
-
-    int m_dump_frequency; 
-    int m_dump_passno;
+            m_mount_options,      // options (per mount), such as "noatime," set when mounting a filesystem 
+	    m_super_options;      // options (per superblock) set when mounting a filesystem 
 
     int m_mount_position;         // More than on device may be mounted on a mount point.
                                   // This number is zero if nothing else is mounted on
@@ -40,18 +38,20 @@ Q_OBJECT
                                   // of mount order. 1 is the *last* one mounted, highest 
                                   // number is the first one mounted. 
 
-    QStringList getMountedDevices(const QString mountPoint, const QList<mntent *> table); // Returns devices mounted to mountPoint
+    int m_major, m_minor;
 
  public:
-    explicit MountEntry(mntent *const entry, const QList<mntent *> table, QObject *parent = 0);
+    explicit MountEntry(MountEntry *const copy, QObject *parent = 0);
     explicit MountEntry(mntent *const entry, QObject *parent = 0);
+    MountEntry(QString const mountinfo, const int major, const int minor, QObject *parent = 0);
     QString getDeviceName();
     QString getMountPoint();
     QString getFilesystemType();
     QString getMountOptions();
-    int getDumpFrequency();
-    int getDumpPassNumber();
     int getMountPosition();    
+    int getMajorNumber();    
+    int getMinorNumber();    
+    void setMountPosition(const int pos);    
 };
 
 #endif

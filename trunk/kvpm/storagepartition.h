@@ -43,6 +43,8 @@ class StoragePartition
     long long m_last_sector;
     long long m_fs_size;
     long long m_fs_used;
+    int m_major;            // block dev numbers
+    int m_minor;
     bool m_is_writable;
     bool m_is_pv;
     bool m_is_mounted;
@@ -79,6 +81,8 @@ public:
     long long getFilesystemUsed();
     long long getFilesystemRemaining();
     int getFilesystemPercentUsed();
+    int getMajorNumber();
+    int getMinorNumber();
     bool isWritable();
     bool isPhysicalVolume();
     bool isMounted();

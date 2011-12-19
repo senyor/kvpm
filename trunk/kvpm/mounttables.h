@@ -18,7 +18,6 @@
 #include <QString>
 #include <QList>
 
-
 class LogVol;
 class StoragePartition;
 class MountEntry;
@@ -26,17 +25,18 @@ class MountEntry;
 
 class MountTables
 {
-    QList<MountEntry *> m_list;
+    QList<MountEntry *> m_mount_list;
     QList<MountEntry *> m_fstab_list;
-    QString getFstabMountPoint(const QString name, const QString label, const QString uuid);
     static bool can_write_mtab;
+
+    QString getFstabMountPoint(const QString name, const QString label, const QString uuid);
     
  public:
     MountTables();
     ~MountTables();
 
     void loadData();
-    QList<MountEntry *> getMtabEntries(const QString deviceName);
+    QList<MountEntry *> getMtabEntries(const int major, const int minor); // The list entries must be freed/deleted by the reciever
     QString getFstabMountPoint(LogVol *const lv);
     QString getFstabMountPoint(StoragePartition *const partition);
 

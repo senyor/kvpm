@@ -15,6 +15,9 @@
 
 #include "storagepartition.h"
 
+#include <sys/types.h>
+#include <kde_file.h>
+
 #include <QtGui>
 
 #include "fsdata.h"
@@ -80,6 +83,18 @@ StoragePartition::StoragePartition(PedPartition *part,
 	}
     }
 
+    KDE_struct_stat buf;
+    QByteArray path = m_partition_path.toLocal8Bit();
+
+    if( KDE_stat(path.data(), &buf) == 0 ){
+        m_major =  major(buf.st_rdev);
+        m_minor =  minor(buf.st_rdev);
+    }
+    else{
+        m_major = -1;
+        m_minor = -1;
+    }
+
     // Iterate though all the possible flags and check each one
 
     PedPartitionFlag ped_flag = PED_PARTITION_BOOT;
@@ -110,7 +125,7 @@ StoragePartition::StoragePartition(PedPartition *part,
             m_is_mountable = true;
     }
 
-    m_device_mount_info_list = mountInfoList->getMtabEntries(m_partition_path);
+    m_device_mount_info_list = mountInfoList->getMtabEntries(m_major, m_minor);
     m_fstab_mount_point = mountInfoList->getFstabMountPoint(this);
 
     if( m_device_mount_info_list.size() )
@@ -235,6 +250,16 @@ long long StoragePartition::getFilesystemRemaining()
 {
     return m_fs_size - m_fs_used;
 }
+
+int StoragePartition::getMajorNumber()
+{
+    return m_major;
+}
+int StoragePartition::getMinorNumber()
+{
+    return m_minor;
+}
+
 
 int StoragePartition::getFilesystemPercentUsed()
 {

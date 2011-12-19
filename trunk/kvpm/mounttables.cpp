@@ -37,7 +37,6 @@ mntent *buildMntent(const QString device, const QString mountPoint, const QStrin
 
 mntent *copyMntent(mntent *const entry);
 
-
 bool isMtabWritable(QString mtab)
 {
     QFileInfo fi = QFileInfo(mtab);
@@ -58,55 +57,71 @@ MountTables::MountTables()
 
 MountTables::~MountTables()
 {
-    for(int x = 0; x < m_list.size(); x++)
-	delete (m_list[x]);
-
     for(int x = 0; x < m_fstab_list.size(); x++)
 	delete (m_fstab_list[x]);
+
+    for(int x = 0; x < m_mount_list.size(); x++)
+	delete (m_mount_list[x]);
 }
 
 void MountTables::loadData()
 {
-    for(int x = m_list.size() - 1; x >= 0; x--)
-	delete ( m_list.takeAt(x) );
-
     for(int x = m_fstab_list.size() - 1; x >= 0; x--)
-	delete ( m_fstab_list.takeAt(x) );
-    
+	m_fstab_list.takeAt(x)->deleteLater();
+
+    for(int x = m_mount_list.size() - 1; x >= 0; x--)
+	m_mount_list.takeAt(x)->deleteLater();
+
+    QString line;
+    QFile file("/proc/self/mountinfo");
+
+    if ( file.open(QIODevice::ReadOnly | QIODevice::Text) ){
+
+        QTextStream in( &file );
+
+        while ( ! (line = in.readLine()).isEmpty() ){
+            QStringList subs = line.section(' ', 2, 2).split(':');  // major and minor dev numbers
+            
+            m_mount_list.append( new MountEntry(line, subs[0].toInt(), subs[1].toInt()) );
+        }
+    }
+
+    file.close();
+
+    for(int x = m_mount_list.size() - 1; x >= 0; x--){
+        int pos = 1;
+
+        for(int y = x - 1; y >= 0; y--){
+            if(m_mount_list[y]->getMountPoint() == m_mount_list[x]->getMountPoint() )
+                m_mount_list[y]->setMountPosition(++pos);
+        }
+        if(pos > 1)
+            m_mount_list[x]->setMountPosition(1);
+    }
+
     mntent *entry;
     FILE *fp;
-    QList<mntent *> entries;
 
-    if( (fp = setmntent(_PATH_MOUNTED, "r")) ){
-        while( (entry = copyMntent(getmntent(fp))) )
-            entries.append(entry);
-        
-        endmntent(fp);
-        
-        QListIterator<mntent *> entry_itr(entries);
-        while( entry_itr.hasNext() ) 
-            m_list.append( new MountEntry(entry_itr.next(), entries) );
-    }
-    
     if( (fp = setmntent(_PATH_FSTAB, "r") ) ){
-        while( (entry = copyMntent(getmntent(fp))) ){
-            entries.append(entry);
+
+        while( (entry = copyMntent(getmntent(fp))) )
             m_fstab_list.append( new MountEntry(entry) );
-        }
+
         endmntent(fp);
     }
-    
-    for(int x = entries.size() - 1 ; x >= 0; x--)
-        delete entries[x];
 }
 
-QList<MountEntry *> MountTables::getMtabEntries(const QString deviceName)
+// Major and minor numbers don't change when lv or vg names are changed
+// Also lookups by fs uuid won't work with snaps since they will match the origin
+// and each other. 
+QList<MountEntry *> MountTables::getMtabEntries(const int major, const int minor)
 {
     QList<MountEntry *> device_mounts;
 
-    for(int x = m_list.size() - 1; x >= 0; x--){
-	if( deviceName == m_list[x]->getDeviceName() )
-	    device_mounts.append( m_list.takeAt(x) );
+    for(int x = 0; x < m_mount_list.size(); x++){
+        if(m_mount_list[x]->getMajorNumber() == major && m_mount_list[x]->getMinorNumber() == minor){
+            device_mounts.append( new MountEntry(m_mount_list[x]) );
+        }
     }
 
     return device_mounts;

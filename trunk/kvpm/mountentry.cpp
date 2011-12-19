@@ -26,6 +26,19 @@
 // MountEntry provides a thin wrapper for 'mntent' structs by providing
 // QStrings rather than const char arrays and a 'mount position' property
 
+MountEntry::MountEntry(MountEntry *const copy, QObject *parent) : QObject(parent)
+{
+    m_device_name     = copy->getDeviceName();
+    m_mount_point     = copy->getMountPoint();
+    m_filesystem_type = copy->getFilesystemType();
+    m_mount_options   = copy->getMountOptions();
+
+    m_major = copy->getMajorNumber();
+    m_minor = copy->getMinorNumber();
+
+    m_mount_position = copy->getMountPosition();
+}
+
 MountEntry::MountEntry(mntent *const entry, QObject *parent) : QObject(parent)
 {
     m_device_name     = QString( entry->mnt_fsname ).trimmed();
@@ -33,56 +46,24 @@ MountEntry::MountEntry(mntent *const entry, QObject *parent) : QObject(parent)
     m_filesystem_type = QString( entry->mnt_type ).trimmed();
     m_mount_options   = QString( entry->mnt_opts ).trimmed();
 
-    m_dump_frequency = entry->mnt_freq;
-    m_dump_passno    = entry->mnt_passno;
+    m_major = -1;
+    m_minor = -1;
+
     m_mount_position = 0;
 }
 
-MountEntry::MountEntry(mntent *const entry, const QList<mntent *> table, QObject *parent) : QObject(parent)
+MountEntry::MountEntry(const QString mountinfo, const int major, const int minor, QObject *parent) : QObject(parent)
 {
-    QStringList mounted_devices;
+    m_mount_point     = mountinfo.section(' ', 4, 4);
+    m_mount_options   = mountinfo.section(' ', 5, 5);
+    m_filesystem_type = mountinfo.section(' ', 6, 6);
+    m_device_name     = mountinfo.section(' ', 8, 8);
+    m_super_options   = mountinfo.section(' ', 9, 9);
 
-    m_device_name     = QString( entry->mnt_fsname ).trimmed();
-    m_mount_point     = QString( entry->mnt_dir ).trimmed();
-    m_filesystem_type = QString( entry->mnt_type ).trimmed();
-    m_mount_options   = QString( entry->mnt_opts ).trimmed();
+    m_major = major;
+    m_minor = minor;
 
-    m_dump_frequency = entry->mnt_freq;
-    m_dump_passno    = entry->mnt_passno;
     m_mount_position = 0;
-
-    mounted_devices = getMountedDevices(m_mount_point, table);
-    if( mounted_devices.size() > 1 ){
-        m_mount_position = 1;
-        for( int x = mounted_devices.size() - 1; x >= 0; x-- ){
-	    if( m_device_name == mounted_devices[x] )
-	        break;
-	    else
-	        m_mount_position++;
-	}
-    }
-    else
-        m_mount_position = 0;
-}
-
-/* This function looks at the mount table and returns the
-   filesystem's mount point if the device is has an entry
-   in the table. */
-
-QStringList MountEntry::getMountedDevices(const QString mountPoint,  const QList<mntent *> table)
-{
-    mntent *mount_entry;
-    QStringList mounted_devices;
-    QListIterator<mntent *> entry_itr(table);
-
-    while( entry_itr.hasNext() ){
-        mount_entry = entry_itr.next();
-
-        if( QString( mount_entry->mnt_dir ) == mountPoint )
-            mounted_devices.append( QString( mount_entry->mnt_fsname ) );
-    }
-
-    return mounted_devices;
 }
 
 QString MountEntry::getDeviceName()
@@ -102,20 +83,31 @@ QString MountEntry::getFilesystemType()
 
 QString MountEntry::getMountOptions()
 {
-    return m_mount_options;
-}
+    QStringList options;
 
-int MountEntry::getDumpFrequency()
-{
-    return m_dump_frequency;
-}
+    options.append(m_mount_options.split(','));
+    options.append(m_super_options.split(','));
+    options.removeDuplicates();
 
-int MountEntry::getDumpPassNumber()
-{
-    return m_dump_passno;
+    return options.join(",");
 }
 
 int MountEntry::getMountPosition()
 {
     return m_mount_position;
 }
+
+int MountEntry::getMajorNumber()
+{
+    return m_major;
+}
+
+int MountEntry::getMinorNumber()
+{
+    return m_minor;
+}
+
+void MountEntry::setMountPosition(const int pos)
+{
+    m_mount_position = pos;
+}    
