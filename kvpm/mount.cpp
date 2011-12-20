@@ -59,20 +59,25 @@ MountDialog::MountDialog(StoragePartition *const partition, QWidget *parent) : K
 
 void MountDialog::buildDialog()
 {
-    KTabWidget *const dialog_body = new KTabWidget(this);
+    setCaption("Mount a Filesystem");
+    QWidget *const dialog_body = new QWidget(this);
     setMainWidget(dialog_body);
 
-    QWidget *const main_tab    = new QWidget(this);
-    QVBoxLayout *const main_layout = new QVBoxLayout();
-    main_tab->setLayout(main_layout);
-    QLabel *const device_label = new QLabel( "<b>" + m_device_to_mount + "</b>");
-    device_label->setAlignment(Qt::AlignCenter);    
-    main_layout->addWidget( device_label );
-    main_layout->addWidget( filesystemBox() );
-    main_layout->addWidget( mountPointBox() );
+    QVBoxLayout *const layout = new QVBoxLayout();
+    dialog_body->setLayout(layout);
 
-    dialog_body->addTab(main_tab,     i18nc("The basic choices", "Main") );
-    dialog_body->addTab(optionsTab(), i18n("Options") );
+    QLabel *const device_label = new QLabel( "<b>" + i18n("Device To Mount: ") + m_device_to_mount + "</b>");
+    device_label->setAlignment(Qt::AlignCenter);    
+    layout->addWidget(device_label);
+
+    QHBoxLayout *const main_layout = new QHBoxLayout();
+    layout->addLayout(main_layout);
+    QVBoxLayout *const left_layout = new QVBoxLayout();
+    main_layout->addLayout(left_layout);
+
+    left_layout->addWidget( filesystemBox() );
+    left_layout->addWidget( mountPointBox() );
+    main_layout->addWidget( optionsBox() );
 
     connect(this, SIGNAL( accepted() ), 
 	    this, SLOT( mountFilesystem() ));
@@ -80,13 +85,13 @@ void MountDialog::buildDialog()
 
 QWidget* MountDialog::filesystemBox()
 {
-    QGroupBox   *filesystem_box = new QGroupBox( i18n("Filesystem type"), this);
-    QVBoxLayout *layout_left    = new QVBoxLayout();
-    QVBoxLayout *layout_center  = new QVBoxLayout();
-    QVBoxLayout *layout_right   = new QVBoxLayout();
-    QHBoxLayout *upper_layout   = new QHBoxLayout();
-    QHBoxLayout *lower_layout   = new QHBoxLayout();
-    QVBoxLayout *filesystem_layout   = new QVBoxLayout();
+    QGroupBox   *const filesystem_box = new QGroupBox( i18n("Filesystem Type"), this);
+    QVBoxLayout *const layout_left    = new QVBoxLayout();
+    QVBoxLayout *const layout_center  = new QVBoxLayout();
+    QVBoxLayout *const layout_right   = new QVBoxLayout();
+    QHBoxLayout *const upper_layout   = new QHBoxLayout();
+    QHBoxLayout *const lower_layout   = new QHBoxLayout();
+    QVBoxLayout *const filesystem_layout = new QVBoxLayout();
     upper_layout->addLayout(layout_left);
     upper_layout->addLayout(layout_center);
     upper_layout->addLayout(layout_right);
@@ -98,8 +103,8 @@ QWidget* MountDialog::filesystemBox()
     ext3_button      = new QRadioButton("ext3", this);
     ext4_button      = new QRadioButton("ext4", this);
     btrfs_button     = new QRadioButton("btrfs",this);
-    reiserfs3_button = new QRadioButton("reiserfs Ver. 3", this);
-    reiserfs4_button = new QRadioButton("reiserfs Ver. 4", this);
+    reiserfs3_button = new QRadioButton("reiser3", this);
+    reiserfs4_button = new QRadioButton("reiser4", this);
     xfs_button       = new QRadioButton("xfs", this);
     jfs_button       = new QRadioButton("jfs", this);
     vfat_button      = new QRadioButton("vfat",this);
@@ -108,7 +113,7 @@ QWidget* MountDialog::filesystemBox()
     hfs_button       = new QRadioButton("hfs", this);
     ntfs_button      = new QRadioButton("ntfs", this);
     
-    specify_button   = new QRadioButton( i18n("Specify other:"), this);
+    specify_button   = new QRadioButton( i18n("Specify another fileystem:"), this);
 
     if( m_filesystem_type == "ext2" )
 	ext2_button->setChecked(true);
@@ -173,17 +178,16 @@ QWidget* MountDialog::filesystemBox()
     return filesystem_box;
 }
 
-QWidget* MountDialog::optionsTab()
+QWidget* MountDialog::optionsBox()
 {
-
-    QWidget *options_tab = new QWidget();
+    QWidget *options_box = new QGroupBox( i18n("Mount Options") );
     QVBoxLayout *options_layout = new QVBoxLayout();
-    options_tab->setLayout(options_layout);
+    options_box->setLayout(options_layout);
     
-    QGroupBox *common_options_box = new QGroupBox( i18n("Common mount options"), this);
+    QGroupBox *common_options_box = new QGroupBox( i18n("Common Options"), this);
     QVBoxLayout *layout_left      = new QVBoxLayout();
     QVBoxLayout *layout_right     = new QVBoxLayout();
-    QHBoxLayout *common_options_layout   = new QHBoxLayout();
+    QHBoxLayout *common_options_layout = new QHBoxLayout();
     common_options_layout->addLayout(layout_left);
     common_options_layout->addLayout(layout_right);
     common_options_box->setLayout(common_options_layout);
@@ -231,10 +235,14 @@ QWidget* MountDialog::optionsTab()
     
     QHBoxLayout *options_atime_layout = new QHBoxLayout();
     options_layout->addLayout(options_atime_layout);
+
     QGroupBox *atime_box = new QGroupBox( i18n("Update atime"), this);
     QVBoxLayout *atime_layout = new QVBoxLayout();
     atime_box->setLayout(atime_layout);
     options_atime_layout->addWidget(common_options_box);
+
+    QVBoxLayout *atime_journal_layout = new QVBoxLayout();
+    options_atime_layout->addLayout(atime_journal_layout);
 
     m_filesystem_journal_box = new QGroupBox( i18n("Journaling") );
     QVBoxLayout *journaling_layout = new QVBoxLayout;
@@ -246,7 +254,7 @@ QWidget* MountDialog::optionsTab()
     journaling_layout->addWidget(data_journal_button);
     journaling_layout->addWidget(data_ordered_button);
     journaling_layout->addWidget(data_writeback_button);
-    options_atime_layout->addWidget(m_filesystem_journal_box);
+    atime_journal_layout->addWidget(m_filesystem_journal_box);
 
     atime_button      = new QRadioButton("atime");
     noatime_button    = new QRadioButton("noatime");
@@ -265,9 +273,9 @@ QWidget* MountDialog::optionsTab()
 				      "access time was earlier than the current modify "
 				      "or change time") );
     
-    options_atime_layout->addWidget(atime_box);
+    atime_journal_layout->addWidget(atime_box);
 
-    QGroupBox *filesystem_options_box = new QGroupBox( i18n("Filesystem specific  mount options") );
+    QGroupBox *filesystem_options_box = new QGroupBox( i18n("Filesystem specific mount options") );
     m_fs_specific_edit = new KLineEdit();
     m_fs_specific_edit->setPlaceholderText( i18n("comma separated list of additional mount options") );
 
@@ -285,19 +293,49 @@ QWidget* MountDialog::optionsTab()
     connect(ext3_button, SIGNAL( toggled(bool) ),
 	    this, SLOT( toggleAdditionalOptions(bool)));
     
+    connect(ext4_button, SIGNAL( toggled(bool) ),
+	    this, SLOT( toggleAdditionalOptions(bool)));
+    
     connect(reiserfs3_button, SIGNAL( toggled(bool) ),
 	    this, SLOT( toggleAdditionalOptions(bool)));
 
     connect(reiserfs4_button, SIGNAL( toggled(bool) ),
 	    this, SLOT( toggleAdditionalOptions(bool)));
     
-    return options_tab;
+    connect(btrfs_button, SIGNAL( toggled(bool) ),
+	    this, SLOT( toggleAdditionalOptions(bool)));
+    
+    connect(xfs_button, SIGNAL( toggled(bool) ),
+	    this, SLOT( toggleAdditionalOptions(bool)));
+
+    connect(jfs_button, SIGNAL( toggled(bool) ),
+	    this, SLOT( toggleAdditionalOptions(bool)));
+    
+    connect(vfat_button, SIGNAL( toggled(bool) ),
+	    this, SLOT( toggleAdditionalOptions(bool)));
+
+    connect(ntfs_button, SIGNAL( toggled(bool) ),
+	    this, SLOT( toggleAdditionalOptions(bool)));
+    
+    connect(specify_button, SIGNAL( toggled(bool) ),
+	    this, SLOT( toggleAdditionalOptions(bool)));
+    
+    connect(udf_button, SIGNAL( toggled(bool) ),
+	    this, SLOT( toggleAdditionalOptions(bool)));
+    
+    connect(iso9660_button, SIGNAL( toggled(bool) ),
+	    this, SLOT( toggleAdditionalOptions(bool)));
+    
+    connect(hfs_button, SIGNAL( toggled(bool) ),
+	    this, SLOT( toggleAdditionalOptions(bool)));
+    
+    return options_box;
 }
 
 QWidget* MountDialog::mountPointBox()
 {
-    QGroupBox *mount_point_box = new QGroupBox( i18n("Mount point") );
-    QHBoxLayout *mount_point_layout = new QHBoxLayout();
+    QGroupBox *const mount_point_box = new QGroupBox( i18n("Mount Point") );
+    QHBoxLayout *const mount_point_layout = new QHBoxLayout();
     mount_point_box->setLayout(mount_point_layout);
     
     m_mount_point_edit = new KLineEdit(m_mount_point);
@@ -307,7 +345,7 @@ QWidget* MountDialog::mountPointBox()
 
     mount_point_layout->addWidget(m_mount_point_edit);
     
-    QPushButton *browse_button = new QPushButton( i18n("Browse"), this);
+    QPushButton *const browse_button = new QPushButton( i18n("Browse"), this);
     mount_point_layout->addWidget(browse_button);
 
     connect(m_mount_point_edit, SIGNAL( textChanged(const QString) ), 
@@ -321,27 +359,20 @@ QWidget* MountDialog::mountPointBox()
 
 void MountDialog::selectMountPoint(bool)
 {
-    // TODO
-    // Some of this can be moved out of the 'if()' I think.
-    
-    if( !m_mount_point.isEmpty() ){  
-	const KUrl url( "file://" + QString(m_mount_point) );
-	const QString filter = "*";
-	KFileDialog dialog( url, filter, 0 );
-	dialog.setModal(true);
-	dialog.setMode(KFile::Directory);
-	dialog.exec();
-	m_mount_point = dialog.selectedFile();
-    }
-    else{
-	const KUrl url( "file:///" );
-	const QString filter = "*";
-	KFileDialog dialog( url, filter, 0 );
-	dialog.setModal(true);
-	dialog.setMode(KFile::Directory);
-	dialog.exec();
-	m_mount_point = dialog.selectedFile();
-    }
+    const QString filter = "*";
+    QString start;
+
+    if( !m_mount_point.isEmpty() )
+	start = QString("file://" + m_mount_point);
+    else
+	start = QString("file:///");
+
+    const KUrl url(start);
+    KFileDialog dialog( url, filter, 0 );
+    dialog.setModal(true);
+    dialog.setMode(KFile::Directory);
+    dialog.exec();
+    m_mount_point = dialog.selectedFile();
     
     if( m_mount_point.length() > 1 && m_mount_point.endsWith('/') )
 	m_mount_point.chop(1);                           // remove trailing "/" character
@@ -508,7 +539,9 @@ void MountDialog::toggleAdditionalOptions(bool)
 	reiserfs3_button->isChecked() || reiserfs4_button->isChecked() ){
 
 	acl_check->setEnabled(true);
+	acl_check->setChecked(true);
 	user_xattr_check->setEnabled(true);
+	user_xattr_check->setChecked(true);
     }
     else{
 	acl_check->setEnabled(false);

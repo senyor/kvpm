@@ -125,6 +125,9 @@ StoragePartition::StoragePartition(PedPartition *part,
             m_is_mountable = true;
     }
 
+    for(int x = m_device_mount_info_list.size() - 1; x >=0; x--)
+        delete m_device_mount_info_list.takeAt(x);
+
     m_device_mount_info_list = mountInfoList->getMtabEntries(m_major, m_minor);
     m_fstab_mount_point = mountInfoList->getFstabMountPoint(this);
 
