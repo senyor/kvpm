@@ -54,7 +54,7 @@ Q_OBJECT
     bool m_is_writable;
 
     QWidget* filesystemBox();
-    QWidget* optionsTab();
+    QWidget* optionsBox();
     QWidget* mountPointBox();
     void buildDialog();
     
