@@ -17,44 +17,115 @@
 
 #include <KMessageBox>
 #include <KLocale>
+
 #include <QtGui>
 
 #include "logvol.h"
 #include "processprogress.h"
 
 
-bool remove_lv(LogVol *logicalVolume)
+LVRemoveDialog::LVRemoveDialog(LogVol *const lv, QWidget *parent) : KDialog(parent), m_lv(lv)
 {
-    QString full_name = logicalVolume->getFullName();
-    full_name.remove('[').remove(']');
-    QStringList args;
-    
-    const QString message = i18n("Are you certain you want to delete the logical volume named: %1 "
-                                 "Any data on it will be lost.", "<b>" + full_name + "</b>");
+    setButtons(KDialog::Yes | KDialog::No);
+    setCaption( i18n("Delete Volume") );
+    QWidget *const dialog_body = new QWidget(this);
+    setMainWidget(dialog_body);
 
-    const QString message2 = i18n("This volume has snapshots that must be deleted first");
+    m_name = m_lv->getName();
+    m_bailout = false;
 
-    if( logicalVolume->isOrigin() ){
-        KMessageBox::error( 0, message2);
-        return false; 
-    }
+    QHBoxLayout *const layout = new QHBoxLayout();
+    QVBoxLayout *const right_layout = new QVBoxLayout();
 
-    if(KMessageBox::warningYesNo( 0, message) == 3){  // 3 = yes button
-        
-        if( logicalVolume->isActive() && !logicalVolume->isSnap() ){
-            args << "lvchange" << "-an" << full_name;
+    QLabel *const icon_label = new QLabel();
+    icon_label->setPixmap( KIcon("dialog-warning").pixmap(64, 64) );
+    layout->addWidget(icon_label);
+    layout->addLayout(right_layout);
 
-            ProcessProgress deactivate(args);
+    QLabel *label;
+
+    label = new QLabel("<b>Confirm Volume Deletion</b>");
+    label->setAlignment(Qt::AlignCenter);
+    right_layout->addWidget(label);
+    right_layout->addSpacing(20);
+
+    QHBoxLayout *const lower_layout = new QHBoxLayout();
+    QVBoxLayout *const list_layout = new QVBoxLayout();
+
+    const QString snap_msg1 = i18n("The volume: <b>%1</b> has snapshots.", m_name);
+    const QString snap_msg2 = i18n("The following volumes will all be deleted:");
+    const QString msg1 = i18n("Delete the volume named: %1?", "<b>" + m_name + "</b>");
+    const QString msg2 = i18n("Any data on it will be lost.");
+
+    if( m_lv->isOrigin() ){
+        right_layout->addWidget( new QLabel(snap_msg1) );
+        right_layout->addWidget( new QLabel(snap_msg2) );
+        right_layout->addWidget( new QLabel("") );
+
+        right_layout->addLayout(lower_layout);
+        lower_layout->addSpacing(15);
+        lower_layout->addLayout(list_layout);
+
+        label = new QLabel("<b>" + m_name + "</b>");
+        label->setAlignment(Qt::AlignLeft);
+        list_layout->addWidget(label);
+
+        QListIterator<LogVol *> snap_itr( m_lv->getSnapshots() );
+        LogVol *snap;
+        while( snap_itr.hasNext() ){
+            snap = snap_itr.next();
+
+            if( snap->isMounted() )
+                m_bailout = true;
+
+            label = new QLabel( "<b>" + snap->getName() + "</b>" );
+            label->setAlignment(Qt::AlignLeft);
+            list_layout->addWidget(label);
         }
-
-        args.clear();
-        args << "lvremove" << "--force" << full_name;
-        
-        ProcessProgress remove(args);
-        
-        return true;
+        right_layout->addWidget( new QLabel("") );
+        right_layout->addWidget( new QLabel( i18n("Are you certain you want to delete these volumes?") ) );
+        right_layout->addWidget( new QLabel( i18n("Any data on them will be lost.") ) );
     }
-    else
-        return false;
+    else{
+        right_layout->addWidget( new QLabel(msg1) );
+        right_layout->addWidget( new QLabel(msg2) );
+    }
+
+    dialog_body->setLayout(layout);
+
+    connect(this, SIGNAL(yesClicked()), 
+            this, SLOT(commitChanges()));
+
+    if(m_bailout){
+        hide();
+        KMessageBox::error(this, i18n("A snapshot of this origin is busy or mounted. It can not be deleted.") );
+    }
 }
 
+bool LVRemoveDialog::bailout()
+{
+    return m_bailout;
+}
+
+void LVRemoveDialog::commitChanges()
+{
+    const QString full_name = m_lv->getFullName().remove('[').remove(']');
+    QStringList args;
+
+    if( m_lv->isActive() && !m_lv->isSnap() ){
+        args << "lvchange" 
+             << "-an" 
+             << full_name;
+        
+        ProcessProgress deactivate(args);
+    }
+
+    args.clear();
+    args << "lvremove" 
+         << "--force" 
+         << full_name;
+    
+    ProcessProgress remove(args);
+        
+    return;
+}
