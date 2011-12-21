@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -15,10 +15,29 @@
 #ifndef LVREMOVE_H
 #define LVREMOVE_H
 
-#include <QStringList>
+#include <KDialog>
+
+#include <QString>
 
 class LogVol;
 
-bool remove_lv(LogVol *logicalVolume);
+
+class LVRemoveDialog : public KDialog
+{
+Q_OBJECT
+
+    bool m_bailout;
+    QString m_name;
+    LogVol *m_lv;
+
+ public:
+     explicit LVRemoveDialog(LogVol *const lv, QWidget *parent = 0);
+     bool bailout();
+
+ private slots:
+     void commitChanges();
+
+};
 
 #endif
+

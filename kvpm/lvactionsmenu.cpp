@@ -586,8 +586,13 @@ void LVActionsMenu::mergeSnapshot()
 
 void LVActionsMenu::removeLogicalVolume()
 {
-    if( remove_lv(m_lv) )
-	MainWindow->reRun();
+    LVRemoveDialog dialog(m_lv);
+    
+    if( !dialog.bailout() ){
+        dialog.exec();
+        if(dialog.result() == KDialog::Yes)
+            MainWindow->reRun();
+    }
 }
 
 void LVActionsMenu::renameLogicalVolume()
