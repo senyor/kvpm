@@ -45,7 +45,7 @@ Q_OBJECT
     void setViewConfig();
 
 public:
-    VGTree(VolGroup *VolumeGroup);
+    VGTree(VolGroup *const group);
     void loadData();
 
 private slots:    
