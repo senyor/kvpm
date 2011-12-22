@@ -34,7 +34,7 @@ Q_OBJECT
      KMenu *m_context_menu;
      
  public:
-     LVChartSeg(VolGroup *volumeGroup, LogVol *logicalVolume, QString use, QWidget *parent);
+     LVChartSeg(VolGroup *const group, LogVol *const volume, const QString use, QWidget *parent);
 
  private slots:
      void popupContextMenu(QPoint);

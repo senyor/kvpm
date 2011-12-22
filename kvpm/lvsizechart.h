@@ -36,7 +36,7 @@ Q_OBJECT
                                    // to the whole chart. The total should be about 1.
 
  public:
-    LVSizeChart(VolGroup *VolumeGroup, QTreeWidget *vgTree, QWidget *parent = 0);
+    LVSizeChart(VolGroup *const group, QTreeWidget *const vgTree, QWidget *parent = 0);
     void populateChart();
     void resizeEvent(QResizeEvent *event);
 
