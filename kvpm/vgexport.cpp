@@ -25,12 +25,12 @@
 #include "volgroup.h"
 
 
-bool export_vg(VolGroup *volumeGroup)
+bool export_vg(VolGroup *const volumeGroup)
 {
     QStringList args;
-    const QString message = i18n("Export volume group: %1 ?", volumeGroup->getName() );
+    const QString message = i18n("Export volume group: <b>%1</b>?", volumeGroup->getName() );
     
-    if(KMessageBox::questionYesNo( 0, message) == 3){      // 3 = "yes" button
+    if(KMessageBox::questionYesNo(0, message) == KMessageBox::Yes){
 
 	args << "vgexport"
 	     << volumeGroup->getName();

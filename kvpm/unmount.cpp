@@ -132,7 +132,7 @@ bool unmount_filesystem(LogVol *logicalVolume)
     if( logicalVolume->isMounted() ){
         if( mount_points.size() == 1 ){
 	    if( mount_position[0] < 2 )  {
-                if( KMessageBox::questionYesNo(0, unused_message) == 3 ){     // 3 is "yes"
+                if( KMessageBox::questionYesNo(0, unused_message) == KMessageBox::Yes){
                     unmount_point = mount_points[0];
                     return( unmount_filesystem( unmount_point ) );
                 }
@@ -175,7 +175,7 @@ bool unmount_filesystem(StoragePartition *partition)
     if( partition->isMounted() ){
         if( mount_points.size() == 1 ){
 	    if( mount_position[0] < 2 )  {
-	        if( KMessageBox::questionYesNo(0, unused_message) == 3 ){     // 3 is "yes"
+	        if( KMessageBox::questionYesNo(0, unused_message) == KMessageBox::Yes){
 		  unmount_point = mount_points[0];
 		  return( unmount_filesystem( unmount_point ) );
 		}

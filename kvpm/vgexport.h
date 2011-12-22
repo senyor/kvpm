@@ -18,7 +18,7 @@
 
 class VolGroup;
 
-bool import_vg(VolGroup *volumeGroup);
+bool import_vg(VolGroup *const volumeGroup);
 
 
 #endif

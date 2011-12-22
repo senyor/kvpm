@@ -25,12 +25,12 @@
 #include "volgroup.h"
 
 
-bool import_vg(VolGroup *volumeGroup)
+bool import_vg(VolGroup *const volumeGroup)
 {
     QStringList args;
-    const QString message = i18n("Import volume group: %1 ?", volumeGroup->getName());
+    const QString message = i18n("Import volume group: <b>%1</b>?", volumeGroup->getName());
     
-    if(KMessageBox::questionYesNo( 0, message) == 3){      // 3 = "yes" button
+    if(KMessageBox::questionYesNo( 0, message) == KMessageBox::Yes){
 
 	args << "vgimport"
 	     << volumeGroup->getName();

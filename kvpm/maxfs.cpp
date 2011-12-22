@@ -43,7 +43,7 @@ bool max_fs(LogVol *logicalVolume)
         return false;
     }
 
-    if(KMessageBox::warningYesNo(0, message) == 3){  // 3 = yes button
+    if(KMessageBox::warningYesNo(0, message) == KMessageBox::Yes){
         return fs_extend(path, fs, logicalVolume->getMountPoints(), true); 
     }
     else
@@ -71,7 +71,7 @@ bool max_fs(StoragePartition *partition)
         return false;
     }
 
-    if(KMessageBox::warningYesNo( 0, message) == 3){  // 3 = yes button
+    if(KMessageBox::warningYesNo(0, message) == KMessageBox::Yes){
         if( partition->isPhysicalVolume() )
             return pv_extend(path); 
         else
@@ -89,7 +89,7 @@ bool max_fs(StorageDevice *device)
     if( ! device->isPhysicalVolume() )
         return false;
 
-    if(KMessageBox::warningYesNo( 0, message) == 3){  // 3 = yes button
+    if(KMessageBox::warningYesNo(0, message) == KMessageBox::Yes){
         return pv_extend(path); 
     }
 

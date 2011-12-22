@@ -65,7 +65,7 @@ bool extend_vg(QString volumeGroupName, StorageDevice *device, StoragePartition 
         KMessageBox::error(0, error_message);
     }
     else{
-        if( KMessageBox::questionYesNo(0, message) == 3 ){     // 3 is the "yes" button
+        if(KMessageBox::questionYesNo(0, message) == KMessageBox::Yes){
 
             progress_box->setRange(0, 1);
             progress_box->setValue(0);

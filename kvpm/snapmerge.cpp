@@ -22,12 +22,12 @@
 #include "snapmerge.h"
 
 
-bool merge_snap(LogVol *snapshot)
+bool merge_snap(LogVol *const snapshot)
 {
     QStringList args;
-    QString message = i18n( "Merge snapshot: %1 with origin: %2?", snapshot->getName(), snapshot->getOrigin() );
+    QString message = i18n("Merge snapshot: <b>%1</b> with origin: <b>%2</b>?", snapshot->getName(), snapshot->getOrigin());
     
-    if(KMessageBox::warningYesNo( 0, message) == 3){      // 3 = "yes" button
+    if(KMessageBox::warningYesNo(0, message) == KMessageBox::Yes){
 
 	args << "lvconvert"
 	     << "--merge" 

@@ -40,7 +40,7 @@ bool remove_mirror_leg(LogVol *mirrorLeg)
 
     QString message = i18n("Remove mirror leg: %1 ?", mirrorLeg->getName());
     
-    if(KMessageBox::warningYesNo( 0, message) == 3){      // 3 = "yes" button
+    if(KMessageBox::warningYesNo(0, message) == KMessageBox::Yes){
 
 	args << "lvconvert"
 	     << "--mirrors" 

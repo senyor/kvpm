@@ -18,7 +18,7 @@
 
 class VolGroup;
 
-bool export_vg(VolGroup *volumeGroup);
+bool export_vg(VolGroup *const volumeGroup);
 
 
 #endif
