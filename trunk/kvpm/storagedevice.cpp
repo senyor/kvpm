@@ -23,11 +23,10 @@
 #include "physvol.h"
 #include "mounttables.h"
 
-StorageDevice::StorageDevice( PedDevice *pedDevice,
-			      QList<PhysVol *> pvList, 
-			      MountTables *mountInformationList) : QObject()
+StorageDevice::StorageDevice( PedDevice *const pedDevice,
+			      const QList<PhysVol *> pvList, 
+			      MountTables *const mountTables) : QObject()
 {
-
     PedPartition *part = NULL;
     PedDisk      *disk = NULL;
     PedGeometry       geometry;
@@ -44,24 +43,24 @@ StorageDevice::StorageDevice( PedDevice *pedDevice,
     m_device_path = QString("%1").arg(pedDevice->path);
 
     if( pedDevice->read_only )
-      m_writable = false;
+        m_is_writable = false;
     else
-      m_writable = true;
+        m_is_writable = true;
 
-    m_busy = ped_device_is_busy(pedDevice);
+    m_is_busy = ped_device_is_busy(pedDevice);
 
-    m_physical_volume = false;
+    m_is_pv = false;
     m_pv = NULL;
 
     for(int x = 0; x < pvList.size(); x++){
 	if(m_device_path == pvList[x]->getName()){
 	    m_pv = pvList[x];
-	    m_physical_volume = true;
+	    m_is_pv = true;
 	}
     }
 
     disk = ped_disk_new(pedDevice);
-    if( disk && !m_physical_volume ){
+    if( disk && !m_is_pv ){
 	m_disk_label = QString( (disk->type)->name );
 	while( (part = ped_disk_next_partition (disk, part)) ){
 
@@ -76,15 +75,14 @@ StorageDevice::StorageDevice( PedDevice *pedDevice,
 		m_storage_partitions.append(new StoragePartition( part,
 								  m_freespace_count,
 								  pvList, 
-								  mountInformationList ));
+								  mountTables ));
 	    }
 	}
     }
-    else if (m_physical_volume)
+    else if (m_is_pv)
 	m_disk_label = "physical volume";
     else
 	m_disk_label = "unknown";
-
 }
 
 QString StorageDevice::getName()
@@ -134,17 +132,17 @@ long long StorageDevice::getPhysicalSectorSize()
 
 bool StorageDevice::isWritable()
 {
-    return m_writable;
+    return m_is_writable;
 }
 
 bool StorageDevice::isBusy()
 {
-    return m_busy;
+    return m_is_busy;
 }
 
 bool StorageDevice::isPhysicalVolume()
 {
-    return m_physical_volume;
+    return m_is_pv;
 }
 
 PhysVol* StorageDevice::getPhysicalVolume()

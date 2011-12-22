@@ -35,18 +35,16 @@ Q_OBJECT
     QString   m_hardware;
     long long m_sector_size;
     long long m_physical_sector_size;
-    bool      m_writable;
-    bool      m_busy;
-    bool      m_physical_volume;
+    bool      m_is_writable;
+    bool      m_is_busy;
+    bool      m_is_pv;
     PhysVol  *m_pv;
     int       m_freespace_count;
 
     QList<StoragePartition *> m_storage_partitions;
 
  public:
-    StorageDevice(PedDevice *pedDevice,
-		  QList<PhysVol *> pvList, 
-		  MountTables *mountInformationList);
+    StorageDevice(PedDevice * const pedDevice, const QList<PhysVol *> pvList, MountTables *const mountTables);
 
     QString getName();
     QString getDiskLabel();

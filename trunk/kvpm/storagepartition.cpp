@@ -27,24 +27,22 @@
 #include "mounttables.h"
 #include "physvol.h"
 
-StoragePartition::StoragePartition(PedPartition *part,
-				   int freespaceCount,
-				   QList<PhysVol *> pvList, 
-				   MountTables *mountInfoList):
+StoragePartition::StoragePartition(PedPartition *const part, 
+                                   const int freespaceCount, 
+                                   const QList<PhysVol *> pvList, 
+                                   MountTables *const mountTables) :
     m_ped_partition (part)
-
 {
-    long long sector_size;
-    PedDisk   *ped_disk   = m_ped_partition->disk;
-    PedDevice *ped_device = ped_disk->dev;
+    PedDisk   *const ped_disk   = m_ped_partition->disk;
+    PedDevice *const ped_device = ped_disk->dev;
     PedGeometry ped_geometry = m_ped_partition->geom;
-    sector_size      = ped_device->sector_size;
+    const long long sector_size      = ped_device->sector_size;
     m_first_sector   = (ped_geometry).start;
     m_last_sector    = (ped_geometry).end;
     m_partition_size = (ped_geometry.length) * sector_size; // in bytes
     m_ped_type = m_ped_partition->type;
     m_is_writable = !ped_device->read_only;
-    m_is_pv    = false;
+    m_is_pv      = false;
     m_is_normal  = false;
     m_is_logical = false;
     m_pv = NULL;
@@ -99,7 +97,7 @@ StoragePartition::StoragePartition(PedPartition *part,
 
     PedPartitionFlag ped_flag = PED_PARTITION_BOOT;
 
-    if( ! m_partition_type.contains("freespace", Qt::CaseInsensitive) ){
+    if( !m_partition_type.contains("freespace", Qt::CaseInsensitive) ){
         while( ped_flag != 0  ){
 	    if( ped_partition_get_flag(m_ped_partition, ped_flag) )
 	        m_flags << ped_partition_flag_get_name(ped_flag);
@@ -125,18 +123,18 @@ StoragePartition::StoragePartition(PedPartition *part,
             m_is_mountable = true;
     }
 
-    for(int x = m_mount_entries.size() - 1; x >=0; x--)
+    for(int x = m_mount_entries.size() - 1; x >= 0; x--)
         delete m_mount_entries.takeAt(x);
 
-    m_mount_entries = mountInfoList->getMtabEntries(m_major, m_minor);
-    m_fstab_mount_point = mountInfoList->getFstabMountPoint(this);
+    m_mount_entries = mountTables->getMtabEntries(m_major, m_minor);
+    m_fstab_mount_point = mountTables->getFstabMountPoint(this);
 
     m_is_mounted = !m_mount_entries.isEmpty();
 
-    QString mp;
     if(m_is_mounted){
-        mp = m_mount_entries[0]->getMountPoint();
+        const QString mp = m_mount_entries[0]->getMountPoint();
         FSData *const fs_data = get_fs_data(mp);
+
         if(fs_data != NULL){
             m_fs_size = fs_data->size * fs_data->block_size; 
             m_fs_used = fs_data->used * fs_data->block_size;
@@ -158,7 +156,7 @@ StoragePartition::StoragePartition(PedPartition *part,
         m_is_busy = ped_partition_is_busy(m_ped_partition);
 
     PedPartition *temp_part = NULL;
-    PedDisk      *temp_disk = ped_disk_new(ped_device);
+    PedDisk *const temp_disk = ped_disk_new(ped_device);
 
     if( m_partition_type == "extended" ){
         m_is_empty = true;

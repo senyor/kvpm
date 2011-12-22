@@ -100,7 +100,7 @@ class LogVol
     void calculateTotalSize();
 
  public:
-    LogVol(lv_t lvmLV, vg_t lvmVG, VolGroup *vg, LogVol *lvParent, MountTables *const tables, bool orphan = false);
+    LogVol(lv_t lvmLV, vg_t lvmVG, VolGroup *const vg, LogVol *const lvParent, MountTables *const tables, bool orphan = false);
     ~LogVol();
 
     void rescan(lv_t lvmLV, vg_t lvmVG);
@@ -131,7 +131,7 @@ class LogVol
     QStringList getPvNamesAll();         // full path of physical volumes for all segments
     QStringList getPvNamesAllFlat();     // full path of physical volumes including child lvs, un-nested
     QStringList getMountPoints();
-    QList<MountEntry *> getMountEntries();
+    QList<MountEntry *> getMountEntries();  // Calling function must delete these objects in the list
     QString getFstabMountPoint();
     QStringList getTags();
     long long getSpaceUsedOnPv(const QString physicalVolume);

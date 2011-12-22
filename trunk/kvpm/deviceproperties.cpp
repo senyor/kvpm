@@ -33,7 +33,7 @@
 DeviceProperties::DeviceProperties(StorageDevice *const device, QWidget *parent) 
   : QWidget(parent) 
 {
-    QVBoxLayout *layout = new QVBoxLayout();
+    QVBoxLayout *const layout = new QVBoxLayout();
     layout->setSpacing(0);
     layout->setMargin(0);
     setLayout(layout);
@@ -54,7 +54,6 @@ DeviceProperties::DeviceProperties(StoragePartition *const partition, QWidget *p
     setLayout(layout);
     layout->setSpacing(0);
     layout->setMargin(0);
-
     layout->addWidget( generalFrame(partition) );
 
     KConfigSkeleton skeleton;
@@ -92,11 +91,10 @@ QFrame *DeviceProperties::generalFrame(StoragePartition *const partition)
     QLabel *const name_label =  new QLabel( QString("<b>%1</b>").arg( partition->getName() ) );
     name_label->setAlignment( Qt::AlignCenter );
     layout->addWidget(name_label);
-
     layout->addWidget( new QLabel( i18n("First sector: %1", partition->getFirstSector() ) ) );
     layout->addWidget( new QLabel( i18n("Last sector: %1", partition->getLastSector() ) ) );
 
-    if( partition->getType() == "logical" || partition->getType() == "normal"){
+    if(partition->getType() == "logical" || partition->getType() == "normal"){
         layout->addWidget( new QLabel() );
         const QStringList flags = partition->getFlags();
         layout->addWidget( new QLabel( i18n("Flags: %1", flags.join(", ") ) ) );
@@ -253,7 +251,6 @@ QFrame *DeviceProperties::hardwareFrame(StorageDevice *const device)
     QFrame *const frame = new QFrame;
     QVBoxLayout *const layout = new QVBoxLayout();
     frame->setLayout(layout);
-
     frame->setFrameStyle( QFrame::Sunken | QFrame::StyledPanel );
     frame->setLineWidth(2);   
 
