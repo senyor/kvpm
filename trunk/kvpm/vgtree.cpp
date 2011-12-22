@@ -25,7 +25,7 @@
 #include "volgroup.h"
 
 
-VGTree::VGTree(VolGroup *VolumeGroup) : QTreeWidget(), m_vg(VolumeGroup)
+VGTree::VGTree(VolGroup *const group) : QTreeWidget(), m_vg(group)
 {
     QStringList header_labels;
     m_init = true;
@@ -496,8 +496,8 @@ void VGTree::setViewConfig()
     skeleton.addItemBool( "volume",      volume,      true );
     skeleton.addItemBool( "size",        size,        true );
     skeleton.addItemBool( "remaining",   remaining,   true );
-    skeleton.addItemBool( "filesystem",  filesystem,  true );
-    skeleton.addItemBool( "type",        type,        false );
+    skeleton.addItemBool( "type",        type,        true );
+    skeleton.addItemBool( "filesystem",  filesystem,  false );
     skeleton.addItemBool( "stripes",     stripes,     false );
     skeleton.addItemBool( "stripesize",  stripesize,  false );
     skeleton.addItemBool( "snapmove",    snapmove,    true );
