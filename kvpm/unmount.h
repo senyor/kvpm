@@ -20,11 +20,12 @@
 #include <QList>
 
 class LogVol;
+class MountEntry;
 class NoMungeCheck;
 class StoragePartition;
 
-bool unmount_filesystem(StoragePartition *partition);
-bool unmount_filesystem(LogVol *logicalVolume);
+bool unmount_filesystem(StoragePartition *const partition);
+bool unmount_filesystem(LogVol *const volume);
 bool unmount_filesystem(const QString mountPoint);
 
 
@@ -33,11 +34,10 @@ class UnmountDialog : public KDialog
 Q_OBJECT
 
     QList<NoMungeCheck *> m_check_list; // one check box for each mount point
-    QStringList m_mount_points;
+    QList<MountEntry *> m_mount_entries;
  
  public:
-    UnmountDialog(QString device, QStringList mountPoints, 
-		  QList<int> mountPosition, QWidget *parent = 0);
+    UnmountDialog(QString const device, const QList<MountEntry *> entries, QWidget *parent = 0);
 
  private slots:   
     void unmountFilesystems();

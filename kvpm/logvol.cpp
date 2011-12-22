@@ -54,6 +54,9 @@ LogVol::~LogVol()
 {
     QList<LogVol *> children = getChildren();
 
+    for(int x = m_mount_entries.size() - 1; x >= 0; x--)
+	delete m_mount_entries.takeAt(x);
+
     while( children.size() )
         delete children.takeAt(0);
 
@@ -354,20 +357,16 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)  // lv_t seems to change -- why?
     QString tag = value.value.string;
     m_tags = tag.split(',', QString::SkipEmptyParts);
 
-    m_mount_info_list = m_tables->getMtabEntries(m_major_device, m_minor_device);
+    for(int x = m_mount_entries.size() - 1; x >= 0; x--)
+	delete m_mount_entries.takeAt(x);
 
-/* To Do: get all the rest of the mount info, not just mount points */
+    m_mount_entries = m_tables->getMtabEntries(m_major_device, m_minor_device);
+
     m_fstab_mount_point = m_tables->getFstabMountPoint(this);
+
     m_mount_points.clear();
-    m_mount_position.clear();
-
-    for(int x = 0; x < m_mount_info_list.size(); x++){
-        m_mount_points.append( m_mount_info_list[x]->getMountPoint() );
-	m_mount_position.append( m_mount_info_list[x]->getMountPosition() );
-	delete m_mount_info_list[x];
-    }
-
-    m_mount_info_list.clear();
+    for(int x = 0; x < m_mount_entries.size(); x++)
+        m_mount_points.append( m_mount_entries[x]->getMountPoint() );
 
     m_mounted = !m_mount_points.isEmpty();
 
@@ -916,19 +915,20 @@ QString LogVol::getOrigin()
     return  m_origin;
 }
 
-/* TO DO: Merge these next two lists in a single
-   list of objects containing mount point and relevant
-   mount position. See "mountentry.h" for more on mount 
-   position. */
+QList<MountEntry *> LogVol::getMountEntries()
+{
+    QList<MountEntry *> copy;
+    QListIterator<MountEntry *> itr(m_mount_entries);
+
+    while( itr.hasNext() )
+        copy.append( new MountEntry( itr.next() ) );
+
+    return copy;
+}
 
 QStringList LogVol::getMountPoints()
 {
     return m_mount_points;
-}
-
-QList<int> LogVol::getMountPosition()
-{
-    return m_mount_position;
 }
 
 QString LogVol::getFstabMountPoint()

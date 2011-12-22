@@ -22,6 +22,7 @@
 
 #include "logvol.h"
 #include "misc.h"
+#include "mountentry.h"
 #include "volgroup.h"
 
 
@@ -77,46 +78,52 @@ LVProperties::LVProperties(LogVol *const logicalVolume, const int segment, QWidg
 
 QFrame *LVProperties::mountPointsFrame()
 {
-    QLabel *temp_label;
-    QFrame *frame = new QFrame();
-    QVBoxLayout *layout = new QVBoxLayout();
+    QLabel *label;
+    QFrame *const frame = new QFrame();
+    QVBoxLayout *const layout = new QVBoxLayout();
     frame->setLayout(layout);
     frame->setFrameStyle( QFrame::Sunken | QFrame::StyledPanel );
     frame->setLineWidth(2);
 
-    QStringList mount_points   = m_lv->getMountPoints();
-    QList<int>  mount_position = m_lv->getMountPosition();
+    const QList<MountEntry *> entries = m_lv->getMountEntries();
 
-    if(mount_points.size() > 1){
-        temp_label = new QLabel( i18n("<b>Mount points</b>") );
-        temp_label->setAlignment(Qt::AlignCenter);
-        layout->addWidget(temp_label);
+    if(entries.size() > 1){
+        label = new QLabel( i18n("<b>Mount points</b>") );
+        label->setAlignment(Qt::AlignCenter);
+        layout->addWidget(label);
     }
     else{
-        temp_label = new QLabel( i18n("<b>Mount point</b>") ) ;
-        temp_label->setAlignment(Qt::AlignCenter);
-        layout->addWidget(temp_label);
+        label = new QLabel( i18n("<b>Mount point</b>") ) ;
+        label->setAlignment(Qt::AlignCenter);
+        layout->addWidget(label);
     }
-    
-    if(mount_points.size() == 0){
-        temp_label = new QLabel( i18n("not mounted") ) ;
-        temp_label->setAlignment(Qt::AlignLeft);
-        layout->addWidget(temp_label);
+
+    if(entries.size() == 0){
+        label = new QLabel( i18n("not mounted") ) ;
+        label->setAlignment(Qt::AlignLeft);
+        layout->addWidget(label);
     }
     else{
-        for(int x = 0; x < mount_points.size(); x++){
-            if(mount_position[x] > 0){
-                temp_label = new QLabel( QString("%1 <%2>").arg(mount_points[x]).arg(mount_position[x]) );
-                temp_label->setToolTip( QString("%1 <%2>").arg(mount_points[x]).arg(mount_position[x]) );
-                layout->addWidget( temp_label );
+        for(int x = 0; x < entries.size(); x++){
+            const int pos = entries[x]->getMountPosition();
+            const QString mp = entries[x]->getMountPoint();
+
+            if(pos > 0){
+                label = new QLabel( QString("%1 <%2>").arg(mp).arg(pos) );
+                label->setToolTip( QString("%1 <%2>").arg(mp).arg(pos) );
+                layout->addWidget(label);
             }
             else{
-                temp_label = new QLabel( mount_points[x] );
-                temp_label->setToolTip( mount_points[x] );
-                layout->addWidget( temp_label );
+                label = new QLabel(mp);
+                label->setToolTip(mp);
+                layout->addWidget(label);
             }
         }
     }
+
+    QListIterator<MountEntry *> entry_itr(entries);
+    while( entry_itr.hasNext() )
+        delete entry_itr.next();
 
     return frame;
 }
@@ -130,18 +137,18 @@ QFrame *LVProperties::uuidFrame()
     frame->setFrameStyle( QFrame::Sunken | QFrame::StyledPanel );
     frame->setLineWidth(2);
 
-    QLabel *temp_label = new QLabel( i18n("<b>Logical volume UUID</b>") );
-    temp_label->setAlignment(Qt::AlignCenter);
-    layout->addWidget( temp_label );
+    QLabel *label = new QLabel( i18n("<b>Logical volume UUID</b>") );
+    label->setAlignment(Qt::AlignCenter);
+    layout->addWidget( label );
 
     uuid = splitUuid( m_lv->getUuid() );
-    temp_label = new QLabel( uuid[0] );
-    temp_label->setToolTip( m_lv->getUuid() );
-    layout->addWidget( temp_label );
+    label = new QLabel( uuid[0] );
+    label->setToolTip( m_lv->getUuid() );
+    layout->addWidget( label );
 
-    temp_label = new QLabel( uuid[1] );
-    temp_label->setToolTip( m_lv->getUuid() );
-    layout->addWidget( temp_label );
+    label = new QLabel( uuid[1] );
+    label->setToolTip( m_lv->getUuid() );
+    layout->addWidget( label );
 
     return frame;
 }
@@ -154,30 +161,30 @@ QFrame *LVProperties::fsFrame(const bool showFsUuid, const bool showFsLabel)
     frame->setLayout(layout);
     frame->setFrameStyle( QFrame::Sunken | QFrame::StyledPanel );
     frame->setLineWidth(2);
-    QLabel *temp_label;
+    QLabel *label;
 
     if(showFsLabel){
-        temp_label = new QLabel( i18n("<b>Filesystem label</b>") );
-        temp_label->setAlignment(Qt::AlignCenter);
-        layout->addWidget( temp_label );
-        temp_label = new QLabel( m_lv->getFilesystemLabel() );
-        temp_label->setToolTip( m_lv->getFilesystemLabel() );
-        temp_label->setWordWrap(true);
-        layout->addWidget( temp_label );
+        label = new QLabel( i18n("<b>Filesystem label</b>") );
+        label->setAlignment(Qt::AlignCenter);
+        layout->addWidget( label );
+        label = new QLabel( m_lv->getFilesystemLabel() );
+        label->setToolTip( m_lv->getFilesystemLabel() );
+        label->setWordWrap(true);
+        layout->addWidget( label );
     }
 
     if(showFsUuid){
-        temp_label = new QLabel( i18n("<b>Filesystem UUID</b>") );
-        temp_label->setAlignment(Qt::AlignCenter);
-        layout->addWidget( temp_label );
+        label = new QLabel( i18n("<b>Filesystem UUID</b>") );
+        label->setAlignment(Qt::AlignCenter);
+        layout->addWidget( label );
         
         uuid = splitUuid( m_lv->getFilesystemUuid() );
-        temp_label = new QLabel( uuid[0] );
-        temp_label->setToolTip( m_lv->getFilesystemUuid() );
-        layout->addWidget( temp_label );
-        temp_label = new QLabel( uuid[1] );
-        temp_label->setToolTip( m_lv->getFilesystemUuid() );
-        layout->addWidget( temp_label );
+        label = new QLabel( uuid[0] );
+        label->setToolTip( m_lv->getFilesystemUuid() );
+        layout->addWidget( label );
+        label = new QLabel( uuid[1] );
+        label->setToolTip( m_lv->getFilesystemUuid() );
+        layout->addWidget( label );
     }
 
     return frame;
@@ -292,32 +299,32 @@ QFrame *LVProperties::physicalVolumesFrame(int segment)
     frame->setFrameStyle( QFrame::Sunken | QFrame::StyledPanel );
     frame->setLineWidth(2);
 
-    QLabel *temp_label = new QLabel( i18n("<b>Physical volumes</b>") );
-    temp_label->setAlignment(Qt::AlignCenter);
-    layout->addWidget(temp_label);
+    QLabel *label = new QLabel( i18n("<b>Physical volumes</b>") );
+    label->setAlignment(Qt::AlignCenter);
+    layout->addWidget(label);
 
     if( m_lv->isMirror() || m_lv->isSnapContainer() ){
 	pv_list = m_lv->getPvNamesAllFlat();
 	for(int pv = 0; pv < pv_list.size(); pv++){
-	    temp_label = new QLabel( pv_list[pv] );
-	    temp_label->setToolTip( pv_list[pv] );
-	    layout->addWidget( temp_label );
+	    label = new QLabel( pv_list[pv] );
+	    label->setToolTip( pv_list[pv] );
+	    layout->addWidget( label );
 	}
     } 
     else if(segment > -1){
 	pv_list = m_lv->getPvNames(segment);
 	for(int pv = 0; pv < pv_list.size(); pv++){
-	    temp_label = new QLabel( pv_list[pv] );
-	    temp_label->setToolTip( pv_list[pv] );
-	    layout->addWidget( temp_label );
+	    label = new QLabel( pv_list[pv] );
+	    label->setToolTip( pv_list[pv] );
+	    layout->addWidget( label );
 	}
     }
     else{
 	pv_list = m_lv->getPvNamesAll();
 	for(int pv = 0; pv < pv_list.size(); pv++){
-	    temp_label = new QLabel( pv_list[pv] );
-	    temp_label->setToolTip( pv_list[pv] );
-	    layout->addWidget( temp_label );
+	    label = new QLabel( pv_list[pv] );
+	    label->setToolTip( pv_list[pv] );
+	    layout->addWidget( label );
 	}
     }
 

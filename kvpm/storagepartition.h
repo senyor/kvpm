@@ -27,7 +27,7 @@ class MountTables;
 
 class StoragePartition 
 {
-    QList<MountEntry *> m_device_mount_info_list;
+    QList<MountEntry *> m_mount_entries;
     QString m_fstab_mount_point;
     PhysVol *m_pv;
     PedPartition *m_ped_partition;
@@ -72,8 +72,8 @@ public:
     unsigned int getPedType();
     QString getFstabMountPoint();
     QStringList getMountPoints();
+    QList<MountEntry *> getMountEntries();  // These need to be deleted by the calling function!
     QStringList getFlags();
-    QList<int> getMountPosition();
     long long getSize();
     long long getFirstSector();
     long long getLastSector();
