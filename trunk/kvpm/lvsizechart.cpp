@@ -21,9 +21,9 @@
 #include "lvsizechartseg.h"
 #include "volgroup.h"
 
-LVSizeChart::LVSizeChart(VolGroup *VolumeGroup, QTreeWidget *vgTree, QWidget *parent) : 
+LVSizeChart::LVSizeChart(VolGroup *const group, QTreeWidget *const vgTree, QWidget *parent) : 
     QFrame(parent),
-    m_vg(VolumeGroup),
+    m_vg(group),
     m_vg_tree(vgTree)
 {
     m_layout = new QHBoxLayout(this);
@@ -100,7 +100,8 @@ void LVSizeChart::populateChart()
 	}
     }
 
-    if( free_extents && !m_vg->isExported() ){ // only create a free space widget if we have some
+    //    if( free_extents && !m_vg->isExported() ){ // only create a free space widget if we have some
+    if(free_extents){ // only create a free space widget if we have some
 	seg_ratio = (free_extents / (double) total_extents) + 0.02; // allow a little "stretch" 0.02
 	usage = "freespace" ;
 	widget = new LVChartSeg(m_vg, 0, usage, this);

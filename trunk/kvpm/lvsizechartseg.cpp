@@ -29,23 +29,22 @@
 /* This should be passed *lv = 0 if it is really free space on a volume
    group that is being displayed */
 
-LVChartSeg::LVChartSeg(VolGroup *volumeGroup, LogVol *logicalVolume, QString use, QWidget *parent) : 
+LVChartSeg::LVChartSeg(VolGroup *const group, LogVol *const volume, const QString use, QWidget *parent) : 
     QFrame(parent), 
-    m_vg(volumeGroup),
-    m_lv(logicalVolume)
+    m_vg(group),
+    m_lv(volume)
 {
-    
     setFrameStyle( QFrame::Sunken | QFrame::Panel );
     setLineWidth(2);
 
-    QVBoxLayout *layout = new QVBoxLayout();
-    QWidget *color_widget = new QWidget();
+    QVBoxLayout *const layout = new QVBoxLayout();
+    QWidget *const color_widget = new QWidget();
     layout->addWidget(color_widget);
     layout->setSpacing(0);
     layout->setMargin(0);
     setLayout(layout);
 
-    QPalette *colorset = new QPalette();
+    QPalette *const colorset = new QPalette();
 
     KConfigSkeleton skeleton;
 
