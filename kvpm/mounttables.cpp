@@ -91,6 +91,9 @@ void MountTables::loadData()
     for(int x = m_mount_list.size() - 1; x >= 0; x--){
         int pos = 1;
 
+        if( m_mount_list[x]->getMountPosition() > 0 )
+            continue;
+
         for(int y = x - 1; y >= 0; y--){
             if(m_mount_list[y]->getMountPoint() == m_mount_list[x]->getMountPoint() )
                 m_mount_list[y]->setMountPosition(++pos);
