@@ -24,6 +24,7 @@
 #include <QtGui>
 
 #include "misc.h"
+#include "mountentry.h"
 #include "physvol.h"
 #include "storagedevice.h"
 #include "storagepartition.h"
@@ -46,7 +47,7 @@ DeviceProperties::DeviceProperties(StorageDevice *const device, QWidget *parent)
     layout->addStretch();
 }
 
-DeviceProperties::DeviceProperties( StoragePartition *const partition, QWidget *parent)
+DeviceProperties::DeviceProperties(StoragePartition *const partition, QWidget *parent)
     : QWidget(parent) 
 {
     QVBoxLayout *const layout = new QVBoxLayout();
@@ -112,29 +113,42 @@ QFrame *DeviceProperties::mpFrame(StoragePartition *const partition)
     frame->setFrameStyle( QFrame::Sunken | QFrame::StyledPanel );
     frame->setLineWidth(2);   
     
-    QStringList mount_points   = partition->getMountPoints();
-    const QList<int>  mount_position = partition->getMountPosition();
+    const QList<MountEntry *> entries = partition->getMountEntries();
+
     QLabel *label;    
 
-    if( mount_points.size() <= 1 )
+    if( entries.size() <= 1 )
         label = new QLabel( i18n("<b>Mount point</b>") );
     else
         label = new QLabel( i18n("<b>Mount points</b>") );
     
-    label->setAlignment( Qt::AlignCenter );
-    layout->addWidget( label );
+    label->setAlignment(Qt::AlignCenter);
+    layout->addWidget(label);
     
-    if( mount_points.size() ){
-        for(int x = 0; x < mount_points.size(); x++){
-            if( mount_position[x] > 1 )
-                mount_points[x] = mount_points[x] + QString("<%1>").arg(mount_position[x]);
-            
-            layout->addWidget( new QLabel( mount_points[x] ) );
+    if( !entries.isEmpty() ){
+        for(int x = 0; x < entries.size(); x++){
+            const QString mp = entries[x]->getMountPoint();
+            const int pos = entries[x]->getMountPosition();
+
+            if( entries[x]->getMountPosition() > 0 ){
+                label = new QLabel(mp + QString("<%1>").arg(pos));
+                label->setToolTip(mp + QString("<%1>").arg(pos));
+                layout->addWidget(label);
+            }
+            else{
+                label = new QLabel(mp);
+                label->setToolTip(mp);
+                layout->addWidget(label);
+            }
         }
     }
     else{
         layout->addWidget( new QLabel( i18n("Not mounted") ) );
     }
+
+    QListIterator<MountEntry *> entry_itr(entries);
+    while( entry_itr.hasNext() )
+        delete entry_itr.next();
     
     return frame;
 }

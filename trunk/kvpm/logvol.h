@@ -34,7 +34,7 @@ class LogVol
 {
     VolGroup *m_vg;
     QList<Segment *> m_segments;
-    QList<MountEntry *> m_mount_info_list;
+    QList<MountEntry *> m_mount_entries;
     QList<LogVol *> m_lv_children;  // For a mirror the children are the legs and log
                                     // Snapshots are also children -- see m_snap_container
 
@@ -57,8 +57,6 @@ class LogVol
     QStringList m_tags;
     QString     m_fstab_mount_point;
     QStringList m_mount_points;  // empty if not mounted
-    QList<int> m_mount_position; // if mountpoint has multiple mounts 
-                                 // position 1 is the most recently mounted one.
 
     double  m_snap_percent;      // the percentage used, if this is a snapshot
     double  m_copy_percent;      // the percentage of extents moved, if pvmove underway
@@ -133,9 +131,9 @@ class LogVol
     QStringList getPvNamesAll();         // full path of physical volumes for all segments
     QStringList getPvNamesAllFlat();     // full path of physical volumes including child lvs, un-nested
     QStringList getMountPoints();
+    QList<MountEntry *> getMountEntries();
     QString getFstabMountPoint();
     QStringList getTags();
-    QList<int>  getMountPosition();
     long long getSpaceUsedOnPv(const QString physicalVolume);
     long long getExtents();
     long long getSize();

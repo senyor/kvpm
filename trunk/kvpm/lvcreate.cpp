@@ -22,6 +22,7 @@
 #include "fsextend.h"
 #include "logvol.h"
 #include "misc.h"
+#include "mountentry.h"
 #include "physvol.h"
 #include "pvcheckbox.h"
 #include "processprogress.h"

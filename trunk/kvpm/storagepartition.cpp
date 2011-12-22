@@ -125,20 +125,17 @@ StoragePartition::StoragePartition(PedPartition *part,
             m_is_mountable = true;
     }
 
-    for(int x = m_device_mount_info_list.size() - 1; x >=0; x--)
-        delete m_device_mount_info_list.takeAt(x);
+    for(int x = m_mount_entries.size() - 1; x >=0; x--)
+        delete m_mount_entries.takeAt(x);
 
-    m_device_mount_info_list = mountInfoList->getMtabEntries(m_major, m_minor);
+    m_mount_entries = mountInfoList->getMtabEntries(m_major, m_minor);
     m_fstab_mount_point = mountInfoList->getFstabMountPoint(this);
 
-    if( m_device_mount_info_list.size() )
-	m_is_mounted = true;
-    else
-	m_is_mounted = false;
+    m_is_mounted = !m_mount_entries.isEmpty();
 
     QString mp;
     if(m_is_mounted){
-        mp = m_device_mount_info_list[0]->getMountPoint();
+        mp = m_mount_entries[0]->getMountPoint();
         FSData *const fs_data = get_fs_data(mp);
         if(fs_data != NULL){
             m_fs_size = fs_data->size * fs_data->block_size; 
@@ -180,8 +177,8 @@ StoragePartition::StoragePartition(PedPartition *part,
 
 StoragePartition::~StoragePartition()
 {
-    for(int x = 0; x < m_device_mount_info_list.size(); x++)
-	delete m_device_mount_info_list[x];
+    for(int x = 0; x < m_mount_entries.size(); x++)
+	delete m_mount_entries[x];
 }
 
 QString StoragePartition::getType()
@@ -332,20 +329,21 @@ QStringList StoragePartition::getMountPoints()
 {
     QStringList mount_points;
     
-    for(int x = 0; x < m_device_mount_info_list.size(); x++)
-	mount_points.append( m_device_mount_info_list[x]->getMountPoint() );
+    for(int x = 0; x < m_mount_entries.size(); x++)
+	mount_points.append( m_mount_entries[x]->getMountPoint() );
 
     return mount_points;
 }
 
-QList<int> StoragePartition::getMountPosition()
+QList<MountEntry *> StoragePartition::getMountEntries()
 {
-  QList<int> mount_position;
-    
-    for(int x = 0; x < m_device_mount_info_list.size(); x++)
-	mount_position.append( m_device_mount_info_list[x]->getMountPosition() );
+    QList<MountEntry *> copy;
+    QListIterator<MountEntry *> itr(m_mount_entries);
 
-    return mount_position;
+    while( itr.hasNext() )
+        copy.append( new MountEntry( itr.next() ) );
+
+    return copy;
 }
 
 QStringList StoragePartition::getFlags()
