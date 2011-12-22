@@ -36,7 +36,7 @@ bool remove_vg(VolGroup *volumeGroup)
     bool success = true;
     const QString message = i18n("Are you certain you want to delete volume group: <b>%1</b>?", volumeGroup->getName());
 
-    if(KMessageBox::questionYesNo( 0, message) == 3){      // 3 = "yes" button
+    if(KMessageBox::questionYesNo( 0, message) == KMessageBox::Yes){
 
         progress_box->setRange(0,3);
         progress_box->setValue(1);

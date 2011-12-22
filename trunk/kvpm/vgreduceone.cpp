@@ -28,9 +28,7 @@ bool reduce_vg_one(QString volumeGroupName, QString physicalVolumeName)
     const QString message = i18n( "Remove physical volume: <b>%1</b> from volume " 
                                   "group: <b>%2</b>", physicalVolumeName, volumeGroupName );
 
-    int return_code =  KMessageBox::questionYesNo( 0, message);
-
-    if(return_code == 3){  // 3 = yes button
+    if(KMessageBox::questionYesNo(0, message) == KMessageBox::Yes){
 
 	args << "vgreduce"
 	     << volumeGroupName

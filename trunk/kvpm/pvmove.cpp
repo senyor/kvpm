@@ -44,7 +44,7 @@ bool restart_pvmove()
     QStringList args;
     const QString message = i18n("Do you wish to restart all interrupted physical volume moves?");
 
-    if(KMessageBox::questionYesNo( 0, message) == 3){      // 3 = "yes" button
+    if(KMessageBox::questionYesNo(0, message) == KMessageBox::Yes){
 
         args << "pvmove";
 
@@ -60,7 +60,7 @@ bool stop_pvmove()
     QStringList args;
     const QString message = i18n("Do you wish to abort all physical volume moves currently in progress?");
     
-    if(KMessageBox::questionYesNo( 0, message) == 3){      // 3 = "yes" button
+    if(KMessageBox::questionYesNo(0, message) == KMessageBox::Yes){
 
         args << "pvmove" << "--abort";
 

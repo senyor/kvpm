@@ -18,7 +18,7 @@
 
 class LogVol;
 
-bool merge_snap(LogVol *snapshot);
+bool merge_snap(LogVol *const snapshot);
 
 
 #endif
