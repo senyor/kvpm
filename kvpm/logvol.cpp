@@ -40,7 +40,7 @@ struct Segment
                                           // for this segment
 };
 
-LogVol::LogVol(lv_t lvmLV, vg_t lvmVG, VolGroup *vg, LogVol *lvParent, MountTables *const tables, bool orphan) :
+LogVol::LogVol(lv_t lvmLV, vg_t lvmVG, VolGroup *const vg, LogVol *const lvParent, MountTables *const tables, bool orphan) :
     m_vg(vg),
     m_lv_parent(lvParent),
     m_orphan(orphan)

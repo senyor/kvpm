@@ -55,10 +55,10 @@ class StoragePartition
     bool m_is_logical;
     
 public: 
-    StoragePartition(PedPartition *part,
-		     int freespaceCount,
-		     QList<PhysVol *> pvList, 
-		     MountTables *mountInfoList);
+    StoragePartition(PedPartition *const part, 
+                     const int freespaceCount, 
+                     const QList<PhysVol *> pvList, 
+                     MountTables *const mountTables);
 
     ~StoragePartition();
 
