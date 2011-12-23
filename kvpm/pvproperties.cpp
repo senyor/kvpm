@@ -15,6 +15,7 @@
 
 #include "pvproperties.h"
 
+#include <KConfigSkeleton>
 #include <KSeparator>
 #include <KLocale>
 #include <QtGui>
@@ -32,25 +33,38 @@ struct LVSegmentExtent
     long long last_extent;
 };
 
+
 bool isLessThan( const LVSegmentExtent * lv1 , const LVSegmentExtent * lv2 )
 {
     return lv1->first_extent < lv2->first_extent;
 }
 
 
-PVProperties::PVProperties(PhysVol *physicalVolume, QWidget *parent) : 
+PVProperties::PVProperties(PhysVol *const volume, QWidget *parent) : 
     QWidget(parent),
-    m_pv(physicalVolume)
+    m_pv(volume)
 {
     setBackgroundRole(QPalette::Base);
     setAutoFillBackground(true);
 
+    KConfigSkeleton skeleton;
+    bool mda, uuid;
+
+    skeleton.setCurrentGroup("PhysicalVolumeProperties");
+    skeleton.addItemBool("mda",  mda,  true);
+    skeleton.addItemBool("uuid", uuid, false);
+
     QVBoxLayout *const top_layout = new QVBoxLayout;
     top_layout->setSpacing(2);
     top_layout->setMargin(2);
-    top_layout->addWidget( buildLVBox() );
-    top_layout->addWidget( buildMDABox() );
-    top_layout->addWidget( buildUUIDBox() );
+
+    top_layout->addWidget( buildLvBox() );
+
+    if(mda)
+        top_layout->addWidget( buildMdaBox() );
+    if(uuid)
+        top_layout->addWidget( buildUuidBox() );
+
     top_layout->addStretch();
     setLayout(top_layout);
 } 
@@ -90,32 +104,32 @@ QList<LVSegmentExtent *> PVProperties::sortByExtent()
     return lv_extents;
 }
 
-QFrame *PVProperties::buildMDABox()
+QFrame *PVProperties::buildMdaBox()
 {
-    QLabel *temp_label;
+    QLabel *label;
     QHBoxLayout *const layout = new QHBoxLayout;
     QFrame *const frame = new QFrame;
     frame->setFrameStyle( QFrame::Sunken | QFrame::StyledPanel );
     frame->setLineWidth(2);
     frame->setLayout(layout);
 
-    temp_label = new QLabel( "<b>MDA</b>" );
-    temp_label->setAlignment( Qt::AlignVCenter | Qt::AlignLeft );
-    layout->addWidget(temp_label);
-    temp_label = new QLabel( QString("Total: %1").arg( m_pv->getMdaCount() ) );
-    layout->addWidget(temp_label);
-    temp_label = new QLabel( QString("In use: %1").arg( m_pv->getMdaUsed() ) );
-    layout->addWidget(temp_label);
-    temp_label = new QLabel( QString("Size: %1").arg( sizeToString( m_pv->getMdaSize() ) ) );
-    layout->addWidget(temp_label);
+    label = new QLabel( "<b>MDA</b>" );
+    label->setAlignment( Qt::AlignVCenter | Qt::AlignLeft );
+    layout->addWidget(label);
+    label = new QLabel( QString("Total: %1").arg( m_pv->getMdaCount() ) );
+    layout->addWidget(label);
+    label = new QLabel( QString("In use: %1").arg( m_pv->getMdaUsed() ) );
+    layout->addWidget(label);
+    label = new QLabel( QString("Size: %1").arg( sizeToString( m_pv->getMdaSize() ) ) );
+    layout->addWidget(label);
 
     return frame;
 }
 
-QFrame *PVProperties::buildLVBox()
+QFrame *PVProperties::buildLvBox()
 {
     QGridLayout *const layout = new QGridLayout;
-    QLabel *temp_label;
+    QLabel *label;
     long long first_extent;
     long long last_extent;
 
@@ -124,18 +138,18 @@ QFrame *PVProperties::buildLVBox()
     frame->setLineWidth(2);
     frame->setLayout(layout);
 
-    temp_label = new QLabel( i18n("Volume name") );
-    temp_label->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
-    layout->addWidget(temp_label, 1, 0);
-    temp_label =  new QLabel( i18n("Start") );
-    temp_label->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
-    layout->addWidget(temp_label, 1, 1);
-    temp_label = new QLabel( i18n("End") );
-    temp_label->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
-    layout->addWidget(temp_label, 1, 2);
-    temp_label =  new QLabel( i18n("Extents") );
-    temp_label->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
-    layout->addWidget(temp_label, 1, 3);
+    label = new QLabel( i18n("Volume name") );
+    label->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+    layout->addWidget(label, 1, 0);
+    label =  new QLabel( i18n("Start") );
+    label->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+    layout->addWidget(label, 1, 1);
+    label = new QLabel( i18n("End") );
+    label->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+    layout->addWidget(label, 1, 2);
+    label =  new QLabel( i18n("Extents") );
+    label->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+    layout->addWidget(label, 1, 3);
 
     const QList<LVSegmentExtent *> lv_extents = sortByExtent();
 
@@ -147,62 +161,62 @@ QFrame *PVProperties::buildLVBox()
         last_extent = lv_extents[x]->last_extent;
 
         if( row % 2 == 0 ){		    
-            temp_label = new QLabel( lv_extents[x]->lv_name );
-            temp_label->setAlignment(Qt::AlignLeft | Qt::AlignVCenter );
-            temp_label->setBackgroundRole(QPalette::Base);
-            temp_label->setAutoFillBackground(true);
-            layout->addWidget(temp_label,row, 0);
+            label = new QLabel( lv_extents[x]->lv_name );
+            label->setAlignment(Qt::AlignLeft | Qt::AlignVCenter );
+            label->setBackgroundRole(QPalette::Base);
+            label->setAutoFillBackground(true);
+            layout->addWidget(label,row, 0);
             
-            temp_label = new QLabel( i18n("%1", first_extent) );
-            temp_label->setAlignment(Qt::AlignRight | Qt::AlignVCenter );
-            temp_label->setBackgroundRole(QPalette::Base);
-            temp_label->setAutoFillBackground(true);
-            layout->addWidget(temp_label,row, 1);
+            label = new QLabel( i18n("%1", first_extent) );
+            label->setAlignment(Qt::AlignRight | Qt::AlignVCenter );
+            label->setBackgroundRole(QPalette::Base);
+            label->setAutoFillBackground(true);
+            layout->addWidget(label,row, 1);
             
-            temp_label = new QLabel( i18n("%1", last_extent) );
-            temp_label->setAlignment(Qt::AlignRight | Qt::AlignVCenter );
-            temp_label->setBackgroundRole(QPalette::Base);
-            temp_label->setAutoFillBackground(true);
-            layout->addWidget(temp_label, row, 2);
+            label = new QLabel( i18n("%1", last_extent) );
+            label->setAlignment(Qt::AlignRight | Qt::AlignVCenter );
+            label->setBackgroundRole(QPalette::Base);
+            label->setAutoFillBackground(true);
+            layout->addWidget(label, row, 2);
             
-            temp_label = new QLabel( i18n("%1", last_extent - first_extent + 1 ) );
-            temp_label->setBackgroundRole(QPalette::Base);
-            temp_label->setAutoFillBackground(true);
-            temp_label->setAlignment(Qt::AlignRight | Qt::AlignVCenter );
-            layout->addWidget(temp_label, row, 3);
+            label = new QLabel( i18n("%1", last_extent - first_extent + 1 ) );
+            label->setBackgroundRole(QPalette::Base);
+            label->setAutoFillBackground(true);
+            label->setAlignment(Qt::AlignRight | Qt::AlignVCenter );
+            layout->addWidget(label, row, 3);
         }
         else{
-            temp_label = new QLabel( lv_extents[x]->lv_name );
-            temp_label->setAlignment(Qt::AlignLeft | Qt::AlignVCenter );
-            temp_label->setBackgroundRole(QPalette::AlternateBase);
-            temp_label->setAutoFillBackground(true);
-            layout->addWidget(temp_label,row, 0);
+            label = new QLabel( lv_extents[x]->lv_name );
+            label->setAlignment(Qt::AlignLeft | Qt::AlignVCenter );
+            label->setBackgroundRole(QPalette::AlternateBase);
+            label->setAutoFillBackground(true);
+            layout->addWidget(label,row, 0);
             
-            temp_label = new QLabel( i18n("%1", first_extent) );
-            temp_label->setAlignment(Qt::AlignRight | Qt::AlignVCenter );
-            temp_label->setBackgroundRole(QPalette::AlternateBase);
-            temp_label->setAutoFillBackground(true);
-            layout->addWidget(temp_label,row, 1);
+            label = new QLabel( i18n("%1", first_extent) );
+            label->setAlignment(Qt::AlignRight | Qt::AlignVCenter );
+            label->setBackgroundRole(QPalette::AlternateBase);
+            label->setAutoFillBackground(true);
+            layout->addWidget(label,row, 1);
             
-            temp_label = new QLabel( i18n("%1", last_extent) );
-            temp_label->setAlignment(Qt::AlignRight | Qt::AlignVCenter );
-            temp_label->setBackgroundRole(QPalette::AlternateBase);
-            temp_label->setAutoFillBackground(true);
-            layout->addWidget(temp_label, row, 2);
+            label = new QLabel( i18n("%1", last_extent) );
+            label->setAlignment(Qt::AlignRight | Qt::AlignVCenter );
+            label->setBackgroundRole(QPalette::AlternateBase);
+            label->setAutoFillBackground(true);
+            layout->addWidget(label, row, 2);
             
-            temp_label = new QLabel( i18n("%1", last_extent - first_extent + 1 ) );
-            temp_label->setAlignment(Qt::AlignRight | Qt::AlignVCenter );
-            temp_label->setBackgroundRole(QPalette::AlternateBase);
-            temp_label->setAutoFillBackground(true);
-            layout->addWidget(temp_label, row, 3);
+            label = new QLabel( i18n("%1", last_extent - first_extent + 1 ) );
+            label->setAlignment(Qt::AlignRight | Qt::AlignVCenter );
+            label->setBackgroundRole(QPalette::AlternateBase);
+            label->setAutoFillBackground(true);
+            layout->addWidget(label, row, 3);
         }
         row++;
     }
 
-    temp_label = new QLabel();
-    layout->addWidget(temp_label, row + 1, 0, 1, -1 );
-    temp_label = new QLabel( i18n("Total extents: %1", m_pv->getSize() / m_pv->getVg()->getExtentSize() ) );
-    layout->addWidget(temp_label, row + 2, 0, 1, -1 );
+    label = new QLabel();
+    layout->addWidget(label, row + 1, 0, 1, -1 );
+    label = new QLabel( i18n("Total extents: %1", m_pv->getSize() / m_pv->getVg()->getExtentSize() ) );
+    layout->addWidget(label, row + 2, 0, 1, -1 );
 
     for(int x = 0; x < lv_extents.size(); x++)
         delete lv_extents[x];
@@ -210,23 +224,23 @@ QFrame *PVProperties::buildLVBox()
     return frame;
 }
 
-QFrame *PVProperties::buildUUIDBox()
+QFrame *PVProperties::buildUuidBox()
 {
-    QLabel *temp_label;
+    QLabel *label;
     QHBoxLayout *const layout = new QHBoxLayout;
     QFrame *const frame = new QFrame;
     frame->setFrameStyle( QFrame::Sunken | QFrame::StyledPanel );
     frame->setLineWidth(2);
     frame->setLayout(layout);
 
-    temp_label = new QLabel( "<b>UUID</b>" );
-    temp_label->setAlignment( Qt::AlignVCenter | Qt::AlignLeft );
-    layout->addWidget(temp_label);
+    label = new QLabel( "<b>UUID</b>" );
+    label->setAlignment( Qt::AlignVCenter | Qt::AlignLeft );
+    layout->addWidget(label);
 
-    temp_label = new QLabel( m_pv->getUuid() );
-    temp_label->setAlignment( Qt::AlignCenter );
-    temp_label->setWordWrap(true);
-    layout->addWidget(temp_label);
+    label = new QLabel( m_pv->getUuid() );
+    label->setAlignment( Qt::AlignCenter );
+    label->setWordWrap(true);
+    layout->addWidget(label);
 
     return frame;
 }

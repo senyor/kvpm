@@ -340,6 +340,9 @@ void KvpmConfigDialog::updateSettings()
     m_devprop_fsuuid  = m_devprop_fsuuid_check->isChecked();
     m_devprop_fslabel = m_devprop_fslabel_check->isChecked();
 
+    m_pvprop_mda = m_pvprop_mda_check->isChecked(); 
+    m_pvprop_pvuuid = m_pvprop_pvuuid_check->isChecked(); 
+
     if( m_percent_radio->isChecked() ){
         m_show_percent = true;
         m_show_total   = false;
@@ -438,6 +441,9 @@ void KvpmConfigDialog::updateWidgetsDefault()
     m_devprop_mp_check->setChecked(true);
     m_devprop_fsuuid_check->setChecked(false);
     m_devprop_fslabel_check->setChecked(false);
+
+    m_pvprop_mda_check->setChecked(true); 
+    m_pvprop_pvuuid_check->setChecked(false); 
 }
 
 void KvpmConfigDialog::fillExecutablesTable()
@@ -791,6 +797,21 @@ QGroupBox *KvpmConfigDialog::pvPropertiesGroup()
 {
     QGroupBox *const properties = new QGroupBox( i18n("Physical Volume Property Panel") );
     QVBoxLayout *const layout = new QVBoxLayout();
+
+    m_skeleton->setCurrentGroup("PhysicalVolumeProperties");
+    m_skeleton->addItemBool("mda",  m_pvprop_mda,    true);
+    m_skeleton->addItemBool("uuid", m_pvprop_pvuuid, false);
+
+    m_pvprop_mda_check = new QCheckBox( i18n("Metadata areas") );
+    m_pvprop_mda_check->setToolTip( i18n("Show information about physical volume metadata") );
+    m_pvprop_mda_check->setChecked(m_pvprop_mda);
+    m_pvprop_pvuuid_check = new QCheckBox( i18n("Physical volume uuid") );
+    m_pvprop_pvuuid_check->setToolTip( i18n("Show the physical volume UUID") );
+    m_pvprop_pvuuid_check->setChecked(m_pvprop_pvuuid);
+
+    layout->addWidget(m_pvprop_mda_check);
+    layout->addWidget(m_pvprop_pvuuid_check);
+
     properties->setLayout(layout);
     layout->addStretch();
 

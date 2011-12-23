@@ -26,12 +26,12 @@ class PVProperties : public QWidget
     PhysVol *m_pv;
 
     QList<LVSegmentExtent *> sortByExtent();
-    QFrame *buildMDABox();
-    QFrame *buildLVBox();
-    QFrame *buildUUIDBox();
+    QFrame *buildMdaBox();
+    QFrame *buildLvBox();
+    QFrame *buildUuidBox();
 
  public:
-    explicit PVProperties(PhysVol *physicalVolume, QWidget *parent = 0);
+    explicit PVProperties(PhysVol *const volume, QWidget *parent = 0);
 
 };
 
