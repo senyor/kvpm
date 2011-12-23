@@ -47,21 +47,21 @@ StoragePartition::StoragePartition(PedPartition *const part,
     m_is_logical = false;
     m_pv = NULL;
 
-    if( m_ped_type == 0 ){
+    if( m_ped_type == PED_PARTITION_NORMAL ){
       m_partition_type = "normal";
       m_is_normal = true;
       m_partition_path = ped_partition_get_path(part);
     }
-    else if( m_ped_type & 0x02 ){
+    else if( m_ped_type & PED_PARTITION_EXTENDED ){
       m_partition_type = "extended";
       m_partition_path = ped_partition_get_path(part);
     }
-    else if( (m_ped_type & 0x01) && !(m_ped_type & 0x04) ){
+    else if( (m_ped_type & PED_PARTITION_LOGICAL) && !(m_ped_type & PED_PARTITION_FREESPACE) ){
       m_partition_type = "logical";
       m_is_logical = true;
       m_partition_path = ped_partition_get_path(part);
     }
-    else if( (m_ped_type & 0x01) && (m_ped_type & 0x04) ){
+    else if( (m_ped_type & PED_PARTITION_LOGICAL) && (m_ped_type & PED_PARTITION_FREESPACE) ){
       m_partition_type = "freespace (logical)";
       m_partition_path = ped_partition_get_path(part);
       m_partition_path.chop(1);
