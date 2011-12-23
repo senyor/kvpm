@@ -18,33 +18,36 @@
 #include <string.h>
 #include <sys/statvfs.h>
 
-#include <KLocale>
-#include <KMessageBox>
-
 #include <QtGui>
 
 #include "misc.h"
 
 
-FSData *get_fs_data(QString path){
+// Gets basic stats on mounted filesystems like amount used up.
 
-    struct statvfs *buff = new struct statvfs;
+FSData get_fs_data(const QString path){
 
-    QByteArray path_array = path.toLocal8Bit();
-    const char *mp = path_array.data();
-    const int error = statvfs(mp, buff);
+    struct statvfs buff;
+    const QByteArray path_qba = path.toLocal8Bit();
+    const int error = statvfs(path_qba.data(), &buff);
  
-    if( !error ){
-        const long long block_size = buff->f_bsize;
-        const long long frag_size  = buff->f_frsize;
-        const long long total_blocks = (frag_size * buff->f_blocks) / block_size;
+    FSData fs_data;
 
-        FSData *fs_data = new FSData();
-        fs_data->block_size = block_size; 
-        fs_data->size = total_blocks;
-        fs_data->used = total_blocks - buff->f_bavail;
-        return fs_data;
+    if(error){
+        fs_data.block_size = -1;
+        fs_data.size = -1;
+        fs_data.used = -1;
     }
-    else
-        return NULL;
+    else{
+        const long long block_size = buff.f_bsize;
+        const long long frag_size  = buff.f_frsize;
+        const long long total_blocks = (frag_size * buff.f_blocks) / block_size;
+
+        fs_data.block_size = block_size; 
+        fs_data.size = total_blocks;
+        fs_data.used = total_blocks - buff.f_bavail;
+    }
+    
+    return fs_data;
 }
+
