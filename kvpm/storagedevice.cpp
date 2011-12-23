@@ -23,6 +23,7 @@
 #include "physvol.h"
 #include "mounttables.h"
 
+
 StorageDevice::StorageDevice( PedDevice *const pedDevice,
 			      const QList<PhysVol *> pvList, 
 			      MountTables *const mountTables) : QObject()
@@ -68,8 +69,9 @@ StorageDevice::StorageDevice( PedDevice *const pedDevice,
 	    length = geometry.length * m_sector_size;
 	    part_type = part->type;
 
-            if( !( (part_type & 0x08) || (  (part_type & 0x04) && (length < (0x200000))))){  // ignore freespace less than 2 megs
-	        if( part_type & 0x04 )
+            // ignore freespace less than 2 megs
+            if( !( (part_type & PED_PARTITION_METADATA) || (  (part_type & PED_PARTITION_FREESPACE) && (length < (0x200000))))){
+	        if( part_type & PED_PARTITION_FREESPACE )
 		    m_freespace_count++;
 
 		m_storage_partitions.append(new StoragePartition( part,
