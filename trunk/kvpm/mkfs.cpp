@@ -25,14 +25,14 @@
 #include "storagepartition.h"
 
 
-MkfsDialog::MkfsDialog(LogVol *const logicalVolume, QWidget *parent) : KDialog(parent)
+MkfsDialog::MkfsDialog(LogVol *const volume, QWidget *parent) : KDialog(parent)
 {
-    m_path = logicalVolume->getMapperPath();
+    m_path = volume->getMapperPath();
 
-    const long stride_size = 1; // logicalVolume->getSegmentStripeSize( 0 ); <-- must convert to blocks!
-    const long stride_count = logicalVolume->getSegmentStripes(0);
+    const long stride_size = 1; // volume->getSegmentStripeSize( 0 ); <-- must convert to blocks!
+    const long stride_count = volume->getSegmentStripes(0);
 
-    if( hasInitialErrors( logicalVolume->isMounted() ) )
+    if( hasInitialErrors( volume->isMounted() ) )
         m_bailout = true;
     else{
         m_bailout = false;
@@ -40,7 +40,7 @@ MkfsDialog::MkfsDialog(LogVol *const logicalVolume, QWidget *parent) : KDialog(p
     }
 }
 
-MkfsDialog::MkfsDialog(StoragePartition *partition, QWidget *parent) : KDialog(parent)
+MkfsDialog::MkfsDialog(StoragePartition *const partition, QWidget *parent) : KDialog(parent)
 {
     m_path = partition->getName();
 
@@ -53,6 +53,27 @@ MkfsDialog::MkfsDialog(StoragePartition *partition, QWidget *parent) : KDialog(p
         m_bailout = false;
         buildDialog(stride_size, stride_count);
     }
+}
+
+// Determines if there is any point to calling up the dialog at all
+bool MkfsDialog::hasInitialErrors(const bool mounted)
+{
+    const QString warning_message = i18n("Writing a new file system on <b>%1</b> "
+                                         "will delete any existing data on it.", m_path);
+    
+    const QString error_message = i18n("The volume: <b>%1</b> is mounted. It must be "
+                                       "unmounted before a new filesystem " 
+                                       "can be written on it", m_path);
+
+    if(mounted){
+        KMessageBox::error(0, error_message);
+        return true;
+    }
+    
+    if(KMessageBox::warningContinueCancel(0, warning_message) == KMessageBox::Continue)
+        return false;
+
+    return true;
 }
 
 void MkfsDialog::buildDialog(const long strideSize, const long strideCount)
@@ -644,29 +665,6 @@ void MkfsDialog::commitFilesystem()
     }
 
     ProcessProgress mkfs(arguments);
-}
-
-
-// Determines if there is any point to calling up the dialog at all
- 
-bool MkfsDialog::hasInitialErrors(const bool mounted)
-{
-    const QString warning_message = i18n("By writing a new file system to this volume "
-                                         "any existing data on it will be lost.");
-    
-    const QString error_message = i18n("The volume: <b>%1</b> is mounted. It must be "
-                                       "unmounted before a new filesystem " 
-                                       "can be written on it", m_path);
-
-    if(mounted){
-        KMessageBox::error(0, error_message);
-        return true;
-    }
-    
-    if(KMessageBox::warningContinueCancel(0, warning_message) == KMessageBox::Continue)
-        return false;
-
-    return true;
 }
 
 bool MkfsDialog::bailout()
