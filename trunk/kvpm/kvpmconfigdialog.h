@@ -92,10 +92,12 @@ Q_OBJECT
               *m_mountpoints_check,  *m_type_check;
 
     QCheckBox *m_devprop_mp_check, *m_devprop_fsuuid_check, *m_devprop_fslabel_check;
-    QCheckBox *m_lvprop_mp_check, *m_lvprop_fsuuid_check, *m_lvprop_fslabel_check, *m_lvprop_lvuuid_check;
+    QCheckBox *m_lvprop_mp_check,  *m_lvprop_fsuuid_check,  *m_lvprop_fslabel_check, *m_lvprop_lvuuid_check;
+    QCheckBox *m_pvprop_mda_check, *m_pvprop_pvuuid_check;
+
     bool m_devprop_mp, m_devprop_fsuuid, m_devprop_fslabel;
     bool m_lvprop_mp,  m_lvprop_fsuuid,  m_lvprop_fslabel, m_lvprop_lvuuid;
-
+    bool m_pvprop_mda, m_pvprop_pvuuid;
 
     bool m_device_column,       m_volume_column,     m_pvname_column,
          m_partition_column,    m_size_column,       m_pvsize_column,
