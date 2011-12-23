@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2010 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -23,6 +23,6 @@ struct FSData {
     long long block_size;
 };
 
-FSData *get_fs_data(QString path);
+FSData get_fs_data(const QString path);
 
 #endif
