@@ -86,7 +86,7 @@ Q_OBJECT
     void commitFilesystem();
 
  public:
-    explicit MkfsDialog(LogVol *const logicalVolume, QWidget *parent = 0);
+    explicit MkfsDialog(LogVol *const volume, QWidget *parent = 0);
     explicit MkfsDialog(StoragePartition *const partition, QWidget *parent = 0);
     bool bailout();
 
