@@ -629,8 +629,13 @@ void LVActionsMenu::mountFilesystem()
 
 void LVActionsMenu::unmountFilesystem()
 {
-    if( unmount_filesystem(m_lv) )
-	MainWindow->reRun();
+    UnmountDialog dialog(m_lv);
+
+    if( !dialog.bailout() ){
+        dialog.exec();
+        if(dialog.result() == QDialog::Accepted || dialog.result() == KDialog::Yes)
+            MainWindow->reRun();
+    }
 }
 
 void LVActionsMenu::movePhysicalExtents()
