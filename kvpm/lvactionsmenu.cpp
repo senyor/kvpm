@@ -614,7 +614,10 @@ void LVActionsMenu::createSnapshot()
 
 void LVActionsMenu::changeLogicalVolume()
 {
-    if( change_lv(m_lv) )
+    LVChangeDialog dialog(m_lv);
+    dialog.exec();
+
+    if(dialog.result() == QDialog::Accepted)
 	MainWindow->reRun();
 }
 
