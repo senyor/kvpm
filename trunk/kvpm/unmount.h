@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -24,23 +24,25 @@ class MountEntry;
 class NoMungeCheck;
 class StoragePartition;
 
-bool unmount_filesystem(StoragePartition *const partition);
-bool unmount_filesystem(LogVol *const volume);
-bool unmount_filesystem(const QString mountPoint);
-
 
 class UnmountDialog : public KDialog
 {
 Q_OBJECT
 
+    bool m_bailout;
+    bool m_single;
+    QString m_mp;
     QList<NoMungeCheck *> m_check_list; // one check box for each mount point
-    QList<MountEntry *> m_mount_entries;
  
  public:
-    UnmountDialog(QString const device, const QList<MountEntry *> entries, QWidget *parent = 0);
+    UnmountDialog(StoragePartition *const partition, QWidget *parent = NULL);
+    UnmountDialog(LogVol *const volume, QWidget *parent = NULL);
+    void buildDialog(QString const device, const QList<MountEntry *> entries);
+    bool bailout();
 
  private slots:   
-    void unmountFilesystems();
+    void resetOkButton();
+    void commitChanges();
  
 };
 

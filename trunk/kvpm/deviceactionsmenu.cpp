@@ -369,7 +369,12 @@ void DeviceActionsMenu::removefsPartition()
 
 void DeviceActionsMenu::unmountPartition()
 {
-    if( unmount_filesystem(m_part) )
-	MainWindow->reRun();
+    UnmountDialog dialog(m_part);
+
+    if( !dialog.bailout() ){
+        dialog.exec();
+        if(dialog.result() == QDialog::Accepted || dialog.result() == KDialog::Yes)
+            MainWindow->reRun();
+    }
 }
 
