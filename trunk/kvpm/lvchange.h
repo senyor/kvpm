@@ -27,8 +27,6 @@
 
 class LogVol;
 
-bool change_lv(LogVol *logicalVolumes);
-
 
 class LVChangeDialog : public KDialog
 {
@@ -68,19 +66,16 @@ Q_OBJECT
 
     KComboBox *m_deltag_combo;
 
-    QWidget *m_general_tab;
-    QWidget *m_advanced_tab;
-    QWidget *m_mirror_tab;
-
-    void buildGeneralTab();
-    void buildMirrorTab();
-    void buildAdvancedTab();
+    QWidget *buildGeneralTab();
+    QWidget *buildMirrorTab();
+    QWidget *buildAdvancedTab();
+    QStringList arguments();
     
 public:
-    explicit LVChangeDialog(LogVol *logicalVolume, QWidget *parent = 0);
-    QStringList arguments();
+    explicit LVChangeDialog(LogVol *const volume, QWidget *parent = 0);
 
 private slots:
+    void commitChanges();
     void resetOkButton();
     
 };

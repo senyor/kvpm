@@ -15,56 +15,84 @@
 
 #include "lvchange.h"
 
-#include <QtGui>
 #include <KLocale>
 #include <KSeparator>
+
+#include <QtGui>
 
 #include "logvol.h"
 #include "processprogress.h"
 
 
-bool change_lv(LogVol *logicalVolume)
-{
-    LVChangeDialog dialog(logicalVolume);
-    dialog.exec();
-
-    if(dialog.result() == QDialog::Accepted){
-        ProcessProgress change_lv( dialog.arguments() );
-	return true;
-    }
-    else
-	return false;
-}
-
-LVChangeDialog::LVChangeDialog(LogVol *logicalVolume, QWidget *parent) : 
+LVChangeDialog::LVChangeDialog(LogVol *const volume, QWidget *parent) : 
     KDialog(parent),
-    m_lv(logicalVolume)
+    m_lv(volume)
 {
-    setWindowTitle( i18n("Change logical volume attributes") );
- 
-    KTabWidget *tab_widget = new KTabWidget();
-    setMainWidget(tab_widget);
+    setWindowTitle( i18n("Change Logical Volume Attributes") );
+
+    QWidget *const dialog_body = new QWidget();
+    setMainWidget(dialog_body);
+    QVBoxLayout *const layout = new QVBoxLayout;
+    dialog_body->setLayout(layout);
+
+    QLabel *const name = new QLabel( i18n("Change Volume: <b>%1</b>", m_lv->getName()) );
+    name->setAlignment(Qt::AlignCenter);
+    layout->addSpacing(10);
+    layout->addWidget(name);
+    layout->addStretch();
+
+    KTabWidget *const tab_widget = new KTabWidget();
     tab_widget->setAutomaticResizeTabs(true); 
-    buildGeneralTab();
-    buildMirrorTab();
-    buildAdvancedTab();
+    layout->addWidget(tab_widget);
     
-    tab_widget->addTab(m_general_tab,  i18nc("The standard or basic options", "General") );
-    if( m_lv->isSnap() || m_lv->isMirror() )
-        tab_widget->addTab(m_mirror_tab,   i18n("Mirror/Snapshot") );
-    tab_widget->addTab(m_advanced_tab, i18nc("Less used or complex options", "Advanced") );
+    tab_widget->addTab(buildGeneralTab(),  i18nc("The standard or basic options", "General") );
+    tab_widget->addTab(buildAdvancedTab(), i18nc("Less used or complex options", "Advanced") );
+
+    if( m_lv->isSnap() || m_lv->isMirror() ){
+
+        if(  m_lv->isMirror() )
+            tab_widget->insertTab(1, buildMirrorTab(), i18n("Mirror") );
+        else
+            tab_widget->insertTab(1, buildMirrorTab(), i18n("Snapshot") );
+
+        connect(m_dmeventd_box,     SIGNAL(clicked()), this, SLOT(resetOkButton()));
+        connect(m_monitor_button,   SIGNAL(clicked()), this, SLOT(resetOkButton()));
+        connect(m_nomonitor_button, SIGNAL(clicked()), this, SLOT(resetOkButton()));
+        connect(m_ignore_button,    SIGNAL(clicked()), this, SLOT(resetOkButton()));
+        connect(m_resync_check,     SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    }
+
+    connect(m_alloc_box,         SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    connect(m_normal_button,     SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    connect(m_contiguous_button, SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    connect(m_anywhere_button,   SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    connect(m_cling_button,      SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    connect(m_inherit_button,    SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    connect(m_available_check,   SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    connect(m_ro_check,          SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    connect(m_refresh_check,     SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    connect(m_udevsync_check,    SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    connect(m_persistant_check,  SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    connect(m_tag_group,         SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    connect(m_deltag_combo, SIGNAL(currentIndexChanged(int)), this, SLOT(resetOkButton()));
+    connect(m_tag_edit, SIGNAL(userTextChanged(QString)), this, SLOT(resetOkButton()));
+
+    connect(m_polling_box,       SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    connect(m_poll_button,       SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    connect(m_nopoll_button,     SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    connect(m_devnum_box,        SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    connect(m_udevsync_box,      SIGNAL(clicked()), this, SLOT(resetOkButton()));
+
+    connect(this, SIGNAL(okClicked()), this, SLOT(commitChanges()));
+
+    resetOkButton();
 }
 
-void LVChangeDialog::buildGeneralTab()
+QWidget *LVChangeDialog::buildGeneralTab()
 {
-    m_general_tab = new QWidget();
+    QWidget *const tab = new QWidget();
     QVBoxLayout *layout = new QVBoxLayout();
-    m_general_tab->setLayout(layout);
-
-    QLabel *lv_name = new QLabel( QString("<b>%1</b>").arg(m_lv->getName()) );
-    lv_name->setAlignment(Qt::AlignCenter);
-    layout->addWidget(lv_name);
-    layout->addStretch();
+    tab->setLayout(layout);
 
     QGroupBox *general_group = new QGroupBox();
     QVBoxLayout *general_layout = new QVBoxLayout();
@@ -87,7 +115,7 @@ void LVChangeDialog::buildGeneralTab()
     if( !m_lv->isWritable() )
 	m_ro_check->setChecked(true);
 
-    m_tag_group = new QGroupBox( i18n("Change volume tags"));
+    m_tag_group = new QGroupBox( i18n("Change Volume Tags"));
     m_tag_group->setCheckable(true);
     m_tag_group->setChecked(false);
     layout->addWidget(m_tag_group);
@@ -113,7 +141,7 @@ void LVChangeDialog::buildGeneralTab()
     m_deltag_combo->setCurrentIndex(0);
     del_tag_layout->addWidget(m_deltag_combo);
 
-    m_alloc_box = new QGroupBox( i18n("Allocation Policy") );
+    m_alloc_box = new QGroupBox( i18n("Change Allocation Policy") );
     m_alloc_box->setCheckable(true);
     m_alloc_box->setChecked(false);
     QVBoxLayout *alloc_box_layout = new QVBoxLayout;
@@ -158,27 +186,35 @@ void LVChangeDialog::buildGeneralTab()
     alloc_box_layout->addWidget(m_inherit_button);
     m_alloc_box->setLayout(alloc_box_layout);
     layout->addWidget(m_alloc_box);
+
+    return tab;
 }
 
-void LVChangeDialog::buildMirrorTab()
+QWidget *LVChangeDialog::buildMirrorTab()
 {
-    m_mirror_tab = new QWidget();
+    QWidget *const tab = new QWidget(this);
     QVBoxLayout *layout = new QVBoxLayout();
-    m_mirror_tab->setLayout(layout);
+    tab->setLayout(layout);
     layout->addStretch();
 
-    QGroupBox *resync_box = new QGroupBox( i18n("Mirror sync") );
+    QGroupBox *const resync_box = new QGroupBox( i18n("Mirror Sync") );
+    if( !m_lv->isMirror() ){
+        resync_box->setEnabled(false);
+        resync_box->hide();
+    }
+
     layout->addWidget(resync_box);
-    QVBoxLayout *resync_layout = new QVBoxLayout();
+    QVBoxLayout *const resync_layout = new QVBoxLayout();
     resync_box->setLayout(resync_layout);
     m_resync_check = new QCheckBox( i18n("Re-synchronize mirrors") );
     m_resync_check->setEnabled( !m_lv->isMounted() );
     resync_layout->addWidget(m_resync_check);
 
-    m_dmeventd_box = new QGroupBox( i18n("dmeventd monitoring") );
+    m_dmeventd_box = new QGroupBox( i18n("Monitoring With dmeventd") );
     m_dmeventd_box->setCheckable(true);
     m_dmeventd_box->setChecked(false);
-    QVBoxLayout *mirror_layout = new QVBoxLayout();
+
+    QVBoxLayout *const mirror_layout = new QVBoxLayout();
     m_dmeventd_box->setLayout(mirror_layout);
     m_monitor_button = new QRadioButton( i18n("Monitor with dmeventd") );
     m_nomonitor_button = new QRadioButton( i18n("Do not monitor") );
@@ -188,15 +224,18 @@ void LVChangeDialog::buildMirrorTab()
     mirror_layout->addWidget(m_nomonitor_button);
     mirror_layout->addWidget(m_ignore_button);
     layout->addWidget(m_dmeventd_box);
+    layout->addStretch();
+
+    return tab;
 }
 
-void LVChangeDialog::buildAdvancedTab()
+QWidget *LVChangeDialog::buildAdvancedTab()
 {
-    m_advanced_tab = new QWidget();
+    QWidget *const tab = new QWidget();
     QVBoxLayout *layout = new QVBoxLayout();
-    m_advanced_tab->setLayout(layout);
+    tab->setLayout(layout);
 
-    m_polling_box = new QGroupBox( i18n("Volume polling") );
+    m_polling_box = new QGroupBox( i18n("Chnage Volume Polling") );
     m_polling_box->setCheckable(true);
     m_polling_box->setChecked(false);
     layout->addWidget(m_polling_box);
@@ -208,7 +247,7 @@ void LVChangeDialog::buildAdvancedTab()
     m_nopoll_button = new QRadioButton( i18n("Stop polling") );
     poll_layout->addWidget(m_nopoll_button);
 
-    m_udevsync_box = new QGroupBox( i18n("Udev synchronizing") );
+    m_udevsync_box = new QGroupBox( i18n("Udev Synchronizing") );
     layout->addWidget(m_udevsync_box);
     QVBoxLayout *sync_layout = new QVBoxLayout();
     m_udevsync_box->setLayout(sync_layout);
@@ -216,7 +255,7 @@ void LVChangeDialog::buildAdvancedTab()
     m_udevsync_check->setChecked(true);
     sync_layout->addWidget(m_udevsync_check);
     
-    m_devnum_box = new QGroupBox( i18n("Set kernel device numbers") );
+    m_devnum_box = new QGroupBox( i18n("Set Kernel Device Numbers") );
     m_devnum_box->setCheckable(true);
     QVBoxLayout *devnum_layout = new QVBoxLayout();
     m_devnum_box->setLayout(devnum_layout);
@@ -237,34 +276,7 @@ void LVChangeDialog::buildAdvancedTab()
     m_persistant_check->setChecked( m_lv->isPersistant() );
     m_devnum_box->setChecked(false);
 
-    m_dmeventd_box->setEnabled( m_lv->isMirror() );
-
-    connect(m_available_check,     SIGNAL(clicked()), this, SLOT(resetOkButton()));
-    connect(m_ro_check,            SIGNAL(clicked()), this, SLOT(resetOkButton()));
-    connect(m_refresh_check,       SIGNAL(clicked()), this, SLOT(resetOkButton()));
-    connect(m_resync_check,        SIGNAL(clicked()), this, SLOT(resetOkButton()));
-    connect(m_udevsync_check,    SIGNAL(clicked()), this, SLOT(resetOkButton()));
-    connect(m_persistant_check,  SIGNAL(clicked()), this, SLOT(resetOkButton()));
-    connect(m_monitor_button,    SIGNAL(clicked()), this, SLOT(resetOkButton()));
-    connect(m_nomonitor_button,  SIGNAL(clicked()), this, SLOT(resetOkButton()));
-    connect(m_ignore_button,     SIGNAL(clicked()), this, SLOT(resetOkButton()));
-    connect(m_poll_button,       SIGNAL(clicked()), this, SLOT(resetOkButton()));
-    connect(m_nopoll_button,     SIGNAL(clicked()), this, SLOT(resetOkButton()));
-    connect(m_normal_button,     SIGNAL(clicked()), this, SLOT(resetOkButton()));
-    connect(m_contiguous_button, SIGNAL(clicked()), this, SLOT(resetOkButton()));
-    connect(m_anywhere_button,   SIGNAL(clicked()), this, SLOT(resetOkButton()));
-    connect(m_cling_button,      SIGNAL(clicked()), this, SLOT(resetOkButton()));
-    connect(m_inherit_button,    SIGNAL(clicked()), this, SLOT(resetOkButton()));
-    connect(m_devnum_box,        SIGNAL(clicked()), this, SLOT(resetOkButton()));
-    connect(m_dmeventd_box,      SIGNAL(clicked()), this, SLOT(resetOkButton()));
-    connect(m_polling_box,       SIGNAL(clicked()), this, SLOT(resetOkButton()));
-    connect(m_udevsync_box,      SIGNAL(clicked()), this, SLOT(resetOkButton()));
-    connect(m_tag_group,         SIGNAL(clicked()), this, SLOT(resetOkButton()));
-    connect(m_alloc_box,         SIGNAL(clicked()), this, SLOT(resetOkButton()));
-    connect(m_deltag_combo, SIGNAL(currentIndexChanged(int)), this, SLOT(resetOkButton()));
-    connect(m_tag_edit, SIGNAL(userTextChanged(QString)), this, SLOT(resetOkButton()));
-
-    resetOkButton();
+    return tab;
 }
 
 QStringList LVChangeDialog::arguments()
@@ -285,19 +297,21 @@ QStringList LVChangeDialog::arguments()
     else if( ( ! m_ro_check->isChecked() ) && ( ! m_lv->isWritable() ) )
 	args << "--permission" << "rw";
 
-    if( m_resync_check->isChecked() )
-        args << "--resync";
-
     if( m_refresh_check->isChecked() )
         args << "--refresh";
+
+    if( m_lv->isSnap() || m_lv->isMirror() ){ // These buttons are undefined if the mirrortab isn't built!
+        if( m_resync_check->isChecked() )
+            args << "--resync";
     
-    if( m_dmeventd_box->isChecked() ){
-        if( m_monitor_button->isChecked() )
-	    args << "--monitor" << "y";
-        else if( m_nomonitor_button->isChecked() )
-	    args << "--monitor" << "n";
-        else
-	    args << "--ignoremonitoring";
+        if( m_dmeventd_box->isChecked() ){
+            if( m_monitor_button->isChecked() )
+                args << "--monitor" << "y";
+            else if( m_nomonitor_button->isChecked() )
+                args << "--monitor" << "n";
+            else
+                args << "--ignoremonitoring";
+        }
     }
 
     if( m_devnum_box->isChecked() ){
@@ -347,6 +361,12 @@ QStringList LVChangeDialog::arguments()
     args << m_lv->getFullName();
 
     return args;
+}
+
+void LVChangeDialog::commitChanges()
+{
+    hide();
+    ProcessProgress change_lv( arguments() );
 }
 
 void LVChangeDialog::resetOkButton(){
