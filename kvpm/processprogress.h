@@ -21,7 +21,7 @@
 #include <QProcess>
 
 class KProcess;
-
+class KProgressDialog;
 
 class ProcessProgress : public QObject
 {
@@ -30,10 +30,11 @@ Q_OBJECT
     QEventLoop *m_loop;
     QStringList m_output_all, m_output_no_error;
     KProcess *m_process;
+    KProgressDialog *m_progress_dialog;
     int m_exit_code;
 
  public:
-    ProcessProgress(QStringList arguments, QObject *parent = 0);
+    ProcessProgress(QStringList arguments, const bool canCancel = false, QObject *parent = NULL);
 
     QStringList programOutput();
     QStringList programOutputAll();
@@ -41,6 +42,7 @@ Q_OBJECT
     
  public slots:   
     void stopProgressLoop(int exitCode, QProcess::ExitStatus);
+    void cancelProcess();
     void readStandardOut();
     void readStandardError();
  
