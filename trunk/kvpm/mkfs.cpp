@@ -664,7 +664,7 @@ void MkfsDialog::commitFilesystem()
 	arguments << "mkswap" << m_path;
     }
 
-    ProcessProgress mkfs(arguments);
+    ProcessProgress mkfs(arguments, true);
 }
 
 bool MkfsDialog::bailout()
