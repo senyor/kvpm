@@ -34,14 +34,14 @@ Q_OBJECT
     int m_exit_code;
 
  public:
-    ProcessProgress(QStringList arguments, const bool canCancel = false, QObject *parent = NULL);
+    ProcessProgress(QStringList arguments, const bool allowCancel = false, QObject *parent = NULL);
 
     QStringList programOutput();
     QStringList programOutputAll();
     int exitCode();
     
- public slots:   
-    void stopProgressLoop(int exitCode, QProcess::ExitStatus);
+ private slots:   
+    void cleanup(const int code, const QProcess::ExitStatus status);
     void cancelProcess();
     void readStandardOut();
     void readStandardError();
