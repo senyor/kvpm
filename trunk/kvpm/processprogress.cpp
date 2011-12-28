@@ -30,12 +30,8 @@
 
 
 
-ProcessProgress::ProcessProgress(QStringList arguments, const bool canCancel, QObject *parent) : QObject(parent)
+ProcessProgress::ProcessProgress(QStringList arguments, const bool allowCancel, QObject *parent) : QObject(parent)
 {
-    QString executable, 
-            executable_path,
-            output_errors;
-
     m_exit_code = 127;  // command not found
     m_progress_dialog = NULL;
 
@@ -44,8 +40,8 @@ ProcessProgress::ProcessProgress(QStringList arguments, const bool canCancel, QO
     }
     else{
 
-        executable = arguments.takeFirst();
-	executable_path = ExecutableFinder::getPath( executable );
+        const QString executable = arguments.takeFirst();
+	const QString executable_path = ExecutableFinder::getPath( executable );
 
         if( !executable_path.isEmpty() ){
 
@@ -56,8 +52,13 @@ ProcessProgress::ProcessProgress(QStringList arguments, const bool canCancel, QO
             m_process->setEnvironment(environment);
             m_loop = new QEventLoop(this);
 
-            if(canCancel){
-                m_progress_dialog = new KProgressDialog(NULL, i18n("progress"), executable);
+            if(allowCancel){
+                TopWindow::getProgressBox()->hide();
+                m_progress_dialog = new KProgressDialog(NULL, 
+                                                        i18n("progress"),
+                                                        i18n("Running program: %1", executable), 
+                                                        Qt::CustomizeWindowHint |
+                                                        Qt::WindowTitleHint);
                 m_progress_dialog->setAllowCancel(true);
                 m_progress_dialog->setMinimumDuration(250); 
                 m_progress_dialog->progressBar()->setRange(0,0);
@@ -71,7 +72,7 @@ ProcessProgress::ProcessProgress(QStringList arguments, const bool canCancel, QO
             }
 
             connect(m_process,  SIGNAL(finished(int, QProcess::ExitStatus)), 
-                    this, SLOT(stopProgressLoop(int, QProcess::ExitStatus)));
+                    this, SLOT(cleanup(int, QProcess::ExitStatus)));
 
             connect(m_process, SIGNAL(readyReadStandardOutput()),
                     this,      SLOT(readStandardOut()));
@@ -86,28 +87,10 @@ ProcessProgress::ProcessProgress(QStringList arguments, const bool canCancel, QO
             m_process->start();
             m_process->closeWriteChannel();
 
-            if(canCancel)
+            if(allowCancel)
                 m_loop->exec(QEventLoop::AllEvents);
             else
                 m_loop->exec(QEventLoop::ExcludeUserInputEvents);
-            
-            m_process->waitForFinished();
-
-            qApp->restoreOverrideCursor();
-            m_exit_code = m_process->exitCode();
-
-            if ( m_exit_code || ( m_process->exitStatus() == QProcess::CrashExit ) ){
-
-                if ( ( m_exit_code == 0 ) && ( m_process->exitStatus() == QProcess::CrashExit ) )
-                    m_exit_code = 1;  // if it crashed without an exit code, set a non zero exit code
-
-                output_errors = m_output_all.join("");
-
-                if( m_process->exitStatus() != QProcess::CrashExit ) 
-                    KMessageBox::error(NULL, i18n("%1 produced this output: %2", executable_path, output_errors) );
-                else
-                    KMessageBox::error(NULL, i18n("%1 <b>crashed</b> with this output: %2", executable_path, output_errors) );
-            }
         }
         else{
             KMessageBox::error(NULL, i18n("Executable: '%1' not found", executable));
@@ -115,14 +98,34 @@ ProcessProgress::ProcessProgress(QStringList arguments, const bool canCancel, QO
     }
 }
 
-void ProcessProgress::stopProgressLoop(int, QProcess::ExitStatus)
+void ProcessProgress::cleanup(const int code, const QProcess::ExitStatus status)
 {
+    m_exit_code = code;
     m_loop->exit();
 
-    if(m_progress_dialog != NULL)
+    bool cancelled = false;
+
+    qApp->restoreOverrideCursor();
+    if(m_progress_dialog != NULL){
         m_progress_dialog->close();
-    else
-        TopWindow::getProgressBox()->reset();
+        cancelled = m_progress_dialog->wasCancelled();
+        delete m_progress_dialog;
+    }
+
+    if ( m_exit_code || ( status == QProcess::CrashExit ) ){
+        
+        if ( ( m_exit_code == 0 ) && ( status == QProcess::CrashExit ) )
+            m_exit_code = 1;  // if it crashed without an exit code, set a non zero exit code
+        
+        const QString errors = m_output_all.join("");
+        
+        if( status != QProcess::CrashExit || cancelled ) 
+            KMessageBox::error(NULL, i18n("%1 produced this output: %2", m_process->program().takeFirst(), errors) );
+        else
+            KMessageBox::error(NULL, i18n("%1 <b>crashed</b> with this output: %2", m_process->program().takeFirst(), errors) );
+    }
+
+    TopWindow::getProgressBox()->reset();
 }
 
 QStringList ProcessProgress::programOutput()
@@ -148,10 +151,13 @@ void ProcessProgress::cancelProcess()
 
     if(KMessageBox::warningYesNo(NULL, message) == KMessageBox::Yes){
         m_process->kill();
+        m_progress_dialog->show();
+        m_progress_dialog->setLabelText( i18n("Waiting for process to finish") );
+        m_progress_dialog->setAllowCancel(false);
     }
     else if(m_process->state() == QProcess::Running){
-        kill(m_process->pid(), SIGCONT);
         m_progress_dialog->show();
+        kill(m_process->pid(), SIGCONT);
     }
 }
 

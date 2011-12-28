@@ -79,6 +79,7 @@ void MasterList::rescan()
     progress_box->setValue(3);
     qApp->restoreOverrideCursor();
     qApp->processEvents();
+    progress_box->reset();
 
     return;
 }

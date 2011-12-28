@@ -34,6 +34,8 @@ ProgressBox::ProgressBox(QWidget *parent) : QFrame(parent)
 
 void ProgressBox::setText(const QString text)
 {
+    show();
+
     if( !text.isEmpty() )
         m_message->setText(text + " >>");
     else
@@ -42,12 +44,16 @@ void ProgressBox::setText(const QString text)
 
 void ProgressBox::setRange(const int start, const int end)
 {
+    show();
+
     m_progressbar->setRange(start, end);
     m_message->clear();
 }
 
 void ProgressBox::setValue(const int value)
 {
+    show();
+
     m_progressbar->setValue(value);
     if( value >= m_progressbar->maximum() )
         m_message->clear();
@@ -55,6 +61,8 @@ void ProgressBox::setValue(const int value)
 
 void ProgressBox::reset()
 {
+    show();
+
     m_progressbar->setRange(0, 1);
     m_progressbar->setValue(1);
     m_message->clear();
