@@ -597,8 +597,11 @@ void LVActionsMenu::removeLogicalVolume()
 
 void LVActionsMenu::renameLogicalVolume()
 {
-    if( rename_lv(m_lv) )
-	MainWindow->reRun();
+    LVRenameDialog dialog(m_lv);
+    dialog.exec();
+    
+    if(dialog.result() == QDialog::Accepted)
+        MainWindow->reRun();
 }
 
 void LVActionsMenu::createSnapshot()

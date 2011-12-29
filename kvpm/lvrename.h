@@ -22,25 +22,25 @@
 
 class LogVol;
 
-bool rename_lv(LogVol *logicalVolume);
 
 class LVRenameDialog : public KDialog
 {
 Q_OBJECT
 
-    QString m_old_name;
-    QString m_vg_name;
+    LogVol  *m_lv;
+    QString  m_old_name;
+    QString  m_vg_name;
     KLineEdit *m_new_name;
     QRegExpValidator *m_name_validator;
-    LogVol *m_lv;
+
+    QString getNewMapperPath();
 
 public:
-    explicit    LVRenameDialog(LogVol *logicalVolume, QWidget *parent = 0);
-    QStringList arguments();
-    QString     getNewMapperPath();
+    explicit LVRenameDialog(LogVol *const volume, QWidget *parent = 0);
 
 private slots:
-    void validateName(QString);
+    void validateName(QString name);
+    void commitChanges();
 
 };
 
