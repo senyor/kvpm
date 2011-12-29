@@ -15,6 +15,8 @@
 
 #include "vginfolabels.h"
 
+#include <KConfigSkeleton>
+#include <KGlobal>
 #include <KLocale>
 
 #include <QtGui>
@@ -23,7 +25,7 @@
 #include "volgroup.h"
 
 
-VGInfoLabels::VGInfoLabels(VolGroup *volumeGroup, QWidget *parent) : QFrame(parent) 
+VGInfoLabels::VGInfoLabels(VolGroup *const group, QWidget *parent) : QFrame(parent) 
 {
     QLabel *extent_size_label, *size_label, *used_label, 
 	   *free_label, *lvm_fmt_label, *resizable_label, 
@@ -85,38 +87,53 @@ VGInfoLabels::VGInfoLabels(VolGroup *volumeGroup, QWidget *parent) : QFrame(pare
     label_widget6->setLayout(vlayout6);
     label_widget7->setLayout(vlayout7);
     
-    if(volumeGroup->isResizable())
+    if(group->isResizable())
 	resizable = "Yes";
     else
 	resizable = "No";
 
-    if(volumeGroup->isClustered())
+    if(group->isClustered())
 	clustered = "Yes";
     else    
 	clustered = "No";
 
-    if(volumeGroup->isPartial()){
+    if(group->isPartial()){
         hlayout2->addStretch();
         hlayout2->addWidget( new QLabel( i18n("<b>Warning: Partial Volume Group</b>") ) );
         hlayout2->addStretch();
     }
-    else if(volumeGroup->isExported()){
+    else if(group->isExported()){
         hlayout2->addStretch();
         hlayout2->addWidget( new QLabel( i18n("<b>Exported Volume Group</b>") ) );
         hlayout2->addStretch();
     }
 
-    used_label   = new QLabel( i18nc("Space used up", "Used: %1", sizeToString(volumeGroup->getUsedSpace())) );
-    free_label   = new QLabel( i18nc("Space not used", "Free: %1", sizeToString(volumeGroup->getFreeSpace())) );
-    size_label   = new QLabel( i18nc("Total space on device", "Total: %1", sizeToString(volumeGroup->getSize())));
-    lvm_fmt_label   = new QLabel( i18n("Format: %1", volumeGroup->getFormat()) );
-    policy_label    = new QLabel( i18n("Policy: %1", volumeGroup->getPolicy()) );
+
+    KLocale *locale = KGlobal::locale();
+
+
+    KConfigSkeleton skeleton;
+    bool use_si_units;
+
+    skeleton.setCurrentGroup("General");
+    skeleton.addItemBool("use_si_units", use_si_units, false);
+ 
+    if(use_si_units)
+        locale->setBinaryUnitDialect(KLocale::MetricBinaryDialect); 
+    else
+        locale->setBinaryUnitDialect(KLocale::IECBinaryDialect); 
+
+    used_label = new QLabel( i18nc("Space used up",  "Used: %1", locale->formatByteSize(group->getUsedSpace())) );
+    free_label = new QLabel( i18nc("Space not used", "Free: %1", locale->formatByteSize(group->getFreeSpace())) );
+    size_label = new QLabel( i18nc("Total space on device", "Total: %1", locale->formatByteSize(group->getSize())));
+    lvm_fmt_label   = new QLabel( i18n("Format: %1", group->getFormat()) );
+    policy_label    = new QLabel( i18n("Policy: %1", group->getPolicy()) );
     resizable_label = new QLabel( i18n("Resizable: %1", resizable) );
     clustered_label = new QLabel( i18n("Clustered: %1", clustered) );
-    allocatable_label = new QLabel( i18n("Allocatable: %1", sizeToString(volumeGroup->getAllocatableSpace())) );
-    extent_size_label  = new QLabel( i18n("Extent size: %1", sizeToString(volumeGroup->getExtentSize())) );
-    mda_label          = new QLabel( i18n("MDA count: %1", volumeGroup->getMdaCount() ) );
-    uuid_label         = new QLabel( i18n("UUID: %1", volumeGroup->getUuid()) );
+    allocatable_label = new QLabel( i18n("Allocatable: %1", locale->formatByteSize(group->getAllocatableSpace())) );
+    extent_size_label = new QLabel( i18n("Extent size: %1", locale->formatByteSize(group->getExtentSize())) );
+    mda_label         = new QLabel( i18n("MDA count: %1", group->getMdaCount() ) );
+    uuid_label        = new QLabel( i18n("UUID: %1", group->getUuid()) );
     uuid_label->setWordWrap(true);
 
     vlayout1->addWidget(size_label);
@@ -138,15 +155,15 @@ VGInfoLabels::VGInfoLabels(VolGroup *volumeGroup, QWidget *parent) : QFrame(pare
     hlayout1->addWidget(label_widget5);
     hlayout1->addWidget(label_widget6);
 
-    if( volumeGroup->getLVMax() || volumeGroup->getPvMax() ){
+    if( group->getLVMax() || group->getPvMax() ){
 
-	if(volumeGroup->getPvMax())
-	    max_pv_label = new QLabel( i18n("Max pvs: %1", volumeGroup->getPvMax()) );
+	if(group->getPvMax())
+	    max_pv_label = new QLabel( i18n("Max pvs: %1", group->getPvMax()) );
 	else
 	    max_pv_label = new QLabel( i18n("Max pvs: Unlimited") );
 
-	if(volumeGroup->getLVMax())
-	    max_lv_label = new QLabel( i18n("Max lvs: %1", volumeGroup->getLVMax()) );
+	if(group->getLVMax())
+	    max_lv_label = new QLabel( i18n("Max lvs: %1", group->getLVMax()) );
 	else
 	    max_lv_label = new QLabel( i18n("Max lvs: Unlimited") );
 

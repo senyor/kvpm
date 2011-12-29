@@ -337,7 +337,7 @@ void TopWindow::showVolumeGroupInfo(bool show)
     bool show_vg_info;
 
     skeleton.setCurrentGroup("General");
-    skeleton.addItemBool( "show_vg_info", show_vg_info, true );
+    skeleton.addItemBool("show_vg_info", show_vg_info, true);
     show_vg_info = show;
     skeleton.writeConfig();
     updateTabs();
@@ -349,8 +349,20 @@ void TopWindow::showVolumeGroupBar(bool show)
     bool show_lv_bar;
 
     skeleton.setCurrentGroup("General");
-    skeleton.addItemBool( "show_lv_bar", show_lv_bar, true );
+    skeleton.addItemBool("show_lv_bar", show_lv_bar, true);
     show_lv_bar = show;
+    skeleton.writeConfig();
+    updateTabs();
+}
+
+void TopWindow::useSiUnits(bool use)
+{
+    KConfigSkeleton skeleton;
+    bool use_si_units;
+
+    skeleton.setCurrentGroup("General");
+    skeleton.addItemBool("use_si_units", use_si_units, false);
+    use_si_units = use;
     skeleton.writeConfig();
     updateTabs();
 }
@@ -360,38 +372,39 @@ KMenu *TopWindow::buildSettingsMenu()
     KMenu *const settings_menu = new KMenu( i18n("Settings") );
     KToggleAction *const show_vg_info_action = new KToggleAction( KIcon("preferences-other"), i18n("Show Volume Group Information"), this);
     KToggleAction *const show_lv_bar_action  = new KToggleAction( KIcon("preferences-other"), i18n("Show Volume Group Bar Graph"), this);
+    KToggleAction *const use_si_units_action  = new KToggleAction( KIcon("preferences-other"), i18n("Use Metric SI Units"), this);
     KAction *const config_kvpm_action        = new KAction( KIcon("configure"), i18n("Configure kvpm..."), this);
 
     settings_menu->addAction(show_vg_info_action);
     settings_menu->addAction(show_lv_bar_action);
+    settings_menu->addAction(use_si_units_action);
+    settings_menu->addSeparator();
     settings_menu->addAction(config_kvpm_action);
 
     KConfigSkeleton skeleton;
-    bool show_vg_info, show_lv_bar;
+    bool show_vg_info, show_lv_bar, use_si_units;
 
     skeleton.setCurrentGroup("General");
     skeleton.addItemBool( "show_vg_info", show_vg_info, true );
     skeleton.addItemBool( "show_lv_bar",  show_lv_bar,  true );
+    skeleton.addItemBool( "use_si_units", use_si_units, false );
 
     // This must be *before* the following connect() statements
-    if(show_vg_info)
-        show_vg_info_action->setChecked(true);
-    else
-        show_vg_info_action->setChecked(false);
+    show_vg_info_action->setChecked(show_vg_info);
+    show_lv_bar_action->setChecked(show_lv_bar);
+    use_si_units_action->setChecked(use_si_units);
 
-    if(show_lv_bar)
-        show_lv_bar_action->setChecked(true);
-    else
-        show_lv_bar_action->setChecked(false);
-
-    connect(config_kvpm_action,    SIGNAL(triggered()), 
+    connect(config_kvpm_action,  SIGNAL(triggered()), 
 	    this, SLOT(configKvpm()));
 
-    connect(show_vg_info_action,   SIGNAL(toggled(bool)), 
+    connect(show_vg_info_action, SIGNAL(toggled(bool)), 
 	    this, SLOT(showVolumeGroupInfo(bool)));
 
-    connect(show_lv_bar_action,    SIGNAL(toggled(bool)), 
+    connect(show_lv_bar_action,  SIGNAL(toggled(bool)), 
 	    this, SLOT(showVolumeGroupBar(bool)));
+
+    connect(use_si_units_action, SIGNAL(toggled(bool)), 
+	    this, SLOT(useSiUnits(bool)));
 
     return settings_menu;
 }

@@ -73,6 +73,7 @@ Q_OBJECT
     void setupMenus();
     void showVolumeGroupInfo(bool show);
     void showVolumeGroupBar(bool show);
+    void useSiUnits(bool use);
     void changeVolumeGroup();
     void createVolumeGroup();
     void removeVolumeGroup();
