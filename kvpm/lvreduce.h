@@ -36,7 +36,7 @@ Q_OBJECT
     bool m_bailout;
 
  public:
-    explicit LVReduceDialog(LogVol *const logicalVolume, QWidget *parent = 0);
+    explicit LVReduceDialog(LogVol *const volume, QWidget *parent = 0);
     bool bailout();
      
  private slots:
