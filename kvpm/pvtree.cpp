@@ -36,7 +36,9 @@
 
 /* This is the physical volume tree list on the volume group tab */
 
-PVTree::PVTree(VolGroup *volumeGroup, QWidget *parent) : QTreeWidget(parent), m_vg(volumeGroup)
+PVTree::PVTree(VolGroup *const group, QWidget *parent) 
+    : QTreeWidget(parent), 
+      m_vg(group)
 {
     QStringList header_labels;
     m_context_menu = NULL;
@@ -90,16 +92,23 @@ void PVTree::loadData()
     clear();
     setupContextMenu();
     setSortingEnabled(false);
-    
+    setViewConfig();
+
+    KLocale *const locale = KGlobal::locale();
+    if(m_use_si_units)
+        locale->setBinaryUnitDialect(KLocale::MetricBinaryDialect); 
+    else
+        locale->setBinaryUnitDialect(KLocale::IECBinaryDialect);    
+
     for(int n = 0; n < pvs.size(); n++){
 	pv = pvs[n];
 	pv_data.clear();
 	device_name = pv->getName();
 	
 	pv_data << device_name
-		<< sizeToString( pv->getSize() )
-		<< sizeToString( pv->getRemaining() )
-		<< sizeToString( pv->getSize() - pv->getRemaining() );
+		<< locale->formatByteSize( pv->getSize() )
+		<< locale->formatByteSize( pv->getRemaining() )
+		<< locale->formatByteSize( pv->getSize() - pv->getRemaining() );
 
 	if( pv->isActive() )
 	    pv_data << "Active";
@@ -165,9 +174,11 @@ void PVTree::loadData()
     }
     insertTopLevelItems(0, pv_tree_items);
 
-
     setSortingEnabled(true);
-    setHiddenColumns();
+
+    for(int column = 0; column < 7; column++)
+        if( !isColumnHidden(column) )
+            resizeColumnToContents(column);
 
     if( !pv_tree_items.isEmpty() && !old_current_pv_name.isEmpty() ){
         bool match = false;
@@ -304,7 +315,7 @@ void PVTree::changePhysicalVolume()
     }
 }
 
-void PVTree::setHiddenColumns()
+void PVTree::setViewConfig()
 {
     KConfigSkeleton skeleton;
 
@@ -313,6 +324,9 @@ void PVTree::setHiddenColumns()
     bool pvname, pvsize,  pvremaining,
          pvused, pvstate, pvallocate,
          pvtags, pvlvnames;
+
+    skeleton.setCurrentGroup("General");
+    skeleton.addItemBool("use_si_units", m_use_si_units, false);
 
     skeleton.setCurrentGroup("PhysicalTreeColumns");
     skeleton.addItemBool( "pvname",      pvname,      true );
@@ -339,10 +353,6 @@ void PVTree::setHiddenColumns()
         setColumnHidden( 5, !pvallocate );
         setColumnHidden( 6, !pvtags );
         setColumnHidden( 7, !pvlvnames );
-
-        for(int column = 0; column < 7; column++)
-            if( !isColumnHidden(column) )
-                resizeColumnToContents(column);
     }
 }
 

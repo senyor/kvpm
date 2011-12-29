@@ -34,17 +34,19 @@ Q_OBJECT
 
     QMenu *m_context_menu;
 
+    bool m_use_si_units;
+
     QAction *pv_move_action, 
             *vg_reduce_action, 
 	    *pv_change_action;
 
     QString m_pv_name;
 
-    void setHiddenColumns();
+    void setViewConfig();
     void setupContextMenu();
     
 public:
-    explicit PVTree(VolGroup *volumeGroup, QWidget *parent = 0);
+    explicit PVTree(VolGroup *const group, QWidget *parent = 0);
     void loadData();
 
 private slots:    

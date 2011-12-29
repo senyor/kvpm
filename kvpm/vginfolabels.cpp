@@ -108,10 +108,7 @@ VGInfoLabels::VGInfoLabels(VolGroup *const group, QWidget *parent) : QFrame(pare
         hlayout2->addStretch();
     }
 
-
     KLocale *locale = KGlobal::locale();
-
-
     KConfigSkeleton skeleton;
     bool use_si_units;
 

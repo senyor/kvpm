@@ -137,6 +137,12 @@ QTreeWidgetItem *VGTree::loadItem(LogVol *lv, QTreeWidgetItem *item)
     const int old_child_count = item->childCount();
     bool was_expanded = false;
 
+    KLocale *const locale = KGlobal::locale();
+    if(m_use_si_units)
+        locale->setBinaryUnitDialect(KLocale::MetricBinaryDialect); 
+    else
+        locale->setBinaryUnitDialect(KLocale::IECBinaryDialect);
+
     QList<LogVol *> temp_kids;
     long long fs_remaining;       // remaining space on fs -- if known
     int fs_percent;               // percentage of space remaining
@@ -185,7 +191,7 @@ QTreeWidgetItem *VGTree::loadItem(LogVol *lv, QTreeWidgetItem *item)
     item->setData(1, Qt::DisplayRole, lv->getType());
 
     if(lv->isSnapContainer()){
-        item->setData(2, Qt::DisplayRole, sizeToString(lv->getTotalSize()));           
+        item->setData(2, Qt::DisplayRole, locale->formatByteSize(lv->getTotalSize()));           
 
         for(int x = 3; x < 12; x++)
             item->setData(x, Qt::DisplayRole, QVariant());
@@ -196,7 +202,7 @@ QTreeWidgetItem *VGTree::loadItem(LogVol *lv, QTreeWidgetItem *item)
         item->setToolTip(8, QString());
     }
     else{
-        item->setData(2, Qt::DisplayRole, sizeToString(lv->getSize()));           
+        item->setData(2, Qt::DisplayRole, locale->formatByteSize(lv->getSize()));           
       
         if( lv->getFilesystemSize() > -1 &&  lv->getFilesystemUsed() > -1 ){
 
@@ -204,11 +210,11 @@ QTreeWidgetItem *VGTree::loadItem(LogVol *lv, QTreeWidgetItem *item)
             fs_percent = qRound( ((double)fs_remaining / (double)lv->getFilesystemSize()) * 100 );
             
             if(m_show_total && !m_show_percent)
-                item->setData(3, Qt::DisplayRole, sizeToString(fs_remaining));
+                item->setData(3, Qt::DisplayRole, locale->formatByteSize(fs_remaining));
             else if(!m_show_total && m_show_percent)
                 item->setData(3, Qt::DisplayRole, QString("%%1").arg(fs_percent) );
             else
-                item->setData(3, Qt::DisplayRole, QString(sizeToString(fs_remaining) + " (%%1)").arg(fs_percent) );
+                item->setData(3, Qt::DisplayRole, QString(locale->formatByteSize(fs_remaining) + " (%%1)").arg(fs_percent) );
             
             if( fs_percent <= m_fs_warn_percent ){
                 item->setIcon(3, KIcon("exclamation"));
@@ -278,7 +284,7 @@ QTreeWidgetItem *VGTree::loadItem(LogVol *lv, QTreeWidgetItem *item)
         }
         else{
             item->setData(5, Qt::DisplayRole, QString("%1").arg(lv->getSegmentStripes(0)) );
-            item->setData(6, Qt::DisplayRole, sizeToString(lv->getSegmentStripeSize(0)) );
+            item->setData(6, Qt::DisplayRole, locale->formatByteSize(lv->getSegmentStripeSize(0)) );
         }
         
         if( !is_sc && old_type.contains("origin", Qt::CaseInsensitive) ){
@@ -348,62 +354,6 @@ void VGTree::setupContextMenu()
     }
 
     return;
-}
-
-void VGTree::insertSegmentItems(LogVol *lv, QTreeWidgetItem *item)
-{
-    const int segment_count = lv->getSegmentCount();
-    const int child_count = item->childCount();
-
-    QTreeWidgetItem *child_item;
-    QList<QTreeWidgetItem *> segment_children;
-
-    for(int x = 0; x < child_count ; x++)  // segments can never have children
-        segment_children.append( item->child(x)->takeChildren() );
-
-    for(int x = segment_children.size() - 1; x >= 0 ;x--)
-        delete segment_children[x]; // so delete them
-
-    if( segment_count > child_count ){
-        for(int x = 0; x < segment_count - child_count; x++)
-            new QTreeWidgetItem(item);
-    }
-    else if( segment_count < child_count ){
-        for(int x = child_count - 1; x >= segment_count ; x--)
-            delete (item->takeChild(x));
-    }
-
-    for(int segment = 0; segment < segment_count; segment++){
-            
-        child_item = item->child(segment);
-
-        if( lv->getPvNames(segment).contains("unknown device") ){
-            child_item->setIcon(0, KIcon("exclamation") );
-            child_item->setToolTip( 0, i18n("one or more physical volumes are missing") );
-        }
-        else{
-            child_item->setIcon(0, KIcon() );
-            child_item->setToolTip( 0, QString() );
-        }
-
-        child_item->setData(0, Qt::DisplayRole, QString("Seg# %1").arg(segment));
-        child_item->setData(1, Qt::DisplayRole, QString(""));
-        child_item->setData(2, Qt::DisplayRole, sizeToString(lv->getSegmentSize(segment)));           
-        child_item->setData(3, Qt::DisplayRole, QString(""));
-        child_item->setData(4, Qt::DisplayRole, QString(""));
-        child_item->setData(5, Qt::DisplayRole, QString("%1").arg(lv->getSegmentStripes(segment)));
-        child_item->setData(6, Qt::DisplayRole, sizeToString(lv->getSegmentStripeSize(segment))); 
- 	child_item->setData(0, Qt::UserRole, lv->getName());
-	child_item->setData(1, Qt::UserRole, segment);
- 	child_item->setData(2, Qt::UserRole, lv->getUuid());
- 	child_item->setData(3, Qt::UserRole, QString("segment"));
-
-        for(int column = 7; column < 12; column++)
-            child_item->setData(column, Qt::DisplayRole, QString(""));
-    
-        for(int column = 1; column < child_item->columnCount() ; column++)
-            child_item->setTextAlignment(column, Qt::AlignRight);
-    }
 }
 
 void VGTree::insertChildItems(LogVol *parentVolume, QTreeWidgetItem *parentItem)
@@ -487,6 +437,9 @@ void VGTree::setViewConfig()
          access,      tags,
          mountpoints;
 
+    skeleton.setCurrentGroup("General");
+    skeleton.addItemBool("use_si_units", m_use_si_units, false);
+
     skeleton.setCurrentGroup("AllTreeColumns");
     skeleton.addItemBool( "percent", m_show_percent, true );
     skeleton.addItemBool( "total",   m_show_total,   true );
@@ -541,5 +494,67 @@ void VGTree::adjustColumnWidth(QTreeWidgetItem *)
     resizeColumnToContents(0);
     resizeColumnToContents(1);
     resizeColumnToContents(6);
+}
+
+void VGTree::insertSegmentItems(LogVol *lv, QTreeWidgetItem *item)
+{
+    const int segment_count = lv->getSegmentCount();
+    const int child_count = item->childCount();
+
+    KLocale *const locale = KGlobal::locale();
+    if(m_use_si_units)
+        locale->setBinaryUnitDialect(KLocale::MetricBinaryDialect); 
+    else
+        locale->setBinaryUnitDialect(KLocale::IECBinaryDialect);
+
+    QTreeWidgetItem *child_item;
+    QList<QTreeWidgetItem *> segment_children;
+
+    for(int x = 0; x < child_count ; x++)  // segments can never have children
+        segment_children.append( item->child(x)->takeChildren() );
+
+    for(int x = segment_children.size() - 1; x >= 0 ;x--)
+        delete segment_children[x]; // so delete them
+
+    if( segment_count > child_count ){
+        for(int x = 0; x < segment_count - child_count; x++)
+            new QTreeWidgetItem(item);
+    }
+    else if( segment_count < child_count ){
+        for(int x = child_count - 1; x >= segment_count ; x--)
+            delete (item->takeChild(x));
+    }
+
+    for(int segment = 0; segment < segment_count; segment++){
+            
+        child_item = item->child(segment);
+
+        if( lv->getPvNames(segment).contains("unknown device") ){
+            child_item->setIcon(0, KIcon("exclamation") );
+            child_item->setToolTip( 0, i18n("one or more physical volumes are missing") );
+        }
+        else{
+            child_item->setIcon(0, KIcon() );
+            child_item->setToolTip( 0, QString() );
+        }
+
+        child_item->setData(0, Qt::DisplayRole, QString("Seg# %1").arg(segment));
+        child_item->setData(1, Qt::DisplayRole, QString(""));
+        child_item->setData(2, Qt::DisplayRole, locale->formatByteSize(lv->getSegmentSize(segment)));           
+        child_item->setData(3, Qt::DisplayRole, QString(""));
+        child_item->setData(4, Qt::DisplayRole, QString(""));
+        child_item->setData(5, Qt::DisplayRole, QString("%1").arg(lv->getSegmentStripes(segment)));
+        child_item->setData(6, Qt::DisplayRole, locale->formatByteSize(lv->getSegmentStripeSize(segment))); 
+ 	child_item->setData(0, Qt::UserRole, lv->getName());
+	child_item->setData(1, Qt::UserRole, segment);
+ 	child_item->setData(2, Qt::UserRole, lv->getUuid());
+ 	child_item->setData(3, Qt::UserRole, QString("segment"));
+
+        for(int column = 7; column < 12; column++)
+            child_item->setData(column, Qt::DisplayRole, QString(""));
+    
+        for(int column = 1; column < child_item->columnCount() ; column++)
+            child_item->setTextAlignment(column, Qt::AlignRight);
+    }
 }
 
