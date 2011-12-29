@@ -21,6 +21,7 @@
 #include <QtGui>
 
 #include "logvol.h"
+#include "misc.h"
 #include "processprogress.h"
 #include "storagepartition.h"
 
@@ -470,14 +471,17 @@ void MkfsDialog::enableOptions(bool)
 
 void MkfsDialog::clobberFilesystem()
 {
-    QByteArray zero_array(128 * 1024, '\0');
+    if( !isBusy(m_path) ){  // Last check -- just to be sure
 
-    if(m_clobber_fs_check->isChecked()){
-        QFile *const device = new QFile(m_path);
-        if( device->open(QIODevice::ReadWrite) ){ // nuke the old filesystem with zeros
-            device->write(zero_array);
-            device->flush();
-            device->close();
+        QByteArray zero_array(128 * 1024, '\0');
+        
+        if(m_clobber_fs_check->isChecked()){
+            QFile *const device = new QFile(m_path);
+            if( device->open(QIODevice::ReadWrite) ){ // nuke the old filesystem with zeros
+                device->write(zero_array);
+                device->flush();
+                device->close();
+            }
         }
     }
 }

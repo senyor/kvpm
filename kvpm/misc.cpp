@@ -14,6 +14,13 @@
 
 #include "misc.h"
 
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <errno.h>
+
+
+
 #include <KPushButton>
 
 #include <QtGui>
@@ -153,4 +160,26 @@ QStringList splitUuid(QString const uuid) // Turns a one line uuid into two shor
     QString const uuid_end   = uuid.right((uuid.size() - split_index) - 1);
 
     return QStringList(uuid_start)  << uuid_end;
+}
+
+// Checks to see if a device is busy on linux 2.6+
+bool isBusy(const QString device)
+{
+    struct stat     st_buf;
+    int             fd;
+
+    QByteArray dev_qba = device.toLocal8Bit();
+
+    if (stat(dev_qba.data(), &st_buf) != 0)
+        return false;
+
+    fd = open(dev_qba.data(), O_RDONLY | O_EXCL);
+    if (fd < 0) {
+        if (errno == EBUSY)
+            return true;
+    } 
+    else
+        close(fd);
+
+    return false;
 }
