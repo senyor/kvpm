@@ -23,7 +23,7 @@ class VolGroup;
 class VGInfoLabels : public QFrame
 {
  public:
-     explicit VGInfoLabels(VolGroup *volumeGroup, QWidget *parent = 0);
+     explicit VGInfoLabels(VolGroup *const group, QWidget *parent = 0);
     
 };
 
