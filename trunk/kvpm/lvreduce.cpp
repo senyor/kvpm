@@ -27,9 +27,9 @@
 #include "volgroup.h"
 
 
-LVReduceDialog::LVReduceDialog(LogVol *const logicalVolume, QWidget *parent) : 
-    KDialog(parent),
-    m_lv(logicalVolume)
+LVReduceDialog::LVReduceDialog(LogVol *const volume, QWidget *parent)
+    : KDialog(parent),
+      m_lv(volume)
 {
     m_vg = m_lv->getVg();
     setWindowTitle( i18n("Reduce Logical Volume") );
@@ -60,11 +60,11 @@ LVReduceDialog::LVReduceDialog(LogVol *const logicalVolume, QWidget *parent) :
 	else
             m_bailout = true;
     }
-    else if( logicalVolume->isMounted() ){
+    else if( m_lv->isMounted() ){
         KMessageBox::error(0, i18n("The filesystem must be unmounted first") );
         m_bailout = true;
     }
-    else if( !fs_can_reduce(fs) && !logicalVolume->isSnap() ){
+    else if( !fs_can_reduce(fs) && !m_lv->isSnap() ){
 	if(KMessageBox::warningContinueCancel(0, warning_message2) == KMessageBox::Continue)
 	    force = true;
 	else
