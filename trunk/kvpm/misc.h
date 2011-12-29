@@ -22,6 +22,7 @@
 
 QString sizeToString(long long bytes);
 QStringList splitUuid(QString const uuid);
+bool isBusy(const QString device);
 
 
 class NoMungeCheck : public QCheckBox
