@@ -70,7 +70,7 @@ TopWindow::TopWindow(MasterList *const masterList, ExecutableFinder *const execu
     setCentralWidget(m_tab_widget);
 
     m_device_tab = new DeviceTab();
-    m_tab_widget->appendDeviceTab(m_device_tab, i18n("Storage devices") );
+    m_tab_widget->appendDeviceTab(m_device_tab, i18n("Storage Devices") );
 
     menuBar()->setCornerWidget(m_progress_box);
 

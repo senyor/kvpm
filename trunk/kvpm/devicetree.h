@@ -36,7 +36,8 @@ Q_OBJECT
     bool m_initial_run,
          m_show_total, 
          m_show_percent,
-         m_expand_parts;
+         m_expand_parts,
+         m_use_si_units;
 
     int m_fs_warn_percent, 
         m_pv_warn_percent;

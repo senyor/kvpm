@@ -35,7 +35,7 @@ Q_OBJECT
 
     VolGroup *m_vg;
     bool m_init;        // is this the initial building of the tree or a reload?
-    bool m_show_percent, m_show_total;
+    bool m_show_percent, m_show_total, m_use_si_units;
     int m_fs_warn_percent;
 
     void setupContextMenu();

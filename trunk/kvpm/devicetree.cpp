@@ -30,9 +30,9 @@
 
 
 DeviceTree::DeviceTree(DeviceSizeChart *const chart, DevicePropertiesStack *const stack, QWidget *parent)
- : QTreeWidget(parent), 
-   m_chart(chart),
-   m_stack(stack)
+    : QTreeWidget(parent), 
+      m_chart(chart),
+      m_stack(stack)
 {
     QStringList header_labels;
 
@@ -87,6 +87,12 @@ void DeviceTree::loadData(QList<StorageDevice *> devices)
 
     setViewConfig();
 
+    KLocale *const locale = KGlobal::locale();
+    if(m_use_si_units)
+        locale->setBinaryUnitDialect(KLocale::MetricBinaryDialect); 
+    else
+        locale->setBinaryUnitDialect(KLocale::IECBinaryDialect);
+
     if( currentItem() )
         current_device = currentItem()->data(0, Qt::DisplayRole).toString();
 
@@ -112,19 +118,19 @@ void DeviceTree::loadData(QList<StorageDevice *> devices)
 
         if(dev->isPhysicalVolume()){
             pv = dev->getPhysicalVolume();
-            data << dev_name << "" << sizeToString(dev->getSize());
+            data << dev_name << "" << locale->formatByteSize(dev->getSize());
 
             if(m_show_total && !m_show_percent)
-                data << sizeToString( pv->getRemaining() );
+                data << locale->formatByteSize( pv->getRemaining() );
             else if(!m_show_total && m_show_percent)
                 data << QString("%%1").arg( 100 - pv->getPercentUsed() );
             else
-                data << QString("%1 (%%2) ").arg( sizeToString( pv->getRemaining() )).arg( 100 - pv->getPercentUsed() );
+                data << QString("%1 (%%2) ").arg( locale->formatByteSize( pv->getRemaining() )).arg( 100 - pv->getPercentUsed() );
 
             data << "PV" << pv->getVg()->getName();
         }
         else{
-            data << dev_name << "" << sizeToString(dev->getSize());
+            data << dev_name << "" << locale->formatByteSize(dev->getSize());
         }
         
         parent = new QTreeWidgetItem(data);
@@ -165,17 +171,17 @@ void DeviceTree::loadData(QList<StorageDevice *> devices)
             part_variant.setValue( (void *) part);
             type = part->getType();
             
-            data << part->getName() << type << sizeToString(part->getSize());
+            data << part->getName() << type << locale->formatByteSize(part->getSize());
             
             if(part->isPhysicalVolume()){
                 pv = part->getPhysicalVolume();
 
                 if(m_show_total && !m_show_percent)
-                    data << sizeToString( pv->getRemaining() );
+                    data << locale->formatByteSize( pv->getRemaining() );
                 else if(!m_show_total && m_show_percent)
                     data << QString("%%1").arg( 100 - pv->getPercentUsed() );
                 else
-                    data << QString("%1 (%%2) ").arg( sizeToString( pv->getRemaining() )).arg( 100 - pv->getPercentUsed() );
+                    data << QString("%1 (%%2) ").arg( locale->formatByteSize( pv->getRemaining() )).arg( 100 - pv->getPercentUsed() );
 
                 data << "PV"
                      << pv->getVg()->getName()
@@ -186,11 +192,11 @@ void DeviceTree::loadData(QList<StorageDevice *> devices)
                 if(part->getFilesystemSize() > -1 && part->getFilesystemUsed() > -1){
 
                 if(m_show_total && !m_show_percent)
-                    data << sizeToString( part->getFilesystemRemaining() );
+                    data << locale->formatByteSize( part->getFilesystemRemaining() );
                 else if(!m_show_total && m_show_percent)
                     data << QString("%%1").arg( 100 - part->getFilesystemPercentUsed() );
                 else
-                    data << QString("%1 (%%2) ").arg( sizeToString( part->getFilesystemRemaining() )).arg( 100 - part->getFilesystemPercentUsed() );
+                    data << QString("%1 (%%2) ").arg( locale->formatByteSize( part->getFilesystemRemaining() )).arg( 100 - part->getFilesystemPercentUsed() );
                 }
                 else
                     data << "";
@@ -411,6 +417,9 @@ void DeviceTree::setViewConfig()
          group,
          flags,
          mount;
+
+    skeleton.setCurrentGroup("General");
+    skeleton.addItemBool("use_si_units", m_use_si_units, false);
 
     skeleton.setCurrentGroup("DeviceTreeColumns");
     skeleton.addItemBool( "device",      device,    true );
