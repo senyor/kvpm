@@ -47,6 +47,7 @@ Q_OBJECT
     bool m_is_offset;    // Are we selecting the starting point offset of a partition?
     bool m_is_new;       // New volume/partition, not resizing old one?
     bool m_is_valid;     // Valid data?
+    bool m_use_si_units;
 
     long long convertSizeToUnits(int index, double size); // ie: convert MiBs to sectors or extents
     void updateValidator();
