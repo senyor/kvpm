@@ -13,11 +13,14 @@
  */
 
 
+#include "sizeselectorbox.h"
+
+#include <KConfigSkeleton>
+#include <KGlobal>
 #include <KLocale>
 
 #include <QtGui>
 
-#include "sizeselectorbox.h"
 
 SizeSelectorBox::SizeSelectorBox(long long unitSize, long long minSize, long long maxSize, long long initialSize,
                                  bool isVolume, bool isOffset, bool isNew, QWidget *parent) : 
@@ -35,25 +38,37 @@ SizeSelectorBox::SizeSelectorBox(long long unitSize, long long minSize, long lon
     m_constrained_max = m_max_size;
     m_constrained_min = m_min_size;
 
-    QVBoxLayout *layout = new QVBoxLayout();
-    QHBoxLayout *upper_layout = new QHBoxLayout();
+    KConfigSkeleton skeleton;
+    skeleton.setCurrentGroup("General");
+    skeleton.addItemBool("use_si_units", m_use_si_units, false);
 
-    m_size_slider  = new QSlider(Qt::Horizontal);
+    QVBoxLayout *const layout = new QVBoxLayout();
+    QHBoxLayout *const upper_layout = new QHBoxLayout();
+
+    m_size_slider = new QSlider(Qt::Horizontal);
     m_size_slider->setRange(0, 100);
-    m_size_edit    = new KLineEdit();
+    m_size_edit   = new KLineEdit();
     m_size_edit->setAlignment(Qt::AlignRight);
 
     m_suffix_combo = new KComboBox();
-    m_suffix_combo->insertItem(0,"MiB");
-    m_suffix_combo->insertItem(1,"GiB");
-    m_suffix_combo->insertItem(2,"TiB");
+    if(m_use_si_units){
+        m_suffix_combo->insertItem(0,"MB");
+        m_suffix_combo->insertItem(1,"GB");
+        m_suffix_combo->insertItem(2,"TB");
+    }
+    else{
+        m_suffix_combo->insertItem(0,"MiB");
+        m_suffix_combo->insertItem(1,"GiB");
+        m_suffix_combo->insertItem(2,"TiB");
+    }
+
     if(m_is_volume)
         m_suffix_combo->insertItem(0, i18n("Extents"));
     m_suffix_combo->setInsertPolicy(KComboBox::NoInsert);
     m_suffix_combo->setCurrentIndex(1);
 
     if(m_is_new){
-        if( ! m_is_offset )
+        if( !m_is_offset )
             m_current_size = m_constrained_max;
         else
             m_current_size = 0;
@@ -64,7 +79,7 @@ SizeSelectorBox::SizeSelectorBox(long long unitSize, long long minSize, long lon
     m_size_validator->setBottom(0);
 
     if(m_is_volume){
-        setTitle( i18n("Volume size") );
+        setTitle( i18n("Volume Size") );
         if( !m_is_new ){
             m_size_box = new QCheckBox( i18n("Lock selected size") );
             m_size_box->setChecked(false);
@@ -76,7 +91,7 @@ SizeSelectorBox::SizeSelectorBox(long long unitSize, long long minSize, long lon
         }
     }
     else if(m_is_offset){
-        setTitle( i18n("Partition start") );
+        setTitle( i18n("Partition Start") );
         m_offset_box = new QCheckBox( i18n("Lock partition start") );
         m_offset_box->setChecked(false);
         setConstraints(false);
@@ -86,7 +101,7 @@ SizeSelectorBox::SizeSelectorBox(long long unitSize, long long minSize, long lon
                 this, SLOT(lock(bool)));
     }
     else{
-        setTitle( i18n("Partition size") );
+        setTitle( i18n("Partition Size") );
         m_size_box = new QCheckBox( i18n("Lock selected size") );
         m_size_box->setChecked(false);
         layout->addWidget(m_size_box);
@@ -360,13 +375,25 @@ long long SizeSelectorBox::convertSizeToUnits(int index, double size)
 
     long double partition_size = size;
 
-    if(index == 0)
-        partition_size *= (long double)0x100000;
-    else if(index == 1)
-        partition_size *= (long double)0x40000000;
+    if(m_use_si_units){
+        if(index == 0)
+            partition_size *= (long double)1.0E6;
+        else if(index == 1)
+            partition_size *= (long double)1.0E9;
+        else{
+            partition_size *= (long double)1.0E6;
+            partition_size *= (long double)1.0E6;
+        }
+    }
     else{
-        partition_size *= (long double)0x100000;
-        partition_size *= (long double)0x100000;
+        if(index == 0)
+            partition_size *= (long double)0x100000;
+        else if(index == 1)
+            partition_size *= (long double)0x40000000;
+        else{
+            partition_size *= (long double)0x100000;
+            partition_size *= (long double)0x100000;
+        }
     }
 
     partition_size /= m_unit_size;
@@ -387,21 +414,31 @@ void SizeSelectorBox::updateEdit()
     if(m_is_volume)
         index -= 1;
 
-    if(index == 0){
-        sized /= (long double)0x100000;
-    }
-    else if(index == 1){
-        sized /= (long double)0x40000000;
+    if(m_use_si_units){
+        if(index == 0)
+            sized /= (long double)1.0E6;
+        else if(index == 1)
+            sized /= (long double)1.0E9;
+        else{
+            sized /= (long double)1.0E6;
+            sized /= (long double)1.0E6;
+        }
     }
     else{
-        sized /= (long double)(0x100000);
-        sized /= (long double)(0x100000);
+        if(index == 0)
+            sized /= (long double)0x100000;
+        else if(index == 1)
+            sized /= (long double)0x40000000;
+        else{
+            sized /= (long double)0x100000;
+            sized /= (long double)0x100000;
+        }
     }
 
     if( index == -1 )
-        m_size_edit->setText( QString("%1").arg( (double)m_current_size, 0, 'g', 4) );
+        m_size_edit->setText( QString("%1").arg( (double)m_current_size, 0, 'g', 5) );
     else
-        m_size_edit->setText( QString("%1").arg( (double)sized, 0, 'g', 4) );
+        m_size_edit->setText( QString("%1").arg( (double)sized, 0, 'g', 5) );
     
     if( (m_current_size >= m_constrained_min) && (m_current_size <= m_constrained_max))
         m_is_valid = true;
@@ -413,7 +450,6 @@ void SizeSelectorBox::updateEdit()
 
 void SizeSelectorBox::updateValidator()
 {
-
     long double valid_topd = (long double)m_constrained_max * m_unit_size;
     long double valid_bottomd = (long double)m_constrained_min * m_unit_size;
     int index = m_suffix_combo->currentIndex();
@@ -421,24 +457,43 @@ void SizeSelectorBox::updateValidator()
     if(m_is_volume)
         index -= 1;
 
-    if(index == 0){
-        valid_topd /= (long double)0x100000;
-        valid_bottomd /= (long double)0x100000;
-    }
-    else if(index == 1){
-        valid_topd /= (long double)0x40000000;
-        valid_bottomd /= (long double)0x40000000;
+    if(m_use_si_units){
+        if(index == 0){
+            valid_topd /= (long double)1.0E6;
+            valid_bottomd /= (long double)1.0E6;
+        }
+        else if(index == 1){
+            valid_topd /= (long double)1.0E9;
+            valid_bottomd /= (long double)1.0E9;
+        }
+        else{
+            valid_topd /= (long double)1.0E6;
+            valid_topd /= (long double)1.0E6;
+            valid_bottomd /= (long double)1.0E6;
+            valid_bottomd /= (long double)1.0E6;
+        }
     }
     else{
-        valid_topd /= (long double)0x100000;
-        valid_topd /= (long double)0x100000;
-        valid_bottomd /= (long double)0x100000;
-        valid_bottomd /= (long double)0x100000;
+        if(index == 0){
+            valid_topd /= (long double)0x100000;
+            valid_bottomd /= (long double)0x100000;
+        }
+        else if(index == 1){
+            valid_topd /= (long double)0x40000000;
+            valid_bottomd /= (long double)0x40000000;
+        }
+        else{
+            valid_topd /= (long double)0x100000;
+            valid_topd /= (long double)0x100000;
+            valid_bottomd /= (long double)0x100000;
+            valid_bottomd /= (long double)0x100000;
+        }
+        
     }
-    
+
     if( valid_bottomd < 0 )
         valid_bottomd = 0;
-
+        
     if( index != -1 ){    
         m_size_validator->setTop( (double)valid_topd );
         m_size_validator->setBottom( (double)valid_bottomd );
