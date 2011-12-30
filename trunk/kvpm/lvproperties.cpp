@@ -15,6 +15,7 @@
 
 #include "lvproperties.h"
 
+#include <KGlobal>
 #include <KLocale>
 #include <KConfigSkeleton>
 
@@ -30,9 +31,9 @@
    we are not focused on any one segment. Therefor stripes and
    stripe size have no meaning */
 
-LVProperties::LVProperties(LogVol *const logicalVolume, const int segment, QWidget *parent):
-    QWidget(parent),
-    m_lv(logicalVolume)
+LVProperties::LVProperties(LogVol *const volume, const int segment, QWidget *parent)
+    : QWidget(parent),
+      m_lv(volume)
 {
     QVBoxLayout *layout = new QVBoxLayout();
     layout->setSpacing(2);
@@ -44,6 +45,9 @@ LVProperties::LVProperties(LogVol *const logicalVolume, const int segment, QWidg
          show_fsuuid, 
          show_fslabel, 
          show_uuid;
+
+    skeleton.setCurrentGroup("General");
+    skeleton.addItemBool("use_si_units", m_use_si_units, false);
 
     skeleton.setCurrentGroup("LogicalVolumeProperties");
     skeleton.addItemBool("mount",   show_mount,   true);
@@ -205,6 +209,12 @@ QFrame *LVProperties::generalFrame(int segment)
     frame->setFrameStyle( QFrame::Sunken | QFrame::StyledPanel );
     frame->setLineWidth(2);
 
+    KLocale *const locale = KGlobal::locale();
+    if(m_use_si_units)
+        locale->setBinaryUnitDialect(KLocale::MetricBinaryDialect); 
+    else
+        locale->setBinaryUnitDialect(KLocale::IECBinaryDialect);
+
     if((segment >= 0) && (segment_count > 1)){
 
 	extents = m_lv->getSegmentExtents(segment);
@@ -217,7 +227,7 @@ QFrame *LVProperties::generalFrame(int segment)
 
 	    if( stripes != 1 ){
 		stripe_layout->addWidget(new QLabel( i18n("Stripes: %1", stripes) ));
-                stripe_layout->addWidget(new QLabel( i18n("Stripe size: %1", stripe_size) ));
+                stripe_layout->addWidget(new QLabel( i18n("Stripe size: %1", locale->formatByteSize(stripe_size)) ));
 	    }
 	    else{
 		stripe_layout->addWidget(new QLabel( i18n("Stripes: none") ));
@@ -241,7 +251,7 @@ QFrame *LVProperties::generalFrame(int segment)
 
 	    if( stripes != 1 ){
 		stripe_layout->addWidget(new QLabel( i18n("Stripes: %1", stripes) ));
-                stripe_layout->addWidget(new QLabel( i18n("Stripe size: %1", stripe_size) ));
+                stripe_layout->addWidget(new QLabel( i18n("Stripe size: %1", locale->formatByteSize(stripe_size)) ));
 	    }
 	    else{
 		stripe_layout->addWidget(new QLabel( i18n("Stripes: none") ));
@@ -251,7 +261,7 @@ QFrame *LVProperties::generalFrame(int segment)
 	}
 	else if( !m_lv->isMirrorLog() || ( m_lv->isMirrorLog() && m_lv->isMirror() ) ){
             layout->addWidget(new QLabel( i18n("Total extents: %1", total_extents) ));
-	    layout->addWidget(new QLabel( i18n("Total size: %1", sizeToString(total_size)) ));
+	    layout->addWidget(new QLabel( i18n("Total size: %1", locale->formatByteSize(total_size)) ));
 	}
 
 	if( !( m_lv->isMirrorLeg() || m_lv->isMirrorLog() )){

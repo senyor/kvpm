@@ -16,8 +16,10 @@
 
 #include <lvm2app.h>
 
-#include <KMessageBox>
+#include <KConfigSkeleton>
+#include <KGlobal>
 #include <KLocale>
+#include <KMessageBox>
 #include <KPushButton>
 
 #include <QtGui>
@@ -34,14 +36,26 @@
 
 
 
-bool extend_vg(QString volumeGroupName, StorageDevice *device, StoragePartition *partition)
+bool extend_vg(const QString groupName, StorageDevice *const device, StoragePartition *partition)
 {
-    const QByteArray vg_name = volumeGroupName.toLocal8Bit();
+    bool use_si_units;
+    KConfigSkeleton skeleton;
+    skeleton.setCurrentGroup("General");
+    skeleton.addItemBool("use_si_units", use_si_units, false);
+
+
+    KLocale *const locale = KGlobal::locale();
+    if(use_si_units)
+        locale->setBinaryUnitDialect(KLocale::MetricBinaryDialect); 
+    else
+        locale->setBinaryUnitDialect(KLocale::IECBinaryDialect);
+
+    const QByteArray vg_name = groupName.toLocal8Bit();
     QByteArray pv_name;
     long long size;
     lvm_t lvm = MasterList::getLvm();
     vg_t  vg_dm;
-    VolGroup *const vg = MasterList::getVgByName(volumeGroupName);
+    VolGroup *const vg = MasterList::getVgByName(groupName);
     const long long extent_size = vg->getExtentSize();
     ProgressBox *const progress_box = TopWindow::getProgressBox();
     const QString error_message = i18n("This physical volume <b>%1</b> is smaller than the extent size", QString(pv_name));
@@ -57,9 +71,9 @@ bool extend_vg(QString volumeGroupName, StorageDevice *device, StoragePartition 
 
     const QString message = i18n("Do you want to extend volume group: <b>%1</b> with "
                                  "physical volume: <b>%2</b> (size: %3)", 
-                                 volumeGroupName, 
+                                 groupName, 
                                  QString(pv_name), 
-                                 sizeToString(size));
+                                 locale->formatByteSize(size));
 
     if(extent_size > size){
         KMessageBox::error(0, error_message);
@@ -96,7 +110,7 @@ bool extend_vg(QString volumeGroupName, StorageDevice *device, StoragePartition 
     return false;  // do nothing
 }
 
-bool extend_vg(VolGroup *volumeGroup)
+bool extend_vg(VolGroup *group)
 {
     const QList<StorageDevice *> all_devices = MasterList::getStorageDevices();   
     QList<StorageDevice *> usable_devices;
@@ -135,7 +149,7 @@ bool extend_vg(VolGroup *volumeGroup)
     }
 
     if( ( usable_devices.size() + usable_partitions.size() ) > 0 ){
-        VGExtendDialog dialog( volumeGroup, usable_devices, usable_partitions );
+        VGExtendDialog dialog( group, usable_devices, usable_partitions );
         dialog.exec();
         if(dialog.result() == QDialog::Accepted)
             return true;
@@ -148,10 +162,10 @@ bool extend_vg(VolGroup *volumeGroup)
     return false;
 }
 
-VGExtendDialog::VGExtendDialog(VolGroup *volumeGroup, QList<StorageDevice *> devices, 
+VGExtendDialog::VGExtendDialog(VolGroup *const group, QList<StorageDevice *> devices, 
                                QList<StoragePartition *> partitions, QWidget *parent) : 
     KDialog(parent),
-    m_vg(volumeGroup)
+    m_vg(group)
 {
 
     setWindowTitle( i18n("Extend Volume Group") );

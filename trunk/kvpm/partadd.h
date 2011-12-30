@@ -45,6 +45,8 @@ Q_OBJECT
     PedDisk          *m_ped_disk;
     DualSelectorBox  *m_dual_selector;
 
+    bool m_use_si_units;
+
     PedSector m_max_part_start,   // first available sector of free space
               m_max_part_end,     // last available sector of free space 
               m_max_part_size;    // sectors available of free space 

@@ -15,6 +15,7 @@
 
 #include "pvtree.h"
 
+#include <KGlobal>
 #include <KConfigSkeleton>
 #include <KIcon>
 #include <KLocale>
@@ -23,7 +24,6 @@
 
 #include "logvol.h"
 #include "masterlist.h"
-#include "misc.h"
 #include "processprogress.h"
 #include "pvmove.h"
 #include "pvchange.h"

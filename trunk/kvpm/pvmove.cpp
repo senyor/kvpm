@@ -15,9 +15,11 @@
 
 #include "pvmove.h"
 
-#include <KPushButton>
-#include <KMessageBox>
+#include <KConfigSkeleton>
+#include <KGlobal>
 #include <KLocale>
+#include <KMessageBox>
+#include <KPushButton>
 
 #include <QtGui>
 
@@ -195,6 +197,17 @@ PVMoveDialog::~PVMoveDialog()
 
 void PVMoveDialog::buildDialog()
 {
+    bool use_si_units;
+    KConfigSkeleton skeleton;
+    skeleton.setCurrentGroup("General");
+    skeleton.addItemBool("use_si_units", use_si_units, false);
+
+    KLocale *const locale = KGlobal::locale();
+    if(use_si_units)
+        locale->setBinaryUnitDialect(KLocale::MetricBinaryDialect); 
+    else
+        locale->setBinaryUnitDialect(KLocale::IECBinaryDialect);
+
     QLabel *label;
     NoMungeRadioButton *radio_button;
     
@@ -230,17 +243,17 @@ void PVMoveDialog::buildDialog()
    
             if(m_move_segment){
                 m_pv_used_space = (1 + m_sources[x]->end - m_sources[x]->start) * m_vg->getExtentSize();
-                radio_button = new NoMungeRadioButton( QString("%1  %2").arg(m_sources[x]->name_range).arg(sizeToString(m_pv_used_space)));
+                radio_button = new NoMungeRadioButton( QString("%1  %2").arg(m_sources[x]->name_range).arg(locale->formatByteSize(m_pv_used_space)));
                 radio_button->setAlternateText( m_sources[x]->name );
             }
 	    else if(m_move_lv){
 	        m_pv_used_space = m_lv->getSpaceUsedOnPv(m_sources[x]->name);
-                radio_button = new NoMungeRadioButton( QString("%1  %2").arg(m_sources[x]->name).arg(sizeToString(m_pv_used_space)));
+                radio_button = new NoMungeRadioButton( QString("%1  %2").arg(m_sources[x]->name).arg(locale->formatByteSize(m_pv_used_space)));
                 radio_button->setAlternateText( m_sources[x]->name );
             }
             else{
                 m_pv_used_space = m_vg->getPvByName(m_sources[x]->name)->getSize() - m_vg->getPvByName(m_sources[x]->name )->getRemaining();
-                radio_button = new NoMungeRadioButton( QString("%1  %2").arg(m_sources[x]->name).arg(sizeToString(m_pv_used_space)));
+                radio_button = new NoMungeRadioButton( QString("%1  %2").arg(m_sources[x]->name).arg(locale->formatByteSize(m_pv_used_space)));
                 radio_button->setAlternateText( m_sources[x]->name );
             }
 
@@ -263,15 +276,15 @@ void PVMoveDialog::buildDialog()
     else{
         if(m_move_segment){
             m_pv_used_space = (1 + m_sources[0]->end - m_sources[0]->start) * m_vg->getExtentSize();
-            radio_layout->addWidget( new QLabel( QString("%1  %2").arg(m_sources[0]->name_range).arg(sizeToString(m_pv_used_space)) ) );
+            radio_layout->addWidget( new QLabel( QString("%1  %2").arg(m_sources[0]->name_range).arg(locale->formatByteSize(m_pv_used_space)) ) );
         }
 	else if(m_move_lv){
 	    m_pv_used_space = m_lv->getSpaceUsedOnPv(m_sources[0]->name);
-            radio_layout->addWidget( new QLabel( QString("%1  %2").arg(m_sources[0]->name).arg(sizeToString(m_pv_used_space)) ) );
+            radio_layout->addWidget( new QLabel( QString("%1  %2").arg(m_sources[0]->name).arg(locale->formatByteSize(m_pv_used_space)) ) );
         }
 	else{
             m_pv_used_space = m_vg->getPvByName( m_sources[0]->name )->getSize() - m_vg->getPvByName( m_sources[0]->name )->getRemaining();
-            radio_layout->addWidget( new QLabel( QString("%1  %2").arg(m_sources[0]->name).arg(sizeToString(m_pv_used_space)) ) );
+            radio_layout->addWidget( new QLabel( QString("%1  %2").arg(m_sources[0]->name).arg(locale->formatByteSize(m_pv_used_space)) ) );
         }
     }
 

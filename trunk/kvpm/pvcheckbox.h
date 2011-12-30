@@ -32,6 +32,7 @@ class PVCheckBox: public QGroupBox
 {
 Q_OBJECT
 
+    bool m_use_si_units;
     QList<PhysVol *> m_pvs;
     QList<StorageDevice *> m_devices;
     QList<StoragePartition *> m_partitions;
@@ -40,7 +41,7 @@ Q_OBJECT
     long long m_extent_size;
 
  public:
-    explicit PVCheckBox(QList<PhysVol *> physicalVolumes, QWidget *parent = NULL); 
+    explicit PVCheckBox(QList<PhysVol *> volumes, QWidget *parent = NULL); 
     PVCheckBox(QList<StorageDevice *> devices, QList<StoragePartition *> partitions, 
                long long extentSize, QWidget *parent = NULL); 
 

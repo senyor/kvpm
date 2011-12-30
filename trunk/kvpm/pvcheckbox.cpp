@@ -12,8 +12,12 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
-#include <KPushButton>
+
+#include <KConfigSkeleton>
+#include <KGlobal>
 #include <KLocale>
+#include <KPushButton>
+
 #include <QtGui>
 
 #include "pvcheckbox.h"
@@ -24,10 +28,13 @@
 #include "volgroup.h"
 
 
-PVCheckBox::PVCheckBox(QList<PhysVol *> physicalVolumes, QWidget *parent):
-    QGroupBox(parent), 
-    m_pvs(physicalVolumes)
+PVCheckBox::PVCheckBox(QList<PhysVol *> volumes, QWidget *parent)
+    : QGroupBox(parent), 
+      m_pvs(volumes)
 {
+    KConfigSkeleton skeleton;
+    skeleton.setCurrentGroup("General");
+    skeleton.addItemBool("use_si_units", m_use_si_units, false);
 
     setTitle( i18n("Available physical volumes") );
     QGridLayout *layout = new QGridLayout();
@@ -40,6 +47,12 @@ PVCheckBox::PVCheckBox(QList<PhysVol *> physicalVolumes, QWidget *parent):
     m_space_label   = new QLabel;
     m_extents_label = new QLabel;
 
+    KLocale *const locale = KGlobal::locale();
+    if(m_use_si_units)
+        locale->setBinaryUnitDialect(KLocale::MetricBinaryDialect); 
+    else
+        locale->setBinaryUnitDialect(KLocale::IECBinaryDialect);
+
     if(pv_check_count < 1){
         m_extent_size = 1;
         QLabel *pv_label = new QLabel( i18n("<b>No suitable volumes found!</b>") );
@@ -47,7 +60,7 @@ PVCheckBox::PVCheckBox(QList<PhysVol *> physicalVolumes, QWidget *parent):
     }
     else if(pv_check_count < 2){
         m_extent_size = m_pvs[0]->getVg()->getExtentSize();
-        QLabel *pv_label = new QLabel( m_pvs[0]->getName() + "  " + sizeToString( m_pvs[0]->getRemaining() ) );
+        QLabel *pv_label = new QLabel( m_pvs[0]->getName() + "  " + locale->formatByteSize( m_pvs[0]->getRemaining() ) );
         layout->addWidget(pv_label, 0, 0, 1, -1);
         layout->addWidget(m_space_label,   layout->rowCount(), 0, 1, -1);
         layout->addWidget(m_extents_label, layout->rowCount(), 0, 1, -1);
@@ -56,7 +69,7 @@ PVCheckBox::PVCheckBox(QList<PhysVol *> physicalVolumes, QWidget *parent):
     else{
         m_extent_size = m_pvs[0]->getVg()->getExtentSize();
         for(int x = 0; x < pv_check_count; x++){
-	    temp_check = new NoMungeCheck( m_pvs[x]->getName() + "  " + sizeToString( m_pvs[x]->getRemaining() ) );
+	    temp_check = new NoMungeCheck( m_pvs[x]->getName() + "  " + locale->formatByteSize( m_pvs[x]->getRemaining() ) );
 	    temp_check->setAlternateText( m_pvs[x]->getName() );
 	    temp_check->setData( QVariant( m_pvs[x]->getRemaining() ) );
 	    m_pv_checks.append(temp_check);
@@ -88,12 +101,16 @@ PVCheckBox::PVCheckBox(QList<PhysVol *> physicalVolumes, QWidget *parent):
 }
 
 PVCheckBox::PVCheckBox(QList <StorageDevice *> devices, QList<StoragePartition *> partitions, 
-                       long long extentSize, QWidget *parent):
-    QGroupBox(parent), 
-    m_devices(devices), 
-    m_partitions(partitions), 
-    m_extent_size(extentSize)
+                       long long extentSize, QWidget *parent)
+    : QGroupBox(parent), 
+      m_devices(devices), 
+      m_partitions(partitions), 
+      m_extent_size(extentSize)
 {
+    KConfigSkeleton skeleton;
+    skeleton.setCurrentGroup("General");
+    skeleton.addItemBool("use_si_units", m_use_si_units, false);
+
     setTitle( i18n("Available physical volumes") );
     QGridLayout *layout = new QGridLayout();
     setLayout(layout);
@@ -109,6 +126,12 @@ PVCheckBox::PVCheckBox(QList <StorageDevice *> devices, QList<StoragePartition *
 
     m_extents_label = new QLabel;
 
+    KLocale *const locale = KGlobal::locale();
+    if(m_use_si_units)
+        locale->setBinaryUnitDialect(KLocale::MetricBinaryDialect); 
+    else
+        locale->setBinaryUnitDialect(KLocale::IECBinaryDialect);
+
     if(pv_check_count < 1){
         QLabel *pv_label = new QLabel( i18n("none found") );
         layout->addWidget(pv_label);
@@ -122,7 +145,7 @@ PVCheckBox::PVCheckBox(QList <StorageDevice *> devices, QList<StoragePartition *
             name = m_partitions[0]->getName();
             size = m_partitions[0]->getSize();
         }
-        QLabel *pv_label = new QLabel( name + "  " + sizeToString(size) );
+        QLabel *pv_label = new QLabel( name + "  " + locale->formatByteSize(size) );
         layout->addWidget(pv_label, 0, 0, 1, -1);
         layout->addWidget(m_space_label,   layout->rowCount(), 0, 1, -1);
         layout->addWidget(m_extents_label, layout->rowCount(), 0, 1, -1);
@@ -134,7 +157,7 @@ PVCheckBox::PVCheckBox(QList <StorageDevice *> devices, QList<StoragePartition *
             dev_count++;
             name = m_devices[x]->getName();
             size = m_devices[x]->getSize();
-	    temp_check = new NoMungeCheck( name + "  " + sizeToString(size) );
+	    temp_check = new NoMungeCheck( name + "  " + locale->formatByteSize(size) );
 	    temp_check->setAlternateText(name);
 	    temp_check->setData( QVariant(size) );
 	    m_pv_checks.append(temp_check);
@@ -153,7 +176,7 @@ PVCheckBox::PVCheckBox(QList <StorageDevice *> devices, QList<StoragePartition *
         for(int x = 0; x < m_partitions.size(); x++){
             name = m_partitions[x]->getName();
             size = m_partitions[x]->getSize();
-	    temp_check = new NoMungeCheck( name + "  " + sizeToString(size) );
+	    temp_check = new NoMungeCheck( name + "  " + locale->formatByteSize(size) );
 	    temp_check->setAlternateText(name);
 	    temp_check->setData( QVariant(size) );
 	    m_pv_checks.append(temp_check);
@@ -293,7 +316,13 @@ void PVCheckBox::selectNone(){
 
 void PVCheckBox::calculateSpace(){
 
-    m_space_label->setText( i18n("Selected space: %1", sizeToString(getRemainingSpace()) ) );
+    KLocale *const locale = KGlobal::locale();
+    if(m_use_si_units)
+        locale->setBinaryUnitDialect(KLocale::MetricBinaryDialect); 
+    else
+        locale->setBinaryUnitDialect(KLocale::IECBinaryDialect);
+
+    m_space_label->setText( i18n("Selected space: %1", locale->formatByteSize(getRemainingSpace()) ) );
     m_extents_label->setText( i18n("Selected extents: %1", getRemainingSpace() / m_extent_size ) );
 
     emit stateChanged();

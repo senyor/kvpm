@@ -46,6 +46,7 @@ Q_OBJECT
      bool m_name_is_valid;   // TRUE if the new name is acceptable
      bool m_bailout;         // TRUE if we should not bother to execute this dialog
      bool m_fs_can_extend;
+     bool m_use_si_units;    // TRUE Metric SI sizes = MB and GB, otherise use MiB, GiB etc.
 
      SizeSelectorBox *m_size_selector;
 
@@ -106,8 +107,8 @@ Q_OBJECT
      QStringList argumentsLV();
 
  public:
-     explicit LVCreateDialog(VolGroup *volumeGroup, QWidget *parent = 0);
-     LVCreateDialog(LogVol *logicalVolume, bool snapshot, QWidget *parent = 0);
+     explicit LVCreateDialog(VolGroup *const group, QWidget *parent = 0);
+     LVCreateDialog(LogVol *const volume, const bool snapshot, QWidget *parent = 0);
      bool bailout();
 
  private slots:

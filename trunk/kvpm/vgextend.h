@@ -25,9 +25,9 @@ class StorageDevice;
 class StoragePartition;
 class VolGroup;
 
-bool extend_vg(QString volumeGroupName, StorageDevice *device, StoragePartition *partition);
+bool extend_vg(const QString groupName, StorageDevice *const device, StoragePartition *partition);
 
-bool extend_vg(VolGroup *volumeGroup);
+bool extend_vg(VolGroup *const group);
 
 class VGExtendDialog : public KDialog
 {
