@@ -16,12 +16,13 @@
 #include "pvproperties.h"
 
 #include <KConfigSkeleton>
-#include <KSeparator>
+#include <KGlobal>
 #include <KLocale>
+#include <KSeparator>
+
 #include <QtGui>
 
 #include "masterlist.h"
-#include "misc.h"
 #include "physvol.h"
 #include "logvol.h"
 #include "volgroup.h"
@@ -106,6 +107,17 @@ QList<LVSegmentExtent *> PVProperties::sortByExtent()
 
 QFrame *PVProperties::buildMdaBox()
 {
+    bool use_si_units;
+    KConfigSkeleton skeleton;
+    skeleton.setCurrentGroup("General");
+    skeleton.addItemBool("use_si_units", use_si_units, false);
+
+    KLocale *const locale = KGlobal::locale();
+    if(use_si_units)
+        locale->setBinaryUnitDialect(KLocale::MetricBinaryDialect); 
+    else
+        locale->setBinaryUnitDialect(KLocale::IECBinaryDialect);
+
     QLabel *label;
     QHBoxLayout *const layout = new QHBoxLayout;
     QFrame *const frame = new QFrame;
@@ -120,7 +132,7 @@ QFrame *PVProperties::buildMdaBox()
     layout->addWidget(label);
     label = new QLabel( QString("In use: %1").arg( m_pv->getMdaUsed() ) );
     layout->addWidget(label);
-    label = new QLabel( QString("Size: %1").arg( sizeToString( m_pv->getMdaSize() ) ) );
+    label = new QLabel( QString("Size: %1").arg( locale->formatByteSize( m_pv->getMdaSize() ) ) );
     layout->addWidget(label);
 
     return frame;

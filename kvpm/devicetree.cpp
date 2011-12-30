@@ -14,6 +14,7 @@
 #include "devicetree.h"
 
 #include <KConfigSkeleton>
+#include <KGlobal>
 #include <KIcon>
 #include <KLocale>
 
@@ -22,7 +23,6 @@
 #include "deviceactionsmenu.h"
 #include "devicepropertiesstack.h"
 #include "devicesizechart.h"
-#include "misc.h"
 #include "physvol.h"
 #include "storagedevice.h"
 #include "storagepartition.h"

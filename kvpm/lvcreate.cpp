@@ -14,14 +14,15 @@
 
 #include "lvcreate.h"
 
-#include <KMessageBox>
+#include <KConfigSkeleton>
+#include <KGlobal>
 #include <KLocale>
+#include <KMessageBox>
 
 #include <QtGui>
 
 #include "fsextend.h"
 #include "logvol.h"
-#include "misc.h"
 #include "mountentry.h"
 #include "physvol.h"
 #include "pvcheckbox.h"
@@ -34,15 +35,19 @@
 /* This class handles both the creation and extension of logical
    volumes and snapshots since both processes are so similar. */
 
-LVCreateDialog::LVCreateDialog(VolGroup *volumeGroup, QWidget *parent):
+LVCreateDialog::LVCreateDialog(VolGroup *const group, QWidget *parent):
     KDialog(parent),
-    m_vg(volumeGroup)
+    m_vg(group)
 {
     m_lv = NULL;
     m_extend = false;
     m_snapshot = false;
     m_bailout  = hasInitialErrors();
     m_fs_can_extend = false;
+
+    KConfigSkeleton skeleton;
+    skeleton.setCurrentGroup("General");
+    skeleton.addItemBool("use_si_units", m_use_si_units, false);
 
     if ( !m_bailout ){
         setCaption( i18n("Create Logical Volume") );
@@ -61,19 +66,23 @@ LVCreateDialog::LVCreateDialog(VolGroup *volumeGroup, QWidget *parent):
     }
 }
 
-LVCreateDialog::LVCreateDialog(LogVol *logicalVolume, bool snapshot, QWidget *parent):
+LVCreateDialog::LVCreateDialog(LogVol *const volume, const bool snapshot, QWidget *parent):
     KDialog(parent),
     m_snapshot(snapshot),
-    m_lv(logicalVolume)
+    m_lv(volume)
 {
     m_extend = !m_snapshot;
     m_vg = m_lv->getVg();
     m_bailout  = hasInitialErrors();
 
+    KConfigSkeleton skeleton;
+    skeleton.setCurrentGroup("General");
+    skeleton.addItemBool("use_si_units", m_use_si_units, false);
+
     if ( !m_bailout ){
 
         if(m_snapshot)
-            setCaption( i18n("Create snapshot Volume") );
+            setCaption( i18n("Create Snapshot Volume") );
         else
             setCaption( i18n("Extend Logical Volume") );
         
@@ -129,133 +138,139 @@ void LVCreateDialog::makeConnections()
 
 QWidget* LVCreateDialog::createGeneralTab()
 {
-     m_tag_edit = NULL;
-
-     QWidget *general_tab = new QWidget(this);
-     QHBoxLayout *general_layout = new QHBoxLayout;
-     general_tab->setLayout(general_layout);
-     QGroupBox *volume_box = new QGroupBox(); 
-     QVBoxLayout *layout = new QVBoxLayout;
-     volume_box->setLayout(layout);
-     general_layout->addStretch();
-     general_layout->addWidget(volume_box);
-     general_layout->addStretch();
-     QVBoxLayout *upper_layout = new QVBoxLayout();
-     QHBoxLayout *lower_layout = new QHBoxLayout();
-     layout->addStretch();
-     layout->addLayout(upper_layout);
-     layout->addStretch();
-     layout->addLayout(lower_layout);
-
-     m_name_is_valid = true;
-
-     if(m_extend){
-         volume_box->setTitle( i18n("Extending volume: %1", m_lv->getName()) );
-         m_extend_by_label = new QLabel();
-         layout->insertWidget( 1, m_extend_by_label );
-         m_current_size_label = new QLabel( i18n("Current size: %1", sizeToString( m_lv->getSize() ) )  );
-         layout->insertWidget( 2, m_current_size_label );
-     }
-     else{
-
-         if(m_snapshot)
-             volume_box->setTitle( i18n("Creating snapshot of: %1", m_lv->getName()) );
-         else
-             volume_box->setTitle( i18n("Create new logical volume") );
-
-	 QHBoxLayout *name_layout = new QHBoxLayout();
-	 m_name_edit = new KLineEdit();
-
-	 QRegExp rx("[0-9a-zA-Z_\\.][-0-9a-zA-Z_\\.]*");
-	 m_name_validator = new QRegExpValidator( rx, m_name_edit );
-	 m_name_edit->setValidator(m_name_validator);
-
-	 name_layout->addWidget( new QLabel( i18n("Volume name: ") ) );
-	 name_layout->addWidget(m_name_edit);
-	 upper_layout->insertLayout(0, name_layout);
-
-	 QHBoxLayout *tag_layout = new QHBoxLayout();
-	 m_tag_edit = new KLineEdit();
-
-	 QRegExp rx2("[0-9a-zA-Z_\\.+-]*");
-	 m_tag_validator = new QRegExpValidator( rx2, m_tag_edit );
-	 m_tag_edit->setValidator(m_tag_validator);
-
-	 tag_layout->addWidget( new QLabel( i18n("Optional tag: ") ) );
-	 tag_layout->addWidget(m_tag_edit);
-	 upper_layout->insertLayout(1, tag_layout);
-
-	 connect(m_name_edit, SIGNAL(textEdited(QString)), 
-		 this, SLOT(validateVolumeName(QString)));
-
-     }
-
-     if(m_extend){
-         if( getStripeCount() > 1 ){
-             m_stripe_box->setChecked(false);
-             m_size_selector = new SizeSelectorBox(m_vg->getExtentSize(), m_lv->getExtents(), 
-                                                   getLargestVolume() / m_vg->getExtentSize(), 
-                                                   m_lv->getExtents(), true, false);
-             m_stripe_box->setChecked(true);
-         }
-         else{
-             m_size_selector = new SizeSelectorBox(m_vg->getExtentSize(), m_lv->getExtents(), 
-                                                   getLargestVolume() / m_vg->getExtentSize(), 
-                                                   m_lv->getExtents(), true, false);
-         }
-     }
-     else{
-         m_size_selector = new SizeSelectorBox(m_vg->getExtentSize(), 0, 
-                                               getLargestVolume() / m_vg->getExtentSize() , 
-                                               0, true, false);
-     }
-
-     upper_layout->addWidget(m_size_selector);
-
-     QGroupBox *volume_limit_box = new QGroupBox( i18n("Maximum volume size") );
-     QVBoxLayout *volume_limit_layout = new QVBoxLayout();
-     volume_limit_box->setLayout(volume_limit_layout);
-     m_max_size_label = new QLabel();
-     volume_limit_layout->addWidget(m_max_size_label);
-     m_max_extents_label = new QLabel();
-     volume_limit_layout->addWidget(m_max_extents_label);
-     m_stripe_count_label = new QLabel();
-     volume_limit_layout->addWidget(m_stripe_count_label);
-     volume_limit_layout->addStretch();
-     lower_layout->addWidget(volume_limit_box);
-
-     QGroupBox *alloc_box = new QGroupBox( i18n("Allocation Policy") );
-     QVBoxLayout *alloc_box_layout = new QVBoxLayout;
-     normal_button     = new QRadioButton( i18nc("The usual way", "Normal") );
-     contiguous_button = new QRadioButton( i18n("Contiguous") );
-     anywhere_button   = new QRadioButton( i18n("Anywhere") );
-     inherited_button  = new QRadioButton( i18nc("Inherited from the parent group", "Inherited") );
-     cling_button      = new QRadioButton( i18n("Cling") );
-
-     QString policy = "Inherited";
-     if( m_extend )
-         policy = m_lv->getPolicy();
-
-     if( policy == "Normal" )
-         normal_button->setChecked(true);
-     else if( policy == "Contiguous" )
-         contiguous_button->setChecked(true);
-     else if( policy == "Anywhere" )
-         anywhere_button->setChecked(true);
-     else if( policy == "Cling" )
-         cling_button->setChecked(true);
-     else
-         inherited_button->setChecked(true);
-
-     alloc_box_layout->addWidget(normal_button);
-     alloc_box_layout->addWidget(contiguous_button);
-     alloc_box_layout->addWidget(anywhere_button);
-     alloc_box_layout->addWidget(inherited_button);
-     alloc_box_layout->addWidget(cling_button);
-     alloc_box->setLayout(alloc_box_layout);
-     lower_layout->addWidget(alloc_box);
-
-     return general_tab;
+    m_tag_edit = NULL;
+    
+    QWidget *general_tab = new QWidget(this);
+    QHBoxLayout *general_layout = new QHBoxLayout;
+    general_tab->setLayout(general_layout);
+    QGroupBox *volume_box = new QGroupBox(); 
+    QVBoxLayout *layout = new QVBoxLayout;
+    volume_box->setLayout(layout);
+    general_layout->addStretch();
+    general_layout->addWidget(volume_box);
+    general_layout->addStretch();
+    QVBoxLayout *upper_layout = new QVBoxLayout();
+    QHBoxLayout *lower_layout = new QHBoxLayout();
+    layout->addStretch();
+    layout->addLayout(upper_layout);
+    layout->addStretch();
+    layout->addLayout(lower_layout);
+    
+    m_name_is_valid = true;
+    
+    KLocale *const locale = KGlobal::locale();
+    if(m_use_si_units)
+        locale->setBinaryUnitDialect(KLocale::MetricBinaryDialect); 
+    else
+        locale->setBinaryUnitDialect(KLocale::IECBinaryDialect);
+    
+    if(m_extend){
+        volume_box->setTitle( i18n("Extending volume: %1", m_lv->getName()) );
+        m_extend_by_label = new QLabel();
+        layout->insertWidget( 1, m_extend_by_label );
+        m_current_size_label = new QLabel( i18n("Current size: %1", locale->formatByteSize( m_lv->getSize() ) )  );
+        layout->insertWidget( 2, m_current_size_label );
+    }
+    else{
+        
+        if(m_snapshot)
+            volume_box->setTitle( i18n("Creating snapshot of: %1", m_lv->getName()) );
+        else
+            volume_box->setTitle( i18n("Create new logical volume") );
+        
+        QHBoxLayout *name_layout = new QHBoxLayout();
+        m_name_edit = new KLineEdit();
+        
+        QRegExp rx("[0-9a-zA-Z_\\.][-0-9a-zA-Z_\\.]*");
+        m_name_validator = new QRegExpValidator( rx, m_name_edit );
+        m_name_edit->setValidator(m_name_validator);
+        
+        name_layout->addWidget( new QLabel( i18n("Volume name: ") ) );
+        name_layout->addWidget(m_name_edit);
+        upper_layout->insertLayout(0, name_layout);
+        
+        QHBoxLayout *tag_layout = new QHBoxLayout();
+        m_tag_edit = new KLineEdit();
+        
+        QRegExp rx2("[0-9a-zA-Z_\\.+-]*");
+        m_tag_validator = new QRegExpValidator( rx2, m_tag_edit );
+        m_tag_edit->setValidator(m_tag_validator);
+        
+        tag_layout->addWidget( new QLabel( i18n("Optional tag: ") ) );
+        tag_layout->addWidget(m_tag_edit);
+        upper_layout->insertLayout(1, tag_layout);
+        
+        connect(m_name_edit, SIGNAL(textEdited(QString)), 
+                this, SLOT(validateVolumeName(QString)));
+        
+    }
+    
+    if(m_extend){
+        if( getStripeCount() > 1 ){
+            m_stripe_box->setChecked(false);
+            m_size_selector = new SizeSelectorBox(m_vg->getExtentSize(), m_lv->getExtents(), 
+                                                  getLargestVolume() / m_vg->getExtentSize(), 
+                                                  m_lv->getExtents(), true, false);
+            m_stripe_box->setChecked(true);
+        }
+        else{
+            m_size_selector = new SizeSelectorBox(m_vg->getExtentSize(), m_lv->getExtents(), 
+                                                  getLargestVolume() / m_vg->getExtentSize(), 
+                                                  m_lv->getExtents(), true, false);
+        }
+    }
+    else{
+        m_size_selector = new SizeSelectorBox(m_vg->getExtentSize(), 0, 
+                                              getLargestVolume() / m_vg->getExtentSize() , 
+                                              0, true, false);
+    }
+    
+    upper_layout->addWidget(m_size_selector);
+    
+    QGroupBox *volume_limit_box = new QGroupBox( i18n("Maximum volume size") );
+    QVBoxLayout *volume_limit_layout = new QVBoxLayout();
+    volume_limit_box->setLayout(volume_limit_layout);
+    m_max_size_label = new QLabel();
+    volume_limit_layout->addWidget(m_max_size_label);
+    m_max_extents_label = new QLabel();
+    volume_limit_layout->addWidget(m_max_extents_label);
+    m_stripe_count_label = new QLabel();
+    volume_limit_layout->addWidget(m_stripe_count_label);
+    volume_limit_layout->addStretch();
+    lower_layout->addWidget(volume_limit_box);
+    
+    QGroupBox *alloc_box = new QGroupBox( i18n("Allocation Policy") );
+    QVBoxLayout *alloc_box_layout = new QVBoxLayout;
+    normal_button     = new QRadioButton( i18nc("The usual way", "Normal") );
+    contiguous_button = new QRadioButton( i18n("Contiguous") );
+    anywhere_button   = new QRadioButton( i18n("Anywhere") );
+    inherited_button  = new QRadioButton( i18nc("Inherited from the parent group", "Inherited") );
+    cling_button      = new QRadioButton( i18n("Cling") );
+    
+    QString policy = "Inherited";
+    if( m_extend )
+        policy = m_lv->getPolicy();
+    
+    if( policy == "Normal" )
+        normal_button->setChecked(true);
+    else if( policy == "Contiguous" )
+        contiguous_button->setChecked(true);
+    else if( policy == "Anywhere" )
+        anywhere_button->setChecked(true);
+    else if( policy == "Cling" )
+        cling_button->setChecked(true);
+    else
+        inherited_button->setChecked(true);
+    
+    alloc_box_layout->addWidget(normal_button);
+    alloc_box_layout->addWidget(contiguous_button);
+    alloc_box_layout->addWidget(anywhere_button);
+    alloc_box_layout->addWidget(inherited_button);
+    alloc_box_layout->addWidget(cling_button);
+    alloc_box->setLayout(alloc_box_layout);
+    lower_layout->addWidget(alloc_box);
+    
+    return general_tab;
 }
 
 QWidget* LVCreateDialog::createPhysicalTab()
@@ -492,9 +507,15 @@ void LVCreateDialog::setMaxSize()
     const int mirror_count = getMirrorCount();
     const long long free_extents  = getLargestVolume() / m_vg->getExtentSize();
     const long long selected_size = m_size_selector->getCurrentSize() * m_vg->getExtentSize(); 
+    
+    KLocale *const locale = KGlobal::locale();
+    if(m_use_si_units)
+        locale->setBinaryUnitDialect(KLocale::MetricBinaryDialect); 
+    else
+        locale->setBinaryUnitDialect(KLocale::IECBinaryDialect);
 
     m_size_selector->setConstrainedMax(free_extents);
-    m_max_size_label->setText( i18n("Size: %1", sizeToString( getLargestVolume() )) );
+    m_max_size_label->setText( i18n("Size: %1", locale->formatByteSize( getLargestVolume() )) );
     m_max_extents_label->setText( i18n("Extents: %1", free_extents) );
 
     if(!m_extend){
@@ -509,7 +530,7 @@ void LVCreateDialog::setMaxSize()
             m_stripe_count_label->setText( i18n("(linear volume)") );
     }
     else{
-        m_extend_by_label->setText( i18n("Extend by: %1", sizeToString( selected_size - m_lv->getSize() )) );
+        m_extend_by_label->setText( i18n("Extend by: %1", locale->formatByteSize( selected_size - m_lv->getSize() )) );
 
         if( mirror_count > 1 && !m_stripe_box->isChecked() )
             m_stripe_count_label->setText( i18n("(with %1 mirror legs)", mirror_count) );

@@ -20,7 +20,6 @@
 #include <QRadioButton>
 #include <QVariant>
 
-QString sizeToString(long long bytes);
 QStringList splitUuid(QString const uuid);
 bool isBusy(const QString device);
 

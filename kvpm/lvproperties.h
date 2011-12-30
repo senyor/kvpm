@@ -22,6 +22,7 @@ class LogVol;
 
 class LVProperties : public QWidget
 {
+    bool m_use_si_units;
     LogVol *m_lv;
     QFrame *mountPointsFrame();
     QFrame *uuidFrame();
@@ -30,7 +31,7 @@ class LVProperties : public QWidget
     QFrame *physicalVolumesFrame(int segment);
 
  public:
-    LVProperties(LogVol *const logicalVolume, const int segment, QWidget *parent = 0);
+    LVProperties(LogVol *const volume, const int segment, QWidget *parent = 0);
 
 };
 

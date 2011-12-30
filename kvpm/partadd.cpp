@@ -12,6 +12,8 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
+#include <KConfigSkeleton>
+#include <KGlobal>
 #include <KLocale>
 #include <KMessageBox>
 
@@ -21,7 +23,6 @@
 #include "partadd.h"
 #include "partaddgraphic.h"
 #include "pedexceptions.h"
-#include "misc.h"
 #include "sizeselectorbox.h"
 #include "storagepartition.h"
 
@@ -58,10 +59,13 @@ bool add_partition(StoragePartition *partition)
     }
 }
 
-PartitionAddDialog::PartitionAddDialog(StoragePartition *partition, QWidget *parent) : 
-  KDialog(parent),
-  m_partition(partition)
+PartitionAddDialog::PartitionAddDialog(StoragePartition *partition, QWidget *parent)
+    : KDialog(parent),
+      m_partition(partition)
 {
+    KConfigSkeleton skeleton;
+    skeleton.setCurrentGroup("General");
+    skeleton.addItemBool("use_si_units", m_use_si_units, false);
 
     PedPartition *ped_free_partition = partition->getPedPartition();
     PedGeometry   ped_geometry;
@@ -160,11 +164,17 @@ PartitionAddDialog::PartitionAddDialog(StoragePartition *partition, QWidget *par
     m_remaining_label = new QLabel();
     layout->addWidget( m_remaining_label );
 
-    QString total_bytes = sizeToString( m_max_part_size * m_sector_size );
+    KLocale *const locale = KGlobal::locale();
+    if(m_use_si_units)
+        locale->setBinaryUnitDialect(KLocale::MetricBinaryDialect); 
+    else
+        locale->setBinaryUnitDialect(KLocale::IECBinaryDialect);
+
+    QString total_bytes = locale->formatByteSize( m_max_part_size * m_sector_size );
     QLabel *excluded_label = new QLabel( i18n("Maximum size: %1",  total_bytes) );
     layout->addWidget( excluded_label );
 
-    total_bytes = sizeToString(m_max_part_size * m_sector_size);
+    total_bytes = locale->formatByteSize(m_max_part_size * m_sector_size);
     m_unexcluded_label = new QLabel( i18n("Remaining space: %1", total_bytes) );
     layout->addWidget( m_unexcluded_label );
 
@@ -276,10 +286,16 @@ void PartitionAddDialog::updatePartition(){
     if(free < 0)
         free = 0;
 
-    QString total_bytes = sizeToString(m_sector_size * free);
+    KLocale *const locale = KGlobal::locale();
+    if(m_use_si_units)
+        locale->setBinaryUnitDialect(KLocale::MetricBinaryDialect); 
+    else
+        locale->setBinaryUnitDialect(KLocale::IECBinaryDialect);
+
+    QString total_bytes = locale->formatByteSize(m_sector_size * free);
     m_unexcluded_label->setText( i18n("Available space: %1", total_bytes) );
 
-    QString preceding_bytes_string = sizeToString(offset * m_sector_size);
+    QString preceding_bytes_string = locale->formatByteSize(offset * m_sector_size);
     m_preceding_label->setText( i18n("Preceding space: %1", preceding_bytes_string) );
 
     PedSector following = m_max_part_size - (size + offset);
@@ -291,7 +307,7 @@ void PartitionAddDialog::updatePartition(){
     if( following_space < 32 * m_sector_size )
         following_space = 0;
 
-    QString following_bytes_string = sizeToString(following_space);
+    QString following_bytes_string = locale->formatByteSize(following_space);
     m_remaining_label->setText( i18n("Following space: %1", following_bytes_string) );
 
     m_display_graphic->setPrecedingSectors(offset);

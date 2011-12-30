@@ -16,10 +16,12 @@
 #include "partmoveresize.h"
 
 #include <KApplication>
+#include <KButtonGroup>
+#include <KConfigSkeleton>
+#include <KGlobal>
 #include <KLocale>
 #include <KMessageBox>
 #include <KPushButton>
-#include <KButtonGroup>
 
 #include <QtGui>
 
@@ -36,7 +38,6 @@
 #include "sizeselectorbox.h"
 #include "storagepartition.h"
 #include "topwindow.h"
-#include "misc.h"
 #include "volgroup.h"
 
 
@@ -64,11 +65,14 @@ bool moveresize_partition(StoragePartition *partition)
 
 }
 
-PartitionMoveResizeDialog::PartitionMoveResizeDialog(StoragePartition *partition, QWidget *parent) : 
-    KDialog(parent),
-    m_old_storage_part(partition)
-  
+PartitionMoveResizeDialog::PartitionMoveResizeDialog(StoragePartition *partition, QWidget *parent) 
+    : KDialog(parent),
+      m_old_storage_part(partition)
 {
+    KConfigSkeleton skeleton;
+    skeleton.setCurrentGroup("General");
+    skeleton.addItemBool("use_si_units", m_use_si_units, false);
+
     setup();
 
     const QString fs = m_old_storage_part->getFilesystem();
@@ -106,14 +110,20 @@ PartitionMoveResizeDialog::PartitionMoveResizeDialog(StoragePartition *partition
     info_group->setLayout(info_group_layout);
     layout->addWidget(info_group);
 
+    KLocale *const locale = KGlobal::locale();
+    if(m_use_si_units)
+        locale->setBinaryUnitDialect(KLocale::MetricBinaryDialect); 
+    else
+        locale->setBinaryUnitDialect(KLocale::IECBinaryDialect);
+
     m_change_by_label = new QLabel();
     m_preceding_label = new QLabel();
     m_following_label = new QLabel();
     info_group_layout->addWidget( m_preceding_label );
     info_group_layout->addWidget( m_following_label );
     info_group_layout->addStretch();
-    info_group_layout->addWidget( new QLabel( i18n("Minimum size: %1", sizeToString( m_min_shrink_size * m_sector_size ))));
-    info_group_layout->addWidget( new QLabel( i18n("Maximum size: %1", sizeToString( max_size * m_sector_size ) ))); 
+    info_group_layout->addWidget( new QLabel( i18n("Minimum size: %1", locale->formatByteSize( m_min_shrink_size * m_sector_size ))));
+    info_group_layout->addWidget( new QLabel( i18n("Maximum size: %1", locale->formatByteSize( max_size * m_sector_size ) ))); 
     info_group_layout->addStretch();
     info_group_layout->addWidget( m_change_by_label );
 
@@ -595,13 +605,19 @@ void PartitionMoveResizeDialog::updateGraphicAndLabels()
     m_display_graphic->setFollowingSectors(following_sectors);
     m_display_graphic->repaint();
 
-    QString change = sizeToString(change_size);
+    KLocale *const locale = KGlobal::locale();
+    if(m_use_si_units)
+        locale->setBinaryUnitDialect(KLocale::MetricBinaryDialect); 
+    else
+        locale->setBinaryUnitDialect(KLocale::IECBinaryDialect);
+
+    QString change = locale->formatByteSize(change_size);
     if(change_size < 0)
         m_change_by_label->setText( i18n("<b>Shrink by : %1</b>", change) );
     else
         m_change_by_label->setText( i18n("<b>Grow by : %1</b>", change) );
 
-    QString preceding_bytes_string = sizeToString(preceding_sectors * m_sector_size);
+    QString preceding_bytes_string = locale->formatByteSize(preceding_sectors * m_sector_size);
     m_preceding_label->setText( i18n("Preceding space: %1", preceding_bytes_string) );
 
     long long following_space = following_sectors * m_sector_size;
@@ -609,7 +625,7 @@ void PartitionMoveResizeDialog::updateGraphicAndLabels()
     if(following_space < 0)
         following_space = 0;
 
-    QString following_bytes_string = sizeToString(following_space);
+    QString following_bytes_string = locale->formatByteSize(following_space);
     m_following_label->setText( i18n("Following space: %1", following_bytes_string) );
 }
 

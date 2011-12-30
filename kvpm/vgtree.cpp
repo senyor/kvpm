@@ -13,6 +13,7 @@
 
 #include "vgtree.h"
 
+#include <KGlobal>
 #include <KConfigSkeleton>
 #include <KIcon>
 #include <KLocale>
@@ -21,7 +22,7 @@
 
 #include "lvactionsmenu.h"
 #include "logvol.h"
-#include "misc.h"
+//#include "misc.h"
 #include "volgroup.h"
 
 

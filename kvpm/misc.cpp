@@ -96,47 +96,6 @@ QVariant NoMungeRadioButton::getData()
     return m_data;
 }
 
-
-/* The idea here is to not have numbers over three digits long
-   before the decimal point and two after it. This will need 
-   to be worked on to optionally provide proper SI units in 
-   the future */
-
-QString sizeToString(long long bytes)
-{
-    double size = (double)bytes; 
-
-    if( qAbs(size) < 1000)
-	return QString("%1").arg(bytes);
-
-    if( ( qAbs(size /= 1024) ) < 1000){
-        if( size < 1.0 )
-            size = qRound(size * 100.0) / 100.0;
-
-	return QString("%1 KiB").arg(size, 0,'g', 3);
-    }
-
-    if( ( qAbs(size /= 1024) ) < 1000){
-        if( size < 1.0 )
-            size = qRound(size * 100.0) / 100.0;
-
-	return QString("%1 MiB").arg(size, 0, 'g', 3);
-    }
-
-    if( ( qAbs(size /= 1024) ) < 1000){
-        if( size < 1.0 )
-            size = qRound(size * 100.0) / 100.0;
-
-	return QString("%1 GiB").arg(size, 0,'g', 3);
-    }
-    size /= 1024;
-
-    if( 0.0 < size && size < 1.0 )
-        size = qRound(size * 100.0) / 100.0;
-
-    return QString("%1 TiB").arg(size, 0, 'g', 3);
-}
-
 QStringList splitUuid(QString const uuid) // Turns a one line uuid into two shorter lines for veiwing
 {
     int split_index = 0;

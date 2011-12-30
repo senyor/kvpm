@@ -46,6 +46,8 @@ Q_OBJECT
     PedDisk          *m_ped_disk;
     PedPartition     *m_existing_part; // The partition on the disk now
 
+    bool m_use_si_units;
+
     PedSector m_min_shrink_size;     // Minimum size of the fs after shrinking
     long long m_sector_size;         // bytes per logical sector
     long long m_max_part_start;      // start of biggest possible partition
