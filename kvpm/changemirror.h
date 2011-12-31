@@ -30,7 +30,7 @@ class KComboBox;
 class KIntSpinBox;
 class KTabWidget;
 class LogVol;
-class PVCheckBox;
+class PvGroupBox;
 class VolGroup;
 class KIcon;
 
@@ -43,7 +43,7 @@ Q_OBJECT
     KIntSpinBox *m_add_mirrors_spin;
     KIntSpinBox *m_stripes_number_spin;
     QStackedWidget *m_error_stack;
-    PVCheckBox *m_pv_box;
+    PvGroupBox *m_pv_box;
     QGroupBox  *m_stripe_box;
     KComboBox  *m_stripe_size_combo;
 

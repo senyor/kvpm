@@ -27,7 +27,7 @@
 #include "masterlist.h"
 #include "misc.h"
 #include "progressbox.h"
-#include "pvcheckbox.h"
+#include "pvgroupbox.h"
 #include "storagedevice.h"
 #include "storagepartition.h"
 #include "topwindow.h"
@@ -179,7 +179,7 @@ VGExtendDialog::VGExtendDialog(VolGroup *const group, QList<StorageDevice *> dev
     name_label->setAlignment(Qt::AlignCenter);
     m_layout->addWidget(name_label);
 
-    m_pv_checkbox = new PVCheckBox( devices, partitions, m_vg->getExtentSize() );
+    m_pv_checkbox = new PvGroupBox( devices, partitions, m_vg->getExtentSize() );
     m_layout->addWidget(m_pv_checkbox);
 
     connect(m_pv_checkbox, SIGNAL(stateChanged()), 

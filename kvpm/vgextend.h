@@ -20,7 +20,7 @@
 #include <QCheckBox>
 #include <QVBoxLayout>
 
-class PVCheckBox;
+class PvGroupBox;
 class StorageDevice;
 class StoragePartition;
 class VolGroup;
@@ -33,7 +33,7 @@ class VGExtendDialog : public KDialog
 {
 Q_OBJECT
 
-    PVCheckBox  *m_pv_checkbox;
+    PvGroupBox  *m_pv_checkbox;
     VolGroup    *m_vg;
     QVBoxLayout *m_layout;
 

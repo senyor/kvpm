@@ -12,8 +12,8 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
-#ifndef PVCHECKBOX_H
-#define PVCHECKBOX_H
+#ifndef PVGROUPBOX_H
+#define PVGROUPBOX_H
 
 #include <QStringList>
 #include <QCheckBox>
@@ -28,7 +28,7 @@ class PhysVol;
 class StorageDevice;
 class StoragePartition;
 
-class PVCheckBox: public QGroupBox
+class PvGroupBox: public QGroupBox
 {
 Q_OBJECT
 
@@ -41,8 +41,8 @@ Q_OBJECT
     long long m_extent_size;
 
  public:
-    explicit PVCheckBox(QList<PhysVol *> volumes, QWidget *parent = NULL); 
-    PVCheckBox(QList<StorageDevice *> devices, QList<StoragePartition *> partitions, 
+    explicit PvGroupBox(QList<PhysVol *> volumes, QWidget *parent = NULL); 
+    PvGroupBox(QList<StorageDevice *> devices, QList<StoragePartition *> partitions, 
                long long extentSize, QWidget *parent = NULL); 
 
     QStringList getAllNames();    // names of all pvs displayed in the box

@@ -25,7 +25,7 @@
 
 #include "masterlist.h"
 #include "progressbox.h"
-#include "pvcheckbox.h"
+#include "pvgroupbox.h"
 #include "storagedevice.h"
 #include "storagepartition.h"
 #include "topwindow.h"
@@ -133,7 +133,7 @@ VGCreateDialog::VGCreateDialog(QList<StorageDevice *> devices, QList<StoragePart
     m_extent_suffix->setInsertPolicy(QComboBox::NoInsert);
     m_extent_suffix->setCurrentIndex(1);
     
-    m_pv_checkbox = new PVCheckBox(devices, partitions, 0x400000);  // 4 MiB default extent size
+    m_pv_checkbox = new PvGroupBox(devices, partitions, 0x400000);  // 4 MiB default extent size
     m_layout->addWidget(m_pv_checkbox);
 
     connect(m_pv_checkbox, SIGNAL(stateChanged()),

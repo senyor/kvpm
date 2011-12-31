@@ -27,7 +27,7 @@
 
 class StorageDevice;
 class StoragePartition;
-class PVCheckBox;
+class PvGroupBox;
 
 bool create_vg(StorageDevice *device, StoragePartition *partition);
 
@@ -41,7 +41,7 @@ Q_OBJECT
            *m_total_available_label, 
            *m_total_selected_label;
 
-    PVCheckBox  *m_pv_checkbox;
+    PvGroupBox  *m_pv_checkbox;
     QVBoxLayout *m_layout;
 
     KLineEdit *m_vg_name, 
