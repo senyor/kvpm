@@ -36,14 +36,12 @@ PvGroupBox::PvGroupBox(QList<PhysVol *> volumes, QWidget *parent)
     skeleton.setCurrentGroup("General");
     skeleton.addItemBool("use_si_units", m_use_si_units, false);
 
-    setTitle( i18n("Available physical volumes") );
-    QGridLayout *layout = new QGridLayout();
+    setTitle( i18n("Available Physical Volumes") );
+    QGridLayout *const layout = new QGridLayout();
     setLayout(layout);
-    QHBoxLayout *button_layout = new QHBoxLayout();
-    KPushButton *all_button = new KPushButton( i18n("Select all") );
-    KPushButton *none_button = new KPushButton( i18n("Clear all") );
-    NoMungeCheck *temp_check;
-    int pv_check_count = m_pvs.size();
+
+    NoMungeCheck *check;
+    const int pv_check_count = m_pvs.size();
     m_space_label   = new QLabel;
     m_extents_label = new QLabel;
 
@@ -55,7 +53,7 @@ PvGroupBox::PvGroupBox(QList<PhysVol *> volumes, QWidget *parent)
 
     if(pv_check_count < 1){
         m_extent_size = 1;
-        QLabel *pv_label = new QLabel( i18n("<b>No suitable volumes found!</b>") );
+        QLabel *pv_label = new QLabel( i18n("<b>No suitable volumes found</b>") );
         layout->addWidget(pv_label);
     }
     else if(pv_check_count < 2){
@@ -69,10 +67,10 @@ PvGroupBox::PvGroupBox(QList<PhysVol *> volumes, QWidget *parent)
     else{
         m_extent_size = m_pvs[0]->getVg()->getExtentSize();
         for(int x = 0; x < pv_check_count; x++){
-	    temp_check = new NoMungeCheck( m_pvs[x]->getName() + "  " + locale->formatByteSize( m_pvs[x]->getRemaining() ) );
-	    temp_check->setAlternateText( m_pvs[x]->getName() );
-	    temp_check->setData( QVariant( m_pvs[x]->getRemaining() ) );
-	    m_pv_checks.append(temp_check);
+	    check = new NoMungeCheck( m_pvs[x]->getName() + "  " + locale->formatByteSize( m_pvs[x]->getRemaining() ) );
+	    check->setAlternateText( m_pvs[x]->getName() );
+	    check->setData( QVariant( m_pvs[x]->getRemaining() ) );
+	    m_pv_checks.append(check);
 
             if(pv_check_count < 11 )
                 layout->addWidget(m_pv_checks[x], x % 5, x / 5);
@@ -81,22 +79,14 @@ PvGroupBox::PvGroupBox(QList<PhysVol *> volumes, QWidget *parent)
             else
                 layout->addWidget(m_pv_checks[x], x % ( (pv_check_count + 2) / 3), x / ( (pv_check_count + 2) / 3));
 
-	    connect(temp_check, SIGNAL(toggled(bool)), 
+	    connect(check, SIGNAL(toggled(bool)), 
 		    this, SLOT(calculateSpace()));
 	}
 
         selectAll();
         layout->addWidget(m_space_label,   layout->rowCount(), 0, 1, -1);
         layout->addWidget(m_extents_label, layout->rowCount(), 0, 1, -1);
-        layout->addLayout(button_layout,   layout->rowCount(), 0, 1, -1);
-        button_layout->addStretch();
-        button_layout->addWidget(all_button);
-        button_layout->addStretch();
-        button_layout->addWidget(none_button);
-        button_layout->addStretch();
-        connect(all_button,  SIGNAL(clicked(bool)), this, SLOT(selectAll()));
-        connect(none_button, SIGNAL(clicked(bool)), this, SLOT(selectNone()));
-
+        layout->addLayout(getButtons(),    layout->rowCount(), 0, 1, -1);
     }
 }
 
@@ -111,19 +101,16 @@ PvGroupBox::PvGroupBox(QList <StorageDevice *> devices, QList<StoragePartition *
     skeleton.setCurrentGroup("General");
     skeleton.addItemBool("use_si_units", m_use_si_units, false);
 
-    setTitle( i18n("Available physical volumes") );
-    QGridLayout *layout = new QGridLayout();
+    setTitle( i18n("Available Physical Volumes") );
+    QGridLayout *const layout = new QGridLayout();
     setLayout(layout);
     QString name;
     long long size;
     int dev_count = 0;
-    QHBoxLayout *button_layout = new QHBoxLayout();
-    KPushButton *all_button = new KPushButton( i18n("Select all") );
-    KPushButton *none_button = new KPushButton( i18n("Clear all") );
-    NoMungeCheck *temp_check;
-    int pv_check_count = m_devices.size() + m_partitions.size();
-    m_space_label   = new QLabel;
 
+    NoMungeCheck *check;
+    const int pv_check_count = m_devices.size() + m_partitions.size();
+    m_space_label   = new QLabel;
     m_extents_label = new QLabel;
 
     KLocale *const locale = KGlobal::locale();
@@ -157,10 +144,10 @@ PvGroupBox::PvGroupBox(QList <StorageDevice *> devices, QList<StoragePartition *
             dev_count++;
             name = m_devices[x]->getName();
             size = m_devices[x]->getSize();
-	    temp_check = new NoMungeCheck( name + "  " + locale->formatByteSize(size) );
-	    temp_check->setAlternateText(name);
-	    temp_check->setData( QVariant(size) );
-	    m_pv_checks.append(temp_check);
+	    check = new NoMungeCheck( name + "  " + locale->formatByteSize(size) );
+	    check->setAlternateText(name);
+	    check->setData( QVariant(size) );
+	    m_pv_checks.append(check);
 
             if(pv_check_count < 11 )
                 layout->addWidget(m_pv_checks[x], x % 5, x / 5);
@@ -169,40 +156,33 @@ PvGroupBox::PvGroupBox(QList <StorageDevice *> devices, QList<StoragePartition *
             else
                 layout->addWidget(m_pv_checks[x], x % ( (pv_check_count + 2) / 3), x / ( (pv_check_count + 2) / 3));
 
-	    connect(temp_check, SIGNAL(toggled(bool)), 
+	    connect(check, SIGNAL(toggled(bool)), 
 		    this, SLOT(calculateSpace()));
 	}
 
         for(int x = 0; x < m_partitions.size(); x++){
             name = m_partitions[x]->getName();
             size = m_partitions[x]->getSize();
-	    temp_check = new NoMungeCheck( name + "  " + locale->formatByteSize(size) );
-	    temp_check->setAlternateText(name);
-	    temp_check->setData( QVariant(size) );
-	    m_pv_checks.append(temp_check);
+	    check = new NoMungeCheck( name + "  " + locale->formatByteSize(size) );
+	    check->setAlternateText(name);
+	    check->setData( QVariant(size) );
+	    m_pv_checks.append(check);
 
             if(pv_check_count < 11 )
-                layout->addWidget(temp_check, (dev_count + x) % 5, (dev_count + x) / 5);
+                layout->addWidget(check, (dev_count + x) % 5, (dev_count + x) / 5);
             else if (pv_check_count % 3 == 0)
-                layout->addWidget(temp_check, (dev_count + x) % (pv_check_count / 3), (dev_count + x) / (pv_check_count / 3));
+                layout->addWidget(check, (dev_count + x) % (pv_check_count / 3), (dev_count + x) / (pv_check_count / 3));
             else
-                layout->addWidget(temp_check, (dev_count + x) % ( (pv_check_count + 2) / 3), (dev_count + x) / ( (pv_check_count + 2) / 3));
+                layout->addWidget(check, (dev_count + x) % ( (pv_check_count + 2) / 3), (dev_count + x) / ( (pv_check_count + 2) / 3));
 
-	    connect(temp_check, SIGNAL(toggled(bool)), 
+	    connect(check, SIGNAL(toggled(bool)), 
 		    this, SLOT(calculateSpace()));
 	}
 
         selectAll();
         layout->addWidget(m_space_label,   layout->rowCount(), 0, 1, -1);
         layout->addWidget(m_extents_label, layout->rowCount(), 0, 1, -1);
-        layout->addLayout(button_layout,   layout->rowCount(), 0, 1, -1);
-        button_layout->addStretch();
-        button_layout->addWidget(all_button);
-        button_layout->addStretch();
-        button_layout->addWidget(none_button);
-        button_layout->addStretch();
-        connect(all_button,  SIGNAL(clicked(bool)), this, SLOT(selectAll()));
-        connect(none_button, SIGNAL(clicked(bool)), this, SLOT(selectNone()));
+        layout->addLayout(getButtons(),    layout->rowCount(), 0, 1, -1);
 
         setExtentSize(extentSize);
     }
@@ -364,4 +344,22 @@ void PvGroupBox::disableOrigin(PhysVol *originVolume){
                 m_pv_checks[x]->setEnabled(true);
         }
     }
+}
+
+QHBoxLayout *PvGroupBox::getButtons()
+{
+    QHBoxLayout *const layout = new QHBoxLayout();
+    KPushButton *const all    = new KPushButton( i18n("Select all") );
+    KPushButton *const none   = new KPushButton( i18n("Clear all") );
+
+    layout->addStretch();
+    layout->addWidget(all);
+    layout->addStretch();
+    layout->addWidget(none);
+    layout->addStretch();
+
+    connect(all,  SIGNAL(clicked(bool)), this, SLOT(selectAll()));
+    connect(none, SIGNAL(clicked(bool)), this, SLOT(selectNone()));
+    
+    return layout;
 }
