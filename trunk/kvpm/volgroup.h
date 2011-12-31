@@ -76,8 +76,8 @@ public:
     long long getSize();
     long long getFreeSpace();
     long long getUsedSpace();
-    int getLVCount();
-    int getLVMax();
+    int getLvCount();
+    int getLvMax();
     int getPvCount();
     int getPvMax();
     int getMdaCount();
