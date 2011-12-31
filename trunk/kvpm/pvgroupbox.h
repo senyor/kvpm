@@ -15,11 +15,12 @@
 #ifndef PVGROUPBOX_H
 #define PVGROUPBOX_H
 
-#include <QStringList>
 #include <QCheckBox>
 #include <QGroupBox>
+#include <QHBoxLayout>
 #include <QLabel>
 #include <QRadioButton>
+#include <QStringList>
 #include <QVariant>
 
 
@@ -27,6 +28,7 @@ class NoMungeCheck;
 class PhysVol;
 class StorageDevice;
 class StoragePartition;
+
 
 class PvGroupBox: public QGroupBox
 {
@@ -39,6 +41,7 @@ Q_OBJECT
     QList<NoMungeCheck *> m_pv_checks; 
     QLabel *m_space_label, *m_extents_label;
     long long m_extent_size;
+    QHBoxLayout *getButtons();
 
  public:
     explicit PvGroupBox(QList<PhysVol *> volumes, QWidget *parent = NULL); 
