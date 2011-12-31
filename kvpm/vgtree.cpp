@@ -73,7 +73,7 @@ void VGTree::loadData()
     setSortingEnabled(false);
     setViewConfig();
 
-    for(int x = 0; x < m_vg->getLVCount(); x++){
+    for(int x = 0; x < m_vg->getLvCount(); x++){
 	
  	lv = logical_volumes[x];
         new_item = NULL;

@@ -282,12 +282,12 @@ long long VolGroup::getUsedSpace()
     return (m_extents - m_free_extents) * m_extent_size;
 }
 
-int VolGroup::getLVCount()
+int VolGroup::getLvCount()
 {
     return m_member_lvs.size();
 }
 
-int VolGroup::getLVMax()
+int VolGroup::getLvMax()
 {
     return m_lv_max;
 }

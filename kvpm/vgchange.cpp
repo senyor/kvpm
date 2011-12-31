@@ -199,7 +199,7 @@ VGChangeDialog::VGChangeDialog(VolGroup *volumeGroup, QWidget *parent) :
     
 // We don't want the limit set to less than the number already in existence!
 
-    int lv_count = m_vg->getLVCount();
+    int lv_count = m_vg->getLvCount();
     if(lv_count <= 0)
 	lv_count = 1;
 

@@ -152,15 +152,15 @@ VGInfoLabels::VGInfoLabels(VolGroup *const group, QWidget *parent) : QFrame(pare
     hlayout1->addWidget(label_widget5);
     hlayout1->addWidget(label_widget6);
 
-    if( group->getLVMax() || group->getPvMax() ){
+    if( group->getLvMax() || group->getPvMax() ){
 
 	if(group->getPvMax())
 	    max_pv_label = new QLabel( i18n("Max pvs: %1", group->getPvMax()) );
 	else
 	    max_pv_label = new QLabel( i18n("Max pvs: Unlimited") );
 
-	if(group->getLVMax())
-	    max_lv_label = new QLabel( i18n("Max lvs: %1", group->getLVMax()) );
+	if(group->getLvMax())
+	    max_lv_label = new QLabel( i18n("Max lvs: %1", group->getLvMax()) );
 	else
 	    max_lv_label = new QLabel( i18n("Max lvs: Unlimited") );
 
