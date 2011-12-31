@@ -20,7 +20,7 @@
 
 #include <QtGui>
 
-#include "pvcheckbox.h"
+#include "pvgroupbox.h"
 #include "physvol.h"
 #include "misc.h"
 #include "storagedevice.h"
@@ -28,7 +28,7 @@
 #include "volgroup.h"
 
 
-PVCheckBox::PVCheckBox(QList<PhysVol *> volumes, QWidget *parent)
+PvGroupBox::PvGroupBox(QList<PhysVol *> volumes, QWidget *parent)
     : QGroupBox(parent), 
       m_pvs(volumes)
 {
@@ -100,7 +100,7 @@ PVCheckBox::PVCheckBox(QList<PhysVol *> volumes, QWidget *parent)
     }
 }
 
-PVCheckBox::PVCheckBox(QList <StorageDevice *> devices, QList<StoragePartition *> partitions, 
+PvGroupBox::PvGroupBox(QList <StorageDevice *> devices, QList<StoragePartition *> partitions, 
                        long long extentSize, QWidget *parent)
     : QGroupBox(parent), 
       m_devices(devices), 
@@ -208,7 +208,7 @@ PVCheckBox::PVCheckBox(QList <StorageDevice *> devices, QList<StoragePartition *
     }
 }
 
-QStringList PVCheckBox::getNames(){
+QStringList PvGroupBox::getNames(){
 
     QStringList names;
 
@@ -228,7 +228,7 @@ QStringList PVCheckBox::getNames(){
     return names;
 }
 
-QStringList PVCheckBox::getAllNames(){
+QStringList PvGroupBox::getAllNames(){
 
     QStringList names;
 
@@ -247,7 +247,7 @@ QStringList PVCheckBox::getAllNames(){
     return names;
 }
 
-long long PVCheckBox::getRemainingSpace(){
+long long PvGroupBox::getRemainingSpace(){
 
     long long space = 0;
 
@@ -269,7 +269,7 @@ long long PVCheckBox::getRemainingSpace(){
     return space;
 }
 
-QList<long long> PVCheckBox::getRemainingSpaceList(){
+QList<long long> PvGroupBox::getRemainingSpaceList(){
 
     QList<long long> space;
 
@@ -289,7 +289,7 @@ QList<long long> PVCheckBox::getRemainingSpaceList(){
     return space;
 }
 
-void PVCheckBox::selectAll(){
+void PvGroupBox::selectAll(){
 
     if(m_pv_checks.size()){
         for(int x = 0; x < m_pv_checks.size(); x++){
@@ -302,7 +302,7 @@ void PVCheckBox::selectAll(){
     return;
 }
 
-void PVCheckBox::selectNone(){
+void PvGroupBox::selectNone(){
 
     if(m_pv_checks.size()){
         for(int x = 0; x < m_pv_checks.size(); x++)
@@ -314,7 +314,7 @@ void PVCheckBox::selectNone(){
     return;
 }
 
-void PVCheckBox::calculateSpace(){
+void PvGroupBox::calculateSpace(){
 
     KLocale *const locale = KGlobal::locale();
     if(m_use_si_units)
@@ -330,7 +330,7 @@ void PVCheckBox::calculateSpace(){
     return;
 }
 
-void PVCheckBox::setExtentSize(long long extentSize){
+void PvGroupBox::setExtentSize(long long extentSize){
     m_extent_size = extentSize;
 
     if(m_pv_checks.size()){
@@ -347,7 +347,7 @@ void PVCheckBox::setExtentSize(long long extentSize){
     calculateSpace();
 }
 
-void PVCheckBox::disableOrigin(PhysVol *originVolume){
+void PvGroupBox::disableOrigin(PhysVol *originVolume){
 
     QString name;
 

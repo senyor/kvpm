@@ -21,7 +21,7 @@
 
 
 class VolGroup;
-class PVCheckBox;
+class PvGroupBox;
 
 bool reduce_vg(VolGroup *volumeGroup);
 
@@ -31,7 +31,7 @@ class VGReduceDialog : public KDialog
 Q_OBJECT
 
     VolGroup *m_vg;
-    PVCheckBox *m_pv_checkbox; 
+    PvGroupBox *m_pv_checkbox; 
     bool m_unremovable_pvs_present;
 
  public:

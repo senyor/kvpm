@@ -28,7 +28,7 @@ class LogVol;
 class NameAndRange;
 class NoMungeRadioButton;
 class PhysVol;
-class PVCheckBox;
+class PvGroupBox;
 class VolGroup;
 
 
@@ -50,7 +50,7 @@ Q_OBJECT
     QList<NameAndRange *> m_sources; 
     QList<PhysVol *> m_target_pvs;               // destination physical volumes
     QList<NoMungeRadioButton *> m_radio_buttons; // user can select only one source pv
-    PVCheckBox *m_pv_checkbox;                   // many target pvs may be selected
+    PvGroupBox *m_pv_checkbox;                   // many target pvs may be selected
 
     QRadioButton *m_contiguous_button, *m_normal_button,   // Radio button to chose
                  *m_anywhere_button, *m_inherited_button,  // the allocation policy

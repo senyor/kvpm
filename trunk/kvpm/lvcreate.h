@@ -33,7 +33,7 @@ class VolGroup;
 class PhysVol;
 class QRegExpValidator;
 class QDoubleValidator;
-class PVCheckBox;
+class PvGroupBox;
 class SizeSelectorBox;
 
 
@@ -73,7 +73,7 @@ Q_OBJECT
 	       *m_mirror_box,
 	       *m_stripe_box;
 
-     PVCheckBox *m_pv_checkbox;
+     PvGroupBox *m_pv_checkbox;
  
      KTabWidget *m_tab_widget;
 

@@ -25,7 +25,7 @@
 #include "logvol.h"
 #include "misc.h"
 #include "physvol.h"
-#include "pvcheckbox.h"
+#include "pvgroupbox.h"
 #include "processprogress.h"
 #include "volgroup.h"
 
@@ -178,7 +178,7 @@ QWidget *ChangeMirrorDialog::buildPhysicalTab()
 
     QVBoxLayout *const physical_layout = new QVBoxLayout();
 
-    m_pv_box = new PVCheckBox(unused_pvs);
+    m_pv_box = new PvGroupBox(unused_pvs);
     physical_layout->addWidget(m_pv_box);
     physical_layout->addStretch();
 

@@ -25,7 +25,7 @@
 #include "logvol.h"
 #include "mountentry.h"
 #include "physvol.h"
-#include "pvcheckbox.h"
+#include "pvgroupbox.h"
 #include "processprogress.h"
 #include "sizeselectorbox.h"
 #include "volgroup.h"
@@ -289,7 +289,7 @@ QWidget* LVCreateDialog::createPhysicalTab()
             physical_volumes.removeAt(x);
     }
 
-    m_pv_checkbox = new PVCheckBox(physical_volumes);
+    m_pv_checkbox = new PvGroupBox(physical_volumes);
     layout->addWidget(m_pv_checkbox);
 
     QVBoxLayout *striped_layout = new QVBoxLayout;

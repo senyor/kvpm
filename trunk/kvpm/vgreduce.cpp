@@ -23,7 +23,7 @@
 #include "masterlist.h"
 #include "misc.h"
 #include "physvol.h"
-#include "pvcheckbox.h"
+#include "pvgroupbox.h"
 #include "volgroup.h"
 
 
@@ -74,7 +74,7 @@ VGReduceDialog::VGReduceDialog(VolGroup *volumeGroup, QWidget *parent) : KDialog
     label->setWordWrap(true);
     layout->addWidget(label);
 
-    m_pv_checkbox = new PVCheckBox(member_pvs);
+    m_pv_checkbox = new PvGroupBox(member_pvs);
     layout->addWidget(m_pv_checkbox);
     m_pv_checkbox->setTitle( i18n("Unused physical volumes") );
 
