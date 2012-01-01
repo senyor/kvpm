@@ -46,20 +46,20 @@ void GraphicBody::paintEvent(QPaintEvent *)
     QPainter painter(this);
     painter.setPen(Qt::blue);
     
-    long double total_sectors =  m_preceding_sectors + m_following_sectors + m_partition_sectors;
+    const long double total_sectors = m_preceding_sectors + m_following_sectors + m_partition_sectors;
     double offset = 0;
-    double length = (m_preceding_sectors / total_sectors) * 199;
-    QRectF preceding_rectangle(offset, 0.0, length, 29.0);
+    double length = (m_preceding_sectors / total_sectors) * width();
+    QRectF preceding_rectangle(offset, 0.0, length, (double)height());
     
     offset += length;
-    length = (m_partition_sectors / total_sectors) * 199;
+    length = (m_partition_sectors / total_sectors) * width();
     if( length < 1.0 )                                     // always show at least a sliver
-        length = 1;
-    QRectF partition_rectangle(offset, 0.0, length, 29.0);
+        length = 1.0;
+    QRectF partition_rectangle(offset, 0.0, length, (double)height());
     
     offset += length;
-    length = (m_following_sectors / total_sectors) * 199;
-    QRectF following_rectangle(offset, 0.0, length, 29.0);
+    length = (m_following_sectors / total_sectors) * width();
+    QRectF following_rectangle(offset, 0.0, length, (double)height());
     
     QBrush free_brush( Qt::green, Qt::SolidPattern );
     QBrush partition_brush( Qt::blue, Qt::SolidPattern );
@@ -73,7 +73,7 @@ void GraphicBody::paintEvent(QPaintEvent *)
 
 PartitionGraphic::PartitionGraphic(QWidget *parent) : QFrame(parent)
 {
-    setFixedWidth(200);
+    setFixedWidth(250);
     setMinimumHeight(30);
 
     QVBoxLayout *const layout = new QVBoxLayout();

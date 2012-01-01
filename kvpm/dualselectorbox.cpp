@@ -29,7 +29,8 @@ DualSelectorBox::DualSelectorBox(long long unitSize,
 {
 
     m_max_size = maxSize;
-    QVBoxLayout *layout = new QVBoxLayout();
+    QVBoxLayout *const layout = new QVBoxLayout();
+    layout->setMargin(0);
 
     m_size_selector   = new SizeSelectorBox(unitSize, minSize,   maxSize,   initialSize,   false, false, true);
     m_offset_selector = new SizeSelectorBox(unitSize, minOffset, maxOffset, initialOffset, false, true);
