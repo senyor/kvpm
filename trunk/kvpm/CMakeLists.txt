@@ -8,7 +8,7 @@ set(kvpm_SRCS changemirror.cpp kvpmconfigdialog.cpp deviceproperties.cpp
 	      lvremove.cpp lvsizechart.cpp main.cpp maxfs.cpp mkfs.cpp masterlist.cpp  mount.cpp 
 	      lvsizechartseg.cpp mountentry.cpp mounttables.cpp maintabwidget.cpp 
 	      pvextend.cpp pvreduce.cpp partremove.cpp pvgroupbox.cpp
-	      partaddgraphic.cpp partadd.cpp pvproperties.cpp  pvpropertiesstack.cpp 
+	      partitiongraphic.cpp partadd.cpp pvproperties.cpp  pvpropertiesstack.cpp 
 	      physvol.cpp partmoveresize.cpp removefs.cpp progressbox.cpp
 	      misc.cpp pedexceptions.cpp processprogress.cpp pvchange.cpp snapmerge.cpp
 	      pvmove.cpp pvtree.cpp removemissing.cpp removemirror.cpp sizeselectorbox.cpp

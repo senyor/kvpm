@@ -29,7 +29,7 @@
 #include "fsreduce.h"
 #include "masterlist.h"
 #include "pedexceptions.h"
-#include "partaddgraphic.h"
+#include "partitiongraphic.h"
 #include "physvol.h"
 #include "processprogress.h"
 #include "progressbox.h"
@@ -93,17 +93,8 @@ PartitionMoveResizeDialog::PartitionMoveResizeDialog(StoragePartition *partition
     QVBoxLayout *layout = new QVBoxLayout();
     dialog_body->setLayout(layout);
 
-    QFrame *display_graphic_frame = new QFrame();
-    QVBoxLayout *display_graphic_layout = new QVBoxLayout();
-    display_graphic_layout->setSpacing(0);
-    display_graphic_layout->setMargin(0);
-    display_graphic_frame->setFrameStyle(QFrame::Sunken | QFrame::Panel);
-    display_graphic_frame->setLineWidth(2);
-    display_graphic_frame->setLayout(display_graphic_layout);
-
-    m_display_graphic = new PartAddGraphic();
-    display_graphic_layout->addWidget(m_display_graphic);
-    layout->addWidget(display_graphic_frame, 0, Qt::AlignCenter);
+    m_display_graphic = new PartitionGraphic();
+    layout->addWidget(m_display_graphic, 0, Qt::AlignCenter);
  
     QGroupBox   *info_group = new QGroupBox( m_old_storage_part->getName() );  
     QVBoxLayout *info_group_layout = new QVBoxLayout();
@@ -596,9 +587,9 @@ bool PartitionMoveResizeDialog::growPartition()
 
 void PartitionMoveResizeDialog::updateGraphicAndLabels()
 {
-    PedSector preceding_sectors = m_offset_selector->getCurrentSize();
-    PedSector following_sectors = m_max_part_size - ( preceding_sectors + m_size_selector->getCurrentSize() );
-    long long change_size = m_sector_size * (m_size_selector->getCurrentSize() - m_existing_part->geom.length );
+    const PedSector preceding_sectors = m_offset_selector->getCurrentSize();
+    const PedSector following_sectors = m_max_part_size - ( preceding_sectors + m_size_selector->getCurrentSize() );
+    const long long change_size = m_sector_size * (m_size_selector->getCurrentSize() - m_existing_part->geom.length );
 
     m_display_graphic->setPrecedingSectors(preceding_sectors);
     m_display_graphic->setPartitionSectors(m_size_selector->getCurrentSize());
@@ -611,11 +602,14 @@ void PartitionMoveResizeDialog::updateGraphicAndLabels()
     else
         locale->setBinaryUnitDialect(KLocale::IECBinaryDialect);
 
-    QString change = locale->formatByteSize(change_size);
-    if(change_size < 0)
-        m_change_by_label->setText( i18n("<b>Shrink by : %1</b>", change) );
-    else
+    if(change_size < 0){
+        QString change = locale->formatByteSize( qAbs(change_size) );
+        m_change_by_label->setText( i18n("<b>Shrink by : -%1</b>", change) );
+    }
+    else{
+        QString change = locale->formatByteSize(change_size);
         m_change_by_label->setText( i18n("<b>Grow by : %1</b>", change) );
+    }
 
     QString preceding_bytes_string = locale->formatByteSize(preceding_sectors * m_sector_size);
     m_preceding_label->setText( i18n("Preceding space: %1", preceding_bytes_string) );
