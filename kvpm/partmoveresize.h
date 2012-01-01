@@ -31,7 +31,7 @@
 #include <QSpinBox>
 
 
-class PartAddGraphic;
+class PartitionGraphic;
 class SizeSelectorBox;
 class StoragePartition;
 
@@ -53,8 +53,8 @@ Q_OBJECT
     long long m_max_part_start;      // start of biggest possible partition
     long long m_max_part_size;       // size of largest possible partition
 
-    PartAddGraphic *m_display_graphic; // The color bar that shows the relative
-                                       // size of the partition graphically
+    PartitionGraphic *m_display_graphic; // The color bar that shows the relative
+                                         // size of the partition graphically
 
     SizeSelectorBox *m_size_selector,
                     *m_offset_selector;

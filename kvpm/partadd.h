@@ -28,7 +28,7 @@
 
 
 class QDoubleValidator;
-class PartAddGraphic;
+class PartitionGraphic;
 class DualSelectorBox;
 class StoragePartition;
 
@@ -53,18 +53,19 @@ Q_OBJECT
 
     long long m_sector_size;    // bytes per logical sector
 
-    PartAddGraphic *m_display_graphic; // The color bar that shows the relative
-                                       // size of the partition graphically
+    PartitionGraphic *m_display_graphic; // The color bar that shows the relative
+                                         // size of the partition graphically
 
-    QLabel    *m_unexcluded_label,  // Space left for new partition
-              *m_remaining_label,
-              *m_preceding_label;
+    QLabel *m_remaining_label,  // space left past the end of the proposed partition
+           *m_preceding_label;  // ditto for the preceding space 
 
     KComboBox *m_type_combo;
 
     void updatePartition();
     long long convertSizeToSectors(int index, double size);
     void getMaximumPartition();
+    QFrame *buildInfoFrame();
+    KComboBox *buildTypeCombo();
 
 public:
     explicit PartitionAddDialog(StoragePartition *partition, QWidget *parent = 0);

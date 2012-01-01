@@ -21,7 +21,7 @@
 
 #include "dualselectorbox.h"
 #include "partadd.h"
-#include "partaddgraphic.h"
+#include "partitiongraphic.h"
 #include "pedexceptions.h"
 #include "sizeselectorbox.h"
 #include "storagepartition.h"
@@ -67,13 +67,11 @@ PartitionAddDialog::PartitionAddDialog(StoragePartition *partition, QWidget *par
     skeleton.setCurrentGroup("General");
     skeleton.addItemBool("use_si_units", m_use_si_units, false);
 
-    PedPartition *ped_free_partition = partition->getPedPartition();
+    PedPartition *ped_free_partition = m_partition->getPedPartition();
     PedGeometry   ped_geometry;
     PedDisk      *ped_disk  = ped_free_partition->disk;
     PedDisk      *temp_disk = ped_disk_new( ped_disk->dev );
     PedDevice    *ped_device;
-    bool logical_freespace;      // true if we are inside an extended partition
-    bool extended_allowed;       // true if we can create an extended partition here
 
     // If this is an empty extended partition and not freespace inside
     // one then look for the freespace.
@@ -93,21 +91,6 @@ PartitionAddDialog::PartitionAddDialog(StoragePartition *partition, QWidget *par
     m_sector_size = ped_device->sector_size;
 
 
-    /* check to see if partition table supports extended
-       partitions and if it already has one */
-
-    if( (PED_DISK_TYPE_EXTENDED & m_ped_disk->type->features) && 
-	(! ped_disk_extended_partition(m_ped_disk) )  ){
-        extended_allowed = true;
-    }
-    else
-        extended_allowed = false;
-
-    if( ped_free_partition->type & PED_PARTITION_LOGICAL )
-        logical_freespace = true;
-    else
-        logical_freespace = false;
-
     /* how big can it grow? */
     PedGeometry ped_max_geometry = ped_free_partition->geom;
     m_max_part_start = ped_max_geometry.start;
@@ -119,67 +102,21 @@ PartitionAddDialog::PartitionAddDialog(StoragePartition *partition, QWidget *par
     if( QString( m_ped_disk->type->name ) == "msdos" )
         getMaximumPartition();
 
-    setWindowTitle( i18n("Add partition") );
+    setWindowTitle( i18n("Add Partition") );
 
     QWidget *dialog_body = new QWidget(this);
     setMainWidget(dialog_body);
     QVBoxLayout *layout = new QVBoxLayout();
     dialog_body->setLayout(layout);
 
-    QFrame *display_graphic_frame = new QFrame();
-    QVBoxLayout *display_graphic_layout = new QVBoxLayout();
-    display_graphic_layout->setSpacing(0);
-    display_graphic_layout->setMargin(0);
-    display_graphic_frame->setFrameStyle(QFrame::Sunken | QFrame::Panel);
-    display_graphic_frame->setLineWidth(2);
-    display_graphic_frame->setLayout(display_graphic_layout);
-
-    m_display_graphic = new PartAddGraphic();
-    display_graphic_layout->addWidget(m_display_graphic);
-    layout->addWidget(display_graphic_frame, 0, Qt::AlignCenter);
+    QLabel *const label = new QLabel( i18n("<b>Create A New Partition</b>") );
+    label->setAlignment(Qt::AlignCenter);
+    layout->addSpacing(5);
+    layout->addWidget(label);
+    layout->addSpacing(5);
  
-    QLabel *path = new QLabel("<b>" + m_partition->getName() + "</b>");
-    path->setAlignment( Qt::AlignHCenter );
-    layout->addWidget(path);
-
-    m_type_combo = new KComboBox;
-    layout->addWidget(m_type_combo);
-
-    m_type_combo->insertItem(0,"Primary");
-    m_type_combo->insertItem(1,"Extended");
-
-    if( logical_freespace){
-        m_type_combo->insertItem(2,"Logical");
-        m_type_combo->setEnabled(false);
-	m_type_combo->setCurrentIndex(2);
-    }
-    else if(! extended_allowed){
-	    m_type_combo->setEnabled(false);
-	    m_type_combo->setCurrentIndex(0);
-    }
-
-    m_preceding_label = new QLabel();
-    layout->addWidget( m_preceding_label );
-
-    m_remaining_label = new QLabel();
-    layout->addWidget( m_remaining_label );
-
-    KLocale *const locale = KGlobal::locale();
-    if(m_use_si_units)
-        locale->setBinaryUnitDialect(KLocale::MetricBinaryDialect); 
-    else
-        locale->setBinaryUnitDialect(KLocale::IECBinaryDialect);
-
-    QString total_bytes = locale->formatByteSize( m_max_part_size * m_sector_size );
-    QLabel *excluded_label = new QLabel( i18n("Maximum size: %1",  total_bytes) );
-    layout->addWidget( excluded_label );
-
-    total_bytes = locale->formatByteSize(m_max_part_size * m_sector_size);
-    m_unexcluded_label = new QLabel( i18n("Remaining space: %1", total_bytes) );
-    layout->addWidget( m_unexcluded_label );
-
+    layout->addWidget( buildInfoFrame() );
     m_dual_selector = new DualSelectorBox(m_sector_size, 0, m_max_part_size, m_max_part_size, 0, m_max_part_size, 0);
-
     validateChange();
 
     layout->addWidget(m_dual_selector);
@@ -193,7 +130,6 @@ PartitionAddDialog::PartitionAddDialog(StoragePartition *partition, QWidget *par
 
 void PartitionAddDialog::commitPartition()
 {
-
     PedDevice *device = m_ped_disk->dev;
     PedPartitionType type;
     PedSector first_sector = m_max_part_start + m_dual_selector->getCurrentOffset();
@@ -280,8 +216,8 @@ void PartitionAddDialog::validateChange(){
 
 void PartitionAddDialog::updatePartition(){
 
-    long long offset = m_dual_selector->getCurrentOffset();
-    long long size = m_dual_selector->getCurrentSize();
+    const long long offset = m_dual_selector->getCurrentOffset();
+    const long long size = m_dual_selector->getCurrentSize();
     long long free = m_max_part_size - offset;
     if(free < 0)
         free = 0;
@@ -291,9 +227,6 @@ void PartitionAddDialog::updatePartition(){
         locale->setBinaryUnitDialect(KLocale::MetricBinaryDialect); 
     else
         locale->setBinaryUnitDialect(KLocale::IECBinaryDialect);
-
-    QString total_bytes = locale->formatByteSize(m_sector_size * free);
-    m_unexcluded_label->setText( i18n("Available space: %1", total_bytes) );
 
     QString preceding_bytes_string = locale->formatByteSize(offset * m_sector_size);
     m_preceding_label->setText( i18n("Preceding space: %1", preceding_bytes_string) );
@@ -395,3 +328,85 @@ void PartitionAddDialog::getMaximumPartition()
     m_max_part_size = 1 + m_max_part_end - m_max_part_start;
 }
 
+QFrame* PartitionAddDialog::buildInfoFrame()
+{
+    QFrame *const frame = new QFrame(this);
+    QVBoxLayout *const layout = new QVBoxLayout();
+    layout->setMargin(15);
+
+    m_display_graphic = new PartitionGraphic();
+    layout->addWidget(m_display_graphic, 0, Qt::AlignCenter);
+    QLabel *const path = new QLabel( i18n("<b>Device: %1</b>", m_partition->getName()) );
+    path->setAlignment( Qt::AlignHCenter );
+    layout->addWidget(path);
+
+    m_preceding_label = new QLabel();
+    layout->addWidget( m_preceding_label );
+
+    m_remaining_label = new QLabel();
+    layout->addWidget( m_remaining_label );
+
+    KLocale *const locale = KGlobal::locale();
+    if(m_use_si_units)
+        locale->setBinaryUnitDialect(KLocale::MetricBinaryDialect); 
+    else
+        locale->setBinaryUnitDialect(KLocale::IECBinaryDialect);
+
+    QString total_bytes = locale->formatByteSize( m_max_part_size * m_sector_size );
+    QLabel *excluded_label = new QLabel( i18n("Maximum size: %1",  total_bytes) );
+    layout->addWidget( excluded_label );
+
+    QLabel *const type_label = new QLabel( i18n("Select type: ") );
+    QHBoxLayout *const type_layout = new QHBoxLayout;
+    m_type_combo = buildTypeCombo();
+    type_layout->addWidget(type_label);
+    type_layout->addWidget(m_type_combo);
+    type_layout->addStretch();
+    layout->addLayout(type_layout);
+
+    frame->setFrameStyle(QFrame::StyledPanel | QFrame::Raised);
+
+
+    frame->setLayout(layout);
+
+    return frame;
+}
+
+KComboBox* PartitionAddDialog::buildTypeCombo()
+{
+    KComboBox *const combo = new KComboBox;
+    PedPartition *ped_free_partition = m_partition->getPedPartition();
+
+    bool logical_freespace;      // true if we are inside an extended partition
+    bool extended_allowed;       // true if we can create an extended partition here
+
+    /* check to see if partition table supports extended
+       partitions and if it already has one */
+
+    if( (PED_DISK_TYPE_EXTENDED & m_ped_disk->type->features) && 
+	(! ped_disk_extended_partition(m_ped_disk) )  ){
+        extended_allowed = true;
+    }
+    else
+        extended_allowed = false;
+
+    if( ped_free_partition->type & PED_PARTITION_LOGICAL )
+        logical_freespace = true;
+    else
+        logical_freespace = false;
+
+    combo->insertItem(0,"Primary");
+    combo->insertItem(1,"Extended");
+
+    if( logical_freespace){
+        m_type_combo->insertItem(2,"Logical");
+        m_type_combo->setEnabled(false);
+	m_type_combo->setCurrentIndex(2);
+    }
+    else if(! extended_allowed){
+	    m_type_combo->setEnabled(false);
+	    m_type_combo->setCurrentIndex(0);
+    }
+
+    return combo;
+}

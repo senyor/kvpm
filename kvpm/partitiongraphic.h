@@ -12,24 +12,24 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
-#ifndef PARTADDGRAPHIC_H
-#define PARTADDGRAPHIC_H
+
+#ifndef PARTITIONGRAPHIC_H
+#define PARTITIONGRAPHIC_H
 
 #include <QFrame>
 
 
-class PartAddGraphic : public QFrame
+class GraphicBody;
+
+
+class PartitionGraphic : public QFrame
 {
 Q_OBJECT
 
-    long long  m_preceding_sectors;
-    long long  m_following_sectors;
-    long long  m_partition_sectors;
-
-    void paintEvent(QPaintEvent *);
+    GraphicBody  *m_body;
 
 public:
-    PartAddGraphic(QWidget *parent = 0);
+    PartitionGraphic(QWidget *parent = 0);
     void setPrecedingSectors(const long long precedingSectors);
     void setFollowingSectors(const long long followingSectors);
     void setPartitionSectors(const long long partitionSectors);
