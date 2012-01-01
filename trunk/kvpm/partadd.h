@@ -64,7 +64,7 @@ Q_OBJECT
     void updatePartition();
     long long convertSizeToSectors(int index, double size);
     void getMaximumPartition();
-    QFrame *buildInfoFrame();
+    QGroupBox *buildInfoGroup();
     KComboBox *buildTypeCombo();
 
 public:

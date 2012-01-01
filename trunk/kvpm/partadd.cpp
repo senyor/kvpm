@@ -90,7 +90,6 @@ PartitionAddDialog::PartitionAddDialog(StoragePartition *partition, QWidget *par
     ped_device   = m_ped_disk->dev;
     m_sector_size = ped_device->sector_size;
 
-
     /* how big can it grow? */
     PedGeometry ped_max_geometry = ped_free_partition->geom;
     m_max_part_start = ped_max_geometry.start;
@@ -115,7 +114,7 @@ PartitionAddDialog::PartitionAddDialog(StoragePartition *partition, QWidget *par
     layout->addWidget(label);
     layout->addSpacing(5);
  
-    layout->addWidget( buildInfoFrame() );
+    layout->addWidget( buildInfoGroup() );
     m_dual_selector = new DualSelectorBox(m_sector_size, 0, m_max_part_size, m_max_part_size, 0, m_max_part_size, 0);
     validateChange();
 
@@ -204,9 +203,9 @@ void PartitionAddDialog::validateChange(){
     const long long size   = m_dual_selector->getCurrentSize();
 
   
-        if(( offset <= m_max_part_size - size ) && ( size <= m_max_part_size - offset  ) && 
-           ( size >= 2 * sectors_1MiB ) && ( m_dual_selector->isValid() ) ){
-            enableButtonOk(true);
+    if(( offset <= m_max_part_size - size ) && ( size <= m_max_part_size - offset  ) && 
+       ( size >= 2 * sectors_1MiB ) && ( m_dual_selector->isValid() ) ){
+        enableButtonOk(true);
     }
     else
         enableButtonOk(false);
@@ -328,17 +327,18 @@ void PartitionAddDialog::getMaximumPartition()
     m_max_part_size = 1 + m_max_part_end - m_max_part_start;
 }
 
-QFrame* PartitionAddDialog::buildInfoFrame()
+QGroupBox* PartitionAddDialog::buildInfoGroup()
 {
-    QFrame *const frame = new QFrame(this);
+    QGroupBox *const group = new QGroupBox(this);
     QVBoxLayout *const layout = new QVBoxLayout();
-    layout->setMargin(15);
+    layout->addSpacing(10);
 
     m_display_graphic = new PartitionGraphic();
     layout->addWidget(m_display_graphic, 0, Qt::AlignCenter);
     QLabel *const path = new QLabel( i18n("<b>Device: %1</b>", m_partition->getName()) );
     path->setAlignment( Qt::AlignHCenter );
     layout->addWidget(path);
+    layout->addSpacing(10);
 
     m_preceding_label = new QLabel();
     layout->addWidget( m_preceding_label );
@@ -355,6 +355,7 @@ QFrame* PartitionAddDialog::buildInfoFrame()
     QString total_bytes = locale->formatByteSize( m_max_part_size * m_sector_size );
     QLabel *excluded_label = new QLabel( i18n("Maximum size: %1",  total_bytes) );
     layout->addWidget( excluded_label );
+    layout->addSpacing(10);
 
     QLabel *const type_label = new QLabel( i18n("Select type: ") );
     QHBoxLayout *const type_layout = new QHBoxLayout;
@@ -364,12 +365,9 @@ QFrame* PartitionAddDialog::buildInfoFrame()
     type_layout->addStretch();
     layout->addLayout(type_layout);
 
-    frame->setFrameStyle(QFrame::StyledPanel | QFrame::Raised);
+    group->setLayout(layout);
 
-
-    frame->setLayout(layout);
-
-    return frame;
+    return group;
 }
 
 KComboBox* PartitionAddDialog::buildTypeCombo()
@@ -398,14 +396,14 @@ KComboBox* PartitionAddDialog::buildTypeCombo()
     combo->insertItem(0,"Primary");
     combo->insertItem(1,"Extended");
 
-    if( logical_freespace){
-        m_type_combo->insertItem(2,"Logical");
-        m_type_combo->setEnabled(false);
-	m_type_combo->setCurrentIndex(2);
+    if(logical_freespace){
+        combo->insertItem(2,"Logical");
+        combo->setEnabled(false);
+	combo->setCurrentIndex(2);
     }
-    else if(! extended_allowed){
-	    m_type_combo->setEnabled(false);
-	    m_type_combo->setCurrentIndex(0);
+    else if(!extended_allowed){
+        combo->setEnabled(false);
+        combo->setCurrentIndex(0);
     }
 
     return combo;
