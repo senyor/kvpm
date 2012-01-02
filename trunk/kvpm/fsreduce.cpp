@@ -147,10 +147,6 @@ long long get_min_fs_size(const QString path, const QString fs){
             ProcessProgress fs_scan(arguments);
             output = fs_scan.programOutput();
 
-            if( fs_scan.hadErrors() )
-                KMessageBox::error(NULL, i18n("This filesystem seems to have errors. You will need to "
-                                              "repair them before trying to grow or shrink the filesystem"));
-
             if( output.size() > 0 && fs_scan.exitCode() == 0 ){
 
                 size_string = output[0];
