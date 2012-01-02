@@ -34,7 +34,6 @@ ProcessProgress::ProcessProgress(QStringList arguments, const bool allowCancel, 
 {
     m_exit_code = 127;  // command not found
     m_progress_dialog = NULL;
-    m_had_errors = false;
 
     if(arguments.size() == 0){
 	qDebug() << "ProcessProgress given an empty arguments list";
@@ -114,7 +113,7 @@ void ProcessProgress::cleanup(const int code, const QProcess::ExitStatus status)
     }
 
     if ( m_exit_code || ( status == QProcess::CrashExit ) ){
-        
+
         if ( ( m_exit_code == 0 ) && ( status == QProcess::CrashExit ) )
             m_exit_code = 1;  // if it crashed without an exit code, set a non zero exit code
         
@@ -142,11 +141,6 @@ QStringList ProcessProgress::programOutputAll()
 int ProcessProgress::exitCode()
 {
     return m_exit_code;
-}
-
-bool ProcessProgress::hadErrors()
-{
-    return m_had_errors;
 }
 
 void ProcessProgress::cancelProcess()
@@ -186,9 +180,6 @@ void ProcessProgress::readStandardError()
     QString output_line;
     
     m_process->setReadChannel(QProcess::StandardError);
-
-    if(m_process->canReadLine())
-        m_had_errors = true;
 
     while(m_process->canReadLine()){
 	output_line = m_process->readLine();
