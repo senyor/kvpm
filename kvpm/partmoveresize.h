@@ -74,6 +74,7 @@ Q_OBJECT
     bool pedCommitAndWait(PedDisk *disk);
     void updateAndValidatePartition();
     void getMaximumPartition();
+    QGroupBox *buildInfoGroup(const long long maxSize);
 
 public:
     explicit PartitionMoveResizeDialog(StoragePartition *partition, QWidget *parent = 0);

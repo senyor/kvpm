@@ -93,31 +93,14 @@ PartitionMoveResizeDialog::PartitionMoveResizeDialog(StoragePartition *partition
     QVBoxLayout *layout = new QVBoxLayout();
     dialog_body->setLayout(layout);
 
-    m_display_graphic = new PartitionGraphic();
-    layout->addWidget(m_display_graphic, 0, Qt::AlignCenter);
+    QLabel *const label = new QLabel( i18n("<b>Resize Or Move A Partition</b>") );
+    label->setAlignment(Qt::AlignCenter);
+    layout->addSpacing(5);
+    layout->addWidget(label);
+    layout->addSpacing(5);
+
+    layout->addWidget( buildInfoGroup(max_size) );
  
-    QGroupBox   *info_group = new QGroupBox( m_old_storage_part->getName() );  
-    QVBoxLayout *info_group_layout = new QVBoxLayout();
-    info_group->setLayout(info_group_layout);
-    layout->addWidget(info_group);
-
-    KLocale *const locale = KGlobal::locale();
-    if(m_use_si_units)
-        locale->setBinaryUnitDialect(KLocale::MetricBinaryDialect); 
-    else
-        locale->setBinaryUnitDialect(KLocale::IECBinaryDialect);
-
-    m_change_by_label = new QLabel();
-    m_preceding_label = new QLabel();
-    m_following_label = new QLabel();
-    info_group_layout->addWidget( m_preceding_label );
-    info_group_layout->addWidget( m_following_label );
-    info_group_layout->addStretch();
-    info_group_layout->addWidget( new QLabel( i18n("Minimum size: %1", locale->formatByteSize( m_min_shrink_size * m_sector_size ))));
-    info_group_layout->addWidget( new QLabel( i18n("Maximum size: %1", locale->formatByteSize( max_size * m_sector_size ) ))); 
-    info_group_layout->addStretch();
-    info_group_layout->addWidget( m_change_by_label );
-
     if( m_old_storage_part->isPhysicalVolume() ){
         if( m_old_storage_part->getPhysicalVolume()->isActive() ){
             max_size -= existing_offset;
@@ -799,3 +782,37 @@ void PartitionMoveResizeDialog::getMaximumPartition()
     m_max_part_size = 1 + max_end - m_max_part_start;
 }
 
+QGroupBox *PartitionMoveResizeDialog::buildInfoGroup(const long long maxSize)
+{
+    QGroupBox   *const group = new QGroupBox();
+    QVBoxLayout *const layout = new QVBoxLayout();
+    group->setLayout(layout);
+    layout->addSpacing(10);
+
+    m_display_graphic = new PartitionGraphic();
+    layout->addWidget(m_display_graphic, 0, Qt::AlignCenter);
+    QLabel *const path = new QLabel( i18n("<b>Device: %1</b>", m_old_storage_part->getName()) );
+    path->setAlignment( Qt::AlignHCenter );
+    layout->addWidget(path);
+    layout->addSpacing(10);
+
+    KLocale *const locale = KGlobal::locale();
+    if(m_use_si_units)
+        locale->setBinaryUnitDialect(KLocale::MetricBinaryDialect); 
+    else
+        locale->setBinaryUnitDialect(KLocale::IECBinaryDialect);
+
+    m_change_by_label = new QLabel();
+    m_preceding_label = new QLabel();
+    m_following_label = new QLabel();
+    layout->addWidget( m_preceding_label );
+    layout->addWidget( m_following_label );
+    layout->addStretch();
+    layout->addWidget( new QLabel( i18n("Minimum size: %1", locale->formatByteSize( m_min_shrink_size * m_sector_size ))));
+    layout->addWidget( new QLabel( i18n("Maximum size: %1", locale->formatByteSize( maxSize * m_sector_size ) ))); 
+    layout->addStretch();
+    layout->addSpacing(10);
+    layout->addWidget( m_change_by_label );
+
+    return group;
+}
