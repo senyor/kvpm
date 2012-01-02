@@ -66,7 +66,6 @@ Q_OBJECT
     bool m_logical;      // Are we a logical partition?
 
     void setup();
-    long long getMinShrinkSize();
     bool movefs(long long from_start, long long to_start, long long length);
     bool shrinkPartition();
     bool growPartition();
