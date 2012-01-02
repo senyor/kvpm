@@ -34,6 +34,7 @@ ProcessProgress::ProcessProgress(QStringList arguments, const bool allowCancel, 
 {
     m_exit_code = 127;  // command not found
     m_progress_dialog = NULL;
+    m_had_errors = false;
 
     if(arguments.size() == 0){
 	qDebug() << "ProcessProgress given an empty arguments list";
@@ -143,6 +144,11 @@ int ProcessProgress::exitCode()
     return m_exit_code;
 }
 
+bool ProcessProgress::hadErrors()
+{
+    return m_had_errors;
+}
+
 void ProcessProgress::cancelProcess()
 {
     const QString message = i18n("<b>Really kill process %1</b>", m_process->program().takeFirst());
@@ -180,6 +186,9 @@ void ProcessProgress::readStandardError()
     QString output_line;
     
     m_process->setReadChannel(QProcess::StandardError);
+
+    if(m_process->canReadLine())
+        m_had_errors = true;
 
     while(m_process->canReadLine()){
 	output_line = m_process->readLine();
