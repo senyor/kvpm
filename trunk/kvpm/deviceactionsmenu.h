@@ -39,7 +39,7 @@ Q_OBJECT
             *m_maxpv_action,
             *m_partremove_action,
             *m_partadd_action,
-            *m_partmoveresize_action,
+            *m_partchange_action,
             *m_removefs_action,
 	    *m_vgcreate_action,
 	    *m_tablecreate_action,
@@ -52,17 +52,17 @@ Q_OBJECT
     StorageDevice *m_dev;
     QString m_vg_name;
 
-    void setup(QTreeWidgetItem *item);
+    void setup(QTreeWidgetItem *const item);
     
  public:
-    explicit DeviceActionsMenu( QTreeWidgetItem *item, QWidget *parent = 0);
+    explicit DeviceActionsMenu(QTreeWidgetItem *const item, QWidget *parent = 0);
 
  private slots:
     void fsckPartition();
     void mkfsPartition();
     void maxfsPartition();
     void addPartition();
-    void moveresizePartition();
+    void changePartition();
     void removePartition();
     void removefsPartition();
     void vgcreatePartition();

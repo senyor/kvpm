@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2009, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2009, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -12,8 +12,8 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
-#ifndef PARTMOVERESIZE_H
-#define PARTMOVERESIZE_H
+#ifndef PARTCHANGESIZE_H
+#define PARTCHANGESIZE_H
 
 #include <parted/parted.h>
 
@@ -32,13 +32,12 @@
 
 
 class PartitionGraphic;
-class SizeSelectorBox;
+class DualSelectorBox;
 class StoragePartition;
 
 
-bool moveresize_partition(StoragePartition *partition);
 
-class PartitionMoveResizeDialog : public KDialog
+class PartitionChangeDialog : public KDialog
 {
 Q_OBJECT
 
@@ -47,6 +46,7 @@ Q_OBJECT
     PedPartition     *m_existing_part; // The partition on the disk now
 
     bool m_use_si_units;
+    bool m_bailout;
 
     PedSector m_min_shrink_size;     // Minimum size of the fs after shrinking
     long long m_sector_size;         // bytes per logical sector
@@ -56,8 +56,7 @@ Q_OBJECT
     PartitionGraphic *m_display_graphic; // The color bar that shows the relative
                                          // size of the partition graphically
 
-    SizeSelectorBox *m_size_selector,
-                    *m_offset_selector;
+    DualSelectorBox *m_dual_selector;
 
     QLabel *m_change_by_label,  // How much are we growing or shrinking the partition? 
            *m_preceding_label,  // Free space before the proposed partition
@@ -66,24 +65,22 @@ Q_OBJECT
     bool m_logical;      // Are we a logical partition?
 
     void setup();
-    bool movefs(long long from_start, long long to_start, long long length);
+    bool movefs(const long long from_start, const long long to_start, const long long length);
     bool shrinkPartition();
     bool growPartition();
     bool movePartition();
     void updateGraphicAndLabels();
-    bool pedCommitAndWait(PedDisk *disk);
-    void updateAndValidatePartition();
+    bool pedCommitAndWait(PedDisk *const disk);
     void getMaximumPartition();
     QGroupBox *buildInfoGroup(const long long maxSize);
 
 public:
-    explicit PartitionMoveResizeDialog(StoragePartition *partition, QWidget *parent = 0);
+    explicit PartitionChangeDialog(StoragePartition *const partition, QWidget *parent = 0);
+    bool bailout();
 
 private slots:
     void commitPartition();
-    void resetSelectors();
-    void offsetChanged();
-    void sizeChanged();
+    void validateChange();
 
 };
 
