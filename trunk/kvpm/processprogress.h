@@ -32,6 +32,7 @@ Q_OBJECT
     KProcess *m_process;
     KProgressDialog *m_progress_dialog;
     int m_exit_code;
+    bool m_had_errors;
 
  public:
     ProcessProgress(QStringList arguments, const bool allowCancel = false, QObject *parent = NULL);
@@ -39,6 +40,7 @@ Q_OBJECT
     QStringList programOutput();
     QStringList programOutputAll();
     int exitCode();
+    bool hadErrors();
     
  private slots:   
     void cleanup(const int code, const QProcess::ExitStatus status);

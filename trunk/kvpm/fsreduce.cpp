@@ -146,14 +146,19 @@ long long get_min_fs_size(const QString path, const QString fs){
             
             ProcessProgress fs_scan(arguments);
             output = fs_scan.programOutput();
-            
-            if( output.size() > 0 ){
+
+            if( fs_scan.hadErrors() )
+                KMessageBox::error(NULL, i18n("This filesystem seems to have errors. You will need to "
+                                              "repair them before trying to grow or shrink the filesystem"));
+
+            if( output.size() > 0 && fs_scan.exitCode() == 0 ){
 
                 size_string = output[0];
+
                 if ( size_string.contains("Estimated", Qt::CaseInsensitive) ){
                     size_string = size_string.remove( 0, size_string.indexOf(":") + 1 );
                     size_string = size_string.simplified();
-                return size_string.toLongLong() * block_size;
+                    return size_string.toLongLong() * block_size;
                 }
                 else
                     return 0;
