@@ -38,8 +38,10 @@ public:
     long long getCurrentOffset();
     bool isValid();
 
-private slots:
+public slots:
     void resetSelectors();
+
+private slots:
     void offsetChanged();
     void sizeChanged();
 

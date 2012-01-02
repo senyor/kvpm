@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2009, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2009, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -13,7 +13,7 @@
  */
 
 
-#include "partmoveresize.h"
+#include "partchange.h"
 
 #include <KApplication>
 #include <KButtonGroup>
@@ -25,6 +25,7 @@
 
 #include <QtGui>
 
+#include "dualselectorbox.h"
 #include "fsextend.h"
 #include "fsreduce.h"
 #include "masterlist.h"
@@ -35,40 +36,17 @@
 #include "progressbox.h"
 #include "pvextend.h"
 #include "pvreduce.h"
-#include "sizeselectorbox.h"
 #include "storagepartition.h"
 #include "topwindow.h"
 #include "volgroup.h"
 
 
 
-bool moveresize_partition(StoragePartition *partition)
-{
-    PartitionMoveResizeDialog dialog(partition);
-    const QString fs = partition->getFilesystem();
-
-    const QString message = i18n("Currently only the ext2, ext3 and ext4 file systems "
-                                 "are supported for file system shrinking. "
-                                 "Growing is supported for ext2/3/4, jfs, xfs, ntfs and Reiserfs. "
-                                 "Moving a partition is supported for any filesystem. "
-                                 "Physical volumes may also be grown, shrunk or moved");
-
-    if( ! ( fs == "ext2" || fs == "ext3" || fs == "ext4" || partition->isPhysicalVolume() ) )
-        KMessageBox::information(0, message);
-
-    dialog.exec();
-    
-    if(dialog.result() == QDialog::Accepted)
-        return true;
-    else
-        return false;
-
-}
-
-PartitionMoveResizeDialog::PartitionMoveResizeDialog(StoragePartition *partition, QWidget *parent) 
+PartitionChangeDialog::PartitionChangeDialog(StoragePartition *partition, QWidget *parent) 
     : KDialog(parent),
       m_old_storage_part(partition)
 {
+    m_bailout = false;
     KConfigSkeleton skeleton;
     skeleton.setCurrentGroup("General");
     skeleton.addItemBool("use_si_units", m_use_si_units, false);
@@ -88,9 +66,9 @@ PartitionMoveResizeDialog::PartitionMoveResizeDialog(StoragePartition *partition
     setButtons( KDialog::Ok | KDialog::Cancel | KDialog::Reset );
     setWindowTitle( i18n("Move or resize a partition") );
 
-    QWidget *dialog_body = new QWidget(this);
+    QWidget *const dialog_body = new QWidget(this);
     setMainWidget(dialog_body);
-    QVBoxLayout *layout = new QVBoxLayout();
+    QVBoxLayout *const layout = new QVBoxLayout();
     dialog_body->setLayout(layout);
 
     QLabel *const label = new QLabel( i18n("<b>Resize Or Move A Partition</b>") );
@@ -104,48 +82,41 @@ PartitionMoveResizeDialog::PartitionMoveResizeDialog(StoragePartition *partition
     if( m_old_storage_part->isPhysicalVolume() ){
         if( m_old_storage_part->getPhysicalVolume()->isActive() ){
             max_size -= existing_offset;
-            m_size_selector = new SizeSelectorBox(m_sector_size, m_min_shrink_size, max_size, 
-                                                  m_existing_part->geom.length, false, false);
-            m_offset_selector = new SizeSelectorBox(m_sector_size, existing_offset, existing_offset, 
-                                                    existing_offset, false, true );
+            m_dual_selector = new DualSelectorBox(m_sector_size, 
+                                                  m_min_shrink_size, max_size, m_existing_part->geom.length,
+                                                  existing_offset, existing_offset, existing_offset);
         }
         else{
-            m_size_selector = new SizeSelectorBox(m_sector_size, m_min_shrink_size, max_size, 
-                                                  m_existing_part->geom.length, false, false);
-            m_offset_selector = new SizeSelectorBox(m_sector_size, 0, max_offset, existing_offset, false, true); 
+            m_dual_selector = new DualSelectorBox(m_sector_size, 
+                                                  m_min_shrink_size, max_size, m_existing_part->geom.length,
+                                                  0, max_offset, existing_offset);
         }
     }
     else{
-        m_size_selector = new SizeSelectorBox(m_sector_size, m_min_shrink_size, max_size, 
-                                              m_existing_part->geom.length, false, false);
-        m_offset_selector = new SizeSelectorBox(m_sector_size, 0, max_offset, existing_offset, false, true ); 
+        m_dual_selector = new DualSelectorBox(m_sector_size, 
+                                              m_min_shrink_size, max_size, m_existing_part->geom.length,
+                                              0, max_offset, existing_offset);
     }
 
-    layout->addWidget(m_size_selector);
-    layout->addWidget(m_offset_selector);
+    layout->addWidget(m_dual_selector);
+    m_dual_selector->resetSelectors();
+    validateChange();
 
-    offsetChanged();
-    sizeChanged();
-    updateAndValidatePartition();
-
-    connect(m_size_selector, SIGNAL(stateChanged()),
-	    this , SLOT(sizeChanged()));
-
-    connect(m_offset_selector, SIGNAL(stateChanged()),
-	    this , SLOT(offsetChanged()));
+    connect(m_dual_selector, SIGNAL(changed()),
+            this, SLOT(validateChange()));
 
     connect(this, SIGNAL(resetClicked()),
-	    this, SLOT(resetSelectors()));
+	    m_dual_selector, SLOT(resetSelectors()));
 
     connect(this, SIGNAL(okClicked()),
 	    this, SLOT(commitPartition()));
 
 }
 
-void PartitionMoveResizeDialog::commitPartition()
+void PartitionChangeDialog::commitPartition()
 {
-    long long new_size   = m_size_selector->getCurrentSize();
-    long long new_offset = m_offset_selector->getCurrentSize();
+    long long new_size   = m_dual_selector->getCurrentSize();
+    long long new_offset = m_dual_selector->getCurrentOffset();
     bool grow   = false;
     bool shrink = false;
     bool move   = ( (m_max_part_start + new_offset) != m_existing_part->geom.start );
@@ -190,74 +161,15 @@ void PartitionMoveResizeDialog::commitPartition()
     qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
 }
 
-void PartitionMoveResizeDialog::sizeChanged()
+void PartitionChangeDialog::validateChange()
 {
-    const long long max = m_max_part_size;
-    const long long current_size   = m_size_selector->getCurrentSize();
-    const long long current_offset = m_offset_selector->getCurrentSize();
-
-    if( m_size_selector->isValid() ){
-        if( ! m_offset_selector->isValid() )
-            m_offset_selector->setCurrentSize( m_offset_selector->getCurrentSize() ); // reset to last valid value 
-
-        if( ! m_offset_selector->isLocked() ){
-                
-            if( m_size_selector->isLocked() )
-                m_offset_selector->setConstrainedMax( max - current_size );
-            else
-                m_offset_selector->setConstrainedMax( max - m_size_selector->getMinimumSize() );
-            
-            if( m_offset_selector->getCurrentSize() > ( max - current_size ) )
-                if( ! m_offset_selector->setCurrentSize( max - current_size ) )
-                    m_size_selector->setCurrentSize( max - current_offset );
-        }
-        else{
-            m_size_selector->setConstrainedMax( max - current_offset);
-        }        
-    }
-
-    updateAndValidatePartition();
-} 
-
-void PartitionMoveResizeDialog::offsetChanged()
-{
-    const long long max = m_max_part_size;
-    const long long current_size   = m_size_selector->getCurrentSize();
-    const long long current_offset = m_offset_selector->getCurrentSize();
-
-    if( m_offset_selector->isValid() ){
-        if( ! m_size_selector->isValid() )
-            m_size_selector->setCurrentSize( m_size_selector->getCurrentSize() ); // poke it to make it valid 
-
-        if( ! m_size_selector->isLocked() ){
-            m_size_selector->setConstrainedMax( max );
-
-            if( m_offset_selector->isLocked() )
-                m_size_selector->setConstrainedMax( max - current_offset );
-            else
-                m_size_selector->setConstrainedMax( max - m_offset_selector->getMinimumSize() );
-
-            if( m_size_selector->getCurrentSize() > ( max - current_offset ) )
-                if( ! m_size_selector->setCurrentSize( max - current_offset ) )
-                    m_offset_selector->setCurrentSize( max - current_size );
-        }
-        else{
-            m_offset_selector->setConstrainedMax( max - current_size );
-        }
-    }
-
-    updateAndValidatePartition();
-}
-
-void PartitionMoveResizeDialog::updateAndValidatePartition()
-{
-    if( !m_offset_selector->isValid() || !m_size_selector->isValid() ){
-        (button(KDialog::Ok))->setEnabled(false);
+    if( !m_dual_selector->isValid() ){
+        button(KDialog::Ok)->setEnabled(false);
         return;
     }
 
-    const long long preceding_sectors = m_offset_selector->getCurrentSize();
-    const long long following_sectors = m_max_part_size - ( m_offset_selector->getCurrentSize() + m_size_selector->getCurrentSize() );
+    const long long preceding_sectors = m_dual_selector->getCurrentOffset();
+    const long long following_sectors = m_max_part_size - ( m_dual_selector->getCurrentOffset() + m_dual_selector->getCurrentSize() );
 
     if( preceding_sectors < 0 || following_sectors < 0 ){
         (button(KDialog::Ok))->setEnabled(false);
@@ -266,24 +178,37 @@ void PartitionMoveResizeDialog::updateAndValidatePartition()
 
     updateGraphicAndLabels();
 
-    (button(KDialog::Ok))->setEnabled(true);
+    button(KDialog::Ok)->setEnabled(true);
 }
 
-void PartitionMoveResizeDialog::resetSelectors()
-{
-    m_size_selector->resetToInitial();
-    m_offset_selector->resetToInitial();
-}
-
-void PartitionMoveResizeDialog::setup()
+void PartitionChangeDialog::setup()
 {
     const QString fs = m_old_storage_part->getFilesystem();
 
     m_existing_part = m_old_storage_part->getPedPartition();
     m_ped_disk = m_existing_part->disk;   
 
-    PedDevice   *ped_device = m_ped_disk->dev;
-    PedGeometry *ped_max_geometry  = NULL;
+    PedDevice   *const ped_device = m_ped_disk->dev;
+    PedGeometry *ped_max_geometry = NULL;
+
+
+    QString message = i18n("Currently only the ext2, ext3 and ext4 file systems "
+                           "are supported for file system shrinking. "
+                           "Growing is supported for ext2/3/4, jfs, xfs, ntfs and Reiserfs. "
+                           "Moving a partition is supported for any filesystem. "
+                           "Physical volumes may also be grown, shrunk or moved");
+    
+    if( ! ( fs == "ext2" || fs == "ext3" || fs == "ext4" || m_old_storage_part->isPhysicalVolume() ) )
+        KMessageBox::information(0, message);
+
+    message = i18n("This partition is on the same device with partitions that are busy or mounted. "
+                   "If possible they should be unmounted before proceeding or "
+                   "changes to the partition table may not be recognized by the kernel.");
+
+    if( ped_device_is_busy(ped_device) ){
+        if(KMessageBox::warningContinueCancel(0, message) != KMessageBox::Continue)
+            m_bailout = true;
+    }
 
     /* how big can it grow? */
     PedConstraint *constraint = ped_device_get_constraint(ped_device);
@@ -304,7 +229,7 @@ void PartitionMoveResizeDialog::setup()
 
     if( m_old_storage_part->isPhysicalVolume() ){
 
-        PhysVol* const pv = m_old_storage_part->getPhysicalVolume();
+        PhysVol *const pv = m_old_storage_part->getPhysicalVolume();
         const long mda_count = pv->getMdaCount();
         const long long extent_size = pv->getVg()->getExtentSize();
         const long long mda_extents = (pv->getMdaSize() / extent_size) + 1;
@@ -324,28 +249,28 @@ void PartitionMoveResizeDialog::setup()
         m_min_shrink_size = m_existing_part->geom.length;
 }
 
-bool PartitionMoveResizeDialog::movefs(long long from_start, long long to_start, long long length)
+bool PartitionChangeDialog::movefs(long long from_start, long long to_start, long long length)
 {
     const long long blocksize = 8000;    // sectors moved in each block
 
-    PedDevice *device = m_ped_disk->dev;
+    PedDevice *const device = m_ped_disk->dev;
 
-    char *buff = static_cast<char *>( malloc( blocksize * m_sector_size ) ) ;
+    char *const buff = static_cast<char *>( malloc( blocksize * m_sector_size ) ) ;
 
-    long long blockcount = length / blocksize;
-    long long extra = length % blocksize;
+    const long long blockcount = length / blocksize;
+    const long long extra = length % blocksize;
 
     ped_device_open(device);
 
     ProgressBox *const progress_box = TopWindow::getProgressBox();
     progress_box->setRange(0, blockcount);
-    progress_box->setText("Moving data");
+    progress_box->setText( i18n("Moving data") );
     int event_timer = 0;
     qApp->setOverrideCursor(Qt::WaitCursor);
     qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
 
     if( to_start < from_start ){                       // moving left
-        for( long long x = 0; x < blockcount  ; x++){
+        for(long long x = 0; x < blockcount; x++){
             event_timer++;
             if(event_timer > 5){
                 qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
@@ -385,7 +310,7 @@ bool PartitionMoveResizeDialog::movefs(long long from_start, long long to_start,
             KMessageBox::error( 0, i18n("Move failed: could not write to device") );
             return false;
         }
-        for( long long x = blockcount - 1; x >= 0 ; x--){
+        for(long long x = blockcount - 1; x >= 0 ; x--){
             event_timer++;
             if(event_timer > 5){
                 qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
@@ -415,18 +340,18 @@ bool PartitionMoveResizeDialog::movefs(long long from_start, long long to_start,
     return true;
 }
 
-bool PartitionMoveResizeDialog::shrinkPartition()
+bool PartitionChangeDialog::shrinkPartition()
 {
     hide();
 
     const PedSector sectors_1MiB  = 0x100000 / m_sector_size;   // sectors per megabyte
-    PedDevice* const device = m_ped_disk->dev;
+    PedDevice *const device = m_ped_disk->dev;
     const PedSector current_start = m_existing_part->geom.start;
     const PedSector current_size  = m_existing_part->geom.length;
     const QString fs   = m_old_storage_part->getFilesystem();
     const QString path = ped_partition_get_path(m_existing_part); 
     const bool is_pv   = m_old_storage_part->isPhysicalVolume();
-    PedSector new_size = m_size_selector->getCurrentSize();
+    PedSector new_size = m_dual_selector->getCurrentSize();
 
     if( new_size >= current_size )
         return false;
@@ -451,10 +376,10 @@ bool PartitionMoveResizeDialog::shrinkPartition()
     // This constraint assures we have a new partition at least as long as the fs can shrink it
     // We allow up to an extra 1MiB sectors for the end of the partition
 
-    PedAlignment * const start_alignment = ped_alignment_new(0, 1);
-    PedGeometry *  const start_range = ped_geometry_new(device, current_start, 1);
+    PedAlignment *const start_alignment = ped_alignment_new(0, 1);
+    PedGeometry  *const start_range = ped_geometry_new(device, current_start, 1);
 
-    PedGeometry *end_range;
+    PedGeometry  *end_range;
     PedAlignment *end_alignment;
     PedSector maximum_size;
     PedSector minimum_size = reduced_size;
@@ -493,12 +418,12 @@ bool PartitionMoveResizeDialog::shrinkPartition()
     }
 }
 
-bool PartitionMoveResizeDialog::growPartition()
+bool PartitionChangeDialog::growPartition()
 {
     hide();
 
     const PedSector sectors_1MiB  = 0x100000 / m_sector_size;   // sectors per megabyte
-    PedDevice* const device = m_ped_disk->dev;
+    PedDevice *const device = m_ped_disk->dev;
     const QString fs = m_old_storage_part->getFilesystem();
     const bool is_pv = m_old_storage_part->isPhysicalVolume();
     const PedSector current_start = m_existing_part->geom.start;
@@ -511,12 +436,12 @@ bool PartitionMoveResizeDialog::growPartition()
               max_new_size;  // max desired size
 
     // Don't grow less than 1 MiB
-    if( m_size_selector->getCurrentSize() <= ( current_size + ( 2 * sectors_1MiB ) ) )
+    if( m_dual_selector->getCurrentSize() <= ( current_size + ( 2 * sectors_1MiB ) ) )
         return true;  // Not worth the trouble, just say we did it
-    else if( m_size_selector->getCurrentSize() + current_start > max_end )
+    else if( m_dual_selector->getCurrentSize() + current_start > max_end )
         max_new_size = max_end - current_start;
     else
-        max_new_size = m_size_selector->getCurrentSize();
+        max_new_size = m_dual_selector->getCurrentSize();
 
     min_new_size = max_new_size - sectors_1MiB;
 
@@ -543,7 +468,7 @@ bool PartitionMoveResizeDialog::growPartition()
     qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
     qApp->restoreOverrideCursor();
 
-    if( ! success ){  
+    if( !success ){  
         KMessageBox::error( 0, i18n("Partition extension failed") );
         return false;
     }
@@ -553,7 +478,7 @@ bool PartitionMoveResizeDialog::growPartition()
          
         pedCommitAndWait(m_ped_disk);
 
-        if( is_pv ){            
+        if(is_pv){            
            if( pv_extend( ped_partition_get_path(m_existing_part) ) )
                 return true;
             else
@@ -568,14 +493,14 @@ bool PartitionMoveResizeDialog::growPartition()
     }
 }
 
-void PartitionMoveResizeDialog::updateGraphicAndLabels()
+void PartitionChangeDialog::updateGraphicAndLabels()
 {
-    const PedSector preceding_sectors = m_offset_selector->getCurrentSize();
-    const PedSector following_sectors = m_max_part_size - ( preceding_sectors + m_size_selector->getCurrentSize() );
-    const long long change_size = m_sector_size * (m_size_selector->getCurrentSize() - m_existing_part->geom.length );
+    const PedSector preceding_sectors = m_dual_selector->getCurrentOffset();
+    const PedSector following_sectors = m_max_part_size - ( preceding_sectors + m_dual_selector->getCurrentSize() );
+    const long long change_size = m_sector_size * (m_dual_selector->getCurrentSize() - m_existing_part->geom.length );
 
     m_display_graphic->setPrecedingSectors(preceding_sectors);
-    m_display_graphic->setPartitionSectors(m_size_selector->getCurrentSize());
+    m_display_graphic->setPartitionSectors(m_dual_selector->getCurrentSize());
     m_display_graphic->setFollowingSectors(following_sectors);
     m_display_graphic->repaint();
 
@@ -606,18 +531,18 @@ void PartitionMoveResizeDialog::updateGraphicAndLabels()
     m_following_label->setText( i18n("Following space: %1", following_bytes_string) );
 }
 
-bool PartitionMoveResizeDialog::movePartition()
+bool PartitionChangeDialog::movePartition()
 {
     hide();
 
-    PedDevice *device = m_ped_disk->dev;
+    PedDevice *const device = m_ped_disk->dev;
 
     const PedSector sectors_1MiB  = 0x100000 / m_sector_size;   // sectors per megabyte
     const PedSector max_start = m_max_part_start;
     const PedSector max_end   = max_start + m_max_part_size - 1;
     const PedSector current_size  = m_existing_part->geom.length;
     PedSector current_start = m_existing_part->geom.start;
-    PedSector new_start     = m_max_part_start + m_offset_selector->getCurrentSize();
+    PedSector new_start     = m_max_part_start + m_dual_selector->getCurrentOffset();
 
     // don't move if the move is less than 1 megabyte 
     // and check that we have at least 1 meg to spare
@@ -690,7 +615,7 @@ bool PartitionMoveResizeDialog::movePartition()
 
 /* The following function waits for udev to acknowledge the partion changes before exiting */
 
-bool PartitionMoveResizeDialog::pedCommitAndWait(PedDisk *disk)
+bool PartitionChangeDialog::pedCommitAndWait(PedDisk *disk)
 {
     QStringList args;
 
@@ -711,7 +636,7 @@ bool PartitionMoveResizeDialog::pedCommitAndWait(PedDisk *disk)
     }
 }
 
-void PartitionMoveResizeDialog::getMaximumPartition()
+void PartitionChangeDialog::getMaximumPartition()
 {
     QList<PedPartition *> parts;
     PedPartition *next_part = NULL;
@@ -782,7 +707,7 @@ void PartitionMoveResizeDialog::getMaximumPartition()
     m_max_part_size = 1 + max_end - m_max_part_start;
 }
 
-QGroupBox *PartitionMoveResizeDialog::buildInfoGroup(const long long maxSize)
+QGroupBox *PartitionChangeDialog::buildInfoGroup(const long long maxSize)
 {
     QGroupBox   *const group = new QGroupBox();
     QVBoxLayout *const layout = new QVBoxLayout();
@@ -815,4 +740,9 @@ QGroupBox *PartitionMoveResizeDialog::buildInfoGroup(const long long maxSize)
     layout->addWidget( m_change_by_label );
 
     return group;
+}
+
+bool PartitionChangeDialog::bailout()
+{
+    return m_bailout;
 }
