@@ -16,6 +16,7 @@
 #define PVGROUPBOX_H
 
 #include <QCheckBox>
+#include <QGridLayout>
 #include <QGroupBox>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -42,6 +43,7 @@ Q_OBJECT
     QLabel *m_space_label, *m_extents_label;
     long long m_extent_size;
     QHBoxLayout *getButtons();
+    void addLabelsAndButtons(QGridLayout *const layout, const int pvCount);
 
  public:
     explicit PvGroupBox(QList<PhysVol *> volumes, QWidget *parent = NULL); 

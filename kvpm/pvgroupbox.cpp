@@ -60,8 +60,8 @@ PvGroupBox::PvGroupBox(QList<PhysVol *> volumes, QWidget *parent)
         m_extent_size = m_pvs[0]->getVg()->getExtentSize();
         QLabel *pv_label = new QLabel( m_pvs[0]->getName() + "  " + locale->formatByteSize( m_pvs[0]->getRemaining() ) );
         layout->addWidget(pv_label, 0, 0, 1, -1);
-        layout->addWidget(m_space_label,   layout->rowCount(), 0, 1, -1);
-        layout->addWidget(m_extents_label, layout->rowCount(), 0, 1, -1);
+
+        addLabelsAndButtons(layout, pv_check_count);
         calculateSpace();
     }
     else{
@@ -84,9 +84,7 @@ PvGroupBox::PvGroupBox(QList<PhysVol *> volumes, QWidget *parent)
 	}
 
         selectAll();
-        layout->addWidget(m_space_label,   layout->rowCount(), 0, 1, -1);
-        layout->addWidget(m_extents_label, layout->rowCount(), 0, 1, -1);
-        layout->addLayout(getButtons(),    layout->rowCount(), 0, 1, -1);
+        addLabelsAndButtons(layout, pv_check_count);
     }
 }
 
@@ -101,7 +99,11 @@ PvGroupBox::PvGroupBox(QList <StorageDevice *> devices, QList<StoragePartition *
     skeleton.setCurrentGroup("General");
     skeleton.addItemBool("use_si_units", m_use_si_units, false);
 
-    setTitle( i18n("Available Physical Volumes") );
+    if(devices.size() + partitions.size() > 1)
+        setTitle( i18n("Available Physical Volumes") );
+    else
+        setTitle( i18n("Physical Volume") );
+
     QGridLayout *const layout = new QGridLayout();
     setLayout(layout);
     QString name;
@@ -134,8 +136,7 @@ PvGroupBox::PvGroupBox(QList <StorageDevice *> devices, QList<StoragePartition *
         }
         QLabel *pv_label = new QLabel( name + "  " + locale->formatByteSize(size) );
         layout->addWidget(pv_label, 0, 0, 1, -1);
-        layout->addWidget(m_space_label,   layout->rowCount(), 0, 1, -1);
-        layout->addWidget(m_extents_label, layout->rowCount(), 0, 1, -1);
+        addLabelsAndButtons(layout, pv_check_count);
 
         calculateSpace();
     }
@@ -180,9 +181,7 @@ PvGroupBox::PvGroupBox(QList <StorageDevice *> devices, QList<StoragePartition *
 	}
 
         selectAll();
-        layout->addWidget(m_space_label,   layout->rowCount(), 0, 1, -1);
-        layout->addWidget(m_extents_label, layout->rowCount(), 0, 1, -1);
-        layout->addLayout(getButtons(),    layout->rowCount(), 0, 1, -1);
+        addLabelsAndButtons(layout, pv_check_count);
 
         setExtentSize(extentSize);
     }
@@ -302,8 +301,14 @@ void PvGroupBox::calculateSpace(){
     else
         locale->setBinaryUnitDialect(KLocale::IECBinaryDialect);
 
-    m_space_label->setText( i18n("Selected space: %1", locale->formatByteSize(getRemainingSpace()) ) );
-    m_extents_label->setText( i18n("Selected extents: %1", getRemainingSpace() / m_extent_size ) );
+    if(m_pv_checks.size() > 1){
+        m_space_label->setText( i18n("Selected space: %1", locale->formatByteSize(getRemainingSpace()) ) );
+        m_extents_label->setText( i18n("Selected extents: %1", getRemainingSpace() / m_extent_size ) );
+    }
+    else{
+        m_space_label->setText( i18n("Space: %1", locale->formatByteSize(getRemainingSpace()) ) );
+        m_extents_label->setText( i18n("Extents: %1", getRemainingSpace() / m_extent_size ) );
+    }
 
     emit stateChanged();
 
@@ -362,4 +367,21 @@ QHBoxLayout *PvGroupBox::getButtons()
     connect(none, SIGNAL(clicked(bool)), this, SLOT(selectNone()));
     
     return layout;
+}
+
+void PvGroupBox::addLabelsAndButtons(QGridLayout *const layout, const int pvCount)
+{
+    QVBoxLayout *const spacer1 = new QVBoxLayout;
+    QVBoxLayout *const spacer2 = new QVBoxLayout;
+    spacer1->addSpacing(10);
+    spacer2->addSpacing(10);
+    const int count = layout->rowCount();
+
+    layout->addLayout(spacer1,         count,     0, 1, -1);
+    layout->addWidget(m_space_label,   count + 1, 0, 1, -1);
+    layout->addWidget(m_extents_label, count + 2, 0, 1, -1);
+    layout->addLayout(spacer2,         count + 3, 0, 1, -1);
+    
+    if(pvCount > 1)
+        layout->addLayout(getButtons(), count + 4, 0, 1, -1);
 }
