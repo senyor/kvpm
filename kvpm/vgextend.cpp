@@ -69,8 +69,8 @@ bool extend_vg(const QString groupName, StorageDevice *const device, StoragePart
         pv_name = partition->getName().toLocal8Bit();
     }
 
-    const QString message = i18n("Do you want to extend volume group: <b>%1</b> with "
-                                 "physical volume: <b>%2</b> (size: %3)", 
+    const QString message = i18n("Really extend volume group: <b>%1</b> with <b>%2</b>? "
+                                 "Any data currently on the device will be lost.", 
                                  groupName, 
                                  QString(pv_name), 
                                  locale->formatByteSize(size));
@@ -78,34 +78,29 @@ bool extend_vg(const QString groupName, StorageDevice *const device, StoragePart
     if(extent_size > size){
         KMessageBox::error(0, error_message);
     }
-    else{
-        if(KMessageBox::questionYesNo(0, message) == KMessageBox::Yes){
+    else if(KMessageBox::warningYesNo(0, message) == KMessageBox::Yes){
 
-            progress_box->setRange(0, 1);
-            progress_box->setValue(0);
-            progress_box->setText("Extending VG");
-
-            if( (vg_dm = lvm_vg_open(lvm, vg_name.data(), "w", 0)) ){
-                if( ! lvm_vg_extend(vg_dm, pv_name.data()) ){
-                    if( lvm_vg_write(vg_dm) )
-                        KMessageBox::error(0, QString(lvm_errmsg(lvm)));;
-                    lvm_vg_close(vg_dm);
-                    progress_box->reset();
-                    return true;
-                }
-                KMessageBox::error(0, QString(lvm_errmsg(lvm))); 
+        progress_box->setRange(0, 1);
+        progress_box->setValue(0);
+        progress_box->setText("Extending VG");
+        
+        if( (vg_dm = lvm_vg_open(lvm, vg_name.data(), "w", 0)) ){
+            if( ! lvm_vg_extend(vg_dm, pv_name.data()) ){
+                if( lvm_vg_write(vg_dm) )
+                    KMessageBox::error(0, QString(lvm_errmsg(lvm)));;
                 lvm_vg_close(vg_dm);
                 progress_box->reset();
                 return true;
             }
             KMessageBox::error(0, QString(lvm_errmsg(lvm))); 
+            lvm_vg_close(vg_dm);
             progress_box->reset();
             return true;
         }
-        KMessageBox::error(0, QString(lvm_errmsg(lvm)));
+        KMessageBox::error(0, QString(lvm_errmsg(lvm))); 
         progress_box->reset();
         return true;
-    }   
+    }
 
     return false;  // do nothing
 }

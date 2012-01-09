@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2009, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -313,12 +313,22 @@ void DeviceActionsMenu::changePartition()
 void DeviceActionsMenu::vgcreatePartition()
 {
     if(m_part){
-        if( create_vg(NULL, m_part) )
-            MainWindow->reRun();
+        VGCreateDialog dialog(NULL, m_part);
+        if( !dialog.bailout() ){
+            dialog.exec();
+    
+            if(dialog.result() == QDialog::Accepted)
+                MainWindow->reRun();
+        }
     }
     else{                             // whole device, not partition
-        if( create_vg(m_dev, NULL) )
-            MainWindow->reRun();
+        VGCreateDialog dialog(m_dev, NULL);
+        if( !dialog.bailout() ){
+            dialog.exec();
+    
+            if(dialog.result() == QDialog::Accepted)
+                MainWindow->reRun();
+        }
     }
 }
 
