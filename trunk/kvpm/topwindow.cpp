@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2009, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -235,8 +235,13 @@ void TopWindow::changeVolumeGroup()
 
 void TopWindow::createVolumeGroup()
 {
-    if( create_vg() )
-        reRun();
+    VGCreateDialog dialog;
+
+    if( !dialog.bailout() ){
+        dialog.exec();
+        if(dialog.result() == QDialog::Accepted)
+            reRun();
+    }
 }
 
 void TopWindow::removeVolumeGroup()

@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -15,9 +15,9 @@
 #ifndef VGCREATE_H
 #define VGCREATE_H
 
+#include <KComboBox>
 #include <KDialog>
 #include <KLineEdit>
-#include <KComboBox>
 
 #include <QLabel>
 #include <QStringList>
@@ -29,20 +29,18 @@ class StorageDevice;
 class StoragePartition;
 class PvGroupBox;
 
-bool create_vg(StorageDevice *device, StoragePartition *partition);
-
-bool create_vg();
 
 class VGCreateDialog : public KDialog
 {
 Q_OBJECT
+
+    bool m_bailout;
 
     QLabel *m_pv_label, 
            *m_total_available_label, 
            *m_total_selected_label;
 
     PvGroupBox  *m_pv_checkbox;
-    QVBoxLayout *m_layout;
 
     KLineEdit *m_vg_name, 
               *m_max_lvs, 
@@ -58,11 +56,15 @@ Q_OBJECT
 
     QRegExpValidator *m_validator;
 
+    void buildDialog(QList<StorageDevice *> devices, QList<StoragePartition *> partitions);
+    void getUsablePvs(QList<StorageDevice *> &devices, QList<StoragePartition *> &partitions);
     void limitExtentSize(int);
     
  public:
-    VGCreateDialog(QList<StorageDevice *> devices, QList<StoragePartition *> partitions, QWidget *parent = 0);
-    
+    explicit VGCreateDialog(QWidget *parent = NULL);
+    VGCreateDialog(StorageDevice *const device, StoragePartition *const partition, QWidget *parent = NULL);
+    bool bailout();    
+
  private slots:
     //void limitLogicalVolumes(int boxstate);
     //void limitPhysicalVolumes(int boxstate);
