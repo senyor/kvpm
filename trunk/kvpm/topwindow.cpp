@@ -270,8 +270,13 @@ void TopWindow::exportVolumeGroup()
 
 void TopWindow::extendVolumeGroup()
 {
-    if( extend_vg(m_vg) )
-        reRun();
+    VGExtendDialog dialog(m_vg);
+
+    if( !dialog.bailout() ){
+        dialog.exec();
+        if(dialog.result() == QDialog::Accepted)
+            reRun();
+    }
 }
 
 void TopWindow::importVolumeGroup()
