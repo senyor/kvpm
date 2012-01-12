@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -25,22 +25,22 @@ class StorageDevice;
 class StoragePartition;
 class VolGroup;
 
-bool extend_vg(const QString groupName, StorageDevice *const device, StoragePartition *partition);
-
-bool extend_vg(VolGroup *const group);
 
 class VGExtendDialog : public KDialog
 {
 Q_OBJECT
 
+    bool m_bailout;
     PvGroupBox  *m_pv_checkbox;
     VolGroup    *m_vg;
-    QVBoxLayout *m_layout;
 
  public:
-    VGExtendDialog(VolGroup *volumeGroup, QList<StorageDevice *> devices, 
-                   QList<StoragePartition *> partitions, QWidget *parent = 0);
-    
+    VGExtendDialog(VolGroup *const group, QWidget *parent = NULL);
+    VGExtendDialog(VolGroup *const group, StorageDevice *const device, StoragePartition *const partition, QWidget *parent = NULL);
+    void buildDialog(QList<StorageDevice *> devices, QList<StoragePartition *> partitions);
+    void getUsablePvs(QList<StorageDevice *> &devices, QList<StoragePartition *> &partitions);
+    bool bailout();
+
  private slots:
     void commitChanges();
     void validateOK();

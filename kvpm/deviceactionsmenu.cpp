@@ -353,18 +353,27 @@ void DeviceActionsMenu::vgreducePartition() // pvs can also be whole devices
 
 void DeviceActionsMenu::vgextendPartition(QAction *action)
 {
-    QString group = action->text();
-    group.remove(QChar('&'));
-    StorageDevice *device = NULL;
-    StoragePartition *partition = NULL;
+    QString vg_name = action->text();
+    VolGroup *vg = MasterList::getVgByName( vg_name.remove(QChar('&')) );
 
-    if(m_part)
-        partition = m_part;
-    else
-        device = m_dev;
-
-    if( extend_vg(group, device, partition) )
-	MainWindow->reRun();
+    if(m_part){
+        VGExtendDialog dialog(vg, NULL, m_part);
+        if( !dialog.bailout() ){
+            dialog.exec();
+    
+            if(dialog.result() == QDialog::Accepted)
+                MainWindow->reRun();
+        }
+    }
+    else{                             // whole device, not partition
+        VGExtendDialog dialog(vg, m_dev, NULL);
+        if( !dialog.bailout() ){
+            dialog.exec();
+    
+            if(dialog.result() == QDialog::Accepted)
+                MainWindow->reRun();
+        }
+    }
 }
 
 void DeviceActionsMenu::mountPartition()

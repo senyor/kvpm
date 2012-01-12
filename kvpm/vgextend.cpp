@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -36,152 +36,50 @@
 
 
 
-bool extend_vg(const QString groupName, StorageDevice *const device, StoragePartition *partition)
+VGExtendDialog::VGExtendDialog(VolGroup *const group, QWidget *parent) 
+    : KDialog(parent), m_vg(group)
 {
-    bool use_si_units;
-    KConfigSkeleton skeleton;
-    skeleton.setCurrentGroup("General");
-    skeleton.addItemBool("use_si_units", use_si_units, false);
+    m_bailout = false;
 
+    QList<StorageDevice *> devices;
+    QList<StoragePartition *> partitions;
+    QString warning = i18n("If a device or partition is added to a volume group, "
+                           "any data currently on that device or partition will be lost.");
 
-    KLocale *const locale = KGlobal::locale();
-    if(use_si_units)
-        locale->setBinaryUnitDialect(KLocale::MetricBinaryDialect); 
-    else
-        locale->setBinaryUnitDialect(KLocale::IECBinaryDialect);
+    getUsablePvs(devices, partitions); 
 
-    const QByteArray vg_name = groupName.toLocal8Bit();
-    QByteArray pv_name;
-    long long size;
-    lvm_t lvm = MasterList::getLvm();
-    vg_t  vg_dm;
-    VolGroup *const vg = MasterList::getVgByName(groupName);
-    const long long extent_size = vg->getExtentSize();
-    ProgressBox *const progress_box = TopWindow::getProgressBox();
-    const QString error_message = i18n("This physical volume <b>%1</b> is smaller than the extent size", QString(pv_name));
-
-    if(device){
-        size = device->getSize();
-        pv_name = device->getName().toLocal8Bit();
+    if( partitions.size() + devices.size() > 0 ){
+        if(KMessageBox::warningContinueCancel(0, warning) == KMessageBox::Continue)
+            buildDialog(devices, partitions);
+        else
+            m_bailout = true;
     }
     else{
-        size = partition->getSize();
-        pv_name = partition->getName().toLocal8Bit();
-    }
-
-    const QString message = i18n("Really extend volume group: <b>%1</b> with <b>%2</b>? "
-                                 "Any data currently on the device will be lost.", 
-                                 groupName, 
-                                 QString(pv_name), 
-                                 locale->formatByteSize(size));
-
-    if(extent_size > size){
-        KMessageBox::error(0, error_message);
-    }
-    else if(KMessageBox::warningYesNo(0, message) == KMessageBox::Yes){
-
-        progress_box->setRange(0, 1);
-        progress_box->setValue(0);
-        progress_box->setText("Extending VG");
-        
-        if( (vg_dm = lvm_vg_open(lvm, vg_name.data(), "w", 0)) ){
-            if( ! lvm_vg_extend(vg_dm, pv_name.data()) ){
-                if( lvm_vg_write(vg_dm) )
-                    KMessageBox::error(0, QString(lvm_errmsg(lvm)));;
-                lvm_vg_close(vg_dm);
-                progress_box->reset();
-                return true;
-            }
-            KMessageBox::error(0, QString(lvm_errmsg(lvm))); 
-            lvm_vg_close(vg_dm);
-            progress_box->reset();
-            return true;
-        }
-        KMessageBox::error(0, QString(lvm_errmsg(lvm))); 
-        progress_box->reset();
-        return true;
-    }
-
-    return false;  // do nothing
-}
-
-bool extend_vg(VolGroup *group)
-{
-    const QList<StorageDevice *> all_devices = MasterList::getStorageDevices();   
-    QList<StorageDevice *> usable_devices;
-    QStringList device_names;
-    QList<StoragePartition *> all_partitions;
-    QList<StoragePartition *> usable_partitions;
-
-    for(int x = 0; x < all_devices.size(); x++){
-        if( (all_devices[x]->getRealPartitionCount() == 0) && 
-            (! all_devices[x]->isBusy()) && 
-            (! all_devices[x]->isPhysicalVolume() )){
-            usable_devices.append(all_devices[x]);
-        }
-        else if( all_devices[x]->getRealPartitionCount() > 0 ){
-            all_partitions = all_devices[x]->getStoragePartitions();
-            for(int y = 0; y < all_partitions.size(); y++){
-                if( (! all_partitions[y]->isBusy() ) &&
-                    (! all_partitions[y]->isPhysicalVolume() ) &&
-                    (( all_partitions[y]->isNormal() ) ||  
-                     ( all_partitions[y]->isLogical() )))  
-                {
-                    usable_partitions.append(all_partitions[y]);
-                }
-            }
-        }
-    }
-
-    for(int x = usable_devices.size() - 1; x >= 0 ; x--){
-        if((usable_devices[x]->getName()).contains("/dev/mapper/") )
-            usable_devices.removeAt(x);
-    }
-
-    for(int x = usable_partitions.size() - 1; x >= 0 ; x--){
-        if( (usable_partitions[x]->getName()).contains("/dev/mapper/") )
-            usable_partitions.removeAt(x);
-    }
-
-    if( ( usable_devices.size() + usable_partitions.size() ) > 0 ){
-        VGExtendDialog dialog( group, usable_devices, usable_partitions );
-        dialog.exec();
-        if(dialog.result() == QDialog::Accepted)
-            return true;
-        else
-            return false;
-    }
-    else
+        m_bailout = true;
         KMessageBox::error(0, i18n("No unused potential physical volumes found") );
-
-    return false;
+    }
 }
 
-VGExtendDialog::VGExtendDialog(VolGroup *const group, QList<StorageDevice *> devices, 
-                               QList<StoragePartition *> partitions, QWidget *parent) : 
-    KDialog(parent),
-    m_vg(group)
+VGExtendDialog::VGExtendDialog(VolGroup *const group, StorageDevice *const device, StoragePartition *const partition, QWidget *parent) 
+    : KDialog(parent), m_vg(group) 
 {
+    m_bailout = false;
 
-    setWindowTitle( i18n("Extend Volume Group") );
+    QList<StorageDevice *> devices;
+    QList<StoragePartition *> partitions;
 
-    QWidget *dialog_body = new QWidget(this);
-    setMainWidget(dialog_body);
-    m_layout = new QVBoxLayout();
-    dialog_body->setLayout(m_layout);
+    if(device != NULL)
+        devices.append(device);
+    else
+        partitions.append(partition);
 
-    QLabel *name_label = new QLabel( i18n("Extending Volume Group <b>%1</b>", m_vg->getName()) );
-    name_label->setAlignment(Qt::AlignCenter);
-    m_layout->addWidget(name_label);
+    QString warning = i18n("If a device or partition is added to a volume group, "
+                           "any data currently on that device or partition will be lost.");
 
-    m_pv_checkbox = new PvGroupBox( devices, partitions, m_vg->getExtentSize() );
-    m_layout->addWidget(m_pv_checkbox);
-
-    connect(m_pv_checkbox, SIGNAL(stateChanged()), 
-	    this, SLOT(validateOK()));
-
-    connect(this, SIGNAL(okClicked()), 
-	    this, SLOT(commitChanges()));
+    if(KMessageBox::warningContinueCancel(0, warning) == KMessageBox::Continue)
+        buildDialog(devices, partitions);
+    else
+        m_bailout = true;
 }
 
 void VGExtendDialog::commitChanges()
@@ -231,3 +129,57 @@ void VGExtendDialog::validateOK()
         enableButtonOk(false);
 }
 
+void VGExtendDialog::buildDialog(QList<StorageDevice *> devices, QList<StoragePartition *> partitions)
+{
+    setWindowTitle( i18n("Extend Volume Group") );
+
+    QWidget *const dialog_body = new QWidget(this);
+    setMainWidget(dialog_body);
+    QVBoxLayout *const layout = new QVBoxLayout();
+    dialog_body->setLayout(layout);
+
+    QLabel *const title = new QLabel( i18n("Extend Volume Group: <b>%1</b>", m_vg->getName()) );
+    title->setAlignment(Qt::AlignCenter);
+    layout->addSpacing(5);
+    layout->addWidget(title);
+    layout->addSpacing(5);
+
+    m_pv_checkbox = new PvGroupBox( devices, partitions, m_vg->getExtentSize() );
+    layout->addWidget(m_pv_checkbox);
+
+    connect(m_pv_checkbox, SIGNAL(stateChanged()), 
+	    this, SLOT(validateOK()));
+
+    connect(this, SIGNAL(okClicked()), 
+	    this, SLOT(commitChanges()));
+}
+
+void VGExtendDialog::getUsablePvs(QList<StorageDevice *> &devices, QList<StoragePartition *> &partitions) 
+{
+    QList<StorageDevice *> all_dev = MasterList::getStorageDevices();   
+    QList<StoragePartition *> all_part;
+
+    for(int x = 0; x < all_dev.size(); x++){
+        if( (all_dev[x]->getRealPartitionCount() == 0) && 
+            ( !all_dev[x]->isBusy()) && 
+            ( !all_dev[x]->isPhysicalVolume() )) {
+
+            devices.append( all_dev[x] );
+        }
+        else if( all_dev[x]->getRealPartitionCount() > 0 ){
+            all_part = all_dev[x]->getStoragePartitions();
+            for(int y = 0; y < all_part.size(); y++){
+                if( ( !all_part[y]->isBusy() ) && (! all_part[y]->isPhysicalVolume() ) &&
+                    (( all_part[y]->isNormal() ) || ( all_part[y]->isLogical() )))  {
+
+                    partitions.append(all_part[y]); 
+                }
+            }
+        }
+    }
+}
+
+bool VGExtendDialog::bailout()
+{
+    return m_bailout;
+}
