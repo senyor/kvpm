@@ -153,12 +153,16 @@ SizeSelectorBox::SizeSelectorBox(long long unitSize, long long minSize, long lon
 
     if( m_min_size == m_max_size ){
         setCurrentSize(m_min_size);
+        m_size_box->setChecked(true);
         setEnabled(false);
     }
 }
 
 void SizeSelectorBox::resetToInitial()
 {
+    if( !isEnabled() )
+        return;
+
     m_current_size = m_initial_size;
 
     if(m_is_volume){
