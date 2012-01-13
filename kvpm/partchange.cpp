@@ -98,6 +98,7 @@ PartitionChangeDialog::PartitionChangeDialog(StoragePartition *partition, QWidge
                                               0, max_offset, existing_offset);
     }
 
+
     layout->addWidget(m_dual_selector);
     m_dual_selector->resetSelectors();
     validateChange();
@@ -210,17 +211,19 @@ void PartitionChangeDialog::setup()
             m_bailout = true;
     }
 
+    PedDiskFlag cylinder_flag = ped_disk_flag_get_by_name("cylinder_alignment");
+
+    if( ped_disk_is_flag_available(m_ped_disk, cylinder_flag) ){
+        ped_disk_set_flag(m_ped_disk, cylinder_flag, 0);
+    }
+
     /* how big can it grow? */
-    PedConstraint *constraint = ped_device_get_constraint(ped_device);
-    constraint = ped_constraint_any(ped_device);
-    ped_max_geometry  = ped_disk_get_max_partition_geometry( m_ped_disk, m_existing_part, constraint );
-    m_sector_size     = ped_device->sector_size;
+    PedConstraint *constraint = ped_constraint_any(ped_device);
+    ped_max_geometry = ped_disk_get_max_partition_geometry(m_ped_disk, m_existing_part, constraint);
+    m_sector_size    = ped_device->sector_size;
 
-    m_max_part_start  = ped_max_geometry->start;
-    m_max_part_size   = ped_max_geometry->length;
-
-    // remove this when possible!!!!
-    getMaximumPartition();
+    m_max_part_start = ped_max_geometry->start;
+    m_max_part_size  = ped_max_geometry->length;
 
     if( m_existing_part->type & PED_PARTITION_LOGICAL )
         m_logical = true;
@@ -634,77 +637,6 @@ bool PartitionChangeDialog::pedCommitAndWait(PedDisk *disk)
         qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
         return true;
     }
-}
-
-void PartitionChangeDialog::getMaximumPartition()
-{
-    QList<PedPartition *> parts;
-    PedPartition *next_part = NULL;
-    bool is_logical;
-    int index, prev, next;
-    long long max_end = m_max_part_start + m_max_part_size - 1;
-    const PedSector sectors_1MiB  = 0x100000 / m_sector_size;   // sectors per megabyte
-
-    while( (next_part = ped_disk_next_partition(m_ped_disk, next_part) ) )
-        parts.append(next_part);
-
-    is_logical = m_existing_part->type & PED_PARTITION_LOGICAL;
-
-    // look for the index of the current part
-    for(index = 0; index < parts.size(); index++){
-        if( parts[index]->geom.start == m_existing_part->geom.start )
-            break;
-    }
-
-    if( index >= parts.size() ) // We couldn't find the current part?
-        return;
-
-    prev = index - 1;
-    next = index + 1; 
-
-    while( prev >= 0 ){
-        if( is_logical == (parts[prev]->type & PED_PARTITION_LOGICAL) ){
-            if( (parts[prev]->type & PED_PARTITION_METADATA) || (parts[prev]->type & PED_PARTITION_FREESPACE) ){
-                if( m_max_part_start > parts[prev]->geom.start ){
-                    m_max_part_start = parts[prev]->geom.start;
-                }
-            }
-            else
-                break;
-        }
-        else{
-            break;
-        }
-        prev--;
-    }
-
-    if(is_logical){
-        m_max_part_start += 64;
-    }
-
-    while( next < parts.size() ){
-        if( is_logical == (parts[next]->type & PED_PARTITION_LOGICAL) ){
-            if( (parts[next]->type & PED_PARTITION_METADATA) || (parts[next]->type & PED_PARTITION_FREESPACE) ){
-                if( max_end < parts[next]->geom.end ){
-                    max_end = parts[next]->geom.end;
-                }
-            }
-            else
-                break;
-        }
-        else{
-            break;
-        }
-        next++;
-    }
-
-    if(m_max_part_start < sectors_1MiB)
-        m_max_part_start = sectors_1MiB;
-
-    if(m_max_part_start > m_existing_part->geom.start)
-        m_max_part_start = m_existing_part->geom.start;
-
-    m_max_part_size = 1 + max_end - m_max_part_start;
 }
 
 QGroupBox *PartitionChangeDialog::buildInfoGroup(const long long maxSize)
