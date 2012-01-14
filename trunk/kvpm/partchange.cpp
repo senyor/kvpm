@@ -55,6 +55,10 @@ PartitionChangeDialog::PartitionChangeDialog(StoragePartition *partition, QWidge
 
     const QString fs = m_old_storage_part->getFilesystem();
     const long long existing_offset = m_existing_part->geom.start - m_max_part_start; 
+
+
+    qDebug() << "Start: " << m_existing_part->geom.start << "Max Start: " << m_max_part_start; 
+
     const long long max_offset = m_max_part_size - m_min_shrink_size;
     long long max_size;
 
@@ -82,18 +86,18 @@ PartitionChangeDialog::PartitionChangeDialog(StoragePartition *partition, QWidge
     if( m_old_storage_part->isPhysicalVolume() ){
         if( m_old_storage_part->getPhysicalVolume()->isActive() ){
             max_size -= existing_offset;
-            m_dual_selector = new DualSelectorBox(m_sector_size, 
+            m_dual_selector = new DualSelectorBox(m_sector_size, m_max_part_size,
                                                   m_min_shrink_size, max_size, m_existing_part->geom.length,
                                                   existing_offset, existing_offset, existing_offset);
         }
         else{
-            m_dual_selector = new DualSelectorBox(m_sector_size, 
+            m_dual_selector = new DualSelectorBox(m_sector_size, m_max_part_size,
                                                   m_min_shrink_size, max_size, m_existing_part->geom.length,
                                                   0, max_offset, existing_offset);
         }
     }
     else{
-        m_dual_selector = new DualSelectorBox(m_sector_size, 
+        m_dual_selector = new DualSelectorBox(m_sector_size, m_max_part_size, 
                                               m_min_shrink_size, max_size, m_existing_part->geom.length,
                                               0, max_offset, existing_offset);
     }
