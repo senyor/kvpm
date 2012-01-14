@@ -71,7 +71,6 @@ Q_OBJECT
     bool movePartition();
     void updateGraphicAndLabels();
     bool pedCommitAndWait(PedDisk *const disk);
-    void getMaximumPartition();
     QGroupBox *buildInfoGroup(const long long maxSize);
 
 public:

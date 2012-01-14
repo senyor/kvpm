@@ -115,7 +115,7 @@ PartitionAddDialog::PartitionAddDialog(StoragePartition *partition, QWidget *par
     layout->addSpacing(5);
  
     layout->addWidget( buildInfoGroup() );
-    m_dual_selector = new DualSelectorBox(m_sector_size, 0, m_max_part_size, m_max_part_size, 0, m_max_part_size, 0);
+    m_dual_selector = new DualSelectorBox(m_sector_size, m_max_part_size);
     validateChange();
 
     layout->addWidget(m_dual_selector);

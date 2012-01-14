@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -25,14 +25,19 @@ Q_OBJECT
 
     SizeSelectorBox *m_size_selector;
     SizeSelectorBox *m_offset_selector;
-    long long m_max_size;
+    long long m_space;
+
 
 signals:
     void changed();
 
 public:
-    DualSelectorBox(long long unitSize, long long minSize, long long maxSize, long long initialSize, 
-                    long long minOffset, long long maxOffset, long long initialOffset, QWidget *parent = 0);
+    DualSelectorBox(const long long sectorSize,  const long long totalSpace,
+                    const long long minSize,   const long long maxSize,   const long long initialSize, 
+                    const long long minOffset, const long long maxOffset, const long long initialOffset, 
+                    QWidget *parent = 0);
+
+    DualSelectorBox(const long long sectorSize, const long long totalSpace, QWidget *parent = 0);
 
     long long getCurrentSize();
     long long getCurrentOffset();

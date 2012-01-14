@@ -77,6 +77,7 @@ SizeSelectorBox::SizeSelectorBox(long long unitSize, long long minSize, long lon
     m_size_validator = new QDoubleValidator(m_size_edit);
     m_size_edit->setValidator(m_size_validator);
     m_size_validator->setBottom(0);
+    m_size_box = NULL;
 
     if(m_is_volume){
         setTitle( i18n("Volume Size") );
@@ -154,14 +155,16 @@ SizeSelectorBox::SizeSelectorBox(long long unitSize, long long minSize, long lon
     if( m_min_size == m_max_size ){
         setCurrentSize(m_min_size);
         m_size_box->setChecked(true);
-        setEnabled(false);
+        m_size_box->setEnabled(false);
     }
 }
 
 void SizeSelectorBox::resetToInitial()
 {
-    if( !isEnabled() )
-        return;
+    if( m_size_box != NULL ){
+        if( !m_size_box->isEnabled() )
+            return;
+    }
 
     m_current_size = m_initial_size;
 
@@ -513,8 +516,13 @@ bool SizeSelectorBox::isValid()
     return m_is_valid;
 }
 
-bool SizeSelectorBox::isLocked() // this should include the lock button too
+bool SizeSelectorBox::isLocked()
 {
-    return !isEnabled();
+    if( m_size_box != NULL ){
+        if( m_size_box->isChecked() )
+            return true;
+    }
+
+    return false;
 }
 
