@@ -37,7 +37,6 @@ SizeSelectorBox::SizeSelectorBox(long long unitSize, long long minSize, long lon
     m_is_valid = true;
     m_constrained_max = m_max_size;
     m_constrained_min = m_min_size;
-
     KConfigSkeleton skeleton;
     skeleton.setCurrentGroup("General");
     skeleton.addItemBool("use_si_units", m_use_si_units, false);
@@ -154,8 +153,15 @@ SizeSelectorBox::SizeSelectorBox(long long unitSize, long long minSize, long lon
 
     if( m_min_size == m_max_size ){
         setCurrentSize(m_min_size);
-        m_size_box->setChecked(true);
-        m_size_box->setEnabled(false);
+
+        if(m_is_offset){
+            m_offset_box->setChecked(true);
+            m_offset_box->setEnabled(false);
+        }
+        else{
+            m_size_box->setChecked(true);
+            m_size_box->setEnabled(false);
+        }
     }
 }
 
