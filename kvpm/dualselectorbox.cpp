@@ -31,7 +31,7 @@ DualSelectorBox::DualSelectorBox(const long long sectorSize,  const long long to
 
     const long ONE_MIB = 0x100000 / sectorSize;
 
-    m_size_selector   = new SizeSelectorBox(sectorSize, ONE_MIB, m_space, m_space, false, false, true);
+    m_size_selector   = new SizeSelectorBox(sectorSize, 2 * ONE_MIB, m_space, m_space, false, false, true);
     m_offset_selector = new SizeSelectorBox(sectorSize, 0, m_space - ONE_MIB, 0, false, true);
 
     layout->addWidget(m_size_selector);
@@ -45,9 +45,9 @@ DualSelectorBox::DualSelectorBox(const long long sectorSize,  const long long to
 	    this , SLOT(offsetChanged()));
 }
 
-DualSelectorBox::DualSelectorBox(const long long sectorSize,  const long long totalSpace, 
-                                 const long long minSize,   const long long maxSize,   const long long initialSize, 
-                                 const long long minOffset, const long long maxOffset, const long long initialOffset, 
+DualSelectorBox::DualSelectorBox(const long long sectorSize, const long long totalSpace, 
+                                 const long long minSize,    const long long maxSize,   const long long initialSize, 
+                                 const long long minOffset,  const long long maxOffset, const long long initialOffset, 
                                  QWidget *parent) 
     : QWidget(parent), m_space(totalSpace)
 {
