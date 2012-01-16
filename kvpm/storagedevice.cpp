@@ -69,8 +69,8 @@ StorageDevice::StorageDevice( PedDevice *const pedDevice,
 	    length = geometry.length * m_sector_size;
 	    part_type = part->type;
 
-            // ignore freespace less than 2 megs
-            if( !( (part_type & PED_PARTITION_METADATA) || (  (part_type & PED_PARTITION_FREESPACE) && (length < (0x200000))))){
+            // ignore freespace less than 3 megs
+            if( !( (part_type & PED_PARTITION_METADATA) || (  (part_type & PED_PARTITION_FREESPACE) && (length < (0x300000))))){
 	        if( part_type & PED_PARTITION_FREESPACE )
 		    m_freespace_count++;
 
