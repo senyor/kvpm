@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2009, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2009, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -33,8 +33,6 @@ class DualSelectorBox;
 class StoragePartition;
 
 
-bool add_partition(StoragePartition *partition);
-
 
 class PartitionAddDialog : public KDialog
 {
@@ -42,10 +40,9 @@ Q_OBJECT
 
     StoragePartition *m_partition;    
     PedConstraint    *m_ped_constraints;
-    PedDisk          *m_ped_disk;
     DualSelectorBox  *m_dual_selector;
 
-    bool m_use_si_units;
+    bool m_use_si_units, m_bailout;
 
     PedSector m_max_part_start,   // first available sector of free space
               m_max_part_end,     // last available sector of free space 
@@ -63,12 +60,14 @@ Q_OBJECT
 
     void updatePartition();
     long long convertSizeToSectors(int index, double size);
-    void getMaximumPartition();
+    void getMaximumPartition(PedSector &start, PedSector &end, PedSector &sectorSize);
     QGroupBox *buildInfoGroup();
     KComboBox *buildTypeCombo();
+    bool hasInitialErrors();
 
 public:
-    explicit PartitionAddDialog(StoragePartition *partition, QWidget *parent = 0);
+    explicit PartitionAddDialog(StoragePartition *const partition, QWidget *parent = 0);
+    bool bailout();
 
 private slots:
     void commitPartition();

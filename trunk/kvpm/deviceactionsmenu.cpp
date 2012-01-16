@@ -295,8 +295,13 @@ void DeviceActionsMenu::removePartition()
 
 void DeviceActionsMenu::addPartition()
 {
-    if( add_partition(m_part) )
-	MainWindow->reRun();
+    PartitionAddDialog dialog(m_part);
+
+    if( !dialog.bailout() ){
+        dialog.exec();
+        if(dialog.result() == QDialog::Accepted)
+            MainWindow->reRun();
+    }
 }
 
 void DeviceActionsMenu::changePartition()
