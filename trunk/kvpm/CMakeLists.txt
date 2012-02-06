@@ -26,3 +26,5 @@ INSTALL( TARGETS kvpm DESTINATION ${BIN_INSTALL_DIR} )
 
 set_target_properties(kvpm PROPERTIES COMPILE_FLAGS "-std=gnu++98")
 
+
+SET(CMAKE_CXX_FLAGS_DEBUG "-ggdb")
