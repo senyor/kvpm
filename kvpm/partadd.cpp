@@ -249,7 +249,6 @@ void PartitionAddDialog::getMaximumPartition(PedSector &start, PedSector &end, P
 
     PedConstraint *constraint = ped_constraint_any(device);
     ped_disk_add_partition(disk, part, constraint);
-    ped_constraint_destroy(constraint);
 
     start = part->geom.start;
     end = part->geom.length + start - 1;
@@ -261,6 +260,7 @@ void PartitionAddDialog::getMaximumPartition(PedSector &start, PedSector &end, P
     PedGeometry *max_geometry = ped_disk_get_max_partition_geometry(disk, part, constraint);
     start = max_geometry->start;
     end = max_geometry->length + max_geometry->start - 1;
+    ped_constraint_destroy(constraint);
 
     PedAlignment *const start_align  = ped_alignment_new( 0, ONE_MIB);
     PedAlignment *const end_align    = ped_alignment_new(-1, ONE_MIB);

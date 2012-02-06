@@ -75,6 +75,7 @@ Q_OBJECT
 
 public:
     explicit PartitionChangeDialog(StoragePartition *const partition, QWidget *parent = 0);
+    void getMaximumPartition(PedSector &start, PedSector &end, PedSector &sectorSize);
     bool bailout();
 
 private slots:
