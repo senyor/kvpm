@@ -448,26 +448,38 @@ bool PartitionChangeDialog::growPartition()
     PedSector min_new_size, 
               max_new_size;  // max desired size
 
-    if( m_dual_selector->getCurrentSize() <= current_size )
+    PedSector proposed_new_size = m_dual_selector->getCurrentSize();
+
+    if( proposed_new_size - 1 + current_start > max_end )
+        proposed_new_size = 1 + max_end - current_start;
+
+    if( proposed_new_size <= current_size )
         return true;
-    else if( m_dual_selector->getCurrentSize() <= ( current_size + ( 2 * ONE_MIB ) ) ){
-        max_new_size = 1 + max_end - current_start;
-        min_new_size = current_size;
+
+    if( proposed_new_size < current_size + ONE_MIB ){
+        if( current_start + ONE_MIB <= max_end){
+            max_new_size = current_size + ONE_MIB;
+            min_new_size = current_size;
+        }
+        else{
+            max_new_size = max_end - current_start + 1;
+            min_new_size = current_size;
+        }
     }
-    else if( m_dual_selector->getCurrentSize() + current_start > max_end ){
+    else if( proposed_new_size + ONE_MIB >= 1 + max_end - current_start ){
         max_new_size = 1 + max_end - current_start;
         min_new_size = max_new_size - ONE_MIB;
     }
     else{
-        max_new_size = m_dual_selector->getCurrentSize();
-        min_new_size = max_new_size - ONE_MIB;
+        max_new_size = proposed_new_size + ONE_MIB;
+        min_new_size = proposed_new_size;
     }
 
     qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
     qApp->setOverrideCursor(Qt::WaitCursor);
 
     PedGeometry *start_range = ped_geometry_new(device, current_start, 1);
-    PedGeometry *end_range   = ped_geometry_new(device, current_start + min_new_size - 1, ONE_MIB);
+    PedGeometry *end_range   = ped_geometry_new(device, current_start, max_new_size);
 
     PedConstraint *constraint = ped_constraint_new( ped_alignment_new(0, 1), ped_alignment_new(-1, ONE_MIB),    
                                                     start_range, end_range,
@@ -584,10 +596,10 @@ bool PartitionChangeDialog::movePartition()
     }
     else {                                 // moving right
 
-        if( ( max_end - (current_start + current_size - 1) ) < ONE_MIB )  
+        if( ( max_end - (current_start + current_size - 1) ) < ONE_MIB )
             return false;
-        else if( ( new_start + current_size - 1 )  > ( max_end - ONE_MIB / 2 ) )  
-            new_start = 1 + max_end - ( ( ONE_MIB / 2) + current_size );
+        else if( ( new_start + current_size - 1 ) > ( max_end - ONE_MIB / 2 ) )
+            new_start = 2 + max_end - ( ( ONE_MIB / 2 ) + current_size );
     }
 
     qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
