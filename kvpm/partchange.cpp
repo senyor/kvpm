@@ -345,7 +345,6 @@ bool PartitionChangeDialog::movefs(long long from_start, long long to_start, lon
     return true;
 }
 
-
 bool PartitionChangeDialog::shrinkPartition()
 {
     hide();
@@ -471,7 +470,7 @@ bool PartitionChangeDialog::growPartition()
         min_new_size = max_new_size - ONE_MIB;
     }
     else{
-        max_new_size = proposed_new_size + ONE_MIB;
+        max_new_size = proposed_new_size + ONE_MIB - 1;
         min_new_size = proposed_new_size;
     }
 
