@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2009, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -37,15 +37,23 @@ StoragePartition::StoragePartition(PedPartition *const part,
     PedDevice *const ped_device = ped_disk->dev;
     PedGeometry ped_geometry = m_ped_partition->geom;
     const long long sector_size      = ped_device->sector_size;
-    m_first_sector   = (ped_geometry).start;
-    m_last_sector    = (ped_geometry).end;
-    m_partition_size = (ped_geometry.length) * sector_size; // in bytes
-    m_ped_type = m_ped_partition->type;
-    m_is_writable = !ped_device->read_only;
+    m_true_first_sector = ped_geometry.start;
+    m_first_sector   = ped_geometry.start;
+    m_last_sector    = ped_geometry.end;
+    m_partition_size = ped_geometry.length * sector_size; // in bytes
+    m_ped_type       = m_ped_partition->type;
+    m_is_writable    = !ped_device->read_only;
     m_is_pv      = false;
     m_is_normal  = false;
     m_is_logical = false;
+    m_is_freespace = false;
     m_pv = NULL;
+
+    if( m_ped_type & PED_PARTITION_FREESPACE ){
+        getMaximumFreespace(m_first_sector, m_last_sector);
+        m_partition_size = (m_last_sector - m_first_sector + 1) * sector_size;
+        m_is_freespace = true;
+    }
 
     if( m_ped_type == PED_PARTITION_NORMAL ){
       m_partition_type = "normal";
@@ -221,12 +229,17 @@ long long StoragePartition::getSize()
     return m_partition_size;
 }
 
-long long StoragePartition::getFirstSector()
+PedSector StoragePartition::getFirstSector()
 {
     return m_first_sector;
 }
 
-long long StoragePartition::getLastSector()
+PedSector StoragePartition::getTrueFirstSector()
+{
+    return m_true_first_sector;
+}
+
+PedSector StoragePartition::getLastSector()
 {
     return m_last_sector;
 }
@@ -310,6 +323,11 @@ bool StoragePartition::isMountable()
     return m_is_mountable;
 }
 
+bool StoragePartition::isFreespace()
+{
+    return m_is_freespace;
+}
+
 bool StoragePartition::isPhysicalVolume()
 {
     return m_is_pv;
@@ -344,4 +362,65 @@ QList<MountEntry *> StoragePartition::getMountEntries()
 QStringList StoragePartition::getFlags()
 {
     return m_flags;
+}
+
+void StoragePartition::getMaximumFreespace(PedSector &start, PedSector &end)
+{
+    PedPartition *const free_space = m_ped_partition;
+    PedDevice *const device = free_space->disk->dev;
+    PedDisk   *const disk = ped_disk_new(device);
+    const long long sectorSize = device->sector_size;
+    const PedSector ONE_MIB = 0x100000 / sectorSize;   // sectors per megabyte
+
+    start = free_space->geom.start;
+    end = free_space->geom.length + start - 1;
+    PedPartition *part;
+
+    if( (end - start) < (ONE_MIB * 2) )  // ignore partitions less than 2 MiB, alignment may fail.
+        return;
+
+    if( free_space->type & PED_PARTITION_LOGICAL )
+        part = ped_partition_new(disk, PED_PARTITION_LOGICAL, NULL, start, end);
+    else
+        part = ped_partition_new(disk, PED_PARTITION_NORMAL, NULL, start, end); 
+
+    start = part->geom.start;
+    end = part->geom.length + start - 1;
+
+    PedConstraint *constraint = ped_constraint_any(device);
+    ped_disk_add_partition(disk, part, constraint);
+
+    start = part->geom.start;
+    end = part->geom.length + start - 1;
+
+    PedDiskFlag cylinder_flag = ped_disk_flag_get_by_name("cylinder_alignment");
+    if( ped_disk_is_flag_available(disk, cylinder_flag) )
+        ped_disk_set_flag(disk, cylinder_flag, 0);
+
+    PedGeometry *max_geometry = ped_disk_get_max_partition_geometry(disk, part, constraint);
+    start = max_geometry->start;
+    end = max_geometry->length + max_geometry->start - 1;
+    ped_constraint_destroy(constraint);
+
+    PedAlignment *const start_align  = ped_alignment_new( 0, ONE_MIB);
+    PedAlignment *const end_align    = ped_alignment_new(-1, ONE_MIB);
+    PedGeometry  *const start_range  = ped_geometry_new(device, start, max_geometry->length);
+    PedGeometry  *const end_range    = ped_geometry_new(device, start, max_geometry->length);
+
+    constraint = ped_constraint_new(start_align, end_align,
+                                    start_range, end_range,
+                                    1, max_geometry->length);
+
+    ped_geometry_destroy(max_geometry);
+    max_geometry = ped_disk_get_max_partition_geometry(disk, part, constraint);
+    start = max_geometry->start;
+    end = max_geometry->length + max_geometry->start - 1;
+
+    ped_disk_remove_partition(disk, part);
+    ped_partition_destroy(part);
+    ped_constraint_destroy(constraint);
+    ped_geometry_destroy(max_geometry);
+    ped_disk_destroy(disk);
+
+    return;
 }
