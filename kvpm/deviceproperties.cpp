@@ -91,10 +91,16 @@ QFrame *DeviceProperties::generalFrame(StoragePartition *const partition)
     QLabel *const name_label =  new QLabel( QString("<b>%1</b>").arg( partition->getName() ) );
     name_label->setAlignment( Qt::AlignCenter );
     layout->addWidget(name_label);
-    layout->addWidget( new QLabel( i18n("First sector: %1", partition->getFirstSector() ) ) );
+
+    layout->addWidget( new QLabel( i18n("First sector: %1", partition->getTrueFirstSector() ) ) );
+
+    if( partition->isFreespace() ){
+        layout->addWidget( new QLabel( i18n("First aligned: %1 (to 1 MiB)", partition->getFirstSector() ) ) );
+    }
+
     layout->addWidget( new QLabel( i18n("Last sector: %1", partition->getLastSector() ) ) );
 
-    if(partition->getType() == "logical" || partition->getType() == "normal"){
+    if( partition->isNormal() || partition->isLogical() ){
         layout->addWidget( new QLabel() );
         const QStringList flags = partition->getFlags();
         layout->addWidget( new QLabel( i18n("Flags: %1", flags.join(", ") ) ) );
