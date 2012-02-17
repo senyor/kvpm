@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -38,9 +38,10 @@ class StoragePartition
     QString m_fs_uuid;
     QString m_fs_label;
     QStringList m_flags;
-    long long m_partition_size;
-    long long m_first_sector;
-    long long m_last_sector;
+    long long m_partition_size; // Partition size and first sector for *freespace* are aligned
+    PedSector m_first_sector;   // within the space to 1 MiB and may be different than libparted reports.
+    PedSector m_last_sector;    // Last sector is not aligned and will be the same as libarted
+    PedSector m_true_first_sector;   // unaligned first sector
     long long m_fs_size;
     long long m_fs_used;
     int m_major;            // block dev numbers
@@ -53,7 +54,10 @@ class StoragePartition
     bool m_is_mountable;
     bool m_is_normal;
     bool m_is_logical;
+    bool m_is_freespace;
     
+    void getMaximumFreespace(PedSector &start, PedSector &end);
+
 public: 
     StoragePartition(PedPartition *const part, 
                      const int freespaceCount, 
@@ -75,8 +79,9 @@ public:
     QList<MountEntry *> getMountEntries();  // These need to be deleted by the calling function!
     QStringList getFlags();
     long long getSize();
-    long long getFirstSector();
-    long long getLastSector();
+    PedSector getFirstSector();
+    PedSector getTrueFirstSector();
+    PedSector getLastSector();
     long long getFilesystemSize();
     long long getFilesystemUsed();
     long long getFilesystemRemaining();
@@ -91,6 +96,7 @@ public:
     bool isMountable();
     bool isNormal();
     bool isLogical();
+    bool isFreespace();
 };
 
 #endif
