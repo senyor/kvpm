@@ -1,8 +1,13 @@
+version 0.8.5
+It is now possible to cancel a running mkfs process and some other long
+running process should follow soon. Sizes may now be specified in traditional
+powers of two (1KiB = 1024) or in powers of ten (1KB = 1000) SI units.
+
 version 0.8.4
 Added to, and improved, the configuration dialog. Property panels can now
 be configured. Changed the detection of mounted filesystems to use
 /proc/self/mountinfo rather than the depracated /etc/mtab file. Fixed
-a bug that deleted symlinked mtab and replaced it with a real file.
+a bug that deleted symlinked /etc/mtab and replaced it with a real file.
 
 version 0.8.3
 Added new configuration options and made showing some panels optional.
