@@ -46,18 +46,18 @@ Q_OBJECT
     QRegExpValidator *m_validator;
     VolGroup *m_vg;
 
-    QWidget *buildLVLists(const QStringList mobileLVNames, const QStringList immobileLVNames);
-    QWidget *buildPVLists(const QStringList mobilePVNames, const QStringList immobilePVNames);
+    QWidget *buildLvLists(const QStringList mobileLvNames, const QStringList immobileLvNames);
+    QWidget *buildPvLists(const QStringList mobilePvNames, const QStringList immobilePvNames);
 
-    void volumeMobility(QStringList &mobileLVNames, QStringList &immobileLVNames, 
-                        QStringList &mobilePVNames, QStringList &immobilePVNames);
+    void volumeMobility(QStringList &mobileLvNames, QStringList &immobileLvNames, 
+                        QStringList &mobilePvNames, QStringList &immobilePvNames);
 
     void pvState(QStringList &open, QStringList &closed );
 
     void movesWithVolume(const bool isLV, const QString name, 
-                         QStringList &movingPVNames, QStringList &movingLVNames);
+                         QStringList &movingPvNames, QStringList &movingLvNames);
 
-    void moveNames(const bool isLVMove, 
+    void moveNames(const bool isLvMove, 
                    KListWidget *const lvSource, KListWidget *const lvTarget, 
                    KListWidget *const pvSource, KListWidget *const pvTarget);
 
@@ -66,12 +66,12 @@ Q_OBJECT
     QStringList arguments();    
 
  private slots:
-    void enableLVArrows();
-    void enablePVArrows();
-    void addPVList();
-    void removePVList();
-    void addLVList();
-    void removeLVList();
+    void enableLvArrows();
+    void enablePvArrows();
+    void addPvList();
+    void removePvList();
+    void addLvList();
+    void removeLvList();
     void validateOK();
     void deactivate();     // active lvs must be deactivated before moving
 
