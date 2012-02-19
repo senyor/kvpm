@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -88,10 +88,10 @@ VGSplitDialog::VGSplitDialog(VolGroup *volumeGroup, QWidget *parent) : KDialog(p
     volumeMobility( mobile_lv_names, immobile_lv_names, mobile_pv_names, immobile_pv_names);
 
     tw->addTab( buildLVLists(mobile_lv_names, immobile_lv_names), i18n("Logical volume view") );
-    tw->addTab( buildPVLists(mobile_pv_names, immobile_pv_names), i18n("Physical volume view") );
+    tw->addTab( buildPvLists(mobile_pv_names, immobile_pv_names), i18n("Physical volume view") );
 
     enableLVArrows();
-    enablePVArrows();
+    enablePvArrows();
 
     validateOK();
     setMinimumWidth(400);
@@ -146,7 +146,7 @@ void VGSplitDialog::deactivate()
     for(int x = m_right_lv_list->count() - 1; x >= 0; x--)        
         moving_lvs << m_right_lv_list->item(x)->data(Qt::DisplayRole).toString();
 
-    if( (vg_dm = lvm_vg_open(lvm, vg_name.data(), "w", NULL)) ){
+    if( (vg_dm = lvm_vg_open(lvm, vg_name.data(), "w", 0x0)) ){
 
         for(int x = 0; x < moving_lvs.size(); x++){
             lv_dm_list = lvm_vg_list_lvs(vg_dm);
@@ -236,7 +236,7 @@ QWidget *VGSplitDialog::buildLVLists(const QStringList mobileLVNames, const QStr
     return lv_list;
 }
 
-QWidget *VGSplitDialog::buildPVLists(const QStringList mobilePVNames, const QStringList immobilePVNames)
+QWidget *VGSplitDialog::buildPvLists(const QStringList mobilePVNames, const QStringList immobilePVNames)
 {
     QWidget *pv_list = new QWidget();
     QHBoxLayout *layout = new QHBoxLayout;
@@ -292,16 +292,16 @@ QWidget *VGSplitDialog::buildPVLists(const QStringList mobilePVNames, const QStr
     pv_list->setLayout(layout);
 
     connect(m_left_pv_list, SIGNAL(itemSelectionChanged()), 
-            this, SLOT(enablePVArrows()));
+            this, SLOT(enablePvArrows()));
 
     connect(m_right_pv_list, SIGNAL(itemSelectionChanged()), 
-            this, SLOT(enablePVArrows()));
+            this, SLOT(enablePvArrows()));
 
     connect(m_pv_add, SIGNAL(clicked()), 
-            this, SLOT(addPVList()));
+            this, SLOT(addPvList()));
 
     connect(m_pv_remove, SIGNAL(clicked()), 
-            this, SLOT(removePVList()));
+            this, SLOT(removePvList()));
 
     return pv_list;
 }
@@ -319,7 +319,7 @@ void VGSplitDialog::enableLVArrows()
         m_lv_remove->setEnabled(false);
 }
 
-void VGSplitDialog::enablePVArrows()
+void VGSplitDialog::enablePvArrows()
 {
     if( m_left_pv_list->selectedItems().size() )
         m_pv_add->setEnabled(true);
@@ -342,12 +342,12 @@ void VGSplitDialog::removeLVList()
     moveNames(true, m_right_lv_list, m_left_lv_list, m_right_pv_list, m_left_pv_list);
 }
 
-void VGSplitDialog::addPVList()
+void VGSplitDialog::addPvList()
 {
     moveNames(false, m_left_lv_list, m_right_lv_list, m_left_pv_list, m_right_pv_list);
 }
 
-void VGSplitDialog::removePVList()
+void VGSplitDialog::removePvList()
 {
     moveNames(false, m_right_lv_list, m_left_lv_list, m_right_pv_list, m_left_pv_list);
 }
