@@ -33,14 +33,13 @@ StoragePartition::StoragePartition(PedPartition *const part,
                                    MountTables *const mountTables) :
     m_ped_partition (part)
 {
-    PedDisk   *const ped_disk   = m_ped_partition->disk;
-    PedDevice *const ped_device = ped_disk->dev;
-    PedGeometry ped_geometry    = m_ped_partition->geom;
-    const long long sector_size = ped_device->sector_size;
-    m_true_first_sector = ped_geometry.start;
-    m_first_sector   = ped_geometry.start;
-    m_last_sector    = ped_geometry.end;
-    m_partition_size = ped_geometry.length * sector_size; // in bytes
+    PedDevice *const ped_device = m_ped_partition->disk->dev;
+    PedGeometry const geometry  = m_ped_partition->geom;
+    long long const sector_size = ped_device->sector_size;
+    m_true_first_sector = geometry.start;
+    m_first_sector   = geometry.start;
+    m_last_sector    = geometry.end;
+    m_partition_size = geometry.length * sector_size; // in bytes
     m_ped_type       = m_ped_partition->type;
     m_is_writable    = !ped_device->read_only;
     m_is_pv      = false;
@@ -372,11 +371,10 @@ PedSector StoragePartition::getAlignedStart()
 {
     PedPartition *const free_space = m_ped_partition;
     PedDevice *const device = free_space->disk->dev;
-    const long long sectorSize = device->sector_size;
-    const PedSector ONE_MIB = 0x100000 / sectorSize;   // sectors per megabyte
+    const PedSector ONE_MIB = 0x100000 / device->sector_size;   // sectors per megabyte
 
     PedSector start = free_space->geom.start;
-    PedSector end = free_space->geom.length + start - 1;
+    PedSector const end = free_space->geom.length + start - 1;
 
     if( (end - start) < (ONE_MIB * 2) )  // ignore partitions less than 2 MiB, alignment may fail.
         return start;
@@ -393,7 +391,6 @@ PedSector StoragePartition::getAlignedStart()
     PedGeometry *const aligned_geometry = ped_constraint_solve_max(constraint);
 
     start = aligned_geometry->start;
-    end = aligned_geometry->length + aligned_geometry->start - 1;
 
     ped_constraint_destroy(constraint);
     ped_geometry_destroy(aligned_geometry);
