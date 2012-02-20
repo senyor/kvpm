@@ -56,7 +56,8 @@ class StoragePartition
     bool m_is_logical;
     bool m_is_freespace;
     
-    void getMaximumFreespace(PedSector &start, PedSector &end);
+    PedSector getAlignedStart();
+    PedSector getFreespaceEnd();
 
 public: 
     StoragePartition(PedPartition *const part, 
