@@ -61,23 +61,27 @@ StorageDevice::StorageDevice( PedDevice *const pedDevice,
     }
 
     disk = ped_disk_new(pedDevice);
+
     if( disk && !m_is_pv ){
-	m_disk_label = QString( (disk->type)->name );
+
+        PedDiskFlag cylinder_flag = ped_disk_flag_get_by_name("cylinder_alignment");
+        if( ped_disk_is_flag_available(disk, cylinder_flag) ){
+            ped_disk_set_flag(disk, cylinder_flag, 0);
+        }
+
+	m_disk_label = QString( disk->type->name );
 	while( (part = ped_disk_next_partition (disk, part)) ){
 
-	    geometry  = part->geom;
+	    geometry = part->geom;
 	    length = geometry.length * m_sector_size;
 	    part_type = part->type;
 
             // ignore freespace less than 3 megs
             if( !( (part_type & PED_PARTITION_METADATA) || (  (part_type & PED_PARTITION_FREESPACE) && (length < (0x300000))))){
-	        if( part_type & PED_PARTITION_FREESPACE )
+                if( part_type & PED_PARTITION_FREESPACE )
 		    m_freespace_count++;
 
-		m_storage_partitions.append(new StoragePartition( part,
-								  m_freespace_count,
-								  pvList, 
-								  mountTables ));
+		m_storage_partitions.append(new StoragePartition(part, m_freespace_count, pvList, mountTables));
 	    }
 	}
     }
