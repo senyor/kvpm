@@ -456,7 +456,7 @@ KMenu *TopWindow::buildHelpMenu()
                                                          "Mark James http://www.famfamfam.com/lab/icons/silk/\n"
                                                          "under the Creative Commons Attribution 2.5 License"),
                                                    KAboutData::License_GPL_V3, 
-                                                   ki18n("(c) 2008, 2009, 2010, 2011 Benjamin Scott"),
+                                                   ki18n("(c) 2008, 2009, 2010, 2011, 2012 Benjamin Scott"),
                                                    ki18n(" "),
                                                    QByteArray("http://sourceforge.net/projects/kvpm/"),
                                                    QByteArray("benscott@nwlink.com") );
