@@ -6,3 +6,4 @@ Exec=kvpm
 X-KDE-SubstituteUID=true
 Type=Application
 Categories=System;KDE;
+Icon=kvpm
