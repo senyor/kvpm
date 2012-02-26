@@ -39,18 +39,20 @@
 
 QList<VolGroup *> MasterList::m_volume_groups = QList<VolGroup *>();
 QList<StorageDevice *> MasterList::m_storage_devices = QList<StorageDevice *>();
-lvm_t MasterList::m_lvm = lvm_init(NULL);
+lvm_t MasterList::m_lvm = NULL;
 
 
 MasterList::MasterList() : QObject()
 {
+    m_lvm = lvm_init(NULL);
     ped_exception_set_handler(my_handler);
     m_mount_tables = new MountTables();
 }
 
 MasterList::~MasterList()
 {
-    lvm_quit(m_lvm);
+    if(m_lvm)
+        lvm_quit(m_lvm);
 }
 
 void MasterList::rescan()
