@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -23,14 +23,15 @@
 
 
 SizeSelectorBox::SizeSelectorBox(long long unitSize, long long minSize, long long maxSize, long long initialSize,
-                                 bool isVolume, bool isOffset, bool isNew, QWidget *parent) : 
+                                 bool isVolume, bool isOffset, bool isNew, bool startLocked, QWidget *parent) : 
     QGroupBox(parent),
     m_max_size(maxSize),
     m_min_size(minSize),
     m_unit_size(unitSize),
     m_is_volume(isVolume),
     m_is_offset(isOffset),
-    m_is_new(isNew)
+    m_is_new(isNew),
+    m_start_locked(startLocked)
 {
     m_initial_size = initialSize;
     m_current_size = initialSize;
@@ -93,7 +94,6 @@ SizeSelectorBox::SizeSelectorBox(long long unitSize, long long minSize, long lon
     else if(m_is_offset){
         setTitle( i18n("Partition Start") );
         m_offset_box = new QCheckBox( i18n("Lock partition start") );
-        m_offset_box->setChecked(false);
         setConstraints(false);
         layout->addWidget(m_offset_box);
 
@@ -103,7 +103,6 @@ SizeSelectorBox::SizeSelectorBox(long long unitSize, long long minSize, long lon
     else{
         setTitle( i18n("Partition Size") );
         m_size_box = new QCheckBox( i18n("Lock selected size") );
-        m_size_box->setChecked(false);
         layout->addWidget(m_size_box);
 
         connect(m_size_box, SIGNAL(toggled(bool)),
@@ -180,10 +179,12 @@ void SizeSelectorBox::resetToInitial()
         }
     }
     else if(m_is_offset){
-        m_offset_box->setChecked(false);
+        lock(m_start_locked);
+        m_offset_box->setChecked(m_start_locked);
     }
     else{
-        m_size_box->setChecked(false);
+        lock(m_start_locked);
+        m_size_box->setChecked(m_start_locked);
 
         if( !m_is_new ){
             m_shrink_box->setChecked(false);
@@ -292,8 +293,15 @@ void SizeSelectorBox::setConstraints(bool lock)
             updateEdit();
         }
         
-        m_constrained_max = m_current_size;
-        m_constrained_min = m_current_size;
+        if(m_is_offset){
+            m_constrained_min = m_min_size;
+            m_constrained_max = m_max_size;
+        }
+        else{
+            m_constrained_min = m_current_size;
+            m_constrained_max = m_current_size;
+        }
+
         m_size_edit->setEnabled(false);
         m_size_slider->setEnabled(false);
         m_suffix_combo->setEnabled(false);
@@ -524,11 +532,10 @@ bool SizeSelectorBox::isValid()
 
 bool SizeSelectorBox::isLocked()
 {
-    if( m_size_box != NULL ){
-        if( m_size_box->isChecked() )
-            return true;
-    }
-
-    return false;
+    if(m_is_offset){
+        return m_offset_box->isChecked();
+    } 
+    else
+        return m_size_box->isChecked(); 
 }
 

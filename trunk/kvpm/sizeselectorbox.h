@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -46,6 +46,7 @@ Q_OBJECT
     bool m_is_volume;    // Is it a volume or a partition?
     bool m_is_offset;    // Are we selecting the starting point offset of a partition?
     bool m_is_new;       // New volume/partition, not resizing old one?
+    bool m_start_locked; // Start out with the size check box checked
     bool m_is_valid;     // Valid data?
     bool m_use_si_units;
 
@@ -59,7 +60,7 @@ signals:
 
 public:
     SizeSelectorBox(long long unitSize, long long minSize, long long maxSize, long long initialSize, 
-                    bool isVolume, bool isOffset, bool isNew = false, QWidget *parent = 0);
+                    bool isVolume, bool isOffset, bool isNew = false, bool startLocked = false, QWidget *parent = 0);
 
     long long getCurrentSize();
     long long getMinimumSize();
