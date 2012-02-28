@@ -62,10 +62,14 @@ SizeSelectorBox::SizeSelectorBox(long long unitSize, long long minSize, long lon
         m_suffix_combo->insertItem(2,"TiB");
     }
 
-    if(m_is_volume)
+    if(m_is_volume){
         m_suffix_combo->insertItem(0, i18n("Extents"));
+        m_suffix_combo->setCurrentIndex(2);
+    }
+    else{
+        m_suffix_combo->setCurrentIndex(1);
+    }
     m_suffix_combo->setInsertPolicy(KComboBox::NoInsert);
-    m_suffix_combo->setCurrentIndex(1);
 
     if(m_is_new){
         if( !m_is_offset )
