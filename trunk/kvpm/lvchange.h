@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -77,6 +77,7 @@ public:
 private slots:
     void commitChanges();
     void resetOkButton();
+    void refreshAndAvailableCheck();
     
 };
 

@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -82,6 +82,9 @@ LVChangeDialog::LVChangeDialog(LogVol *const volume, QWidget *parent) :
     connect(m_nopoll_button,     SIGNAL(clicked()), this, SLOT(resetOkButton()));
     connect(m_devnum_box,        SIGNAL(clicked()), this, SLOT(resetOkButton()));
     connect(m_udevsync_box,      SIGNAL(clicked()), this, SLOT(resetOkButton()));
+
+    connect(m_available_check, SIGNAL(stateChanged(int)), this ,SLOT(refreshAndAvailableCheck()));
+    connect(m_refresh_check, SIGNAL(stateChanged(int)), this ,SLOT(refreshAndAvailableCheck()));
 
     connect(this, SIGNAL(okClicked()), this, SLOT(commitChanges()));
 
@@ -387,4 +390,30 @@ void LVChangeDialog::resetOkButton(){
     else
         enableButtonOk(false);
 }
+
+
+// metadata refresh and availability change can't happen at the same time
+
+void LVChangeDialog::refreshAndAvailableCheck()
+{
+    if( !m_lv->isMounted() && !m_lv->isSnap() ){    
+
+        if( m_lv->isActive() == m_available_check->isChecked() ){
+            m_refresh_check->setEnabled(true);
+        }
+        else{
+            m_refresh_check->setEnabled(false);
+            m_refresh_check->setChecked(false);
+        }
+
+        if( m_refresh_check->isChecked() ){
+            m_available_check->setChecked( m_lv->isActive() );
+            m_available_check->setEnabled(false);
+        }
+        else{
+            m_available_check->setEnabled(true);
+        }
+    }
+}
+
 
