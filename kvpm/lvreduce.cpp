@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -60,7 +60,7 @@ LVReduceDialog::LVReduceDialog(LogVol *const volume, QWidget *parent)
 	else
             m_bailout = true;
     }
-    else if( m_lv->isMounted() ){
+    else if( m_lv->isMounted() && !m_lv->isSnap() ){
         KMessageBox::error(0, i18n("The filesystem must be unmounted first") );
         m_bailout = true;
     }
