@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008 ,2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -41,6 +41,7 @@ Q_OBJECT
      
  private slots:
     void doShrink();
+    void resetOkButton();
  
 };
 

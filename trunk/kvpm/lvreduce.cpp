@@ -38,6 +38,7 @@ LVReduceDialog::LVReduceDialog(LogVol *const volume, QWidget *parent)
     setMainWidget(dialog_body);
     QVBoxLayout *layout = new QVBoxLayout();
     dialog_body->setLayout(layout);
+    setDefaultButton(KDialog::Cancel);  
 
     const long long extent_size = m_vg->getExtentSize();
     const long long current_lv_extents = m_lv->getExtents();
@@ -90,7 +91,7 @@ LVReduceDialog::LVReduceDialog(LogVol *const volume, QWidget *parent)
 
     if(!m_bailout){                
 
-        QLabel *lv_name_label  = new QLabel( i18n("<b>Volume: %1</b>", m_lv->getName() ));
+        QLabel *lv_name_label  = new QLabel( i18n("<b>Reducing Volume: %1</b>", m_lv->getName() ));
         lv_name_label->setAlignment(Qt::AlignCenter);
         
         m_size_selector = new SizeSelectorBox(extent_size, min_lv_extents, current_lv_extents, current_lv_extents, true, false, true);
@@ -100,6 +101,9 @@ LVReduceDialog::LVReduceDialog(LogVol *const volume, QWidget *parent)
         
         connect(this, SIGNAL(okClicked()),
                 this, SLOT(doShrink()));
+
+        connect(m_size_selector, SIGNAL(stateChanged()),
+                this , SLOT(resetOkButton()));
     }
 }
 
@@ -133,4 +137,9 @@ void LVReduceDialog::doShrink()
 
         ProcessProgress reduce_lv(lv_arguments);
     }
+}
+
+void LVReduceDialog::resetOkButton()
+{
+    enableButtonOk( m_size_selector->isValid() );
 }
