@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-02-20 16:56-0800\n"
+"POT-Creation-Date: 2012-02-28 15:09-0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -30,7 +30,7 @@ msgstr ""
 msgid "Physical layout"
 msgstr ""
 
-#: changemirror.cpp:63 lvreduce.cpp:93
+#: changemirror.cpp:63
 msgid "<b>Volume: %1</b>"
 msgstr ""
 
@@ -66,27 +66,27 @@ msgstr ""
 msgid "Allocation policy"
 msgstr ""
 
-#: changemirror.cpp:136 lvchange.cpp:148 lvcreate.cpp:244 pvmove.cpp:293
+#: changemirror.cpp:136 lvchange.cpp:151 lvcreate.cpp:244 pvmove.cpp:293
 #: vgchange.cpp:69
 msgctxt "The usual way"
 msgid "Normal"
 msgstr ""
 
-#: changemirror.cpp:137 lvchange.cpp:149 lvcreate.cpp:245 pvmove.cpp:294
+#: changemirror.cpp:137 lvchange.cpp:152 lvcreate.cpp:245 pvmove.cpp:294
 #: vgchange.cpp:70
 msgid "Contiguous"
 msgstr ""
 
-#: changemirror.cpp:138 lvchange.cpp:150 lvcreate.cpp:246 pvmove.cpp:295
+#: changemirror.cpp:138 lvchange.cpp:153 lvcreate.cpp:246 pvmove.cpp:295
 msgid "Anywhere"
 msgstr ""
 
-#: changemirror.cpp:139 lvchange.cpp:152 lvcreate.cpp:247
+#: changemirror.cpp:139 lvchange.cpp:155 lvcreate.cpp:247
 msgctxt "Inherited from the parent group"
 msgid "Inherited"
 msgstr ""
 
-#: changemirror.cpp:140 lvchange.cpp:151 lvcreate.cpp:248 pvmove.cpp:298
+#: changemirror.cpp:140 lvchange.cpp:154 lvcreate.cpp:248 pvmove.cpp:298
 #: vgchange.cpp:72
 msgid "Cling"
 msgstr ""
@@ -826,91 +826,91 @@ msgstr ""
 msgid "Snapshot"
 msgstr ""
 
-#: lvchange.cpp:102
+#: lvchange.cpp:105
 msgid "Make volume available for use"
 msgstr ""
 
-#: lvchange.cpp:103
+#: lvchange.cpp:106
 msgid "Make volume read only"
 msgstr ""
 
-#: lvchange.cpp:104
+#: lvchange.cpp:107
 msgid "Refresh volume metadata"
 msgstr ""
 
-#: lvchange.cpp:118
+#: lvchange.cpp:121
 msgid "Change Volume Tags"
 msgstr ""
 
-#: lvchange.cpp:128 pvchange.cpp:67
+#: lvchange.cpp:131 pvchange.cpp:67
 msgid "Add new tag:"
 msgstr ""
 
-#: lvchange.cpp:134 pvchange.cpp:73
+#: lvchange.cpp:137 pvchange.cpp:73
 msgid "Remove tag:"
 msgstr ""
 
-#: lvchange.cpp:144
+#: lvchange.cpp:147
 msgid "Change Allocation Policy"
 msgstr ""
 
-#: lvchange.cpp:200
+#: lvchange.cpp:203
 msgid "Mirror Sync"
 msgstr ""
 
-#: lvchange.cpp:209
+#: lvchange.cpp:212
 msgid "Re-synchronize mirrors"
 msgstr ""
 
-#: lvchange.cpp:213
+#: lvchange.cpp:216
 msgid "Monitoring With dmeventd"
 msgstr ""
 
-#: lvchange.cpp:219 lvcreate.cpp:451
+#: lvchange.cpp:222 lvcreate.cpp:451
 msgid "Monitor with dmeventd"
 msgstr ""
 
-#: lvchange.cpp:220
+#: lvchange.cpp:223
 msgid "Do not monitor"
 msgstr ""
 
-#: lvchange.cpp:221
+#: lvchange.cpp:224
 msgid "Ignore dmeventd"
 msgstr ""
 
-#: lvchange.cpp:238
+#: lvchange.cpp:241
 msgid "Chnage Volume Polling"
 msgstr ""
 
-#: lvchange.cpp:244 vgchange.cpp:174
+#: lvchange.cpp:247 vgchange.cpp:177
 msgid "Start polling"
 msgstr ""
 
-#: lvchange.cpp:247 vgchange.cpp:175
+#: lvchange.cpp:250 vgchange.cpp:178
 msgid "Stop polling"
 msgstr ""
 
-#: lvchange.cpp:250
+#: lvchange.cpp:253
 msgid "Udev Synchronizing"
 msgstr ""
 
-#: lvchange.cpp:254
+#: lvchange.cpp:257
 msgid "Synchronize with udev"
 msgstr ""
 
-#: lvchange.cpp:258
+#: lvchange.cpp:261
 msgid "Set Kernel Device Numbers"
 msgstr ""
 
-#: lvchange.cpp:264
+#: lvchange.cpp:267
 msgid "Use persistant device numbers"
 msgstr ""
 
-#: lvchange.cpp:270
+#: lvchange.cpp:273
 msgid "Major number: "
 msgstr ""
 
-#: lvchange.cpp:273
+#: lvchange.cpp:276
 msgid "Minor number: "
 msgstr ""
 
@@ -1122,29 +1122,37 @@ msgstr ""
 msgid "Snapshots"
 msgstr ""
 
-#: lvreduce.cpp:35
+#: lvreduce.cpp:36
 msgid "Reduce Logical Volume"
 msgstr ""
 
-#: lvreduce.cpp:49
+#: lvreduce.cpp:51
 msgid ""
 "If this <b>Inactive</b> logical volume is reduced any <b>data</b> it "
 "contains <b>will be lost!</b>"
 msgstr ""
 
-#: lvreduce.cpp:52
+#: lvreduce.cpp:54
 msgid ""
 "Only the ext2, ext3 and ext4 file systems are supported for file system "
 "reduction. If this logical volume is reduced any <b>data</b> it contains "
 "<b>will be lost!</b>"
 msgstr ""
 
-#: lvreduce.cpp:64
+#: lvreduce.cpp:66
 msgid "The filesystem must be unmounted first"
 msgstr ""
 
-#: lvreduce.cpp:84
+#: lvreduce.cpp:86
 msgid "The filesystem is already as small as it can be"
+msgstr ""
+
+#: lvreduce.cpp:109
+msgid "<b>Reducing Volume: %1</b>"
+msgstr ""
+
+#: lvreduce.cpp:111
+msgid "Estimated minimum size: %1"
 msgstr ""
 
 #: lvremove.cpp:30
@@ -1725,7 +1733,7 @@ msgstr ""
 msgid "End"
 msgstr ""
 
-#: pvproperties.cpp:162 sizeselectorbox.cpp:65
+#: pvproperties.cpp:162 sizeselectorbox.cpp:66
 msgid "Extents"
 msgstr ""
 
@@ -1749,7 +1757,7 @@ msgctxt "Space used up"
 msgid "Used"
 msgstr ""
 
-#: pvtree.cpp:52 vgchange.cpp:236
+#: pvtree.cpp:52 vgchange.cpp:239
 msgid "Logical volumes"
 msgstr ""
 
@@ -1829,35 +1837,35 @@ msgid ""
 "extreme care.</b>"
 msgstr ""
 
-#: sizeselectorbox.cpp:82
+#: sizeselectorbox.cpp:87
 msgid "Volume Size"
 msgstr ""
 
-#: sizeselectorbox.cpp:84 sizeselectorbox.cpp:105
+#: sizeselectorbox.cpp:89 sizeselectorbox.cpp:109
 msgid "Lock selected size"
 msgstr ""
 
-#: sizeselectorbox.cpp:94
+#: sizeselectorbox.cpp:99
 msgid "Partition Start"
 msgstr ""
 
-#: sizeselectorbox.cpp:95
+#: sizeselectorbox.cpp:100
 msgid "Lock partition start"
 msgstr ""
 
-#: sizeselectorbox.cpp:104
+#: sizeselectorbox.cpp:108
 msgid "Partition Size"
 msgstr ""
 
-#: sizeselectorbox.cpp:113
+#: sizeselectorbox.cpp:116
 msgid "Prevent shrinking"
 msgstr ""
 
-#: sizeselectorbox.cpp:129
+#: sizeselectorbox.cpp:132
 msgid "New start:"
 msgstr ""
 
-#: sizeselectorbox.cpp:131
+#: sizeselectorbox.cpp:134
 msgid "New size:"
 msgstr ""
 
@@ -2062,23 +2070,23 @@ msgstr ""
 msgid "Refresh metadata"
 msgstr ""
 
-#: vgchange.cpp:154
+#: vgchange.cpp:155
 msgid "Generate new UUID fo group"
 msgstr ""
 
-#: vgchange.cpp:162
+#: vgchange.cpp:165
 msgid "Make all logical volumes available"
 msgstr ""
 
-#: vgchange.cpp:163
+#: vgchange.cpp:166
 msgid "Make all logical volumes unavailable"
 msgstr ""
 
-#: vgchange.cpp:206
+#: vgchange.cpp:209
 msgid "Change limit on number of volumes"
 msgstr ""
 
-#: vgchange.cpp:243
+#: vgchange.cpp:246
 msgid "Physical volumes"
 msgstr ""
 
