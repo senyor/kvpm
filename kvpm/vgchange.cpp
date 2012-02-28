@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -151,7 +151,10 @@ VGChangeDialog::VGChangeDialog(VolGroup *volumeGroup, QWidget *parent) :
     misc_layout->addWidget(m_clustered);
     m_refresh = new QCheckBox( i18n("Refresh metadata") );
     misc_layout->addWidget(m_refresh);
+
     m_uuid = new QCheckBox( i18n("Generate new UUID fo group") );
+    if( m_vg->isActive() )
+        m_uuid->setEnabled(false);
     misc_layout->addWidget(m_uuid);
 
     QHBoxLayout *middle_layout = new QHBoxLayout();
