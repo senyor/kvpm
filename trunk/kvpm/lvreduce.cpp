@@ -14,14 +14,15 @@
 
 #include "lvreduce.h"
 
-#include <KMessageBox>
+#include <KConfigSkeleton>
 #include <KLocale>
+#include <KMessageBox>
 
 #include <QtGui>
 
+#include "fsreduce.h"
 #include "logvol.h"
 #include "processprogress.h"
-#include "fsreduce.h"
 #include "misc.h"
 #include "sizeselectorbox.h"
 #include "volgroup.h"
@@ -91,12 +92,31 @@ LVReduceDialog::LVReduceDialog(LogVol *const volume, QWidget *parent)
 
     if(!m_bailout){                
 
-        QLabel *lv_name_label  = new QLabel( i18n("<b>Reducing Volume: %1</b>", m_lv->getName() ));
+        bool use_si_units;
+        KConfigSkeleton skeleton;
+        skeleton.setCurrentGroup("General");
+        skeleton.addItemBool("use_si_units", use_si_units, false);
+
+        KLocale *const locale = KGlobal::locale();
+        if(use_si_units)
+            locale->setBinaryUnitDialect(KLocale::MetricBinaryDialect); 
+        else
+            locale->setBinaryUnitDialect(KLocale::IECBinaryDialect);
+
+        QVBoxLayout *const label_layout = new QVBoxLayout();
+        QWidget *const label_widget = new QWidget();
+        label_widget->setLayout(label_layout);
+        QLabel *const lv_name_label  = new QLabel( i18n("<b>Reducing Volume: %1</b>", m_lv->getName() ));
         lv_name_label->setAlignment(Qt::AlignCenter);
+        QLabel *const lv_min_label  = new QLabel( i18n("Estimated minimum size: %1", locale->formatByteSize(min_lv_extents * extent_size) ));
         
         m_size_selector = new SizeSelectorBox(extent_size, min_lv_extents, current_lv_extents, current_lv_extents, true, false, true);
                 
-        layout->addWidget(lv_name_label);
+        label_layout->addWidget(lv_name_label);
+        label_layout->addSpacing(5);
+        label_layout->addWidget(lv_min_label);
+        label_layout->addSpacing(5);
+        layout->addWidget(label_widget);
         layout->addWidget(m_size_selector);
         
         connect(this, SIGNAL(okClicked()),
