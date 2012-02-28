@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2009, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2009, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -34,7 +34,7 @@ bool remove_fs(const QString name)
 
     const QString error_message = i18n("Error writing to device %1", name);
 
-    if(KMessageBox::warningContinueCancel(0, warning_message) == KMessageBox::Continue){
+    if(KMessageBox::warningYesNo(0, warning_message) == KMessageBox::Yes){
 
         QByteArray zero_array(128 * 1024, '\0');
         QFile *const device = new QFile(name);
