@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -249,7 +249,7 @@ void PVTree::popupContextMenu(QPoint point)
     QTreeWidgetItem *item = itemAt(point);
     QStringList lvs;
 
-    if(item){
+    if(item && !m_vg->isExported()){
 	if( (QVariant(item->data(3, 0)).toString()) == "0" ){  // 0 =  Zero used extents on pv
 	    m_pv_name = QVariant(item->data(0, 0)).toString();
 
