@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2009, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -229,11 +229,21 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
                     lv_fsck_action->setEnabled(false);
                     lv_mkfs_action->setEnabled(false);
                     lv_removefs_action->setEnabled(false);
-                    
+
+                    if( m_lv->isMounted() )
+                        filesystem_menu->setEnabled(true);
+
                     if( !m_lv->isValid() )
                         lv_remove_action->setEnabled(true);
                     else
                         lv_remove_action->setEnabled(false);
+                }
+                else if( m_lv->isMounted() ){
+                    lv_extend_action->setEnabled(true);
+                    lv_reduce_action->setEnabled(false);
+                    lv_fsck_action->setEnabled(false);
+                    lv_mkfs_action->setEnabled(false);
+                    lv_removefs_action->setEnabled(false);
                 }
                 else{
                     lv_extend_action->setEnabled(true);
@@ -272,7 +282,6 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
             if(m_lv->isSnap() && m_lv->isMerging()){
                 lv_rename_action->setEnabled(false);
                 lv_change_action->setEnabled(false);
-                filesystem_menu->setEnabled(false);
             }
             else{
                 lv_rename_action->setEnabled(true);
