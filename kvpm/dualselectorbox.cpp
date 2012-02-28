@@ -56,7 +56,11 @@ DualSelectorBox::DualSelectorBox(const long long sectorSize, const long long tot
     layout->setMargin(0);
 
     m_size_selector   = new SizeSelectorBox(sectorSize, minSize,   maxSize,   initialSize,   false, false, true);
-    m_offset_selector = new SizeSelectorBox(sectorSize, minOffset, maxOffset, initialOffset, false, true);
+
+    if(minSize == maxSize)
+        m_offset_selector = new SizeSelectorBox(sectorSize, minOffset, maxOffset, initialOffset, false, true, false, false);
+    else
+        m_offset_selector = new SizeSelectorBox(sectorSize, minOffset, maxOffset, initialOffset, false, true, false, true);
 
     layout->addWidget(m_size_selector);
     layout->addWidget(m_offset_selector);
