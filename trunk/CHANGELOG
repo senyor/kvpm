@@ -1,4 +1,7 @@
 version 0.8.5
+Fixed immediate crash when group is clustered.
+
+version 0.8.5
 It is now possible to cancel a running mkfs process and some other long
 running process should follow soon. Sizes may now be specified in traditional
 powers of two (1KiB = 1024) or in powers of ten (1KB = 1000) SI units.
