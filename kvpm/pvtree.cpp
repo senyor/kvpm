@@ -194,7 +194,7 @@ void PVTree::loadData()
             scrollToItem(pv_tree_items[0], QAbstractItemView::EnsureVisible);
         }
     }
-    else{
+    else if( !pv_tree_items.isEmpty() ){
         setCurrentItem( pv_tree_items[0] );
         scrollToItem(pv_tree_items[0], QAbstractItemView::EnsureVisible);
     }
