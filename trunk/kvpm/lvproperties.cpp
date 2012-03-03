@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2009, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -204,7 +204,7 @@ QFrame *LVProperties::generalFrame(int segment)
 
     QFrame *frame = new QFrame();
     QVBoxLayout *layout = new QVBoxLayout();
-    QHBoxLayout *stripe_layout = new QHBoxLayout();
+    QHBoxLayout *stripe_layout = new QHBoxLayout(this);
     frame->setLayout(layout);
     frame->setFrameStyle( QFrame::Sunken | QFrame::StyledPanel );
     frame->setLineWidth(2);
