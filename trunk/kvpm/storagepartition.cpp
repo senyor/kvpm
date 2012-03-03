@@ -392,7 +392,11 @@ PedSector StoragePartition::getAlignedStart()
 
     start = aligned_geometry->start;
 
+    ped_alignment_destroy(start_align);
+    ped_alignment_destroy(end_align);
     ped_constraint_destroy(constraint);
+    ped_geometry_destroy(start_range);
+    ped_geometry_destroy(end_range);
     ped_geometry_destroy(aligned_geometry);
 
     return start;
