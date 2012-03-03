@@ -44,7 +44,7 @@ LVChartSeg::LVChartSeg(VolGroup *const group, LogVol *const volume, const QStrin
     layout->setMargin(0);
     setLayout(layout);
 
-    QPalette *const colorset = new QPalette();
+    QPalette colorset;
 
     KConfigSkeleton skeleton;
 
@@ -71,35 +71,35 @@ LVChartSeg::LVChartSeg(VolGroup *const group, LogVol *const volume, const QStrin
     skeleton.addItemColor("swap",    swap_color,  Qt::lightGray);
 
     if(use == "ext2")
-	colorset->setColor(QPalette::Window, ext2_color);
+	colorset.setColor(QPalette::Window, ext2_color);
     else if(use == "ext3")
-	colorset->setColor(QPalette::Window, ext3_color);
+	colorset.setColor(QPalette::Window, ext3_color);
     else if(use == "ext4")
-	colorset->setColor(QPalette::Window, ext4_color);
+	colorset.setColor(QPalette::Window, ext4_color);
     else if(use == "btrfs")
-	colorset->setColor(QPalette::Window, btrfs_color);
+	colorset.setColor(QPalette::Window, btrfs_color);
     else if(use == "reiserfs")
-	colorset->setColor(QPalette::Window, reiser_color);
+	colorset.setColor(QPalette::Window, reiser_color);
     else if(use == "reiser4")
-	colorset->setColor(QPalette::Window, reiser4_color);
+	colorset.setColor(QPalette::Window, reiser4_color);
     else if(use == "hfs")
-	colorset->setColor(QPalette::Window, hfs_color);
+	colorset.setColor(QPalette::Window, hfs_color);
     else if(use == "vfat")
-	colorset->setColor(QPalette::Window, msdos_color);
+	colorset.setColor(QPalette::Window, msdos_color);
     else if(use == "jfs")
-        colorset->setColor(QPalette::Window, jfs_color);
+        colorset.setColor(QPalette::Window, jfs_color);
     else if(use == "xfs")
-	colorset->setColor(QPalette::Window, xfs_color);
+	colorset.setColor(QPalette::Window, xfs_color);
     else if(use == "ntfs")
-	colorset->setColor(QPalette::Window, ntfs_color);
+	colorset.setColor(QPalette::Window, ntfs_color);
     else if(use == "swap")
-	colorset->setColor(QPalette::Window, swap_color);
+	colorset.setColor(QPalette::Window, swap_color);
     else if(use == "freespace")
-	colorset->setColor(QPalette::Window, free_color);
+	colorset.setColor(QPalette::Window, free_color);
     else
-	colorset->setColor(QPalette::Window, none_color);
+	colorset.setColor(QPalette::Window, none_color);
 
-    color_widget->setPalette(*colorset);
+    color_widget->setPalette(colorset);
     color_widget->setAutoFillBackground(true);
 
     if( !m_vg->isExported() ){
