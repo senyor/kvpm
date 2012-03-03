@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -76,7 +76,7 @@ VGInfoLabels::VGInfoLabels(VolGroup *const group, QWidget *parent) : QFrame(pare
     label_widget5->setAutoFillBackground(true);
     label_widget6->setBackgroundRole(QPalette::AlternateBase);
     label_widget6->setAutoFillBackground(true);
-    label_widget7->setBackgroundRole(QPalette::AlternateBase);
+    label_widget7->setBackgroundRole(QPalette::Base);
     label_widget7->setAutoFillBackground(true);
 
     label_widget1->setLayout(vlayout1);
@@ -152,22 +152,22 @@ VGInfoLabels::VGInfoLabels(VolGroup *const group, QWidget *parent) : QFrame(pare
     hlayout1->addWidget(label_widget5);
     hlayout1->addWidget(label_widget6);
 
-    if( group->getLvMax() || group->getPvMax() ){
-
-	if(group->getPvMax())
-	    max_pv_label = new QLabel( i18n("Max pvs: %1", group->getPvMax()) );
-	else
-	    max_pv_label = new QLabel( i18n("Max pvs: Unlimited") );
-
-	if(group->getLvMax())
-	    max_lv_label = new QLabel( i18n("Max lvs: %1", group->getLvMax()) );
-	else
-	    max_lv_label = new QLabel( i18n("Max lvs: Unlimited") );
-
-	vlayout7->addWidget(max_pv_label);
-	vlayout7->addWidget(max_lv_label);
-	hlayout1->addWidget(label_widget7);
-    }
+    if(group->getPvMax())
+        max_pv_label = new QLabel( i18n("Max pvs: %1", group->getPvMax()) );
+    else
+        max_pv_label = new QLabel( i18n("Max pvs: Unlimited") );
+    
+    if(group->getLvMax())
+        max_lv_label = new QLabel( i18n("Max lvs: %1", group->getLvMax()) );
+    else
+        max_lv_label = new QLabel( i18n("Max lvs: Unlimited") );
+    
+    vlayout7->addWidget(max_pv_label);
+    vlayout7->addWidget(max_lv_label);
+    hlayout1->addWidget(label_widget7);
+    
+    if( !group->getLvMax() && !group->getPvMax() )
+        label_widget7->hide();
     
     setLayout(upper_layout);
 }
