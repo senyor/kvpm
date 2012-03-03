@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -191,11 +191,13 @@ bool MountTables::addEntry(const QString device, const QString mountPoint, const
 
     if(fp){
 	if( addmntent(fp, &mount_entry) ){
-            fsync( fileno(fp) );
+            fchown(fileno(fp), S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+            fsync(fileno(fp));
 	    endmntent(fp);
 	    return false;
 	}
 	else{              // success
+            fchown(fileno(fp), S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
             fsync( fileno(fp) );
 	    endmntent(fp);
 	    return true;
@@ -241,6 +243,7 @@ bool MountTables::removeEntry(const QString mountPoint)
 	addmntent(fp_new, entry);
         delete entry;
     }
+    fchown(fileno(fp), S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
     fsync( fileno(fp_new) );
     endmntent(fp_new);
 
@@ -290,6 +293,7 @@ bool MountTables::renameEntries(const QString oldName, const QString newName)
 	addmntent(fp_new, entry);
         delete entry;
     }
+    fchown(fileno(fp), S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
     fsync( fileno(fp_new) );
     endmntent(fp_new);
 
