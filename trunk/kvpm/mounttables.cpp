@@ -36,6 +36,7 @@ mntent *buildMntent(const QString device, const QString mountPoint, const QStrin
                     const QString options, const int dumpFreq, const int pass);
 
 mntent *copyMntent(mntent *const entry);
+void  deleteMntent(mntent *const entry);
 
 bool isMtabWritable(QString mtab)
 {
@@ -107,7 +108,7 @@ void MountTables::loadData()
 
     if( (fp = setmntent(_PATH_FSTAB, "r") ) ){
 
-        while( (entry = copyMntent(getmntent(fp))) )
+        while( (entry = getmntent(fp)) )
             m_fstab_list.append( new MountEntry(entry) );
 
         endmntent(fp);
@@ -191,13 +192,13 @@ bool MountTables::addEntry(const QString device, const QString mountPoint, const
 
     if(fp){
 	if( addmntent(fp, &mount_entry) ){
-            fchown(fileno(fp), S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+            fchmod(fileno(fp), S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
             fsync(fileno(fp));
 	    endmntent(fp);
 	    return false;
 	}
 	else{              // success
-            fchown(fileno(fp), S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+            fchmod(fileno(fp), S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
             fsync( fileno(fp) );
 	    endmntent(fp);
 	    return true;
@@ -231,7 +232,7 @@ bool MountTables::removeEntry(const QString mountPoint)
 
     for( int x = mount_entry_list.size() - 1; x >= 0; x--){
         if( QString( (mount_entry_list[x])->mnt_dir ) == mountPoint ){
-	    mount_entry_list.removeAt(x);
+            deleteMntent(mount_entry_list.takeAt(x));
 	    break;
 	}
     }
@@ -241,9 +242,8 @@ bool MountTables::removeEntry(const QString mountPoint)
     for(int x = 0; x < mount_entry_list.size(); x++){
 	const mntent *entry = mount_entry_list[x];
 	addmntent(fp_new, entry);
-        delete entry;
     }
-    fchown(fileno(fp), S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+    fchmod(fileno(fp_new), S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
     fsync( fileno(fp_new) );
     endmntent(fp_new);
 
@@ -259,7 +259,7 @@ bool MountTables::renameEntries(const QString oldName, const QString newName)
     QList<mntent *> mount_entry_list;
     mntent *mount_entry;
     mntent *temp_entry;
-    qDebug() << "Read only" << ! can_write_mtab;     
+
     QByteArray new_path(_PATH_MOUNTED);
     new_path.append(".new");     
 
@@ -280,7 +280,7 @@ bool MountTables::renameEntries(const QString oldName, const QString newName)
                                       mount_entry->mnt_opts,
                                       mount_entry->mnt_freq,
                                       mount_entry->mnt_passno );
-	    delete mount_entry;
+	    deleteMntent(mount_entry);
 	    mount_entry_list.append(temp_entry);
 	}
     }
@@ -291,10 +291,9 @@ bool MountTables::renameEntries(const QString oldName, const QString newName)
     for(int x = 0; x < mount_entry_list.size(); x++){
 	const mntent *entry = mount_entry_list[x];
 	addmntent(fp_new, entry);
-        delete entry;
     }
-    fchown(fileno(fp), S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
-    fsync( fileno(fp_new) );
+    fchmod(fileno(fp_new), S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+    fsync(fileno(fp_new));
     endmntent(fp_new);
 
     KDE_rename(mount_table_new, mount_table_old);
@@ -348,3 +347,13 @@ mntent *copyMntent(mntent *const entry)
     return new_entry;
 }
 
+void  deleteMntent(mntent *const entry)
+{
+    if(entry != NULL){
+        delete entry->mnt_fsname;
+        delete entry->mnt_dir;
+        delete entry->mnt_type;
+        delete entry->mnt_opts;
+        delete entry;
+    }
+}
