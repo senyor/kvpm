@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -179,6 +179,7 @@ void UnmountDialog::commitChanges()
     hide();
 
     if(m_single){
+
         mp_qba = m_mp.toLocal8Bit();
         
         if(umount2(mp_qba.data(), 0)){
@@ -191,16 +192,16 @@ void UnmountDialog::commitChanges()
     else{
         while( cb_itr.hasNext() ){
             cb = cb_itr.next();
-            
+
             if( cb->isChecked() ) {
                 mp_qba = cb->getUnmungedText().toLocal8Bit();
-                
+
                 if(umount2(mp_qba.data(), 0)){
                     KMessageBox::error(0, i18n("Unmounting <b>%1</b> failed with error number: %2 %3", 
                                                m_mp, errno, QString(strerror(errno))));
                 }
                 else
-                    MountTables::removeEntry(m_mp);
+                    MountTables::removeEntry(cb->getUnmungedText());
             } 
         }
     }
