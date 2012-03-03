@@ -30,7 +30,7 @@ DeviceChartSeg::DeviceChartSeg(QTreeWidgetItem *storageItem, QWidget *parent) :
 {
     QStringList group_names;
     QString use;
-    QPalette *colorset = new QPalette();
+    QPalette colorset;
 
     KConfigSkeleton skeleton;
 
@@ -67,60 +67,60 @@ DeviceChartSeg::DeviceChartSeg(QTreeWidgetItem *storageItem, QWidget *parent) :
         if ( m_partition->getPedType() & 0x02 ){  // extended
             setFrameStyle(QFrame::Sunken | QFrame::Panel);
             setLineWidth(2);
-	    colorset->setColor(QPalette::Window, Qt::green);
+	    colorset.setColor(QPalette::Window, Qt::green);
         }
         else if( m_partition->getPedType() & 0x04 ){   // freespace
             setFrameStyle(QFrame::Sunken | QFrame::Panel);
             setLineWidth(2);
-            colorset->setColor(QPalette::Window, Qt::green);
+            colorset.setColor(QPalette::Window, Qt::green);
         }
         else{
             setFrameStyle(QFrame::Sunken | QFrame::Panel);
             setLineWidth(2);
             
             if(use == "ext2")
-                colorset->setColor(QPalette::Window, ext2_color);
+                colorset.setColor(QPalette::Window, ext2_color);
             else if(use == "ext3")
-                colorset->setColor(QPalette::Window, ext3_color);
+                colorset.setColor(QPalette::Window, ext3_color);
             else if(use == "ext4")
-                colorset->setColor(QPalette::Window, ext4_color);
+                colorset.setColor(QPalette::Window, ext4_color);
             else if(use == "reiserfs")
-                colorset->setColor(QPalette::Window, reiser_color);
+                colorset.setColor(QPalette::Window, reiser_color);
             else if(use == "reiser4")
-                colorset->setColor(QPalette::Window, reiser4_color);
+                colorset.setColor(QPalette::Window, reiser4_color);
             else if(use == "hfs")
-                colorset->setColor(QPalette::Window, hfs_color);
+                colorset.setColor(QPalette::Window, hfs_color);
             else if(use == "ntfs")
-                colorset->setColor(QPalette::Window, ntfs_color);
+                colorset.setColor(QPalette::Window, ntfs_color);
             else if(use == "vfat")
-                colorset->setColor(QPalette::Window, msdos_color);
+                colorset.setColor(QPalette::Window, msdos_color);
             else if(use == "jfs")
-                colorset->setColor(QPalette::Window, jfs_color);
+                colorset.setColor(QPalette::Window, jfs_color);
             else if(use == "xfs")
-                colorset->setColor(QPalette::Window, xfs_color);
+                colorset.setColor(QPalette::Window, xfs_color);
             else if(use == "btrfs")
-                colorset->setColor(QPalette::Window, btrfs_color);
+                colorset.setColor(QPalette::Window, btrfs_color);
             else if(use == "swap")
-                colorset->setColor(QPalette::Window, swap_color);
+                colorset.setColor(QPalette::Window, swap_color);
             else if(use == "freespace")
-                colorset->setColor(QPalette::Window, free_color);
+                colorset.setColor(QPalette::Window, free_color);
             else if(use == "PV")
-                colorset->setColor(QPalette::Window, physical_color);
+                colorset.setColor(QPalette::Window, physical_color);
             else
-                colorset->setColor(QPalette::Window, none_color);
+                colorset.setColor(QPalette::Window, none_color);
         }
     }
     else{  // whole device, not a partition
         setFrameStyle( QFrame::Sunken | QFrame::Panel );
         setLineWidth( 2 );
         if(use == "PV")
-            colorset->setColor(QPalette::Window, physical_color);
+            colorset.setColor(QPalette::Window, physical_color);
         else
-            colorset->setColor(QPalette::Window, none_color);
+            colorset.setColor(QPalette::Window, none_color);
     }
 	
     setToolTip( i18n("Device: %1", m_item->data(0, Qt::DisplayRole).toString()) );
-    setPalette(*colorset);
+    setPalette(colorset);
     setAutoFillBackground(true);
 
     setContextMenuPolicy(Qt::CustomContextMenu);
