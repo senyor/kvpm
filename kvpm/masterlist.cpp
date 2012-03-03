@@ -122,7 +122,7 @@ void MasterList::scanStorageDevices()
     for(int x = 0; x < m_volume_groups.size(); x++)
         physical_volumes.append( m_volume_groups[x]->getPhysicalVolumes() );
 
-    for(int x = 0; x < m_storage_devices.size(); x++)
+    for(int x = m_storage_devices.size() - 1; x >= 0;  x--)
 	delete m_storage_devices[x];
 
     m_storage_devices.clear();
