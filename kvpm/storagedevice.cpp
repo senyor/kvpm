@@ -91,6 +91,17 @@ StorageDevice::StorageDevice( PedDevice *const pedDevice,
 	m_disk_label = "unknown";
 }
 
+StorageDevice::~StorageDevice()
+{
+    if( !m_storage_partitions.isEmpty() ){
+
+        ped_device_destroy(m_storage_partitions[0]->getPedPartition()->disk->dev);
+
+        for(int x = m_storage_partitions.size() - 1; x >= 0; x--)
+            delete m_storage_partitions[x];
+    }
+}
+
 QString StorageDevice::getName()
 {
     return m_device_path;
