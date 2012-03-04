@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -26,17 +26,17 @@ QString fsprobe_getfstype2(const QString devicePath)
 {
     static blkid_cache blkid2;
     const QByteArray path = devicePath.toLocal8Bit();
-    QString fs_type;
     blkid2 = NULL;
     
     if( blkid_get_cache(&blkid2, BLKID_EMPTY_CACHE) < 0){
-	qDebug() << "blkid2 cache could not be allocated?";
 	return QString();
     }
     else{
-	fs_type = QString( blkid_get_tag_value(blkid2, "TYPE", path.data() ) );
+        char *tag = blkid_get_tag_value(blkid2, "TYPE", path.data());
+        QString type(tag);
+        free (tag);
 	blkid_put_cache(blkid2);
-	return fs_type;
+	return type;
     }
 }
 
@@ -44,34 +44,35 @@ QString fsprobe_getfsuuid(const QString devicePath)
 {
     static blkid_cache blkid2;
     const QByteArray path = devicePath.toLocal8Bit();
-    QString fs_uuid;
     blkid2 = NULL;
     
     if( blkid_get_cache(&blkid2, BLKID_EMPTY_CACHE) < 0){
-	qDebug() << "blkid2 cache could not be allocated?";
 	return QString();
     }
     else{
-	fs_uuid = QString( blkid_get_tag_value(blkid2, "UUID", path.data() ) );
+        char *tag = blkid_get_tag_value(blkid2, "UUID", path.data());
+        QString uuid(tag);
+        free (tag);
 	blkid_put_cache(blkid2);
-	return fs_uuid;
+	return uuid;
     }
 }
+
 
 QString fsprobe_getfslabel(const QString devicePath)
 {
     static blkid_cache blkid2;
     const QByteArray path = devicePath.toLocal8Bit();
-    QString fs_label;
     blkid2 = NULL;
     
     if( blkid_get_cache(&blkid2, BLKID_EMPTY_CACHE) < 0){
-	qDebug() << "blkid2 cache could not be allocated?";
 	return QString();
     }
     else{
-        fs_label = QString( blkid_get_tag_value(blkid2, "LABEL", path.data() ) );
+        char *tag = blkid_get_tag_value(blkid2, "LABEL", path.data());
+        QString label(tag);
+        free (tag);
 	blkid_put_cache(blkid2);
-	return fs_label;
+	return label;
     }
 }
