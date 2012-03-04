@@ -202,9 +202,8 @@ QFrame *LVProperties::generalFrame(int segment)
     int stripes, stripe_size;
     QStringList pv_list;
 
-    QFrame *frame = new QFrame();
-    QVBoxLayout *layout = new QVBoxLayout();
-    QHBoxLayout *stripe_layout = new QHBoxLayout(this);
+    QFrame *const frame = new QFrame();
+    QVBoxLayout *const layout = new QVBoxLayout();
     frame->setLayout(layout);
     frame->setFrameStyle( QFrame::Sunken | QFrame::StyledPanel );
     frame->setLineWidth(2);
@@ -224,6 +223,8 @@ QFrame *LVProperties::generalFrame(int segment)
 	layout->addWidget(new QLabel( i18n("Extents: %1", extents) ) );
 
 	if( !m_lv->isMirror() ){
+            
+            QHBoxLayout *const stripe_layout = new QHBoxLayout();
 
 	    if( stripes != 1 ){
 		stripe_layout->addWidget(new QLabel( i18n("Stripes: %1", stripes) ));
@@ -248,6 +249,8 @@ QFrame *LVProperties::generalFrame(int segment)
             layout->addWidget(new QLabel( i18n("Extents: %1", extents) ));
 
 	if( !m_lv->isMirror() ){
+
+            QHBoxLayout *const stripe_layout = new QHBoxLayout();
 
 	    if( stripes != 1 ){
 		stripe_layout->addWidget(new QLabel( i18n("Stripes: %1", stripes) ));
