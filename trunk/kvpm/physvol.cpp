@@ -30,16 +30,19 @@ void PhysVol::rescan(pv_t lvm_pv)
     lvm_property_value value;
 
     value = lvm_pv_get_property(lvm_pv, "pv_attr");
-    flags.append(value.value.string);
+    if(value.is_valid)
+        flags.append(value.value.string);
 
     value = lvm_pv_get_property(lvm_pv, "pv_tags");
     m_tags.clear();
-    m_tags = QString( value.value.string ).split(',');
+    if(value.is_valid)
+        m_tags = QString( value.value.string ).split(',');
     for(int x = 0; x < m_tags.size(); x++)
         m_tags[x] = m_tags[x].trimmed();
 
     value = lvm_pv_get_property(lvm_pv, "pv_mda_used_count");
-    m_mda_used = value.value.integer;
+    if(value.is_valid)
+        m_mda_used = value.value.integer;
 
     if(flags[0] == 'a')
         m_allocatable = true;
@@ -56,7 +59,8 @@ void PhysVol::rescan(pv_t lvm_pv)
     m_mda_count     = lvm_pv_get_mda_count(lvm_pv);
 
     value = lvm_pv_get_property(lvm_pv, "pv_mda_size");
-    m_mda_size = value.value.integer;
+    if(value.is_valid)
+        m_mda_size = value.value.integer;
 
     /*
     // The following wil be used to to calculate the last used
