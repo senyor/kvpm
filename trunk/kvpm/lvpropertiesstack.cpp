@@ -103,6 +103,8 @@ void LVPropertiesStack::loadData()
 {
     const QList<LogVol *> members  = m_vg->getLogicalVolumesFlat();
 
+
+    delete m_vscroll->takeWidget();
     m_stack_widget = new QStackedWidget;
     m_lv_stack_list.clear();
 
@@ -111,6 +113,7 @@ void LVPropertiesStack::loadData()
 	QStackedWidget *const segment_properties_stack = new QStackedWidget();
   
 	if(members[x]->getSegmentCount() > 1){
+
 	    segment_properties_stack->addWidget(new LVProperties(members[x], -1));
 	    for(int segment = 0; segment < members[x]->getSegmentCount(); segment++)
 		segment_properties_stack->addWidget(new LVProperties(members[x], segment));
