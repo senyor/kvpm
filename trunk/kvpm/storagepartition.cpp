@@ -163,10 +163,11 @@ StoragePartition::StoragePartition(PedPartition *const part,
     else
         m_is_busy = ped_partition_is_busy(m_ped_partition);
 
-    PedPartition *temp_part = NULL;
-    PedDisk *const temp_disk = ped_disk_new(ped_device);
-
     if( m_partition_type == "extended" ){
+
+        PedPartition *temp_part = NULL;
+        PedDisk *const temp_disk = ped_disk_new(ped_device);
+
         m_is_empty = true;
 	if( temp_disk ){
 	    while( (temp_part = ped_disk_next_partition (temp_disk, temp_part)) ){
@@ -175,6 +176,7 @@ StoragePartition::StoragePartition(PedPartition *const part,
 		    break;
 		}
 	    }
+            ped_disk_destroy(temp_disk);
 	}
     }
     else

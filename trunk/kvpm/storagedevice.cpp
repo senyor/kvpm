@@ -96,6 +96,7 @@ StorageDevice::~StorageDevice()
     if( !m_storage_partitions.isEmpty() ){
 
         ped_device_destroy(m_storage_partitions[0]->getPedPartition()->disk->dev);
+        ped_disk_destroy(m_storage_partitions[0]->getPedPartition()->disk);
 
         for(int x = m_storage_partitions.size() - 1; x >= 0; x--)
             delete m_storage_partitions[x];
