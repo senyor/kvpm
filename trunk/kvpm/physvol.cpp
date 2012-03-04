@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -31,7 +31,7 @@ void PhysVol::rescan(pv_t lvm_pv)
 
     value = lvm_pv_get_property(lvm_pv, "pv_attr");
     if(value.is_valid)
-        flags.append(value.value.string);
+        flags.append(value.value.string, 3);
 
     value = lvm_pv_get_property(lvm_pv, "pv_tags");
     m_tags.clear();
