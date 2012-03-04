@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -16,6 +16,7 @@
 #define VGREDUCE_H
 
 #include <KDialog>
+
 #include <QCheckBox>
 #include <QStringList>
 
@@ -35,7 +36,7 @@ Q_OBJECT
     bool m_unremovable_pvs_present;
 
  public:
-    explicit VGReduceDialog(VolGroup *volumeGroup, QWidget *parent = 0);
+    explicit VGReduceDialog(VolGroup *const volumeGroup, QWidget *parent = NULL);
     QStringList arguments();
     
  private slots:

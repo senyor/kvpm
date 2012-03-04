@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -28,7 +28,7 @@
 
 
 
-bool reduce_vg(VolGroup *volumeGroup)
+bool reduce_vg(VolGroup *const volumeGroup)
 {
     VGReduceDialog dialog(volumeGroup);
     dialog.exec();
@@ -39,7 +39,7 @@ bool reduce_vg(VolGroup *volumeGroup)
         return false;
 }
 
-VGReduceDialog::VGReduceDialog(VolGroup *volumeGroup, QWidget *parent) : KDialog(parent), m_vg(volumeGroup)
+VGReduceDialog::VGReduceDialog(VolGroup *const volumeGroup, QWidget *parent) : KDialog(parent), m_vg(volumeGroup)
 {
     setWindowTitle( i18n("Reduce Volume Group") );
     QWidget *dialog_body = new QWidget(this);
