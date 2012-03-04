@@ -482,6 +482,7 @@ void MkfsDialog::clobberFilesystem()
                 device->flush();
                 device->close();
             }
+            delete device;
         }
     }
 }
