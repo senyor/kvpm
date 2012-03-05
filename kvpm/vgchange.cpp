@@ -25,7 +25,7 @@
 #include "processprogress.h"
 #include "volgroup.h"
 
-bool change_vg(VolGroup *volumeGroup)
+bool change_vg(VolGroup *const volumeGroup)
 {
     VGChangeDialog dialog(volumeGroup);
     dialog.exec();
@@ -38,13 +38,14 @@ bool change_vg(VolGroup *volumeGroup)
         return false;
 }
 
-
-VGChangeDialog::VGChangeDialog(VolGroup *volumeGroup, QWidget *parent) : 
-    KDialog(parent), m_vg(volumeGroup)
+VGChangeDialog::VGChangeDialog(VolGroup *const volumeGroup, QWidget *parent) 
+    : KDialog(parent), 
+      m_vg(volumeGroup)
 {
-
-    setWindowTitle( i18n("Change volume group attributes") );
     m_vg_name = m_vg->getName();
+
+    setWindowTitle( i18n("Change Volume Group Attributes") );
+    setDefaultButton(KDialog::Cancel);
 
     QWidget *dialog_body = new QWidget(this);
     setMainWidget(dialog_body);
@@ -206,50 +207,59 @@ VGChangeDialog::VGChangeDialog(VolGroup *volumeGroup, QWidget *parent) :
     if(lv_count <= 0)
 	lv_count = 1;
 
-    m_limit_box = new QGroupBox( i18n("Change limit on number of volumes") );
-    QHBoxLayout *limit_groupbox_layout = new QHBoxLayout();
+    m_limit_box = new QGroupBox( i18n("Change maximum limit for number of volumes") );
+    QVBoxLayout *const limit_groupbox_layout = new QVBoxLayout();
     m_limit_box->setLayout(limit_groupbox_layout);
 
-    m_limit_pv_no  = new QRadioButton("UnLimited volumes");
-    m_limit_pv_yes = new QRadioButton("Limit volumes");
+    QLabel *const lv_limit_label = new QLabel( i18n("Logical volumes") );
+    QLabel *const pv_limit_label = new QLabel( i18n("Physical volumes") );
+
+    QString lv_current_max;
+    QString pv_current_max;
+
+    if(m_vg->getLvMax() > 0)
+        lv_current_max = QString("%1").arg(m_vg->getLvMax());
+    else
+        lv_current_max = QString("unlimited");
+
+    if(m_vg->getPvMax() > 0)
+        pv_current_max = QString("%1").arg(m_vg->getPvMax());
+    else
+        pv_current_max = QString("unlimited");
+
+    QLabel *const lv_min_label = new QLabel( i18n("Currently: %1 Minimum: %2", lv_current_max, m_vg->getLvCount()) );
+    QLabel *const pv_min_label = new QLabel( i18n("Currently: %1 Minimum: %2", pv_current_max, m_vg->getPvCount()) );
+
+    QHBoxLayout *const lv_layout = new QHBoxLayout();
+    QHBoxLayout *const pv_layout = new QHBoxLayout();
+
     m_max_pvs_spin = new QSpinBox();
-    m_limit_lv_no  = new QRadioButton("UnLimited volumes");
-    m_limit_lv_yes = new QRadioButton("Limit volumes");
     m_max_lvs_spin = new QSpinBox();
 
     if(m_vg->getFormat() == "lvm1"){
-        m_limit_pv_yes->setChecked(true);
-        m_limit_lv_yes->setChecked(true);
-        m_limit_pv_yes->setEnabled(false);
-        m_limit_lv_yes->setEnabled(false);
 	m_max_lvs_spin->setEnabled(true);
 	m_max_lvs_spin->setRange(lv_count, 255);
-	m_max_lvs_spin->setValue(255);
     }
     else{
-        m_limit_pv_no->setChecked(true);
-        m_limit_lv_no->setChecked(true);
 	m_limit_box->setCheckable(true);
 	m_limit_box->setChecked(false);
 	m_limit_box->setEnabled(true);
-	m_max_lvs_spin->setMinimum(lv_count);
-	m_max_lvs_spin->setRange(lv_count, 32767); // does anyone need more than 32 thousand?
+        m_max_lvs_spin->setSpecialValueText( i18n("unlimited") );
+	m_max_lvs_spin->setRange(0, 32767); // does anyone need more than 32 thousand?
     }
+    m_max_lvs_spin->setValue(m_vg->getLvMax());
 
-    m_lvlimit_box = new QGroupBox( i18n("Logical volumes") );
-    QGridLayout *lvlimit_groupbox_layout = new QGridLayout();
-    m_lvlimit_box->setLayout(lvlimit_groupbox_layout);
-    lvlimit_groupbox_layout->addWidget(m_limit_lv_no, 0, 0);
-    lvlimit_groupbox_layout->addWidget(m_limit_lv_yes, 1, 0);
-    lvlimit_groupbox_layout->addWidget(m_max_lvs_spin, 1, 1);
+    lv_layout->addWidget(lv_limit_label);
+    lv_layout->addWidget(m_max_lvs_spin);
+    lv_layout->addWidget(lv_min_label);
+    lv_layout->addStretch();
+    pv_layout->addWidget(pv_limit_label);
+    pv_layout->addWidget(m_max_pvs_spin);
+    pv_layout->addWidget(pv_min_label);
+    pv_layout->addStretch();
 
-    m_pvlimit_box = new QGroupBox( i18n("Physical volumes") );
-    QGridLayout *pvlimit_groupbox_layout = new QGridLayout();
-    m_pvlimit_box->setLayout(pvlimit_groupbox_layout);
-
-    pvlimit_groupbox_layout->addWidget(m_limit_pv_no, 0, 0);
-    pvlimit_groupbox_layout->addWidget(m_limit_pv_yes, 1, 0);
-    pvlimit_groupbox_layout->addWidget(m_max_pvs_spin, 1, 1);
+    limit_groupbox_layout->addLayout(lv_layout);
+    limit_groupbox_layout->addLayout(pv_layout);
 
 // We don't want the limit set to less than the number already in existence!
 
@@ -260,40 +270,35 @@ VGChangeDialog::VGChangeDialog(VolGroup *volumeGroup, QWidget *parent) :
     if(m_vg->getFormat() == "lvm1"){
 	m_max_pvs_spin->setEnabled(true);
 	m_max_pvs_spin->setRange(pv_count, 255);
-	m_max_pvs_spin->setValue(255);
     }
     else{
-	m_max_pvs_spin->setMinimum(pv_count);
-	m_max_pvs_spin->setRange(pv_count, 32767); // does anyone need more than 32 thousand?
+        m_max_pvs_spin->setSpecialValueText( i18n("unlimited") );
+	m_max_pvs_spin->setRange(0, 32767); // does anyone need more than 32 thousand?
     }
+    m_max_pvs_spin->setValue(m_vg->getPvMax());
 
-    limit_groupbox_layout->addWidget(m_lvlimit_box);
-    limit_groupbox_layout->addWidget(m_pvlimit_box);
     layout->addWidget(m_limit_box);
 
-    connect(m_normal,     SIGNAL(clicked()), this, SLOT(resetOkButton()));
-    connect(m_cling,      SIGNAL(clicked()), this, SLOT(resetOkButton()));
-    connect(m_anywhere,   SIGNAL(clicked()), this, SLOT(resetOkButton()));
-    connect(m_contiguous, SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    connect(m_normal,        SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    connect(m_cling,         SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    connect(m_anywhere,      SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    connect(m_contiguous,    SIGNAL(clicked()), this, SLOT(resetOkButton()));
     connect(m_available_yes, SIGNAL(clicked()), this, SLOT(resetOkButton()));
     connect(m_available_no,  SIGNAL(clicked()), this, SLOT(resetOkButton()));
     connect(m_polling_yes,   SIGNAL(clicked()), this, SLOT(resetOkButton()));
     connect(m_polling_no,    SIGNAL(clicked()), this, SLOT(resetOkButton()));
-    connect(m_limit_pv_yes,  SIGNAL(clicked()), this, SLOT(resetOkButton()));
-    connect(m_limit_lv_yes,  SIGNAL(clicked()), this, SLOT(resetOkButton())); 
-    connect(m_limit_pv_no,   SIGNAL(clicked()), this, SLOT(resetOkButton()));
-    connect(m_limit_lv_no,   SIGNAL(clicked()), this, SLOT(resetOkButton()));
-    connect(m_limit_box,     SIGNAL(clicked()), this, SLOT(resetOkButton()));
-    connect(m_lvlimit_box,   SIGNAL(clicked()), this, SLOT(resetOkButton()));
-    connect(m_pvlimit_box,   SIGNAL(clicked()), this, SLOT(resetOkButton()));
     connect(m_available_box, SIGNAL(clicked()), this, SLOT(resetOkButton()));
     connect(m_polling_box,   SIGNAL(clicked()), this, SLOT(resetOkButton()));
     connect(m_resize,        SIGNAL(clicked()), this, SLOT(resetOkButton()));
     connect(m_clustered,     SIGNAL(clicked()), this, SLOT(resetOkButton()));
     connect(m_refresh,       SIGNAL(clicked()), this, SLOT(resetOkButton()));
     connect(m_uuid,          SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    connect(m_limit_box ,    SIGNAL(toggled(bool)),     this, SLOT(resetOkButton()));
+    connect(m_max_lvs_spin,  SIGNAL(valueChanged(int)), this, SLOT(resetOkButton()));
+    connect(m_max_pvs_spin,  SIGNAL(valueChanged(int)), this, SLOT(resetOkButton()));
     connect(m_extent_size_combo,   SIGNAL(currentIndexChanged(int)), this, SLOT(resetOkButton()));
     connect(m_extent_suffix_combo, SIGNAL(currentIndexChanged(int)), this, SLOT(resetOkButton()));
+
    
     enableButtonOk(false);
 
@@ -325,16 +330,12 @@ QStringList VGChangeDialog::arguments()
             args << "--available" << "n";
     }
 
-    if(m_limit_box->isChecked()) {
-        if( m_limit_lv_yes->isChecked() )
-            args << "--logicalvolume" << QString( "%1" ).arg( m_max_lvs_spin->value() );
-        else
-            args << "--logicalvolume" << QString( "%1" ).arg( 0 );           // unlimited
+    if(m_limit_box->isChecked()){
+        if(m_max_lvs_spin->value() != m_vg->getLvMax())
+            args << "--logicalvolume" << QString("%1").arg(m_max_lvs_spin->value());
 
-        if( m_limit_pv_yes->isChecked() )
-            args << "--maxphysicalvolumes" << QString( "%1" ).arg( m_max_pvs_spin->value() );
-        else
-            args << "--maxphysicalvolumes" << QString( "%1" ).arg( 0 );      // unlimited
+        if(m_max_pvs_spin->value() != m_vg->getPvMax())
+            args << "--maxphysicalvolumes" << QString("%1").arg(m_max_pvs_spin->value());
     }
 
     if( m_resize->isChecked() != m_vg->isResizable() ){
@@ -387,6 +388,14 @@ void VGChangeDialog::resetOkButton(){
         enableButtonOk(true);
     else
         enableButtonOk(false);
+
+    if(m_limit_box->isChecked()){
+        if((m_max_lvs_spin->value() < m_vg->getLvCount()) && (m_max_lvs_spin->value() != 0))
+            enableButtonOk(false);
+
+        if((m_max_pvs_spin->value() < m_vg->getPvCount()) && (m_max_pvs_spin->value() != 0))
+            enableButtonOk(false);
+    }
 }
 
 void VGChangeDialog::limitExtentSize(int index){
