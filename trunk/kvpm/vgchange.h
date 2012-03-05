@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -15,16 +15,17 @@
 #ifndef VGCHANGE_H
 #define VGCHANGE_H
 
+#include <KComboBox>
 #include <KDialog>
+
 #include <QStringList>
 #include <QRadioButton>
 #include <QCheckBox>
-#include <KComboBox>
 #include <QSpinBox>
 #include <QGroupBox>
 
 class VolGroup;
-bool change_vg(VolGroup *VolumeGroup);
+bool change_vg(VolGroup *const VolumeGroup);
 
 class VGChangeDialog : public KDialog
 {
@@ -33,8 +34,7 @@ Q_OBJECT
     VolGroup *m_vg;
     QString m_vg_name;
     QRadioButton *m_normal, *m_contiguous, *m_anywhere, *m_cling, 
-                 *m_available_yes, *m_available_no, *m_polling_yes, *m_polling_no,
-                 *m_limit_pv_yes, *m_limit_lv_yes, *m_limit_pv_no, *m_limit_lv_no;
+                 *m_available_yes, *m_available_no, *m_polling_yes, *m_polling_no;
 
     QCheckBox *m_resize, *m_clustered, *m_refresh, *m_uuid;
     KComboBox *m_extent_size_combo, *m_extent_suffix_combo;
@@ -42,7 +42,7 @@ Q_OBJECT
     QSpinBox  *m_max_lvs_spin, *m_max_pvs_spin; 
 
 public:
-    explicit VGChangeDialog(VolGroup *volumeGroup, QWidget *parent = 0);
+    explicit VGChangeDialog(VolGroup *const volumeGroup, QWidget *parent = 0);
     QStringList arguments();
 
 private slots:

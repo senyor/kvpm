@@ -30,7 +30,7 @@ class VolGroup
     MountTables *m_tables;
 
     long m_extent_size;
-    int m_lv_max;          // maximum number of logical volumes
+    int m_lv_max;          // maximum number of logical volumes, unlimited == 0
     int m_pv_max;
     long long m_mda_count;
     long long m_size;      // total size of volume group in bytes
