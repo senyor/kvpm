@@ -34,6 +34,7 @@ Q_OBJECT
     ExecutableFinder(QObject *parent = 0);
     static QString getPath(QString name);
     void reload();                            // rescan the system for needed executables
+    void reload(QStringList search);          // As above using the stringlist for the search paths
     QStringList getAllPaths();
     QStringList getAllNames();
     QStringList getNotFound();

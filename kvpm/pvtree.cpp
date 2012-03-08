@@ -43,7 +43,7 @@ PVTree::PVTree(VolGroup *const group, QWidget *parent)
     QStringList header_labels;
     m_context_menu = NULL;
     setColumnCount(6);
-    QTreeWidgetItem * item;
+    QTreeWidgetItem *item;
 
     header_labels << i18nc("The name of the device", "Name") << i18n("Size") 
 		  << i18nc("Unused space", "Remaining") << i18nc("Space used up", "Used")
@@ -329,14 +329,14 @@ void PVTree::setViewConfig()
     skeleton.addItemBool("use_si_units", m_use_si_units, false);
 
     skeleton.setCurrentGroup("PhysicalTreeColumns");
-    skeleton.addItemBool( "pvname",      pvname,      true );
-    skeleton.addItemBool( "pvsize",      pvsize,      true );
-    skeleton.addItemBool( "pvremaining", pvremaining, true );
-    skeleton.addItemBool( "pvused",      pvused,      false );
-    skeleton.addItemBool( "pvstate",     pvstate,     false );
-    skeleton.addItemBool( "pvallocate",  pvallocate,  true );
-    skeleton.addItemBool( "pvtags",      pvtags,      true );
-    skeleton.addItemBool( "pvlvnames",   pvlvnames,   true );
+    skeleton.addItemBool( "pt_name",      pvname,      true );
+    skeleton.addItemBool( "pt_size",      pvsize,      true );
+    skeleton.addItemBool( "pt_remaining", pvremaining, true );
+    skeleton.addItemBool( "pt_used",      pvused,      false );
+    skeleton.addItemBool( "pt_state",     pvstate,     false );
+    skeleton.addItemBool( "pt_allocate",  pvallocate,  true );
+    skeleton.addItemBool( "pt_tags",      pvtags,      true );
+    skeleton.addItemBool( "pt_lvnames",   pvlvnames,   true );
 
     if( !( !pvname == isColumnHidden(0)      && !pvsize == isColumnHidden(1) && 
            !pvremaining == isColumnHidden(2) && !pvused == isColumnHidden(3) &&

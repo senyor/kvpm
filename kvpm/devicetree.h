@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -36,6 +36,7 @@ Q_OBJECT
     bool m_initial_run,
          m_show_total, 
          m_show_percent,
+         m_show_both,
          m_expand_parts,
          m_use_si_units;
 
