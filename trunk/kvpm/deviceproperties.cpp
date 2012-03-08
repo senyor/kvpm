@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2009, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -63,9 +63,9 @@ DeviceProperties::DeviceProperties(StoragePartition *const partition, QWidget *p
          show_fslabel;
 
     skeleton.setCurrentGroup("DeviceProperties");
-    skeleton.addItemBool("mount",   show_mount,   true);
-    skeleton.addItemBool("fsuuid",  show_fsuuid,  false);
-    skeleton.addItemBool("fslabel", show_fslabel, false);
+    skeleton.addItemBool("dp_mount",   show_mount,   true);
+    skeleton.addItemBool("dp_fsuuid",  show_fsuuid,  false);
+    skeleton.addItemBool("dp_fslabel", show_fslabel, false);
     
     if( partition->isMountable() ){
         if(show_mount)

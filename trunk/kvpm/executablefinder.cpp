@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2009, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -86,25 +86,30 @@ QString ExecutableFinder::getPath(const QString name)
 
 void ExecutableFinder::reload()
 {
-    KDE_struct_stat buf;
-    const int key_length = m_keys.size();
-
     KConfigSkeleton skeleton;
-    QStringList search_paths;
+    QStringList search;
 
     skeleton.setCurrentGroup("SystemPaths");
-    skeleton.addItemStringList("SearchPath", search_paths, m_default_search_paths);
+    skeleton.addItemStringList("SearchPath", search, m_default_search_paths);
+
+    reload(search);
+}
+
+void ExecutableFinder::reload(QStringList search)
+{
+    KDE_struct_stat buf;
+    const int key_length = m_keys.size();
 
     m_path_map.clear();
 
     for(int y = 0; y < key_length; y++){
-	for(int x = 0; x < search_paths.size(); x++){
+	for(int x = 0; x < search.size(); x++){
 
-            QByteArray path_qba = QString( search_paths[x] + m_keys[y] ).toLocal8Bit();
+            QByteArray path_qba = QString( search[x] + m_keys[y] ).toLocal8Bit();
             const char *path = path_qba.data(); 
 
             if( KDE_lstat(path, &buf) == 0 ){
-		m_path_map.insert( m_keys[y], search_paths[x] + m_keys[y] );
+		m_path_map.insert( m_keys[y], search[x] + m_keys[y] );
 		break;
 	    }
 	}

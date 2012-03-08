@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2009, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -52,8 +52,8 @@ PVProperties::PVProperties(PhysVol *const volume, QWidget *parent) :
     bool mda, uuid;
 
     skeleton.setCurrentGroup("PhysicalVolumeProperties");
-    skeleton.addItemBool("mda",  mda,  true);
-    skeleton.addItemBool("uuid", uuid, false);
+    skeleton.addItemBool("pp_mda",  mda,  true);
+    skeleton.addItemBool("pp_uuid", uuid, false);
 
     QVBoxLayout *const top_layout = new QVBoxLayout;
     top_layout->setSpacing(2);

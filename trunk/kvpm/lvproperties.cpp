@@ -50,10 +50,10 @@ LVProperties::LVProperties(LogVol *const volume, const int segment, QWidget *par
     skeleton.addItemBool("use_si_units", m_use_si_units, false);
 
     skeleton.setCurrentGroup("LogicalVolumeProperties");
-    skeleton.addItemBool("mount",   show_mount,   true);
-    skeleton.addItemBool("fsuuid",  show_fsuuid,  false);
-    skeleton.addItemBool("fslabel", show_fslabel, false);
-    skeleton.addItemBool("uuid",    show_uuid,    false);
+    skeleton.addItemBool("lp_mount",   show_mount,   true);
+    skeleton.addItemBool("lp_fsuuid",  show_fsuuid,  false);
+    skeleton.addItemBool("lp_fslabel", show_fslabel, false);
+    skeleton.addItemBool("lp_uuid",    show_uuid,    false);
 
     layout->addWidget( generalFrame(segment) );
 

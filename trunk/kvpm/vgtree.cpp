@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2009, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  * * This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,6 @@
 
 #include "lvactionsmenu.h"
 #include "logvol.h"
-//#include "misc.h"
 #include "volgroup.h"
 
 
@@ -210,11 +209,11 @@ QTreeWidgetItem *VGTree::loadItem(LogVol *lv, QTreeWidgetItem *item)
             fs_remaining = lv->getFilesystemSize() - lv->getFilesystemUsed();
             fs_percent = qRound( ((double)fs_remaining / (double)lv->getFilesystemSize()) * 100 );
             
-            if(m_show_total && !m_show_percent)
+            if(m_show_total)
                 item->setData(3, Qt::DisplayRole, locale->formatByteSize(fs_remaining));
-            else if(!m_show_total && m_show_percent)
+            else if(m_show_percent)
                 item->setData(3, Qt::DisplayRole, QString("%%1").arg(fs_percent) );
-            else
+            else if(m_show_both)
                 item->setData(3, Qt::DisplayRole, QString(locale->formatByteSize(fs_remaining) + " (%%1)").arg(fs_percent) );
             
             if( fs_percent <= m_fs_warn_percent ){
@@ -442,23 +441,24 @@ void VGTree::setViewConfig()
     skeleton.addItemBool("use_si_units", m_use_si_units, false);
 
     skeleton.setCurrentGroup("AllTreeColumns");
-    skeleton.addItemBool( "percent", m_show_percent, true );
-    skeleton.addItemBool( "total",   m_show_total,   true );
+    skeleton.addItemBool( "show_percent", m_show_percent, false );
+    skeleton.addItemBool( "show_total",   m_show_total,   false );
+    skeleton.addItemBool( "show_both",    m_show_both,    true );
     skeleton.addItemInt(  "fs_warn", m_fs_warn_percent, 10 );
 
     skeleton.setCurrentGroup("VolumeTreeColumns");
-    skeleton.addItemBool( "volume",      volume,      true );
-    skeleton.addItemBool( "size",        size,        true );
-    skeleton.addItemBool( "remaining",   remaining,   true );
-    skeleton.addItemBool( "type",        type,        true );
-    skeleton.addItemBool( "filesystem",  filesystem,  false );
-    skeleton.addItemBool( "stripes",     stripes,     false );
-    skeleton.addItemBool( "stripesize",  stripesize,  false );
-    skeleton.addItemBool( "snapmove",    snapmove,    true );
-    skeleton.addItemBool( "state",       state,       true );
-    skeleton.addItemBool( "access",      access,      false );
-    skeleton.addItemBool( "tags",        tags,        true );
-    skeleton.addItemBool( "mountpoints", mountpoints, false );
+    skeleton.addItemBool( "vt_volume",      volume,      true );
+    skeleton.addItemBool( "vt_size",        size,        true );
+    skeleton.addItemBool( "vt_remaining",   remaining,   true );
+    skeleton.addItemBool( "vt_type",        type,        true );
+    skeleton.addItemBool( "vt_filesystem",  filesystem,  false );
+    skeleton.addItemBool( "vt_stripes",     stripes,     false );
+    skeleton.addItemBool( "vt_stripesize",  stripesize,  false );
+    skeleton.addItemBool( "vt_snapmove",    snapmove,    true );
+    skeleton.addItemBool( "vt_state",       state,       true );
+    skeleton.addItemBool( "vt_access",      access,      false );
+    skeleton.addItemBool( "vt_tags",        tags,        true );
+    skeleton.addItemBool( "vt_mountpoints", mountpoints, false );
 
     if( !( !volume == isColumnHidden(0)     && !size == isColumnHidden(1) &&
            !remaining == isColumnHidden(2)  && !filesystem == isColumnHidden(3) &&

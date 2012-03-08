@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2009, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -35,7 +35,7 @@ Q_OBJECT
 
     VolGroup *m_vg;
     bool m_init;        // is this the initial building of the tree or a reload?
-    bool m_show_percent, m_show_total, m_use_si_units;
+    bool m_show_percent, m_show_total, m_use_si_units, m_show_both;
     int m_fs_warn_percent;
 
     void setupContextMenu();

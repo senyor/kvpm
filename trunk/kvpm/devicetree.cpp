@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  * * This program is free software; you can redistribute it and/or modify
@@ -124,7 +124,7 @@ void DeviceTree::loadData(QList<StorageDevice *> devices)
                 data << locale->formatByteSize( pv->getRemaining() );
             else if(!m_show_total && m_show_percent)
                 data << QString("%%1").arg( 100 - pv->getPercentUsed() );
-            else
+            else if(m_show_both)
                 data << QString("%1 (%%2) ").arg( locale->formatByteSize( pv->getRemaining() )).arg( 100 - pv->getPercentUsed() );
 
             data << "PV" << pv->getVg()->getName();
@@ -422,19 +422,20 @@ void DeviceTree::setViewConfig()
     skeleton.addItemBool("use_si_units", m_use_si_units, false);
 
     skeleton.setCurrentGroup("DeviceTreeColumns");
-    skeleton.addItemBool( "device",      device,    true );
-    skeleton.addItemBool( "partition",   partition, true );
-    skeleton.addItemBool( "capacity",    capacity,  true );
-    skeleton.addItemBool( "remaining",   remaining, true );
-    skeleton.addItemBool( "usage",       usage,     true );
-    skeleton.addItemBool( "group",       group,     true );
-    skeleton.addItemBool( "flags",       flags,     true );
-    skeleton.addItemBool( "mount",       mount,     true );
-    skeleton.addItemBool( "expandparts", m_expand_parts, true );
+    skeleton.addItemBool( "dt_device",      device,    true );
+    skeleton.addItemBool( "dt_partition",   partition, true );
+    skeleton.addItemBool( "dt_capacity",    capacity,  true );
+    skeleton.addItemBool( "dt_remaining",   remaining, true );
+    skeleton.addItemBool( "dt_usage",       usage,     true );
+    skeleton.addItemBool( "dt_group",       group,     true );
+    skeleton.addItemBool( "dt_flags",       flags,     true );
+    skeleton.addItemBool( "dt_mount",       mount,     true );
+    skeleton.addItemBool( "dt_expandparts", m_expand_parts, true );
 
     skeleton.setCurrentGroup("AllTreeColumns");
-    skeleton.addItemBool( "total",   m_show_total,     true );
-    skeleton.addItemBool( "percent", m_show_percent,   true );
+    skeleton.addItemBool( "show_total",   m_show_total,   false );
+    skeleton.addItemBool( "show_percent", m_show_percent, false );
+    skeleton.addItemBool( "show_both",    m_show_both,    true );
     skeleton.addItemInt(  "fs_warn", m_fs_warn_percent, 10 );
     skeleton.addItemInt(  "pv_warn", m_pv_warn_percent,  0 );
 
