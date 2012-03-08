@@ -34,13 +34,11 @@ DeviceTree::DeviceTree(DeviceSizeChart *const chart, DevicePropertiesStack *cons
       m_chart(chart),
       m_stack(stack)
 {
-    QStringList header_labels;
-
-    header_labels << "Device"    << "Type"  << "Capacity" 
-                  << "Remaining" << "Usage" << "Group"
-                  << "Flags"     << "Mount point" ;
+    const QStringList headers = QStringList() << "Device"    << "Type"  << "Capacity" 
+                                              << "Remaining" << "Usage" << "Group"
+                                              << "Flags"     << "Mount point" ;
     
-    QTreeWidgetItem *item = new QTreeWidgetItem((QTreeWidgetItem *)0, header_labels);
+    QTreeWidgetItem *item = new QTreeWidgetItem((QTreeWidgetItem *)0, headers);
 
     for(int column = 0; column < item->columnCount() ; column++)
         item->setTextAlignment(column, Qt::AlignCenter);
@@ -56,6 +54,7 @@ DeviceTree::DeviceTree(DeviceSizeChart *const chart, DevicePropertiesStack *cons
 
     m_initial_run = true;
     setHeaderItem(item);
+    sortByColumn(0, Qt::AscendingOrder);
     setAlternatingRowColors(true); 
     setAllColumnsShowFocus(true);
     setExpandsOnDoubleClick(true);
@@ -78,6 +77,8 @@ void DeviceTree::loadData(QList<StorageDevice *> devices)
        x = 0:  pointer to storagepartition if partition, else "" 
        x = 1:  pointer to storagedevice
     */
+
+    setSortingEnabled(false);
 
     disconnect(this, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem *)), 
                m_chart, SLOT(setNewDevice(QTreeWidgetItem*)));
@@ -377,6 +378,7 @@ void DeviceTree::loadData(QList<StorageDevice *> devices)
     resizeColumnToContents(0);
     resizeColumnToContents(3);
     resizeColumnToContents(5);
+    setSortingEnabled(true);
 
     if( topLevelItemCount() && ( currentItem() == NULL ) )
         setCurrentItem( topLevelItem(0) );
