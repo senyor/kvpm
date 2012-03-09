@@ -54,7 +54,6 @@ DeviceTree::DeviceTree(DeviceSizeChart *const chart, DevicePropertiesStack *cons
 
     m_initial_run = true;
     setHeaderItem(item);
-    sortByColumn(0, Qt::AscendingOrder);
     setAlternatingRowColors(true); 
     setAllColumnsShowFocus(true);
     setExpandsOnDoubleClick(true);
@@ -378,7 +377,6 @@ void DeviceTree::loadData(QList<StorageDevice *> devices)
     resizeColumnToContents(0);
     resizeColumnToContents(3);
     resizeColumnToContents(5);
-    setSortingEnabled(true);
 
     if( topLevelItemCount() && ( currentItem() == NULL ) )
         setCurrentItem( topLevelItem(0) );
