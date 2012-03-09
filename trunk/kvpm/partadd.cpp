@@ -78,6 +78,8 @@ PartitionAddDialog::PartitionAddDialog(StoragePartition *const partition, QWidge
             KMessageBox::error(0, i18n("Not enough usable space for a new partition"));
         }
     }
+
+    setDefaultButton(KDialog::Cancel);
 }
 
 void PartitionAddDialog::commitPartition()
