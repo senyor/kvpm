@@ -113,6 +113,7 @@ PartitionChangeDialog::PartitionChangeDialog(StoragePartition *const partition, 
     connect(this, SIGNAL(okClicked()),
 	    this, SLOT(commitPartition()));
 
+    setDefaultButton(KDialog::Cancel);
 }
 
 void PartitionChangeDialog::commitPartition()
