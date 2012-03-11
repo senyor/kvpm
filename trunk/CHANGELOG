@@ -1,5 +1,7 @@
 version 0.8.5
-Fixed immediate crash when group is clustered.
+Fixed immediate crash when group is clustered. Fixed configuration dialog
+buttons to work more as a user would expect. /etc/mtab permissions don't get
+mangled now.
 
 version 0.8.5
 It is now possible to cancel a running mkfs process and some other long
