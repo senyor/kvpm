@@ -5,5 +5,5 @@ Comment=KDE Volume Partition Manager
 Exec=kvpm
 X-KDE-SubstituteUID=true
 Type=Application
-Categories=System;KDE;
+Categories=Qt;KDE;System;
 Icon=kvpm
