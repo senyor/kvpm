@@ -21,7 +21,7 @@ set(kvpm_SRCS changemirror.cpp kvpmconfigdialog.cpp deviceproperties.cpp
 kde4_add_executable(kvpm ${kvpm_SRCS})
 target_link_libraries(kvpm ${KDE4_KDEUI_LIBS} ${KDE4_KFILE_LIBS} ${QT_LIBRARIES} blkid parted lvm2app)
 
-INSTALL( TARGETS kvpm DESTINATION ${BIN_INSTALL_DIR} )
+INSTALL( TARGETS kvpm DESTINATION ${SBIN_INSTALL_DIR} )
 
 
 IF (CMAKE_COMPILER_IS_GNUCXX)
