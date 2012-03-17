@@ -39,7 +39,6 @@ LVReduceDialog::LVReduceDialog(LogVol *const volume, QWidget *parent)
     setMainWidget(dialog_body);
     QVBoxLayout *layout = new QVBoxLayout();
     dialog_body->setLayout(layout);
-    setDefaultButton(KDialog::Cancel);  
 
     const long long extent_size = m_vg->getExtentSize();
     const long long current_lv_extents = m_lv->getExtents();
@@ -57,20 +56,36 @@ LVReduceDialog::LVReduceDialog(LogVol *const volume, QWidget *parent)
                                           "<b>will be lost!</b>");
 
     if( !m_lv->isActive() && !m_lv->isSnap() ){
-	if(KMessageBox::warningContinueCancel(0, warning_message1) == KMessageBox::Continue)
+	if(KMessageBox::warningContinueCancel(NULL, 
+                                              warning_message1, 
+                                              QString(), 
+                                              KStandardGuiItem::cont(), 
+                                              KStandardGuiItem::cancel(), 
+                                              QString(), 
+                                              KMessageBox::Dangerous) == KMessageBox::Continue){
             force = true;
-	else
+        }
+	else{
             m_bailout = true;
+        }
     }
     else if( m_lv->isMounted() && !m_lv->isSnap() ){
         KMessageBox::error(0, i18n("The filesystem must be unmounted first") );
         m_bailout = true;
     }
     else if( !fs_can_reduce(fs) && !m_lv->isSnap() ){
-	if(KMessageBox::warningContinueCancel(0, warning_message2) == KMessageBox::Continue)
+	if(KMessageBox::warningContinueCancel(NULL, 
+                                              warning_message2, 
+                                              QString(), 
+                                              KStandardGuiItem::cont(), 
+                                              KStandardGuiItem::cancel(), 
+                                              QString(), 
+                                              KMessageBox::Dangerous) == KMessageBox::Continue){
 	    force = true;
-	else
+        }
+	else{
             m_bailout = true;
+        }
     }
 
     if( !m_bailout && !force && !m_lv->isSnap() ){

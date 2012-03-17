@@ -43,16 +43,25 @@ VGExtendDialog::VGExtendDialog(VolGroup *const group, QWidget *parent)
 
     QList<StorageDevice *> devices;
     QList<StoragePartition *> partitions;
-    QString warning = i18n("If a device or partition is added to a volume group, "
-                           "any data currently on that device or partition will be lost.");
+    const QString warning = i18n("If a device or partition is added to a volume group, "
+                                 "any data currently on that device or partition will be lost.");
 
     getUsablePvs(devices, partitions); 
 
+
     if( partitions.size() + devices.size() > 0 ){
-        if(KMessageBox::warningContinueCancel(0, warning) == KMessageBox::Continue)
+        if(KMessageBox::warningContinueCancel(NULL, 
+                                              warning, 
+                                              QString(), 
+                                              KStandardGuiItem::cont(), 
+                                              KStandardGuiItem::cancel(), 
+                                              QString(), 
+                                              KMessageBox::Dangerous) == KMessageBox::Continue){
             buildDialog(devices, partitions);
-        else
+        }
+        else{
             m_bailout = true;
+        }
     }
     else{
         m_bailout = true;
@@ -76,10 +85,19 @@ VGExtendDialog::VGExtendDialog(VolGroup *const group, StorageDevice *const devic
     QString warning = i18n("If a device or partition is added to a volume group, "
                            "any data currently on that device or partition will be lost.");
 
-    if(KMessageBox::warningContinueCancel(0, warning) == KMessageBox::Continue)
+
+    if(KMessageBox::warningContinueCancel(NULL, 
+                                          warning, 
+                                          QString(), 
+                                          KStandardGuiItem::cont(), 
+                                          KStandardGuiItem::cancel(), 
+                                          QString(), 
+                                          KMessageBox::Dangerous) == KMessageBox::Continue){
         buildDialog(devices, partitions);
-    else
+    }
+    else{
         m_bailout = true;
+    }    
 }
 
 void VGExtendDialog::commitChanges()

@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -27,6 +27,7 @@
 LVRemoveDialog::LVRemoveDialog(LogVol *const lv, QWidget *parent) : KDialog(parent), m_lv(lv)
 {
     setButtons(KDialog::Yes | KDialog::No);
+    setDefaultButton(KDialog::No);
     setCaption( i18n("Delete Volume") );
     QWidget *const dialog_body = new QWidget(this);
     setMainWidget(dialog_body);
