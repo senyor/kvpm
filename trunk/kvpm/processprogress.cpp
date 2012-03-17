@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -145,11 +145,17 @@ int ProcessProgress::exitCode()
 
 void ProcessProgress::cancelProcess()
 {
-    const QString message = i18n("<b>Really kill process %1</b>", m_process->program().takeFirst());
+    const QString warning = i18n("<b>Really kill process %1</b>", m_process->program().takeFirst());
 
     kill(m_process->pid(), SIGSTOP);
 
-    if(KMessageBox::warningYesNo(NULL, message) == KMessageBox::Yes){
+    if(KMessageBox::warningYesNo(NULL, 
+                                 warning, 
+                                 QString(), 
+                                 KStandardGuiItem::yes(), 
+                                 KStandardGuiItem::no(), 
+                                 QString(), 
+                                 KMessageBox::Dangerous) == KMessageBox::Yes){
         m_process->kill();
         m_progress_dialog->show();
         m_progress_dialog->setLabelText( i18n("Waiting for process to finish") );

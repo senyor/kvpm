@@ -34,7 +34,13 @@ bool remove_fs(const QString name)
 
     const QString error_message = i18n("Error writing to device %1", name);
 
-    if(KMessageBox::warningYesNo(0, warning_message) == KMessageBox::Yes){
+    if(KMessageBox::warningYesNo(NULL, 
+                                 warning_message, 
+                                 QString(), 
+                                 KStandardGuiItem::yes(), 
+                                 KStandardGuiItem::no(), 
+                                 QString(), 
+                                 KMessageBox::Dangerous) == KMessageBox::Yes){
 
         QByteArray zero_array(128 * 1024, '\0');
         QFile *const device = new QFile(name);
@@ -56,5 +62,6 @@ bool remove_fs(const QString name)
 
         return(true);
     }
+
     return(false);
 }

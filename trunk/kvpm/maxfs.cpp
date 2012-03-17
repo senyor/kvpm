@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -34,7 +34,7 @@ bool max_fs(LogVol *logicalVolume)
     QString full_name  = logicalVolume->getFullName();
     full_name.remove('[').remove(']');
     
-    const QString message = i18n("Extend the filesystem on: %1 to fill the entire volume?", "<b>"+full_name+"</b>");
+    const QString warning = i18n("Extend the filesystem on: %1 to fill the entire volume?", "<b>"+full_name+"</b>");
     const QString error_message = i18n("Extending is only supported for ext2, ext3, ext4, jfs, xfs, ntfs and Reiserfs. "
                                        "The correct executables for file system extention must also be present");
 
@@ -43,11 +43,18 @@ bool max_fs(LogVol *logicalVolume)
         return false;
     }
 
-    if(KMessageBox::warningYesNo(0, message) == KMessageBox::Yes){
+    if(KMessageBox::warningYesNo(NULL, 
+                                 warning, 
+                                 QString(), 
+                                 KStandardGuiItem::yes(), 
+                                 KStandardGuiItem::no(), 
+                                 QString(), 
+                                 KMessageBox::Dangerous) == KMessageBox::Yes){
         return fs_extend(path, fs, logicalVolume->getMountPoints(), true); 
     }
-    else
+    else{
         return false;
+    }
 }
 
 bool max_fs(StoragePartition *partition)
@@ -71,25 +78,39 @@ bool max_fs(StoragePartition *partition)
         return false;
     }
 
-    if(KMessageBox::warningYesNo(0, message) == KMessageBox::Yes){
-        if( partition->isPhysicalVolume() )
-            return pv_extend(path); 
-        else
+    if(KMessageBox::warningYesNo(NULL, 
+                                 message, 
+                                 QString(), 
+                                 KStandardGuiItem::yes(), 
+                                 KStandardGuiItem::no(), 
+                                 QString(), 
+                                 KMessageBox::Dangerous) == KMessageBox::Yes){
+        if( partition->isPhysicalVolume() ){
+            return pv_extend(path);
+        } 
+        else{
             return fs_extend(path, fs, partition->getMountPoints(), false); 
+        }
     }
-
+    
     return false;
 }
 
 bool max_fs(StorageDevice *device)
 {
     const QString path = device->getName();
-    const QString message = i18n("Extend the physical volume on: %1 to fill the entire partition?", "<b>"+path+"</b>");
+    const QString warning = i18n("Extend the physical volume on: %1 to fill the entire partition?", "<b>"+path+"</b>");
 
     if( ! device->isPhysicalVolume() )
         return false;
 
-    if(KMessageBox::warningYesNo(0, message) == KMessageBox::Yes){
+    if(KMessageBox::warningYesNo(NULL, 
+                                 warning, 
+                                 QString(), 
+                                 KStandardGuiItem::yes(), 
+                                 KStandardGuiItem::no(), 
+                                 QString(), 
+                                 KMessageBox::Dangerous) == KMessageBox::Yes){
         return pv_extend(path); 
     }
 

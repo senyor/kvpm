@@ -63,7 +63,6 @@ LVCreateDialog::LVCreateDialog(VolGroup *const group, QWidget *parent):
         setMainWidget(m_tab_widget);
         makeConnections();
         setMaxSize();
-        setDefaultButton(KDialog::Cancel);
     }
 }
 
@@ -98,7 +97,6 @@ LVCreateDialog::LVCreateDialog(LogVol *const volume, const bool snapshot, QWidge
         setMainWidget(m_tab_widget);
         makeConnections();
         setMaxSize();
-        setDefaultButton(KDialog::Cancel);
     }
 }
 
@@ -858,7 +856,13 @@ bool LVCreateDialog::hasInitialErrors()
         m_fs_can_extend = fs_can_extend( m_lv->getFilesystem() );
 
         if( !( m_fs_can_extend || m_lv->isSnap() ) ){
-            if(KMessageBox::warningContinueCancel(this, warning_message) != KMessageBox::Continue){
+            if(KMessageBox::warningContinueCancel(NULL, 
+                                                  warning_message, 
+                                                  QString(), 
+                                                  KStandardGuiItem::cont(), 
+                                                  KStandardGuiItem::cancel(), 
+                                                  QString(), 
+                                                  KMessageBox::Dangerous) != KMessageBox::Continue){
                 return true;
             }
         }

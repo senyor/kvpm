@@ -32,8 +32,15 @@ bool create_table(const QString devicePath)
                                          "or removing the old one, will cause "
                                          "any existing data on it to be permanently lost");
 
-    if(KMessageBox::warningContinueCancel(0, warning_message) != KMessageBox::Continue)
+    if(KMessageBox::warningContinueCancel(NULL, 
+                                          warning_message, 
+                                          QString(), 
+                                          KStandardGuiItem::cont(), 
+                                          KStandardGuiItem::cancel(), 
+                                          QString(), 
+                                          KMessageBox::Dangerous) != KMessageBox::Continue){
         return false;
+    }
     else{
         TableCreateDialog dialog(devicePath);
 	dialog.exec();
@@ -77,8 +84,6 @@ TableCreateDialog::TableCreateDialog(const QString devicePath, QWidget *parent) 
 
     connect(this, SIGNAL(okClicked()),
             this, SLOT(commitTable()));
-
-    setDefaultButton(KDialog::Cancel);
 }
 
 void TableCreateDialog::commitTable()

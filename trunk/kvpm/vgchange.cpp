@@ -45,7 +45,6 @@ VGChangeDialog::VGChangeDialog(VolGroup *const volumeGroup, QWidget *parent)
     m_vg_name = m_vg->getName();
 
     setWindowTitle( i18n("Change Volume Group Attributes") );
-    setDefaultButton(KDialog::Cancel);
 
     QWidget *dialog_body = new QWidget(this);
     setMainWidget(dialog_body);

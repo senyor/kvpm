@@ -207,10 +207,17 @@ void PartitionChangeDialog::setup()
                    "changes to the partition table may not be recognized by the kernel.");
 
     if( ped_device_is_busy(ped_device) ){
-        if(KMessageBox::warningContinueCancel(0, message) != KMessageBox::Continue)
+        if(KMessageBox::warningContinueCancel(NULL, 
+                                              message, 
+                                              QString(), 
+                                              KStandardGuiItem::cont(), 
+                                              KStandardGuiItem::cancel(), 
+                                              QString(), 
+                                              KMessageBox::Dangerous) != KMessageBox::Continue){
             m_bailout = true;
+        }
     }
-
+    
     /* Switch off cylinder alignment */
     PedDiskFlag cylinder_flag = ped_disk_flag_get_by_name("cylinder_alignment");
     if( ped_disk_is_flag_available(m_ped_disk, cylinder_flag) )

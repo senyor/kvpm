@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2009, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -70,9 +70,16 @@ bool MkfsDialog::hasInitialErrors(const bool mounted)
         KMessageBox::error(0, error_message);
         return true;
     }
-    
-    if(KMessageBox::warningContinueCancel(0, warning_message) == KMessageBox::Continue)
+
+    if(KMessageBox::warningContinueCancel(NULL, 
+                                          warning_message, 
+                                          QString(), 
+                                          KStandardGuiItem::cont(), 
+                                          KStandardGuiItem::cancel(), 
+                                          QString(), 
+                                          KMessageBox::Dangerous) == KMessageBox::Continue){
         return false;
+    }
 
     return true;
 }
