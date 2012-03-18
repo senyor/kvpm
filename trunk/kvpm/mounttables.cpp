@@ -29,28 +29,78 @@
 #include "storagepartition.h"
 
 
-const int BUFF_LEN = 2000;   // Enough?
+namespace {  // The following functions are only needed locally
 
+    const int BUFF_LEN = 2000;   // Enough?
 
-mntent *buildMntent(const QString device, const QString mountPoint, const QString type, 
-                    const QString options, const int dumpFreq, const int pass);
+    bool isWritableFile(QString mtab)
+    {
+        QFileInfo fi = QFileInfo(mtab);
+        
+        if( fi.isSymLink() )
+            return false;
+        else
+            return fi.isWritable();
+    }
 
-mntent *copyMntent(mntent *const entry);
-void  deleteMntent(mntent *const entry);
+    /* This function generates an mntent structure from its parameters
+       and returns it  */
 
-bool isMtabWritable(QString mtab)
-{
-    QFileInfo fi = QFileInfo(mtab);
+    mntent* buildMntent(const QString device, const QString mountPoint, const QString type, 
+                        const QString options, const int dumpFreq, const int pass)
+    {
+        QByteArray device_array      = device.toLocal8Bit();
+        QByteArray mount_point_array = mountPoint.toLocal8Bit();
+        QByteArray type_array        = type.toLocal8Bit();
+        QByteArray options_array     = options.toLocal8Bit();
+        
+        mntent *mount_entry = new mntent;
+        
+        mount_entry->mnt_fsname = device_array.data();
+        mount_entry->mnt_dir    = mount_point_array.data();
+        mount_entry->mnt_type   = type_array.data();
+        mount_entry->mnt_opts   = options_array.data();
+        mount_entry->mnt_freq   = dumpFreq;
+        mount_entry->mnt_passno = pass;
+        
+        return mount_entry;
+    }
 
-    if( fi.isSymLink() )
-        return false;
-    else
-        return fi.isWritable();
+    mntent *copyMntent(mntent *const entry)
+    {
+        if( entry == NULL )
+            return NULL;
+        
+        mntent *new_entry = new mntent;
+        
+        new_entry->mnt_fsname = new char[BUFF_LEN]; 
+        new_entry->mnt_dir    = new char[BUFF_LEN];
+        new_entry->mnt_type   = new char[BUFF_LEN];
+        new_entry->mnt_opts   = new char[BUFF_LEN];
+        
+        strncpy(new_entry->mnt_fsname, entry->mnt_fsname, BUFF_LEN);
+        strncpy(new_entry->mnt_dir,    entry->mnt_dir,    BUFF_LEN);
+        strncpy(new_entry->mnt_type,   entry->mnt_type,   BUFF_LEN);
+        strncpy(new_entry->mnt_opts,   entry->mnt_opts,   BUFF_LEN);
+        
+        new_entry->mnt_freq   = entry->mnt_freq;
+        new_entry->mnt_passno = entry->mnt_passno;
+        
+        return new_entry;
+    }
+    
+    void  deleteMntent(mntent *const entry)
+    {
+        if(entry != NULL){
+            delete entry->mnt_fsname;
+            delete entry->mnt_dir;
+            delete entry->mnt_type;
+            delete entry->mnt_opts;
+            delete entry;
+        }
+    }
+
 }
-
-// Static init
-bool MountTables::can_write_mtab = isMtabWritable(_PATH_MOUNTED);
-
 
 MountTables::MountTables()
 {
@@ -173,7 +223,7 @@ QString MountTables::getFstabMountPoint(const QString name, const QString label,
 bool MountTables::addEntry(const QString device, const QString mountPoint, const QString type, 
                            const QString options, const int dumpFreq, const int pass)
 {
-    if(!can_write_mtab)
+    if(!isWritableFile(_PATH_MOUNTED))
         return true;
 
     QByteArray device_array      = device.toLocal8Bit();
@@ -210,7 +260,7 @@ bool MountTables::addEntry(const QString device, const QString mountPoint, const
 
 bool MountTables::removeEntry(const QString mountPoint)
 {
-    if(!can_write_mtab)
+    if(!isWritableFile(_PATH_MOUNTED))
         return true;
 
     QList<mntent *> mount_entry_list;
@@ -253,7 +303,7 @@ bool MountTables::removeEntry(const QString mountPoint)
 	    
 bool MountTables::renameEntries(const QString oldName, const QString newName)
 {
-    if(!can_write_mtab)
+    if(!isWritableFile(_PATH_MOUNTED))
         return true;
 
     QList<mntent *> mount_entry_list;
@@ -301,59 +351,3 @@ bool MountTables::renameEntries(const QString oldName, const QString newName)
     return true;
 }
 
-/* This function generates an mntent structure from its parameters
-and returns it  */
-
-mntent* buildMntent(const QString device, const QString mountPoint, const QString type, 
-                    const QString options, const int dumpFreq, const int pass)
-{
-    QByteArray device_array      = device.toLocal8Bit();
-    QByteArray mount_point_array = mountPoint.toLocal8Bit();
-    QByteArray type_array        = type.toLocal8Bit();
-    QByteArray options_array     = options.toLocal8Bit();
-
-    mntent *mount_entry = new mntent;
-    
-    mount_entry->mnt_fsname = device_array.data();
-    mount_entry->mnt_dir    = mount_point_array.data();
-    mount_entry->mnt_type   = type_array.data();
-    mount_entry->mnt_opts   = options_array.data();
-    mount_entry->mnt_freq   = dumpFreq;
-    mount_entry->mnt_passno = pass;
-
-    return mount_entry;
-}
-
-mntent *copyMntent(mntent *const entry)
-{
-    if( entry == NULL )
-        return NULL;
-
-    mntent *new_entry = new mntent;
-
-    new_entry->mnt_fsname = new char[BUFF_LEN]; 
-    new_entry->mnt_dir    = new char[BUFF_LEN];
-    new_entry->mnt_type   = new char[BUFF_LEN];
-    new_entry->mnt_opts   = new char[BUFF_LEN];
-    
-    strncpy(new_entry->mnt_fsname, entry->mnt_fsname, BUFF_LEN);
-    strncpy(new_entry->mnt_dir,    entry->mnt_dir,    BUFF_LEN);
-    strncpy(new_entry->mnt_type,   entry->mnt_type,   BUFF_LEN);
-    strncpy(new_entry->mnt_opts,   entry->mnt_opts,   BUFF_LEN);
-    
-    new_entry->mnt_freq   = entry->mnt_freq;
-    new_entry->mnt_passno = entry->mnt_passno;
-    
-    return new_entry;
-}
-
-void  deleteMntent(mntent *const entry)
-{
-    if(entry != NULL){
-        delete entry->mnt_fsname;
-        delete entry->mnt_dir;
-        delete entry->mnt_type;
-        delete entry->mnt_opts;
-        delete entry;
-    }
-}
