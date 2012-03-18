@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -27,7 +27,6 @@ class MountTables
 {
     QList<MountEntry *> m_mount_list;
     QList<MountEntry *> m_fstab_list;
-    static bool can_write_mtab;
 
     QString getFstabMountPoint(const QString name, const QString label, const QString uuid);
     
