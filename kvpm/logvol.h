@@ -76,7 +76,7 @@ class LogVol
     bool m_mirror;               // Is a mirrored volume
     bool m_mirror_leg;           // Is one of the underlying legs of a mirrored volume
     bool m_mirror_log;           // Is the log for a mirrored volume
-    bool m_fixed, m_persistant;  // fix the device minor and major number 
+    bool m_fixed, m_persistent;  // fix the device minor and major number 
 
     bool m_alloc_locked;         // allocation type is fixed when pvmove is underway 
                                  // (and maybe other times)
@@ -158,7 +158,7 @@ class LogVol
     bool isOpen();
     bool isOrigin();
     bool isOrphan();
-    bool isPersistant();
+    bool isPersistent();
     bool isPvmove();
     bool isSnap();
     bool isSnapContainer();

@@ -340,9 +340,9 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)  // lv_t seems to change -- why?
     value = lvm_lv_get_property(lvm_lv, "lv_major");
 
     if(value.value.integer != -1)
-	m_persistant = true;
+	m_persistent = true;
     else
-	m_persistant = false;
+	m_persistent = false;
     */
 
     if( m_snap_container && !was_snap_container ){
@@ -824,9 +824,9 @@ bool LogVol::isMirrorLog()
     return m_mirror_log;
 }
 
-bool LogVol::isPersistant()
+bool LogVol::isPersistent()
 {
-    return m_persistant;
+    return m_persistent;
 }
 
 bool LogVol::isOpen()

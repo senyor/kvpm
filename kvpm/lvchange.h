@@ -39,7 +39,7 @@ Q_OBJECT
 	      *m_refresh_check,      // refresh the metadata
               *m_resync_check,       // re-sync mirrors
               *m_udevsync_check,     // sync with udev
-              *m_persistant_check;   // Set persistant kernel device numbers  
+              *m_persistent_check;   // Set persistent kernel device numbers  
 
     QRadioButton *m_normal_button,      // allocation policy 
                  *m_contiguous_button, 
