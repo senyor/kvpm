@@ -835,7 +835,7 @@ bool LVCreateDialog::hasInitialErrors()
 
         const QString warning_message = i18n("If this volume has a filesystem or data, it will need to be extended <b>separately</b>. "
                                              "Currently, only the ext2, ext3, ext4, xfs, jfs, ntfs and reiserfs file systems are "
-                                             "supported for extension. The correct executable for extention must also be present. "); 
+                                             "supported for extension. The correct executable for extension must also be present. "); 
         
         if( m_lv->isOrigin() ){
             if( m_lv->isOpen() ){
@@ -900,7 +900,7 @@ void LVCreateDialog::commitChanges()
             
             ProcessProgress extend_origin( argumentsLV() );
             if( extend_origin.exitCode() ){
-                KMessageBox::error(0, i18n("Volume extention failed") );
+                KMessageBox::error(0, i18n("Volume extension failed") );
                 return;
             }
             

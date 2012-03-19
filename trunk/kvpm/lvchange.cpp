@@ -72,7 +72,7 @@ LVChangeDialog::LVChangeDialog(LogVol *const volume, QWidget *parent) :
     connect(m_ro_check,          SIGNAL(clicked()), this, SLOT(resetOkButton()));
     connect(m_refresh_check,     SIGNAL(clicked()), this, SLOT(resetOkButton()));
     connect(m_udevsync_check,    SIGNAL(clicked()), this, SLOT(resetOkButton()));
-    connect(m_persistant_check,  SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    connect(m_persistent_check,  SIGNAL(clicked()), this, SLOT(resetOkButton()));
     connect(m_tag_group,         SIGNAL(clicked()), this, SLOT(resetOkButton()));
     connect(m_deltag_combo, SIGNAL(currentIndexChanged(int)), this, SLOT(resetOkButton()));
     connect(m_tag_edit, SIGNAL(userTextChanged(QString)), this, SLOT(resetOkButton()));
@@ -238,7 +238,7 @@ QWidget *LVChangeDialog::buildAdvancedTab()
     QVBoxLayout *layout = new QVBoxLayout();
     tab->setLayout(layout);
 
-    m_polling_box = new QGroupBox( i18n("Chnage Volume Polling") );
+    m_polling_box = new QGroupBox( i18n("Change Volume Polling") );
     m_polling_box->setCheckable(true);
     m_polling_box->setChecked(false);
     layout->addWidget(m_polling_box);
@@ -264,8 +264,8 @@ QWidget *LVChangeDialog::buildAdvancedTab()
     m_devnum_box->setLayout(devnum_layout);
     QHBoxLayout *major_layout = new QHBoxLayout();
     QHBoxLayout *minor_layout = new QHBoxLayout();
-    m_persistant_check = new QCheckBox( i18n("Use persistant device numbers") );
-    devnum_layout->addWidget(m_persistant_check); 
+    m_persistent_check = new QCheckBox( i18n("Use persistent device numbers") );
+    devnum_layout->addWidget(m_persistent_check); 
     devnum_layout->addLayout(major_layout);
     devnum_layout->addLayout(minor_layout);
 
@@ -276,7 +276,7 @@ QWidget *LVChangeDialog::buildAdvancedTab()
     minor_layout->addWidget( new QLabel( i18n("Minor number: ") ) );
     minor_layout->addWidget(m_minor_edit);
     layout->addWidget(m_devnum_box);
-    m_persistant_check->setChecked( m_lv->isPersistant() );
+    m_persistent_check->setChecked( m_lv->isPersistent() );
     m_devnum_box->setChecked(false);
 
     return tab;
@@ -318,7 +318,7 @@ QStringList LVChangeDialog::arguments()
     }
 
     if( m_devnum_box->isChecked() ){
-        if( m_persistant_check->isChecked() ){
+        if( m_persistent_check->isChecked() ){
             args << "--force" << "--persistent" << "y";
             args << "--major" << m_major_edit->text();
             args << "--minor" << m_minor_edit->text();

@@ -36,7 +36,7 @@ bool max_fs(LogVol *logicalVolume)
     
     const QString warning = i18n("Extend the filesystem on: %1 to fill the entire volume?", "<b>"+full_name+"</b>");
     const QString error_message = i18n("Extending is only supported for ext2, ext3, ext4, jfs, xfs, ntfs and Reiserfs. "
-                                       "The correct executables for file system extention must also be present");
+                                       "The correct executables for file system extension must also be present");
 
     if( !fs_can_extend(fs) ){
         KMessageBox::error(0, error_message );
@@ -63,7 +63,7 @@ bool max_fs(StoragePartition *partition)
     const QString fs = partition->getFilesystem();
     const QString error_message = i18n("Filesystem extending is only supported for ext2, ext3, ext4, jfs, xfs, ntfs and Reiserfs. "
                                        "Physical volumes can also be extended. "
-                                       "The correct executables for file system extention must be present");
+                                       "The correct executables for file system extension must be present");
 
     QString message;
 
