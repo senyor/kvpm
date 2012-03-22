@@ -454,7 +454,7 @@ KMenu *TopWindow::buildHelpMenu()
                                                          "bug reports and any comments are welcomed.\n \n"
                                                          "Additional icons taken from the Silk icon set by\n"
                                                          "Mark James http://www.famfamfam.com/lab/icons/silk/\n"
-                                                         "under the Creative Commons Attribution 2.5 License"),
+                                                         "under the Creative Commons Attribution 3.0 License"),
                                                    KAboutData::License_GPL_V3, 
                                                    ki18n("(c) 2008, 2009, 2010, 2011, 2012 Benjamin Scott"),
                                                    ki18n(" "),
