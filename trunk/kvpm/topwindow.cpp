@@ -449,18 +449,21 @@ KMenu *TopWindow::buildHelpMenu()
                                                    QByteArray(""),
                                                    ki18n("kvpm"),
                                                    QByteArray("0.8.6"),
-                                                   ki18n("Linux volume and partition manager for KDE.\n"
-                                                         "This program is still under development,\n"
-                                                         "bug reports and any comments are welcomed.\n \n"
-                                                         "Additional icons taken from the Silk icon set by\n"
-                                                         "Mark James http://www.famfamfam.com/lab/icons/silk/\n"
-                                                         "under the Creative Commons Attribution 3.0 License"),
+                                                   ki18n("Linux volume and partition manager for KDE.  "
+                                                         "This program is still under development, "
+                                                         "bug reports and any comments are welcomed.  "
+                                                         "Licensed under GNU General Public License v3.0"),
                                                    KAboutData::License_GPL_V3, 
                                                    ki18n("(c) 2008, 2009, 2010, 2011, 2012 Benjamin Scott"),
-                                                   ki18n(" "),
+                                                   ki18n(""),
                                                    QByteArray("http://sourceforge.net/projects/kvpm/"),
                                                    QByteArray("benscott@nwlink.com") );
 
+    about_data->addCredit( ki18n("Mark James"), 
+                           ki18n("Additional icons taken from the Silk icon set by "
+                                 "Mark James under the Creative Commons Attribution 3.0 License."),
+                           QByteArray(),
+                           QByteArray("http://www.famfamfam.com/lab/icons/silk/") );
 
     KHelpMenu *const help_menu = new KHelpMenu(this, about_data);
 
