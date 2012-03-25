@@ -38,7 +38,11 @@ int main(int argc, char **argv)
     
     KAboutData aboutData( "kvpm", 0,
 			  ki18n("kvpm"), "0.8.6",
-			  ki18n( "Linux volume and partition manager for KDE"),
+			  ki18n( "The Linux volume and partition manager for KDE.\n"
+                                 "Licensed under the GPL v3.0\n \n"
+                                 "Additional icons taken from the Silk icon set by Mark James.\n"
+                                 "http://www.famfamfam.com/lab/icons/silk/\n"
+                                 "Licensed under the under the Creative Commons Attribution 3.0 License."),
 			  KAboutData::License_GPL_V3,
 			  ki18n("Copyright (c) 2008, 2009, 2010, 2011, 2012 Benjamin Scott") );
 
