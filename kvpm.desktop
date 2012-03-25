@@ -2,7 +2,7 @@
 GenericName=LVM Frontend
 Name=KVPM
 Comment=KDE Volume Partition Manager
-Exec=kvpm
+Exec=/usr/sbin/kvpm
 X-KDE-SubstituteUID=true
 Type=Application
 Categories=Qt;KDE;System;
