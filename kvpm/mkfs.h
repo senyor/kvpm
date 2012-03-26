@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -16,16 +16,17 @@
 #define MKFS_H
 
 #include <KDialog>
-#include <KTabWidget>
-#include <KLineEdit>
-#include <KComboBox>
 
 #include <QCheckBox>
 #include <QGroupBox>
 #include <QRadioButton>
 #include <QLabel>
 #include <QStringList>
-#include <QSpinBox>
+
+class KIntSpinBox;
+class KTabWidget;
+class KLineEdit;
+class KComboBox;
 
 class VolGroup;
 class LogVol;
@@ -44,6 +45,7 @@ Q_OBJECT
     QRadioButton *ext2, *ext3, *ext4, *reiser, *reiser4, *ntfs,
                  *jfs,  *xfs,  *vfat, *swap,   *btrfs;
 
+    KIntSpinBox *m_reserved_spin;  // space reserved for root processes
     KComboBox *m_block_combo;      // blocksize
     KComboBox *m_inode_combo;      // inode size
     KLineEdit *m_name_edit;        // volume name
@@ -51,7 +53,6 @@ Q_OBJECT
     KLineEdit *m_total_edit;       // total inode count
     KLineEdit *m_stride_edit;      // stride size
     KLineEdit *m_count_edit;       // strides per stripe
-    QSpinBox  *m_reserved_spin;
     QCheckBox *m_extent_check;
     QCheckBox *m_ext_attr_check;
     QCheckBox *m_resize_inode_check;

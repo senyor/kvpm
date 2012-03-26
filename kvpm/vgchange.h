@@ -15,14 +15,15 @@
 #ifndef VGCHANGE_H
 #define VGCHANGE_H
 
-#include <KComboBox>
 #include <KDialog>
 
 #include <QStringList>
 #include <QRadioButton>
 #include <QCheckBox>
-#include <QSpinBox>
 #include <QGroupBox>
+
+class KComboBox;
+class KIntSpinBox;
 
 class VolGroup;
 bool change_vg(VolGroup *const VolumeGroup);
@@ -39,7 +40,7 @@ Q_OBJECT
     QCheckBox *m_resize, *m_clustered, *m_refresh, *m_uuid;
     KComboBox *m_extent_size_combo, *m_extent_suffix_combo;
     QGroupBox *m_limit_box, *m_lvlimit_box, *m_pvlimit_box, *m_available_box, *m_polling_box;
-    QSpinBox  *m_max_lvs_spin, *m_max_pvs_spin; 
+    KIntSpinBox  *m_max_lvs_spin, *m_max_pvs_spin; 
 
 public:
     explicit VGChangeDialog(VolGroup *const volumeGroup, QWidget *parent = 0);

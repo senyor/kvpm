@@ -20,6 +20,7 @@
 #include <KEditListWidget>
 #include <KIcon>
 #include <KIconLoader>
+#include <KIntSpinBox>
 #include <KListWidget>
 #include <KLocale>
 #include <KMessageBox>
@@ -641,7 +642,7 @@ QGroupBox *KvpmConfigDialog::allGroup()
     percent_layout->addLayout(warn_layout);
     percent_layout->addWidget( new QLabel( i18n("when space falls to or below:") ) );
 
-    QSpinBox *const fs_warn_spin = new QSpinBox;
+    KIntSpinBox *const fs_warn_spin = new KIntSpinBox;
     fs_warn_spin->setObjectName("kcfg_fs_warn");
     fs_warn_spin->setRange(0, 99);
     fs_warn_spin->setSingleStep(1);
@@ -651,7 +652,7 @@ QGroupBox *KvpmConfigDialog::allGroup()
     fs_warn_layout->addWidget( new QLabel( i18n("on a filesystem") ) );
     fs_warn_layout->addStretch();
 
-    QSpinBox *const pv_warn_spin = new QSpinBox;
+    KIntSpinBox *const pv_warn_spin = new KIntSpinBox;
     pv_warn_spin->setObjectName("kcfg_pv_warn");
     pv_warn_spin->setRange(0, 99);
     pv_warn_spin->setSingleStep(1);

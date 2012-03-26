@@ -14,9 +14,12 @@
 
 #include "mkfs.h"
 
-#include <KMessageBox>
-#include <KDialog>
+#include <KComboBox>
+#include <KIntSpinBox>
+#include <KLineEdit>
 #include <KLocale>
+#include <KMessageBox>
+#include <KTabWidget>
 
 #include <QtGui>
 
@@ -289,7 +292,7 @@ QGroupBox* MkfsDialog::miscOptionsBox()
 
     label = new QLabel( i18n("Reserved space: ") );
     reserved_layout->addWidget(label);
-    m_reserved_spin = new QSpinBox;
+    m_reserved_spin = new KIntSpinBox;
     label->setBuddy(m_reserved_spin);
     m_reserved_spin->setRange(0, 100);
     m_reserved_spin->setValue(5);
