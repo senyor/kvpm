@@ -15,6 +15,8 @@
 
 #include "vgchange.h"
 
+#include <KComboBox>
+#include <KIntSpinBox>
 #include <KLocale>
 #include <KSeparator>
 
@@ -232,8 +234,8 @@ VGChangeDialog::VGChangeDialog(VolGroup *const volumeGroup, QWidget *parent)
     QHBoxLayout *const lv_layout = new QHBoxLayout();
     QHBoxLayout *const pv_layout = new QHBoxLayout();
 
-    m_max_pvs_spin = new QSpinBox();
-    m_max_lvs_spin = new QSpinBox();
+    m_max_pvs_spin = new KIntSpinBox();
+    m_max_lvs_spin = new KIntSpinBox();
 
     if(m_vg->getFormat() == "lvm1"){
 	m_max_lvs_spin->setEnabled(true);

@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -16,9 +16,6 @@
 #define LVCREATE_H
 
 #include <KDialog>
-#include <KLineEdit>
-#include <KTabWidget>
-#include <KComboBox>
 
 #include <QGroupBox>
 #include <QCheckBox>
@@ -26,13 +23,18 @@
 #include <QStringList>
 #include <QRadioButton>
 #include <QLabel>
-#include <QSpinBox>
+
+class KIntSpinBox;
+class KLineEdit;
+class KTabWidget;
+class KComboBox;
+
+class QRegExpValidator;
+class QDoubleValidator;
 
 class LogVol;
 class VolGroup;
 class PhysVol;
-class QRegExpValidator;
-class QDoubleValidator;
 class PvGroupBox;
 class SizeSelectorBox;
 
@@ -79,8 +81,8 @@ Q_OBJECT
 
      KComboBox *stripe_size_combo; 
 
-     QSpinBox *m_mirror_count_spin,  // how many mirrors we want
-	      *m_stripe_count_spin;  // how many stripes we want
+     KIntSpinBox *m_mirror_count_spin,  // how many mirrors we want
+	         *m_stripe_count_spin;  // how many stripes we want
 
      QLabel *m_stripe_count_label,
 	    *m_max_size_label, 
