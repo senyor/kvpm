@@ -24,7 +24,6 @@
 #include <QGroupBox>
 #include <QCheckBox>
 #include <QLabel>
-#include <QSpinBox>
 
 
 class QDoubleValidator;

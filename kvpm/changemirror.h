@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -21,7 +21,6 @@
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QRadioButton>
-#include <QSpinBox>
 #include <QStackedWidget>
 #include <QStringList>
 #include <QVBoxLayout>
