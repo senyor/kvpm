@@ -416,6 +416,8 @@ void DeviceTree::setViewConfig()
 {  
     KConfigSkeleton skeleton;
 
+    bool hidden_columns_changed = false;
+
     bool device, 
          partition, 
          capacity, 
@@ -446,12 +448,57 @@ void DeviceTree::setViewConfig()
     skeleton.addItemInt(  "fs_warn", m_fs_warn_percent, 10 );
     skeleton.addItemInt(  "pv_warn", m_pv_warn_percent,  0 );
 
-    setColumnHidden( 0, !device );
-    setColumnHidden( 1, !partition );
-    setColumnHidden( 2, !capacity );
-    setColumnHidden( 3, !remaining );
-    setColumnHidden( 4, !usage );
-    setColumnHidden( 5, !group );
-    setColumnHidden( 6, !flags );
-    setColumnHidden( 7, !mount );
+    if(isColumnHidden(0) == device){
+        hidden_columns_changed = true;
+        setColumnHidden(0, !device);
+    }
+
+    if(isColumnHidden(1) == partition){
+        hidden_columns_changed = true;
+        setColumnHidden(1, !partition);
+    }
+
+    if(isColumnHidden(2) == capacity){
+        hidden_columns_changed = true;
+        setColumnHidden(2, !capacity);
+    }
+
+    if(isColumnHidden(3) == remaining){
+        hidden_columns_changed = true;
+        setColumnHidden(3, !remaining);
+    }
+
+    if(isColumnHidden(4) == usage){
+        hidden_columns_changed = true;
+        setColumnHidden(4, !usage);
+    }
+
+    if(isColumnHidden(5) == group){
+        hidden_columns_changed = true;
+        setColumnHidden(5, !group);
+    }
+
+    if(isColumnHidden(6) == flags){
+        hidden_columns_changed = true;
+        setColumnHidden(6, !flags);
+    }
+
+    if(isColumnHidden(7) == mount){
+        hidden_columns_changed = true;
+        setColumnHidden(7, !mount);
+    }
+
+    bool skip = true;
+    if(hidden_columns_changed){
+        for(int x = 7; x >= 0; x--){
+            if(!isColumnHidden(x)){
+                if(skip){
+                    skip = false;
+                }
+                else{
+                    resizeColumnToContents(x);
+                }
+            }
+        }
+    }
 }
