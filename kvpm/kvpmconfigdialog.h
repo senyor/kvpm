@@ -15,19 +15,16 @@
 #ifndef KVPMCONFIGDIALOG_H
 #define KVPMCONFIGDIALOG_H
 
-#include <KConfigDialog>
-#include <KConfigSkeleton>
-#include <KColorButton>
-#include <KEditListBox>
-#include <KPageWidgetItem>
-#include <KTabWidget>
+class KConfigSkeleton;
+class KColorButton;
+class KEditListWidget;
+class KPageWidgetItem;
+class KTabWidget;
 
-#include <QColor>
-#include <QCheckBox>
+#include <KConfigDialog>
+
 #include <QGroupBox>
-#include <QRadioButton>
-#include <QStringList>
-#include <QSpinBox>
+#include <QString>
 #include <QTableWidget>
 #include <QWidget>
 
@@ -39,7 +36,7 @@ class KvpmConfigDialog: public KConfigDialog
 Q_OBJECT
 
     QTableWidget     *m_executables_table;
-    KEditListBox     *m_edit_list;
+    KEditListWidget  *m_edit_list;
     KConfigSkeleton  *m_skeleton;
     ExecutableFinder *m_executable_finder;
 

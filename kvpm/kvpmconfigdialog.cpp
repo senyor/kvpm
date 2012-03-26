@@ -17,12 +17,13 @@
 
 #include <KColorButton>
 #include <KConfigSkeleton>
-#include <KEditListBox>
+#include <KEditListWidget>
 #include <KIcon>
 #include <KIconLoader>
 #include <KListWidget>
 #include <KLocale>
 #include <KMessageBox>
+#include <KPageWidgetItem>
 #include <KSeparator>
 #include <KTabWidget>
 
@@ -288,7 +289,7 @@ QTabWidget *KvpmConfigDialog::programsPage()
     m_skeleton->setCurrentGroup("SystemPaths");
     m_skeleton->addItemStringList("SearchPath", search_entries, default_entries);
 
-    m_edit_list = new KEditListBox();
+    m_edit_list = new KEditListWidget();
     m_edit_list->setObjectName("kcfg_SearchPath");
     QLabel *search_label = new QLabel( i18n("<b>Set the search path for support programs</b>") );
     search_label->setAlignment(Qt::AlignCenter);
