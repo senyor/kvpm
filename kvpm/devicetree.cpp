@@ -67,7 +67,7 @@ void DeviceTree::loadData(QList<StorageDevice *> devices)
     StoragePartition *part;
     StorageDevice *dev;
     PhysVol *pv;
-    QStringList data, expanded_items;
+    QStringList data, expanded_items, old_dev_names;
     QString dev_name, part_name, type, current_device;
     QVariant part_variant, dev_variant;
 
@@ -96,8 +96,9 @@ void DeviceTree::loadData(QList<StorageDevice *> devices)
     if( currentItem() )
         current_device = currentItem()->data(0, Qt::DisplayRole).toString();
 
+    old_dev_names.clear();
     for(int x = topLevelItemCount() - 1; x >= 0; x--){
-        parent = topLevelItem(x);
+        parent = topLevelItem(x); 
 
         if( parent->isExpanded() )
             expanded_items << parent->data(0, Qt::DisplayRole).toString();
@@ -107,7 +108,8 @@ void DeviceTree::loadData(QList<StorageDevice *> devices)
                 expanded_items << parent->child(y)->data(0, Qt::DisplayRole).toString();
         }
 
-        delete takeTopLevelItem(x);
+        old_dev_names << parent->data(0, Qt::DisplayRole).toString();
+        delete takeTopLevelItem(x); 
     }
 
     for(int x = 0; x < devices.size(); x++){
@@ -347,6 +349,11 @@ void DeviceTree::loadData(QList<StorageDevice *> devices)
     else{
         for(int x = topLevelItemCount() - 1; x >= 0; x--){
             parent = topLevelItem(x);
+      
+            const QString dev_name = parent->data(0, Qt::DisplayRole).toString();
+            if(!old_dev_names.contains(dev_name))
+                parent->setExpanded(m_expand_parts);
+      
             if( parent->data(0, Qt::DisplayRole).toString() == current_device ){
                 match = true;
                 setCurrentItem(parent);
