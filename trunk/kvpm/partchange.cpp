@@ -15,6 +15,8 @@
 
 #include "partchange.h"
 
+#include <KComboBox>
+#include <KLineEdit>
 #include <KApplication>
 #include <KButtonGroup>
 #include <KConfigSkeleton>

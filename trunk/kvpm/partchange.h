@@ -17,24 +17,15 @@
 
 #include <parted/parted.h>
 
-#include <KComboBox>
 #include <KDialog>
-#include <KLineEdit>
 
-#include <QDoubleValidator>
-#include <QEventLoop>
-#include <QFrame>
 #include <QGroupBox>
-#include <QCheckBox>
 #include <QLabel>
-#include <QSlider>
-#include <QSpinBox>
 
 
 class PartitionGraphic;
 class DualSelectorBox;
 class StoragePartition;
-
 
 
 class PartitionChangeDialog : public KDialog
