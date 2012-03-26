@@ -63,10 +63,10 @@ DeviceTree::DeviceTree(DeviceSizeChart *const chart, DevicePropertiesStack *cons
 
 void DeviceTree::loadData(QList<StorageDevice *> devices)
 {
-    QTreeWidgetItem  *parent, *child, *extended = 0;
-    StoragePartition *part;
-    StorageDevice *dev;
-    PhysVol *pv;
+    QTreeWidgetItem  *parent, *child, *extended = NULL;
+    StoragePartition *part = NULL;
+    StorageDevice *dev = NULL;
+    PhysVol *pv = NULL;
     QStringList data, expanded_items, old_dev_names;
     QString dev_name, part_name, type, current_device;
     QVariant part_variant, dev_variant;
