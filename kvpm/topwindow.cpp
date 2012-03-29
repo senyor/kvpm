@@ -293,8 +293,13 @@ void TopWindow::splitVolumeGroup()
 
 void TopWindow::mergeVolumeGroup()
 {
-    if( merge_vg(m_vg) )
-        reRun();
+    VGMergeDialog dialog(m_vg);
+
+    if( !dialog.bailout() ){
+        dialog.exec();
+        if(dialog.result() == QDialog::Accepted)
+            reRun();
+    }
 }
 
 void TopWindow::removeMissingVolumes()
