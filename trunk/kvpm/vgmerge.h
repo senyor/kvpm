@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -15,14 +15,16 @@
 #ifndef VGMERGE_H
 #define VGMERGE_H
 
-#include <QCheckBox>
-
 #include <KDialog>
-#include <KComboBox>
+#include <QList>
+
+class QCheckBox;
+class QStackedWidget;
+
+class KComboBox;
 
 class VolGroup;
 
-bool merge_vg(VolGroup *volumeGroup);
 
 class VGMergeDialog : public KDialog
 {
@@ -31,10 +33,16 @@ Q_OBJECT
     VolGroup  *m_vg;
     KComboBox *m_target_combo;
     QCheckBox *m_autobackup;
+    QStackedWidget *m_error_stack;
+    QList<long> m_extent_size;
 
  public:
-    explicit VGMergeDialog(VolGroup *volumeGroup, QWidget *parent = 0);
-    QStringList arguments();    
+    explicit VGMergeDialog(VolGroup *const volumeGroup, QWidget *parent = 0);
+    bool bailout();
+
+ private slots:
+    void commitChanges();
+    void compareExtentSize();
 
 };
 
