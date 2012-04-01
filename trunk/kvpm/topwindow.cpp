@@ -254,8 +254,13 @@ void TopWindow::renameVolumeGroup()
 
 void TopWindow::reduceVolumeGroup()
 {
-    if (reduce_vg(m_vg))
-        reRun();
+    VGReduceDialog dialog(m_vg);
+
+    if (!dialog.bailout()) {
+        dialog.exec();
+        if (dialog.result() == QDialog::Accepted)
+            reRun();
+    }
 }
 
 void TopWindow::exportVolumeGroup()

@@ -17,14 +17,12 @@
 
 #include <KDialog>
 
-#include <QCheckBox>
 #include <QStringList>
 
+class QCheckBox;
 
 class VolGroup;
 class PvGroupBox;
-
-bool reduce_vg(VolGroup *volumeGroup);
 
 
 class VGReduceDialog : public KDialog
@@ -34,10 +32,11 @@ class VGReduceDialog : public KDialog
     VolGroup *m_vg;
     PvGroupBox *m_pv_checkbox;
     bool m_unremovable_pvs_present;
+    bool m_bailout;
 
 public:
     explicit VGReduceDialog(VolGroup *const volumeGroup, QWidget *parent = NULL);
-    QStringList arguments();
+    bool bailout();
 
 private slots:
     void excludeOneVolume();  // one pv must remain in the vg

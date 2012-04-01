@@ -14,30 +14,20 @@
 
 #include "vgreduce.h"
 
-#include <lvm2app.h>
-
-#include <KMessageBox>
-#include <KLocale>
-#include <QtGui>
-
 #include "masterlist.h"
 #include "misc.h"
 #include "physvol.h"
 #include "pvgroupbox.h"
 #include "volgroup.h"
 
+#include <lvm2app.h>
 
+#include <KLocale>
+#include <KMessageBox>
 
-bool reduce_vg(VolGroup *const volumeGroup)
-{
-    VGReduceDialog dialog(volumeGroup);
-    dialog.exec();
+#include <QLabel>
+#include <QVBoxLayout>
 
-    if (dialog.result() == QDialog::Accepted)
-        return true;
-    else
-        return false;
-}
 
 VGReduceDialog::VGReduceDialog(VolGroup *const volumeGroup, QWidget *parent) : KDialog(parent), m_vg(volumeGroup)
 {
@@ -48,7 +38,7 @@ VGReduceDialog::VGReduceDialog(VolGroup *const volumeGroup, QWidget *parent) : K
     dialog_body->setLayout(layout);
 
     m_unremovable_pvs_present = false;
-    QString vg_name = m_vg->getName();
+    const QString vg_name = m_vg->getName();
 
     QList<PhysVol *> member_pvs = m_vg->getPhysicalVolumes();
     int pv_count = m_vg->getPvCount();
@@ -61,27 +51,41 @@ VGReduceDialog::VGReduceDialog(VolGroup *const volumeGroup, QWidget *parent) : K
         }
     }
 
-    QLabel *label;
-    if (m_unremovable_pvs_present) {
-        label = new QLabel(i18n("Select physical volumes to "
-                                "remove them from volume group <b>%1</b>", vg_name));
+    if (member_pvs.isEmpty()){
+        m_bailout = true;
+        KMessageBox::error(0, i18n("There are no physical volumes that can be removed"));
+    } else if (member_pvs.size() == 1 && !m_unremovable_pvs_present) {
+        m_bailout = true;
+        KMessageBox::error(0, i18n("There is only one physical volume in this group"));
     } else {
-        label = new QLabel(i18n("Select physical volumes <b>excluding one</b> to "
-                                "remove them from volume group <b>%1</b>", vg_name));
+        m_bailout = false;
+        QLabel *label;
+
+        label = new QLabel(i18n("<b>Reduce volume group: %1</b>", vg_name));
+        label->setAlignment(Qt::AlignCenter);
+        layout->addWidget(label);
+        layout->addSpacing(5);
+
+        if (m_unremovable_pvs_present) {
+            label = new QLabel(i18n("Select physical volumes to remove them from the volume group"));
+        } else {
+            label = new QLabel(i18n("Select physical volumes, <b>excluding one</b>, to "
+                                    "remove them from the volume group"));
+        }
+        
+        label->setWordWrap(true);
+        layout->addWidget(label);
+        
+        m_pv_checkbox = new PvGroupBox(member_pvs);
+        layout->addWidget(m_pv_checkbox);
+        m_pv_checkbox->setTitle(i18n("Unused physical volumes"));
+        
+        connect(m_pv_checkbox, SIGNAL(stateChanged()), this, SLOT(excludeOneVolume()));
+        m_pv_checkbox->selectNone();
+        
+        connect(this, SIGNAL(okClicked()),
+                this, SLOT(commitChanges()));
     }
-
-    label->setWordWrap(true);
-    layout->addWidget(label);
-
-    m_pv_checkbox = new PvGroupBox(member_pvs);
-    layout->addWidget(m_pv_checkbox);
-    m_pv_checkbox->setTitle(i18n("Unused physical volumes"));
-
-    connect(m_pv_checkbox, SIGNAL(stateChanged()), this, SLOT(excludeOneVolume()));
-    m_pv_checkbox->selectNone();
-
-    connect(this, SIGNAL(okClicked()),
-            this, SLOT(commitChanges()));
 }
 
 void VGReduceDialog::commitChanges()
@@ -125,4 +129,7 @@ void VGReduceDialog::excludeOneVolume()
         enableButtonOk(false);
 }
 
-
+bool VGReduceDialog::bailout()
+{
+    return m_bailout;
+}
