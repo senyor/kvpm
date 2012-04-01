@@ -188,8 +188,9 @@ QWidget* LVCreateDialog::createGeneralTab()
         QRegExp rx("[0-9a-zA-Z_\\.][-0-9a-zA-Z_\\.]*");
         m_name_validator = new QRegExpValidator( rx, m_name_edit );
         m_name_edit->setValidator(m_name_validator);
-        
-        name_layout->addWidget( new QLabel( i18n("Volume name: ") ) );
+        QLabel *const name_label = new QLabel( i18n("Volume name: ") );
+        name_label->setBuddy(m_name_edit);
+        name_layout->addWidget(name_label);
         name_layout->addWidget(m_name_edit);
         upper_layout->insertLayout(0, name_layout);
         
@@ -199,8 +200,9 @@ QWidget* LVCreateDialog::createGeneralTab()
         QRegExp rx2("[0-9a-zA-Z_\\.+-]*");
         m_tag_validator = new QRegExpValidator( rx2, m_tag_edit );
         m_tag_edit->setValidator(m_tag_validator);
-        
-        tag_layout->addWidget( new QLabel( i18n("Optional tag: ") ) );
+        QLabel *const tag_label = new QLabel( i18n("Optional tag: ") );
+        tag_label->setBuddy(m_tag_edit);
+        tag_layout->addWidget(tag_label);
         tag_layout->addWidget(m_tag_edit);
         upper_layout->insertLayout(1, tag_layout);
         
@@ -483,8 +485,10 @@ QWidget* LVCreateDialog::createAdvancedTab()
     QHBoxLayout *major_number_layout = new QHBoxLayout;
     m_minor_number_edit = new KLineEdit();
     m_major_number_edit = new KLineEdit();
-    QLabel *minor_number = new QLabel( i18n("Device minor number: ") );
-    QLabel *major_number = new QLabel( i18n("Device major number: ") );
+    QLabel *const minor_number = new QLabel( i18n("Device minor number: ") );
+    QLabel *const major_number = new QLabel( i18n("Device major number: ") );
+    minor_number->setBuddy(m_minor_number_edit);
+    major_number->setBuddy(m_major_number_edit);
     major_number_layout->addWidget(major_number);
     major_number_layout->addWidget(m_major_number_edit);
     minor_number_layout->addWidget(minor_number);
