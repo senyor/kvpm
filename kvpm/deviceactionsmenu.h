@@ -1,14 +1,14 @@
 /*
  *
- * 
+ *
  * Copyright (C) 2008, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License,  version 3, as 
+ * it under the terms of the GNU General Public License,  version 3, as
  * published by the Free Software Foundation.
- * 
+ *
  * See the file "COPYING" for the exact licensing terms.
  */
 
@@ -29,7 +29,7 @@ class StorageDevice;
 
 class DeviceActionsMenu : public KMenu
 {
-Q_OBJECT
+    Q_OBJECT
 
     KMenu *m_vgextend_menu;
 
@@ -41,10 +41,10 @@ Q_OBJECT
             *m_partadd_action,
             *m_partchange_action,
             *m_removefs_action,
-	    *m_vgcreate_action,
-	    *m_tablecreate_action,
-	    *m_vgreduce_action,
-	    *m_mount_action,
+            *m_vgcreate_action,
+            *m_tablecreate_action,
+            *m_vgreduce_action,
+            *m_mount_action,
             *m_unmount_action;
 
     QList<QAction *> vgextend_actions;
@@ -53,11 +53,11 @@ Q_OBJECT
     QString m_vg_name;
 
     void setup(QTreeWidgetItem *const item);
-    
- public:
+
+public:
     explicit DeviceActionsMenu(QTreeWidgetItem *const item, QWidget *parent = 0);
 
- private slots:
+private slots:
     void fsckPartition();
     void mkfsPartition();
     void maxfsPartition();
@@ -71,7 +71,7 @@ Q_OBJECT
     void vgextendPartition(QAction *action);
     void mountPartition();
     void unmountPartition();
-    
+
 };
 
 #endif

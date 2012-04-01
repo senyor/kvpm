@@ -1,14 +1,14 @@
 /*
  *
- * 
+ *
  * Copyright (C) 2008, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License,  version 3, as 
+ * it under the terms of the GNU General Public License,  version 3, as
  * published by the Free Software Foundation.
- * 
+ *
  * See the file "COPYING" for the exact licensing terms.
  */
 
@@ -41,10 +41,10 @@ MountEntry::MountEntry(MountEntry *const copy, QObject *parent) : QObject(parent
 
 MountEntry::MountEntry(mntent *const entry, QObject *parent) : QObject(parent)
 {
-    m_device_name     = QString( entry->mnt_fsname ).trimmed();
-    m_mount_point     = QString( entry->mnt_dir ).trimmed();
-    m_filesystem_type = QString( entry->mnt_type ).trimmed();
-    m_mount_options   = QString( entry->mnt_opts ).trimmed();
+    m_device_name     = QString(entry->mnt_fsname).trimmed();
+    m_mount_point     = QString(entry->mnt_dir).trimmed();
+    m_filesystem_type = QString(entry->mnt_type).trimmed();
+    m_mount_options   = QString(entry->mnt_opts).trimmed();
 
     m_major = -1;
     m_minor = -1;
@@ -110,4 +110,4 @@ int MountEntry::getMinorNumber()
 void MountEntry::setMountPosition(const int pos)
 {
     m_mount_position = pos;
-}    
+}

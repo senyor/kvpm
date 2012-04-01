@@ -1,14 +1,14 @@
 /*
  *
- * 
+ *
  * Copyright (C) 2008, 2009, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License,  version 3, as 
+ * it under the terms of the GNU General Public License,  version 3, as
  * published by the Free Software Foundation.
- * 
+ *
  * See the file "COPYING" for the exact licensing terms.
  */
 
@@ -31,9 +31,9 @@ class DeviceProperties : public QWidget
     QFrame *generalFrame(StorageDevice *const device);
     QFrame *generalFrame(StoragePartition *const partition);
 
- public:
-     explicit DeviceProperties(StorageDevice *const device, QWidget *parent = 0);
-     explicit DeviceProperties(StoragePartition *const partition, QWidget *parent = 0);
+public:
+    explicit DeviceProperties(StorageDevice *const device, QWidget *parent = 0);
+    explicit DeviceProperties(StoragePartition *const partition, QWidget *parent = 0);
 };
 
 #endif

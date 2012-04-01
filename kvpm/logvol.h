@@ -1,14 +1,14 @@
 /*
  *
- * 
+ *
  * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License,  version 3, as 
+ * it under the terms of the GNU General Public License,  version 3, as
  * published by the Free Software Foundation.
- * 
+ *
  * See the file "COPYING" for the exact licensing terms.
  */
 
@@ -36,7 +36,7 @@ class LogVol
     QList<Segment *> m_segments;
     QList<MountEntry *> m_mount_entries;
     QList<LogVol *> m_lv_children;  // For a mirror the children are the legs and log
-                                    // Snapshots are also children -- see m_snap_container
+    // Snapshots are also children -- see m_snap_container
 
     MountTables *m_tables;
     LogVol *m_lv_parent;       // NULL if this is the 'top' lv
@@ -48,7 +48,7 @@ class LogVol
     QString m_lv_fs_uuid;    // Filesystem uuid
     QString m_origin;        // the origin if this is a snapshot
 
-    QString m_log;           // The mirror log, if this is a mirror 
+    QString m_log;           // The mirror log, if this is a mirror
     QString m_type;          // the type of volume
     QString m_policy;        // the allocation policy
     QString m_state;         // the lv state
@@ -63,7 +63,7 @@ class LogVol
     long long m_size;            // size in bytes
     long long m_total_size;      // size in bytes, size of all children (mirror legs/logs and snaps) added together
     long long m_extents;         // size in extents
-    long long m_fs_size;         // fs size in bytes 
+    long long m_fs_size;         // fs size in bytes
     long long m_fs_used;         // bytes used up in fs
 
     int m_seg_total;             // total number of segments in logical volume
@@ -76,10 +76,10 @@ class LogVol
     bool m_mirror;               // Is a mirrored volume
     bool m_mirror_leg;           // Is one of the underlying legs of a mirrored volume
     bool m_mirror_log;           // Is the log for a mirrored volume
-    bool m_fixed, m_persistent;  // fix the device minor and major number 
+    bool m_fixed, m_persistent;  // fix the device minor and major number
 
-    bool m_alloc_locked;         // allocation type is fixed when pvmove is underway 
-                                 // (and maybe other times)
+    bool m_alloc_locked;         // allocation type is fixed when pvmove is underway
+    // (and maybe other times)
     bool m_active;
     bool m_mounted;              // has a mounted filesystem
     bool m_open;                 // device is open
@@ -91,7 +91,7 @@ class LogVol
     bool m_writable;
     bool m_valid;                // is a valid snap
     bool m_merging;              // is snap or snap origin that is merging
-    
+
     void countLegsAndLogs();
     void processSegments(lv_t lvmLV);
     QStringList removePvNames(QStringList names);  // list lv children that are lvs and not devices or pvmove*
@@ -99,7 +99,7 @@ class LogVol
     void insertChildren(lv_t lvmLV, vg_t lvmVG);
     void calculateTotalSize();
 
- public:
+public:
     LogVol(lv_t lvmLV, vg_t lvmVG, VolGroup *const vg, LogVol *const lvParent, MountTables *const tables, bool orphan = false);
     ~LogVol();
 
@@ -107,7 +107,7 @@ class LogVol
     QList<LogVol *> getChildren();         // just the children -- not grandchildren etc.
     QList<LogVol *> takeChildren();        // removes the children from the logical volume
     QList<LogVol *> getAllChildrenFlat();  // All children, grandchildren etc. un-nested.
-    QList<LogVol *> getSnapshots();        // This will work the same for snapcontainers or the real lv 
+    QList<LogVol *> getSnapshots();        // This will work the same for snapcontainers or the real lv
     LogVol *getParent();                   // NULL if this is a "top level" lv
     VolGroup* getVg();
     QString getName();
@@ -127,7 +127,7 @@ class LogVol
     long long getSegmentSize(const int segment);
     long long getSegmentExtents(const int segment);
     QList<long long> getSegmentStartingExtent(const int segment);
-    QStringList getPvNames(const int segment);     
+    QStringList getPvNames(const int segment);
     QStringList getPvNamesAll();         // full path of physical volumes for all segments
     QStringList getPvNamesAllFlat();     // full path of physical volumes including child lvs, un-nested
     QStringList getMountPoints();
@@ -167,7 +167,7 @@ class LogVol
     bool isVirtual();
     bool isWritable();
     bool hasMissingVolume();
-    
+
 };
 
 #endif

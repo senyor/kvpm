@@ -1,14 +1,14 @@
 /*
  *
- * 
+ *
  * Copyright (C) 2008, 2009, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License,  version 3, as 
+ * it under the terms of the GNU General Public License,  version 3, as
  * published by the Free Software Foundation.
- * 
+ *
  * See the file "COPYING" for the exact licensing terms.
  */
 
@@ -29,8 +29,8 @@ bool remove_mirror_leg(LogVol *mirrorLeg)
     QStringList args;
     LogVol *parent_mirror = mirrorLeg->getParent();
 
-    while( parent_mirror->getParent() != NULL ){
-        if( parent_mirror->getParent()->isSnapContainer() )
+    while (parent_mirror->getParent() != NULL) {
+        if (parent_mirror->getParent()->isSnapContainer())
             break;
         else
             parent_mirror = parent_mirror->getParent();
@@ -39,25 +39,24 @@ bool remove_mirror_leg(LogVol *mirrorLeg)
     QStringList pvs_to_remove = mirrorLeg->getPvNamesAll();
 
     const QString warning = i18n("Remove mirror leg: %1 ?", mirrorLeg->getName());
-    
-    if(KMessageBox::warningYesNo(NULL, 
-                                 warning, 
-                                 QString(), 
-                                 KStandardGuiItem::yes(), 
-                                 KStandardGuiItem::no(), 
-                                 QString(), 
-                                 KMessageBox::Dangerous) == KMessageBox::Yes){
 
-	args << "lvconvert"
-	     << "--mirrors" 
-	     << QString("-1")
-	     << parent_mirror->getFullName()
-	     << pvs_to_remove;
+    if (KMessageBox::warningYesNo(NULL,
+                                  warning,
+                                  QString(),
+                                  KStandardGuiItem::yes(),
+                                  KStandardGuiItem::no(),
+                                  QString(),
+                                  KMessageBox::Dangerous) == KMessageBox::Yes) {
 
-	ProcessProgress remove(args);
-	return true;
-    }
-    else{
-	return false;
+        args << "lvconvert"
+             << "--mirrors"
+             << QString("-1")
+             << parent_mirror->getFullName()
+             << pvs_to_remove;
+
+        ProcessProgress remove(args);
+        return true;
+    } else {
+        return false;
     }
 }

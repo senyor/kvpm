@@ -1,14 +1,14 @@
 /*
  *
- * 
+ *
  * Copyright (C) 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License,  version 3, as 
+ * it under the terms of the GNU General Public License,  version 3, as
  * published by the Free Software Foundation.
- * 
+ *
  * See the file "COPYING" for the exact licensing terms.
  */
 
@@ -26,7 +26,7 @@
 
 class SizeSelectorBox : public QGroupBox
 {
-Q_OBJECT
+    Q_OBJECT
 
     long long  m_max_size;        // max size possible in sectors or extents, not bytes etc.
     long long  m_min_size;
@@ -59,7 +59,7 @@ signals:
     void stateChanged();
 
 public:
-    SizeSelectorBox(long long unitSize, long long minSize, long long maxSize, long long initialSize, 
+    SizeSelectorBox(long long unitSize, long long minSize, long long maxSize, long long initialSize,
                     bool isVolume, bool isOffset, bool isNew = false, bool startLocked = false, QWidget *parent = 0);
 
     long long getCurrentSize();

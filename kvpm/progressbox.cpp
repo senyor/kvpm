@@ -1,14 +1,14 @@
 /*
  *
- * 
+ *
  * Copyright (C) 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License,  version 3, as 
+ * it under the terms of the GNU General Public License,  version 3, as
  * published by the Free Software Foundation.
- * 
+ *
  * See the file "COPYING" for the exact licensing terms.
  */
 
@@ -36,7 +36,7 @@ void ProgressBox::setText(const QString text)
 {
     show();
 
-    if( !text.isEmpty() )
+    if (!text.isEmpty())
         m_message->setText(text + " >>");
     else
         m_message->clear();
@@ -55,7 +55,7 @@ void ProgressBox::setValue(const int value)
     show();
 
     m_progressbar->setValue(value);
-    if( value >= m_progressbar->maximum() )
+    if (value >= m_progressbar->maximum())
         m_message->clear();
 }
 

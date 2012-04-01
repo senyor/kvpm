@@ -1,14 +1,14 @@
 /*
  *
- * 
+ *
  * Copyright (C) 2009, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License,  version 3, as 
+ * it under the terms of the GNU General Public License,  version 3, as
  * published by the Free Software Foundation.
- * 
+ *
  * See the file "COPYING" for the exact licensing terms.
  */
 
@@ -45,28 +45,28 @@ void GraphicBody::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
     painter.setPen(Qt::blue);
-    
+
     const long double total_sectors = m_preceding_sectors + m_following_sectors + m_partition_sectors;
     double offset = 0;
     double length = (m_preceding_sectors / total_sectors) * width();
     QRectF preceding_rectangle(offset, 0.0, length, (double)height());
-    
+
     offset += length;
     length = (m_partition_sectors / total_sectors) * width();
-    if( length < 1.0 )                                     // always show at least a sliver
+    if (length < 1.0)                                      // always show at least a sliver
         length = 1.0;
     QRectF partition_rectangle(offset, 0.0, length, (double)height());
-    
+
     offset += length;
     length = (m_following_sectors / total_sectors) * width();
     QRectF following_rectangle(offset, 0.0, length, (double)height());
-    
-    QBrush free_brush( Qt::green, Qt::SolidPattern );
-    QBrush partition_brush( Qt::blue, Qt::SolidPattern );
-    
-    painter.fillRect( preceding_rectangle, free_brush );
-    painter.fillRect( following_rectangle, free_brush );
-    painter.fillRect( partition_rectangle, partition_brush );
+
+    QBrush free_brush(Qt::green, Qt::SolidPattern);
+    QBrush partition_brush(Qt::blue, Qt::SolidPattern);
+
+    painter.fillRect(preceding_rectangle, free_brush);
+    painter.fillRect(following_rectangle, free_brush);
+    painter.fillRect(partition_rectangle, partition_brush);
 }
 
 

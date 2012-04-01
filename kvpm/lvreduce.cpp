@@ -1,14 +1,14 @@
 /*
  *
- * 
+ *
  * Copyright (C) 2008, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License,  version 3, as 
+ * it under the terms of the GNU General Public License,  version 3, as
  * published by the Free Software Foundation.
- * 
+ *
  * See the file "COPYING" for the exact licensing terms.
  */
 
@@ -33,7 +33,7 @@ LVReduceDialog::LVReduceDialog(LogVol *const volume, QWidget *parent)
       m_lv(volume)
 {
     m_vg = m_lv->getVg();
-    setWindowTitle( i18n("Reduce Logical Volume") );
+    setWindowTitle(i18n("Reduce Logical Volume"));
 
     QWidget *dialog_body = new QWidget(this);
     setMainWidget(dialog_body);
@@ -51,61 +51,56 @@ LVReduceDialog::LVReduceDialog(LogVol *const volume, QWidget *parent)
                                           "any <b>data</b> it contains <b>will be lost!</b>");
 
     const QString warning_message2 = i18n("Only the ext2, ext3 and ext4 file systems "
-                                          "are supported for file system reduction. If this " 
+                                          "are supported for file system reduction. If this "
                                           "logical volume is reduced any <b>data</b> it contains "
                                           "<b>will be lost!</b>");
 
-    if( !m_lv->isActive() && !m_lv->isSnap() ){
-	if(KMessageBox::warningContinueCancel(NULL, 
-                                              warning_message1, 
-                                              QString(), 
-                                              KStandardGuiItem::cont(), 
-                                              KStandardGuiItem::cancel(), 
-                                              QString(), 
-                                              KMessageBox::Dangerous) == KMessageBox::Continue){
+    if (!m_lv->isActive() && !m_lv->isSnap()) {
+        if (KMessageBox::warningContinueCancel(NULL,
+                                               warning_message1,
+                                               QString(),
+                                               KStandardGuiItem::cont(),
+                                               KStandardGuiItem::cancel(),
+                                               QString(),
+                                               KMessageBox::Dangerous) == KMessageBox::Continue) {
             force = true;
-        }
-	else{
+        } else {
             m_bailout = true;
         }
-    }
-    else if( m_lv->isMounted() && !m_lv->isSnap() ){
-        KMessageBox::error(0, i18n("The filesystem must be unmounted first") );
+    } else if (m_lv->isMounted() && !m_lv->isSnap()) {
+        KMessageBox::error(0, i18n("The filesystem must be unmounted first"));
         m_bailout = true;
-    }
-    else if( !fs_can_reduce(fs) && !m_lv->isSnap() ){
-	if(KMessageBox::warningContinueCancel(NULL, 
-                                              warning_message2, 
-                                              QString(), 
-                                              KStandardGuiItem::cont(), 
-                                              KStandardGuiItem::cancel(), 
-                                              QString(), 
-                                              KMessageBox::Dangerous) == KMessageBox::Continue){
-	    force = true;
-        }
-	else{
+    } else if (!fs_can_reduce(fs) && !m_lv->isSnap()) {
+        if (KMessageBox::warningContinueCancel(NULL,
+                                               warning_message2,
+                                               QString(),
+                                               KStandardGuiItem::cont(),
+                                               KStandardGuiItem::cancel(),
+                                               QString(),
+                                               KMessageBox::Dangerous) == KMessageBox::Continue) {
+            force = true;
+        } else {
             m_bailout = true;
         }
     }
 
-    if( !m_bailout && !force && !m_lv->isSnap() ){
+    if (!m_bailout && !force && !m_lv->isSnap()) {
 
-        const long long min_fs_size = get_min_fs_size( m_lv->getMapperPath(), m_lv->getFilesystem() );
+        const long long min_fs_size = get_min_fs_size(m_lv->getMapperPath(), m_lv->getFilesystem());
 
-        if( min_fs_size % extent_size )
+        if (min_fs_size % extent_size)
             min_lv_extents = 1 + (min_fs_size / extent_size);
         else
             min_lv_extents = min_fs_size / extent_size;
-        
-        if( min_fs_size == 0 || min_lv_extents >= m_lv->getExtents() ){
-            KMessageBox::error(0, i18n("The filesystem is already as small as it can be") );
+
+        if (min_fs_size == 0 || min_lv_extents >= m_lv->getExtents()) {
+            KMessageBox::error(0, i18n("The filesystem is already as small as it can be"));
             m_bailout = true;
         }
-    }
-    else
+    } else
         min_lv_extents = 1;
 
-    if(!m_bailout){                
+    if (!m_bailout) {
 
         bool use_si_units;
         KConfigSkeleton skeleton;
@@ -113,27 +108,27 @@ LVReduceDialog::LVReduceDialog(LogVol *const volume, QWidget *parent)
         skeleton.addItemBool("use_si_units", use_si_units, false);
 
         KLocale *const locale = KGlobal::locale();
-        if(use_si_units)
-            locale->setBinaryUnitDialect(KLocale::MetricBinaryDialect); 
+        if (use_si_units)
+            locale->setBinaryUnitDialect(KLocale::MetricBinaryDialect);
         else
             locale->setBinaryUnitDialect(KLocale::IECBinaryDialect);
 
         QVBoxLayout *const label_layout = new QVBoxLayout();
         QWidget *const label_widget = new QWidget();
         label_widget->setLayout(label_layout);
-        QLabel *const lv_name_label  = new QLabel( i18n("<b>Reducing Volume: %1</b>", m_lv->getName() ));
+        QLabel *const lv_name_label  = new QLabel(i18n("<b>Reducing Volume: %1</b>", m_lv->getName()));
         lv_name_label->setAlignment(Qt::AlignCenter);
-        QLabel *const lv_min_label  = new QLabel( i18n("Estimated minimum size: %1", locale->formatByteSize(min_lv_extents * extent_size) ));
-        
+        QLabel *const lv_min_label  = new QLabel(i18n("Estimated minimum size: %1", locale->formatByteSize(min_lv_extents * extent_size)));
+
         m_size_selector = new SizeSelectorBox(extent_size, min_lv_extents, current_lv_extents, current_lv_extents, true, false, true);
-                
+
         label_layout->addWidget(lv_name_label);
         label_layout->addSpacing(5);
         label_layout->addWidget(lv_min_label);
         label_layout->addSpacing(5);
         layout->addWidget(label_widget);
         layout->addWidget(m_size_selector);
-        
+
         connect(this, SIGNAL(okClicked()),
                 this, SLOT(doShrink()));
 
@@ -156,18 +151,18 @@ void LVReduceDialog::doShrink()
 
     hide();
 
-    if( m_lv->isSnap() || !m_lv->isActive() )   // never reduce the fs of a snap!
+    if (m_lv->isSnap() || !m_lv->isActive())    // never reduce the fs of a snap!
         new_size = target_size;
-    else if( fs_can_reduce(fs) )
-        new_size = fs_reduce( m_lv->getMapperPath(), target_size, fs );
+    else if (fs_can_reduce(fs))
+        new_size = fs_reduce(m_lv->getMapperPath(), target_size, fs);
     else
         new_size = target_size;
 
-    if( new_size ){
-        lv_arguments << "lvreduce" 
-                     << "--force" 
-                     << "--size" 
-                     << QString("%1K").arg( new_size / 1024 )
+    if (new_size) {
+        lv_arguments << "lvreduce"
+                     << "--force"
+                     << "--size"
+                     << QString("%1K").arg(new_size / 1024)
                      << m_lv->getMapperPath();
 
         ProcessProgress reduce_lv(lv_arguments);
@@ -176,5 +171,5 @@ void LVReduceDialog::doShrink()
 
 void LVReduceDialog::resetOkButton()
 {
-    enableButtonOk( m_size_selector->isValid() );
+    enableButtonOk(m_size_selector->isValid());
 }

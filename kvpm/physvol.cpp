@@ -1,14 +1,14 @@
 /*
  *
- * 
+ *
  * Copyright (C) 2008, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License,  version 3, as 
+ * it under the terms of the GNU General Public License,  version 3, as
  * published by the Free Software Foundation.
- * 
+ *
  * See the file "COPYING" for the exact licensing terms.
  */
 
@@ -30,36 +30,36 @@ void PhysVol::rescan(pv_t lvm_pv)
     lvm_property_value value;
 
     value = lvm_pv_get_property(lvm_pv, "pv_attr");
-    if(value.is_valid)
+    if (value.is_valid)
         flags.append(value.value.string, 3);
 
     value = lvm_pv_get_property(lvm_pv, "pv_tags");
     m_tags.clear();
-    if(value.is_valid)
-        m_tags = QString( value.value.string ).split(',');
-    for(int x = 0; x < m_tags.size(); x++)
+    if (value.is_valid)
+        m_tags = QString(value.value.string).split(',');
+    for (int x = 0; x < m_tags.size(); x++)
         m_tags[x] = m_tags[x].trimmed();
 
     value = lvm_pv_get_property(lvm_pv, "pv_mda_used_count");
-    if(value.is_valid)
+    if (value.is_valid)
         m_mda_used = value.value.integer;
 
-    if(flags[0] == 'a')
+    if (flags[0] == 'a')
         m_allocatable = true;
     else
         m_allocatable = false;
 
     m_last_used_extent = 0;
     m_active        = false;     // pv is active if any associated lvs are active
-    m_device        = QString( lvm_pv_get_name(lvm_pv) );
-    m_device_size   = lvm_pv_get_dev_size(lvm_pv); 
+    m_device        = QString(lvm_pv_get_name(lvm_pv));
+    m_device_size   = lvm_pv_get_dev_size(lvm_pv);
     m_unused        = lvm_pv_get_free(lvm_pv);
     m_size          = lvm_pv_get_size(lvm_pv);
-    m_uuid          = QString( lvm_pv_get_uuid(lvm_pv) );
+    m_uuid          = QString(lvm_pv_get_uuid(lvm_pv));
     m_mda_count     = lvm_pv_get_mda_count(lvm_pv);
 
     value = lvm_pv_get_property(lvm_pv, "pv_mda_size");
-    if(value.is_valid)
+    if (value.is_valid)
         m_mda_size = value.value.integer;
 
     /*
@@ -67,16 +67,16 @@ void PhysVol::rescan(pv_t lvm_pv)
     // segement once the "lv_name" property gets implemented
 
     // Finding segments with lvs locked against change (snaps mirrors and pvmoves)
-    // will also be possible 
+    // will also be possible
 
     // remove clunky code from pvtree.cpp when this get implemented!
 
-    dm_list* pvseg_dm_list = lvm_pv_list_pvsegs(lvm_pv);  
+    dm_list* pvseg_dm_list = lvm_pv_list_pvsegs(lvm_pv);
     lvm_pvseg_list *pvseg_list;
 
     if(pvseg_dm_list){
-        dm_list_iterate_items(pvseg_list, pvseg_dm_list){ 
-	    
+        dm_list_iterate_items(pvseg_list, pvseg_dm_list){
+
             value = lvm_pvseg_get_property( pvseg_list->pvseg , "lv_name");
 
             qDebug() << "Name: " << value.value.string;
@@ -96,7 +96,7 @@ void PhysVol::rescan(pv_t lvm_pv)
                 qDebug() << "Seg size:  " << value.value.integer;
             else
                 qDebug() << "Not valid";
-	}
+    }
     }
     */
     return;
@@ -171,15 +171,15 @@ int PhysVol::getPercentUsed()
 {
     int percent;
 
-    if( m_unused == 0 )
-	return 100;
-    else if( m_unused == m_size )
-	return 0;
-    else if( m_size == 0 )      // This shouldn't happen
-	return 100;
+    if (m_unused == 0)
+        return 100;
+    else if (m_unused == m_size)
+        return 0;
+    else if (m_size == 0)       // This shouldn't happen
+        return 100;
     else
-	percent = qRound(  ( ( m_size - m_unused ) * 100.0 ) / m_size );
-    
+        percent = qRound(((m_size - m_unused) * 100.0) / m_size);
+
     return percent;
 }
 

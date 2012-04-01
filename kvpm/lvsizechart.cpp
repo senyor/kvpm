@@ -1,14 +1,14 @@
 /*
  *
- * 
+ *
  * Copyright (C) 2008, 2009, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License,  version 3, as 
+ * it under the terms of the GNU General Public License,  version 3, as
  * published by the Free Software Foundation.
- * 
+ *
  * See the file "COPYING" for the exact licensing terms.
  */
 
@@ -21,7 +21,7 @@
 #include "lvsizechartseg.h"
 #include "volgroup.h"
 
-LVSizeChart::LVSizeChart(VolGroup *const group, QTreeWidget *const vgTree, QWidget *parent) : 
+LVSizeChart::LVSizeChart(VolGroup *const group, QTreeWidget *const vgTree, QWidget *parent) :
     QFrame(parent),
     m_vg(group),
     m_vg_tree(vgTree)
@@ -30,7 +30,7 @@ LVSizeChart::LVSizeChart(VolGroup *const group, QTreeWidget *const vgTree, QWidg
     m_layout->setSpacing(0);
     m_layout->setMargin(0);
     m_layout->setSizeConstraint(QLayout::SetNoConstraint);
-    
+
     populateChart();
     setLayout(m_layout);
     setMinimumHeight(45);
@@ -46,21 +46,21 @@ void LVSizeChart::populateChart()
     QTreeWidgetItem *item;
     LogVol *lv;
     QLayoutItem *child;
-    const long item_count = m_vg_tree->topLevelItemCount(); 
+    const long item_count = m_vg_tree->topLevelItemCount();
 
-    while( (child = m_layout->takeAt(0) ) != 0 )   // remove old children of layout
+    while ((child = m_layout->takeAt(0)) != 0)     // remove old children of layout
         delete child;
 
-    for(int x = 0; x < item_count; x++){
+    for (int x = 0; x < item_count; x++) {
 
         item = m_vg_tree->topLevelItem(x);
-        lv = m_vg->getLvByName( item->data(0,Qt::UserRole).toString() );
+        lv = m_vg->getLvByName(item->data(0, Qt::UserRole).toString());
 
-        if( lv != NULL ){
+        if (lv != NULL) {
             logical_volumes.append(lv);
-        
-            if( lv->getSnapshotCount() ){
-                logical_volumes.append( lv->getSnapshots() );
+
+            if (lv->getSnapshotCount()) {
+                logical_volumes.append(lv->getSnapshots());
             }
         }
     }
@@ -74,86 +74,85 @@ void LVSizeChart::populateChart()
 
     QString usage;                   // Filesystem: blank, ext2 etc. or freespace in vg
     int max_segment_width;
-    
-    for(int x = 0; x < lv_count; x++){
-	m_lv = logical_volumes[x];
 
- 	if( !m_lv->isMirrorLeg() && 
-	    !m_lv->isMirrorLog() &&
-	    !m_lv->isVirtual() &&
-	    !( m_lv->isMirror() && !(m_lv->getOrigin()).isEmpty() ) ){
+    for (int x = 0; x < lv_count; x++) {
+        m_lv = logical_volumes[x];
 
-	    usage = m_lv->getFilesystem();
+        if (!m_lv->isMirrorLeg() &&
+                !m_lv->isMirrorLog() &&
+                !m_lv->isVirtual() &&
+                !(m_lv->isMirror() && !(m_lv->getOrigin()).isEmpty())) {
 
-            if( m_lv->isMirror() ) 
-                seg_ratio = ( m_lv->getExtents() + m_lv->getLogCount() ) / (double) total_extents;
+            usage = m_lv->getFilesystem();
+
+            if (m_lv->isMirror())
+                seg_ratio = (m_lv->getExtents() + m_lv->getLogCount()) / (double) total_extents;
             else
                 seg_ratio = m_lv->getExtents() / (double) total_extents;
 
-            if( m_lv->isMirror() )
-	        seg_ratio *= m_lv->getMirrorCount();
+            if (m_lv->isMirror())
+                seg_ratio *= m_lv->getMirrorCount();
 
-	    m_ratios.append(seg_ratio);
-	    widget = new LVChartSeg(m_vg, m_lv, usage, this);
-	    m_layout->addWidget(widget);
-	    m_widgets.append(widget);
-	}
+            m_ratios.append(seg_ratio);
+            widget = new LVChartSeg(m_vg, m_lv, usage, this);
+            m_layout->addWidget(widget);
+            m_widgets.append(widget);
+        }
     }
 
     //    if( free_extents && !m_vg->isExported() ){ // only create a free space widget if we have some
-    if(free_extents){ // only create a free space widget if we have some
-	seg_ratio = (free_extents / (double) total_extents) + 0.02; // allow a little "stretch" 0.02
-	usage = "freespace" ;
-	widget = new LVChartSeg(m_vg, 0, usage, this);
-	m_widgets.append(widget);
-	
-	m_layout->addWidget(widget);
-	m_ratios.append(seg_ratio);
+    if (free_extents) { // only create a free space widget if we have some
+        seg_ratio = (free_extents / (double) total_extents) + 0.02; // allow a little "stretch" 0.02
+        usage = "freespace" ;
+        widget = new LVChartSeg(m_vg, 0, usage, this);
+        m_widgets.append(widget);
+
+        m_layout->addWidget(widget);
+        m_ratios.append(seg_ratio);
+    } else if (m_widgets.size() == 0) { // if we have no chart segs then put in a blank one
+        // because lvsizechart won't work with zero segments
+        usage = "" ;
+        widget = new LVChartSeg(m_vg, 0, usage, this);
+        m_widgets.append(widget);
+
+        m_layout->addWidget(widget);
+        m_ratios.append(1.0);
     }
-    else if ( m_widgets.size() == 0 ){ // if we have no chart segs then put in a blank one
-                                       // because lvsizechart won't work with zero segments
-	usage = "" ;
-	widget = new LVChartSeg(m_vg, 0, usage, this);
-	m_widgets.append(widget);
-	
-	m_layout->addWidget(widget);
-	m_ratios.append( 1.0 );
-    }
-    
-    max_segment_width = (int) ( width() * m_ratios[0] ); 
 
-    if( max_segment_width < 1 )
-	max_segment_width = 1;
+    max_segment_width = (int)(width() * m_ratios[0]);
 
-    m_widgets[0]->setMaximumWidth(max_segment_width); 
+    if (max_segment_width < 1)
+        max_segment_width = 1;
 
-    for(int x =  m_widgets.size() - 1; x >= 1 ; x--){
-	max_segment_width = qRound( ( (double)width() * m_ratios[x]) );
-	
-	if( max_segment_width < 1 )
-	    max_segment_width = 1;
-	
-	m_widgets[x]->setMaximumWidth( max_segment_width ); 
+    m_widgets[0]->setMaximumWidth(max_segment_width);
+
+    for (int x =  m_widgets.size() - 1; x >= 1 ; x--) {
+        max_segment_width = qRound(((double)width() * m_ratios[x]));
+
+        if (max_segment_width < 1)
+            max_segment_width = 1;
+
+        m_widgets[x]->setMaximumWidth(max_segment_width);
     }
 }
 
 void LVSizeChart::resizeEvent(QResizeEvent *event)
 {
     const int new_width = (event->size()).width();
-    int max_segment_width = (int) (new_width * m_ratios[0]);  
+    int max_segment_width = (int)(new_width * m_ratios[0]);
 
-    if( max_segment_width < 1 )
-	max_segment_width = 1;
+    if (max_segment_width < 1)
+        max_segment_width = 1;
 
-    m_widgets[0]->setMaximumWidth(max_segment_width); 
-    
-    for(int x =  m_widgets.size() - 1; x >= 1 ; x--){
-	max_segment_width = qRound( ( (double)width() * m_ratios[x]) );
+    m_widgets[0]->setMaximumWidth(max_segment_width);
 
-	if( max_segment_width < 1 )
-	    max_segment_width = 1;
+    for (int x =  m_widgets.size() - 1; x >= 1 ; x--) {
+        max_segment_width = qRound(((double)width() * m_ratios[x]));
 
-	m_widgets[x]->setMaximumWidth( max_segment_width ); 
+        if (max_segment_width < 1)
+            max_segment_width = 1;
+
+        m_widgets[x]->setMaximumWidth(max_segment_width);
     }
 }
 

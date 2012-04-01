@@ -1,14 +1,14 @@
 /*
  *
- * 
+ *
  * Copyright (C) 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License,  version 3, as 
+ * it under the terms of the GNU General Public License,  version 3, as
  * published by the Free Software Foundation.
- * 
+ *
  * See the file "COPYING" for the exact licensing terms.
  */
 
@@ -33,18 +33,17 @@
 
 bool split_vg(VolGroup *volumeGroup)
 {
-    if( volumeGroup->getPhysicalVolumes().size() < 2  ){
-        KMessageBox::error(0, i18n("A volume group must have at least two physical volumes to split group") );
+    if (volumeGroup->getPhysicalVolumes().size() < 2) {
+        KMessageBox::error(0, i18n("A volume group must have at least two physical volumes to split group"));
         return false;
     }
 
     VGSplitDialog dialog(volumeGroup);
     dialog.exec();
-    if(dialog.result() == QDialog::Accepted){
-        ProcessProgress vgsplit( dialog.arguments() );
+    if (dialog.result() == QDialog::Accepted) {
+        ProcessProgress vgsplit(dialog.arguments());
         return true;
-    }
-    else
+    } else
         return false;
 }
 
@@ -52,21 +51,21 @@ VGSplitDialog::VGSplitDialog(VolGroup *volumeGroup, QWidget *parent) : KDialog(p
 {
     QList<PhysVol *> pv_list = m_vg->getPhysicalVolumes();
 
-    setWindowTitle( i18n("Split Volume Group") );
+    setWindowTitle(i18n("Split Volume Group"));
 
     QWidget *dialog_body = new QWidget(this);
     setMainWidget(dialog_body);
     QVBoxLayout *layout = new QVBoxLayout();
     dialog_body->setLayout(layout);
-    QLabel *name_label = new QLabel( i18n("Volume Group To Split: <b>%1</b>", m_vg->getName() ) );
+    QLabel *name_label = new QLabel(i18n("Volume Group To Split: <b>%1</b>", m_vg->getName()));
     name_label->setAlignment(Qt::AlignCenter);
     layout->addWidget(name_label);
 
     m_new_vg_name = new KLineEdit();
     QRegExp rx("[0-9a-zA-Z_\\.][-0-9a-zA-Z_\\.]*");
-    m_validator = new QRegExpValidator( rx, m_new_vg_name );
+    m_validator = new QRegExpValidator(rx, m_new_vg_name);
     m_new_vg_name->setValidator(m_validator);
-    QLabel *new_name_label = new QLabel( i18n("New Volume Group Name") );
+    QLabel *new_name_label = new QLabel(i18n("New Volume Group Name"));
     QHBoxLayout *new_name_layout = new QHBoxLayout();
     new_name_layout->addStretch();
     new_name_layout->addWidget(new_name_label);
@@ -74,10 +73,10 @@ VGSplitDialog::VGSplitDialog(VolGroup *volumeGroup, QWidget *parent) : KDialog(p
     new_name_layout->addStretch();
     layout->addLayout(new_name_layout);
 
-    connect(m_new_vg_name, SIGNAL(textEdited(QString)), 
+    connect(m_new_vg_name, SIGNAL(textEdited(QString)),
             this, SLOT(validateOK()));
 
-    connect(this, SIGNAL(okClicked()), 
+    connect(this, SIGNAL(okClicked()),
             this, SLOT(deactivate()));
 
     KTabWidget *tw = new KTabWidget();
@@ -85,10 +84,10 @@ VGSplitDialog::VGSplitDialog(VolGroup *volumeGroup, QWidget *parent) : KDialog(p
 
     QStringList mobile_lv_names, immobile_lv_names, mobile_pv_names, immobile_pv_names;
 
-    volumeMobility( mobile_lv_names, immobile_lv_names, mobile_pv_names, immobile_pv_names);
+    volumeMobility(mobile_lv_names, immobile_lv_names, mobile_pv_names, immobile_pv_names);
 
-    tw->addTab( buildLvLists(mobile_lv_names, immobile_lv_names), i18n("Logical volume view") );
-    tw->addTab( buildPvLists(mobile_pv_names, immobile_pv_names), i18n("Physical volume view") );
+    tw->addTab(buildLvLists(mobile_lv_names, immobile_lv_names), i18n("Logical volume view"));
+    tw->addTab(buildPvLists(mobile_pv_names, immobile_pv_names), i18n("Physical volume view"));
 
     enableLvArrows();
     enablePvArrows();
@@ -104,20 +103,19 @@ void VGSplitDialog::validateOK()
     bool original_vg = false;
     bool new_vg = false;
 
-    if(m_validator->validate(name, pos) == QValidator::Acceptable && name != "." && name != ".."){
-        
-        if( m_left_pv_list->count() ) // Must have at least one pv in old group and one in new group
+    if (m_validator->validate(name, pos) == QValidator::Acceptable && name != "." && name != "..") {
+
+        if (m_left_pv_list->count())  // Must have at least one pv in old group and one in new group
             original_vg = true;
 
-        if( m_right_pv_list->count() )
+        if (m_right_pv_list->count())
             new_vg = true;
 
-        if(new_vg && original_vg)
+        if (new_vg && original_vg)
             enableButtonOk(true);
         else
             enableButtonOk(false);
-    }
-    else
+    } else
         enableButtonOk(false);
 }
 
@@ -127,7 +125,7 @@ QStringList VGSplitDialog::arguments()
 
     args << "vgsplit" << m_vg->getName() << m_new_vg_name->text();
 
-    for(int x = m_right_pv_list->count() - 1; x >= 0; x--)        
+    for (int x = m_right_pv_list->count() - 1; x >= 0; x--)
         args << m_right_pv_list->item(x)->data(Qt::DisplayRole).toString();
 
     return args;
@@ -143,33 +141,32 @@ void VGSplitDialog::deactivate()
     lvm_lv_list *lv_list;
     QList<lv_t> lvs_to_deactivate;
 
-    for(int x = m_right_lv_list->count() - 1; x >= 0; x--)        
+    for (int x = m_right_lv_list->count() - 1; x >= 0; x--)
         moving_lvs << m_right_lv_list->item(x)->data(Qt::DisplayRole).toString();
 
-    if( (vg_dm = lvm_vg_open(lvm, vg_name.data(), "w", 0x0)) ){
+    if ((vg_dm = lvm_vg_open(lvm, vg_name.data(), "w", 0x0))) {
 
-        for(int x = 0; x < moving_lvs.size(); x++){
+        for (int x = 0; x < moving_lvs.size(); x++) {
             lv_dm_list = lvm_vg_list_lvs(vg_dm);
-            dm_list_iterate_items(lv_list, lv_dm_list){ 
-                if( QString( lvm_lv_get_name( lv_list->lv ) ).trimmed() == moving_lvs[x])
-                    lvs_to_deactivate.append( lv_list->lv );
+            dm_list_iterate_items(lv_list, lv_dm_list) {
+                if (QString(lvm_lv_get_name(lv_list->lv)).trimmed() == moving_lvs[x])
+                    lvs_to_deactivate.append(lv_list->lv);
             }
         }
-        
-        for(int x = 0; x < lvs_to_deactivate.size(); x++){
-            if( lvm_lv_is_active(lvs_to_deactivate[x]) ){
-                if( lvm_lv_deactivate(lvs_to_deactivate[x]) )
-                    KMessageBox::error(0, QString(lvm_errmsg(lvm))); 
+
+        for (int x = 0; x < lvs_to_deactivate.size(); x++) {
+            if (lvm_lv_is_active(lvs_to_deactivate[x])) {
+                if (lvm_lv_deactivate(lvs_to_deactivate[x]))
+                    KMessageBox::error(0, QString(lvm_errmsg(lvm)));
             }
         }
         lvm_vg_close(vg_dm);
         return;
-    }
-    else{
-        KMessageBox::error(0, QString(lvm_errmsg(lvm))); 
+    } else {
+        KMessageBox::error(0, QString(lvm_errmsg(lvm)));
         return;
     }
-    
+
     return;
 }
 
@@ -180,8 +177,8 @@ QWidget *VGSplitDialog::buildLvLists(const QStringList mobileLvNames, const QStr
     QVBoxLayout *left_layout = new QVBoxLayout;
     QVBoxLayout *center_layout = new QVBoxLayout;
     QVBoxLayout *right_layout = new QVBoxLayout;
-    m_lv_add = new KPushButton( KIcon("arrow-right"), i18n("Add") );
-    m_lv_remove = new KPushButton( KIcon("arrow-left"), i18n("Remove") );
+    m_lv_add = new KPushButton(KIcon("arrow-right"), i18n("Add"));
+    m_lv_remove = new KPushButton(KIcon("arrow-left"), i18n("Remove"));
 
     m_left_lv_list = new KListWidget();
     m_right_lv_list = new KListWidget();
@@ -192,18 +189,18 @@ QWidget *VGSplitDialog::buildLvLists(const QStringList mobileLvNames, const QStr
 
     QListWidgetItem *lv_item;
 
-    for(int x = mobileLvNames.size() - 1; x >= 0; x--){
+    for (int x = mobileLvNames.size() - 1; x >= 0; x--) {
         lv_item = new QListWidgetItem(mobileLvNames[x]);
         lv_item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
         m_left_lv_list->addItem(lv_item);
     }
-    for(int x = immobileLvNames.size() - 1; x >= 0; x--){
+    for (int x = immobileLvNames.size() - 1; x >= 0; x--) {
         lv_item = new QListWidgetItem(immobileLvNames[x]);
         lv_item->setFlags(Qt::NoItemFlags);
         m_left_lv_list->addItem(lv_item);
     }
 
-    QLabel *temp_label = new QLabel( i18n("Original volume group") );
+    QLabel *temp_label = new QLabel(i18n("Original volume group"));
     temp_label->setAlignment(Qt::AlignCenter);
     left_layout->addWidget(temp_label);
     left_layout->addWidget(m_left_lv_list);
@@ -213,7 +210,7 @@ QWidget *VGSplitDialog::buildLvLists(const QStringList mobileLvNames, const QStr
     center_layout->addWidget(m_lv_remove);
     center_layout->addStretch();
     layout->addLayout(center_layout);
-    temp_label = new QLabel( i18n("New volume group") );
+    temp_label = new QLabel(i18n("New volume group"));
     temp_label->setAlignment(Qt::AlignCenter);
     right_layout->addWidget(temp_label);
     right_layout->addWidget(m_right_lv_list);
@@ -221,16 +218,16 @@ QWidget *VGSplitDialog::buildLvLists(const QStringList mobileLvNames, const QStr
 
     lv_list->setLayout(layout);
 
-    connect(m_left_lv_list, SIGNAL(itemSelectionChanged()), 
+    connect(m_left_lv_list, SIGNAL(itemSelectionChanged()),
             this, SLOT(enableLvArrows()));
 
-    connect(m_right_lv_list, SIGNAL(itemSelectionChanged()), 
+    connect(m_right_lv_list, SIGNAL(itemSelectionChanged()),
             this, SLOT(enableLvArrows()));
 
-    connect(m_lv_add, SIGNAL(clicked()), 
+    connect(m_lv_add, SIGNAL(clicked()),
             this, SLOT(addLvList()));
 
-    connect(m_lv_remove, SIGNAL(clicked()), 
+    connect(m_lv_remove, SIGNAL(clicked()),
             this, SLOT(removeLvList()));
 
     return lv_list;
@@ -243,8 +240,8 @@ QWidget *VGSplitDialog::buildPvLists(const QStringList mobilePvNames, const QStr
     QVBoxLayout *left_layout = new QVBoxLayout;
     QVBoxLayout *center_layout = new QVBoxLayout;
     QVBoxLayout *right_layout = new QVBoxLayout;
-    m_pv_add = new KPushButton( KIcon("arrow-right"), "Add" );
-    m_pv_remove = new KPushButton( KIcon("arrow-left"), "Remove" );
+    m_pv_add = new KPushButton(KIcon("arrow-right"), "Add");
+    m_pv_remove = new KPushButton(KIcon("arrow-left"), "Remove");
 
     QList<PhysVol *> pvs = m_vg->getPhysicalVolumes();
     QList<LogVol *>  lvs = m_vg->getLogicalVolumes();
@@ -259,19 +256,19 @@ QWidget *VGSplitDialog::buildPvLists(const QStringList mobilePvNames, const QStr
     m_left_pv_list->setSortingEnabled(true);
     m_right_pv_list->setSortingEnabled(true);
 
-    for(int x = mobilePvNames.size() - 1; x >= 0; x--){
-        pv_item = new QListWidgetItem( mobilePvNames[x] );
+    for (int x = mobilePvNames.size() - 1; x >= 0; x--) {
+        pv_item = new QListWidgetItem(mobilePvNames[x]);
         pv_item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
         m_left_pv_list->addItem(pv_item);
     }
 
-    for(int x = immobilePvNames.size() - 1; x >= 0; x--){
-        pv_item = new QListWidgetItem( immobilePvNames[x] );
+    for (int x = immobilePvNames.size() - 1; x >= 0; x--) {
+        pv_item = new QListWidgetItem(immobilePvNames[x]);
         pv_item->setFlags(Qt::NoItemFlags);
         m_left_pv_list->addItem(pv_item);
     }
 
-    QLabel *temp_label = new QLabel( i18n("Original volume group") );
+    QLabel *temp_label = new QLabel(i18n("Original volume group"));
     temp_label->setAlignment(Qt::AlignCenter);
     left_layout->addWidget(temp_label);
     left_layout->addWidget(m_left_pv_list);
@@ -283,7 +280,7 @@ QWidget *VGSplitDialog::buildPvLists(const QStringList mobilePvNames, const QStr
     center_layout->addStretch();
     layout->addLayout(center_layout);
 
-    temp_label = new QLabel( i18n("New volume group") );
+    temp_label = new QLabel(i18n("New volume group"));
     temp_label->setAlignment(Qt::AlignCenter);
     right_layout->addWidget(temp_label);
     right_layout->addWidget(m_right_pv_list);
@@ -291,16 +288,16 @@ QWidget *VGSplitDialog::buildPvLists(const QStringList mobilePvNames, const QStr
 
     pv_list->setLayout(layout);
 
-    connect(m_left_pv_list, SIGNAL(itemSelectionChanged()), 
+    connect(m_left_pv_list, SIGNAL(itemSelectionChanged()),
             this, SLOT(enablePvArrows()));
 
-    connect(m_right_pv_list, SIGNAL(itemSelectionChanged()), 
+    connect(m_right_pv_list, SIGNAL(itemSelectionChanged()),
             this, SLOT(enablePvArrows()));
 
-    connect(m_pv_add, SIGNAL(clicked()), 
+    connect(m_pv_add, SIGNAL(clicked()),
             this, SLOT(addPvList()));
 
-    connect(m_pv_remove, SIGNAL(clicked()), 
+    connect(m_pv_remove, SIGNAL(clicked()),
             this, SLOT(removePvList()));
 
     return pv_list;
@@ -308,12 +305,12 @@ QWidget *VGSplitDialog::buildPvLists(const QStringList mobilePvNames, const QStr
 
 void VGSplitDialog::enableLvArrows()
 {
-    if( m_left_lv_list->selectedItems().size() )
+    if (m_left_lv_list->selectedItems().size())
         m_lv_add->setEnabled(true);
     else
         m_lv_add->setEnabled(false);
 
-    if( m_right_lv_list->selectedItems().size() )
+    if (m_right_lv_list->selectedItems().size())
         m_lv_remove->setEnabled(true);
     else
         m_lv_remove->setEnabled(false);
@@ -321,12 +318,12 @@ void VGSplitDialog::enableLvArrows()
 
 void VGSplitDialog::enablePvArrows()
 {
-    if( m_left_pv_list->selectedItems().size() )
+    if (m_left_pv_list->selectedItems().size())
         m_pv_add->setEnabled(true);
     else
         m_pv_add->setEnabled(false);
 
-    if( m_right_pv_list->selectedItems().size() )
+    if (m_right_pv_list->selectedItems().size())
         m_pv_remove->setEnabled(true);
     else
         m_pv_remove->setEnabled(false);
@@ -362,11 +359,11 @@ void VGSplitDialog::moveNames(const bool isLvMove,
     QStringList pv_names, lv_names;
     QString name;
 
-    if(isLvMove){
+    if (isLvMove) {
         selected_items = lvSource->selectedItems();
 
-        for(int x = selected_items.size() - 1; x >= 0; x--){
-            name = lvSource->item( lvSource->row(selected_items[x]))->data(Qt::DisplayRole).toString();
+        for (int x = selected_items.size() - 1; x >= 0; x--) {
+            name = lvSource->item(lvSource->row(selected_items[x]))->data(Qt::DisplayRole).toString();
             movesWithVolume(true, name, pv_names, lv_names);
             moving_pv_names.append(pv_names);
             moving_lv_names.append(lv_names);
@@ -374,12 +371,11 @@ void VGSplitDialog::moveNames(const bool isLvMove,
 
         moving_pv_names.removeDuplicates();
         moving_lv_names.removeDuplicates();
-    }
-    else{
+    } else {
         selected_items = pvSource->selectedItems();
 
-        for(int x = selected_items.size() - 1; x >= 0; x--){
-            name = pvSource->item( pvSource->row(selected_items[x]))->data(Qt::DisplayRole).toString();
+        for (int x = selected_items.size() - 1; x >= 0; x--) {
+            name = pvSource->item(pvSource->row(selected_items[x]))->data(Qt::DisplayRole).toString();
             movesWithVolume(false, name, pv_names, lv_names);
             moving_pv_names.append(pv_names);
             moving_lv_names.append(lv_names);
@@ -389,30 +385,30 @@ void VGSplitDialog::moveNames(const bool isLvMove,
         moving_lv_names.removeDuplicates();
     }
 
-    for(int x = moving_lv_names.size() - 1; x >= 0; x--){
+    for (int x = moving_lv_names.size() - 1; x >= 0; x--) {
 
         moving_items = lvSource->findItems(moving_lv_names[x], Qt::MatchExactly);
 
-        for(int y = moving_items.size() - 1; y >= 0; y--){
-            lvSource->takeItem( lvSource->row( moving_items[y] ) );        
-            lvTarget->addItem( moving_items[y] );        
+        for (int y = moving_items.size() - 1; y >= 0; y--) {
+            lvSource->takeItem(lvSource->row(moving_items[y]));
+            lvTarget->addItem(moving_items[y]);
         }
     }
 
-    for(int x = moving_pv_names.size() - 1; x >= 0; x--){
+    for (int x = moving_pv_names.size() - 1; x >= 0; x--) {
 
         moving_items = pvSource->findItems(moving_pv_names[x], Qt::MatchExactly);
 
-        for(int y = moving_items.size() - 1; y >= 0; y--){
-            pvSource->takeItem( pvSource->row( moving_items[y] ) );        
-            pvTarget->addItem( moving_items[y] );        
+        for (int y = moving_items.size() - 1; y >= 0; y--) {
+            pvSource->takeItem(pvSource->row(moving_items[y]));
+            pvTarget->addItem(moving_items[y]);
         }
     }
 
     validateOK();
 }
 
-void VGSplitDialog::volumeMobility(QStringList &mobileLvNames, QStringList &immobileLvNames, 
+void VGSplitDialog::volumeMobility(QStringList &mobileLvNames, QStringList &immobileLvNames,
                                    QStringList &mobilePvNames, QStringList &immobilePvNames)
 {
     QStringList all_pv_names;
@@ -423,45 +419,45 @@ void VGSplitDialog::volumeMobility(QStringList &mobileLvNames, QStringList &immo
     bool growing = true;
     int immobile_count = 0;
 
-    mobileLvNames.clear(); 
+    mobileLvNames.clear();
     mobilePvNames.clear();
     immobileLvNames.clear();
     immobilePvNames.clear();
 
     pvState(immobilePvNames, mobilePvNames);
 
-    while(growing){
-        for(int x = lvs.size() - 1; x >= 0 ; x--){
+    while (growing) {
+        for (int x = lvs.size() - 1; x >= 0 ; x--) {
 
             all_pv_names = lvs[x]->getPvNamesAllFlat();
             movable = true;
 
-            for(int y = all_pv_names.size() - 1; y >= 0; y--){
-                for(int z = immobilePvNames.size() - 1; z >= 0; z--){
-                    if( immobilePvNames[z] == all_pv_names[y] ){
+            for (int y = all_pv_names.size() - 1; y >= 0; y--) {
+                for (int z = immobilePvNames.size() - 1; z >= 0; z--) {
+                    if (immobilePvNames[z] == all_pv_names[y]) {
                         movable = false;
                         break;
                     }
-                } 
+                }
             }
 
-            if( !movable )
-                immobileLvNames.append( lvs[x]->getName() );
+            if (!movable)
+                immobileLvNames.append(lvs[x]->getName());
         }
-        
-        for(int x = immobileLvNames.size() - 1; x >= 0; x--){
-            temp = m_vg->getLvByName( immobileLvNames[x] );
 
-            if( temp->isOrigin() && ( temp->getParent() != NULL ) )
-                immobilePvNames.append( temp->getParent()->getPvNamesAllFlat() );
+        for (int x = immobileLvNames.size() - 1; x >= 0; x--) {
+            temp = m_vg->getLvByName(immobileLvNames[x]);
+
+            if (temp->isOrigin() && (temp->getParent() != NULL))
+                immobilePvNames.append(temp->getParent()->getPvNamesAllFlat());
             else
-                immobilePvNames.append( temp->getPvNamesAllFlat() );
+                immobilePvNames.append(temp->getPvNamesAllFlat());
         }
 
         immobilePvNames.removeDuplicates();
         immobileLvNames.removeDuplicates();
 
-        if( immobileLvNames.size() > immobile_count )
+        if (immobileLvNames.size() > immobile_count)
             growing = true;
         else
             growing = false;
@@ -472,26 +468,26 @@ void VGSplitDialog::volumeMobility(QStringList &mobileLvNames, QStringList &immo
     mobilePvNames.clear();
     mobileLvNames.clear();
 
-    for(int x = lvs.size() - 1; x >= 0; x--)
-        mobileLvNames.append( lvs[x]->getName() );
+    for (int x = lvs.size() - 1; x >= 0; x--)
+        mobileLvNames.append(lvs[x]->getName());
 
-    for(int x = mobileLvNames.size() - 1; x >= 0; x--){
-        for(int y = immobileLvNames.size() - 1; y >= 0; y--){
-            if(mobileLvNames[x] == immobileLvNames[y]){
+    for (int x = mobileLvNames.size() - 1; x >= 0; x--) {
+        for (int y = immobileLvNames.size() - 1; y >= 0; y--) {
+            if (mobileLvNames[x] == immobileLvNames[y]) {
                 mobileLvNames.removeAt(x);
-                break;          
+                break;
             }
         }
     }
 
-    for(int x = pvs.size() - 1; x >= 0; x--)
-        mobilePvNames.append( pvs[x]->getName() );
+    for (int x = pvs.size() - 1; x >= 0; x--)
+        mobilePvNames.append(pvs[x]->getName());
 
-    for(int x = mobilePvNames.size() - 1; x >= 0; x--){
-        for(int y = immobilePvNames.size() - 1; y >= 0; y--){
-            if(mobilePvNames[x] == immobilePvNames[y]){
+    for (int x = mobilePvNames.size() - 1; x >= 0; x--) {
+        for (int y = immobilePvNames.size() - 1; y >= 0; y--) {
+            if (mobilePvNames[x] == immobilePvNames[y]) {
                 mobilePvNames.removeAt(x);
-                break;          
+                break;
             }
         }
     }
@@ -500,21 +496,20 @@ void VGSplitDialog::volumeMobility(QStringList &mobileLvNames, QStringList &immo
     mobileLvNames.removeDuplicates();
 }
 
-void VGSplitDialog::pvState(QStringList &open, QStringList &closed )
+void VGSplitDialog::pvState(QStringList &open, QStringList &closed)
 {
     const QList<PhysVol *> pvs = m_vg->getPhysicalVolumes();
     const QList<LogVol *>  lvs = m_vg->getLogicalVolumes();
     QList<LogVol *> snaps;
 
-    for(int x = lvs.size() - 1; x >=0; x--){
-        if( lvs[x]->isOpen() ){
-            open.append( lvs[x]->getPvNamesAllFlat() );
-        }
-        else if( lvs[x]->isSnapContainer() || lvs[x]->isOrigin() ){
+    for (int x = lvs.size() - 1; x >= 0; x--) {
+        if (lvs[x]->isOpen()) {
+            open.append(lvs[x]->getPvNamesAllFlat());
+        } else if (lvs[x]->isSnapContainer() || lvs[x]->isOrigin()) {
             snaps = lvs[x]->getSnapshots();
-            for(int y = snaps.size() - 1; y >= 0; y--){
-                if( snaps[y]->isOpen() ){
-                    open.append( lvs[x]->getPvNamesAllFlat() ); // if any snap is open the whole container is open
+            for (int y = snaps.size() - 1; y >= 0; y--) {
+                if (snaps[y]->isOpen()) {
+                    open.append(lvs[x]->getPvNamesAllFlat());   // if any snap is open the whole container is open
                     break;
                 }
             }
@@ -525,12 +520,12 @@ void VGSplitDialog::pvState(QStringList &open, QStringList &closed )
 
     QStringList all_pv_names;
 
-    for(int x = pvs.size() - 1; x >= 0; x--)
-        all_pv_names.append( pvs[x]->getName() );
+    for (int x = pvs.size() - 1; x >= 0; x--)
+        all_pv_names.append(pvs[x]->getName());
 
-    for(int x = all_pv_names.size() - 1; x >= 0; x--){
-        for(int y = open.size() - 1; y >= 0; y--){
-            if( all_pv_names[x] == open[y] ){
+    for (int x = all_pv_names.size() - 1; x >= 0; x--) {
+        for (int y = open.size() - 1; y >= 0; y--) {
+            if (all_pv_names[x] == open[y]) {
                 all_pv_names.removeAt(x);
                 break;
             }
@@ -540,7 +535,7 @@ void VGSplitDialog::pvState(QStringList &open, QStringList &closed )
     closed = all_pv_names;
 }
 
-void VGSplitDialog::movesWithVolume(const bool isLV, const QString name, 
+void VGSplitDialog::movesWithVolume(const bool isLV, const QString name,
                                     QStringList &movingPvNames, QStringList &movingLvNames)
 {
     QStringList all_pv_names;
@@ -554,57 +549,56 @@ void VGSplitDialog::movesWithVolume(const bool isLV, const QString name,
     movingPvNames.clear();
     movingLvNames.clear();
 
-    if(isLV){
+    if (isLV) {
         moving_lv_count = 1;
         moving_pv_count = 0;
         temp = m_vg->getLvByName(name);
 
-        if( temp->isOrigin() && ( temp->getParent() != NULL ) )
+        if (temp->isOrigin() && (temp->getParent() != NULL))
             movingPvNames = temp->getParent()->getPvNamesAllFlat();
         else
             movingPvNames = temp->getPvNamesAllFlat();
-    }
-    else{
+    } else {
         moving_lv_count = 0;
         moving_pv_count = 1;
         movingPvNames.append(name);
     }
 
-    while(growing){
-        for(int x = lvs.size() - 1; x >= 0 ; x--){
+    while (growing) {
+        for (int x = lvs.size() - 1; x >= 0 ; x--) {
 
-            if( lvs[x]->isOrigin() && ( lvs[x]->getParent() != NULL ) )
+            if (lvs[x]->isOrigin() && (lvs[x]->getParent() != NULL))
                 all_pv_names = lvs[x]->getParent()->getPvNamesAllFlat();
             else
                 all_pv_names = lvs[x]->getPvNamesAllFlat();
 
             moving = false;
 
-            for(int y = all_pv_names.size() - 1; y >= 0; y--){
-                for(int z = movingPvNames.size() - 1; z >= 0; z--){
-                    if( movingPvNames[z] == all_pv_names[y] ){
+            for (int y = all_pv_names.size() - 1; y >= 0; y--) {
+                for (int z = movingPvNames.size() - 1; z >= 0; z--) {
+                    if (movingPvNames[z] == all_pv_names[y]) {
                         moving = true;
                         break;
                     }
-                } 
+                }
             }
-            if( moving )
-               movingLvNames.append( lvs[x]->getName() );
+            if (moving)
+                movingLvNames.append(lvs[x]->getName());
         }
-        
-        for(int x = movingLvNames.size() - 1; x >= 0; x--){
-            temp = m_vg->getLvByName( movingLvNames[x] );
 
-            if( temp->isOrigin() && ( temp->getParent() != NULL ) )
-                movingPvNames.append( temp->getParent()->getPvNamesAllFlat() );
+        for (int x = movingLvNames.size() - 1; x >= 0; x--) {
+            temp = m_vg->getLvByName(movingLvNames[x]);
+
+            if (temp->isOrigin() && (temp->getParent() != NULL))
+                movingPvNames.append(temp->getParent()->getPvNamesAllFlat());
             else
-                movingPvNames.append( temp->getPvNamesAllFlat() );
+                movingPvNames.append(temp->getPvNamesAllFlat());
         }
 
         movingLvNames.removeDuplicates();
         movingPvNames.removeDuplicates();
 
-        if( ( movingLvNames.size() > moving_lv_count ) || ( movingPvNames.size() > moving_pv_count ) )
+        if ((movingLvNames.size() > moving_lv_count) || (movingPvNames.size() > moving_pv_count))
             growing = true;
         else
             growing = false;

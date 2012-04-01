@@ -1,14 +1,14 @@
 /*
  *
- * 
+ *
  * Copyright (C) 2008, 2009, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License,  version 3, as 
+ * it under the terms of the GNU General Public License,  version 3, as
  * published by the Free Software Foundation.
- * 
+ *
  * See the file "COPYING" for the exact licensing terms.
  */
 
@@ -29,12 +29,12 @@
 /* This should be passed *lv = 0 if it is really free space on a volume
    group that is being displayed */
 
-LVChartSeg::LVChartSeg(VolGroup *const group, LogVol *const volume, const QString use, QWidget *parent) : 
-    QFrame(parent), 
+LVChartSeg::LVChartSeg(VolGroup *const group, LogVol *const volume, const QString use, QWidget *parent) :
+    QFrame(parent),
     m_vg(group),
     m_lv(volume)
 {
-    setFrameStyle( QFrame::Sunken | QFrame::Panel );
+    setFrameStyle(QFrame::Sunken | QFrame::Panel);
     setLineWidth(2);
 
     QVBoxLayout *const layout = new QVBoxLayout();
@@ -70,49 +70,49 @@ LVChartSeg::LVChartSeg(VolGroup *const group, LogVol *const volume, const QStrin
     skeleton.addItemColor("free",    free_color,  Qt::green);
     skeleton.addItemColor("swap",    swap_color,  Qt::lightGray);
 
-    if(use == "ext2")
-	colorset.setColor(QPalette::Window, ext2_color);
-    else if(use == "ext3")
-	colorset.setColor(QPalette::Window, ext3_color);
-    else if(use == "ext4")
-	colorset.setColor(QPalette::Window, ext4_color);
-    else if(use == "btrfs")
-	colorset.setColor(QPalette::Window, btrfs_color);
-    else if(use == "reiserfs")
-	colorset.setColor(QPalette::Window, reiser_color);
-    else if(use == "reiser4")
-	colorset.setColor(QPalette::Window, reiser4_color);
-    else if(use == "hfs")
-	colorset.setColor(QPalette::Window, hfs_color);
-    else if(use == "vfat")
-	colorset.setColor(QPalette::Window, msdos_color);
-    else if(use == "jfs")
+    if (use == "ext2")
+        colorset.setColor(QPalette::Window, ext2_color);
+    else if (use == "ext3")
+        colorset.setColor(QPalette::Window, ext3_color);
+    else if (use == "ext4")
+        colorset.setColor(QPalette::Window, ext4_color);
+    else if (use == "btrfs")
+        colorset.setColor(QPalette::Window, btrfs_color);
+    else if (use == "reiserfs")
+        colorset.setColor(QPalette::Window, reiser_color);
+    else if (use == "reiser4")
+        colorset.setColor(QPalette::Window, reiser4_color);
+    else if (use == "hfs")
+        colorset.setColor(QPalette::Window, hfs_color);
+    else if (use == "vfat")
+        colorset.setColor(QPalette::Window, msdos_color);
+    else if (use == "jfs")
         colorset.setColor(QPalette::Window, jfs_color);
-    else if(use == "xfs")
-	colorset.setColor(QPalette::Window, xfs_color);
-    else if(use == "ntfs")
-	colorset.setColor(QPalette::Window, ntfs_color);
-    else if(use == "swap")
-	colorset.setColor(QPalette::Window, swap_color);
-    else if(use == "freespace")
-	colorset.setColor(QPalette::Window, free_color);
+    else if (use == "xfs")
+        colorset.setColor(QPalette::Window, xfs_color);
+    else if (use == "ntfs")
+        colorset.setColor(QPalette::Window, ntfs_color);
+    else if (use == "swap")
+        colorset.setColor(QPalette::Window, swap_color);
+    else if (use == "freespace")
+        colorset.setColor(QPalette::Window, free_color);
     else
-	colorset.setColor(QPalette::Window, none_color);
+        colorset.setColor(QPalette::Window, none_color);
 
     color_widget->setPalette(colorset);
     color_widget->setAutoFillBackground(true);
 
-    if( !m_vg->isExported() ){
-	
-	setContextMenuPolicy(Qt::CustomContextMenu);
+    if (!m_vg->isExported()) {
 
-	if( m_lv )
-	    setToolTip( m_lv->getName() );
-	else
-	    setToolTip( i18n("free space") );
+        setContextMenuPolicy(Qt::CustomContextMenu);
 
-	connect(this, SIGNAL(customContextMenuRequested(QPoint)), 
-		this, SLOT(popupContextMenu(QPoint)) );
+        if (m_lv)
+            setToolTip(m_lv->getName());
+        else
+            setToolTip(i18n("free space"));
+
+        connect(this, SIGNAL(customContextMenuRequested(QPoint)),
+                this, SLOT(popupContextMenu(QPoint)));
     }
 }
 

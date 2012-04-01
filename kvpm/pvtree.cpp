@@ -1,14 +1,14 @@
 /*
  *
- * 
+ *
  * Copyright (C) 2008, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License,  version 3, as 
+ * it under the terms of the GNU General Public License,  version 3, as
  * published by the Free Software Foundation.
- * 
+ *
  * See the file "COPYING" for the exact licensing terms.
  */
 
@@ -35,8 +35,8 @@
 
 /* This is the physical volume tree list on the volume group tab */
 
-PVTree::PVTree(VolGroup *const group, QWidget *parent) 
-    : QTreeWidget(parent), 
+PVTree::PVTree(VolGroup *const group, QWidget *parent)
+    : QTreeWidget(parent),
       m_vg(group)
 {
     QStringList header_labels;
@@ -44,15 +44,15 @@ PVTree::PVTree(VolGroup *const group, QWidget *parent)
     setColumnCount(6);
     QTreeWidgetItem *item;
 
-    header_labels << i18nc("The name of the device", "Name") << i18n("Size") 
-		  << i18nc("Unused space", "Remaining") << i18nc("Space used up", "Used")
-		  << i18n("State") << i18n("Allocatable") 
-                  << i18n("Tags") 
-		  << i18n("Logical volumes");
+    header_labels << i18nc("The name of the device", "Name") << i18n("Size")
+                  << i18nc("Unused space", "Remaining") << i18nc("Space used up", "Used")
+                  << i18n("State") << i18n("Allocatable")
+                  << i18n("Tags")
+                  << i18n("Logical volumes");
 
     item = new QTreeWidgetItem((QTreeWidgetItem *)0, header_labels);
 
-    for(int column = 0; column < 7; column++)
+    for (int column = 0; column < 7; column++)
         item->setTextAlignment(column, Qt::AlignCenter);
 
     sortByColumn(0, Qt::AscendingOrder);
@@ -78,14 +78,14 @@ void PVTree::loadData()
     QStringList lv_name_list;
     QStringList pv_name_list;
     QString device_name;
-    
+
     PhysVol *pv;
     QStringList pv_data;
     QTreeWidgetItem *item;
-    
+
     QString old_current_pv_name;
 
-    if( currentItem() )
+    if (currentItem())
         old_current_pv_name = currentItem()->data(0, 0).toString();
 
     clear();
@@ -94,107 +94,105 @@ void PVTree::loadData()
     setViewConfig();
 
     KLocale *const locale = KGlobal::locale();
-    if(m_use_si_units)
-        locale->setBinaryUnitDialect(KLocale::MetricBinaryDialect); 
+    if (m_use_si_units)
+        locale->setBinaryUnitDialect(KLocale::MetricBinaryDialect);
     else
-        locale->setBinaryUnitDialect(KLocale::IECBinaryDialect);    
+        locale->setBinaryUnitDialect(KLocale::IECBinaryDialect);
 
-    for(int n = 0; n < pvs.size(); n++){
-	pv = pvs[n];
-	pv_data.clear();
-	device_name = pv->getName();
-	
-	pv_data << device_name
-		<< locale->formatByteSize( pv->getSize() )
-		<< locale->formatByteSize( pv->getRemaining() )
-		<< locale->formatByteSize( pv->getSize() - pv->getRemaining() );
+    for (int n = 0; n < pvs.size(); n++) {
+        pv = pvs[n];
+        pv_data.clear();
+        device_name = pv->getName();
 
-	if( pv->isActive() )
-	    pv_data << "Active";
-	else
-	    pv_data << "Inactive";
+        pv_data << device_name
+                << locale->formatByteSize(pv->getSize())
+                << locale->formatByteSize(pv->getRemaining())
+                << locale->formatByteSize(pv->getSize() - pv->getRemaining());
 
-	if( pv->isAllocatable() )
-	    pv_data << "Yes";
-	else
-	    pv_data << "No";
+        if (pv->isActive())
+            pv_data << "Active";
+        else
+            pv_data << "Inactive";
+
+        if (pv->isAllocatable())
+            pv_data << "Yes";
+        else
+            pv_data << "No";
 
         pv_data << pv->getTags().join(", ");
 
-/* here we get the names of logical volumes associated
-   with the physical volume */
+        /* here we get the names of logical volumes associated
+           with the physical volume */
 
-	lv_name_list.clear();
-	for(int x = 0; x < lvs.size() ; x++){
-	    pv_name_list = lvs[x]->getPvNamesAll();
-	    for(int y = 0; y < pv_name_list.size() ; y++)
-		if( device_name == pv_name_list[y] ) 
-		    lv_name_list.append( lvs[x]->getName() );
-	}
+        lv_name_list.clear();
+        for (int x = 0; x < lvs.size() ; x++) {
+            pv_name_list = lvs[x]->getPvNamesAll();
+            for (int y = 0; y < pv_name_list.size() ; y++)
+                if (device_name == pv_name_list[y])
+                    lv_name_list.append(lvs[x]->getName());
+        }
 
-/* next we remove duplicate entries */
+        /* next we remove duplicate entries */
 
-	lv_name_list.sort();
-	if( lv_name_list.size() > 1 )        
-	    for(int x = lv_name_list.size() - 2; x >= 0; x--)
-		if( lv_name_list[x] == lv_name_list[x + 1] )
-		    lv_name_list.removeAt(x + 1);
-	
-	pv_data << lv_name_list.join(", ");
+        lv_name_list.sort();
+        if (lv_name_list.size() > 1)
+            for (int x = lv_name_list.size() - 2; x >= 0; x--)
+                if (lv_name_list[x] == lv_name_list[x + 1])
+                    lv_name_list.removeAt(x + 1);
 
-	item = new QTreeWidgetItem((QTreeWidgetItem *)0, pv_data);
+        pv_data << lv_name_list.join(", ");
 
-        if( device_name == "unknown device" )
+        item = new QTreeWidgetItem((QTreeWidgetItem *)0, pv_data);
+
+        if (device_name == "unknown device")
             item->setIcon(0, KIcon("exclamation"));
         else
             item->setIcon(0, KIcon());
 
-	item->setData(0, Qt::UserRole, pv->getUuid());
-	item->setData(1, Qt::UserRole, pv->getSize());
-	item->setData(2, Qt::UserRole, pv->getRemaining());
-	item->setData(3, Qt::UserRole, (pv->getSize() - pv->getRemaining()));
+        item->setData(0, Qt::UserRole, pv->getUuid());
+        item->setData(1, Qt::UserRole, pv->getSize());
+        item->setData(2, Qt::UserRole, pv->getRemaining());
+        item->setData(3, Qt::UserRole, (pv->getSize() - pv->getRemaining()));
 
-	if( pv->isActive() ){
+        if (pv->isActive()) {
             item->setToolTip(4, i18n("Active"));
             item->setIcon(4, KIcon("lightbulb"));
-        }
-	else{
+        } else {
             item->setToolTip(4, i18n("Inactive"));
             item->setIcon(4, KIcon("lightbulb_off"));
         }
 
-        for(int column = 1; column < 6; column++)
+        for (int column = 1; column < 6; column++)
             item->setTextAlignment(column, Qt::AlignRight);
 
         item->setTextAlignment(6, Qt::AlignLeft);
         item->setTextAlignment(7, Qt::AlignLeft);
 
-	pv_tree_items.append(item);
+        pv_tree_items.append(item);
     }
     insertTopLevelItems(0, pv_tree_items);
 
     setSortingEnabled(true);
 
-    for(int column = 0; column < 7; column++)
-        if( !isColumnHidden(column) )
+    for (int column = 0; column < 7; column++)
+        if (!isColumnHidden(column))
             resizeColumnToContents(column);
 
-    if( !pv_tree_items.isEmpty() && !old_current_pv_name.isEmpty() ){
+    if (!pv_tree_items.isEmpty() && !old_current_pv_name.isEmpty()) {
         bool match = false;
-        for(int x = pv_tree_items.size() - 1; x >= 0; x--){ 
-            if( old_current_pv_name == pv_tree_items[x]->data(0, 0).toString() ){ 
-                setCurrentItem( pv_tree_items[x] );
+        for (int x = pv_tree_items.size() - 1; x >= 0; x--) {
+            if (old_current_pv_name == pv_tree_items[x]->data(0, 0).toString()) {
+                setCurrentItem(pv_tree_items[x]);
                 match = true;
                 break;
             }
         }
-        if(!match){
-            setCurrentItem( pv_tree_items[0] );
+        if (!match) {
+            setCurrentItem(pv_tree_items[0]);
             scrollToItem(pv_tree_items[0], QAbstractItemView::EnsureVisible);
         }
-    }
-    else if( !pv_tree_items.isEmpty() ){
-        setCurrentItem( pv_tree_items[0] );
+    } else if (!pv_tree_items.isEmpty()) {
+        setCurrentItem(pv_tree_items[0]);
         scrollToItem(pv_tree_items[0], QAbstractItemView::EnsureVisible);
     }
 
@@ -203,13 +201,13 @@ void PVTree::loadData()
 
 void PVTree::setupContextMenu()
 {
-    setContextMenuPolicy(Qt::CustomContextMenu);   
+    setContextMenuPolicy(Qt::CustomContextMenu);
 
-    pv_move_action   = new QAction( i18n("Move physical extents"), this);
-    vg_reduce_action = new QAction( i18n("Remove from volume group"), this);
-    pv_change_action = new QAction( i18n("Change physical volume attributes"), this);
+    pv_move_action   = new QAction(i18n("Move physical extents"), this);
+    vg_reduce_action = new QAction(i18n("Remove from volume group"), this);
+    pv_change_action = new QAction(i18n("Change physical volume attributes"), this);
 
-    if(m_context_menu)
+    if (m_context_menu)
         m_context_menu->deleteLater();
     m_context_menu = new QMenu(this);
     m_context_menu->addAction(pv_move_action);
@@ -218,29 +216,29 @@ void PVTree::setupContextMenu()
 
     // disconnect the last run's connections or they pile up.
 
-    disconnect(this, SIGNAL(customContextMenuRequested(QPoint)), 
-	       this, SLOT(popupContextMenu(QPoint)) );
+    disconnect(this, SIGNAL(customContextMenuRequested(QPoint)),
+               this, SLOT(popupContextMenu(QPoint)));
 
-    disconnect(pv_move_action, SIGNAL(triggered()), 
-	       this, SLOT(movePhysicalExtents()));
+    disconnect(pv_move_action, SIGNAL(triggered()),
+               this, SLOT(movePhysicalExtents()));
 
-    disconnect(vg_reduce_action, SIGNAL(triggered()), 
-	       this, SLOT(reduceVolumeGroup()));
+    disconnect(vg_reduce_action, SIGNAL(triggered()),
+               this, SLOT(reduceVolumeGroup()));
 
-    disconnect(pv_change_action, SIGNAL(triggered()), 
-	       this, SLOT(changePhysicalVolume()));
+    disconnect(pv_change_action, SIGNAL(triggered()),
+               this, SLOT(changePhysicalVolume()));
 
-    connect(this, SIGNAL(customContextMenuRequested(QPoint)), 
-	    this, SLOT(popupContextMenu(QPoint)) );
+    connect(this, SIGNAL(customContextMenuRequested(QPoint)),
+            this, SLOT(popupContextMenu(QPoint)));
 
-    connect(pv_move_action, SIGNAL(triggered()), 
-	    this, SLOT(movePhysicalExtents()));
+    connect(pv_move_action, SIGNAL(triggered()),
+            this, SLOT(movePhysicalExtents()));
 
-    connect(vg_reduce_action, SIGNAL(triggered()), 
-	    this, SLOT(reduceVolumeGroup()));
+    connect(vg_reduce_action, SIGNAL(triggered()),
+            this, SLOT(reduceVolumeGroup()));
 
-    connect(pv_change_action, SIGNAL(triggered()), 
-	    this, SLOT(changePhysicalVolume()));
+    connect(pv_change_action, SIGNAL(triggered()),
+            this, SLOT(changePhysicalVolume()));
 }
 
 void PVTree::popupContextMenu(QPoint point)
@@ -248,68 +246,65 @@ void PVTree::popupContextMenu(QPoint point)
     QTreeWidgetItem *item = itemAt(point);
     QStringList lvs;
 
-    if(item && !m_vg->isExported()){
+    if (item && !m_vg->isExported()) {
 
-	if( (QVariant(item->data(3, Qt::UserRole)).toString()) == "0" ){  // 0 =  Zero used extents on pv
-	    m_pv_name = QVariant(item->data(0, 0)).toString();
+        if ((QVariant(item->data(3, Qt::UserRole)).toString()) == "0") {  // 0 =  Zero used extents on pv
+            m_pv_name = QVariant(item->data(0, 0)).toString();
 
             pv_move_action->setEnabled(false);
 
-            if(m_vg->getPvCount() > 1)
+            if (m_vg->getPvCount() > 1)
                 vg_reduce_action->setEnabled(true);
             else
                 vg_reduce_action->setEnabled(false);  // can't remove last pv from group
-        }
-	else{
-	    m_pv_name = QVariant(item->data(0, 0)).toString();
-	    vg_reduce_action->setEnabled(false);
+        } else {
+            m_pv_name = QVariant(item->data(0, 0)).toString();
+            vg_reduce_action->setEnabled(false);
 
-	    if(m_vg->getPvCount() > 1){     // can't move extents if there isn't another volume to put them on
-                if( QVariant(item->data(6, 0)).toString().contains("pvmove") ) // can't have more than one pvmove
+            if (m_vg->getPvCount() > 1) {   // can't move extents if there isn't another volume to put them on
+                if (QVariant(item->data(6, 0)).toString().contains("pvmove"))  // can't have more than one pvmove
                     pv_move_action->setEnabled(false);                      // See physvol.cpp about removing this
                 else
-                    pv_move_action->setEnabled(true); 
-            }
-	    else
-		pv_move_action->setEnabled(false);
-	}
-	m_context_menu->setEnabled(true);
-	m_context_menu->exec(QCursor::pos());
-    }
-    else
-	m_context_menu->setEnabled(false);  // item = 0 if there is no item a that point
+                    pv_move_action->setEnabled(true);
+            } else
+                pv_move_action->setEnabled(false);
+        }
+        m_context_menu->setEnabled(true);
+        m_context_menu->exec(QCursor::pos());
+    } else
+        m_context_menu->setEnabled(false);  // item = 0 if there is no item a that point
 }
 
 void PVTree::movePhysicalExtents()
 {
     PhysVol *pv = m_vg->getPvByName(m_pv_name);
 
-    if(pv){
+    if (pv) {
         PVMoveDialog dialog(pv);
 
-        if( !dialog.bailout() )
+        if (!dialog.bailout())
             dialog.exec();
-        
-        if(dialog.result() == QDialog::Accepted)
+
+        if (dialog.result() == QDialog::Accepted)
             MainWindow->reRun();
     }
 }
 
 void PVTree::reduceVolumeGroup()
 {
-    if( reduce_vg_one(m_vg->getName(), m_pv_name) )
+    if (reduce_vg_one(m_vg->getName(), m_pv_name))
         MainWindow->reRun();
 }
 
 void PVTree::changePhysicalVolume()
 {
     PhysVol *pv = m_vg->getPvByName(m_pv_name);
-    if(pv){
+    if (pv) {
         PVChangeDialog dialog(pv);
         dialog.exec();
 
-        if(dialog.result() == QDialog::Accepted){
-            ProcessProgress change_pv( dialog.arguments() );
+        if (dialog.result() == QDialog::Accepted) {
+            ProcessProgress change_pv(dialog.arguments());
             MainWindow->reRun();
         }
     }
@@ -329,30 +324,30 @@ void PVTree::setViewConfig()
     skeleton.addItemBool("use_si_units", m_use_si_units, false);
 
     skeleton.setCurrentGroup("PhysicalTreeColumns");
-    skeleton.addItemBool( "pt_name",      pvname,      true );
-    skeleton.addItemBool( "pt_size",      pvsize,      true );
-    skeleton.addItemBool( "pt_remaining", pvremaining, true );
-    skeleton.addItemBool( "pt_used",      pvused,      false );
-    skeleton.addItemBool( "pt_state",     pvstate,     false );
-    skeleton.addItemBool( "pt_allocate",  pvallocate,  true );
-    skeleton.addItemBool( "pt_tags",      pvtags,      true );
-    skeleton.addItemBool( "pt_lvnames",   pvlvnames,   true );
+    skeleton.addItemBool("pt_name",      pvname,      true);
+    skeleton.addItemBool("pt_size",      pvsize,      true);
+    skeleton.addItemBool("pt_remaining", pvremaining, true);
+    skeleton.addItemBool("pt_used",      pvused,      false);
+    skeleton.addItemBool("pt_state",     pvstate,     false);
+    skeleton.addItemBool("pt_allocate",  pvallocate,  true);
+    skeleton.addItemBool("pt_tags",      pvtags,      true);
+    skeleton.addItemBool("pt_lvnames",   pvlvnames,   true);
 
-    if( !( !pvname == isColumnHidden(0)      && !pvsize == isColumnHidden(1) && 
-           !pvremaining == isColumnHidden(2) && !pvused == isColumnHidden(3) &&
-           !pvstate == isColumnHidden(4)     && !pvallocate == isColumnHidden(5) &&
-           !pvtags == isColumnHidden(6)      && !pvlvnames == isColumnHidden(7) ) )
+    if (!(!pvname == isColumnHidden(0)      && !pvsize == isColumnHidden(1) &&
+            !pvremaining == isColumnHidden(2) && !pvused == isColumnHidden(3) &&
+            !pvstate == isColumnHidden(4)     && !pvallocate == isColumnHidden(5) &&
+            !pvtags == isColumnHidden(6)      && !pvlvnames == isColumnHidden(7)))
         changed = true;
 
-    if(changed){
-        setColumnHidden( 0, !pvname );
-        setColumnHidden( 1, !pvsize );
-        setColumnHidden( 2, !pvremaining );
-        setColumnHidden( 3, !pvused );
-        setColumnHidden( 4, !pvstate );
-        setColumnHidden( 5, !pvallocate );
-        setColumnHidden( 6, !pvtags );
-        setColumnHidden( 7, !pvlvnames );
+    if (changed) {
+        setColumnHidden(0, !pvname);
+        setColumnHidden(1, !pvsize);
+        setColumnHidden(2, !pvremaining);
+        setColumnHidden(3, !pvused);
+        setColumnHidden(4, !pvstate);
+        setColumnHidden(5, !pvallocate);
+        setColumnHidden(6, !pvtags);
+        setColumnHidden(7, !pvlvnames);
     }
 }
 

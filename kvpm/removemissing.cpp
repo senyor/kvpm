@@ -1,14 +1,14 @@
 /*
  *
- * 
+ *
  * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License,  version 3, as 
+ * it under the terms of the GNU General Public License,  version 3, as
  * published by the Free Software Foundation.
- * 
+ *
  * See the file "COPYING" for the exact licensing terms.
  */
 
@@ -27,25 +27,25 @@ bool remove_missing_pv(VolGroup *volumeGroup)
 {
     RemoveMissingDialog dialog(volumeGroup);
     dialog.exec();
-    
-    if(dialog.result() == QDialog::Accepted){
-        ProcessProgress remove_missing( dialog.arguments() );
+
+    if (dialog.result() == QDialog::Accepted) {
+        ProcessProgress remove_missing(dialog.arguments());
         return true;
     }
     return false;
 }
 
-RemoveMissingDialog::RemoveMissingDialog(VolGroup *volumeGroup, QWidget *parent) : 
+RemoveMissingDialog::RemoveMissingDialog(VolGroup *volumeGroup, QWidget *parent) :
     KDialog(parent),
     m_vg(volumeGroup)
 {
 
-    setWindowTitle( i18n("Remove missing physical volumes") );
+    setWindowTitle(i18n("Remove missing physical volumes"));
     QWidget *dialog_body = new QWidget(this);
     setMainWidget(dialog_body);
     QVBoxLayout *layout = new QVBoxLayout();
     dialog_body->setLayout(layout);
-    QLabel *message = new QLabel( i18n("<b>Removing missing physical volumes may result in data loss! Use with extreme care.</b>") );
+    QLabel *message = new QLabel(i18n("<b>Removing missing physical volumes may result in data loss! Use with extreme care.</b>"));
     message->setWordWrap(true);
     layout->addWidget(message);
 
@@ -67,8 +67,8 @@ QStringList RemoveMissingDialog::arguments()
 
     args << "vgreduce"
          << "--removemissing";
-    
-    if( m_all_button->isChecked() )
+
+    if (m_all_button->isChecked())
         args << "--force";
 
     args << m_vg->getName();

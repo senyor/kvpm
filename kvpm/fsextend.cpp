@@ -1,14 +1,14 @@
 /*
  *
- * 
+ *
  * Copyright (C) 2009, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License,  version 3, as 
+ * it under the terms of the GNU General Public License,  version 3, as
  * published by the Free Software Foundation.
- * 
+ *
  * See the file "COPYING" for the exact licensing terms.
  */
 
@@ -40,25 +40,24 @@ bool fs_can_extend(const QString fs)
 {
     QString executable;
 
-    if(fs == "ext2" || fs == "ext3" || fs == "ext4" || fs == "reiserfs" || fs == "ntfs" || fs == "xfs"){
+    if (fs == "ext2" || fs == "ext3" || fs == "ext4" || fs == "reiserfs" || fs == "ntfs" || fs == "xfs") {
 
-        if(fs == "ext2" || fs == "ext3" || fs == "ext4")
+        if (fs == "ext2" || fs == "ext3" || fs == "ext4")
             executable = "resize2fs";
-        else if(fs == "reiserfs")
+        else if (fs == "reiserfs")
             executable = "resize_reiserfs";
-        else if(fs == "ntfs")
+        else if (fs == "ntfs")
             executable = "ntfsresize";
-        else if(fs == "xfs")
+        else if (fs == "xfs")
             executable = "xfs_growfs";
 
-        if( !ExecutableFinder::getPath(executable).isEmpty() )
+        if (!ExecutableFinder::getPath(executable).isEmpty())
             return true;
-        else{
+        else {
             KMessageBox::error(NULL, i18n("Executable: '%1' not found, this filesystem cannot be extended", executable));
             return false;
         }
-    }
-    else if(fs == "jfs")
+    } else if (fs == "jfs")
         return true;
     else
         return false;
@@ -70,7 +69,7 @@ bool fs_extend(const QString dev, const QString fs, const QStringList mps, const
     bool isMounted = true;
     QString mp;
 
-    if( mps.isEmpty() )
+    if (mps.isEmpty())
         isMounted = false;
     else
         mp = mps[0];
@@ -81,7 +80,7 @@ bool fs_extend(const QString dev, const QString fs, const QStringList mps, const
     QStringList args;
     unsigned long options = 0;
 
-    if( ( !isLV ) && ( isMounted ) ){               
+    if ((!isLV) && (isMounted)) {
         KMessageBox::error(0, i18n("only logical volumes may be mounted during resize, not partitions"));
         return false;
     }
@@ -89,117 +88,103 @@ bool fs_extend(const QString dev, const QString fs, const QStringList mps, const
     const QString err_msg = i18n("It appears that the filesystem on the device or volume was not extended. "
                                  "It will need to be extended before the additional space can be used.");
 
-    if(fs == "ext2" || fs == "ext3" || fs == "ext4"){
+    if (fs == "ext2" || fs == "ext3" || fs == "ext4") {
 
-        if( !isMounted ){
-            if( !fsck(dev) )
+        if (!isMounted) {
+            if (!fsck(dev))
                 return false;
         }
 
-        args << "resize2fs" << dev; 
+        args << "resize2fs" << dev;
         ProcessProgress fs_grow(args);
 
-        if ( fs_grow.exitCode() ){
+        if (fs_grow.exitCode()) {
             KMessageBox::error(0, err_msg);
             return false;
-        }
-        else
+        } else
             return true;
-    }
-    else if(fs == "xfs"){
+    } else if (fs == "xfs") {
 
-        if(isMounted){
+        if (isMounted) {
 
-            args << "xfs_growfs" << mp; 
+            args << "xfs_growfs" << mp;
             ProcessProgress fs_grow(args);
-            
-            if ( fs_grow.exitCode() ){
+
+            if (fs_grow.exitCode()) {
                 KMessageBox::error(0, err_msg);
                 return false;
-            }
-            else
+            } else
                 return true;
-        }
-        else{
+        } else {
 
             KTempDir temp_mp;
 
-            if( do_temp_mount(dev, fs, temp_mp.name()) ){
+            if (do_temp_mount(dev, fs, temp_mp.name())) {
 
                 args << "xfs_growfs" << temp_mp.name();
                 ProcessProgress fs_grow(args);
-                do_temp_unmount( temp_mp.name() );
-            
-                if ( fs_grow.exitCode() ){
+                do_temp_unmount(temp_mp.name());
+
+                if (fs_grow.exitCode()) {
                     KMessageBox::error(0, err_msg);
                     return false;
-                }
-                else
+                } else
                     return true;
-            }
-            else{
+            } else {
                 KMessageBox::error(0, err_msg);
                 return false;
             }
         }
-    }
-    else if(fs == "jfs"){
+    } else if (fs == "jfs") {
 
         options = MS_REMOUNT;
 
-        if(isMounted){
+        if (isMounted) {
 
-            if(mount( dev_qba.data(), mp_qba.data(), NULL, options, "resize" )){
+            if (mount(dev_qba.data(), mp_qba.data(), NULL, options, "resize")) {
                 KMessageBox::error(0, i18n("Error number: %1 %2", errno, strerror(errno)));
                 return false;
-            }
-            else
+            } else
                 return true;
-        }
-        else{
+        } else {
 
             KTempDir temp_mp;
             const QByteArray temp_mp_qba = temp_mp.name().toLocal8Bit();
- 
-            if( do_temp_mount(dev, fs, temp_mp.name()) ){
-                if( ! mount( dev_qba.data(), temp_mp_qba.data(), NULL, options, "resize" ) ){
-                    do_temp_unmount( temp_mp.name() );
+
+            if (do_temp_mount(dev, fs, temp_mp.name())) {
+                if (! mount(dev_qba.data(), temp_mp_qba.data(), NULL, options, "resize")) {
+                    do_temp_unmount(temp_mp.name());
                     return true;
-                }
-                else{
+                } else {
                     KMessageBox::error(0, i18n("Error number: %1 %2", errno, strerror(errno)));
-                    do_temp_unmount( temp_mp.name() );                
-                }                
+                    do_temp_unmount(temp_mp.name());
+                }
             }
             return false;
         }
-    }
-    else if(fs == "reiserfs"){
+    } else if (fs == "reiserfs") {
 
-        args << "resize_reiserfs" << "-fq" << dev; 
+        args << "resize_reiserfs" << "-fq" << dev;
         ProcessProgress fs_grow(args);
-        
-        if ( fs_grow.exitCode() ){
+
+        if (fs_grow.exitCode()) {
             KMessageBox::error(0, err_msg);
             return false;
-        }
-        else
+        } else
             return true;
-    }
-    else if(fs == "ntfs"){
+    } else if (fs == "ntfs") {
 
-        args << "ntfsresize" 
+        args << "ntfsresize"
              << "--no-progress-bar"
              << "--force"
-             << dev; 
+             << dev;
 
         ProcessProgress fs_grow(args);
-        
-        if ( fs_grow.exitCode() ){
+
+        if (fs_grow.exitCode()) {
             KMessageBox::error(0, err_msg);
             return false;
-        }
-        else
+        } else
             return true;
     }
 
@@ -213,9 +198,9 @@ bool do_temp_mount(const QString dev, const QString fs, const QString mp)
     const QByteArray fs_qba  = fs.toLocal8Bit();
     const QByteArray mp_qba  = mp.toLocal8Bit();
 
-    const int error = mount( dev_qba.data(), mp_qba.data(), fs_qba.data(), options, NULL );
+    const int error = mount(dev_qba.data(), mp_qba.data(), fs_qba.data(), options, NULL);
 
-    if( error ){
+    if (error) {
         KMessageBox::error(0, QString("Error number: %1 %2").arg(errno).arg(strerror(errno)));
         return false;
     }
