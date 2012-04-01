@@ -15,15 +15,17 @@
 #ifndef VGCREATE_H
 #define VGCREATE_H
 
-#include <KComboBox>
 #include <KDialog>
-#include <KLineEdit>
 
-#include <QLabel>
 #include <QStringList>
-#include <QCheckBox>
-#include <QRegExpValidator>
-#include <QVBoxLayout>
+
+class KLineEdit;
+class KComboBox;
+
+class QLabel;
+class QCheckBox;
+class QRegExpValidator;
+class QVBoxLayout;
 
 class StorageDevice;
 class StoragePartition;

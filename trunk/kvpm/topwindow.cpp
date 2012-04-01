@@ -283,8 +283,13 @@ void TopWindow::importVolumeGroup()
 
 void TopWindow::splitVolumeGroup()
 {
-    if (split_vg(m_vg))
-        reRun();
+    VGSplitDialog dialog(m_vg);
+
+    if (!dialog.bailout()) {
+        dialog.exec();
+        if (dialog.result() == QDialog::Accepted)
+            reRun();
+    }
 }
 
 void TopWindow::mergeVolumeGroup()
