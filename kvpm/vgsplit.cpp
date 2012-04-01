@@ -15,13 +15,6 @@
 
 #include "vgsplit.h"
 
-#include <KPushButton>
-#include <KLocale>
-#include <KMessageBox>
-#include <KTabWidget>
-
-#include <QtGui>
-
 #include "logvol.h"
 #include "masterlist.h"
 #include "misc.h"
@@ -29,23 +22,21 @@
 #include "processprogress.h"
 #include "volgroup.h"
 
+#include <KDialog>
+#include <KLineEdit>
+#include <KListWidget>
+#include <KLocale>
+#include <KMessageBox>
+#include <KPushButton>
+#include <KTabWidget>
 
+#include <QCheckBox>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QRegExpValidator>
+#include <QTableWidget>
+#include <QVBoxLayout>
 
-bool split_vg(VolGroup *volumeGroup)
-{
-    if (volumeGroup->getPhysicalVolumes().size() < 2) {
-        KMessageBox::error(0, i18n("A volume group must have at least two physical volumes to split group"));
-        return false;
-    }
-
-    VGSplitDialog dialog(volumeGroup);
-    dialog.exec();
-    if (dialog.result() == QDialog::Accepted) {
-        ProcessProgress vgsplit(dialog.arguments());
-        return true;
-    } else
-        return false;
-}
 
 VGSplitDialog::VGSplitDialog(VolGroup *volumeGroup, QWidget *parent) : KDialog(parent), m_vg(volumeGroup)
 {
@@ -53,11 +44,11 @@ VGSplitDialog::VGSplitDialog(VolGroup *volumeGroup, QWidget *parent) : KDialog(p
 
     setWindowTitle(i18n("Split Volume Group"));
 
-    QWidget *dialog_body = new QWidget(this);
+    QWidget *const dialog_body = new QWidget(this);
     setMainWidget(dialog_body);
-    QVBoxLayout *layout = new QVBoxLayout();
+    QVBoxLayout *const layout = new QVBoxLayout();
     dialog_body->setLayout(layout);
-    QLabel *name_label = new QLabel(i18n("Volume Group To Split: <b>%1</b>", m_vg->getName()));
+    QLabel *const name_label = new QLabel(i18n("<b>Volume group to split: %1</b>", m_vg->getName()));
     name_label->setAlignment(Qt::AlignCenter);
     layout->addWidget(name_label);
 
@@ -65,8 +56,9 @@ VGSplitDialog::VGSplitDialog(VolGroup *volumeGroup, QWidget *parent) : KDialog(p
     QRegExp rx("[0-9a-zA-Z_\\.][-0-9a-zA-Z_\\.]*");
     m_validator = new QRegExpValidator(rx, m_new_vg_name);
     m_new_vg_name->setValidator(m_validator);
-    QLabel *new_name_label = new QLabel(i18n("New Volume Group Name"));
-    QHBoxLayout *new_name_layout = new QHBoxLayout();
+    QLabel *const new_name_label = new QLabel(i18n("New Volume Group Name"));
+    new_name_label->setBuddy(m_new_vg_name);
+    QHBoxLayout *const new_name_layout = new QHBoxLayout();
     new_name_layout->addStretch();
     new_name_layout->addWidget(new_name_label);
     new_name_layout->addWidget(m_new_vg_name);
@@ -79,7 +71,7 @@ VGSplitDialog::VGSplitDialog(VolGroup *volumeGroup, QWidget *parent) : KDialog(p
     connect(this, SIGNAL(okClicked()),
             this, SLOT(deactivate()));
 
-    KTabWidget *tw = new KTabWidget();
+    KTabWidget *const tw = new KTabWidget();
     layout->addWidget(tw);
 
     QStringList mobile_lv_names, immobile_lv_names, mobile_pv_names, immobile_pv_names;
@@ -94,6 +86,9 @@ VGSplitDialog::VGSplitDialog(VolGroup *volumeGroup, QWidget *parent) : KDialog(p
 
     validateOK();
     setMinimumWidth(400);
+
+    connect(this, SIGNAL(okClicked()),
+            this, SLOT(commitChanges()));
 }
 
 void VGSplitDialog::validateOK()
@@ -119,16 +114,14 @@ void VGSplitDialog::validateOK()
         enableButtonOk(false);
 }
 
-QStringList VGSplitDialog::arguments()
+void VGSplitDialog::commitChanges()
 {
-    QStringList args;
-
-    args << "vgsplit" << m_vg->getName() << m_new_vg_name->text();
+    QStringList args = QStringList() << "vgsplit" << m_vg->getName() << m_new_vg_name->text(); 
 
     for (int x = m_right_pv_list->count() - 1; x >= 0; x--)
         args << m_right_pv_list->item(x)->data(Qt::DisplayRole).toString();
 
-    return args;
+    ProcessProgress vgsplit(args);
 }
 
 void VGSplitDialog::deactivate()
@@ -172,11 +165,11 @@ void VGSplitDialog::deactivate()
 
 QWidget *VGSplitDialog::buildLvLists(const QStringList mobileLvNames, const QStringList immobileLvNames)
 {
-    QWidget *lv_list = new QWidget();
-    QHBoxLayout *layout = new QHBoxLayout;
-    QVBoxLayout *left_layout = new QVBoxLayout;
-    QVBoxLayout *center_layout = new QVBoxLayout;
-    QVBoxLayout *right_layout = new QVBoxLayout;
+    QWidget *const lv_list = new QWidget();
+    QHBoxLayout *const layout = new QHBoxLayout;
+    QVBoxLayout *const left_layout = new QVBoxLayout;
+    QVBoxLayout *const center_layout = new QVBoxLayout;
+    QVBoxLayout *const right_layout = new QVBoxLayout;
     m_lv_add = new KPushButton(KIcon("arrow-right"), i18n("Add"));
     m_lv_remove = new KPushButton(KIcon("arrow-left"), i18n("Remove"));
 
@@ -235,11 +228,11 @@ QWidget *VGSplitDialog::buildLvLists(const QStringList mobileLvNames, const QStr
 
 QWidget *VGSplitDialog::buildPvLists(const QStringList mobilePvNames, const QStringList immobilePvNames)
 {
-    QWidget *pv_list = new QWidget();
-    QHBoxLayout *layout = new QHBoxLayout;
-    QVBoxLayout *left_layout = new QVBoxLayout;
-    QVBoxLayout *center_layout = new QVBoxLayout;
-    QVBoxLayout *right_layout = new QVBoxLayout;
+    QWidget *const pv_list = new QWidget();
+    QHBoxLayout *const layout = new QHBoxLayout;
+    QVBoxLayout *const left_layout = new QVBoxLayout;
+    QVBoxLayout *const center_layout = new QVBoxLayout;
+    QVBoxLayout *const right_layout = new QVBoxLayout;
     m_pv_add = new KPushButton(KIcon("arrow-right"), "Add");
     m_pv_remove = new KPushButton(KIcon("arrow-left"), "Remove");
 
@@ -607,3 +600,14 @@ void VGSplitDialog::movesWithVolume(const bool isLV, const QString name,
         moving_pv_count = movingPvNames.size();
     }
 }
+
+bool VGSplitDialog::bailout()
+{
+    if (m_vg->getPhysicalVolumes().size() < 2) {
+        KMessageBox::error(0, i18n("A volume group must have at least two physical volumes to split group"));
+        return true;
+    } else {
+        return false;
+    }
+}
+

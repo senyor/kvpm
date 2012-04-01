@@ -14,14 +14,6 @@
 
 #include "vgcreate.h"
 
-#include <lvm2app.h>
-
-#include <KLocale>
-#include <KMessageBox>
-#include <KPushButton>
-
-#include <QtGui>
-
 #include "masterlist.h"
 #include "progressbox.h"
 #include "pvgroupbox.h"
@@ -29,6 +21,20 @@
 #include "storagepartition.h"
 #include "topwindow.h"
 
+#include <lvm2app.h>
+
+#include <KApplication>
+#include <KComboBox>
+#include <KLineEdit>
+#include <KLocale>
+#include <KMessageBox>
+#include <KPushButton>
+
+#include <QCheckBox>
+#include <QEventLoop>
+#include <QLabel>
+#include <QRegExpValidator>
+#include <QVBoxLayout>
 
 
 VGCreateDialog::VGCreateDialog(QWidget *parent) : KDialog(parent)
@@ -215,24 +221,26 @@ void VGCreateDialog::buildDialog(QList<StorageDevice *> devices, QList<StoragePa
     QVBoxLayout *const layout = new QVBoxLayout();
     dialog_body->setLayout(layout);
 
-    QLabel *const title = new QLabel(i18n("<b>Create A Volume Group</b>"));
+    QLabel *const title = new QLabel(i18n("<b>Create a new volume group</b>"));
     title->setAlignment(Qt::AlignCenter);
     layout->addSpacing(5);
     layout->addWidget(title);
     layout->addSpacing(5);
 
-    QLabel *name_label = new QLabel(i18n("Group Name: "));
+    QLabel *const name_label = new QLabel(i18n("Group name: "));
     m_vg_name = new KLineEdit();
+    name_label->setBuddy(m_vg_name);
 
     QRegExp rx("[0-9a-zA-Z_\\.][-0-9a-zA-Z_\\.]*");
     m_validator = new QRegExpValidator(rx, m_vg_name);
     m_vg_name->setValidator(m_validator);
-    QHBoxLayout *name_layout = new QHBoxLayout();
+    QHBoxLayout *const name_layout = new QHBoxLayout();
     name_layout->addWidget(name_label);
     name_layout->addWidget(m_vg_name);
 
-    QLabel *extent_label = new QLabel(i18n("Physical Extent Size: "));
+    QLabel *const extent_label = new QLabel(i18n("Physical extent size: "));
     m_extent_size = new KComboBox();
+    extent_label->setBuddy(m_extent_size);
     m_extent_size->insertItem(0, "1");
     m_extent_size->insertItem(1, "2");
     m_extent_size->insertItem(2, "4");

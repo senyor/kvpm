@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -16,18 +16,19 @@
 #define VGSPLIT_H
 
 #include <KDialog>
-#include <KLineEdit>
-#include <KListWidget>
 
 #include <QStringList>
-#include <QCheckBox>
-#include <QRegExpValidator>
-#include <QTableWidget>
+
+class KLineEdit;
+class KListWidget;
+
+class QCheckBox;
+class QRegExpValidator;
+class QTableWidget;
 
 class LogVol;
 class VolGroup;
 
-bool split_vg(VolGroup *volumeGroup);
 
 class VGSplitDialog : public KDialog
 {
@@ -63,17 +64,18 @@ class VGSplitDialog : public KDialog
 
 public:
     explicit VGSplitDialog(VolGroup *volumeGroup, QWidget *parent = 0);
-    QStringList arguments();
+    bool bailout();
 
 private slots:
+    void addLvList();
+    void addPvList();
+    void commitChanges();
+    void deactivate();     // active lvs must be deactivated before moving
     void enableLvArrows();
     void enablePvArrows();
-    void addPvList();
     void removePvList();
-    void addLvList();
     void removeLvList();
     void validateOK();
-    void deactivate();     // active lvs must be deactivated before moving
 
 };
 

@@ -37,7 +37,7 @@ VGMergeDialog::VGMergeDialog(VolGroup *const volumeGroup, QWidget *parent)
     setMainWidget(dialog_body);
     QVBoxLayout *const layout = new QVBoxLayout();
     dialog_body->setLayout(layout);
-    QLabel *name_label = new QLabel(i18n("Merge volume group: <b>%1</b>", m_vg->getName()));
+    QLabel *name_label = new QLabel(i18n("<b>Merge volume group: %1</b>", m_vg->getName()));
     name_label->setAlignment(Qt::AlignCenter);
     layout->addWidget(name_label);
     layout->addSpacing(5);
