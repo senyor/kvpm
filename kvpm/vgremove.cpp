@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -22,8 +22,8 @@
 #include <QtGui>
 
 #include "masterlist.h"
-#include "topwindow.h"
 #include "progressbox.h"
+#include "topwindow.h"
 #include "volgroup.h"
 
 
@@ -36,7 +36,7 @@ bool remove_vg(VolGroup *volumeGroup)
     bool success = true;
     const QString message = i18n("Are you certain you want to delete volume group: <b>%1</b>?", volumeGroup->getName());
 
-    if(KMessageBox::questionYesNo( 0, message) == KMessageBox::Yes){
+    if(KMessageBox::questionYesNo(0, message) == KMessageBox::Yes){
 
         progress_box->setRange(0,3);
         progress_box->setValue(1);
@@ -65,7 +65,6 @@ bool remove_vg(VolGroup *volumeGroup)
         }
     }
     else{
-        KMessageBox::error(0, QString(lvm_errmsg(lvm)));
         success = false;
     }
 
