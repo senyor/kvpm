@@ -14,16 +14,6 @@
 
 #include "vgextend.h"
 
-#include <lvm2app.h>
-
-#include <KConfigSkeleton>
-#include <KGlobal>
-#include <KLocale>
-#include <KMessageBox>
-#include <KPushButton>
-
-#include <QtGui>
-
 #include "masterlist.h"
 #include "misc.h"
 #include "progressbox.h"
@@ -34,6 +24,18 @@
 #include "vgcreate.h"
 #include "volgroup.h"
 
+#include <lvm2app.h>
+
+#include <KApplication>
+#include <KConfigSkeleton>
+#include <KGlobal>
+#include <KLocale>
+#include <KMessageBox>
+#include <KPushButton>
+
+#include <QCheckBox>
+#include <QEventLoop>
+#include <QVBoxLayout>
 
 
 VGExtendDialog::VGExtendDialog(VolGroup *const group, QWidget *parent)
@@ -68,7 +70,8 @@ VGExtendDialog::VGExtendDialog(VolGroup *const group, QWidget *parent)
 }
 
 VGExtendDialog::VGExtendDialog(VolGroup *const group, StorageDevice *const device, StoragePartition *const partition, QWidget *parent)
-    : KDialog(parent), m_vg(group)
+    : KDialog(parent), 
+      m_vg(group)
 {
     m_bailout = false;
 
@@ -153,7 +156,7 @@ void VGExtendDialog::buildDialog(QList<StorageDevice *> devices, QList<StoragePa
     QVBoxLayout *const layout = new QVBoxLayout();
     dialog_body->setLayout(layout);
 
-    QLabel *const title = new QLabel(i18n("Extend Volume Group: <b>%1</b>", m_vg->getName()));
+    QLabel *const title = new QLabel(i18n("<b>Extend volume group: %1</b>", m_vg->getName()));
     title->setAlignment(Qt::AlignCenter);
     layout->addSpacing(5);
     layout->addWidget(title);

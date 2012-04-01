@@ -15,10 +15,9 @@
 #ifndef VGEXTEND_H
 #define VGEXTEND_H
 
-#include <QStringList>
 #include <KDialog>
-#include <QCheckBox>
-#include <QVBoxLayout>
+
+#include <QStringList>
 
 class PvGroupBox;
 class StorageDevice;
