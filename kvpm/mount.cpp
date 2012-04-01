@@ -14,24 +14,30 @@
 
 #include "mount.h"
 
+#include "logvol.h"
+#include "mountentry.h"
+#include "mounttables.h"
+#include "storagepartition.h"
+
 #include <sys/mount.h>
 #include <linux/fs.h>
 #include <errno.h>
 #include <string.h>
 
-#include <KTabWidget>
 #include <KFileDialog>
-#include <KPushButton>
-#include <KMessageBox>
-#include <KUrl>
+#include <KLineEdit>
 #include <KLocale>
+#include <KMessageBox>
+#include <KPushButton>
+#include <KTabWidget>
+#include <KUrl>
 
-#include <QtGui>
-
-#include "logvol.h"
-#include "mountentry.h"
-#include "mounttables.h"
-#include "storagepartition.h"
+#include <QCheckBox>
+#include <QGroupBox>
+#include <QLabel>
+#include <QRadioButton>
+#include <QString>
+#include <QVBoxLayout>
 
 
 const int BUFF_LEN = 2000;   // Enough?
@@ -71,14 +77,10 @@ void MountDialog::buildDialog()
     layout->addWidget(device_label);
     layout->addSpacing(5);
 
-    QHBoxLayout *const main_layout = new QHBoxLayout();
-    layout->addLayout(main_layout);
-    QVBoxLayout *const left_layout = new QVBoxLayout();
-    main_layout->addLayout(left_layout);
-
-    left_layout->addWidget(filesystemBox());
-    left_layout->addWidget(mountPointBox());
-    main_layout->addWidget(optionsBox());
+    KTabWidget *const tab_widget = new KTabWidget();
+    tab_widget->addTab(mainTab(), i18n("Main"));
+    tab_widget->addTab(optionsTab(), i18n("Options"));
+    layout->addWidget(tab_widget);
 
     connect(this, SIGNAL(accepted()),
             this, SLOT(mountFilesystem()));
@@ -179,16 +181,16 @@ QWidget* MountDialog::filesystemBox()
     return filesystem_box;
 }
 
-QWidget* MountDialog::optionsBox()
+QWidget* MountDialog::optionsTab()
 {
-    QWidget *options_box = new QGroupBox(i18n("Mount Options"));
-    QVBoxLayout *options_layout = new QVBoxLayout();
-    options_box->setLayout(options_layout);
+    QWidget *const options = new QWidget();
+    QVBoxLayout *const options_layout = new QVBoxLayout();
+    options->setLayout(options_layout);
 
-    QGroupBox *common_options_box = new QGroupBox(i18n("Common Options"), this);
-    QVBoxLayout *layout_left      = new QVBoxLayout();
-    QVBoxLayout *layout_right     = new QVBoxLayout();
-    QHBoxLayout *common_options_layout = new QHBoxLayout();
+    QGroupBox *const common_options_box = new QGroupBox(i18n("Common Options"), this);
+    QVBoxLayout *const layout_left      = new QVBoxLayout();
+    QVBoxLayout *const layout_right     = new QVBoxLayout();
+    QHBoxLayout *const common_options_layout = new QHBoxLayout();
     common_options_layout->addLayout(layout_left);
     common_options_layout->addLayout(layout_right);
     common_options_box->setLayout(common_options_layout);
@@ -330,7 +332,19 @@ QWidget* MountDialog::optionsBox()
     connect(hfs_button, SIGNAL(toggled(bool)),
             this, SLOT(toggleAdditionalOptions(bool)));
 
-    return options_box;
+    return options;
+}
+
+QWidget* MountDialog::mainTab()
+{
+    QWidget *const main = new QWidget();
+    QVBoxLayout *const layout = new QVBoxLayout();
+    layout->addWidget(filesystemBox());
+    layout->addStretch();
+    layout->addWidget(mountPointBox());
+    main->setLayout(layout);
+
+    return main;
 }
 
 QWidget* MountDialog::mountPointBox()
