@@ -1,14 +1,14 @@
 /*
  *
- * 
+ *
  * Copyright (C) 2009, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License,  version 3, as 
+ * it under the terms of the GNU General Public License,  version 3, as
  * published by the Free Software Foundation.
- * 
+ *
  * See the file "COPYING" for the exact licensing terms.
  */
 
@@ -34,30 +34,29 @@ bool remove_fs(const QString name)
 
     const QString error_message = i18n("Error writing to device %1", name);
 
-    if(KMessageBox::warningYesNo(NULL, 
-                                 warning_message, 
-                                 QString(), 
-                                 KStandardGuiItem::yes(), 
-                                 KStandardGuiItem::no(), 
-                                 QString(), 
-                                 KMessageBox::Dangerous) == KMessageBox::Yes){
+    if (KMessageBox::warningYesNo(NULL,
+                                  warning_message,
+                                  QString(),
+                                  KStandardGuiItem::yes(),
+                                  KStandardGuiItem::no(),
+                                  QString(),
+                                  KMessageBox::Dangerous) == KMessageBox::Yes) {
 
         QByteArray zero_array(128 * 1024, '\0');
         QFile *const device = new QFile(name);
         bool error = false;
 
-        if( device->open(QIODevice::ReadWrite) ){
-            if( device->write(zero_array) < 0 )
+        if (device->open(QIODevice::ReadWrite)) {
+            if (device->write(zero_array) < 0)
                 error = true;
-            if( !device->flush() )
+            if (!device->flush())
                 error = true;
 
             device->close();
 
-            if(error)
+            if (error)
                 KMessageBox::error(0, error_message);
-        }
-        else
+        } else
             KMessageBox::error(0, error_message);
 
         return(true);

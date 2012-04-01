@@ -1,14 +1,14 @@
 /*
  *
- * 
+ *
  * Copyright (C) 2008, 2009, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License,  version 3, as 
+ * it under the terms of the GNU General Public License,  version 3, as
  * published by the Free Software Foundation.
- * 
+ *
  * See the file "COPYING" for the exact licensing terms.
  */
 
@@ -38,20 +38,20 @@ extern TopWindow *MainWindow;
 
 class TopWindow : public KMainWindow
 {
-Q_OBJECT
-    MainTabWidget *m_tab_widget;          // The current tab widget we are using 
+    Q_OBJECT
+    MainTabWidget *m_tab_widget;          // The current tab widget we are using
 
-    KAction *m_remove_vg_action,      *m_rename_vg_action, 
+    KAction *m_remove_vg_action,      *m_rename_vg_action,
             *m_reduce_vg_action,      *m_create_vg_action,      *m_extend_vg_action,
             *m_change_vg_action,      *m_remove_missing_action, *m_merge_vg_action,
             *m_export_vg_action,      *m_import_vg_action,      *m_split_vg_action;
-            
+
     DeviceTab   *m_device_tab;
     VolGroup    *m_vg;
     MasterList  *m_master_list;
     ExecutableFinder *m_executable_finder;
 
-    static ProgressBox *m_progress_box; 
+    static ProgressBox *m_progress_box;
 
     void closeEvent(QCloseEvent *);
     KMenu *buildFileMenu();
@@ -60,15 +60,15 @@ Q_OBJECT
     KMenu *buildSettingsMenu();
     KMenu *buildToolsMenu();
 
- public:
+public:
     TopWindow(MasterList *const masterList, ExecutableFinder *const executableFinder, QWidget *parent = NULL);
     static ProgressBox *getProgressBox();
-    
- public slots:
+
+public slots:
     void reRun();
     void updateTabs();
- 
- private slots:
+
+private slots:
     void cleanUp();
     void setupMenus();
     void showVolumeGroupInfo(bool show);
@@ -88,7 +88,7 @@ Q_OBJECT
     void restartPhysicalVolumeMove();
     void stopPhysicalVolumeMove();
     void configKvpm();
-    
+
 };
 
 #endif

@@ -1,14 +1,14 @@
 /*
  *
- * 
+ *
  * Copyright (C) 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License,  version 3, as 
+ * it under the terms of the GNU General Public License,  version 3, as
  * published by the Free Software Foundation.
- * 
+ *
  * See the file "COPYING" for the exact licensing terms.
  */
 
@@ -23,7 +23,7 @@
 
 
 SizeSelectorBox::SizeSelectorBox(long long unitSize, long long minSize, long long maxSize, long long initialSize,
-                                 bool isVolume, bool isOffset, bool isNew, bool startLocked, QWidget *parent) : 
+                                 bool isVolume, bool isOffset, bool isNew, bool startLocked, QWidget *parent) :
     QGroupBox(parent),
     m_max_size(maxSize),
     m_min_size(minSize),
@@ -51,28 +51,26 @@ SizeSelectorBox::SizeSelectorBox(long long unitSize, long long minSize, long lon
     m_size_edit->setAlignment(Qt::AlignRight);
 
     m_suffix_combo = new KComboBox();
-    if(m_use_si_units){
-        m_suffix_combo->insertItem(0,"MB");
-        m_suffix_combo->insertItem(1,"GB");
-        m_suffix_combo->insertItem(2,"TB");
-    }
-    else{
-        m_suffix_combo->insertItem(0,"MiB");
-        m_suffix_combo->insertItem(1,"GiB");
-        m_suffix_combo->insertItem(2,"TiB");
+    if (m_use_si_units) {
+        m_suffix_combo->insertItem(0, "MB");
+        m_suffix_combo->insertItem(1, "GB");
+        m_suffix_combo->insertItem(2, "TB");
+    } else {
+        m_suffix_combo->insertItem(0, "MiB");
+        m_suffix_combo->insertItem(1, "GiB");
+        m_suffix_combo->insertItem(2, "TiB");
     }
 
-    if(m_is_volume){
+    if (m_is_volume) {
         m_suffix_combo->insertItem(0, i18n("Extents"));
         m_suffix_combo->setCurrentIndex(2);
-    }
-    else{
+    } else {
         m_suffix_combo->setCurrentIndex(1);
     }
     m_suffix_combo->setInsertPolicy(KComboBox::NoInsert);
 
-    if(m_is_new){
-        if( !m_is_offset )
+    if (m_is_new) {
+        if (!m_is_offset)
             m_current_size = m_constrained_max;
         else
             m_current_size = 0;
@@ -83,10 +81,10 @@ SizeSelectorBox::SizeSelectorBox(long long unitSize, long long minSize, long lon
     m_size_validator->setBottom(0);
     m_size_box = NULL;
 
-    if(m_is_volume){
-        setTitle( i18n("Volume Size") );
-        if( !m_is_new ){
-            m_size_box = new QCheckBox( i18n("Lock selected size") );
+    if (m_is_volume) {
+        setTitle(i18n("Volume Size"));
+        if (!m_is_new) {
+            m_size_box = new QCheckBox(i18n("Lock selected size"));
             m_size_box->setChecked(false);
             layout->addWidget(m_size_box);
             setConstraints(false);
@@ -94,26 +92,24 @@ SizeSelectorBox::SizeSelectorBox(long long unitSize, long long minSize, long lon
             connect(m_size_box, SIGNAL(toggled(bool)),
                     this, SLOT(lock(bool)));
         }
-    }
-    else if(m_is_offset){
-        setTitle( i18n("Partition Start") );
-        m_offset_box = new QCheckBox( i18n("Lock partition start") );
+    } else if (m_is_offset) {
+        setTitle(i18n("Partition Start"));
+        m_offset_box = new QCheckBox(i18n("Lock partition start"));
         setConstraints(false);
         layout->addWidget(m_offset_box);
 
         connect(m_offset_box, SIGNAL(toggled(bool)),
                 this, SLOT(lock(bool)));
-    }
-    else{
-        setTitle( i18n("Partition Size") );
-        m_size_box = new QCheckBox( i18n("Lock selected size") );
+    } else {
+        setTitle(i18n("Partition Size"));
+        m_size_box = new QCheckBox(i18n("Lock selected size"));
         layout->addWidget(m_size_box);
 
         connect(m_size_box, SIGNAL(toggled(bool)),
                 this, SLOT(lock(bool)));
 
-        if( !m_is_new ){
-            m_shrink_box = new QCheckBox( i18n("Prevent shrinking") );
+        if (!m_is_new) {
+            m_shrink_box = new QCheckBox(i18n("Prevent shrinking"));
             m_shrink_box->setChecked(false);
             setConstraints(false);
             layout->addWidget(m_shrink_box);
@@ -128,10 +124,10 @@ SizeSelectorBox::SizeSelectorBox(long long unitSize, long long minSize, long lon
 
     QLabel *const edit_label = new QLabel();
 
-    if(m_is_offset)
-        edit_label->setText( i18n("New start:") );
+    if (m_is_offset)
+        edit_label->setText(i18n("New start:"));
     else
-        edit_label->setText( i18n("New size:") );
+        edit_label->setText(i18n("New size:"));
 
     edit_label->setBuddy(m_size_edit);
     upper_layout->addWidget(edit_label);
@@ -146,22 +142,21 @@ SizeSelectorBox::SizeSelectorBox(long long unitSize, long long minSize, long lon
     updateValidator();
 
     connect(m_size_edit, SIGNAL(textEdited(QString)),
-	    this, SLOT(setToEdit(QString)));
+            this, SLOT(setToEdit(QString)));
 
     connect(m_size_slider, SIGNAL(sliderMoved(int)),
-	    this, SLOT(setToSlider(int)));
+            this, SLOT(setToSlider(int)));
 
     connect(m_suffix_combo, SIGNAL(currentIndexChanged(int)),
-	    this, SLOT(updateEdit()));
+            this, SLOT(updateEdit()));
 
-    if( m_min_size == m_max_size ){
+    if (m_min_size == m_max_size) {
         setCurrentSize(m_min_size);
 
-        if(m_is_offset){
+        if (m_is_offset) {
             m_offset_box->setChecked(true);
             m_offset_box->setEnabled(false);
-        }
-        else{
+        } else {
             m_size_box->setChecked(true);
             m_size_box->setEnabled(false);
         }
@@ -170,27 +165,25 @@ SizeSelectorBox::SizeSelectorBox(long long unitSize, long long minSize, long lon
 
 void SizeSelectorBox::resetToInitial()
 {
-    if( m_size_box != NULL ){
-        if( !m_size_box->isEnabled() )
+    if (m_size_box != NULL) {
+        if (!m_size_box->isEnabled())
             return;
     }
 
     m_current_size = m_initial_size;
 
-    if(m_is_volume){
-        if( !m_is_new ){
+    if (m_is_volume) {
+        if (!m_is_new) {
             m_shrink_box->setChecked(false);
         }
-    }
-    else if(m_is_offset){
+    } else if (m_is_offset) {
         lock(m_start_locked);
         m_offset_box->setChecked(m_start_locked);
-    }
-    else{
+    } else {
         lock(m_start_locked);
         m_size_box->setChecked(m_start_locked);
 
-        if( !m_is_new ){
+        if (!m_is_new) {
             m_shrink_box->setChecked(false);
         }
     }
@@ -201,31 +194,28 @@ void SizeSelectorBox::resetToInitial()
 
 void SizeSelectorBox::setToSlider(int value)
 {
-    long long new_size = ((m_constrained_max - m_constrained_min) * ( (double)value / 100 )) + m_constrained_min;
+    long long new_size = ((m_constrained_max - m_constrained_min) * ((double)value / 100)) + m_constrained_min;
     m_size_slider->setValue(value);
 
-    if( (value >= 100 ) || ( new_size > m_constrained_max ) )
+    if ((value >= 100) || (new_size > m_constrained_max))
         m_current_size = m_constrained_max;
-    else if( ( value <= 0 ) || ( new_size < m_constrained_min ) )
+    else if ((value <= 0) || (new_size < m_constrained_min))
         m_current_size = m_constrained_min;
-    else 
-        m_current_size = new_size; 
-  
+    else
+        m_current_size = new_size;
+
     updateEdit();
-} 
+}
 
 bool SizeSelectorBox::setCurrentSize(long long size)
 {
-    if( isLocked() ){
+    if (isLocked()) {
         return false;
-    }
-    else if( size > m_constrained_max ){
+    } else if (size > m_constrained_max) {
         return false;
-    }
-    else if( size < m_constrained_min ){
+    } else if (size < m_constrained_min) {
         return false;
-    }
-    else{
+    } else {
         m_current_size = size;
         updateEdit();
         updateSlider();
@@ -235,24 +225,24 @@ bool SizeSelectorBox::setCurrentSize(long long size)
 
 void SizeSelectorBox::updateSlider()
 {
-    int percent = qRound(100.0 * ((double)(m_current_size - m_constrained_min)/(m_constrained_max - m_constrained_min))); 
+    int percent = qRound(100.0 * ((double)(m_current_size - m_constrained_min) / (m_constrained_max - m_constrained_min)));
     m_size_slider->setValue(percent);
 }
 
 void SizeSelectorBox::setConstrainedMax(long long max)
 {
-    if( isLocked() || !m_size_edit->isEnabled() )
+    if (isLocked() || !m_size_edit->isEnabled())
         return;
 
-    if( ( max < 0 ) || ( max > m_max_size ) )
+    if ((max < 0) || (max > m_max_size))
         max = m_max_size;
 
     m_constrained_max = max;
 
-    if( m_constrained_min > m_constrained_max )
+    if (m_constrained_min > m_constrained_max)
         m_constrained_min = m_constrained_max;
 
-    if( m_current_size > m_constrained_max )
+    if (m_current_size > m_constrained_max)
         setCurrentSize(m_constrained_max);
 
     updateValidator();
@@ -282,26 +272,25 @@ void SizeSelectorBox::lock(bool lock)
 
 void SizeSelectorBox::disableLockShrink(bool disable)
 {
-    m_shrink_box->setEnabled( !disable );
+    m_shrink_box->setEnabled(!disable);
 }
 
 void SizeSelectorBox::setConstraints(bool lock)
 {
-    if(lock){
-        if( !m_is_valid ){
-            if(m_current_size > m_constrained_max)
+    if (lock) {
+        if (!m_is_valid) {
+            if (m_current_size > m_constrained_max)
                 m_current_size = m_constrained_max;
-            if(m_current_size < m_constrained_min)
+            if (m_current_size < m_constrained_min)
                 m_current_size = m_constrained_min;
-            
+
             updateEdit();
         }
-        
-        if(m_is_offset){
+
+        if (m_is_offset) {
             m_constrained_min = m_min_size;
             m_constrained_max = m_max_size;
-        }
-        else{
+        } else {
             m_constrained_min = m_current_size;
             m_constrained_max = m_current_size;
         }
@@ -309,12 +298,11 @@ void SizeSelectorBox::setConstraints(bool lock)
         m_size_edit->setEnabled(false);
         m_size_slider->setEnabled(false);
         m_suffix_combo->setEnabled(false);
-    }
-    else{
-        if( !m_is_valid ){
-            if(m_current_size > m_constrained_max)
+    } else {
+        if (!m_is_valid) {
+            if (m_current_size > m_constrained_max)
                 m_current_size = m_constrained_max;
-            if(m_current_size < m_constrained_min)
+            if (m_current_size < m_constrained_min)
                 m_current_size = m_constrained_min;
 
             updateEdit();
@@ -333,28 +321,27 @@ void SizeSelectorBox::setConstraints(bool lock)
 
 void SizeSelectorBox::lockShrink(bool lock)
 {
-    if(lock){
-        if( !m_is_valid ){
-            if(m_current_size > m_constrained_max)
+    if (lock) {
+        if (!m_is_valid) {
+            if (m_current_size > m_constrained_max)
                 m_current_size = m_constrained_max;
-            if(m_current_size < m_constrained_min)
+            if (m_current_size < m_constrained_min)
                 m_current_size = m_constrained_min;
-            
+
             updateEdit();
         }
-        
+
         m_constrained_min = m_initial_size;
-        if(m_current_size < m_constrained_min){
+        if (m_current_size < m_constrained_min) {
             m_current_size = m_constrained_min;
             updateValidator();
             updateSlider();
         }
-    }
-    else{
-        if( !m_is_valid ){
-            if(m_current_size > m_constrained_max)
+    } else {
+        if (!m_is_valid) {
+            if (m_current_size > m_constrained_max)
                 m_current_size = m_constrained_max;
-            if(m_current_size < m_constrained_min)
+            if (m_current_size < m_constrained_min)
                 m_current_size = m_constrained_min;
 
             updateEdit();
@@ -373,19 +360,19 @@ void SizeSelectorBox::setToEdit(QString size)
     long long proposed_size;
     int x = 0;
 
-    if(m_size_validator->validate(size, x) == QValidator::Acceptable){
+    if (m_size_validator->validate(size, x) == QValidator::Acceptable) {
 
-        if(m_suffix_combo->currentIndex() == 0 && m_is_volume)
+        if (m_suffix_combo->currentIndex() == 0 && m_is_volume)
             proposed_size = size.toLongLong();
         else
             proposed_size = convertSizeToUnits(m_suffix_combo->currentIndex(), size.toDouble());
 
-        if( (proposed_size >= m_constrained_min) && (proposed_size <= m_constrained_max)){
+        if ((proposed_size >= m_constrained_min) && (proposed_size <= m_constrained_max)) {
             m_current_size = proposed_size;
             m_is_valid = true;
 
             emit stateChanged();
-            return;     
+            return;
         }
     }
 
@@ -395,27 +382,26 @@ void SizeSelectorBox::setToEdit(QString size)
 
 long long SizeSelectorBox::convertSizeToUnits(int index, double size)
 {
-    if(m_is_volume)
+    if (m_is_volume)
         index -= 1;
 
     long double partition_size = size;
 
-    if(m_use_si_units){
-        if(index == 0)
+    if (m_use_si_units) {
+        if (index == 0)
             partition_size *= (long double)1.0E6;
-        else if(index == 1)
+        else if (index == 1)
             partition_size *= (long double)1.0E9;
-        else{
+        else {
             partition_size *= (long double)1.0E6;
             partition_size *= (long double)1.0E6;
         }
-    }
-    else{
-        if(index == 0)
+    } else {
+        if (index == 0)
             partition_size *= (long double)0x100000;
-        else if(index == 1)
+        else if (index == 1)
             partition_size *= (long double)0x40000000;
-        else{
+        else {
             partition_size *= (long double)0x100000;
             partition_size *= (long double)0x100000;
         }
@@ -431,41 +417,40 @@ long long SizeSelectorBox::convertSizeToUnits(int index, double size)
 
 void SizeSelectorBox::updateEdit()
 {
-    long double sized =  (long double)m_current_size * m_unit_size;
+    long double sized = (long double)m_current_size * m_unit_size;
     int index = m_suffix_combo->currentIndex();
 
     updateValidator();
 
-    if(m_is_volume)
+    if (m_is_volume)
         index -= 1;
 
-    if(m_use_si_units){
-        if(index == 0)
+    if (m_use_si_units) {
+        if (index == 0)
             sized /= (long double)1.0E6;
-        else if(index == 1)
+        else if (index == 1)
             sized /= (long double)1.0E9;
-        else{
+        else {
             sized /= (long double)1.0E6;
             sized /= (long double)1.0E6;
         }
-    }
-    else{
-        if(index == 0)
+    } else {
+        if (index == 0)
             sized /= (long double)0x100000;
-        else if(index == 1)
+        else if (index == 1)
             sized /= (long double)0x40000000;
-        else{
+        else {
             sized /= (long double)0x100000;
             sized /= (long double)0x100000;
         }
     }
 
-    if( index == -1 )
-        m_size_edit->setText( QString("%1").arg( (double)m_current_size, 0, 'g', 5) );
+    if (index == -1)
+        m_size_edit->setText(QString("%1").arg((double)m_current_size, 0, 'g', 5));
     else
-        m_size_edit->setText( QString("%1").arg( (double)sized, 0, 'g', 5) );
-    
-    if( (m_current_size >= m_constrained_min) && (m_current_size <= m_constrained_max))
+        m_size_edit->setText(QString("%1").arg((double)sized, 0, 'g', 5));
+
+    if ((m_current_size >= m_constrained_min) && (m_current_size <= m_constrained_max))
         m_is_valid = true;
     else
         m_is_valid = false;
@@ -479,53 +464,47 @@ void SizeSelectorBox::updateValidator()
     long double valid_bottomd = (long double)m_constrained_min * m_unit_size;
     int index = m_suffix_combo->currentIndex();
 
-    if(m_is_volume)
+    if (m_is_volume)
         index -= 1;
 
-    if(m_use_si_units){
-        if(index == 0){
+    if (m_use_si_units) {
+        if (index == 0) {
             valid_topd /= (long double)1.0E6;
             valid_bottomd /= (long double)1.0E6;
-        }
-        else if(index == 1){
+        } else if (index == 1) {
             valid_topd /= (long double)1.0E9;
             valid_bottomd /= (long double)1.0E9;
-        }
-        else{
+        } else {
             valid_topd /= (long double)1.0E6;
             valid_topd /= (long double)1.0E6;
             valid_bottomd /= (long double)1.0E6;
             valid_bottomd /= (long double)1.0E6;
         }
-    }
-    else{
-        if(index == 0){
+    } else {
+        if (index == 0) {
             valid_topd /= (long double)0x100000;
             valid_bottomd /= (long double)0x100000;
-        }
-        else if(index == 1){
+        } else if (index == 1) {
             valid_topd /= (long double)0x40000000;
             valid_bottomd /= (long double)0x40000000;
-        }
-        else{
+        } else {
             valid_topd /= (long double)0x100000;
             valid_topd /= (long double)0x100000;
             valid_bottomd /= (long double)0x100000;
             valid_bottomd /= (long double)0x100000;
         }
-        
+
     }
 
-    if( valid_bottomd < 0 )
+    if (valid_bottomd < 0)
         valid_bottomd = 0;
-        
-    if( index != -1 ){    
-        m_size_validator->setTop( (double)valid_topd );
-        m_size_validator->setBottom( (double)valid_bottomd );
-    }
-    else{
-        m_size_validator->setTop( (double)m_constrained_max );
-        m_size_validator->setBottom( (double)m_constrained_min );
+
+    if (index != -1) {
+        m_size_validator->setTop((double)valid_topd);
+        m_size_validator->setBottom((double)valid_bottomd);
+    } else {
+        m_size_validator->setTop((double)m_constrained_max);
+        m_size_validator->setBottom((double)m_constrained_min);
     }
 }
 
@@ -536,10 +515,9 @@ bool SizeSelectorBox::isValid()
 
 bool SizeSelectorBox::isLocked()
 {
-    if(m_is_offset){
+    if (m_is_offset) {
         return m_offset_box->isChecked();
-    } 
-    else
-        return m_size_box->isChecked(); 
+    } else
+        return m_size_box->isChecked();
 }
 

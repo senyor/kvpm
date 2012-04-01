@@ -1,14 +1,14 @@
 /*
  *
- * 
+ *
  * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License,  version 3, as 
+ * it under the terms of the GNU General Public License,  version 3, as
  * published by the Free Software Foundation.
- * 
+ *
  * See the file "COPYING" for the exact licensing terms.
  */
 
@@ -30,7 +30,7 @@ class PVProperties : public QWidget
     QFrame *buildLvBox();
     QFrame *buildUuidBox();
 
- public:
+public:
     explicit PVProperties(PhysVol *const volume, QWidget *parent = 0);
 
 };

@@ -1,14 +1,14 @@
 /*
  *
- * 
+ *
  * Copyright (C) 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License,  version 3, as 
+ * it under the terms of the GNU General Public License,  version 3, as
  * published by the Free Software Foundation.
- * 
+ *
  * See the file "COPYING" for the exact licensing terms.
  */
 
@@ -22,7 +22,7 @@
 
 
 
-DualSelectorBox::DualSelectorBox(const long long sectorSize,  const long long totalSpace, QWidget *parent) 
+DualSelectorBox::DualSelectorBox(const long long sectorSize,  const long long totalSpace, QWidget *parent)
     : QWidget(parent), m_space(totalSpace)
 {
 
@@ -39,16 +39,16 @@ DualSelectorBox::DualSelectorBox(const long long sectorSize,  const long long to
     setLayout(layout);
 
     connect(m_size_selector, SIGNAL(stateChanged()),
-	    this , SLOT(sizeChanged()));
+            this , SLOT(sizeChanged()));
 
     connect(m_offset_selector, SIGNAL(stateChanged()),
-	    this , SLOT(offsetChanged()));
+            this , SLOT(offsetChanged()));
 }
 
-DualSelectorBox::DualSelectorBox(const long long sectorSize, const long long totalSpace, 
-                                 const long long minSize,    const long long maxSize,   const long long initialSize, 
-                                 const long long minOffset,  const long long maxOffset, const long long initialOffset, 
-                                 QWidget *parent) 
+DualSelectorBox::DualSelectorBox(const long long sectorSize, const long long totalSpace,
+                                 const long long minSize,    const long long maxSize,   const long long initialSize,
+                                 const long long minOffset,  const long long maxOffset, const long long initialOffset,
+                                 QWidget *parent)
     : QWidget(parent), m_space(totalSpace)
 {
 
@@ -57,7 +57,7 @@ DualSelectorBox::DualSelectorBox(const long long sectorSize, const long long tot
 
     m_size_selector   = new SizeSelectorBox(sectorSize, minSize,   maxSize,   initialSize,   false, false, true);
 
-    if(minSize == maxSize)
+    if (minSize == maxSize)
         m_offset_selector = new SizeSelectorBox(sectorSize, minOffset, maxOffset, initialOffset, false, true, false, false);
     else
         m_offset_selector = new SizeSelectorBox(sectorSize, minOffset, maxOffset, initialOffset, false, true, false, true);
@@ -67,10 +67,10 @@ DualSelectorBox::DualSelectorBox(const long long sectorSize, const long long tot
     setLayout(layout);
 
     connect(m_size_selector, SIGNAL(stateChanged()),
-	    this , SLOT(sizeChanged()));
+            this , SLOT(sizeChanged()));
 
     connect(m_offset_selector, SIGNAL(stateChanged()),
-	    this , SLOT(offsetChanged()));
+            this , SLOT(offsetChanged()));
 }
 
 void DualSelectorBox::sizeChanged()
@@ -79,28 +79,27 @@ void DualSelectorBox::sizeChanged()
     const long long current_size   = m_size_selector->getCurrentSize();
     const long long current_offset = m_offset_selector->getCurrentSize();
 
-    if( m_size_selector->isValid() ){
-        if( !m_offset_selector->isValid() )
-            m_offset_selector->setCurrentSize( m_offset_selector->getCurrentSize() ); // reset to last valid value 
+    if (m_size_selector->isValid()) {
+        if (!m_offset_selector->isValid())
+            m_offset_selector->setCurrentSize(m_offset_selector->getCurrentSize());   // reset to last valid value
 
-        if( !m_offset_selector->isLocked() ){
-                
-            if( m_size_selector->isLocked() )
+        if (!m_offset_selector->isLocked()) {
+
+            if (m_size_selector->isLocked())
                 m_offset_selector->setConstrainedMax(max - current_size);
             else
-                m_offset_selector->setConstrainedMax( max - m_size_selector->getMinimumSize() );
-            
-            if( m_offset_selector->getCurrentSize() > (max - current_size) )
-                if( !m_offset_selector->setCurrentSize(max - current_size) )
+                m_offset_selector->setConstrainedMax(max - m_size_selector->getMinimumSize());
+
+            if (m_offset_selector->getCurrentSize() > (max - current_size))
+                if (!m_offset_selector->setCurrentSize(max - current_size))
                     m_size_selector->setCurrentSize(max - current_offset);
-        }
-        else{
+        } else {
             m_size_selector->setConstrainedMax(max - current_offset);
-        }        
+        }
     }
 
     emit changed();
-} 
+}
 
 void DualSelectorBox::offsetChanged()
 {
@@ -108,24 +107,23 @@ void DualSelectorBox::offsetChanged()
     const long long current_size   = m_size_selector->getCurrentSize();
     const long long current_offset = m_offset_selector->getCurrentSize();
 
-    if( m_offset_selector->isValid() ){
+    if (m_offset_selector->isValid()) {
 
-        if( !m_size_selector->isValid() )
-            m_size_selector->setCurrentSize( m_size_selector->getCurrentSize() ); // poke it to make it valid 
+        if (!m_size_selector->isValid())
+            m_size_selector->setCurrentSize(m_size_selector->getCurrentSize());   // poke it to make it valid
 
-        if( !m_size_selector->isLocked() ){
+        if (!m_size_selector->isLocked()) {
             m_size_selector->setConstrainedMax(max);
 
-            if( m_offset_selector->isLocked() )
+            if (m_offset_selector->isLocked())
                 m_size_selector->setConstrainedMax(max - current_offset);
             else
-                m_size_selector->setConstrainedMax( max - m_offset_selector->getMinimumSize() );
+                m_size_selector->setConstrainedMax(max - m_offset_selector->getMinimumSize());
 
-            if( m_size_selector->getCurrentSize() > (max - current_offset) )
-                if( !m_size_selector->setCurrentSize(max - current_offset) )
+            if (m_size_selector->getCurrentSize() > (max - current_offset))
+                if (!m_size_selector->setCurrentSize(max - current_offset))
                     m_offset_selector->setCurrentSize(max - current_size);
-        }
-        else{
+        } else {
             m_offset_selector->setConstrainedMax(max - current_size);
         }
     }
@@ -151,6 +149,6 @@ long long DualSelectorBox::getCurrentOffset()
 
 bool DualSelectorBox::isValid()
 {
-    return ( m_size_selector->isValid() && m_offset_selector->isValid() ); 
+    return (m_size_selector->isValid() && m_offset_selector->isValid());
 }
 

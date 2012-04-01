@@ -1,14 +1,14 @@
 /*
  *
- * 
+ *
  * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License,  version 3, as 
+ * it under the terms of the GNU General Public License,  version 3, as
  * published by the Free Software Foundation.
- * 
+ *
  * See the file "COPYING" for the exact licensing terms.
  */
 
@@ -30,7 +30,7 @@
 #include "volgroup.h"
 
 
-VolumeGroupTab::VolumeGroupTab(VolGroup *volumeGroup, QWidget *parent) : QWidget(parent), m_vg(volumeGroup) 
+VolumeGroupTab::VolumeGroupTab(VolGroup *volumeGroup, QWidget *parent) : QWidget(parent), m_vg(volumeGroup)
 {
     QSplitter *const tree_splitter = new QSplitter(Qt::Vertical);
     QSplitter *const lv_splitter   = new QSplitter();
@@ -55,21 +55,21 @@ VolumeGroupTab::VolumeGroupTab(VolGroup *volumeGroup, QWidget *parent) : QWidget
     lv_splitter->addWidget(m_vg_tree);
     pv_splitter->addWidget(m_pv_tree);
 
-    tree_splitter->setStretchFactor(0, 3); 
-    tree_splitter->setStretchFactor(1, 2); 
+    tree_splitter->setStretchFactor(0, 3);
+    tree_splitter->setStretchFactor(1, 2);
 
     QList<int> lv_size_list;
     lv_size_list << 1500 << 10 ;
-    lv_splitter->setSizes( lv_size_list );
+    lv_splitter->setSizes(lv_size_list);
     m_lv_properties_stack = new LVPropertiesStack(m_vg);
-    m_lv_properties_stack->setFrameStyle( m_vg_tree->frameStyle() );
+    m_lv_properties_stack->setFrameStyle(m_vg_tree->frameStyle());
     lv_splitter->addWidget(m_lv_properties_stack);
 
     QList<int> pv_size_list;
     pv_size_list << 1500 << 10 ;
-    pv_splitter->setSizes( pv_size_list );
+    pv_splitter->setSizes(pv_size_list);
     m_pv_properties_stack = new PVPropertiesStack(m_vg);
-    m_pv_properties_stack->setFrameStyle( m_vg_tree->frameStyle() );
+    m_pv_properties_stack->setFrameStyle(m_vg_tree->frameStyle());
     pv_splitter->addWidget(m_pv_properties_stack);
 
     return;
@@ -77,13 +77,13 @@ VolumeGroupTab::VolumeGroupTab(VolGroup *volumeGroup, QWidget *parent) : QWidget
 
 void VolumeGroupTab::rescan()
 {
-    disconnect(m_vg_tree, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)), 
+    disconnect(m_vg_tree, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)),
                m_lv_properties_stack, SLOT(changeLVStackIndex(QTreeWidgetItem*, QTreeWidgetItem*)));
 
-    disconnect(m_pv_tree, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)), 
+    disconnect(m_pv_tree, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)),
                m_pv_properties_stack, SLOT(changePVStackIndex(QTreeWidgetItem*, QTreeWidgetItem*)));
 
-    if(m_vg_info_labels){
+    if (m_vg_info_labels) {
         m_layout->removeWidget(m_vg_info_labels);
         m_vg_info_labels->setParent(NULL);
         m_vg_info_labels->deleteLater();
@@ -94,16 +94,16 @@ void VolumeGroupTab::rescan()
     m_lv_properties_stack->loadData();
     m_pv_properties_stack->loadData();
 
-    connect(m_vg_tree, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)), 
-	    m_lv_properties_stack, SLOT(changeLVStackIndex(QTreeWidgetItem*, QTreeWidgetItem*)));
+    connect(m_vg_tree, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)),
+            m_lv_properties_stack, SLOT(changeLVStackIndex(QTreeWidgetItem*, QTreeWidgetItem*)));
 
-    connect(m_pv_tree, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)), 
-	    m_pv_properties_stack, SLOT(changePVStackIndex(QTreeWidgetItem*, QTreeWidgetItem*)));
+    connect(m_pv_tree, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)),
+            m_pv_properties_stack, SLOT(changePVStackIndex(QTreeWidgetItem*, QTreeWidgetItem*)));
 
     m_vg_tree->loadData(); // This needs to be done after the lv property stack is built
     m_pv_tree->loadData(); // This needs to be done after the pv property stack is loaded
 
-    if(m_lv_size_chart){   // This needs to be after the vgtree is loaded
+    if (m_lv_size_chart) { // This needs to be after the vgtree is loaded
         m_layout->removeWidget(m_lv_size_chart);
         m_lv_size_chart->setParent(NULL);
         m_lv_size_chart->deleteLater();
@@ -118,7 +118,7 @@ void VolumeGroupTab::rescan()
 
 VolGroup* VolumeGroupTab::getVg()
 {
-    return m_vg;   
+    return m_vg;
 }
 
 void VolumeGroupTab::readConfig()
@@ -127,15 +127,15 @@ void VolumeGroupTab::readConfig()
     bool show_vg_info, show_lv_bar;
 
     skeleton.setCurrentGroup("General");
-    skeleton.addItemBool( "show_vg_info", show_vg_info, true );
-    skeleton.addItemBool( "show_lv_bar",  show_lv_bar,  true );
+    skeleton.addItemBool("show_vg_info", show_vg_info, true);
+    skeleton.addItemBool("show_lv_bar",  show_lv_bar,  true);
 
-    if(show_vg_info)
+    if (show_vg_info)
         m_vg_info_labels->show();
     else
         m_vg_info_labels->hide();
 
-    if(show_lv_bar)
+    if (show_lv_bar)
         m_lv_size_chart->show();
     else
         m_lv_size_chart->hide();

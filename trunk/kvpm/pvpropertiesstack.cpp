@@ -1,14 +1,14 @@
 /*
  *
- * 
+ *
  * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License,  version 3, as 
+ * it under the terms of the GNU General Public License,  version 3, as
  * published by the Free Software Foundation.
- * 
+ *
  * See the file "COPYING" for the exact licensing terms.
  */
 
@@ -23,8 +23,8 @@
 #include "volgroup.h"
 
 
-PVPropertiesStack::PVPropertiesStack(VolGroup *volumeGroup, QWidget *parent) 
-    : QFrame(parent), 
+PVPropertiesStack::PVPropertiesStack(VolGroup *volumeGroup, QWidget *parent)
+    : QFrame(parent),
       m_vg(volumeGroup)
 {
     m_vscroll = new QScrollArea;
@@ -54,27 +54,26 @@ PVPropertiesStack::PVPropertiesStack(VolGroup *volumeGroup, QWidget *parent)
 
 
 /* If *item points to a volume we set the widget stack to the widget with that volume's information.
-   Else we set the stack widget index to -1, nothing */ 
+   Else we set the stack widget index to -1, nothing */
 
 void PVPropertiesStack::changePVStackIndex(QTreeWidgetItem *item, QTreeWidgetItem*)
 {
     const QList<PhysVol *> devices  = m_vg->getPhysicalVolumes();
 
-    if( !m_stack_widget )
+    if (!m_stack_widget)
         return;
 
-    if(item){
-	const QString pv_uuid = QVariant( item->data(0, Qt::UserRole ) ).toString();
+    if (item) {
+        const QString pv_uuid = QVariant(item->data(0, Qt::UserRole)).toString();
 
-	for(int x = devices.size() - 1; x >= 0; x--){
-	    if( pv_uuid == devices[x]->getUuid() ){
-		m_stack_widget->setCurrentIndex(x);
-                m_pv_label->setText( "<b>" + devices[x]->getName() + "</b>" );
+        for (int x = devices.size() - 1; x >= 0; x--) {
+            if (pv_uuid == devices[x]->getUuid()) {
+                m_stack_widget->setCurrentIndex(x);
+                m_pv_label->setText("<b>" + devices[x]->getName() + "</b>");
             }
-	}
-    }
-    else{
-	m_stack_widget->setCurrentIndex(-1);
+        }
+    } else {
+        m_stack_widget->setCurrentIndex(-1);
         m_pv_label->setText("");
     }
 }
@@ -85,11 +84,11 @@ void PVPropertiesStack::loadData()
 
     m_stack_widget = new QStackedWidget;
 
-    for(int x = 0; x < devices.size(); x++)
-        m_stack_widget->addWidget( new PVProperties(devices[x]) ); 
+    for (int x = 0; x < devices.size(); x++)
+        m_stack_widget->addWidget(new PVProperties(devices[x]));
 
-    if( devices.size() )
-	m_stack_widget->setCurrentIndex(0);
+    if (devices.size())
+        m_stack_widget->setCurrentIndex(0);
 
     m_vscroll->setWidget(m_stack_widget);
     m_vscroll->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding);

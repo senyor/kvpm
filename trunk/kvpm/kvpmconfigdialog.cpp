@@ -1,14 +1,14 @@
 /*
  *
- * 
+ *
  * Copyright (C) 2009, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License,  version 3, as 
+ * it under the terms of the GNU General Public License,  version 3, as
  * published by the Free Software Foundation.
- * 
+ *
  * See the file "COPYING" for the exact licensing terms.
  */
 
@@ -34,20 +34,20 @@
 
 
 
-KvpmConfigDialog::KvpmConfigDialog( QWidget *parent, 
-                                    const QString name, 
-                                    KConfigSkeleton *const skeleton, 
-                                    ExecutableFinder *const executableFinder ) 
-    : KConfigDialog(parent, name, skeleton), 
+KvpmConfigDialog::KvpmConfigDialog(QWidget *parent,
+                                   const QString name,
+                                   KConfigSkeleton *const skeleton,
+                                   ExecutableFinder *const executableFinder)
+    : KConfigDialog(parent, name, skeleton),
       m_skeleton(skeleton),
-      m_executable_finder(executableFinder) 
+      m_executable_finder(executableFinder)
 {
     setFaceType(KPageDialog::Auto);
     setDefaultButton(KDialog::Cancel);
 
     addPage(generalPage(), i18nc("The standard common options", "General"), QString("configure"));
     addPage(colorsPage(), i18n("Colors"), QString("color-picker"));
-    addPage(programsPage(), i18n("Programs"), QString("applications-system")); 
+    addPage(programsPage(), i18n("Programs"), QString("applications-system"));
 }
 
 KvpmConfigDialog::~KvpmConfigDialog()
@@ -58,8 +58,8 @@ KvpmConfigDialog::~KvpmConfigDialog()
 QTabWidget *KvpmConfigDialog::generalPage()
 {
     KTabWidget *const tabwidget = new KTabWidget;
-    tabwidget->insertTab(1, treesTab(), i18n("Tree Views") );
-    tabwidget->insertTab(1, propertiesTab(), i18n("Property Panels") );
+    tabwidget->insertTab(1, treesTab(), i18n("Tree Views"));
+    tabwidget->insertTab(1, propertiesTab(), i18n("Property Panels"));
 
     return tabwidget;
 }
@@ -68,15 +68,15 @@ QWidget *KvpmConfigDialog::treesTab()
 {
     QWidget *const trees = new QWidget;
     QVBoxLayout *const layout = new QVBoxLayout();
-    QLabel *const banner = new QLabel( i18n("<b>Set columns to show in tables and tree views</b>") );
+    QLabel *const banner = new QLabel(i18n("<b>Set columns to show in tables and tree views</b>"));
     banner->setAlignment(Qt::AlignCenter);
     layout->addWidget(banner);
 
     QHBoxLayout *const horizontal_layout = new QHBoxLayout();
-    horizontal_layout->addWidget( deviceGroup() );
-    horizontal_layout->addWidget( logicalGroup() );
-    horizontal_layout->addWidget( physicalGroup() );
-    horizontal_layout->addWidget( allGroup() );
+    horizontal_layout->addWidget(deviceGroup());
+    horizontal_layout->addWidget(logicalGroup());
+    horizontal_layout->addWidget(physicalGroup());
+    horizontal_layout->addWidget(allGroup());
 
     layout->addLayout(horizontal_layout);
     trees->setLayout(layout);
@@ -88,14 +88,14 @@ QWidget *KvpmConfigDialog::propertiesTab()
 {
     QWidget *const properties = new QWidget();
     QVBoxLayout *const layout = new QVBoxLayout();
-    QLabel *const banner = new QLabel( i18n("<b>Set information to show in property panels</b>") );
+    QLabel *const banner = new QLabel(i18n("<b>Set information to show in property panels</b>"));
     banner->setAlignment(Qt::AlignCenter);
     layout->addWidget(banner);
 
     QHBoxLayout *const horizontal_layout = new QHBoxLayout();
-    horizontal_layout->addWidget( devicePropertiesGroup() );
-    horizontal_layout->addWidget( lvPropertiesGroup() );
-    horizontal_layout->addWidget( pvPropertiesGroup() );
+    horizontal_layout->addWidget(devicePropertiesGroup());
+    horizontal_layout->addWidget(lvPropertiesGroup());
+    horizontal_layout->addWidget(pvPropertiesGroup());
 
     layout->addLayout(horizontal_layout);
     properties->setLayout(layout);
@@ -141,12 +141,12 @@ QWidget *KvpmConfigDialog::colorsPage()
     QWidget *const colors = new QWidget;
     QVBoxLayout *const colors_layout = new QVBoxLayout();
 
-    QGroupBox *const selection_box = new QGroupBox( i18n("Volume and Partition Colors") );
+    QGroupBox *const selection_box = new QGroupBox(i18n("Volume and Partition Colors"));
     QGridLayout *const selection_layout = new QGridLayout();
 
-    QLabel *const message_label = new QLabel( i18n("These are the colors used to show the filesystem type \n"
-                                                   "on a partition or volume in any graphical display. Colors\n"
-                                                   "may also be selected for swap and unpartitioned space.") );
+    QLabel *const message_label = new QLabel(i18n("These are the colors used to show the filesystem type \n"
+            "on a partition or volume in any graphical display. Colors\n"
+            "may also be selected for swap and unpartitioned space."));
 
     KSeparator *const left_separator  = new KSeparator(Qt::Vertical);
     KSeparator *const right_separator = new KSeparator(Qt::Vertical);
@@ -245,7 +245,7 @@ QWidget *KvpmConfigDialog::colorsPage()
     physical_button->setObjectName("kcfg_physvol");
     selection_layout->addWidget(physical_button, 5, 2, Qt::AlignLeft);
 
-    for(int row = 1; row < selection_layout->rowCount(); row++)
+    for (int row = 1; row < selection_layout->rowCount(); row++)
         selection_layout->setRowStretch(row, 1);
 
     selection_layout->setColumnStretch(0, 30);
@@ -279,12 +279,12 @@ QTabWidget *KvpmConfigDialog::programsPage()
     programs1->setLayout(programs1_layout);
     programs2->setLayout(programs2_layout);
 
-    const QStringList default_entries = QStringList() << "/sbin/" 
-                                                      << "/usr/sbin/" 
-                                                      << "/bin/" 
-                                                      << "/usr/bin/" 
-                                                      << "/usr/local/bin/"
-                                                      << "/usr/local/sbin/";
+    const QStringList default_entries = QStringList() << "/sbin/"
+                                        << "/usr/sbin/"
+                                        << "/bin/"
+                                        << "/usr/bin/"
+                                        << "/usr/local/bin/"
+                                        << "/usr/local/sbin/";
 
     static QStringList search_entries;
     m_skeleton->setCurrentGroup("SystemPaths");
@@ -292,7 +292,7 @@ QTabWidget *KvpmConfigDialog::programsPage()
 
     m_edit_list = new KEditListWidget();
     m_edit_list->setObjectName("kcfg_SearchPath");
-    QLabel *search_label = new QLabel( i18n("<b>Set the search path for support programs</b>") );
+    QLabel *search_label = new QLabel(i18n("<b>Set the search path for support programs</b>"));
     search_label->setAlignment(Qt::AlignCenter);
     programs1_layout->addWidget(search_label);
     programs1_layout->addWidget(m_edit_list);
@@ -306,7 +306,7 @@ QTabWidget *KvpmConfigDialog::programsPage()
     fillExecutablesTable();
 
     return programs;
-} 
+}
 
 void KvpmConfigDialog::updateSettings()
 {
@@ -315,9 +315,9 @@ void KvpmConfigDialog::updateSettings()
 
     m_edit_list->clear();
 
-    for( int x = 0; x < search.size(); x++){
-      if( !search[x].endsWith('/') )
-	search[x].append('/');
+    for (int x = 0; x < search.size(); x++) {
+        if (!search[x].endsWith('/'))
+            search[x].append('/');
     }
 
     m_edit_list->insertStringList(search);
@@ -337,35 +337,35 @@ void KvpmConfigDialog::fillExecutablesTable()
     const QStringList not_found = m_executable_finder->getNotFound();
 
     m_executables_table->clearContents();
-    m_executables_table->setRowCount( all_names.size() + not_found.size() );
+    m_executables_table->setRowCount(all_names.size() + not_found.size());
 
-    for(int x = 0; x < not_found.size(); x++){
-        table_item = new QTableWidgetItem( not_found[x] );
-	m_executables_table->setItem(x, 0, table_item);
+    for (int x = 0; x < not_found.size(); x++) {
+        table_item = new QTableWidgetItem(not_found[x]);
+        m_executables_table->setItem(x, 0, table_item);
 
-	table_item = new QTableWidgetItem( KIcon("dialog-error"), "Not Found" );
-	m_executables_table->setItem(x, 1, table_item);
+        table_item = new QTableWidgetItem(KIcon("dialog-error"), "Not Found");
+        m_executables_table->setItem(x, 1, table_item);
     }
 
     // these lists should be the same length, but just in case...
 
-    for(int x = 0; (x < all_names.size()) && (x < all_paths.size()); x++){
+    for (int x = 0; (x < all_names.size()) && (x < all_paths.size()); x++) {
 
-        table_item = new QTableWidgetItem( all_names[x] );
-	m_executables_table->setItem(x + not_found.size(), 0, table_item);
+        table_item = new QTableWidgetItem(all_names[x]);
+        m_executables_table->setItem(x + not_found.size(), 0, table_item);
 
-	table_item = new QTableWidgetItem( all_paths[x] );
-	m_executables_table->setItem(x + not_found.size(), 1, table_item);
+        table_item = new QTableWidgetItem(all_paths[x]);
+        m_executables_table->setItem(x + not_found.size(), 1, table_item);
 
     }
     m_executables_table->resizeColumnsToContents();
-    m_executables_table->setAlternatingRowColors( true );
+    m_executables_table->setAlternatingRowColors(true);
     m_executables_table->verticalHeader()->hide();
 }
 
 QGroupBox *KvpmConfigDialog::deviceGroup()
 {
-    QGroupBox *const device_group = new QGroupBox( i18n("Device Tree") );
+    QGroupBox *const device_group = new QGroupBox(i18n("Device Tree"));
     QVBoxLayout *const device_layout = new QVBoxLayout();
     device_group->setLayout(device_layout);
 
@@ -380,25 +380,25 @@ QGroupBox *KvpmConfigDialog::deviceGroup()
     static bool expand_parts;
 
     m_skeleton->setCurrentGroup("DeviceTreeColumns"); // dt == device tree
-    m_skeleton->addItemBool( "dt_device",      device_column,       true );
-    m_skeleton->addItemBool( "dt_partition",   partition_column,    true );
-    m_skeleton->addItemBool( "dt_capacity",    capacity_column,     true );
-    m_skeleton->addItemBool( "dt_remaining",   devremaining_column, true );
-    m_skeleton->addItemBool( "dt_usage",       usage_column, true );
-    m_skeleton->addItemBool( "dt_group",       group_column, true );
-    m_skeleton->addItemBool( "dt_flags",       flags_column, true );
-    m_skeleton->addItemBool( "dt_mount",       mount_column, true );
-    m_skeleton->addItemBool( "dt_expandparts", expand_parts, true );
+    m_skeleton->addItemBool("dt_device",      device_column,       true);
+    m_skeleton->addItemBool("dt_partition",   partition_column,    true);
+    m_skeleton->addItemBool("dt_capacity",    capacity_column,     true);
+    m_skeleton->addItemBool("dt_remaining",   devremaining_column, true);
+    m_skeleton->addItemBool("dt_usage",       usage_column, true);
+    m_skeleton->addItemBool("dt_group",       group_column, true);
+    m_skeleton->addItemBool("dt_flags",       flags_column, true);
+    m_skeleton->addItemBool("dt_mount",       mount_column, true);
+    m_skeleton->addItemBool("dt_expandparts", expand_parts, true);
 
-    QCheckBox *const device_check      = new QCheckBox( i18n("Device name") );
-    QCheckBox *const partition_check   = new QCheckBox( i18n("Partition type") );
-    QCheckBox *const capacity_check    = new QCheckBox( i18n("Capacity") );
-    QCheckBox *const devremaining_check = new QCheckBox( i18n("Remaining space") );
-    QCheckBox *const usage_check       = new QCheckBox( i18n("Usage of device") );
-    QCheckBox *const group_check       = new QCheckBox( i18n("Volume group") );
-    QCheckBox *const flags_check       = new QCheckBox( i18n("Partition flags") );
-    QCheckBox *const mount_check       = new QCheckBox( i18n("Mount point") );
-    QCheckBox *const expandparts_check = new QCheckBox( i18n("Expand device tree") );
+    QCheckBox *const device_check      = new QCheckBox(i18n("Device name"));
+    QCheckBox *const partition_check   = new QCheckBox(i18n("Partition type"));
+    QCheckBox *const capacity_check    = new QCheckBox(i18n("Capacity"));
+    QCheckBox *const devremaining_check = new QCheckBox(i18n("Remaining space"));
+    QCheckBox *const usage_check       = new QCheckBox(i18n("Usage of device"));
+    QCheckBox *const group_check       = new QCheckBox(i18n("Volume group"));
+    QCheckBox *const flags_check       = new QCheckBox(i18n("Partition flags"));
+    QCheckBox *const mount_check       = new QCheckBox(i18n("Mount point"));
+    QCheckBox *const expandparts_check = new QCheckBox(i18n("Expand device tree"));
 
     device_check->setObjectName("kcfg_dt_device");
     partition_check->setObjectName("kcfg_dt_partition");
@@ -409,18 +409,18 @@ QGroupBox *KvpmConfigDialog::deviceGroup()
     flags_check->setObjectName("kcfg_dt_flags");
     mount_check->setObjectName("kcfg_dt_mount");
     expandparts_check->setObjectName("kcfg_dt_expandparts");
-    
-    device_check->setToolTip( i18n("Show the path to the device, /dev/sda1 for example.") );
-    partition_check->setToolTip( i18n("Show the type of partition, 'extended' for example.") );
-    capacity_check->setToolTip( i18n("Show the storage capacity in megabytes, gigabytes or terabytes.") );
-    devremaining_check->setToolTip( i18n("Show the remaining storage in megabytes, gigabytes or terabytes.") );
-    usage_check->setToolTip( i18n("Show how the partition is being used. Usually the type of filesystem, such as ext4, \n"
-                                  "swap space or as a physical volume.") );
-    group_check->setToolTip( i18n("If the partition is a physical volume this column shows the volume group it is in.") );
-    flags_check->setToolTip( i18n("Show any flags, such a 'boot.'") );
-    mount_check->setToolTip( i18n("Show the mount point if the partition has a mounted filesystem.") );
-    expandparts_check->setToolTip( i18n("This determines if all partitions of all devices get shown at start up. \n "
-                                        "The user can still expand or collapse the items by clicking on them.") );
+
+    device_check->setToolTip(i18n("Show the path to the device, /dev/sda1 for example."));
+    partition_check->setToolTip(i18n("Show the type of partition, 'extended' for example."));
+    capacity_check->setToolTip(i18n("Show the storage capacity in megabytes, gigabytes or terabytes."));
+    devremaining_check->setToolTip(i18n("Show the remaining storage in megabytes, gigabytes or terabytes."));
+    usage_check->setToolTip(i18n("Show how the partition is being used. Usually the type of filesystem, such as ext4, \n"
+                                 "swap space or as a physical volume."));
+    group_check->setToolTip(i18n("If the partition is a physical volume this column shows the volume group it is in."));
+    flags_check->setToolTip(i18n("Show any flags, such a 'boot.'"));
+    mount_check->setToolTip(i18n("Show the mount point if the partition has a mounted filesystem."));
+    expandparts_check->setToolTip(i18n("This determines if all partitions of all devices get shown at start up. \n "
+                                       "The user can still expand or collapse the items by clicking on them."));
 
     device_layout->addWidget(device_check);
     device_layout->addWidget(partition_check);
@@ -431,7 +431,7 @@ QGroupBox *KvpmConfigDialog::deviceGroup()
     device_layout->addWidget(flags_check);
     device_layout->addWidget(mount_check);
     device_layout->addWidget(new KSeparator(Qt::Horizontal));
-    QLabel *const label = new QLabel( i18n("At start up:") );
+    QLabel *const label = new QLabel(i18n("At start up:"));
     label->setAlignment(Qt::AlignCenter);
     device_layout->addWidget(label);
     device_layout->addWidget(expandparts_check);
@@ -442,7 +442,7 @@ QGroupBox *KvpmConfigDialog::deviceGroup()
 
 QGroupBox *KvpmConfigDialog::physicalGroup()
 {
-    QGroupBox *const physical_group = new QGroupBox( i18n("Physical Volume Table") );
+    QGroupBox *const physical_group = new QGroupBox(i18n("Physical Volume Table"));
     QVBoxLayout *const physical_layout = new QVBoxLayout();
     physical_group->setLayout(physical_layout);
 
@@ -456,24 +456,24 @@ QGroupBox *KvpmConfigDialog::physicalGroup()
     static bool lvnames_column;
 
     m_skeleton->setCurrentGroup("PhysicalTreeColumns"); // pt == physical tree
-    m_skeleton->addItemBool( "pt_name",      name_column,      true );
-    m_skeleton->addItemBool( "pt_size",      size_column,      true );
-    m_skeleton->addItemBool( "pt_remaining", remaining_column, true );
-    m_skeleton->addItemBool( "pt_used",      used_column,      false );
-    m_skeleton->addItemBool( "pt_state",     state_column,     false );
-    m_skeleton->addItemBool( "pt_allocate",  allocate_column,  true );
-    m_skeleton->addItemBool( "pt_tags",      tags_column,      true );
-    m_skeleton->addItemBool( "pt_lvnames",   lvnames_column,   true );
+    m_skeleton->addItemBool("pt_name",      name_column,      true);
+    m_skeleton->addItemBool("pt_size",      size_column,      true);
+    m_skeleton->addItemBool("pt_remaining", remaining_column, true);
+    m_skeleton->addItemBool("pt_used",      used_column,      false);
+    m_skeleton->addItemBool("pt_state",     state_column,     false);
+    m_skeleton->addItemBool("pt_allocate",  allocate_column,  true);
+    m_skeleton->addItemBool("pt_tags",      tags_column,      true);
+    m_skeleton->addItemBool("pt_lvnames",   lvnames_column,   true);
 
-    QCheckBox *const name_check  = new QCheckBox( i18n("Volume name") );
-    QCheckBox *const size_check  = new QCheckBox( i18n("Size") );
-    QCheckBox *const remaining_check  = new QCheckBox( i18n("Remaining space") );
-    QCheckBox *const used_check  = new QCheckBox( i18n("Used space") );
-    QCheckBox *const state_check = new QCheckBox( i18n("State") );
-    QCheckBox *const allocate_check = new QCheckBox( i18n("Allocatable") );
-    QCheckBox *const tags_check     = new QCheckBox( i18n("Tags") );
-    QCheckBox *const lvnames_check  = new QCheckBox( i18n("Logical Volumes") );
-  
+    QCheckBox *const name_check  = new QCheckBox(i18n("Volume name"));
+    QCheckBox *const size_check  = new QCheckBox(i18n("Size"));
+    QCheckBox *const remaining_check  = new QCheckBox(i18n("Remaining space"));
+    QCheckBox *const used_check  = new QCheckBox(i18n("Used space"));
+    QCheckBox *const state_check = new QCheckBox(i18n("State"));
+    QCheckBox *const allocate_check = new QCheckBox(i18n("Allocatable"));
+    QCheckBox *const tags_check     = new QCheckBox(i18n("Tags"));
+    QCheckBox *const lvnames_check  = new QCheckBox(i18n("Logical Volumes"));
+
     name_check->setObjectName("kcfg_pt_name");
     size_check->setObjectName("kcfg_pt_size");
     remaining_check->setObjectName("kcfg_pt_remaining");
@@ -482,15 +482,15 @@ QGroupBox *KvpmConfigDialog::physicalGroup()
     allocate_check->setObjectName("kcfg_pt_allocate");
     tags_check->setObjectName("kcfg_pt_tags");
     lvnames_check->setObjectName("kcfg_pt_lvnames");
-  
-    name_check->setToolTip( i18n("Show the path to the device, /dev/sda1 for example.") );
-    size_check->setToolTip( i18n("Show the storage capacity in megabytes, gigabytes or terabytes.") );
-    remaining_check->setToolTip( i18n("Show the remaining storage in megabytes, gigabytes or terabytes.") );
-    used_check->setToolTip( i18n("Show the used storage in megabytes, gigabytes or terabytes.") );
-    state_check->setToolTip( i18n("Show the state, either 'active' or 'inactive.'") );
-    allocate_check->setToolTip( i18n("Shows whether or not the physical volume can have its extents allocated.") );
-    tags_check->setToolTip( i18n("List any tags associated with the physical volume.") );
-    lvnames_check->setToolTip( i18n("List any logical volumes associated with the physical volume.") );
+
+    name_check->setToolTip(i18n("Show the path to the device, /dev/sda1 for example."));
+    size_check->setToolTip(i18n("Show the storage capacity in megabytes, gigabytes or terabytes."));
+    remaining_check->setToolTip(i18n("Show the remaining storage in megabytes, gigabytes or terabytes."));
+    used_check->setToolTip(i18n("Show the used storage in megabytes, gigabytes or terabytes."));
+    state_check->setToolTip(i18n("Show the state, either 'active' or 'inactive.'"));
+    allocate_check->setToolTip(i18n("Shows whether or not the physical volume can have its extents allocated."));
+    tags_check->setToolTip(i18n("List any tags associated with the physical volume."));
+    lvnames_check->setToolTip(i18n("List any logical volumes associated with the physical volume."));
 
     physical_layout->addWidget(name_check);
     physical_layout->addWidget(size_check);
@@ -507,7 +507,7 @@ QGroupBox *KvpmConfigDialog::physicalGroup()
 
 QGroupBox *KvpmConfigDialog::logicalGroup()
 {
-    QGroupBox *const logical_group = new QGroupBox( i18n("Logical volume tree") );
+    QGroupBox *const logical_group = new QGroupBox(i18n("Logical volume tree"));
     QVBoxLayout *const logical_layout = new QVBoxLayout();
     logical_group->setLayout(logical_layout);
 
@@ -525,31 +525,31 @@ QGroupBox *KvpmConfigDialog::logicalGroup()
     static bool mountpoints_column;
 
     m_skeleton->setCurrentGroup("VolumeTreeColumns"); // vt == volume tree
-    m_skeleton->addItemBool( "vt_volume",      volume_column,      true );
-    m_skeleton->addItemBool( "vt_size",        size_column,        true );
-    m_skeleton->addItemBool( "vt_remaining",   remaining_column,   true );
-    m_skeleton->addItemBool( "vt_type",        type_column,        true );
-    m_skeleton->addItemBool( "vt_filesystem",  filesystem_column,  false );
-    m_skeleton->addItemBool( "vt_stripes",     stripes_column,     false );
-    m_skeleton->addItemBool( "vt_stripesize",  stripesize_column,  false );
-    m_skeleton->addItemBool( "vt_snapmove",    snapmove_column,    true );
-    m_skeleton->addItemBool( "vt_state",       state_column,       true );
-    m_skeleton->addItemBool( "vt_access",      access_column,      false );
-    m_skeleton->addItemBool( "vt_tags",        tags_column,        true );
-    m_skeleton->addItemBool( "vt_mountpoints", mountpoints_column, false );
+    m_skeleton->addItemBool("vt_volume",      volume_column,      true);
+    m_skeleton->addItemBool("vt_size",        size_column,        true);
+    m_skeleton->addItemBool("vt_remaining",   remaining_column,   true);
+    m_skeleton->addItemBool("vt_type",        type_column,        true);
+    m_skeleton->addItemBool("vt_filesystem",  filesystem_column,  false);
+    m_skeleton->addItemBool("vt_stripes",     stripes_column,     false);
+    m_skeleton->addItemBool("vt_stripesize",  stripesize_column,  false);
+    m_skeleton->addItemBool("vt_snapmove",    snapmove_column,    true);
+    m_skeleton->addItemBool("vt_state",       state_column,       true);
+    m_skeleton->addItemBool("vt_access",      access_column,      false);
+    m_skeleton->addItemBool("vt_tags",        tags_column,        true);
+    m_skeleton->addItemBool("vt_mountpoints", mountpoints_column, false);
 
-    QCheckBox *const volume_check      = new QCheckBox( i18n("Volume name") );
-    QCheckBox *const size_check        = new QCheckBox( i18n("Size") );
-    QCheckBox *const remaining_check   = new QCheckBox( i18n("Remaining space") );
-    QCheckBox *const type_check        = new QCheckBox( i18n("Volume type") );
-    QCheckBox *const filesystem_check  = new QCheckBox( i18n("Filesystem type") );
-    QCheckBox *const stripes_check     = new QCheckBox( i18n("Stripe count") );
-    QCheckBox *const stripesize_check  = new QCheckBox( i18n("Stripe size") );
-    QCheckBox *const snapmove_check    = new QCheckBox( i18n("(\%)Snap/Copy") );
-    QCheckBox *const state_check       = new QCheckBox( i18n("Volume state") );
-    QCheckBox *const access_check      = new QCheckBox( i18n("Volume access") );
-    QCheckBox *const tags_check        = new QCheckBox( i18n("Tags") );
-    QCheckBox *const mountpoints_check = new QCheckBox( i18n("Mount point") );
+    QCheckBox *const volume_check      = new QCheckBox(i18n("Volume name"));
+    QCheckBox *const size_check        = new QCheckBox(i18n("Size"));
+    QCheckBox *const remaining_check   = new QCheckBox(i18n("Remaining space"));
+    QCheckBox *const type_check        = new QCheckBox(i18n("Volume type"));
+    QCheckBox *const filesystem_check  = new QCheckBox(i18n("Filesystem type"));
+    QCheckBox *const stripes_check     = new QCheckBox(i18n("Stripe count"));
+    QCheckBox *const stripesize_check  = new QCheckBox(i18n("Stripe size"));
+    QCheckBox *const snapmove_check    = new QCheckBox(i18n("(\%)Snap/Copy"));
+    QCheckBox *const state_check       = new QCheckBox(i18n("Volume state"));
+    QCheckBox *const access_check      = new QCheckBox(i18n("Volume access"));
+    QCheckBox *const tags_check        = new QCheckBox(i18n("Tags"));
+    QCheckBox *const mountpoints_check = new QCheckBox(i18n("Mount point"));
 
     volume_check->setObjectName("kcfg_vt_volume");
     size_check->setObjectName("kcfg_vt_size");
@@ -564,20 +564,20 @@ QGroupBox *KvpmConfigDialog::logicalGroup()
     tags_check->setObjectName("kcfg_vt_tags");
     mountpoints_check->setObjectName("kcfg_vt_mountpoints");
 
-    volume_check->setToolTip( i18n("Show the volume name.") );
-    size_check->setToolTip( i18n("Show the storage capacity in megabytes, gigabytes or terabytes.") );
-    remaining_check->setToolTip( i18n("Show the remaining storage in megabytes, gigabytes or terabytes.") );
-    type_check->setToolTip( i18n("Show the type of volume, 'mirror' or 'linear,' for example.") );
-    filesystem_check->setToolTip( i18n("Show the filesystem type on the volume, 'ext3' or 'swap,' for example.") );
-    stripes_check->setToolTip( i18n("Show the number of stripes on the volume, if it is striped") );
-    stripesize_check->setToolTip( i18n("Show the size of the stripes, if it is striped") );
-    snapmove_check->setToolTip( i18n("For a mirror, show the percentage of the mirror synced. \n"
-                                     "For a snapshot, show the percentage of the snapshot used. \n"
-                                     "For a pvmove, show the percentage of the move completed.") );
-    state_check->setToolTip( i18n("Show the state, 'active' or 'invalid,' for example.") );
-    access_check->setToolTip( i18n("Show access, either read only or read and write.") );
-    tags_check->setToolTip( i18n("List any tags associated with the volume") );
-    mountpoints_check->setToolTip( i18n("Show the mount point if the partition has a mounted filesystem.") );
+    volume_check->setToolTip(i18n("Show the volume name."));
+    size_check->setToolTip(i18n("Show the storage capacity in megabytes, gigabytes or terabytes."));
+    remaining_check->setToolTip(i18n("Show the remaining storage in megabytes, gigabytes or terabytes."));
+    type_check->setToolTip(i18n("Show the type of volume, 'mirror' or 'linear,' for example."));
+    filesystem_check->setToolTip(i18n("Show the filesystem type on the volume, 'ext3' or 'swap,' for example."));
+    stripes_check->setToolTip(i18n("Show the number of stripes on the volume, if it is striped"));
+    stripesize_check->setToolTip(i18n("Show the size of the stripes, if it is striped"));
+    snapmove_check->setToolTip(i18n("For a mirror, show the percentage of the mirror synced. \n"
+                                    "For a snapshot, show the percentage of the snapshot used. \n"
+                                    "For a pvmove, show the percentage of the move completed."));
+    state_check->setToolTip(i18n("Show the state, 'active' or 'invalid,' for example."));
+    access_check->setToolTip(i18n("Show access, either read only or read and write."));
+    tags_check->setToolTip(i18n("List any tags associated with the volume"));
+    mountpoints_check->setToolTip(i18n("Show the mount point if the partition has a mounted filesystem."));
 
     logical_layout->addWidget(volume_check);
     logical_layout->addWidget(size_check);
@@ -598,8 +598,8 @@ QGroupBox *KvpmConfigDialog::logicalGroup()
 
 QGroupBox *KvpmConfigDialog::allGroup()
 {
-    QGroupBox *const all_group = new QGroupBox( i18n("All trees and tables") );
-    QGroupBox *const percent_group = new QGroupBox( i18n("Remaining and used space") );
+    QGroupBox *const all_group = new QGroupBox(i18n("All trees and tables"));
+    QGroupBox *const percent_group = new QGroupBox(i18n("Remaining and used space"));
 
     QVBoxLayout *const all_layout = new QVBoxLayout();
     QVBoxLayout *const percent_layout = new QVBoxLayout();
@@ -619,9 +619,9 @@ QGroupBox *KvpmConfigDialog::allGroup()
     m_skeleton->addItemInt("fs_warn",    fs_warn_percent, 10);
     m_skeleton->addItemInt("pv_warn",    pv_warn_percent,  0);
 
-    QRadioButton *const percent_radio = new QRadioButton( i18n("Show percentage") );
-    QRadioButton *const total_radio   = new QRadioButton( i18n("Show total") );
-    QRadioButton *const both_radio    = new QRadioButton( i18n("Show both") );
+    QRadioButton *const percent_radio = new QRadioButton(i18n("Show percentage"));
+    QRadioButton *const total_radio   = new QRadioButton(i18n("Show total"));
+    QRadioButton *const both_radio    = new QRadioButton(i18n("Show both"));
 
     percent_radio->setObjectName("kcfg_show_percent");
     total_radio->setObjectName("kcfg_show_total");
@@ -635,21 +635,21 @@ QGroupBox *KvpmConfigDialog::allGroup()
     QHBoxLayout *const warn_layout = new QHBoxLayout;
     QHBoxLayout *const fs_warn_layout = new QHBoxLayout;
     QHBoxLayout *const pv_warn_layout = new QHBoxLayout;
-    warn_layout->addWidget( new QLabel( i18n("Show warning icon") ) );
+    warn_layout->addWidget(new QLabel(i18n("Show warning icon")));
     QLabel *const warn_icon = new QLabel;
-    warn_icon->setPixmap( KIcon("exclamation").pixmap(16, 16) );
+    warn_icon->setPixmap(KIcon("exclamation").pixmap(16, 16));
     warn_layout->addWidget(warn_icon);
     percent_layout->addLayout(warn_layout);
-    percent_layout->addWidget( new QLabel( i18n("when space falls to or below:") ) );
+    percent_layout->addWidget(new QLabel(i18n("when space falls to or below:")));
 
     KIntSpinBox *const fs_warn_spin = new KIntSpinBox;
     fs_warn_spin->setObjectName("kcfg_fs_warn");
     fs_warn_spin->setRange(0, 99);
     fs_warn_spin->setSingleStep(1);
     fs_warn_spin->setPrefix("% ");
-    fs_warn_spin->setSpecialValueText( i18n("Never") );
+    fs_warn_spin->setSpecialValueText(i18n("Never"));
     fs_warn_layout->addWidget(fs_warn_spin);
-    fs_warn_layout->addWidget( new QLabel( i18n("on a filesystem") ) );
+    fs_warn_layout->addWidget(new QLabel(i18n("on a filesystem")));
     fs_warn_layout->addStretch();
 
     KIntSpinBox *const pv_warn_spin = new KIntSpinBox;
@@ -657,9 +657,9 @@ QGroupBox *KvpmConfigDialog::allGroup()
     pv_warn_spin->setRange(0, 99);
     pv_warn_spin->setSingleStep(1);
     pv_warn_spin->setPrefix("% ");
-    pv_warn_spin->setSpecialValueText( i18n("Never") );
+    pv_warn_spin->setSpecialValueText(i18n("Never"));
     pv_warn_layout->addWidget(pv_warn_spin);
-    pv_warn_layout->addWidget( new QLabel( i18n("on a physical volume") ) );
+    pv_warn_layout->addWidget(new QLabel(i18n("on a physical volume")));
     pv_warn_layout->addStretch();
 
     percent_layout->addLayout(fs_warn_layout);
@@ -672,7 +672,7 @@ QGroupBox *KvpmConfigDialog::allGroup()
 
 QGroupBox *KvpmConfigDialog::devicePropertiesGroup()
 {
-    QGroupBox *const properties = new QGroupBox( i18n("Device Properties Panel") );
+    QGroupBox *const properties = new QGroupBox(i18n("Device Properties Panel"));
     QVBoxLayout *const layout = new QVBoxLayout();
 
     static bool mountpoint;
@@ -684,14 +684,14 @@ QGroupBox *KvpmConfigDialog::devicePropertiesGroup()
     m_skeleton->addItemBool("dp_fsuuid",  fsuuid,     false);
     m_skeleton->addItemBool("dp_fslabel", fslabel,    false);
 
-    QCheckBox *const mp_check = new QCheckBox( i18n("Mount points") );
-    mp_check->setToolTip( i18n("Show the filesystem mount points for the device") );
+    QCheckBox *const mp_check = new QCheckBox(i18n("Mount points"));
+    mp_check->setToolTip(i18n("Show the filesystem mount points for the device"));
     mp_check->setObjectName("kcfg_dp_mount");
-    QCheckBox *const fsuuid_check = new QCheckBox( i18n("Filesystem uuid") );
-    fsuuid_check->setToolTip( i18n("Show the filesytem UUID") );
+    QCheckBox *const fsuuid_check = new QCheckBox(i18n("Filesystem uuid"));
+    fsuuid_check->setToolTip(i18n("Show the filesytem UUID"));
     fsuuid_check->setObjectName("kcfg_dp_fsuuid");
-    QCheckBox *const fslabel_check = new QCheckBox( i18n("Filesystem label") );
-    fslabel_check->setToolTip( i18n("Show the filesystem label") );
+    QCheckBox *const fslabel_check = new QCheckBox(i18n("Filesystem label"));
+    fslabel_check->setToolTip(i18n("Show the filesystem label"));
     fslabel_check->setObjectName("kcfg_dp_fslabel");
 
     layout->addWidget(mp_check);
@@ -705,7 +705,7 @@ QGroupBox *KvpmConfigDialog::devicePropertiesGroup()
 
 QGroupBox *KvpmConfigDialog::pvPropertiesGroup()
 {
-    QGroupBox *const properties = new QGroupBox( i18n("Physical Volume Properties Panel") );
+    QGroupBox *const properties = new QGroupBox(i18n("Physical Volume Properties Panel"));
     QVBoxLayout *const layout = new QVBoxLayout();
 
     static bool mda;
@@ -715,11 +715,11 @@ QGroupBox *KvpmConfigDialog::pvPropertiesGroup()
     m_skeleton->addItemBool("pp_mda",  mda,    true);
     m_skeleton->addItemBool("pp_uuid", pvuuid, false);
 
-    QCheckBox *const mda_check = new QCheckBox( i18n("Metadata areas") );
-    mda_check->setToolTip( i18n("Show information about physical volume metadata") );
+    QCheckBox *const mda_check = new QCheckBox(i18n("Metadata areas"));
+    mda_check->setToolTip(i18n("Show information about physical volume metadata"));
     mda_check->setObjectName("kcfg_pp_mda");
-    QCheckBox *const pvuuid_check = new QCheckBox( i18n("Physical volume uuid") );
-    pvuuid_check->setToolTip( i18n("Show the physical volume UUID") );
+    QCheckBox *const pvuuid_check = new QCheckBox(i18n("Physical volume uuid"));
+    pvuuid_check->setToolTip(i18n("Show the physical volume UUID"));
     pvuuid_check->setObjectName("kcfg_pp_uuid");
 
     layout->addWidget(mda_check);
@@ -732,7 +732,7 @@ QGroupBox *KvpmConfigDialog::pvPropertiesGroup()
 
 QGroupBox *KvpmConfigDialog::lvPropertiesGroup()
 {
-    QGroupBox *const properties = new QGroupBox( i18n("Logical Volume Properties Panel") );
+    QGroupBox *const properties = new QGroupBox(i18n("Logical Volume Properties Panel"));
     QVBoxLayout *const layout = new QVBoxLayout();
 
     static bool mp;
@@ -746,17 +746,17 @@ QGroupBox *KvpmConfigDialog::lvPropertiesGroup()
     m_skeleton->addItemBool("lp_fslabel", fslabel, false);
     m_skeleton->addItemBool("lp_uuid",    lvuuid,  false);
 
-    QCheckBox *const mp_check = new QCheckBox( i18n("Mount points") );
-    mp_check->setToolTip( i18n("Show the filesystem mount points for the device") );
+    QCheckBox *const mp_check = new QCheckBox(i18n("Mount points"));
+    mp_check->setToolTip(i18n("Show the filesystem mount points for the device"));
     mp_check->setObjectName("kcfg_lp_mount");
-    QCheckBox *const fsuuid_check = new QCheckBox( i18n("Filesystem uuid") );
-    fsuuid_check->setToolTip( i18n("Show the filesytem UUID") );
+    QCheckBox *const fsuuid_check = new QCheckBox(i18n("Filesystem uuid"));
+    fsuuid_check->setToolTip(i18n("Show the filesytem UUID"));
     fsuuid_check->setObjectName("kcfg_lp_fsuuid");
-    QCheckBox *const fslabel_check = new QCheckBox( i18n("Filesystem label") );
-    fslabel_check->setToolTip( i18n("Show the filesystem label") );
+    QCheckBox *const fslabel_check = new QCheckBox(i18n("Filesystem label"));
+    fslabel_check->setToolTip(i18n("Show the filesystem label"));
     fslabel_check->setObjectName("kcfg_lp_fslabel");
-    QCheckBox *const lvuuid_check = new QCheckBox( i18n("Logical volume uuid") );
-    lvuuid_check->setToolTip( i18n("Show the logical volume UUID") );
+    QCheckBox *const lvuuid_check = new QCheckBox(i18n("Logical volume uuid"));
+    lvuuid_check->setToolTip(i18n("Show the logical volume UUID"));
     lvuuid_check->setObjectName("kcfg_lp_uuid");
 
     layout->addWidget(mp_check);

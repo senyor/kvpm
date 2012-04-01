@@ -1,14 +1,14 @@
 /*
  *
- * 
+ *
  * Copyright (C) 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License,  version 3, as 
+ * it under the terms of the GNU General Public License,  version 3, as
  * published by the Free Software Foundation.
- * 
+ *
  * See the file "COPYING" for the exact licensing terms.
  */
 
@@ -31,7 +31,7 @@ bool split_vg(VolGroup *volumeGroup);
 
 class VGSplitDialog : public KDialog
 {
-Q_OBJECT
+    Q_OBJECT
 
     KListWidget *m_left_lv_list;
     KListWidget *m_right_lv_list;
@@ -49,23 +49,23 @@ Q_OBJECT
     QWidget *buildLvLists(const QStringList mobileLvNames, const QStringList immobileLvNames);
     QWidget *buildPvLists(const QStringList mobilePvNames, const QStringList immobilePvNames);
 
-    void volumeMobility(QStringList &mobileLvNames, QStringList &immobileLvNames, 
+    void volumeMobility(QStringList &mobileLvNames, QStringList &immobileLvNames,
                         QStringList &mobilePvNames, QStringList &immobilePvNames);
 
-    void pvState(QStringList &open, QStringList &closed );
+    void pvState(QStringList &open, QStringList &closed);
 
-    void movesWithVolume(const bool isLV, const QString name, 
+    void movesWithVolume(const bool isLV, const QString name,
                          QStringList &movingPvNames, QStringList &movingLvNames);
 
-    void moveNames(const bool isLvMove, 
-                   KListWidget *const lvSource, KListWidget *const lvTarget, 
+    void moveNames(const bool isLvMove,
+                   KListWidget *const lvSource, KListWidget *const lvTarget,
                    KListWidget *const pvSource, KListWidget *const pvTarget);
 
- public:
+public:
     explicit VGSplitDialog(VolGroup *volumeGroup, QWidget *parent = 0);
-    QStringList arguments();    
+    QStringList arguments();
 
- private slots:
+private slots:
     void enableLvArrows();
     void enablePvArrows();
     void addPvList();

@@ -1,14 +1,14 @@
 /*
  *
- * 
+ *
  * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License,  version 3, as 
+ * it under the terms of the GNU General Public License,  version 3, as
  * published by the Free Software Foundation.
- * 
+ *
  * See the file "COPYING" for the exact licensing terms.
  */
 
@@ -38,7 +38,7 @@ class VolGroup
     long long m_extents;
     long long m_free_extents;         // free extents are not always useable
     long long m_allocatable_extents; // extents on some physical volumes
-                                      // may not be allocateable
+    // may not be allocateable
     QString m_vg_name;                // this volume group name
     QString m_uuid;
     QString m_allocation_policy;
@@ -62,7 +62,7 @@ public:
     VolGroup(lvm_t lvm, const char *vgname, MountTables *const tables);
     ~VolGroup();
     void rescan(lvm_t lvm);
-    QList<LogVol *>  getLogicalVolumes();     // *TOP LEVEL ONLY* snapcontainers returned not snaps and origin 
+    QList<LogVol *>  getLogicalVolumes();     // *TOP LEVEL ONLY* snapcontainers returned not snaps and origin
     QList<LogVol *>  getLogicalVolumesFlat(); // un-nest the volumes, snapshots and mirror legs
     QList<PhysVol *> getPhysicalVolumes();
     LogVol* getLvByName(QString shortName);   // lv name without the vg name and "/" -- skips snap containers
@@ -92,7 +92,7 @@ public:
     bool isPartial();
     bool isExported();
     bool isActive();
-    
+
 };
 
 #endif

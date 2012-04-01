@@ -1,14 +1,14 @@
 /*
  *
- * 
+ *
  * Copyright (C) 2008, 2009, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License,  version 3, as 
+ * it under the terms of the GNU General Public License,  version 3, as
  * published by the Free Software Foundation.
- * 
+ *
  * See the file "COPYING" for the exact licensing terms.
  */
 
@@ -21,7 +21,7 @@
 #include <QSplitter>
 #include <QScrollArea>
 #include <QVBoxLayout>
-					
+
 class DeviceTree;
 class DevicePropertiesStack;
 class DeviceSizeChart;
@@ -37,9 +37,9 @@ class DeviceTab : public QWidget
 
     QScrollArea *setupPropertyStack();
 
- public:
+public:
     DeviceTab(QWidget *parent = 0);
-    void rescan( QList<StorageDevice *> Devices );
+    void rescan(QList<StorageDevice *> Devices);
 };
 
 

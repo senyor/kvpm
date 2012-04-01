@@ -1,14 +1,14 @@
 /*
  *
- * 
+ *
  * Copyright (C) 2008, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License,  version 3, as 
+ * it under the terms of the GNU General Public License,  version 3, as
  * published by the Free Software Foundation.
- * 
+ *
  * See the file "COPYING" for the exact licensing terms.
  */
 
@@ -29,17 +29,17 @@ bool reduce_vg(VolGroup *volumeGroup);
 
 class VGReduceDialog : public KDialog
 {
-Q_OBJECT
+    Q_OBJECT
 
     VolGroup *m_vg;
-    PvGroupBox *m_pv_checkbox; 
+    PvGroupBox *m_pv_checkbox;
     bool m_unremovable_pvs_present;
 
- public:
+public:
     explicit VGReduceDialog(VolGroup *const volumeGroup, QWidget *parent = NULL);
     QStringList arguments();
-    
- private slots:
+
+private slots:
     void excludeOneVolume();  // one pv must remain in the vg
     void commitChanges();
 };

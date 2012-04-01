@@ -1,14 +1,14 @@
 /*
  *
- * 
+ *
  * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License,  version 3, as 
+ * it under the terms of the GNU General Public License,  version 3, as
  * published by the Free Software Foundation.
- * 
+ *
  * See the file "COPYING" for the exact licensing terms.
  */
 
@@ -30,14 +30,13 @@
    while other information only applies to a segement in the volume. The
    volume keeps a list of Segment structures for segment information */
 
-struct Segment
-{
+struct Segment {
     int m_stripes;               // number of stripes in segment
-    int m_stripe_size;    
+    int m_stripe_size;
     long long m_size;            // segment size (bytes)
     QStringList m_device_path;   // full path of physical volume
-    QList<long long> m_starting_extent;   // first extent on physical volume 
-                                          // for this segment
+    QList<long long> m_starting_extent;   // first extent on physical volume
+    // for this segment
 };
 
 LogVol::LogVol(lv_t lvmLV, vg_t lvmVG, VolGroup *const vg, LogVol *const lvParent, MountTables *const tables, bool orphan) :
@@ -54,13 +53,13 @@ LogVol::~LogVol()
 {
     QList<LogVol *> children = getChildren();
 
-    for(int x = m_mount_entries.size() - 1; x >= 0; x--)
-	delete m_mount_entries.takeAt(x);
+    for (int x = m_mount_entries.size() - 1; x >= 0; x--)
+        delete m_mount_entries.takeAt(x);
 
-    while( children.size() )
+    while (children.size())
         delete children.takeAt(0);
 
-    while( m_segments.size() )
+    while (m_segments.size())
         delete m_segments.takeAt(0);
 }
 
@@ -104,13 +103,12 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)  // lv_t seems to change -- why?
     m_log = QString(value.value.string).trimmed();
 
     QList<lv_t> lvm_child_snapshots;
-    lvm_child_snapshots.append( getLvmSnapshots(lvmVG) );
+    lvm_child_snapshots.append(getLvmSnapshots(lvmVG));
 
-    if( ( ! lvm_child_snapshots.isEmpty() ) && m_lv_parent == NULL ){
+    if ((! lvm_child_snapshots.isEmpty()) && m_lv_parent == NULL) {
         m_snap_container = true;
         m_seg_total = 1;
-    }
-    else{
+    } else {
         m_snap_container = false;
         value = lvm_lv_get_property(lvmLV, "seg_count");
         m_seg_total = value.value.integer;
@@ -119,182 +117,178 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)  // lv_t seems to change -- why?
     value = lvm_lv_get_property(lvmLV, "lv_attr");
     flags.append(value.value.string);
 
-    switch( flags[0] ){
+    switch (flags[0]) {
     case 'c':
-	m_type = "under conversion";
-	m_mirror = true;
-	m_under_conversion = true;
-	break;
+        m_type = "under conversion";
+        m_mirror = true;
+        m_under_conversion = true;
+        break;
     case 'I':
-	m_type = "mirror leg";
+        m_type = "mirror leg";
         additional_state = "un-synced";
-	m_mirror_leg = true;
-	break;
+        m_mirror_leg = true;
+        break;
     case 'i':
-	m_type = "mirror leg";
+        m_type = "mirror leg";
         additional_state = "synced";
-	m_mirror_leg = true;
-	break;
+        m_mirror_leg = true;
+        break;
     case 'L':
     case 'l':
-	m_type = "mirror log";
-	m_mirror_log = true;
-	break;
+        m_type = "mirror log";
+        m_mirror_log = true;
+        break;
     case 'M':                // mirror logs can be mirrors themselves -- see below
-	m_type = "mirror";
-	m_mirror = true;
-	break;
+        m_type = "mirror";
+        m_mirror = true;
+        break;
     case 'm':
-	m_type = "mirror";   // Origin status overides mirror status in the flags if this is both
-	m_mirror = true;     // We split it below -- snap_containers are origins and the lv is a mirror
-	break;
+        m_type = "mirror";   // Origin status overides mirror status in the flags if this is both
+        m_mirror = true;     // We split it below -- snap_containers are origins and the lv is a mirror
+        break;
     case 'O':
-	m_type = "origin";
+        m_type = "origin";
         additional_state = "merging";
         m_is_origin = true;
         m_merging = true;
-	break;
+        break;
     case 'o':
-	m_type = "origin";
+        m_type = "origin";
         m_is_origin = true;
-	break;
+        break;
     case 'p':
-	m_type = "pvmove";
-	m_pvmove = true;
-	break;
+        m_type = "pvmove";
+        m_pvmove = true;
+        break;
     case 's':
-	m_type = "snapshot";
-	m_snap = true;
-	break;
+        m_type = "snapshot";
+        m_snap = true;
+        break;
     case 'S':
-        if( flags[4] != 'I' ){         // When 'S' stops getting used for Invalid and only merging - remove this
+        if (flags[4] != 'I') {         // When 'S' stops getting used for Invalid and only merging - remove this
             m_type = "snapshot";
             additional_state = "merging";
             m_snap = true;
             m_merging = true;
-        }
-        else{
+        } else {
             m_type = "snapshot";
             m_snap = true;
             m_merging = false;
         }
-	break;
+        break;
     case 'v':
-	m_type = "virtual";
-	m_virtual = true;
-	break;
+        m_type = "virtual";
+        m_virtual = true;
+        break;
     default:
-	m_type = "linear";
-    break;
+        m_type = "linear";
+        break;
     }
 
-    switch(flags[1]){
+    switch (flags[1]) {
     case 'w':
-	m_writable = true;
-	break;
+        m_writable = true;
+        break;
     default:
-	m_writable = false;
+        m_writable = false;
     }
 
     m_alloc_locked = false;
 
-    switch( flags[2] ){
+    switch (flags[2]) {
     case 'C':
-	m_alloc_locked = true;
+        m_alloc_locked = true;
     case 'c':
-	m_policy = "Contiguous";
-	break;
+        m_policy = "Contiguous";
+        break;
     case 'L':
-	m_alloc_locked = true;
+        m_alloc_locked = true;
     case 'l':
-	m_policy = "Cling";
-	break;
+        m_policy = "Cling";
+        break;
     case 'N':
-	m_alloc_locked = true;
+        m_alloc_locked = true;
     case 'n':
-	m_policy = "Normal";
-	break;
+        m_policy = "Normal";
+        break;
     case 'A':
-	m_alloc_locked = true;
+        m_alloc_locked = true;
     case 'a':
-	m_policy = "Anywhere";
-	break;
+        m_policy = "Anywhere";
+        break;
     case 'I':
-	m_alloc_locked = true;
+        m_alloc_locked = true;
     case 'i':
-	m_policy = "Inherited";
-	break;
+        m_policy = "Inherited";
+        break;
     default:
-	m_policy = "Other";
-	break;
+        m_policy = "Other";
+        break;
     }
 
-    if(m_alloc_locked)
-	m_policy.append(" (locked)");
+    if (m_alloc_locked)
+        m_policy.append(" (locked)");
 
-    switch(flags[3]){
+    switch (flags[3]) {
     case 'm':
-	m_fixed = true;
-	break;
+        m_fixed = true;
+        break;
     default:
-	m_fixed = false;
+        m_fixed = false;
     }
 
     m_active = false;
-    
-    switch(flags[4]){
+
+    switch (flags[4]) {
     case '-':
-	m_state = "inactive";
-	break;
+        m_state = "inactive";
+        break;
     case 'a':
-	m_state = "active";
-	m_active = true;
-	break;
+        m_state = "active";
+        m_active = true;
+        break;
     case 's':
-	m_state = "suspended";
-	break;
+        m_state = "suspended";
+        break;
     case 'I':
-	m_state = "invalid";
+        m_state = "invalid";
         m_valid = false;
-	break;
+        break;
     case 'S':
-	m_state = "suspended";
-	break;
+        m_state = "suspended";
+        break;
     case 'd':
-	m_state = "no table";
-	break;
+        m_state = "no table";
+        break;
     case 'i':
-	m_state = "inactive table";
-	break;
+        m_state = "inactive table";
+        break;
     default:
-	m_state = "unknown";
+        m_state = "unknown";
     }
 
-    if( !additional_state.isEmpty() )
+    if (!additional_state.isEmpty())
         m_state = additional_state + " / " + m_state;
 
-    switch(flags[5]){
+    switch (flags[5]) {
     case 'o':
-	m_open = true;
-	break;
+        m_open = true;
+        break;
     default:
-	m_open = false;
+        m_open = false;
     }
 
-    if( m_lv_name.contains("_mlog", Qt::CaseSensitive) ){
+    if (m_lv_name.contains("_mlog", Qt::CaseSensitive)) {
         m_mirror_log = true;    // this needs to be here in case it is a mirrored mirror log
         m_lv_fs = "";
-    }
-    else if( m_lv_name.contains("_mimagetmp_", Qt::CaseSensitive) ){
+    } else if (m_lv_name.contains("_mimagetmp_", Qt::CaseSensitive)) {
         m_virtual = true;    // This is to get lvactionsmenu to forbid doing anything to it
         m_lv_fs = "";
-    }
-    else if( !m_mirror_log && !m_mirror_leg && !m_virtual){
+    } else if (!m_mirror_log && !m_mirror_leg && !m_virtual) {
         m_lv_fs = fsprobe_getfstype2(m_lv_mapper_path);
         m_lv_fs_label = fsprobe_getfslabel(m_lv_mapper_path);
         m_lv_fs_uuid  = fsprobe_getfsuuid(m_lv_mapper_path);
-    }
-    else{
+    } else {
         m_lv_fs = "";
         m_lv_fs_label = "";
         m_lv_fs_uuid  = "";
@@ -304,29 +298,28 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)  // lv_t seems to change -- why?
     m_size = value.value.integer;
     m_extents = m_size / m_vg->getExtentSize();
 
-    if(m_snap || m_merging){
+    if (m_snap || m_merging) {
         value = lvm_lv_get_property(lvmLV, "origin");
         m_origin = value.value.string;
-	value = lvm_lv_get_property(lvmLV, "snap_percent");
-        if( value.is_valid )
+        value = lvm_lv_get_property(lvmLV, "snap_percent");
+        if (value.is_valid)
             m_snap_percent = (double)value.value.integer / 1.0e+6;
-        else 
+        else
             m_snap_percent = 0;
-    }
-    else
+    } else
         m_origin = "";
 
-    if( (m_mirror_leg || m_mirror_log) ){
+    if ((m_mirror_leg || m_mirror_log)) {
 
-        if(m_mirror_log && m_mirror_leg)
-            m_type = m_type.replace("leg","log");
-        else if( (m_mirror || m_virtual) && !m_mirror_log )
+        if (m_mirror_log && m_mirror_leg)
+            m_type = m_type.replace("leg", "log");
+        else if ((m_mirror || m_virtual) && !m_mirror_log)
             m_mirror_leg = true;
 
     }
 
     value = lvm_lv_get_property(lvmLV, "copy_percent");
-    if(value.is_valid)
+    if (value.is_valid)
         m_copy_percent = (double)value.value.integer / 1.0e+6;
     else
         m_copy_percent = 0;
@@ -336,19 +329,18 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)  // lv_t seems to change -- why?
     value = lvm_lv_get_property(lvmLV, "lv_kernel_minor");
     m_minor_device = value.value.integer;
 
-    /* 
+    /*
     value = lvm_lv_get_property(lvm_lv, "lv_major");
 
     if(value.value.integer != -1)
-	m_persistent = true;
+    m_persistent = true;
     else
-	m_persistent = false;
+    m_persistent = false;
     */
 
-    if( m_snap_container && !was_snap_container ){
+    if (m_snap_container && !was_snap_container) {
         m_uuid = QUuid::createUuid().toString();
-    }
-    else if( !m_snap_container ){
+    } else if (!m_snap_container) {
         value = lvm_lv_get_property(lvmLV, "lv_uuid");
         m_uuid  = value.value.string;
     }
@@ -357,43 +349,40 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)  // lv_t seems to change -- why?
     QString tag = value.value.string;
     m_tags = tag.split(',', QString::SkipEmptyParts);
 
-    for(int x = m_mount_entries.size() - 1; x >= 0; x--)
-	delete m_mount_entries.takeAt(x);
+    for (int x = m_mount_entries.size() - 1; x >= 0; x--)
+        delete m_mount_entries.takeAt(x);
 
     m_mount_entries = m_tables->getMtabEntries(m_major_device, m_minor_device);
 
     m_fstab_mount_point = m_tables->getFstabMountPoint(this);
 
     m_mount_points.clear();
-    for(int x = 0; x < m_mount_entries.size(); x++)
-        m_mount_points.append( m_mount_entries[x]->getMountPoint() );
+    for (int x = 0; x < m_mount_entries.size(); x++)
+        m_mount_points.append(m_mount_entries[x]->getMountPoint());
 
     m_mounted = !m_mount_points.isEmpty();
 
-    if(m_mounted){
-        FSData fs_data = get_fs_data( m_mount_points[0] );
-        if(fs_data.size > 0){ 
-            m_fs_size = fs_data.size * fs_data.block_size; 
+    if (m_mounted) {
+        FSData fs_data = get_fs_data(m_mount_points[0]);
+        if (fs_data.size > 0) {
+            m_fs_size = fs_data.size * fs_data.block_size;
             m_fs_used = fs_data.used * fs_data.block_size;
-        }
-        else{
+        } else {
             m_fs_size = -1;
             m_fs_used = -1;
         }
-    }
-    else{
+    } else {
         m_fs_size = -1;
         m_fs_used = -1;
     }
 
-    if( m_snap_container ){
+    if (m_snap_container) {
         m_type = "origin";
-    }
-    else if( m_type.contains("origin", Qt::CaseInsensitive) && ! m_snap_container ){
+    } else if (m_type.contains("origin", Qt::CaseInsensitive) && ! m_snap_container) {
 
-        if( m_mirror )
+        if (m_mirror)
             m_type = "mirror";
-        else 
+        else
             m_type = "linear";
     }
 
@@ -408,27 +397,26 @@ void LogVol::insertChildren(lv_t lvmLV, vg_t lvmVG)
     QByteArray  child_name;
     QStringList child_name_list;
     QList<lv_t> lvm_child_snapshots;
-    lvm_child_snapshots.append( getLvmSnapshots(lvmVG) );
+    lvm_child_snapshots.append(getLvmSnapshots(lvmVG));
 
-    while( m_lv_children.size() )
+    while (m_lv_children.size())
         delete m_lv_children.takeAt(0);
 
-    if( m_snap_container ){
-        for(int x = lvm_child_snapshots.size() - 1; x >= 0; x--)
-            m_lv_children.append( new LogVol(lvm_child_snapshots[x], lvmVG, m_vg, this, m_tables) );
+    if (m_snap_container) {
+        for (int x = lvm_child_snapshots.size() - 1; x >= 0; x--)
+            m_lv_children.append(new LogVol(lvm_child_snapshots[x], lvmVG, m_vg, this, m_tables));
 
-        m_lv_children.append( new LogVol(lvmLV, lvmVG, m_vg, this, m_tables) );
-    }
-    else{
-        child_name_list = removePvNames( getPvNamesAll() );
+        m_lv_children.append(new LogVol(lvmLV, lvmVG, m_vg, this, m_tables));
+    } else {
+        child_name_list = removePvNames(getPvNamesAll());
 
-        if( m_mirror && (! m_log.isEmpty()) )
-                child_name_list.append( m_log );
+        if (m_mirror && (! m_log.isEmpty()))
+            child_name_list.append(m_log);
 
-        for(int x = child_name_list.size() - 1; x >= 0; x--){
+        for (int x = child_name_list.size() - 1; x >= 0; x--) {
             child_name = child_name_list[x].toLocal8Bit();
             lvm_child = lvm_lv_from_name(lvmVG, child_name.data());
-            m_lv_children.append( new LogVol(lvm_child, lvmVG, m_vg, this, m_tables) );
+            m_lv_children.append(new LogVol(lvm_child, lvmVG, m_vg, this, m_tables));
         }
     }
 }
@@ -440,18 +428,17 @@ void LogVol::countLegsAndLogs()
     QList<LogVol *> all_lvs_flat = getAllChildrenFlat();
     LogVol *lv;
 
-    if(m_mirror){
-        for(int x = all_lvs_flat.size() - 1; x >= 0; x--){
+    if (m_mirror) {
+        for (int x = all_lvs_flat.size() - 1; x >= 0; x--) {
             lv = all_lvs_flat[x];
 
-            if( lv->isMirrorLeg() && !lv->isMirror() && !lv->isMirrorLog() )
+            if (lv->isMirrorLeg() && !lv->isMirror() && !lv->isMirrorLog())
                 m_mirror_count++;
 
-            if( lv->isMirrorLog() && !lv->isMirror() )
+            if (lv->isMirrorLog() && !lv->isMirror())
                 m_log_count++;
         }
-    }
-    else
+    } else
         m_mirror_count = 1;  // linear volumes count as mirror = 1;
 }
 
@@ -462,11 +449,11 @@ QList<lv_t> LogVol::getLvmSnapshots(vg_t lvmVG)
     lvm_lv_list *lv_list;
     QList<lv_t>  lvm_snapshots;
 
-    if(lv_dm_list){
-        dm_list_iterate_items(lv_list, lv_dm_list){ 
-            
+    if (lv_dm_list) {
+        dm_list_iterate_items(lv_list, lv_dm_list) {
+
             value = lvm_lv_get_property(lv_list->lv, "origin");
-            if( QString(value.value.string).trimmed() == m_lv_name )
+            if (QString(value.value.string).trimmed() == m_lv_name)
                 lvm_snapshots.append(lv_list->lv);
         }
     }
@@ -477,22 +464,22 @@ QList<lv_t> LogVol::getLvmSnapshots(vg_t lvmVG)
 // Finds logical volumes that are children of this volume by
 // removing physical volumes from the list along with pvmove
 // volumes. One pvmove can be under several lvs so isn't
-// really a child.  
+// really a child.
 
 QStringList LogVol::removePvNames(QStringList names)
 {
-    for(int x = names.size() - 1; x >= 0; x--){
-        if( names[x].startsWith("pvmove") )
+    for (int x = names.size() - 1; x >= 0; x--) {
+        if (names[x].startsWith("pvmove"))
             names.removeAt(x);
     }
 
-    QListIterator<PhysVol *> pv_itr( m_vg->getPhysicalVolumes() );
+    QListIterator<PhysVol *> pv_itr(m_vg->getPhysicalVolumes());
 
-    while( pv_itr.hasNext() ){
-        PhysVol *const pv = pv_itr.next(); 
+    while (pv_itr.hasNext()) {
+        PhysVol *const pv = pv_itr.next();
 
-        for(int y = names.size() - 1; y >= 0; y--){
-            if( pv->getName() == names[y] )
+        for (int y = names.size() - 1; y >= 0; y--) {
+            if (pv->getName() == names[y])
                 names.removeAt(y);
         }
 
@@ -505,11 +492,10 @@ void LogVol::calculateTotalSize()
 {
     m_total_size = 0;
 
-    if( m_lv_children.size() ){
-        for(int x = m_lv_children.size() - 1; x >= 0; x--)
+    if (m_lv_children.size()) {
+        for (int x = m_lv_children.size() - 1; x >= 0; x--)
             m_total_size += m_lv_children[x]->getTotalSize();
-    }
-    else{
+    } else {
         m_total_size = m_size;
     }
 }
@@ -520,55 +506,54 @@ void LogVol::processSegments(lv_t lvmLV)
     QStringList devices_and_starts, temp;
     QString raw_paths;
     lvm_property_value value;
-    dm_list* lvseg_dm_list = lvm_lv_list_lvsegs(lvmLV);  
+    dm_list* lvseg_dm_list = lvm_lv_list_lvsegs(lvmLV);
     lvm_lvseg_list *lvseg_list;
     lvseg_t lvm_lvseg;
 
-    while( m_segments.size() )
+    while (m_segments.size())
         delete m_segments.takeAt(0);
 
-    if(lvseg_dm_list){
-        dm_list_iterate_items(lvseg_list, lvseg_dm_list){ 
+    if (lvseg_dm_list) {
+        dm_list_iterate_items(lvseg_list, lvseg_dm_list) {
 
             lvm_lvseg = lvseg_list->lvseg;
             value = lvm_lvseg_get_property(lvm_lvseg, "regionsize");
-            if( value.is_valid ){
-                if( value.value.integer )
+            if (value.is_valid) {
+                if (value.value.integer)
                     m_mirror = true;
             }
 
             segment = new Segment();
 
-            if(m_mirror){
+            if (m_mirror) {
                 segment->m_stripes = 1;
                 segment->m_stripe_size = 1;
                 segment->m_size = 1;
-            }
-            else{
+            } else {
                 value = lvm_lvseg_get_property(lvm_lvseg, "stripes");
-                segment->m_stripes = value.value.integer; 
-                
+                segment->m_stripes = value.value.integer;
+
                 value = lvm_lvseg_get_property(lvm_lvseg, "stripesize");
                 segment->m_stripe_size = value.value.integer;
-                
+
                 value = lvm_lvseg_get_property(lvm_lvseg, "seg_size");
                 segment->m_size = value.value.integer;
             }
 
             value = lvm_lvseg_get_property(lvm_lvseg, "devices");
-            if( value.is_valid ){
+            if (value.is_valid) {
                 raw_paths = value.value.string;
             }
-            if( raw_paths.size() ){
+            if (raw_paths.size()) {
                 devices_and_starts = raw_paths.split(',');
-                for(int x = 0; x < devices_and_starts.size(); x++){
+                for (int x = 0; x < devices_and_starts.size(); x++) {
                     temp = devices_and_starts[x].split('(');
-                    segment->m_device_path.append( temp[0] );
-                    segment->m_starting_extent.append( ( temp[1].remove(')') ).toLongLong() );
+                    segment->m_device_path.append(temp[0]);
+                    segment->m_starting_extent.append((temp[1].remove(')')).toLongLong());
                 }
             }
-	    m_segments.append(segment);
-	}
+            m_segments.append(segment);
+        }
     }
 }
 
@@ -590,8 +575,8 @@ QList<LogVol *> LogVol::getAllChildrenFlat()
     QList<LogVol *> flat_list = m_lv_children;
     long child_size = m_lv_children.size();
 
-    for(int x = 0; x < child_size; x++)
-        flat_list.append( m_lv_children[x]->getAllChildrenFlat() );
+    for (int x = 0; x < child_size; x++)
+        flat_list.append(m_lv_children[x]->getAllChildrenFlat());
 
     return flat_list;
 }
@@ -601,14 +586,14 @@ QList<LogVol *> LogVol::getSnapshots()
     QList<LogVol *> snapshots;
     LogVol *top_lv = this;
 
-    while( top_lv->getParent() != NULL)
+    while (top_lv->getParent() != NULL)
         top_lv = top_lv->getParent();
 
-    if( top_lv->isSnapContainer() ){
+    if (top_lv->isSnapContainer()) {
         snapshots = top_lv->getChildren();
 
-        for(int x = snapshots.size() - 1; x >= 0; x--){  // delete the 'real' lv leaving the snaps
-            if( m_lv_name == snapshots[x]->getName() )
+        for (int x = snapshots.size() - 1; x >= 0; x--) { // delete the 'real' lv leaving the snaps
+            if (m_lv_name == snapshots[x]->getName())
                 snapshots.removeAt(x);
         }
     }
@@ -661,8 +646,8 @@ QStringList LogVol::getPvNamesAll()
     QStringList pv_names;
     QListIterator<Segment *> seg_itr(m_segments);
 
-    while( seg_itr.hasNext() )
-	pv_names << seg_itr.next()->m_device_path;
+    while (seg_itr.hasNext())
+        pv_names << seg_itr.next()->m_device_path;
 
     pv_names.sort();
     pv_names.removeDuplicates();
@@ -672,20 +657,19 @@ QStringList LogVol::getPvNamesAll()
 
 QStringList LogVol::getPvNamesAllFlat()
 {
-    if( m_snap_container || m_mirror ){
+    if (m_snap_container || m_mirror) {
 
-        QListIterator<LogVol *> child_itr( getChildren() );
+        QListIterator<LogVol *> child_itr(getChildren());
         QStringList pv_names;
 
-        while( child_itr.hasNext() )
+        while (child_itr.hasNext())
             pv_names << child_itr.next()->getPvNamesAllFlat();
 
         pv_names.sort();
         pv_names.removeDuplicates();
 
         return pv_names;
-    }
-    else
+    } else
         return getPvNamesAll();
 }
 
@@ -714,15 +698,15 @@ long long LogVol::getSpaceUsedOnPv(const QString physicalVolume)
     long long space_used = 0;
     QListIterator<Segment *> seg_itr(m_segments);
 
-    while( seg_itr.hasNext() ){
+    while (seg_itr.hasNext()) {
 
         Segment *const seg = seg_itr.next();
         QListIterator<QString> path_itr(seg->m_device_path);
-        
-        while( path_itr.hasNext() ){
-	    if(physicalVolume == path_itr.next())
-		space_used += (seg->m_size) / (seg->m_stripes) ;
-	}
+
+        while (path_itr.hasNext()) {
+            if (physicalVolume == path_itr.next())
+                space_used += (seg->m_size) / (seg->m_stripes) ;
+        }
 
     }
 
@@ -746,17 +730,17 @@ long long LogVol::getTotalSize()
 
 QString LogVol::getFilesystem()
 {
-  return m_lv_fs;
+    return m_lv_fs;
 }
 
 QString LogVol::getFilesystemLabel()
 {
-  return m_lv_fs_label;
+    return m_lv_fs_label;
 }
 
 QString LogVol::getFilesystemUuid()
 {
-  return m_lv_fs_uuid;
+    return m_lv_fs_uuid;
 }
 
 long long LogVol::getFilesystemSize()
@@ -791,7 +775,7 @@ int LogVol::getMirrorCount()
 
 int LogVol::getSnapshotCount()
 {
-    return getSnapshots().size(); 
+    return getSnapshots().size();
 }
 
 bool LogVol::isMerging()
@@ -919,8 +903,8 @@ QList<MountEntry *> LogVol::getMountEntries()
     QList<MountEntry *> copy;
     QListIterator<MountEntry *> itr(m_mount_entries);
 
-    while( itr.hasNext() )
-        copy.append( new MountEntry( itr.next() ) );
+    while (itr.hasNext())
+        copy.append(new MountEntry(itr.next()));
 
     return copy;
 }
@@ -937,7 +921,7 @@ QString LogVol::getFstabMountPoint()
 
 double LogVol::getSnapPercent()
 {
-    if( m_snap || m_merging )
+    if (m_snap || m_merging)
         return m_snap_percent;
     else
         return 0.0;

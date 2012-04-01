@@ -1,14 +1,14 @@
 /*
  *
- * 
+ *
  * Copyright (C) 2008, 2009, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License,  version 3, as 
+ * it under the terms of the GNU General Public License,  version 3, as
  * published by the Free Software Foundation.
- * 
+ *
  * See the file "COPYING" for the exact licensing terms.
  */
 
@@ -27,7 +27,7 @@ class StoragePartition;
 
 class StorageDevice : public QObject
 {
-Q_OBJECT
+    Q_OBJECT
 
     long long m_device_size; // Size in bytes
     QString   m_device_path;
@@ -43,7 +43,7 @@ Q_OBJECT
 
     QList<StoragePartition *> m_storage_partitions;
 
- public:
+public:
     StorageDevice(PedDevice * const pedDevice, const QList<PhysVol *> pvList, MountTables *const mountTables);
     ~StorageDevice();
 
@@ -60,7 +60,7 @@ Q_OBJECT
     bool isBusy();
     bool isPhysicalVolume();
     PhysVol *getPhysicalVolume();
-    
+
 };
 
 #endif

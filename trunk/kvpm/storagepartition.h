@@ -1,14 +1,14 @@
 /*
  *
- * 
+ *
  * Copyright (C) 2008, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License,  version 3, as 
+ * it under the terms of the GNU General Public License,  version 3, as
  * published by the Free Software Foundation.
- * 
+ *
  * See the file "COPYING" for the exact licensing terms.
  */
 
@@ -25,7 +25,7 @@ class PhysVol;
 class MountEntry;
 class MountTables;
 
-class StoragePartition 
+class StoragePartition
 {
     QList<MountEntry *> m_mount_entries;
     QString m_fstab_mount_point;
@@ -55,19 +55,19 @@ class StoragePartition
     bool m_is_normal;
     bool m_is_logical;
     bool m_is_freespace;
-    
+
     PedSector getAlignedStart();
     PedSector getFreespaceEnd();
 
-public: 
-    StoragePartition(PedPartition *const part, 
-                     const int freespaceCount, 
-                     const QList<PhysVol *> pvList, 
+public:
+    StoragePartition(PedPartition *const part,
+                     const int freespaceCount,
+                     const QList<PhysVol *> pvList,
                      MountTables *const mountTables);
 
     ~StoragePartition();
 
-    PedPartition *getPedPartition();    
+    PedPartition *getPedPartition();
     QString getFilesystem();
     QString getFilesystemUuid();
     QString getFilesystemLabel();

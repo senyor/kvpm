@@ -1,14 +1,14 @@
 /*
  *
- * 
+ *
  * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License,  version 3, as 
+ * it under the terms of the GNU General Public License,  version 3, as
  * published by the Free Software Foundation.
- * 
+ *
  * See the file "COPYING" for the exact licensing terms.
  */
 
@@ -100,19 +100,17 @@ QStringList splitUuid(QString const uuid) // Turns a one line uuid into two shor
 {
     int split_index = 0;
 
-    if( uuid.count('-') < 4 ){
+    if (uuid.count('-') < 4) {
         return QStringList(uuid) << "";
-    }
-    else if( uuid.count('-') < 5 ){
-        for(int x = 0; x < 4; x++)
+    } else if (uuid.count('-') < 5) {
+        for (int x = 0; x < 4; x++)
+            split_index = uuid.indexOf('-', split_index + 1);
+    } else {
+        for (int x = 0; x < 5; x++)
             split_index = uuid.indexOf('-', split_index + 1);
     }
-    else{
-        for(int x = 0; x < 5; x++)
-            split_index = uuid.indexOf('-', split_index + 1);
-    }
-    
-    if( split_index <= 0)
+
+    if (split_index <= 0)
         split_index = uuid.size() - 1;
 
     QString const uuid_start = uuid.left(split_index + 1);
@@ -136,8 +134,7 @@ bool isBusy(const QString device)
     if (fd < 0) {
         if (errno == EBUSY)
             return true;
-    } 
-    else
+    } else
         close(fd);
 
     return false;

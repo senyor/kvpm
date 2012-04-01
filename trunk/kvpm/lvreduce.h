@@ -1,14 +1,14 @@
 /*
  *
- * 
+ *
  * Copyright (C) 2008, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License,  version 3, as 
+ * it under the terms of the GNU General Public License,  version 3, as
  * published by the Free Software Foundation.
- * 
+ *
  * See the file "COPYING" for the exact licensing terms.
  */
 
@@ -28,21 +28,21 @@ class VolGroup;
 
 class LVReduceDialog : public KDialog
 {
-Q_OBJECT
+    Q_OBJECT
 
     LogVol   *m_lv;
     VolGroup *m_vg;
     SizeSelectorBox *m_size_selector;
     bool m_bailout;
 
- public:
+public:
     explicit LVReduceDialog(LogVol *const volume, QWidget *parent = 0);
     bool bailout();
-     
- private slots:
+
+private slots:
     void doShrink();
     void resetOkButton();
- 
+
 };
 
 #endif

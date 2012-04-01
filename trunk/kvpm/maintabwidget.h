@@ -1,14 +1,14 @@
 /*
  *
- * 
+ *
  * Copyright (C) 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License,  version 3, as 
+ * it under the terms of the GNU General Public License,  version 3, as
  * published by the Free Software Foundation.
- * 
+ *
  * See the file "COPYING" for the exact licensing terms.
  */
 
@@ -24,16 +24,16 @@ class DeviceTab;
 
 class MainTabWidget : public QWidget
 {
-Q_OBJECT
+    Q_OBJECT
 
     QStringList m_unmunged_text;    // Tab labels without amperands
     KTabWidget *m_tab_widget;
     QList<VolumeGroupTab *>  m_vg_tabs;
 
- signals:
+signals:
     void currentIndexChanged();
 
- public:
+public:
     MainTabWidget(QWidget *parent = 0);
     QString getUnmungedText(const int index);
     void appendVolumeGroupTab(VolumeGroupTab *const page, const QIcon &icon, const QString &label);
@@ -44,8 +44,8 @@ Q_OBJECT
     int getCurrentIndex();
     VolumeGroupTab *getVolumeGroupTab(const int index);
     void setIcon(const int index, const QIcon &icon);
- 
- public slots:
+
+public slots:
     void indexChanged(int index);
 
 };

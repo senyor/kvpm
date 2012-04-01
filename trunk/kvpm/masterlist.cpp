@@ -1,14 +1,14 @@
 /*
  *
- * 
+ *
  * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License,  version 3, as 
+ * it under the terms of the GNU General Public License,  version 3, as
  * published by the Free Software Foundation.
- * 
+ *
  * See the file "COPYING" for the exact licensing terms.
  */
 
@@ -51,7 +51,7 @@ MasterList::MasterList() : QObject()
 
 MasterList::~MasterList()
 {
-    if(m_lvm)
+    if (m_lvm)
         lvm_quit(m_lvm);
 }
 
@@ -60,13 +60,13 @@ void MasterList::rescan()
     ProgressBox *progress_box = TopWindow::getProgressBox();
     m_mount_tables->loadData();
 
-    progress_box->setRange(0,3);
+    progress_box->setRange(0, 3);
     progress_box->setText("Scan lvm");
     qApp->setOverrideCursor(Qt::WaitCursor);
     qApp->processEvents();
 
     lvm_scan(m_lvm);
-    lvm_config_reload(m_lvm);    
+    lvm_config_reload(m_lvm);
 
     progress_box->setValue(1);
     progress_box->setText("Scan vgs");
@@ -92,25 +92,25 @@ void MasterList::scanVolumeGroups()
     lvm_str_list *strl;
 
     vgnames = lvm_list_vg_names(m_lvm);
-    dm_list_iterate_items(strl, vgnames){ // rescan() existing VolGroup, don't create a new one
+    dm_list_iterate_items(strl, vgnames) { // rescan() existing VolGroup, don't create a new one
         bool existing_vg = false;
-        for(int x = 0; x < m_volume_groups.size(); x++){
-            if( QString(strl->str).trimmed() == m_volume_groups[x]->getName() ){
+        for (int x = 0; x < m_volume_groups.size(); x++) {
+            if (QString(strl->str).trimmed() == m_volume_groups[x]->getName()) {
                 existing_vg = true;
                 m_volume_groups[x]->rescan(m_lvm);
             }
         }
-        if( !existing_vg )
-            m_volume_groups.append( new VolGroup(m_lvm, strl->str, m_mount_tables) );
+        if (!existing_vg)
+            m_volume_groups.append(new VolGroup(m_lvm, strl->str, m_mount_tables));
     }
 
-    for(int x = m_volume_groups.size() - 1; x >= 0; x--){ // delete VolGroup if the vg is gone
+    for (int x = m_volume_groups.size() - 1; x >= 0; x--) { // delete VolGroup if the vg is gone
         bool deleted_vg = true;
-        dm_list_iterate_items(strl, vgnames){ 
-            if( QString(strl->str).trimmed() == m_volume_groups[x]->getName() )
+        dm_list_iterate_items(strl, vgnames) {
+            if (QString(strl->str).trimmed() == m_volume_groups[x]->getName())
                 deleted_vg = false;
         }
-        if(deleted_vg)
+        if (deleted_vg)
             delete m_volume_groups.takeAt(x);
     }
 }
@@ -119,11 +119,11 @@ void MasterList::scanStorageDevices()
 {
     QList<PhysVol *>  physical_volumes;
 
-    for(int x = 0; x < m_volume_groups.size(); x++)
-        physical_volumes.append( m_volume_groups[x]->getPhysicalVolumes() );
+    for (int x = 0; x < m_volume_groups.size(); x++)
+        physical_volumes.append(m_volume_groups[x]->getPhysicalVolumes());
 
-    for(int x = m_storage_devices.size() - 1; x >= 0;  x--)
-	delete m_storage_devices[x];
+    for (int x = m_storage_devices.size() - 1; x >= 0;  x--)
+        delete m_storage_devices[x];
 
     m_storage_devices.clear();
 
@@ -132,20 +132,20 @@ void MasterList::scanStorageDevices()
 
     PedDevice *dev = NULL;
 
-    while( ( dev = ped_device_get_next(dev) ) ){
-        if( !QString("%1").arg(dev->path).contains("/dev/mapper") )
-            m_storage_devices.append( new StorageDevice(dev, physical_volumes, m_mount_tables) );
+    while ((dev = ped_device_get_next(dev))) {
+        if (!QString("%1").arg(dev->path).contains("/dev/mapper"))
+            m_storage_devices.append(new StorageDevice(dev, physical_volumes, m_mount_tables));
     }
 }
 
 int MasterList::getVgCount()
 {
-      return m_volume_groups.size();
+    return m_volume_groups.size();
 }
 
 QList<VolGroup *> MasterList::getVolGroups()
 {
-      return m_volume_groups;
+    return m_volume_groups;
 }
 
 QList<StorageDevice *> MasterList::getStorageDevices()
@@ -162,9 +162,9 @@ VolGroup* MasterList::getVgByName(QString name)
 {
     name = name.trimmed();
 
-    for(int x = 0; x < m_volume_groups.size(); x++){
-	if(name == m_volume_groups[x]->getName())
-	    return m_volume_groups[x];
+    for (int x = 0; x < m_volume_groups.size(); x++) {
+        if (name == m_volume_groups[x]->getName())
+            return m_volume_groups[x];
     }
 
     return NULL;
@@ -174,8 +174,8 @@ QStringList MasterList::getVgNames()
 {
     QStringList names;
 
-    for(int x = 0; x < m_volume_groups.size(); x++)
-	names << m_volume_groups[x]->getName();
+    for (int x = 0; x < m_volume_groups.size(); x++)
+        names << m_volume_groups[x]->getName();
 
     return names;
 }
