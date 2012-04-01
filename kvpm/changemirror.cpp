@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2009, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -41,8 +41,17 @@ ChangeMirrorDialog::ChangeMirrorDialog(LogVol *logicalVolume, bool changeLog, QW
 
     setWindowTitle( i18n("Change Mirror") );
 
+    QWidget *const main_widget = new QWidget();
+    QVBoxLayout *const layout = new QVBoxLayout();
+    QLabel  *const lv_name_label = new QLabel( i18n("Change mirror: <b>%1</b>", m_lv->getName() ));
+    lv_name_label->setAlignment(Qt::AlignCenter);
     m_tab_widget = new KTabWidget();
-    setMainWidget(m_tab_widget);
+    layout->addWidget(lv_name_label);
+    layout->addSpacing(5);
+    layout->addWidget(m_tab_widget);
+    main_widget->setLayout(layout);
+
+    setMainWidget(main_widget);
    
     m_tab_widget->addTab(buildGeneralTab(),  i18nc("Common user options", "General") );
     m_tab_widget->addTab(buildPhysicalTab(), i18n("Physical layout") );
@@ -60,14 +69,11 @@ ChangeMirrorDialog::ChangeMirrorDialog(LogVol *logicalVolume, bool changeLog, QW
 QWidget *ChangeMirrorDialog::buildGeneralTab()
 {
     QWidget *const general = new QWidget;
-    QLabel  *const lv_name_label = new QLabel( i18n("<b>Volume: %1</b>", m_lv->getName() ));
     QLabel  *const current_mirrors_label = new QLabel();
     QHBoxLayout *const general_layout = new QHBoxLayout;
     QVBoxLayout *const center_layout = new QVBoxLayout;
     const bool is_mirror = m_lv->isMirror();
 
-    lv_name_label->setAlignment(Qt::AlignCenter);
-    center_layout->addWidget(lv_name_label);
     general_layout->addStretch();
     general_layout->addLayout(center_layout);
     general_layout->addStretch();
@@ -88,6 +94,7 @@ QWidget *ChangeMirrorDialog::buildGeneralTab()
     
         QLabel *const add_mirrors_label = new QLabel( i18n("Add mirror legs: ") );
         m_add_mirrors_spin = new KIntSpinBox(1, 10, 1, 1, this);
+        add_mirrors_label->setBuddy(m_add_mirrors_spin);
         spin_box_layout->addWidget(add_mirrors_label);
         spin_box_layout->addWidget(m_add_mirrors_spin);
         add_mirror_box_layout->addLayout(spin_box_layout);
@@ -206,10 +213,12 @@ QWidget *ChangeMirrorDialog::buildPhysicalTab()
         m_stripes_number_spin = new KIntSpinBox();
         m_stripes_number_spin->setMinimum(2);
         m_stripes_number_spin->setMaximum(m_lv->getVg()->getPvCount());
+        stripe_size->setBuddy(m_stripe_size_combo);
         QHBoxLayout *const stripe_size_layout = new QHBoxLayout();
         stripe_size_layout->addWidget(stripe_size);
         stripe_size_layout->addWidget(m_stripe_size_combo);
         QLabel *const stripes_number = new QLabel( i18n("Number of stripes: ") );
+        stripes_number->setBuddy(m_stripes_number_spin);
         QHBoxLayout *const stripes_number_layout = new QHBoxLayout();
         stripes_number_layout->addWidget(stripes_number); 
         stripes_number_layout->addWidget(m_stripes_number_spin);
