@@ -29,7 +29,6 @@
 #include "pvchange.h"
 #include "physvol.h"
 #include "topwindow.h"
-#include "vgreduce.h"
 #include "vgreduceone.h"
 #include "volgroup.h"
 
@@ -250,11 +249,12 @@ void PVTree::popupContextMenu(QPoint point)
     QStringList lvs;
 
     if(item && !m_vg->isExported()){
-	if( (QVariant(item->data(3, 0)).toString()) == "0" ){  // 0 =  Zero used extents on pv
+
+	if( (QVariant(item->data(3, Qt::UserRole)).toString()) == "0" ){  // 0 =  Zero used extents on pv
 	    m_pv_name = QVariant(item->data(0, 0)).toString();
 
             pv_move_action->setEnabled(false);
-            
+
             if(m_vg->getPvCount() > 1)
                 vg_reduce_action->setEnabled(true);
             else
