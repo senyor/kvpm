@@ -43,7 +43,7 @@ ChangeMirrorDialog::ChangeMirrorDialog(LogVol *logicalVolume, bool changeLog, QW
 
     QWidget *const main_widget = new QWidget();
     QVBoxLayout *const layout = new QVBoxLayout();
-    QLabel  *const lv_name_label = new QLabel( i18n("Change mirror: <b>%1</b>", m_lv->getName() ));
+    QLabel  *const lv_name_label = new QLabel( i18n("<b>Change mirror: %1</b>", m_lv->getName() ));
     lv_name_label->setAlignment(Qt::AlignCenter);
     m_tab_widget = new KTabWidget();
     layout->addWidget(lv_name_label);
