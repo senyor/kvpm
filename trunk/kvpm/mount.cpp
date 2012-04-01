@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -66,9 +66,10 @@ void MountDialog::buildDialog()
     QVBoxLayout *const layout = new QVBoxLayout();
     dialog_body->setLayout(layout);
 
-    QLabel *const device_label = new QLabel( "<b>" + i18n("Device To Mount: ") + m_device_to_mount + "</b>");
+    QLabel *const device_label = new QLabel( i18n("<b>Device to mount: %1</b>", m_device_to_mount) );
     device_label->setAlignment(Qt::AlignCenter);    
     layout->addWidget(device_label);
+    layout->addSpacing(5);
 
     QHBoxLayout *const main_layout = new QHBoxLayout();
     layout->addLayout(main_layout);

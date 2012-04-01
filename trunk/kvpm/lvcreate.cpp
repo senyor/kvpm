@@ -58,7 +58,7 @@ LVCreateDialog::LVCreateDialog(VolGroup *const group, QWidget *parent):
 
         QLabel *const lv_name_label = new QLabel();        
         lv_name_label->setAlignment(Qt::AlignCenter);        
-        lv_name_label->setText( i18n("Creating a new logical volume") );
+        lv_name_label->setText( i18n("<b>Creating a new logical volume</b>") );
 
         QWidget *const main_widget = new QWidget();
         QVBoxLayout *const layout = new QVBoxLayout();
@@ -102,11 +102,11 @@ LVCreateDialog::LVCreateDialog(LogVol *const volume, const bool snapshot, QWidge
 
         if(m_snapshot){
             setCaption( i18n("Create Snapshot Volume") );
-            lv_name_label->setText( i18n("Creating snapshot of: <b>%1</b>", m_lv->getName()) );
+            lv_name_label->setText( i18n("<b>Creating snapshot of: %1</b>", m_lv->getName()) );
         }
         else{
             setCaption( i18n("Extend Logical Volume") );
-            lv_name_label->setText( i18n("Extending volume: <b>%1</b>", m_lv->getName()) );
+            lv_name_label->setText( i18n("<b>Extending volume: %1</b>", m_lv->getName()) );
         }
 
         QWidget *const main_widget = new QWidget();

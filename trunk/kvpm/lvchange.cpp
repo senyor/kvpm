@@ -35,10 +35,10 @@ LVChangeDialog::LVChangeDialog(LogVol *const volume, QWidget *parent) :
     QVBoxLayout *const layout = new QVBoxLayout;
     dialog_body->setLayout(layout);
 
-    QLabel *const name = new QLabel( i18n("Change Volume: <b>%1</b>", m_lv->getName()) );
+    QLabel *const name = new QLabel( i18n("<b>Change volume: %1</b>", m_lv->getName()) );
     name->setAlignment(Qt::AlignCenter);
-    layout->addSpacing(10);
     layout->addWidget(name);
+    layout->addSpacing(5);
     layout->addStretch();
 
     KTabWidget *const tab_widget = new KTabWidget();
