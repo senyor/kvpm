@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -15,14 +15,15 @@
 #ifndef MOUNT_H
 #define MOUNT_H
 
-#include <KLineEdit>
 #include <KDialog>
 
-#include <QString>
-#include <QRadioButton>
-#include <QCheckBox>
-#include <QVBoxLayout>
-#include <QGroupBox>
+class KLineEdit;
+
+class QCheckBox;
+class QGroupBox;
+class QRadioButton;
+class QString;
+class QVBoxLayout;
 
 class LogVol;
 class StoragePartition;
@@ -54,14 +55,14 @@ class MountDialog : public KDialog
     bool m_is_writable;
 
     QWidget* filesystemBox();
-    QWidget* optionsBox();
     QWidget* mountPointBox();
+    QWidget* mainTab();
+    QWidget* optionsTab();
     void buildDialog();
 
 public:
     MountDialog(LogVol *const volume, QWidget *parent = NULL);
     MountDialog(StoragePartition *const partition, QWidget *parent = NULL);
-
 
 private slots:
     void selectMountPoint(bool);

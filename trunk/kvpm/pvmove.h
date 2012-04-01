@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -17,12 +17,14 @@
 #define PVMOVE_H
 
 #include <KDialog>
-#include <QString>
-#include <QCheckBox>
-#include <QRadioButton>
-#include <QGroupBox>
-#include <QLabel>
 
+#include <QList>
+
+class QCheckBox;
+class QGroupBox;
+class QLabel;
+class QRadioButton;
+class QString;
 
 class LogVol;
 class NameAndRange;
@@ -30,7 +32,6 @@ class NoMungeRadioButton;
 class PhysVol;
 class PvGroupBox;
 class VolGroup;
-
 
 bool restart_pvmove();
 bool stop_pvmove();
@@ -63,8 +64,8 @@ class PVMoveDialog : public KDialog
     QStringList arguments();
 
 public:
-    explicit PVMoveDialog(PhysVol *physicalVolume, QWidget *parent = 0);
-    explicit PVMoveDialog(LogVol *logicalVolume, int segment, QWidget *parent = 0);
+    explicit PVMoveDialog(PhysVol *const physicalVolume, QWidget *parent = 0);
+    explicit PVMoveDialog(LogVol *const logicalVolume, int const segment, QWidget *parent = 0);
     ~PVMoveDialog();
     bool bailout();
 

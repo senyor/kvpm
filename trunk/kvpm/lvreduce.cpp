@@ -116,7 +116,7 @@ LVReduceDialog::LVReduceDialog(LogVol *const volume, QWidget *parent)
         QVBoxLayout *const label_layout = new QVBoxLayout();
         QWidget *const label_widget = new QWidget();
         label_widget->setLayout(label_layout);
-        QLabel *const lv_name_label  = new QLabel(i18n("<b>Reducing Volume: %1</b>", m_lv->getName()));
+        QLabel *const lv_name_label  = new QLabel(i18n("<b>Reduce volume: %1</b>", m_lv->getName()));
         lv_name_label->setAlignment(Qt::AlignCenter);
         QLabel *const lv_min_label  = new QLabel(i18n("Estimated minimum size: %1", locale->formatByteSize(min_lv_extents * extent_size)));
 

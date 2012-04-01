@@ -15,14 +15,6 @@
 
 #include "pvmove.h"
 
-#include <KConfigSkeleton>
-#include <KGlobal>
-#include <KLocale>
-#include <KMessageBox>
-#include <KPushButton>
-
-#include <QtGui>
-
 #include "logvol.h"
 #include "masterlist.h"
 #include "misc.h"
@@ -30,6 +22,19 @@
 #include "physvol.h"
 #include "pvgroupbox.h"
 #include "volgroup.h"
+
+#include <KConfigSkeleton>
+#include <KGlobal>
+#include <KLocale>
+#include <KMessageBox>
+#include <KPushButton>
+
+#include <QString>
+#include <QStringList>
+#include <QCheckBox>
+#include <QRadioButton>
+#include <QGroupBox>
+#include <QLabel>
 
 
 struct NameAndRange {
@@ -42,35 +47,31 @@ struct NameAndRange {
 
 bool restart_pvmove()
 {
-    QStringList args;
+    const QStringList args = QStringList() << "pvmove";
     const QString message = i18n("Do you wish to restart all interrupted physical volume moves?");
 
     if (KMessageBox::questionYesNo(0, message) == KMessageBox::Yes) {
-
-        args << "pvmove";
-
         ProcessProgress resize(args);
         return true;
-    } else
+    } else {
         return false;
+    }
 }
 
 bool stop_pvmove()
 {
-    QStringList args;
+    const QStringList args = QStringList() << "pvmove" << "--abort";
     const QString message = i18n("Do you wish to abort all physical volume moves currently in progress?");
 
     if (KMessageBox::questionYesNo(0, message) == KMessageBox::Yes) {
-
-        args << "pvmove" << "--abort";
-
         ProcessProgress resize(args);
         return true;
-    } else
+    } else {
         return false;
+    }
 }
 
-PVMoveDialog::PVMoveDialog(PhysVol *physicalVolume, QWidget *parent) : KDialog(parent)
+PVMoveDialog::PVMoveDialog(PhysVol *const physicalVolume, QWidget *parent) : KDialog(parent)
 {
     m_vg = physicalVolume->getVg();
     m_target_pvs = m_vg->getPhysicalVolumes();
@@ -121,7 +122,7 @@ PVMoveDialog::PVMoveDialog(PhysVol *physicalVolume, QWidget *parent) : KDialog(p
             this, SLOT(commitMove()));
 }
 
-PVMoveDialog::PVMoveDialog(LogVol *logicalVolume, int segment, QWidget *parent) :
+PVMoveDialog::PVMoveDialog(LogVol *const logicalVolume, int const segment, QWidget *parent) :
     KDialog(parent),
     m_lv(logicalVolume)
 {
@@ -208,10 +209,15 @@ void PVMoveDialog::buildDialog()
     QLabel *label;
     NoMungeRadioButton *radio_button;
 
-    setWindowTitle(i18n("Move Physical Volume Extents"));
+    setWindowTitle(i18n("Move Physical Extents"));
     QWidget *dialog_body = new QWidget(this);
     setMainWidget(dialog_body);
     QVBoxLayout *layout = new QVBoxLayout;
+
+    label = new QLabel(i18n("<b>Move physical extents</b>"));
+    label->setAlignment(Qt::AlignCenter);
+    layout->addWidget(label);
+    layout->addSpacing(5);
     dialog_body->setLayout(layout);
 
     if (m_move_lv) {
