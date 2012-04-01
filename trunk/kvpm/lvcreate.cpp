@@ -54,8 +54,15 @@ LVCreateDialog::LVCreateDialog(VolGroup *const group, QWidget *parent):
     skeleton.addItemBool("use_si_units", m_use_si_units, false);
 
     if ( !m_bailout ){
-        setCaption( i18n("Create Logical Volume") );
+        setCaption( i18n("Create A New Logical Volume") );
 
+        QLabel *const lv_name_label = new QLabel();        
+        lv_name_label->setAlignment(Qt::AlignCenter);        
+        lv_name_label->setText( i18n("Creating a new logical volume") );
+
+        QWidget *const main_widget = new QWidget();
+        QVBoxLayout *const layout = new QVBoxLayout();
+        
         m_tab_widget = new KTabWidget(this);
         m_physical_tab = createPhysicalTab();
         m_advanced_tab = createAdvancedTab();
@@ -64,7 +71,12 @@ LVCreateDialog::LVCreateDialog(VolGroup *const group, QWidget *parent):
         m_tab_widget->addTab(m_physical_tab, i18n("Physical layout") );
         m_tab_widget->addTab(m_advanced_tab, i18nc("Less used, dangerous or complex options", "Advanced options") );
         
-        setMainWidget(m_tab_widget);
+        layout->addWidget(lv_name_label);
+        layout->addSpacing(5);
+        layout->addWidget(m_tab_widget);
+        main_widget->setLayout(layout); 
+
+        setMainWidget(main_widget);
         makeConnections();
         setMaxSize();
     }
@@ -85,10 +97,20 @@ LVCreateDialog::LVCreateDialog(LogVol *const volume, const bool snapshot, QWidge
 
     if ( !m_bailout ){
 
-        if(m_snapshot)
+        QLabel *const lv_name_label = new QLabel();        
+        lv_name_label->setAlignment(Qt::AlignCenter);        
+
+        if(m_snapshot){
             setCaption( i18n("Create Snapshot Volume") );
-        else
+            lv_name_label->setText( i18n("Creating snapshot of: <b>%1</b>", m_lv->getName()) );
+        }
+        else{
             setCaption( i18n("Extend Logical Volume") );
+            lv_name_label->setText( i18n("Extending volume: <b>%1</b>", m_lv->getName()) );
+        }
+
+        QWidget *const main_widget = new QWidget();
+        QVBoxLayout *const layout = new QVBoxLayout();
         
         m_tab_widget = new KTabWidget(this);
         m_physical_tab = createPhysicalTab();  // this order is important
@@ -97,8 +119,13 @@ LVCreateDialog::LVCreateDialog(LogVol *const volume, const bool snapshot, QWidge
         m_tab_widget->addTab(m_general_tab,  i18nc("The standard common options", "General") );
         m_tab_widget->addTab(m_physical_tab, i18n("Physical layout") );
         m_tab_widget->addTab(m_advanced_tab, i18nc("Less used, dangerous or complex options", "Advanced options") );
-        
-        setMainWidget(m_tab_widget);
+
+        layout->addWidget(lv_name_label);
+        layout->addSpacing(5);
+        layout->addWidget(m_tab_widget);
+        main_widget->setLayout(layout); 
+
+        setMainWidget(main_widget);
         makeConnections();
         setMaxSize();
     }
@@ -153,8 +180,8 @@ QWidget* LVCreateDialog::createGeneralTab()
     general_layout->addStretch();
     general_layout->addWidget(volume_box);
     general_layout->addStretch();
-    QVBoxLayout *upper_layout = new QVBoxLayout();
-    QHBoxLayout *lower_layout = new QHBoxLayout();
+    QVBoxLayout *const upper_layout = new QVBoxLayout();
+    QHBoxLayout *const lower_layout = new QHBoxLayout();
     layout->addStretch();
     layout->addLayout(upper_layout);
     layout->addStretch();
@@ -169,7 +196,6 @@ QWidget* LVCreateDialog::createGeneralTab()
         locale->setBinaryUnitDialect(KLocale::IECBinaryDialect);
     
     if(m_extend){
-        volume_box->setTitle( i18n("Extending volume: %1", m_lv->getName()) );
         m_extend_by_label = new QLabel();
         layout->insertWidget( 1, m_extend_by_label );
         m_current_size_label = new QLabel( i18n("Current size: %1", locale->formatByteSize( m_lv->getSize() ) )  );
@@ -177,12 +203,7 @@ QWidget* LVCreateDialog::createGeneralTab()
     }
     else{
         
-        if(m_snapshot)
-            volume_box->setTitle( i18n("Creating snapshot of: %1", m_lv->getName()) );
-        else
-            volume_box->setTitle( i18n("Create new logical volume") );
-        
-        QHBoxLayout *name_layout = new QHBoxLayout();
+        QHBoxLayout *const name_layout = new QHBoxLayout();
         m_name_edit = new KLineEdit();
         
         QRegExp rx("[0-9a-zA-Z_\\.][-0-9a-zA-Z_\\.]*");
