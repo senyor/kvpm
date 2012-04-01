@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -14,30 +14,39 @@
 
 #include "pvchange.h"
 
+#include <KComboBox>
+#include <KLineEdit>
 #include <KLocale>
-#include <QtGui>
+
+#include <QCheckBox>
+#include <QGroupBox>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QVBoxLayout>
 
 #include "physvol.h"
 #include "volgroup.h"
 
-PVChangeDialog::PVChangeDialog(PhysVol *physicalVolume, QWidget *parent):
+PVChangeDialog::PVChangeDialog(PhysVol *const physicalVolume, QWidget *parent) :
     KDialog(parent),
     m_pv(physicalVolume)
 {
 
     setWindowTitle(i18n("Change physical volume attributes"));
 
-    QWidget *dialog_body = new QWidget(this);
+    QWidget *const dialog_body = new QWidget(this);
     setMainWidget(dialog_body);
-    QVBoxLayout *layout = new QVBoxLayout;
+    QVBoxLayout *const layout = new QVBoxLayout;
     dialog_body->setLayout(layout);
 
     QString pv_name = m_pv->getName();
-    QLabel *label = new QLabel(i18n("<b>%1</b>", pv_name));
+    QLabel *const label = new QLabel(i18n("<b>Changing volume: %1</b>", pv_name));
     label->setAlignment(Qt::AlignCenter);
     layout->addWidget(label);
-    QGroupBox *attrib_box = new QGroupBox(i18n("Attributes"));
-    QVBoxLayout *attrib_box_layout = new QVBoxLayout;
+    layout->addSpacing(5);
+
+    QGroupBox *const attrib_box = new QGroupBox(i18n("Attributes"));
+    QVBoxLayout *const attrib_box_layout = new QVBoxLayout;
     attrib_box->setLayout(attrib_box_layout);
     layout->addWidget(attrib_box);
     m_allocation_box = new QCheckBox(i18n("Enable allocation of extents"));
@@ -58,27 +67,33 @@ PVChangeDialog::PVChangeDialog(PhysVol *physicalVolume, QWidget *parent):
     m_tags_group->setCheckable(true);
     m_tags_group->setChecked(false);
     layout->addWidget(m_tags_group);
-    QHBoxLayout *add_tag_layout = new QHBoxLayout();
-    QHBoxLayout *del_tag_layout = new QHBoxLayout();
-    QVBoxLayout *tag_group_layout = new QVBoxLayout();
+    QHBoxLayout *const add_tag_layout = new QHBoxLayout();
+    QHBoxLayout *const del_tag_layout = new QHBoxLayout();
+    QVBoxLayout *const tag_group_layout = new QVBoxLayout();
     tag_group_layout->addLayout(add_tag_layout);
     tag_group_layout->addLayout(del_tag_layout);
     m_tags_group->setLayout(tag_group_layout);
-    add_tag_layout->addWidget(new QLabel(i18n("Add new tag:")));
+    QLabel *const add_tag_label = new QLabel(i18n("Add new tag:"));
+    add_tag_layout->addWidget(add_tag_label);
     m_tag_edit = new KLineEdit();
+    add_tag_label->setBuddy(m_tag_edit);
     QRegExp rx("[0-9a-zA-Z_\\.+-]*");
     QRegExpValidator *tag_validator = new QRegExpValidator(rx, m_tag_edit);
     m_tag_edit->setValidator(tag_validator);
     add_tag_layout->addWidget(m_tag_edit);
-    del_tag_layout->addWidget(new QLabel(i18n("Remove tag:")));
+    QLabel *const del_tag_label = new QLabel(i18n("Remove tag:"));
+    del_tag_layout->addWidget(del_tag_label);
     m_deltag_combo = new KComboBox();
+    del_tag_label->setBuddy(m_deltag_combo);
     m_deltag_combo->setEditable(false);
-    QStringList tags = m_pv->getTags();
-    for (int x = 0; x < tags.size(); x++)
+    const QStringList tags = m_pv->getTags();
+    for (int x = 0; x < tags.size(); x++){
         m_deltag_combo->addItem(tags[x]);
+    }
     m_deltag_combo->insertItem(0, QString(""));
     m_deltag_combo->setCurrentIndex(0);
     del_tag_layout->addWidget(m_deltag_combo);
+    del_tag_layout->addStretch();
 
     layout->addWidget(m_tags_group);
 
@@ -111,9 +126,7 @@ void PVChangeDialog::resetOkButton()
 
 QStringList PVChangeDialog::arguments()
 {
-    QStringList args;
-
-    args << "pvchange";
+    QStringList args = QStringList() << "pvchange";
 
     if (m_allocation_box->isChecked() && !m_pv->isAllocatable())
         args << "--allocatable" << "y";
@@ -134,7 +147,6 @@ QStringList PVChangeDialog::arguments()
         if (!m_tag_edit->text().isEmpty())
             args << "--addtag" << m_tag_edit->text();
     }
-
 
     args << m_pv->getName();
 
