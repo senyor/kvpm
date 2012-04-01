@@ -79,7 +79,7 @@ Q_OBJECT
  
      KTabWidget *m_tab_widget;
 
-     KComboBox *stripe_size_combo; 
+     KComboBox *m_stripe_size_combo; 
 
      KIntSpinBox *m_mirror_count_spin,  // how many mirrors we want
 	         *m_stripe_count_spin;  // how many stripes we want

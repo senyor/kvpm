@@ -306,7 +306,7 @@ QWidget* LVCreateDialog::createPhysicalTab()
     int stripe_index;
     QList<PhysVol *> physical_volumes;
 
-    QVBoxLayout *layout = new QVBoxLayout;
+    QVBoxLayout *const layout = new QVBoxLayout;
     m_physical_tab = new QWidget(this);
     m_physical_tab->setLayout(layout);
     
@@ -319,32 +319,35 @@ QWidget* LVCreateDialog::createPhysicalTab()
     m_pv_checkbox = new PvGroupBox(physical_volumes);
     layout->addWidget(m_pv_checkbox);
 
-    QVBoxLayout *striped_layout = new QVBoxLayout;
-    QHBoxLayout *stripe_size_layout = new QHBoxLayout;
-    QHBoxLayout *stripes_number_layout = new QHBoxLayout;
+    QVBoxLayout *const striped_layout = new QVBoxLayout;
+    QHBoxLayout *const stripe_size_layout = new QHBoxLayout;
+    QHBoxLayout *const stripes_number_layout = new QHBoxLayout;
     
     m_stripe_box = new QGroupBox( i18n("Disk striping") );
     m_stripe_box->setCheckable(true);
     m_stripe_box->setChecked(false);
     m_stripe_box->setLayout(striped_layout);
 
-    stripe_size_combo = new KComboBox();    
+    m_stripe_size_combo = new KComboBox();    
     m_stripe_box->setEnabled(false);
     for(int n = 2; (pow(2, n) * 1024) <= m_vg->getExtentSize() ; n++){
-	stripe_size_combo->addItem(QString("%1").arg(pow(2, n)) + " KiB");
-	stripe_size_combo->setItemData(n - 2, QVariant( (int) pow(2, n) ), Qt::UserRole );
+	m_stripe_size_combo->addItem(QString("%1").arg(pow(2, n)) + " KiB");
+	m_stripe_size_combo->setItemData(n - 2, QVariant( (int) pow(2, n) ), Qt::UserRole );
         m_stripe_box->setEnabled(true);   // only enabled if the combo box has at least one entry!
     }
-    if(physical_volumes.size() < 2)
+    if(physical_volumes.size() < 2){
         m_stripe_box->setEnabled(false);
-    
-    QLabel *stripe_size = new QLabel( i18n("Stripe Size: ") );
+    }
+    QLabel *const stripe_size = new QLabel( i18n("Stripe Size: ") );
+    stripe_size->setBuddy(m_stripe_size_combo);
+
     m_stripe_count_spin = new KIntSpinBox();
     m_stripe_count_spin->setMinimum(2);
     m_stripe_count_spin->setMaximum(m_vg->getPvCount());
     stripe_size_layout->addWidget(stripe_size);
-    stripe_size_layout->addWidget(stripe_size_combo);
-    QLabel *stripes_number = new QLabel( i18n("Number of stripes: ") );
+    stripe_size_layout->addWidget(m_stripe_size_combo);
+    QLabel *const stripes_number = new QLabel( i18n("Number of stripes: ") );
+    stripes_number->setBuddy(m_stripe_count_spin);
     stripes_number_layout->addWidget(stripes_number); 
     stripes_number_layout->addWidget(m_stripe_count_spin);
     striped_layout->addLayout(stripe_size_layout);  
@@ -384,14 +387,14 @@ QWidget* LVCreateDialog::createPhysicalTab()
             else
                 m_stripe_box->setChecked(false);
 
-	    stripe_index = stripe_size_combo->findData( QVariant(seg_stripe_size / 1024) );
+	    stripe_index = m_stripe_size_combo->findData( QVariant(seg_stripe_size / 1024) );
 	    if(stripe_index == -1)
 		stripe_index = 0;
-	    stripe_size_combo->setCurrentIndex(stripe_index);
+	    m_stripe_size_combo->setCurrentIndex(stripe_index);
 	}
     }
 
-    QVBoxLayout *mirror_layout = new QVBoxLayout;
+    QVBoxLayout *const mirror_layout = new QVBoxLayout;
     m_mirror_box = new QGroupBox( i18n("Disk mirrors") );
     m_mirror_box->setCheckable(true);
     m_mirror_box->setChecked(false);
@@ -407,18 +410,19 @@ QWidget* LVCreateDialog::createPhysicalTab()
     mirror_layout->addWidget(m_disk_log);
     mirror_layout->addWidget(m_core_log);
 
-    QHBoxLayout *mirrors_spin_layout = new QHBoxLayout();
+    QHBoxLayout *const mirrors_spin_layout = new QHBoxLayout();
     
     m_mirror_count_spin = new KIntSpinBox();
     m_mirror_count_spin->setMinimum(2);
     m_mirror_count_spin->setMaximum(m_vg->getPvCount());
     QLabel *mirrors_number_label  = new QLabel( i18n("Number of mirror legs: ") );
+    mirrors_number_label->setBuddy(m_mirror_count_spin);
     mirrors_spin_layout->addWidget(mirrors_number_label);
     mirrors_spin_layout->addWidget(m_mirror_count_spin);
     mirror_layout->addLayout(mirrors_spin_layout);
 
-    QHBoxLayout *lower_h_layout = new QHBoxLayout;
-    QVBoxLayout *lower_v_layout = new QVBoxLayout;
+    QHBoxLayout *const lower_h_layout = new QHBoxLayout;
+    QVBoxLayout *const lower_v_layout = new QVBoxLayout;
     layout->addLayout(lower_h_layout);
     lower_h_layout->addStretch();
     lower_h_layout->addLayout(lower_v_layout);
@@ -436,11 +440,11 @@ QWidget* LVCreateDialog::createPhysicalTab()
 
 QWidget* LVCreateDialog::createAdvancedTab()
 {
-    QHBoxLayout *advanced_layout = new QHBoxLayout;
+    QHBoxLayout *const advanced_layout = new QHBoxLayout;
     m_advanced_tab = new QWidget(this);
     m_advanced_tab->setLayout(advanced_layout);
-    QGroupBox *advanced_box = new QGroupBox();
-    QVBoxLayout *layout = new QVBoxLayout;
+    QGroupBox *const advanced_box = new QGroupBox();
+    QVBoxLayout *const layout = new QVBoxLayout;
     advanced_box->setLayout(layout);
     advanced_layout->addStretch();
     advanced_layout->addWidget(advanced_box);
@@ -501,9 +505,9 @@ QWidget* LVCreateDialog::createAdvancedTab()
         layout->addWidget(m_skip_sync_check);
     }
 
-    QVBoxLayout *persistent_layout   = new QVBoxLayout;
-    QHBoxLayout *minor_number_layout = new QHBoxLayout;
-    QHBoxLayout *major_number_layout = new QHBoxLayout;
+    QVBoxLayout *const persistent_layout   = new QVBoxLayout;
+    QHBoxLayout *const minor_number_layout = new QHBoxLayout;
+    QHBoxLayout *const major_number_layout = new QHBoxLayout;
     m_minor_number_edit = new KLineEdit();
     m_major_number_edit = new KLineEdit();
     QLabel *const minor_number = new QLabel( i18n("Device minor number: ") );
@@ -737,7 +741,7 @@ QStringList LVCreateDialog::argumentsLV()
 	args << "--minor" << m_minor_number_edit->text();
     }
 
-    stripe_size = stripe_size_combo->itemData(stripe_size_combo->currentIndex(), Qt::UserRole);
+    stripe_size = m_stripe_size_combo->itemData(m_stripe_size_combo->currentIndex(), Qt::UserRole);
 
     if( m_stripe_box->isChecked() || m_extend){
 	args << "--stripes" << QString("%1").arg(stripes);
