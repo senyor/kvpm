@@ -231,6 +231,8 @@ VGChangeDialog::VGChangeDialog(VolGroup *const volumeGroup, QWidget *parent)
 
     m_max_pvs_spin = new KIntSpinBox();
     m_max_lvs_spin = new KIntSpinBox();
+    lv_limit_label->setBuddy(m_max_lvs_spin);
+    pv_limit_label->setBuddy(m_max_pvs_spin);
 
     if (m_vg->getFormat() == "lvm1") {
         m_max_lvs_spin->setEnabled(true);
