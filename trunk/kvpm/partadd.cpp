@@ -318,13 +318,14 @@ QGroupBox* PartitionAddDialog::buildInfoGroup()
         locale->setBinaryUnitDialect(KLocale::IECBinaryDialect);
 
     QString total_bytes = locale->formatByteSize(m_max_part_size * m_sector_size);
-    QLabel *excluded_label = new QLabel(i18n("Maximum size: %1",  total_bytes));
+    QLabel *const excluded_label = new QLabel(i18n("Maximum size: %1",  total_bytes));
     layout->addWidget(excluded_label);
     layout->addSpacing(10);
 
     QLabel *const type_label = new QLabel(i18n("Select type: "));
     QHBoxLayout *const type_layout = new QHBoxLayout;
     m_type_combo = buildTypeCombo();
+    type_label->setBuddy(m_type_combo);
     type_layout->addWidget(type_label);
     type_layout->addWidget(m_type_combo);
     type_layout->addStretch();
