@@ -14,20 +14,21 @@
 
 #include "processprogress.h"
 
+#include "executablefinder.h"
+#include "topwindow.h"
+#include "progressbox.h"
+
 #include <sys/types.h>
 #include <signal.h>
 
+#include <KApplication>
 #include <KMessageBox>
 #include <KProcess>
 #include <KProgressDialog>
 #include <KLocale>
 
-#include <QtGui>
-
-#include "executablefinder.h"
-#include "topwindow.h"
-#include "progressbox.h"
-
+#include <QEventLoop>
+#include <QDebug>
 
 
 ProcessProgress::ProcessProgress(QStringList arguments, const bool allowCancel, QObject *parent) : QObject(parent)
