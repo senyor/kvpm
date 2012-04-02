@@ -19,11 +19,7 @@
 #include <fcntl.h>
 #include <errno.h>
 
-
-
 #include <KPushButton>
-
-#include <QtGui>
 
 
 NoMungeCheck::NoMungeCheck(const QString text, QWidget *parent) : QCheckBox(text, parent)
