@@ -15,6 +15,8 @@
 
 #include "kvpmconfigdialog.h"
 
+#include "executablefinder.h"
+
 #include <KColorButton>
 #include <KConfigSkeleton>
 #include <KEditListWidget>
@@ -28,9 +30,16 @@
 #include <KSeparator>
 #include <KTabWidget>
 
-#include <QtGui>
+#include <QCheckBox>
+#include <QGroupBox>
+#include <QHBoxLayout>
+#include <QHeaderView>
+#include <QLabel>
+#include <QRadioButton>
+#include <QString>
+#include <QTableWidget>
+#include <QVBoxLayout>
 
-#include "executablefinder.h"
 
 
 
@@ -55,7 +64,7 @@ KvpmConfigDialog::~KvpmConfigDialog()
     m_skeleton->deleteLater();
 }
 
-QTabWidget *KvpmConfigDialog::generalPage()
+KTabWidget *KvpmConfigDialog::generalPage()
 {
     KTabWidget *const tabwidget = new KTabWidget;
     tabwidget->insertTab(1, treesTab(), i18n("Tree Views"));
@@ -160,90 +169,105 @@ QWidget *KvpmConfigDialog::colorsPage()
     KColorButton *const ext2_button = new KColorButton();
     ext2_button->setObjectName("kcfg_ext2");
     selection_layout->addWidget(ext2_button, 1, 2, Qt::AlignLeft);
+    ext2_label->setBuddy(ext2_button);
 
     QLabel *const ext3_label = new QLabel("ext3");
     selection_layout->addWidget(ext3_label, 2, 1, Qt::AlignRight);
     KColorButton *const ext3_button = new KColorButton();
     ext3_button->setObjectName("kcfg_ext3");
     selection_layout->addWidget(ext3_button, 2, 2, Qt::AlignLeft);
+    ext3_label->setBuddy(ext3_button);
 
     QLabel *const ext4_label = new QLabel("ext4");
     selection_layout->addWidget(ext4_label, 3, 1, Qt::AlignRight);
     KColorButton *const ext4_button = new KColorButton();
     ext4_button->setObjectName("kcfg_ext4");
     selection_layout->addWidget(ext4_button, 3, 2, Qt::AlignLeft);
+    ext4_label->setBuddy(ext4_button);
 
     QLabel *const btrfs_label = new QLabel("btrfs");
     selection_layout->addWidget(btrfs_label, 4, 1, Qt::AlignRight);
     KColorButton *const btrfs_button = new KColorButton();
     btrfs_button->setObjectName("kcfg_btrfs");
     selection_layout->addWidget(btrfs_button, 4, 2, Qt::AlignLeft);
+    btrfs_label->setBuddy(btrfs_button);
 
     QLabel *const reiser_label = new QLabel("reiser");
     selection_layout->addWidget(reiser_label, 1, 6, Qt::AlignRight);
     KColorButton *const reiser_button = new KColorButton();
     reiser_button->setObjectName("kcfg_reiser");
     selection_layout->addWidget(reiser_button, 1, 7, Qt::AlignLeft);
+    reiser_label->setBuddy(reiser_button);
 
     QLabel *const reiser4_label = new QLabel("reiser4");
     selection_layout->addWidget(reiser4_label, 2, 6, Qt::AlignRight);
     KColorButton *const reiser4_button = new KColorButton();
     reiser4_button->setObjectName("kcfg_reiser4");
     selection_layout->addWidget(reiser4_button, 2, 7, Qt::AlignLeft);
+    reiser4_label->setBuddy(reiser4_button);
 
     QLabel *const msdos_label = new QLabel("ms-dos");
     selection_layout->addWidget(msdos_label, 3, 6, Qt::AlignRight);
     KColorButton *const msdos_button = new KColorButton();
     msdos_button->setObjectName("kcfg_msdos");
     selection_layout->addWidget(msdos_button, 3, 7, Qt::AlignLeft);
+    msdos_label->setBuddy(msdos_button);
 
     QLabel *const jfs_label = new QLabel("jfs");
     selection_layout->addWidget(jfs_label, 1, 11, Qt::AlignRight);
     KColorButton *const jfs_button = new KColorButton();
     jfs_button->setObjectName("kcfg_jfs");
     selection_layout->addWidget(jfs_button, 1, 12, Qt::AlignLeft);
+    jfs_label->setBuddy(jfs_button);
 
     QLabel *const xfs_label = new QLabel("xfs");
     selection_layout->addWidget(xfs_label, 2, 11, Qt::AlignRight);
     KColorButton *const xfs_button = new KColorButton();
     xfs_button->setObjectName("kcfg_xfs");
     selection_layout->addWidget(xfs_button, 2, 12, Qt::AlignLeft);
+    xfs_label->setBuddy(xfs_button);
 
     QLabel *const swap_label = new QLabel("linux \nswap");
     selection_layout->addWidget(swap_label, 3, 11, Qt::AlignRight);
     KColorButton *const swap_button = new KColorButton();
     swap_button->setObjectName("kcfg_swap");
     selection_layout->addWidget(swap_button, 3, 12, Qt::AlignLeft);
+    swap_label->setBuddy(swap_button);
 
     QLabel *const none_label = new QLabel("none");
     selection_layout->addWidget(none_label, 4, 6,  Qt::AlignRight);
     KColorButton *const none_button = new KColorButton();
     none_button->setObjectName("kcfg_none");
     selection_layout->addWidget(none_button, 4, 7, Qt::AlignLeft);
+    none_label->setBuddy(none_button);
 
     QLabel *const free_label = new QLabel("free \nspace");
     selection_layout->addWidget(free_label, 5, 6, Qt::AlignRight);
     KColorButton *const free_button = new KColorButton();
     free_button->setObjectName("kcfg_free");
     selection_layout->addWidget(free_button, 5, 7, Qt::AlignLeft);
+    free_label->setBuddy(free_button);
 
     QLabel *const hfs_label = new QLabel("hfs");
     selection_layout->addWidget(hfs_label, 4, 11,  Qt::AlignRight);
     KColorButton *const hfs_button = new KColorButton();
     hfs_button->setObjectName("kcfg_hfs");
     selection_layout->addWidget(hfs_button, 4, 12, Qt::AlignLeft);
+    hfs_label->setBuddy(hfs_button);
 
     QLabel *const ntfs_label = new QLabel("ntfs");
     selection_layout->addWidget(ntfs_label, 5, 11,  Qt::AlignRight);
     KColorButton *const ntfs_button = new KColorButton();
     ntfs_button->setObjectName("kcfg_ntfs");
     selection_layout->addWidget(ntfs_button, 5, 12, Qt::AlignLeft);
+    ntfs_label->setBuddy(ntfs_button);
 
     QLabel *const physical_label = new QLabel("physical \nvolumes");
     selection_layout->addWidget(physical_label, 5, 1,  Qt::AlignRight);
     KColorButton *const physical_button = new KColorButton();
     physical_button->setObjectName("kcfg_physvol");
     selection_layout->addWidget(physical_button, 5, 2, Qt::AlignLeft);
+    physical_label->setBuddy(physical_button);
 
     for (int row = 1; row < selection_layout->rowCount(); row++)
         selection_layout->setRowStretch(row, 1);
@@ -262,7 +286,7 @@ QWidget *KvpmConfigDialog::colorsPage()
     return colors;
 }
 
-QTabWidget *KvpmConfigDialog::programsPage()
+KTabWidget *KvpmConfigDialog::programsPage()
 {
     m_executables_table = new QTableWidget();
     m_executables_table->setColumnCount(2);
@@ -649,7 +673,9 @@ QGroupBox *KvpmConfigDialog::allGroup()
     fs_warn_spin->setPrefix("% ");
     fs_warn_spin->setSpecialValueText(i18n("Never"));
     fs_warn_layout->addWidget(fs_warn_spin);
-    fs_warn_layout->addWidget(new QLabel(i18n("on a filesystem")));
+    QLabel *const fs_warn_label = new QLabel(i18n("on a filesystem"));
+    fs_warn_label->setBuddy(fs_warn_spin);
+    fs_warn_layout->addWidget(fs_warn_label);
     fs_warn_layout->addStretch();
 
     KIntSpinBox *const pv_warn_spin = new KIntSpinBox;
@@ -659,7 +685,9 @@ QGroupBox *KvpmConfigDialog::allGroup()
     pv_warn_spin->setPrefix("% ");
     pv_warn_spin->setSpecialValueText(i18n("Never"));
     pv_warn_layout->addWidget(pv_warn_spin);
-    pv_warn_layout->addWidget(new QLabel(i18n("on a physical volume")));
+    QLabel *const pv_warn_label = new QLabel(i18n("on a physical volume"));
+    pv_warn_label->setBuddy(pv_warn_spin);
+    pv_warn_layout->addWidget(pv_warn_label);
     pv_warn_layout->addStretch();
 
     percent_layout->addLayout(fs_warn_layout);
