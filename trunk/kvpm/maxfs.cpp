@@ -15,17 +15,19 @@
 
 #include "maxfs.h"
 
-#include <KMessageBox>
-#include <KLocale>
-
-#include <QtGui>
-
 #include "fsextend.h"
 #include "logvol.h"
 #include "processprogress.h"
 #include "pvextend.h"
 #include "storagedevice.h"
 #include "storagepartition.h"
+
+#include <KMessageBox>
+#include <KLocale>
+
+#include <QString>
+#include <QDebug>
+
 
 bool max_fs(LogVol *logicalVolume)
 {

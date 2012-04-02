@@ -15,11 +15,6 @@
 
 #include "deviceactionsmenu.h"
 
-#include <KLocale>
-#include <KIcon>
-
-#include <QtGui>
-
 #include "fsck.h"
 #include "devicesizechartseg.h"
 #include "mkfs.h"
@@ -40,6 +35,12 @@
 #include "vgreduceone.h"
 #include "vgcreate.h"
 #include "vgextend.h"
+
+#include <KLocale>
+#include <KIcon>
+#include <KAction>
+
+#include <QTreeWidgetItem>
 
 
 

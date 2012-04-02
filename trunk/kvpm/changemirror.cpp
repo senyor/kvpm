@@ -14,20 +14,29 @@
 
 #include "changemirror.h"
 
-#include <KComboBox>
-#include <KLocale>
-#include <KIcon>
-#include <KIntSpinBox>
-#include <KTabWidget>
-
-#include <QtGui>
-
 #include "logvol.h"
 #include "misc.h"
 #include "physvol.h"
 #include "pvgroupbox.h"
 #include "processprogress.h"
 #include "volgroup.h"
+
+#include <math.h>
+
+#include <KApplication>
+#include <KComboBox>
+#include <KLocale>
+#include <KIcon>
+#include <KIntSpinBox>
+#include <KTabWidget>
+
+#include <QEventLoop>
+#include <QGroupBox>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QRadioButton>
+#include <QStackedWidget>
+#include <QVBoxLayout>
 
 
 

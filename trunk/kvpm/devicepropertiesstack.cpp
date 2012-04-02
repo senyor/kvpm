@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -15,18 +15,19 @@
 
 #include "devicepropertiesstack.h"
 
-#include <QtGui>
-
 #include "deviceproperties.h"
 #include "devicetree.h"
 #include "storagedevice.h"
 #include "storagepartition.h"
 
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QTreeWidgetItem>
+
 
 /* This stack widget simply displays some information about the
    drive or device selected in the tree view. If nothing is selected
    an empty widget is used.  */
-
 
 DevicePropertiesStack::DevicePropertiesStack(QWidget *parent) : QStackedWidget(parent)
 {

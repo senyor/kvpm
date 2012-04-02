@@ -14,6 +14,17 @@
 
 #include "lvcreate.h"
 
+#include "fsextend.h"
+#include "logvol.h"
+#include "mountentry.h"
+#include "physvol.h"
+#include "pvgroupbox.h"
+#include "processprogress.h"
+#include "sizeselectorbox.h"
+#include "volgroup.h"
+
+#include <math.h>
+
 #include <KComboBox>
 #include <KConfigSkeleton>
 #include <KGlobal>
@@ -23,16 +34,10 @@
 #include <KMessageBox>
 #include <KTabWidget>
 
-#include <QtGui>
-
-#include "fsextend.h"
-#include "logvol.h"
-#include "mountentry.h"
-#include "physvol.h"
-#include "pvgroupbox.h"
-#include "processprogress.h"
-#include "sizeselectorbox.h"
-#include "volgroup.h"
+#include <QCheckBox>
+#include <QGroupBox>
+#include <QLabel>
+#include <QRadioButton>
 
 
 

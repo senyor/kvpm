@@ -17,20 +17,19 @@
 
 #include <parted/parted.h>
 
-#include <QFrame>
 #include <KDialog>
-#include <KLineEdit>
-#include <KComboBox>
-#include <QGroupBox>
-#include <QCheckBox>
-#include <QLabel>
 
+class QFrame;
+class KLineEdit;
+class KComboBox;
+class QGroupBox;
+class QCheckBox;
+class QLabel;
 
 class QDoubleValidator;
 class PartitionGraphic;
 class DualSelectorBox;
 class StoragePartition;
-
 
 
 class PartitionAddDialog : public KDialog

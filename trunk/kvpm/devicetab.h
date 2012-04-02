@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2009, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -18,9 +18,10 @@
 
 #include <QList>
 #include <QWidget>
-#include <QSplitter>
-#include <QScrollArea>
-#include <QVBoxLayout>
+
+class QSplitter;
+class QScrollArea;
+class QVBoxLayout;
 
 class DeviceTree;
 class DevicePropertiesStack;

@@ -12,6 +12,10 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
+#include "executablefinder.h"
+#include "masterlist.h"
+#include "topwindow.h"
+
 #include <KApplication>
 #include <KAboutData>
 #include <KCmdLineArgs>
@@ -19,12 +23,6 @@
 #include <KMessageBox>
 #include <KSplashScreen>
 #include <KStandardDirs>
-
-#include <QtGui>
-
-#include "executablefinder.h"
-#include "masterlist.h"
-#include "topwindow.h"
 
 class VolGroup;
 class PhysVol;

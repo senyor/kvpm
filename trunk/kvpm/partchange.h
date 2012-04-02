@@ -19,9 +19,8 @@
 
 #include <KDialog>
 
-#include <QGroupBox>
-#include <QLabel>
-
+class QGroupBox;
+class QLabel;
 
 class PartitionGraphic;
 class DualSelectorBox;

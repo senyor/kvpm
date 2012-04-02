@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -14,13 +14,22 @@
 
 #include "lvpropertiesstack.h"
 
-#include <KLocale>
-
-#include <QtGui>
-
 #include "lvproperties.h"
 #include "logvol.h"
 #include "volgroup.h"
+
+#include <KLocale>
+
+#include <QFrame>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QList>
+#include <QScrollArea>
+#include <QScrollBar>
+#include <QStackedWidget>
+#include <QTreeWidget>
+#include <QVBoxLayout>
+
 
 /* Each logical volume gets a stack of widgets. The widgets display
    information about the volume highlighted on the tree widget. One

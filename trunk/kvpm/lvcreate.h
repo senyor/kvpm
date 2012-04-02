@@ -17,20 +17,20 @@
 
 #include <KDialog>
 
-#include <QGroupBox>
-#include <QCheckBox>
 #include <QList>
 #include <QStringList>
-#include <QRadioButton>
-#include <QLabel>
 
 class KIntSpinBox;
 class KLineEdit;
 class KTabWidget;
 class KComboBox;
 
-class QRegExpValidator;
+class QCheckBox;
 class QDoubleValidator;
+class QGroupBox;
+class QLabel;
+class QRadioButton;
+class QRegExpValidator;
 
 class LogVol;
 class VolGroup;

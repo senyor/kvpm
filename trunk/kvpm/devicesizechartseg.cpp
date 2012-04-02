@@ -15,13 +15,16 @@
 
 #include "devicesizechartseg.h"
 
+#include "deviceactionsmenu.h"
+#include "storagepartition.h"
+
 #include <KConfigSkeleton>
 #include <KLocale>
 
-#include <QtGui>
+#include <QStringList>
+#include <QTreeWidget>
+#include <QTreeWidgetItem>
 
-#include "deviceactionsmenu.h"
-#include "storagepartition.h"
 
 
 DeviceChartSeg::DeviceChartSeg(QTreeWidgetItem *storageItem, QWidget *parent) :

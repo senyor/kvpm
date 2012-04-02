@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -16,11 +16,13 @@
 #define LVPROPERTIESSTACK_H
 
 #include <QFrame>
-#include <QLabel>
 #include <QList>
-#include <QScrollArea>
-#include <QStackedWidget>
-#include <QTreeWidget>
+
+class QLabel;
+class QScrollArea;
+class QStackedWidget;
+class QTreeWidget;
+class QTreeWidgetItem;
 
 class VolGroup;
 

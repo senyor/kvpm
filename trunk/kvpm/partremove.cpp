@@ -12,15 +12,16 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
+#include "partremove.h"
+
+#include "storagepartition.h"
+
 #include <parted/parted.h>
 
 #include <KLocale>
 #include <KMessageBox>
 
-#include <QtGui>
-
-#include "partremove.h"
-#include "storagepartition.h"
+#include <QDebug>
 
 
 bool remove_partition(StoragePartition *const partition)
