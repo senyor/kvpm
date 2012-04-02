@@ -225,8 +225,13 @@ void TopWindow::setupMenus()
 
 void TopWindow::changeVolumeGroup()
 {
-    if (change_vg(m_vg))
-        reRun();
+    VGChangeDialog dialog(m_vg);
+
+    if (!dialog.bailout()) {
+        dialog.exec();
+        if (dialog.result() == QDialog::Accepted)
+            reRun();
+    }
 }
 
 void TopWindow::createVolumeGroup()
