@@ -15,13 +15,6 @@
 
 #include "masterlist.h"
 
-#include <parted/parted.h>
-
-#include <KLocale>
-#include <KMessageBox>
-
-#include <QtGui>
-
 #include "fsprobe.h"
 #include "logvol.h"
 #include "mountentry.h"
@@ -33,6 +26,12 @@
 #include "storagedevice.h"
 #include "topwindow.h"
 #include "volgroup.h"
+
+#include <parted/parted.h>
+
+#include <KApplication>
+#include <KLocale>
+#include <KMessageBox>
 
 
 // These are static being variables initialized here

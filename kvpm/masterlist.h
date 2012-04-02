@@ -18,9 +18,10 @@
 #include <lvm2app.h>
 
 #include <QList>
-#include <QProcess>
 #include <QStringList>
-#include <QTextEdit>
+
+class QTextEdit;
+class QProcess;
 
 class VolGroup;
 class LogVol;

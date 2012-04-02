@@ -15,29 +15,24 @@
 
 #include "vgchange.h"
 
-#include <KComboBox>
-#include <KIntSpinBox>
-#include <KLocale>
-#include <KSeparator>
-
-#include <QtGui>
-
 #include "logvol.h"
 #include "misc.h"
 #include "processprogress.h"
 #include "volgroup.h"
 
-bool change_vg(VolGroup *const volumeGroup)
-{
-    VGChangeDialog dialog(volumeGroup);
-    dialog.exec();
+#include <KComboBox>
+#include <KIntSpinBox>
+#include <KLocale>
+#include <KSeparator>
 
-    if (dialog.result() == QDialog::Accepted) {
-        ProcessProgress vgchange(dialog.arguments());
-        return true;
-    } else
-        return false;
-}
+#include <QCheckBox>
+#include <QHBoxLayout>
+#include <QGroupBox>
+#include <QLabel>
+#include <QRadioButton>
+#include <QVBoxLayout>
+
+
 
 VGChangeDialog::VGChangeDialog(VolGroup *const volumeGroup, QWidget *parent)
     : KDialog(parent),
@@ -47,20 +42,21 @@ VGChangeDialog::VGChangeDialog(VolGroup *const volumeGroup, QWidget *parent)
 
     setWindowTitle(i18n("Change Volume Group Attributes"));
 
-    QWidget *dialog_body = new QWidget(this);
+    QWidget *const dialog_body = new QWidget(this);
     setMainWidget(dialog_body);
-    QVBoxLayout *layout = new QVBoxLayout();
+    QVBoxLayout *const layout = new QVBoxLayout();
     dialog_body->setLayout(layout);
 
-    QLabel *name_label = new QLabel(i18n("Volume group: <b>%1</b>", m_vg_name));
+    QLabel *const name_label = new QLabel(i18n("<b>Change volume group: %1</b>", m_vg_name));
     name_label->setAlignment(Qt::AlignCenter);
     layout->addWidget(name_label);
+    layout->addSpacing(5);
 
-    QGroupBox *upper_box = new QGroupBox();
-    QHBoxLayout *upper_layout = new QHBoxLayout();
-    QVBoxLayout *upper_left_layout = new QVBoxLayout();
-    QGroupBox *alloc_box = new QGroupBox(i18n("Allocation policy"));
-    QVBoxLayout *alloc_layout = new QVBoxLayout();
+    QGroupBox *const upper_box = new QGroupBox();
+    QHBoxLayout *const upper_layout = new QHBoxLayout();
+    QVBoxLayout *const upper_left_layout = new QVBoxLayout();
+    QGroupBox *const alloc_box = new QGroupBox(i18n("Allocation policy"));
+    QVBoxLayout *const alloc_layout = new QVBoxLayout();
     upper_box->setLayout(upper_layout);
     alloc_box->setLayout(alloc_layout);
     upper_layout->addLayout(upper_left_layout);
@@ -297,17 +293,25 @@ VGChangeDialog::VGChangeDialog(VolGroup *const volumeGroup, QWidget *parent)
     connect(m_extent_size_combo,   SIGNAL(currentIndexChanged(int)), this, SLOT(resetOkButton()));
     connect(m_extent_suffix_combo, SIGNAL(currentIndexChanged(int)), this, SLOT(resetOkButton()));
 
+    connect(this, SIGNAL(okClicked()), this, SLOT(commitChanges()));
 
     enableButtonOk(false);
+}
 
+bool VGChangeDialog::bailout()
+{
+    return false;
+}
+
+void VGChangeDialog::commitChanges()
+{
+    ProcessProgress vgchange(arguments());
 }
 
 QStringList VGChangeDialog::arguments()
 {
     QString new_policy;
-    QStringList args;
-
-    args << "vgchange";
+    QStringList args = QStringList() << "vgchange";
 
     if (m_contiguous->isChecked())
         new_policy = "contiguous";
@@ -376,7 +380,6 @@ QStringList VGChangeDialog::arguments()
     }
 
     args << m_vg->getName();
-
     return args;
 }
 

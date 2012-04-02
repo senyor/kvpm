@@ -18,15 +18,15 @@
 #include <KDialog>
 
 #include <QStringList>
-#include <QRadioButton>
-#include <QCheckBox>
-#include <QGroupBox>
 
 class KComboBox;
 class KIntSpinBox;
 
+class QRadioButton;
+class QCheckBox;
+class QGroupBox;
+
 class VolGroup;
-bool change_vg(VolGroup *const VolumeGroup);
 
 class VGChangeDialog : public KDialog
 {
@@ -41,14 +41,17 @@ class VGChangeDialog : public KDialog
     KComboBox *m_extent_size_combo, *m_extent_suffix_combo;
     QGroupBox *m_limit_box, *m_lvlimit_box, *m_pvlimit_box, *m_available_box, *m_polling_box;
     KIntSpinBox  *m_max_lvs_spin, *m_max_pvs_spin;
+    QStringList arguments();
 
 public:
     explicit VGChangeDialog(VolGroup *const volumeGroup, QWidget *parent = 0);
-    QStringList arguments();
+    bool bailout();
 
 private slots:
     void limitExtentSize(int index);
     void resetOkButton();
+    void commitChanges();
+
 };
 
 #endif
