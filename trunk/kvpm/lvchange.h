@@ -16,14 +16,16 @@
 #define LVCHANGE_H
 
 #include <KDialog>
-#include <KTabWidget>
-#include <KLineEdit>
-#include <KComboBox>
 
 #include <QStringList>
-#include <QGroupBox>
-#include <QCheckBox>
-#include <QRadioButton>
+
+class KComboBox;
+class KLineEdit;
+class KTabWidget;
+
+class QCheckBox;
+class QGroupBox;
+class QRadioButton;
 
 class LogVol;
 

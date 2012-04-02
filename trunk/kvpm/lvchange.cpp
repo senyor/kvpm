@@ -15,13 +15,21 @@
 
 #include "lvchange.h"
 
-#include <KLocale>
-#include <KSeparator>
-
-#include <QtGui>
-
 #include "logvol.h"
 #include "processprogress.h"
+
+#include <KComboBox>
+#include <KLineEdit>
+#include <KLocale>
+#include <KSeparator>
+#include <KTabWidget>
+
+#include <QGroupBox>
+#include <QCheckBox>
+#include <QLabel>
+#include <QRadioButton>
+#include <QVBoxLayout>
+
 
 
 LVChangeDialog::LVChangeDialog(LogVol *const volume, QWidget *parent) :
@@ -128,14 +136,18 @@ QWidget *LVChangeDialog::buildGeneralTab()
     tag_group_layout->addLayout(add_tag_layout);
     tag_group_layout->addLayout(del_tag_layout);
     m_tag_group->setLayout(tag_group_layout);
-    add_tag_layout->addWidget(new QLabel(i18n("Add new tag:")));
+    QLabel *const add_tag_label = new QLabel(i18n("Add new tag:"));
+    add_tag_layout->addWidget(add_tag_label);
     m_tag_edit = new KLineEdit();
+    add_tag_label->setBuddy(m_tag_edit);
     QRegExp rx("[0-9a-zA-Z_\\.+-]*");
     QRegExpValidator *tag_validator = new QRegExpValidator(rx, m_tag_edit);
     m_tag_edit->setValidator(tag_validator);
     add_tag_layout->addWidget(m_tag_edit);
-    del_tag_layout->addWidget(new QLabel(i18n("Remove tag:")));
+    QLabel *const del_tag_label = new QLabel(i18n("Remove tag:"));
+    del_tag_layout->addWidget(del_tag_label);
     m_deltag_combo = new KComboBox();
+    del_tag_label->setBuddy(m_deltag_combo);
     m_deltag_combo->setEditable(false);
     QStringList tags = m_lv->getTags();
     for (int x = 0; x < tags.size(); x++)
@@ -231,14 +243,14 @@ QWidget *LVChangeDialog::buildMirrorTab()
 QWidget *LVChangeDialog::buildAdvancedTab()
 {
     QWidget *const tab = new QWidget();
-    QVBoxLayout *layout = new QVBoxLayout();
+    QVBoxLayout *const layout = new QVBoxLayout();
     tab->setLayout(layout);
 
     m_polling_box = new QGroupBox(i18n("Change Volume Polling"));
     m_polling_box->setCheckable(true);
     m_polling_box->setChecked(false);
     layout->addWidget(m_polling_box);
-    QVBoxLayout *poll_layout = new QVBoxLayout();
+    QVBoxLayout *const poll_layout = new QVBoxLayout();
     m_polling_box->setLayout(poll_layout);
     m_poll_button = new QRadioButton(i18n("Start polling"));
     m_poll_button->setChecked(true);
@@ -248,7 +260,7 @@ QWidget *LVChangeDialog::buildAdvancedTab()
 
     m_udevsync_box = new QGroupBox(i18n("Udev Synchronizing"));
     layout->addWidget(m_udevsync_box);
-    QVBoxLayout *sync_layout = new QVBoxLayout();
+    QVBoxLayout *const sync_layout = new QVBoxLayout();
     m_udevsync_box->setLayout(sync_layout);
     m_udevsync_check = new QCheckBox(i18n("Synchronize with udev"));
     m_udevsync_check->setChecked(true);
@@ -258,19 +270,25 @@ QWidget *LVChangeDialog::buildAdvancedTab()
     m_devnum_box->setCheckable(true);
     QVBoxLayout *devnum_layout = new QVBoxLayout();
     m_devnum_box->setLayout(devnum_layout);
-    QHBoxLayout *major_layout = new QHBoxLayout();
-    QHBoxLayout *minor_layout = new QHBoxLayout();
+    QHBoxLayout *const major_layout = new QHBoxLayout();
+    QHBoxLayout *const minor_layout = new QHBoxLayout();
     m_persistent_check = new QCheckBox(i18n("Use persistent device numbers"));
     devnum_layout->addWidget(m_persistent_check);
     devnum_layout->addLayout(major_layout);
     devnum_layout->addLayout(minor_layout);
 
     m_major_edit = new KLineEdit(QString("%1").arg(m_lv->getMajorDevice()));
-    major_layout->addWidget(new QLabel(i18n("Major number: ")));
+    QLabel *const major_label = new QLabel(i18n("Major number: "));
+    major_label->setBuddy(m_major_edit);
+    major_layout->addWidget(major_label);
     major_layout->addWidget(m_major_edit);
+
     m_minor_edit = new KLineEdit(QString("%1").arg(m_lv->getMinorDevice()));
-    minor_layout->addWidget(new QLabel(i18n("Minor number: ")));
+    QLabel *const minor_label = new QLabel(i18n("Minor number: "));
+    minor_label->setBuddy(m_minor_edit);
+    minor_layout->addWidget(minor_label);
     minor_layout->addWidget(m_minor_edit);
+
     layout->addWidget(m_devnum_box);
     m_persistent_check->setChecked(m_lv->isPersistent());
     m_devnum_box->setChecked(false);
