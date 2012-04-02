@@ -15,18 +15,6 @@
 
 #include "partchange.h"
 
-#include <KComboBox>
-#include <KLineEdit>
-#include <KApplication>
-#include <KButtonGroup>
-#include <KConfigSkeleton>
-#include <KGlobal>
-#include <KLocale>
-#include <KMessageBox>
-#include <KPushButton>
-
-#include <QtGui>
-
 #include "dualselectorbox.h"
 #include "fsextend.h"
 #include "fsreduce.h"
@@ -41,6 +29,21 @@
 #include "storagepartition.h"
 #include "topwindow.h"
 #include "volgroup.h"
+
+#include <math.h>
+
+#include <KComboBox>
+#include <KLineEdit>
+#include <KApplication>
+#include <KButtonGroup>
+#include <KConfigSkeleton>
+#include <KGlobal>
+#include <KLocale>
+#include <KMessageBox>
+#include <KPushButton>
+
+#include <QLabel>
+#include <QGroupBox>
 
 
 

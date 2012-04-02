@@ -12,26 +12,34 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
-#include <KConfigSkeleton>
-#include <KGlobal>
-#include <KLocale>
-#include <KMessageBox>
 
-#include <QtGui>
+#include "partadd.h"
 
 #include "dualselectorbox.h"
-#include "partadd.h"
 #include "partitiongraphic.h"
 #include "pedexceptions.h"
 #include "sizeselectorbox.h"
 #include "storagepartition.h"
 
+#include <KComboBox>
+#include <KConfigSkeleton>
+#include <KGlobal>
+#include <KLocale>
+#include <KLineEdit>
+#include <KMessageBox>
+
+#include <QCheckBox>
+#include <QDebug>
+#include <QFrame>
+#include <QGroupBox>
+#include <QLabel>
+#include <QVBoxLayout>
+
+
 /*
    The "partition" we get here is usually a ped pointer to a the freespace
    between partitions. It can also be an *empty* extended partition however.
 */
-
-
 
 PartitionAddDialog::PartitionAddDialog(StoragePartition *const partition, QWidget *parent)
     : KDialog(parent),

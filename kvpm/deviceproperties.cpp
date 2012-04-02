@@ -15,19 +15,20 @@
 
 #include "deviceproperties.h"
 
+#include "misc.h"
+#include "mountentry.h"
+#include "physvol.h"
+#include "storagedevice.h"
+#include "storagepartition.h"
 
 #include <KConfigSkeleton>
 #include <KGlobal>
 #include <KLocale>
 #include <KSeparator>
 
-#include <QtGui>
+#include <QLabel>
+#include <QVBoxLayout>
 
-#include "misc.h"
-#include "mountentry.h"
-#include "physvol.h"
-#include "storagedevice.h"
-#include "storagepartition.h"
 
 
 DeviceProperties::DeviceProperties(StorageDevice *const device, QWidget *parent)

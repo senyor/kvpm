@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -16,10 +16,10 @@
 #ifndef DEVICEPROPERTIESSTACK_H
 #define DEVICEPROPERTIESSTACK_H
 
-#include <QList>
-#include <QTreeWidgetItem>
 #include <QStackedWidget>
 #include <QStringList>
+
+class QTreeWidgetItem;
 
 class StorageDevice;
 
@@ -29,7 +29,6 @@ class DevicePropertiesStack : public QStackedWidget
     Q_OBJECT
 
     QStringList m_device_path_list;  // full path of each device on the stack, in the same order
-
     QWidget *getDefaultWidget();
 
 public:

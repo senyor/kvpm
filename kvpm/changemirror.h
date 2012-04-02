@@ -17,21 +17,23 @@
 
 #include <KDialog>
 
-#include <QGroupBox>
-#include <QHBoxLayout>
-#include <QLabel>
-#include <QRadioButton>
-#include <QStackedWidget>
 #include <QStringList>
-#include <QVBoxLayout>
 
 class KComboBox;
+class KIcon;
 class KIntSpinBox;
 class KTabWidget;
+
+class QGroupBox;
+class QHBoxLayout;
+class QLabel;
+class QRadioButton;
+class QStackedWidget;
+class QVBoxLayout;
+
 class LogVol;
 class PvGroupBox;
 class VolGroup;
-class KIcon;
 
 
 class ChangeMirrorDialog : public KDialog

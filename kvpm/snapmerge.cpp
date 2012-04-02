@@ -14,13 +14,15 @@
 
 #include "snapmerge.h"
 
+#include "logvol.h"
+#include "processprogress.h"
+
 #include <KMessageBox>
 #include <KLocale>
 
-#include <QtGui>
+#include <QDebug>
+#include <QStringList>
 
-#include "logvol.h"
-#include "processprogress.h"
 
 
 bool merge_snap(LogVol *const snapshot)

@@ -15,21 +15,22 @@
 
 #include "unmount.h"
 
-#include <sys/mount.h>
-#include <errno.h>
-#include <string.h>
-
-#include <KMessageBox>
-#include <KLocale>
-
-#include <QtGui>
-
 #include "logvol.h"
 #include "mountentry.h"
 #include "mounttables.h"
 #include "misc.h"
 #include "storagepartition.h"
 #include "volgroup.h"
+
+#include <sys/mount.h>
+#include <errno.h>
+#include <string.h>
+
+#include <KLocale>
+#include <KMessageBox>
+
+#include <QLabel>
+#include <QVBoxLayout>
 
 
 

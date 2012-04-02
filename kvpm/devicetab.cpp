@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2009, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -15,15 +15,19 @@
 
 #include "devicetab.h"
 
-#include <QtGui>
-#include <KLocale>
-#include <KConfigSkeleton>
-
 #include "devicetree.h"
 #include "devicesizechart.h"
 #include "deviceproperties.h"
 #include "devicepropertiesstack.h"
 #include "storagedevice.h"
+
+#include <KLocale>
+#include <KConfigSkeleton>
+
+#include <QSplitter>
+#include <QScrollArea>
+#include <QVBoxLayout>
+
 
 
 DeviceTab::DeviceTab(QWidget *parent) : QWidget(parent)

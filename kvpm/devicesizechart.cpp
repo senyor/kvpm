@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2009, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -14,14 +14,17 @@
 
 #include "devicesizechart.h"
 
-#include <KSeparator>
-
-#include <QtGui>
-
 #include "devicesizechartseg.h"
 #include "devicetree.h"
 #include "storagedevice.h"
 #include "storagepartition.h"
+
+#include <KSeparator>
+
+#include <QHBoxLayout>
+#include <QResizeEvent>
+#include <QTreeWidget>
+#include <QTreeWidgetItem>
 
 
 DeviceSizeChart::DeviceSizeChart(QWidget *parent) : QFrame(parent)

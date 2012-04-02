@@ -14,9 +14,9 @@
 
 #include "physvol.h"
 
-#include <QtGui>
-
 #include "volgroup.h"
+
+
 
 PhysVol::PhysVol(pv_t pv, VolGroup *vg)
 {

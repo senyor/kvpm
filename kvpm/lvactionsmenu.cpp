@@ -15,11 +15,6 @@
 
 #include "lvactionsmenu.h"
 
-#include <KLocale>
-#include <KActionCollection>
-
-#include <QtGui>
-
 #include "fsck.h"
 #include "logvol.h"
 #include "vgtree.h"
@@ -42,6 +37,12 @@
 #include "snapmerge.h"
 #include "unmount.h"
 #include "volgroup.h"
+
+#include <KAction>
+#include <KActionCollection>
+#include <KLocale>
+
+#include <QPoint>
 
 
 LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volumeGroup, QWidget *parent) :
