@@ -21,6 +21,14 @@
 
 class VolGroup;
 
+
+struct LVSegmentExtent {
+    QString lv_name;
+    long long first_extent;
+    long long last_extent;
+};
+
+
 class PhysVol
 {
     QString m_device;      // eg: /dev/hde4
@@ -57,6 +65,7 @@ public:
     long getMdaCount();
     long getMdaUsed();              // Meta Data areas in use
     long long getMdaSize();         // Meta Data Area size in bytes
+    QList<LVSegmentExtent *> sortByExtent();
 };
 
 #endif

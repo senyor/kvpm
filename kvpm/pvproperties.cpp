@@ -27,17 +27,7 @@
 #include "logvol.h"
 #include "volgroup.h"
 
-struct LVSegmentExtent {
-    QString lv_name;
-    long long first_extent;
-    long long last_extent;
-};
 
-
-bool isLessThan(const LVSegmentExtent * lv1 , const LVSegmentExtent * lv2)
-{
-    return lv1->first_extent < lv2->first_extent;
-}
 
 
 PVProperties::PVProperties(PhysVol *const volume, QWidget *parent) :
@@ -67,41 +57,6 @@ PVProperties::PVProperties(PhysVol *const volume, QWidget *parent) :
 
     top_layout->addStretch();
     setLayout(top_layout);
-}
-
-QList<LVSegmentExtent *> PVProperties::sortByExtent()
-{
-    const QString pv_name = m_pv->getName();
-    QList<long long> first_extent_list;
-    QStringList pv_name_list;
-    QList<LVSegmentExtent *> lv_extents;
-    LVSegmentExtent *temp;
-    LogVol *lv;
-
-    QListIterator<LogVol *> lv_itr(m_pv->getVg()->getLogicalVolumesFlat());
-
-    while (lv_itr.hasNext()) {
-        lv = lv_itr.next();
-        if (!lv->isSnapContainer()) {
-            for (int segment = lv->getSegmentCount() - 1; segment >= 0; segment--) {
-                pv_name_list = lv->getPvNames(segment);
-                first_extent_list = lv->getSegmentStartingExtent(segment);
-                for (int y = pv_name_list.size() - 1; y >= 0; y--) {
-                    if (pv_name_list[y] == pv_name) {
-                        temp = new LVSegmentExtent;
-                        temp->lv_name = lv->getName();
-                        temp->first_extent = first_extent_list[y];
-                        temp->last_extent = temp->first_extent - 1 + (lv->getSegmentExtents(segment) / (lv->getSegmentStripes(segment)));
-                        lv_extents.append(temp);
-                    }
-                }
-            }
-        }
-    }
-
-    qSort(lv_extents.begin() , lv_extents.end(), isLessThan);
-
-    return lv_extents;
 }
 
 QFrame *PVProperties::buildMdaBox()
@@ -162,7 +117,7 @@ QFrame *PVProperties::buildLvBox()
     label->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
     layout->addWidget(label, 1, 3);
 
-    const QList<LVSegmentExtent *> lv_extents = sortByExtent();
+    const QList<LVSegmentExtent *> lv_extents = m_pv->sortByExtent();
 
     int row = 2;
 

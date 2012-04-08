@@ -14,8 +14,21 @@
 
 #include "physvol.h"
 
+#include "logvol.h"
 #include "volgroup.h"
 
+#include <QByteArray>
+#include <QtAlgorithms>
+#include <QListIterator>
+
+
+
+namespace {
+    bool isLessThan(const LVSegmentExtent * lv1 , const LVSegmentExtent * lv2)
+    {
+        return lv1->first_extent < lv2->first_extent;
+    }
+}
 
 
 PhysVol::PhysVol(pv_t pv, VolGroup *vg)
@@ -192,3 +205,43 @@ void PhysVol::setLastUsedExtent(const long long last)
 {
     m_last_used_extent = last;
 }
+
+
+// Returns a list of all the lv segments on the pv sorted by the
+// extent. Ordered from extent first to last extent.
+// Must not be called until after the LogVols have been scanned
+
+QList<LVSegmentExtent *> PhysVol::sortByExtent()
+{
+    QList<long long> first_extent_list;
+    QStringList pv_name_list;
+    QList<LVSegmentExtent *> lv_extents;
+    LVSegmentExtent *temp;
+    LogVol *lv;
+
+    QListIterator<LogVol *> lv_itr(getVg()->getLogicalVolumesFlat());
+
+    while (lv_itr.hasNext()) {
+        lv = lv_itr.next();
+        if (!lv->isSnapContainer()) {
+            for (int segment = lv->getSegmentCount() - 1; segment >= 0; segment--) {
+                pv_name_list = lv->getPvNames(segment);
+                first_extent_list = lv->getSegmentStartingExtent(segment);
+                for (int y = pv_name_list.size() - 1; y >= 0; y--) {
+                    if (pv_name_list[y] == getName()) {
+                        temp = new LVSegmentExtent;
+                        temp->lv_name = lv->getName();
+                        temp->first_extent = first_extent_list[y];
+                        temp->last_extent = temp->first_extent - 1 + (lv->getSegmentExtents(segment) / (lv->getSegmentStripes(segment)));
+                        lv_extents.append(temp);
+                    }
+                }
+            }
+        }
+    }
+
+    qSort(lv_extents.begin() , lv_extents.end(), isLessThan);
+
+    return lv_extents;
+}
+
