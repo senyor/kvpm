@@ -16,6 +16,8 @@
 #include "masterlist.h"
 #include "topwindow.h"
 
+#include <unistd.h>
+
 #include <KApplication>
 #include <KAboutData>
 #include <KCmdLineArgs>
