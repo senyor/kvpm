@@ -20,7 +20,9 @@
 #include <KLocale>
 #include <KSeparator>
 
-#include <QtGui>
+#include <QLabel>
+#include <QHBoxLayout>
+#include <QVBoxLayout>
 
 #include "masterlist.h"
 #include "physvol.h"
