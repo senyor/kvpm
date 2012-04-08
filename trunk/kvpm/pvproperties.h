@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -25,7 +25,6 @@ class PVProperties : public QWidget
 {
     PhysVol *m_pv;
 
-    QList<LVSegmentExtent *> sortByExtent();
     QFrame *buildMdaBox();
     QFrame *buildLvBox();
     QFrame *buildUuidBox();
