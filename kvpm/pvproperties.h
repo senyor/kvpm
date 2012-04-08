@@ -30,7 +30,7 @@ class PVProperties : public QWidget
     QFrame *buildUuidBox();
 
 public:
-    explicit PVProperties(PhysVol *const volume, QWidget *parent = 0);
+    explicit PVProperties(PhysVol *const volume, QWidget *parent = NULL);
 
 };
 
