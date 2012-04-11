@@ -19,7 +19,7 @@
 
 class KConfigSkeleton;
 class KColorButton;
-class KEditListWidget;
+class KEditListBox;
 class KPageWidgetItem;
 class KTabWidget;
 
@@ -36,7 +36,7 @@ class KvpmConfigDialog: public KConfigDialog
     Q_OBJECT
 
     QTableWidget     *m_executables_table;
-    KEditListWidget  *m_edit_list;
+    KEditListBox     *m_edit_list;
     KConfigSkeleton  *m_skeleton;
     ExecutableFinder *m_executable_finder;
 
