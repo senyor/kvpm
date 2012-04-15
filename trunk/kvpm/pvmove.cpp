@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -29,19 +29,23 @@
 #include <KMessageBox>
 #include <KPushButton>
 
+#include <QCheckBox>
+#include <QDebug>
+#include <QGroupBox>
+#include <QGridLayout>
+#include <QHBoxLayout>
+#include <QLabel>
 #include <QString>
 #include <QStringList>
-#include <QCheckBox>
 #include <QRadioButton>
-#include <QGroupBox>
-#include <QLabel>
+#include <QVBoxLayout>
 
 
 struct NameAndRange {
     QString   name;        // Physical volume name
     QString   name_range;  // name + range of extents  ie: /dev/sda1:10-100 and just name if no range specified
-    long long start;       // Starting extent
-    long long end;         // Last extent
+    uint64_t  start;       // Starting extent
+    uint64_t  end;         // Last extent
 };
 
 
@@ -114,6 +118,11 @@ PVMoveDialog::PVMoveDialog(PhysVol *const physicalVolume, QWidget *parent) : KDi
     }
 
     removeFullTargets();
+
+    if (!hasMovableExtents()){
+        m_bailout = true;
+        KMessageBox::error(NULL, i18n("None of the extents on this volume can be moved"));
+    }
 
     if (!m_bailout)
         buildDialog();
@@ -210,30 +219,32 @@ void PVMoveDialog::buildDialog()
     NoMungeRadioButton *radio_button;
 
     setWindowTitle(i18n("Move Physical Extents"));
-    QWidget *dialog_body = new QWidget(this);
+    QWidget *const dialog_body = new QWidget(this);
     setMainWidget(dialog_body);
-    QVBoxLayout *layout = new QVBoxLayout;
+    QVBoxLayout *const layout = new QVBoxLayout;
 
     label = new QLabel(i18n("<b>Move physical extents</b>"));
     label->setAlignment(Qt::AlignCenter);
     layout->addWidget(label);
-    layout->addSpacing(5);
     dialog_body->setLayout(layout);
 
     if (m_move_lv) {
-        label = new QLabel(i18n("<b>Move only physical extents on:</b>"));
+        label->setText(i18n("<b>Move only physical extents on:</b>"));
         label->setAlignment(Qt::AlignCenter);
         layout->addWidget(label);
         label = new QLabel("<b>" + m_lv->getFullName() + "</b>");
         label->setAlignment(Qt::AlignCenter);
         layout->addWidget(label);
     }
+    layout->addSpacing(5);
 
-    QGroupBox *radio_group = new QGroupBox(i18n("Source Physical Volumes"));
-    QGridLayout *radio_layout = new QGridLayout();
-    radio_group->setLayout(radio_layout);
-    layout->addWidget(radio_group);
-    QHBoxLayout *lower_layout = new QHBoxLayout;
+    QGroupBox *const source_group = new QGroupBox(i18n("Source Physical Volumes"));
+    QVBoxLayout *const source_layout = new QVBoxLayout;
+    QGridLayout *const radio_layout = new QGridLayout();
+    source_layout->addLayout(radio_layout);
+    source_group->setLayout(source_layout);
+    layout->addWidget(source_group);
+    QHBoxLayout *const lower_layout = new QHBoxLayout;
     layout->addLayout(lower_layout);
 
     m_pv_checkbox = new PvGroupBox(m_target_pvs);
@@ -274,6 +285,9 @@ void PVMoveDialog::buildDialog()
                 radio_button->setChecked(true);
         }
     } else {
+
+        source_group->setTitle(i18n("Source Physical Volume"));
+
         if (m_move_segment) {
             m_pv_used_space = (1 + m_sources[0]->end - m_sources[0]->start) * m_vg->getExtentSize();
             radio_layout->addWidget(new QLabel(QString("%1  %2").arg(m_sources[0]->name_range).arg(locale->formatByteSize(m_pv_used_space))));
@@ -283,11 +297,12 @@ void PVMoveDialog::buildDialog()
         } else {
             m_pv_used_space = m_vg->getPvByName(m_sources[0]->name)->getSize() - m_vg->getPvByName(m_sources[0]->name)->getRemaining();
             radio_layout->addWidget(new QLabel(QString("%1  %2").arg(m_sources[0]->name).arg(locale->formatByteSize(m_pv_used_space))));
+            source_layout->addWidget(extentWidget());
         }
     }
 
-    QGroupBox *alloc_box = new QGroupBox(i18n("Allocation Policy"));
-    QVBoxLayout *alloc_box_layout = new QVBoxLayout;
+    QGroupBox *const alloc_box = new QGroupBox(i18n("Allocation Policy"));
+    QVBoxLayout *const alloc_box_layout = new QVBoxLayout;
     m_normal_button     = new QRadioButton(i18nc("The usual way", "Normal"));
     m_contiguous_button = new QRadioButton(i18n("Contiguous"));
     m_anywhere_button   = new QRadioButton(i18n("Anywhere"));
@@ -305,6 +320,8 @@ void PVMoveDialog::buildDialog()
 
     connect(m_pv_checkbox, SIGNAL(stateChanged()),
             this, SLOT(resetOkButton()));
+
+    disableSource();
 
     resetOkButton();
 }
@@ -352,10 +369,8 @@ void PVMoveDialog::disableSource()  // don't allow source and target to be the s
 
 QStringList PVMoveDialog::arguments()
 {
-    QStringList args;
+    QStringList args = QStringList() << "pvmove" << "--background";
     QString source;
-
-    args << "pvmove" << "--background";
 
     if (m_move_lv) {
         args << "--name";
@@ -395,7 +410,7 @@ void PVMoveDialog::setupSegmentMove(int segment)
     const int stripes = m_lv->getSegmentStripes(segment);                     // source pv stripe count
     const long long extents = m_lv->getSegmentExtents(segment);               // extent count
     const QList<long long> starts = m_lv->getSegmentStartingExtent(segment);  // lv's first extent on pv
-    NameAndRange *nar;
+    NameAndRange *nar = NULL;
 
     for (int x = 0; x < names.size(); x++) {
         nar = new NameAndRange;
@@ -410,7 +425,7 @@ void PVMoveDialog::setupSegmentMove(int segment)
 void PVMoveDialog::setupFullMove()
 {
     const QStringList names = m_lv->getPvNamesAllFlat();
-    NameAndRange *nar;
+    NameAndRange *nar = NULL;
 
     for (int x = names.size() - 1; x >= 0; x--) {
         nar = new NameAndRange();
@@ -432,3 +447,88 @@ void PVMoveDialog::commitMove()
     return;
 }
 
+QWidget* PVMoveDialog::extentWidget()
+{
+    bool use_si_units;
+    KConfigSkeleton skeleton;
+    skeleton.setCurrentGroup("General");
+    skeleton.addItemBool("use_si_units", use_si_units, false);
+    QLabel *label = NULL;
+
+    KLocale *const locale = KGlobal::locale();
+    if (use_si_units)
+        locale->setBinaryUnitDialect(KLocale::MetricBinaryDialect);
+    else
+        locale->setBinaryUnitDialect(KLocale::IECBinaryDialect);
+
+    QWidget *const widget = new QWidget();
+    QGridLayout *const layout = new QGridLayout();
+    widget->setLayout(layout);
+
+    label = new QLabel(i18n("Logical Volumes"));
+    label->setAlignment(Qt::AlignCenter);
+    layout->addWidget(label, 0, 0);
+    label = new QLabel(i18n("Space Used"));
+    label->setAlignment(Qt::AlignCenter);
+    layout->addWidget(label, 0, 1);
+
+    QList<LVSegmentExtent *> segs;
+    segs = m_vg->getPvByName(m_sources[0]->name)->sortByExtent();
+    QStringList lv_names = getLvNames();
+
+    for (int x = 0; x < lv_names.size(); x++) {
+        LogVol *const lv = m_vg->getLvByName(lv_names[x]); 
+
+        if (lv != NULL){
+            label = new QLabel(lv_names[x]);
+            layout->addWidget(label, x + 1, 0);
+
+            label = new QLabel(QString("%1").arg(locale->formatByteSize(lv->getSpaceUsedOnPv(m_sources[0]->name))));
+            label->setAlignment(Qt::AlignRight);
+            layout->addWidget(label, x + 1, 1); 
+
+            if (lv->isMirror() || lv->isMirrorLeg() || lv->isMirrorLog() || lv->isSnap() || lv->isOrigin()){
+                label = new QLabel(i18n("<Not movable>"));
+                layout->addWidget(label, x + 1, 2);
+            }
+        }
+    }
+
+    return widget;
+}
+
+bool PVMoveDialog::hasMovableExtents()
+{
+    bool movable = false;
+    QStringList lv_names = getLvNames();
+
+    for (int x = 0; x < lv_names.size(); x++) {
+        LogVol *const lv = m_vg->getLvByName(lv_names[x]); 
+
+        if (lv != NULL){
+            if (!lv->isMirror() && !lv->isMirrorLeg() && !lv->isMirrorLog() && !lv->isSnap() && !lv->isOrigin()){
+                movable = true;
+            }
+        }
+    }
+
+    return movable;
+}
+
+// The names of each lv on the source pv when moving a whole pv
+QStringList PVMoveDialog::getLvNames() 
+{
+    QList<LVSegmentExtent *> segs;
+    segs = m_vg->getPvByName(m_sources[0]->name)->sortByExtent();
+    QStringList lv_names;
+
+    for (int x = 0; x < segs.size(); x++) {
+        lv_names.append(segs[x]->lv_name);
+        delete segs[x];
+    }
+
+    lv_names.removeDuplicates();
+    lv_names.sort();
+
+    return lv_names;
+}
