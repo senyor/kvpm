@@ -61,7 +61,10 @@ class PVMoveDialog : public KDialog
     void removeFullTargets();
     void setupSegmentMove(int segment);
     void setupFullMove();
-    QStringList arguments();
+    bool hasMovableExtents();
+    QStringList arguments(); 
+    QStringList getLvNames(); 
+    QWidget* extentWidget();
 
 public:
     explicit PVMoveDialog(PhysVol *const physicalVolume, QWidget *parent = 0);
@@ -70,9 +73,9 @@ public:
     bool bailout();
 
 private slots:
-    void resetOkButton();
-    void disableSource();
     void commitMove();
+    void disableSource();
+    void resetOkButton();
 
 };
 
