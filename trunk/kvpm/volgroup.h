@@ -29,7 +29,7 @@ class VolGroup
 {
     MountTables *m_tables;
 
-    long m_extent_size;
+    uint64_t m_extent_size;
     int m_lv_max;          // maximum number of logical volumes, unlimited == 0
     int m_pv_max;
     long long m_mda_count;
@@ -72,7 +72,7 @@ public:
     long long getFreeExtents();
     long long getAllocatableExtents();
     long long getAllocatableSpace();
-    long getExtentSize();
+    uint64_t getExtentSize();
     long long getSize();
     long long getFreeSpace();
     long long getUsedSpace();
