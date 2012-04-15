@@ -241,7 +241,7 @@ PhysVol* VolGroup::getPvByName(QString name)
     return NULL;
 }
 
-long VolGroup::getExtentSize()
+uint64_t VolGroup::getExtentSize()
 {
     return m_extent_size;
 }

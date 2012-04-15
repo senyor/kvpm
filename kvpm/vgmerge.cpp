@@ -14,17 +14,21 @@
 
 #include "vgmerge.h"
 
-#include <KComboBox>
-#include <KLocale>
-#include <KMessageBox>
-
-#include <QtGui>
-
 #include "logvol.h"
 #include "masterlist.h"
 #include "processprogress.h"
 #include "volgroup.h"
 
+#include <KComboBox>
+#include <KLocale>
+#include <KMessageBox>
+
+#include <QCheckBox>
+#include <QLabel>
+#include <QGroupBox>
+#include <QHBoxLayout>
+#include <QStackedWidget>
+#include <QVBoxLayout>
 
 
 VGMergeDialog::VGMergeDialog(VolGroup *const volumeGroup, QWidget *parent)

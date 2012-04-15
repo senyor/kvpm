@@ -13,19 +13,19 @@
  */
 
 
-#include <KConfigSkeleton>
-#include <KGlobal>
-#include <KLocale>
-#include <KPushButton>
-
-#include <QtGui>
-
 #include "pvgroupbox.h"
+
 #include "physvol.h"
 #include "misc.h"
 #include "storagedevice.h"
 #include "storagepartition.h"
 #include "volgroup.h"
+
+#include <KConfigSkeleton>
+#include <KGlobal>
+#include <KLocale>
+#include <KPushButton>
+
 
 
 PvGroupBox::PvGroupBox(QList<PhysVol *> volumes, QWidget *parent)
@@ -87,7 +87,7 @@ PvGroupBox::PvGroupBox(QList<PhysVol *> volumes, QWidget *parent)
 }
 
 PvGroupBox::PvGroupBox(QList <StorageDevice *> devices, QList<StoragePartition *> partitions,
-                       long long extentSize, QWidget *parent)
+                       uint64_t extentSize, QWidget *parent)
     : QGroupBox(parent),
       m_devices(devices),
       m_partitions(partitions),
@@ -312,7 +312,7 @@ void PvGroupBox::calculateSpace()
     return;
 }
 
-void PvGroupBox::setExtentSize(long long extentSize)
+void PvGroupBox::setExtentSize(uint64_t extentSize)
 {
     m_extent_size = extentSize;
 

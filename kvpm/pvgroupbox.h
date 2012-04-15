@@ -15,6 +15,8 @@
 #ifndef PVGROUPBOX_H
 #define PVGROUPBOX_H
 
+#include <stdint.h>
+
 #include <QCheckBox>
 #include <QGridLayout>
 #include <QGroupBox>
@@ -41,20 +43,20 @@ class PvGroupBox: public QGroupBox
     QList<StoragePartition *> m_partitions;
     QList<NoMungeCheck *> m_pv_checks;
     QLabel *m_space_label, *m_extents_label;
-    long long m_extent_size;
+    uint64_t m_extent_size;
     QHBoxLayout *getButtons();
     void addLabelsAndButtons(QGridLayout *const layout, const int pvCount);
 
 public:
     explicit PvGroupBox(QList<PhysVol *> volumes, QWidget *parent = NULL);
     PvGroupBox(QList<StorageDevice *> devices, QList<StoragePartition *> partitions,
-               long long extentSize, QWidget *parent = NULL);
+               uint64_t extentSize, QWidget *parent = NULL);
 
     QStringList getAllNames();    // names of all pvs displayed in the box
     QStringList getNames();       // names of *selected* pvs
     long long getRemainingSpace();   // total unused space on selected pvs
     QList<long long> getRemainingSpaceList();  // ditto
-    void setExtentSize(long long extentSize);
+    void setExtentSize(uint64_t extentSize);
     void disableOrigin(PhysVol *originVolume); // disable origin to prevent move from and to same pv
 
 signals:
