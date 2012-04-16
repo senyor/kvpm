@@ -25,7 +25,7 @@ INSTALL( TARGETS kvpm DESTINATION ${SBIN_INSTALL_DIR} )
 
 
 IF (CMAKE_COMPILER_IS_GNUCXX)
-set_target_properties(kvpm PROPERTIES COMPILE_FLAGS "-std=gnu++98")
+set_target_properties(kvpm PROPERTIES COMPILE_FLAGS "-std=gnu++98 -Wno-psabi -Wno-cast-align")
 set_target_properties(kvpm PROPERTIES LINK_FLAGS "-Wl,--as-needed")
 ENDIF(CMAKE_COMPILER_IS_GNUCXX)
 

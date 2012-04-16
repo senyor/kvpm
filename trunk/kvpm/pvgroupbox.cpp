@@ -28,7 +28,7 @@
 
 
 
-PvGroupBox::PvGroupBox(QList<PhysVol *> volumes, QWidget *parent)
+PvGroupBox::PvGroupBox(QList<PhysVol *> volumes, bool const target, QWidget *parent)
     : QGroupBox(parent),
       m_pvs(volumes)
 {
@@ -36,7 +36,11 @@ PvGroupBox::PvGroupBox(QList<PhysVol *> volumes, QWidget *parent)
     skeleton.setCurrentGroup("General");
     skeleton.addItemBool("use_si_units", m_use_si_units, false);
 
-    setTitle(i18n("Available Physical Volumes"));
+    if (target)
+      setTitle(i18n("Target Physical Volumes"));
+    else
+      setTitle(i18n("Available Physical Volumes"));
+
     QGridLayout *const layout = new QGridLayout();
     setLayout(layout);
 

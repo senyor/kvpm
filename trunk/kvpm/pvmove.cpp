@@ -247,7 +247,7 @@ void PVMoveDialog::buildDialog()
     QHBoxLayout *const lower_layout = new QHBoxLayout;
     layout->addLayout(lower_layout);
 
-    m_pv_checkbox = new PvGroupBox(m_target_pvs);
+    m_pv_checkbox = new PvGroupBox(m_target_pvs, true);
     lower_layout->addWidget(m_pv_checkbox);
 
     const int radio_count = m_sources.size();
