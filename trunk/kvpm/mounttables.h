@@ -15,8 +15,7 @@
 #ifndef MOUNTTABLES_H
 #define MOUNTTABLES_H
 
-#include <QString>
-#include <QList>
+#include <QStringList>
 
 class LogVol;
 class StoragePartition;

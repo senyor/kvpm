@@ -18,7 +18,6 @@
 #include <parted/parted.h>
 
 #include <QObject>
-#include <QList>
 #include <QStringList>
 
 class PhysVol;

@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2009, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2009, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -22,7 +22,7 @@
 #include <KMessageBox>
 #include <KTempDir>
 
-#include <QtGui>
+#include <QDebug>
 
 #include "executablefinder.h"
 #include "fsck.h"

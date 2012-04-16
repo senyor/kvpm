@@ -16,10 +16,9 @@
 
 #include <lvm2app.h>
 
+#include <KApplication>
 #include <KMessageBox>
 #include <KLocale>
-
-#include <QtGui>
 
 #include "masterlist.h"
 #include "progressbox.h"

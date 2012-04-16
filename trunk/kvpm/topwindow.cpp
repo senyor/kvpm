@@ -16,13 +16,18 @@
 #include "topwindow.h"
 
 #include <KAboutData>
+#include <KApplication>
+#include <KAction>
+#include <KConfigSkeleton>
 #include <KHelpMenu>
 #include <KIcon>
 #include <KLocale>
+#include <KMenu>
+#include <KMenuBar>
 #include <KStandardAction>
-#include <KConfigSkeleton>
+#include <KToggleAction>
 
-#include <QtGui>
+#include <QVBoxLayout>
 
 #include "kvpmconfigdialog.h"
 #include "devicetab.h"

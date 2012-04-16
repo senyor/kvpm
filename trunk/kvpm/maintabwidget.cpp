@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -17,9 +17,15 @@
 
 #include <KTabWidget>
 
-#include <QtGui>
+#include <QDebug>
+#include <QHBoxLayout>
+#include <QIcon>
+#include <QLabel>
+#include <QVBoxLayout>
 
 #include "volumegrouptab.h"
+
+
 
 MainTabWidget::MainTabWidget(QWidget *parent) : QWidget(parent)
 {

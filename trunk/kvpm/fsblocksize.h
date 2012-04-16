@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2009 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2009, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -15,7 +15,7 @@
 #ifndef FSBLOCKSIZE_H
 #define FSBLOCKSIZE_H
 
-#include <QString>
+class QString;
 
 long get_fs_block_size(QString path);
 

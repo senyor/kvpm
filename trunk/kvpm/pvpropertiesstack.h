@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -16,15 +16,16 @@
 #define PVPROPERTIESSTACK_H
 
 #include <QFrame>
-#include <QLabel>
 #include <QList>
-#include <QStackedWidget>
-#include <QTreeWidgetItem>
-#include <QScrollArea>
 
+class QLabel;
+class QStackedWidget;
+class QTreeWidgetItem;
+class QScrollArea;
 
 class PhysVol;
 class VolGroup;
+
 
 class PVPropertiesStack : public QFrame
 {

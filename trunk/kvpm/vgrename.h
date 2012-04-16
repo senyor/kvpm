@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -16,12 +16,13 @@
 #define VGRENAME_H
 
 #include <KDialog>
-#include <KLineEdit>
-
 #include <QStringList>
-#include <QRegExpValidator>
+
+class KLineEdit;
+class QRegExpValidator;
 
 class VolGroup;
+
 
 bool rename_vg(VolGroup *volumeGroup);
 

@@ -18,7 +18,11 @@
 #include <KMessageBox>
 #include <KLocale>
 
-#include <QtGui>
+#include <QDebug>
+#include <QLabel>
+#include <QHBoxLayout>
+#include <QString>
+#include <QVBoxLayout>
 
 #include "logvol.h"
 #include "processprogress.h"

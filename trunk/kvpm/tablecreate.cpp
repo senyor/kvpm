@@ -16,14 +16,18 @@
 
 #include <parted/parted.h>
 
-#include <KMessageBox>
 #include <KLocale>
-#include <QtGui>
+#include <KMessageBox>
 
+#include <QDebug>
+#include <QGroupBox>
+#include <QLabel>
+#include <QRadioButton>
+#include <QString>
+#include <QVBoxLayout>
 
 
 //  Creates or deletes a partition table "disk label" on a device.
-
 
 bool create_table(const QString devicePath)
 {

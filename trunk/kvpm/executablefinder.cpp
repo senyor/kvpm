@@ -17,8 +17,7 @@
 #include <kde_file.h>
 #include <KConfigSkeleton>
 
-#include <QtGui>
-
+#include <QDebug>
 
 QMap<QString, QString> ExecutableFinder::m_path_map = QMap<QString, QString>(); // Static initialization
 

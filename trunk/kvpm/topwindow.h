@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2009, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -15,13 +15,15 @@
 #ifndef TOPWINDOW_H
 #define TOPWINDOW_H
 
-#include <KAction>
-#include <KMainWindow>
-#include <KMenu>
-#include <KMenuBar>
-#include <KToggleAction>
 
-#include <QVBoxLayout>
+#include <KMainWindow>
+
+class KAction;
+class KMenu;
+class KMenuBar;
+class KToggleAction;
+
+class QVBoxLayout;
 
 class DeviceTab;
 class ExecutableFinder;

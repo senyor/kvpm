@@ -20,13 +20,17 @@
 #include <string.h>
 #include <stdio.h>
 
-#include <QtGui>
-
 #include <kde_file.h>
+
+#include <QByteArray>
+#include <QFile>
+#include <QFileInfo>
+#include <QTextStream>
 
 #include "logvol.h"
 #include "mountentry.h"
 #include "storagepartition.h"
+
 
 
 namespace    // The following functions are only needed locally

@@ -14,11 +14,14 @@
 
 #include "lvreduce.h"
 
+#include <KComboBox>
 #include <KConfigSkeleton>
+#include <KDoubleValidator>
+#include <KLineEdit>
 #include <KLocale>
 #include <KMessageBox>
 
-#include <QtGui>
+#include <QVBoxLayout>
 
 #include "fsreduce.h"
 #include "logvol.h"

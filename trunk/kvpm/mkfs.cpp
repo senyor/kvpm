@@ -21,7 +21,10 @@
 #include <KMessageBox>
 #include <KTabWidget>
 
-#include <QtGui>
+#include <QDebug>
+#include <QFile>
+#include <QHBoxLayout>
+#include <QVBoxLayout>
 
 #include "logvol.h"
 #include "misc.h"

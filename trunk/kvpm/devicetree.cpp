@@ -18,7 +18,6 @@
 #include <KIcon>
 #include <KLocale>
 
-#include <QtGui>
 
 #include "deviceactionsmenu.h"
 #include "devicepropertiesstack.h"

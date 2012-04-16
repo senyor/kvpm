@@ -16,9 +16,11 @@
 #include "lvsizechartseg.h"
 
 #include <KConfigSkeleton>
-#include <KMenu>
 #include <KLocale>
-#include <QtGui>
+#include <KMenu>
+
+#include <QHBoxLayout>
+#include <QString>
 
 #include "logvol.h"
 #include "lvactionsmenu.h"

@@ -44,6 +44,7 @@
 
 #include <QLabel>
 #include <QGroupBox>
+#include <QVBoxLayout>
 
 
 

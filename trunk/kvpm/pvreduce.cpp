@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2009, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2009, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -18,14 +18,15 @@
 #include <KLocale>
 #include <KMessageBox>
 
-#include <QtGui>
+#include <QDebug>
+#include <QStringList>
 
 #include "processprogress.h"
 
 
+
 // Returns new pv size in bytes or 0 if no shrinking was done
 // Takes new_size in bytes.
-
 
 long long pv_reduce(QString path, long long new_size)
 {

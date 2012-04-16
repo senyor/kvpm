@@ -15,7 +15,6 @@
 
 #include <parted/parted.h>
 
-#include <QtGui>
 
 #include "storagedevice.h"
 #include "storagepartition.h"

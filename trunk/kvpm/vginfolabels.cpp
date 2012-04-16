@@ -19,10 +19,14 @@
 #include <KGlobal>
 #include <KLocale>
 
-#include <QtGui>
+#include <QDebug>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QVBoxLayout>
 
 #include "misc.h"
 #include "volgroup.h"
+
 
 
 VGInfoLabels::VGInfoLabels(VolGroup *const group, QWidget *parent) : QFrame(parent)

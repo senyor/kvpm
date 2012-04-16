@@ -18,10 +18,17 @@
 #include <KMessageBox>
 #include <KLocale>
 
-#include <QtGui>
+#include <QDebug>
+#include <QGroupBox>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QRadioButton>
+#include <QVBoxLayout>
 
 #include "processprogress.h"
 #include "volgroup.h"
+
+
 
 bool remove_missing_pv(VolGroup *volumeGroup)
 {

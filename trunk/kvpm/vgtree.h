@@ -18,11 +18,11 @@
 
 #include <KMenu>
 
-#include <QPoint>
-#include <QList>
 #include <QStringList>
 #include <QTreeWidget>
-#include <QTreeWidgetItem>
+
+class QPoint;
+class QTreeWidgetItem;
 
 
 class LogVol;

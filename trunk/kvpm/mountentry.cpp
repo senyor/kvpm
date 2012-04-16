@@ -18,7 +18,7 @@
 #include <mntent.h>
 #include <stdio.h>
 
-#include <QtGui>
+#include <QString>
 
 #include "logvol.h"
 #include "volgroup.h"

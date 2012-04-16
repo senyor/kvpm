@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -14,8 +14,15 @@
 
 #include "lvrename.h"
 
+#include <KLineEdit>
 #include <KLocale>
-#include <QtGui>
+
+#include <QDebug>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QRegExpValidator>
+#include <QVBoxLayout>
+
 
 #include "logvol.h"
 #include "mounttables.h"
