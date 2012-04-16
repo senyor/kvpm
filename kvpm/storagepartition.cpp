@@ -18,14 +18,14 @@
 #include <sys/types.h>
 #include <kde_file.h>
 
-#include <QtGui>
-
 #include "fsdata.h"
 #include "fsprobe.h"
 #include "misc.h"
 #include "mountentry.h"
 #include "mounttables.h"
 #include "physvol.h"
+
+
 
 StoragePartition::StoragePartition(PedPartition *const part,
                                    const int freespaceCount,

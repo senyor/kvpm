@@ -18,7 +18,8 @@
 #include <KIcon>
 #include <KLocale>
 
-#include <QtGui>
+#include <QPoint>
+#include <QTreeWidgetItem>
 
 #include "lvactionsmenu.h"
 #include "logvol.h"

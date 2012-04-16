@@ -17,7 +17,8 @@
 
 #include <blkid/blkid.h>
 
-#include <QtGui>
+#include <QDebug>
+#include <QString>
 
 
 #define BLKID_EMPTY_CACHE       "/dev/null"
@@ -55,7 +56,6 @@ QString fsprobe_getfsuuid(const QString devicePath)
         return uuid;
     }
 }
-
 
 QString fsprobe_getfslabel(const QString devicePath)
 {

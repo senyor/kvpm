@@ -17,7 +17,9 @@
 
 #include <KMessageBox>
 #include <KLocale>
-#include <QtGui>
+
+#include <QDebug>
+#include <QStringList>
 
 #include "logvol.h"
 #include "processprogress.h"

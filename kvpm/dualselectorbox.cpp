@@ -15,7 +15,7 @@
 
 #include <KLocale>
 
-#include <QtGui>
+#include <QVBoxLayout>
 
 #include "dualselectorbox.h"
 #include "sizeselectorbox.h"

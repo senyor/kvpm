@@ -18,7 +18,9 @@
 #include <KMessageBox>
 #include <KLocale>
 
-#include <QtGui>
+#include <QDebug>
+#include <QFile>
+#include <QString>
 
 #include "storagepartition.h"
 #include "logvol.h"

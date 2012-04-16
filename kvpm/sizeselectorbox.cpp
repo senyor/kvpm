@@ -19,7 +19,13 @@
 #include <KGlobal>
 #include <KLocale>
 
-#include <QtGui>
+#include <QCheckBox>
+#include <QDebug>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QSlider>
+#include <QVBoxLayout>
+
 
 
 SizeSelectorBox::SizeSelectorBox(long long unitSize, long long minSize, long long maxSize, long long initialSize,

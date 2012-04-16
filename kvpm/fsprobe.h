@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -15,7 +15,7 @@
 #ifndef FSPROBE_H
 #define FSPROBE_H
 
-#include <QString>
+class QString;
 
 QString fsprobe_getfstype2(const QString devicePath);
 QString fsprobe_getfsuuid(const QString devicePath);

@@ -18,7 +18,9 @@
 #include <string.h>
 #include <sys/statvfs.h>
 
-#include <QtGui>
+#include <QByteArray>
+#include <QDebug>
+#include <QString>
 
 #include "misc.h"
 

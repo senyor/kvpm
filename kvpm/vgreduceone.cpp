@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -17,9 +17,9 @@
 
 #include <KMessageBox>
 #include <KLocale>
-#include <QtGui>
 
 #include "processprogress.h"
+
 
 
 bool reduce_vg_one(QString volumeGroupName, QString physicalVolumeName)

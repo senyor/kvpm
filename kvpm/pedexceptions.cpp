@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -16,9 +16,11 @@
 
 #include <parted/parted.h>
 
+#include <KApplication>
 #include <KMessageBox>
 
-#include <QtGui>
+#include <QDebug>
+#include <QString>
 
 
 

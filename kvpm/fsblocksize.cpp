@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2009 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2009, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -17,7 +17,7 @@
 #include <KLocale>
 #include <KMessageBox>
 
-#include <QtGui>
+#include <QStringList>
 
 #include "processprogress.h"
 

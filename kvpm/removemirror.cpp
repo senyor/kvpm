@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2011  Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2011, 2012  Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -17,12 +17,16 @@
 
 #include <KLocale>
 
-#include <QtGui>
+#include <QDebug>
+#include <QLabel>
+#include <QVBoxLayout>
 
 #include "logvol.h"
 #include "misc.h"
 #include "processprogress.h"
 #include "volgroup.h"
+
+
 
 bool remove_mirror(LogVol *logicalVolume)
 {
@@ -106,8 +110,7 @@ QStringList RemoveMirrorDialog::arguments()
 
 void RemoveMirrorDialog::validateCheckStates(int)
 {
-
-    int check_box_count = m_mirror_leg_checks.size();
+    const int check_box_count = m_mirror_leg_checks.size();
     int checked_count = 0;
 
     for (int x = 0; x < check_box_count; x++) {
@@ -130,5 +133,4 @@ void RemoveMirrorDialog::validateCheckStates(int)
         }
 
     }
-
 }

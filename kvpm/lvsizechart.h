@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -15,13 +15,15 @@
 #ifndef LVSIZECHART_H
 #define LVSIZECHART_H
 
-#include <QHBoxLayout>
 #include <QFrame>
-#include <QResizeEvent>
-#include <QTreeWidget>
+
+class QHBoxLayout;
+class QResizeEvent;
+class QTreeWidget;
 
 class VolGroup;
 class LogVol;
+
 
 class LVSizeChart : public QFrame
 {
@@ -33,7 +35,7 @@ class LVSizeChart : public QFrame
     QHBoxLayout  *m_layout;
     QList<QWidget *> m_widgets;    // These are segments of the bar chart
     QList<double>    m_ratios;     // These are the relative size of each segment
-    // to the whole chart. The total should be about 1.
+                                   // to the whole chart. The total should be about 1.
 
 public:
     LVSizeChart(VolGroup *const group, QTreeWidget *const vgTree, QWidget *parent = 0);

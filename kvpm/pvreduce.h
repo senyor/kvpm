@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2009, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2009, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -15,7 +15,7 @@
 #ifndef PVREDUCE_H
 #define PVREDUCE_H
 
-#include <QString>
+class QString;
 
 
 long long pv_reduce(QString path, long long new_size);

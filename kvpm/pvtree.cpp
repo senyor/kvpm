@@ -20,7 +20,9 @@
 #include <KIcon>
 #include <KLocale>
 
-#include <QtGui>
+#include <QPoint>
+#include <QMenu>
+
 
 #include "logvol.h"
 #include "masterlist.h"

@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -17,9 +17,10 @@
 
 #include <KMenu>
 
-#include <QHBoxLayout>
-#include <QString>
 #include <QFrame>
+
+class QHBoxLayout;
+class QString;
 
 class VolGroup;
 class LogVol;

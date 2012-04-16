@@ -16,10 +16,10 @@
 #ifndef STORAGEDEVICE_H
 #define STORAGEDEVICE_H
 
-#include <QWidget>
-#include <QString>
-
 #include <parted/parted.h>
+
+#include <QObject>
+#include <QStringList>
 
 class MountTables;
 class PhysVol;

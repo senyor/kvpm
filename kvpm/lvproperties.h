@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -15,7 +15,6 @@
 #ifndef LVPROPERTIES_H
 #define LVPROPERTIES_H
 
-#include <QWidget>
 #include <QFrame>
 
 class LogVol;

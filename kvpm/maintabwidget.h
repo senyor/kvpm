@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -15,9 +15,11 @@
 #ifndef MAINTABWIDGET_H
 #define MAINTABWIDGET_H
 
-#include <QIcon>
+#include <QWidget>
 #include <QStringList>
-#include <KTabWidget>
+
+class QIcon;
+class KTabWidget;
 
 class VolumeGroupTab;
 class DeviceTab;

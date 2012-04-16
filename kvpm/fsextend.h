@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2009, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2009, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -15,7 +15,8 @@
 #ifndef FSEXTEND_H
 #define FSEXTEND_H
 
-#include <QString>
+
+#include <QStringList>
 
 
 bool fs_extend(const QString dev, const QString fs, const QStringList mps, const bool isLV = false);

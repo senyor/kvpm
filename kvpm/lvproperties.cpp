@@ -19,7 +19,11 @@
 #include <KLocale>
 #include <KConfigSkeleton>
 
-#include <QtGui>
+#include <QDebug>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QStringList>
+#include <QVBoxLayout>
 
 #include "logvol.h"
 #include "misc.h"

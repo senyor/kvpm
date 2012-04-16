@@ -16,14 +16,14 @@
 #define LVREDUCEDIALOG_H
 
 #include <KDialog>
-#include <KLineEdit>
-#include <KComboBox>
-#include <KDoubleValidator>
+
+class KLineEdit;
+class KComboBox;
+class KDoubleValidator;
 
 class LogVol;
 class SizeSelectorBox;
 class VolGroup;
-
 
 
 class LVReduceDialog : public KDialog

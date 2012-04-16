@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -15,7 +15,14 @@
 
 #include "pvpropertiesstack.h"
 
-#include <QtGui>
+#include <QDebug>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QScrollArea>
+#include <QScrollBar>
+#include <QStackedWidget>
+#include <QTreeWidgetItem>
+#include <QVBoxLayout>
 
 #include "logvol.h"
 #include "physvol.h"

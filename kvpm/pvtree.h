@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -16,10 +16,10 @@
 #define PVTREE_H
 
 #include <QList>
-#include <QPoint>
-#include <QMenu>
 #include <QTreeWidget>
 
+class QMenu;
+class QPoint;
 
 class VolGroup;
 class LogVol;

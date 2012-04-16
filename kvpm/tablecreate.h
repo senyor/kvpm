@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2009, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2009, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -17,8 +17,9 @@
 
 #include <KDialog>
 
-#include <QRadioButton>
-#include <QString>
+class QRadioButton;
+class QString;
+
 
 bool create_table(const QString devicePath);
 

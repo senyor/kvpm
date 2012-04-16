@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -15,7 +15,12 @@
 
 #include "progressbox.h"
 
-#include <QtGui>
+#include <QDebug>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QProgressBar>
+#include <QString>
+#include <QVBoxLayout>
 
 
 ProgressBox::ProgressBox(QWidget *parent) : QFrame(parent)
