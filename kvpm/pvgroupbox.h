@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -48,7 +48,7 @@ class PvGroupBox: public QGroupBox
     void addLabelsAndButtons(QGridLayout *const layout, const int pvCount);
 
 public:
-    explicit PvGroupBox(QList<PhysVol *> volumes, QWidget *parent = NULL);
+    explicit PvGroupBox(QList<PhysVol *> volumes, bool const target = false, QWidget *parent = NULL);
     PvGroupBox(QList<StorageDevice *> devices, QList<StoragePartition *> partitions,
                uint64_t extentSize, QWidget *parent = NULL);
 
