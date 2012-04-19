@@ -1,3 +1,13 @@
+version 0.9.1
+Improved pvmove dialog with regard to mirrors and snapshots by making the
+not movable parts clearly labeled.
+
+version 0.9.0
+Made compiling faster by removing #include <QtGui> everywhere. Added
+more calls to QLabel->setBuddy() to improve mouse-less usage. Reformattede
+code with program "astyle" to make it more consistent. Improved consistency
+of dialog appearance too.
+
 version 0.8.6
 Fixed immediate crash when group is clustered. Fixed configuration dialog
 buttons to work more as a user would expect. /etc/mtab permissions don't get
