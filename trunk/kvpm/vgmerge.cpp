@@ -24,6 +24,7 @@
 #include <KMessageBox>
 
 #include <QCheckBox>
+#include <QDebug>
 #include <QLabel>
 #include <QGroupBox>
 #include <QHBoxLayout>
@@ -130,11 +131,13 @@ bool  VGMergeDialog::bailout()
 
 void VGMergeDialog::compareExtentSize()
 {
-    if (m_extent_size[ m_target_combo->currentIndex() ] == m_vg->getExtentSize()) {
-        m_error_stack->setCurrentIndex(0);
-        enableButtonOk(true);
-    } else {
-        m_error_stack->setCurrentIndex(1);
-        enableButtonOk(false);
+    if (m_extent_size.size() > 0){
+        if (m_extent_size[ m_target_combo->currentIndex() ] == m_vg->getExtentSize()) {
+            m_error_stack->setCurrentIndex(0);
+            enableButtonOk(true);
+        } else {
+            m_error_stack->setCurrentIndex(1);
+            enableButtonOk(false);
+        }
     }
 }
