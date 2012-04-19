@@ -39,7 +39,7 @@ LVProperties::LVProperties(LogVol *const volume, const int segment, QWidget *par
     : QWidget(parent),
       m_lv(volume)
 {
-    QVBoxLayout *layout = new QVBoxLayout();
+    QVBoxLayout *const layout = new QVBoxLayout();
     layout->setSpacing(2);
     layout->setMargin(2);
 
@@ -95,11 +95,11 @@ QFrame *LVProperties::mountPointsFrame()
     const QList<MountEntry *> entries = m_lv->getMountEntries();
 
     if (entries.size() > 1) {
-        label = new QLabel(i18n("<b>Mount points</b>"));
+        label = new QLabel(i18n("<b>Mount Points</b>"));
         label->setAlignment(Qt::AlignCenter);
         layout->addWidget(label);
     } else {
-        label = new QLabel(i18n("<b>Mount point</b>")) ;
+        label = new QLabel(i18n("<b>Mount Point</b>")) ;
         label->setAlignment(Qt::AlignCenter);
         layout->addWidget(label);
     }
@@ -135,13 +135,13 @@ QFrame *LVProperties::mountPointsFrame()
 QFrame *LVProperties::uuidFrame()
 {
     QStringList uuid;
-    QFrame *frame = new QFrame();
-    QVBoxLayout *layout = new QVBoxLayout();
+    QFrame *const frame = new QFrame();
+    QVBoxLayout *const layout = new QVBoxLayout();
     frame->setLayout(layout);
     frame->setFrameStyle(QFrame::Sunken | QFrame::StyledPanel);
     frame->setLineWidth(2);
 
-    QLabel *label = new QLabel(i18n("<b>Logical volume UUID</b>"));
+    QLabel *label = new QLabel(i18n("<b>Logical Volume UUID</b>"));
     label->setAlignment(Qt::AlignCenter);
     layout->addWidget(label);
 
@@ -160,15 +160,15 @@ QFrame *LVProperties::uuidFrame()
 QFrame *LVProperties::fsFrame(const bool showFsUuid, const bool showFsLabel)
 {
     QStringList uuid;
-    QFrame *frame = new QFrame();
-    QVBoxLayout *layout = new QVBoxLayout();
+    QFrame *const frame = new QFrame();
+    QVBoxLayout *const layout = new QVBoxLayout();
     frame->setLayout(layout);
     frame->setFrameStyle(QFrame::Sunken | QFrame::StyledPanel);
     frame->setLineWidth(2);
     QLabel *label;
 
     if (showFsLabel) {
-        label = new QLabel(i18n("<b>Filesystem label</b>"));
+        label = new QLabel(i18n("<b>Filesystem Label</b>"));
         label->setAlignment(Qt::AlignCenter);
         layout->addWidget(label);
         label = new QLabel(m_lv->getFilesystemLabel());
@@ -300,14 +300,14 @@ QFrame *LVProperties::generalFrame(int segment)
 QFrame *LVProperties::physicalVolumesFrame(int segment)
 {
     QStringList pv_list;
-    QFrame *frame = new QFrame();
-    QVBoxLayout *layout = new QVBoxLayout();
+    QFrame *const frame = new QFrame();
+    QVBoxLayout *const layout = new QVBoxLayout();
 
     frame->setLayout(layout);
     frame->setFrameStyle(QFrame::Sunken | QFrame::StyledPanel);
     frame->setLineWidth(2);
 
-    QLabel *label = new QLabel(i18n("<b>Physical volumes</b>"));
+    QLabel *label = new QLabel(i18n("<b>Physical Volumes</b>"));
     label->setAlignment(Qt::AlignCenter);
     layout->addWidget(label);
 
