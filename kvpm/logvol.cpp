@@ -923,15 +923,22 @@ QString LogVol::getFstabMountPoint()
 
 double LogVol::getSnapPercent()
 {
-    if (m_snap || m_merging)
-        return m_snap_percent;
+    if (m_snap || m_merging) {
+        if (m_active)
+            return m_snap_percent;
+        else
+            return -1;
+    }
     else
         return 0.0;
 }
 
 double LogVol::getCopyPercent()
 {
-    return m_copy_percent;
+    if (m_active)
+        return m_copy_percent;
+    else
+        return -1;
 }
 
 QString LogVol::getUuid()
