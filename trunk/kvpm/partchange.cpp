@@ -117,7 +117,7 @@ PartitionChangeDialog::PartitionChangeDialog(StoragePartition *const partition, 
     connect(this, SIGNAL(okClicked()),
             this, SLOT(commitPartition()));
 
-    setDefaultButton(KDialog::Cancel);
+    setDefaultButton(KDialog::Ok);
 }
 
 void PartitionChangeDialog::commitPartition()
@@ -191,28 +191,54 @@ void PartitionChangeDialog::setup()
 
     PedDevice *const ped_device = m_ped_disk->dev;
 
-    QString message = i18n("Currently only the ext2, ext3 and ext4 file systems "
-                           "are supported for file system shrinking. "
-                           "Growing is supported for ext2/3/4, jfs, xfs, ntfs and Reiserfs. "
-                           "Moving a partition is supported for any filesystem. "
-                           "Physical volumes may also be grown, shrunk or moved");
+    const QString warning1 = i18n("This partition is on the same device with partitions that are busy or mounted. "
+                                  "If at all possible they should be unmounted before proceeding. Otherise "
+                                  "changes to the partition table may not be recognized by the kernel.");
 
-    if (!(fs == "ext2" || fs == "ext3" || fs == "ext4" || m_old_storage_part->isPhysicalVolume()))
-        KMessageBox::information(0, message);
+    const QString warning2 = i18n("Changes to the partition table can cause unintentional and permanent data"
+                                  " loss. If the partition holds important data, you really should back it"
+                                  " up before continuing.");
 
-    message = i18n("This partition is on the same device with partitions that are busy or mounted. "
-                   "If at all possible they should be unmounted before proceeding. Otherise "
-                   "changes to the partition table may not be recognized by the kernel.");
+    const QString message1 = i18n("Shrinking this filesystem is not supported, only growing or"
+                                  " moving it is possible."
+                                  "\n\n"
+                                  "Note: currently only ext2, ext3, ext4 and physical volumes can be shrunk.");
 
-    if (ped_device_is_busy(ped_device)) {
+    const QString message2 = i18n("Growing or shrinking this filesystem is not supported, only"
+                                  " moving it is possible."
+                                  "\n\n"
+                                  "Note: currently only ext2, ext3, ext4 and physical volumes"
+                                  " can be both shrunk and grown,"
+                                  " while Reiserfs, ntfs, jfs and xfs can be grown only.");
+
+    if (KMessageBox::warningContinueCancel(NULL,
+                                           warning2,
+                                           QString(),
+                                           KStandardGuiItem::cont(),
+                                           KStandardGuiItem::cancel(),
+                                           QString(),
+                                           KMessageBox::Dangerous) != KMessageBox::Continue) {
+        m_bailout = true;
+    }
+
+    if (ped_device_is_busy(ped_device) && !m_bailout) {
         if (KMessageBox::warningContinueCancel(NULL,
-                                               message,
+                                               warning1,
                                                QString(),
                                                KStandardGuiItem::cont(),
                                                KStandardGuiItem::cancel(),
                                                QString(),
                                                KMessageBox::Dangerous) != KMessageBox::Continue) {
             m_bailout = true;
+        }
+    }
+
+    if (!m_bailout){
+        if (!(fs == "ext2" || fs == "ext3" || fs == "ext4" || m_old_storage_part->isPhysicalVolume())){
+            if((fs == "jfs") || (fs == "xfs") || (fs == "ntfs") || (fs == "reiserfs"))
+                KMessageBox::information(0, message1);
+            else
+                KMessageBox::information(0, message2);
         }
     }
 
