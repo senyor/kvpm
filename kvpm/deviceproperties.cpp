@@ -122,9 +122,9 @@ QFrame *DeviceProperties::mpFrame(StoragePartition *const partition)
     QLabel *label;
 
     if (entries.size() <= 1)
-        label = new QLabel(i18n("<b>Mount point</b>"));
+        label = new QLabel(i18n("<b>Mount Point</b>"));
     else
-        label = new QLabel(i18n("<b>Mount points</b>"));
+        label = new QLabel(i18n("<b>Mount Points</b>"));
 
     label->setAlignment(Qt::AlignCenter);
     layout->addWidget(label);
@@ -199,7 +199,7 @@ QFrame *DeviceProperties::fsFrame(StoragePartition *const partition, const bool 
     frame->setLineWidth(2);
 
     if (showFsLabel) {
-        label = new QLabel(i18n("<b>Filesystem LABEL</b>"));
+        label = new QLabel(i18n("<b>Filesystem Label</b>"));
         label->setAlignment(Qt::AlignCenter);
         layout->addWidget(label);
 
@@ -229,7 +229,7 @@ QFrame *DeviceProperties::pvFrame(PhysVol *const pv)
     frame->setLineWidth(2);
 
     QLabel *label;
-    label = new QLabel(i18n("<b>Physical volume</b>"));
+    label = new QLabel(i18n("<b>Physical Volume</b>"));
     label->setAlignment(Qt::AlignCenter);
     layout->addWidget(label);
 
