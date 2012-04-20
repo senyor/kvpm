@@ -58,29 +58,32 @@ void MasterList::rescan()
 {
     ProgressBox *progress_box = TopWindow::getProgressBox();
     m_mount_tables->loadData();
+    qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
 
     progress_box->setRange(0, 3);
+    progress_box->setValue(0);
     progress_box->setText("Scan lvm");
-    qApp->setOverrideCursor(Qt::WaitCursor);
-    qApp->processEvents();
+    qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
 
     lvm_scan(m_lvm);
     lvm_config_reload(m_lvm);
 
+    qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
     progress_box->setValue(1);
     progress_box->setText("Scan vgs");
-    qApp->processEvents();
+    qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
     scanVolumeGroups();
+    qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
 
     progress_box->setValue(2);
-    qApp->processEvents();
+    qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
     progress_box->setText("Scan devs");
+    qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
     scanStorageDevices();
+    qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
 
-    progress_box->setValue(3);
-    qApp->restoreOverrideCursor();
-    qApp->processEvents();
     progress_box->reset();
+    qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
 
     return;
 }

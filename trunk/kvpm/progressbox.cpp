@@ -49,7 +49,7 @@ void ProgressBox::setText(const QString text)
         m_message->clear();
 
     show();
-    qApp->processEvents();
+    qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
 }
 
 void ProgressBox::setRange(const int start, const int end)
@@ -60,7 +60,7 @@ void ProgressBox::setRange(const int start, const int end)
     m_message->clear();
 
     show();
-    qApp->processEvents();
+    qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
 
 }
 
@@ -73,7 +73,7 @@ void ProgressBox::setValue(const int value)
         m_message->clear();
 
     show();
-    qApp->processEvents();
+    qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
 }
 
 void ProgressBox::reset()
@@ -85,5 +85,5 @@ void ProgressBox::reset()
     m_message->clear();
 
     show();
-    qApp->processEvents();
+    qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
 }

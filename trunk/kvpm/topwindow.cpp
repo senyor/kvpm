@@ -87,8 +87,13 @@ TopWindow::TopWindow(MasterList *const masterList, ExecutableFinder *const execu
 
 void TopWindow::reRun()
 {
+    qApp->setOverrideCursor(Qt::WaitCursor);
+
     m_master_list->rescan(); // loads the list with new data
     updateTabs();
+
+    qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
+    qApp->restoreOverrideCursor();
 }
 
 ProgressBox* TopWindow::getProgressBox()
