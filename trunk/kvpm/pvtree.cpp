@@ -95,11 +95,13 @@ void PVTree::loadData()
     setSortingEnabled(false);
     setViewConfig();
 
+    KLocale::BinaryUnitDialect dialect;
     KLocale *const locale = KGlobal::locale();
+
     if (m_use_si_units)
-        locale->setBinaryUnitDialect(KLocale::MetricBinaryDialect);
+        dialect = KLocale::MetricBinaryDialect;
     else
-        locale->setBinaryUnitDialect(KLocale::IECBinaryDialect);
+        dialect = KLocale::IECBinaryDialect;
 
     for (int n = 0; n < pvs.size(); n++) {
         pv = pvs[n];
@@ -107,9 +109,9 @@ void PVTree::loadData()
         device_name = pv->getName();
 
         pv_data << device_name
-                << locale->formatByteSize(pv->getSize())
-                << locale->formatByteSize(pv->getRemaining())
-                << locale->formatByteSize(pv->getSize() - pv->getRemaining());
+                << locale->formatByteSize(pv->getSize(), 1, dialect)
+                << locale->formatByteSize(pv->getRemaining(), 1, dialect)
+                << locale->formatByteSize(pv->getSize() - pv->getRemaining(), 1, dialect);
 
         if (pv->isActive())
             pv_data << "Active";

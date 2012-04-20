@@ -31,6 +31,7 @@
 #include "volgroup.h"
 
 
+
 /* if segment = -1 we have a multi segement logical volume but
    we are not focused on any one segment. Therefor stripes and
    stripe size have no meaning */
@@ -208,11 +209,13 @@ QFrame *LVProperties::generalFrame(int segment)
     frame->setFrameStyle(QFrame::Sunken | QFrame::StyledPanel);
     frame->setLineWidth(2);
 
+    KLocale::BinaryUnitDialect dialect;
     KLocale *const locale = KGlobal::locale();
+
     if (m_use_si_units)
-        locale->setBinaryUnitDialect(KLocale::MetricBinaryDialect);
+        dialect = KLocale::MetricBinaryDialect;
     else
-        locale->setBinaryUnitDialect(KLocale::IECBinaryDialect);
+        dialect = KLocale::IECBinaryDialect;
 
     if ((segment >= 0) && (segment_count > 1)) {
 
@@ -228,7 +231,7 @@ QFrame *LVProperties::generalFrame(int segment)
 
             if (stripes != 1) {
                 stripe_layout->addWidget(new QLabel(i18n("Stripes: %1", stripes)));
-                stripe_layout->addWidget(new QLabel(i18n("Stripe size: %1", locale->formatByteSize(stripe_size))));
+                stripe_layout->addWidget(new QLabel(i18n("Stripe size: %1", locale->formatByteSize(stripe_size, 1, dialect))));
             } else {
                 stripe_layout->addWidget(new QLabel(i18n("Stripes: none")));
             }
@@ -252,7 +255,7 @@ QFrame *LVProperties::generalFrame(int segment)
 
             if (stripes != 1) {
                 stripe_layout->addWidget(new QLabel(i18n("Stripes: %1", stripes)));
-                stripe_layout->addWidget(new QLabel(i18n("Stripe size: %1", locale->formatByteSize(stripe_size))));
+                stripe_layout->addWidget(new QLabel(i18n("Stripe size: %1", locale->formatByteSize(stripe_size, 1, dialect))));
             } else {
                 stripe_layout->addWidget(new QLabel(i18n("Stripes: none")));
             }
@@ -260,7 +263,7 @@ QFrame *LVProperties::generalFrame(int segment)
             layout->addLayout(stripe_layout);
         } else if (!m_lv->isMirrorLog() || (m_lv->isMirrorLog() && m_lv->isMirror())) {
             layout->addWidget(new QLabel(i18n("Total extents: %1", total_extents)));
-            layout->addWidget(new QLabel(i18n("Total size: %1", locale->formatByteSize(total_size))));
+            layout->addWidget(new QLabel(i18n("Total size: %1", locale->formatByteSize(total_size, 1, dialect))));
         }
 
         if (!(m_lv->isMirrorLeg() || m_lv->isMirrorLog())) {

@@ -137,11 +137,13 @@ QTreeWidgetItem *VGTree::loadItem(LogVol *lv, QTreeWidgetItem *item)
     const int old_child_count = item->childCount();
     bool was_expanded = false;
 
+    KLocale::BinaryUnitDialect dialect;
     KLocale *const locale = KGlobal::locale();
+
     if (m_use_si_units)
-        locale->setBinaryUnitDialect(KLocale::MetricBinaryDialect);
+        dialect = KLocale::MetricBinaryDialect;
     else
-        locale->setBinaryUnitDialect(KLocale::IECBinaryDialect);
+        dialect = KLocale::IECBinaryDialect;
 
     QList<LogVol *> temp_kids;
     long long fs_remaining;       // remaining space on fs -- if known
@@ -189,7 +191,7 @@ QTreeWidgetItem *VGTree::loadItem(LogVol *lv, QTreeWidgetItem *item)
     item->setData(1, Qt::DisplayRole, lv->getType());
 
     if (lv->isSnapContainer()) {
-        item->setData(2, Qt::DisplayRole, locale->formatByteSize(lv->getTotalSize()));
+        item->setData(2, Qt::DisplayRole, locale->formatByteSize(lv->getTotalSize(), 1, dialect));
 
         for (int x = 3; x < 12; x++)
             item->setData(x, Qt::DisplayRole, QVariant());
@@ -199,7 +201,7 @@ QTreeWidgetItem *VGTree::loadItem(LogVol *lv, QTreeWidgetItem *item)
         item->setIcon(8, KIcon());
         item->setToolTip(8, QString());
     } else {
-        item->setData(2, Qt::DisplayRole, locale->formatByteSize(lv->getSize()));
+        item->setData(2, Qt::DisplayRole, locale->formatByteSize(lv->getSize(), 1, dialect));
 
         if (lv->getFilesystemSize() > -1 &&  lv->getFilesystemUsed() > -1) {
 
@@ -207,11 +209,11 @@ QTreeWidgetItem *VGTree::loadItem(LogVol *lv, QTreeWidgetItem *item)
             fs_percent = qRound(((double)fs_remaining / (double)lv->getFilesystemSize()) * 100);
 
             if (m_show_total)
-                item->setData(3, Qt::DisplayRole, locale->formatByteSize(fs_remaining));
+                item->setData(3, Qt::DisplayRole, locale->formatByteSize(fs_remaining, 1, dialect));
             else if (m_show_percent)
                 item->setData(3, Qt::DisplayRole, QString("%%1").arg(fs_percent));
             else if (m_show_both)
-                item->setData(3, Qt::DisplayRole, QString(locale->formatByteSize(fs_remaining) + " (%%1)").arg(fs_percent));
+                item->setData(3, Qt::DisplayRole, QString(locale->formatByteSize(fs_remaining, 1, dialect) + " (%%1)").arg(fs_percent));
 
             if (fs_percent <= m_fs_warn_percent) {
                 item->setIcon(3, KIcon("exclamation"));
@@ -279,7 +281,7 @@ QTreeWidgetItem *VGTree::loadItem(LogVol *lv, QTreeWidgetItem *item)
             item->setData(6, Qt::DisplayRole, QString(""));
         } else {
             item->setData(5, Qt::DisplayRole, QString("%1").arg(lv->getSegmentStripes(0)));
-            item->setData(6, Qt::DisplayRole, locale->formatByteSize(lv->getSegmentStripeSize(0)));
+            item->setData(6, Qt::DisplayRole, locale->formatByteSize(lv->getSegmentStripeSize(0), 1, dialect));
         }
 
         if (!is_sc && old_type.contains("origin", Qt::CaseInsensitive)) {
@@ -326,7 +328,6 @@ QTreeWidgetItem *VGTree::loadItem(LogVol *lv, QTreeWidgetItem *item)
 
     return item;
 }
-
 
 void VGTree::setupContextMenu()
 {
@@ -493,11 +494,13 @@ void VGTree::insertSegmentItems(LogVol *lv, QTreeWidgetItem *item)
     const int segment_count = lv->getSegmentCount();
     const int child_count = item->childCount();
 
+    KLocale::BinaryUnitDialect dialect;
     KLocale *const locale = KGlobal::locale();
+
     if (m_use_si_units)
-        locale->setBinaryUnitDialect(KLocale::MetricBinaryDialect);
+        dialect = KLocale::MetricBinaryDialect;
     else
-        locale->setBinaryUnitDialect(KLocale::IECBinaryDialect);
+        dialect = KLocale::IECBinaryDialect;
 
     QTreeWidgetItem *child_item;
     QList<QTreeWidgetItem *> segment_children;
@@ -530,11 +533,11 @@ void VGTree::insertSegmentItems(LogVol *lv, QTreeWidgetItem *item)
 
         child_item->setData(0, Qt::DisplayRole, QString("Seg# %1").arg(segment));
         child_item->setData(1, Qt::DisplayRole, QString(""));
-        child_item->setData(2, Qt::DisplayRole, locale->formatByteSize(lv->getSegmentSize(segment)));
+        child_item->setData(2, Qt::DisplayRole, locale->formatByteSize(lv->getSegmentSize(segment), 1, dialect));
         child_item->setData(3, Qt::DisplayRole, QString(""));
         child_item->setData(4, Qt::DisplayRole, QString(""));
         child_item->setData(5, Qt::DisplayRole, QString("%1").arg(lv->getSegmentStripes(segment)));
-        child_item->setData(6, Qt::DisplayRole, locale->formatByteSize(lv->getSegmentStripeSize(segment)));
+        child_item->setData(6, Qt::DisplayRole, locale->formatByteSize(lv->getSegmentStripeSize(segment), 1, dialect));
         child_item->setData(0, Qt::UserRole, lv->getName());
         child_item->setData(1, Qt::UserRole, segment);
         child_item->setData(2, Qt::UserRole, lv->getUuid());

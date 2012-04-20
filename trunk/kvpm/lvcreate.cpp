@@ -193,16 +193,18 @@ QWidget* LVCreateDialog::createGeneralTab()
 
     m_name_is_valid = true;
 
+    KLocale::BinaryUnitDialect dialect;
     KLocale *const locale = KGlobal::locale();
+
     if (m_use_si_units)
-        locale->setBinaryUnitDialect(KLocale::MetricBinaryDialect);
+        dialect = KLocale::MetricBinaryDialect;
     else
-        locale->setBinaryUnitDialect(KLocale::IECBinaryDialect);
+        dialect = KLocale::IECBinaryDialect;
 
     if (m_extend) {
         m_extend_by_label = new QLabel();
         layout->insertWidget(1, m_extend_by_label);
-        m_current_size_label = new QLabel(i18n("Current size: %1", locale->formatByteSize(m_lv->getSize())));
+        m_current_size_label = new QLabel(i18n("Current size: %1", locale->formatByteSize(m_lv->getSize(), 1, dialect)));
         layout->insertWidget(2, m_current_size_label);
     } else {
 
@@ -538,14 +540,16 @@ void LVCreateDialog::setMaxSize()
     const long long free_extents  = getLargestVolume() / m_vg->getExtentSize();
     const long long selected_size = m_size_selector->getCurrentSize() * m_vg->getExtentSize();
 
+    KLocale::BinaryUnitDialect dialect;
     KLocale *const locale = KGlobal::locale();
+
     if (m_use_si_units)
-        locale->setBinaryUnitDialect(KLocale::MetricBinaryDialect);
+        dialect = KLocale::MetricBinaryDialect;
     else
-        locale->setBinaryUnitDialect(KLocale::IECBinaryDialect);
+        dialect = KLocale::IECBinaryDialect;
 
     m_size_selector->setConstrainedMax(free_extents);
-    m_max_size_label->setText(i18n("Size: %1", locale->formatByteSize(getLargestVolume())));
+    m_max_size_label->setText(i18n("Size: %1", locale->formatByteSize(getLargestVolume(), 1, dialect)));
     m_max_extents_label->setText(i18n("Extents: %1", free_extents));
 
     if (!m_extend) {
@@ -559,7 +563,7 @@ void LVCreateDialog::setMaxSize()
         else
             m_stripe_count_label->setText(i18n("(linear volume)"));
     } else {
-        m_extend_by_label->setText(i18n("Extend by: %1", locale->formatByteSize(selected_size - m_lv->getSize())));
+        m_extend_by_label->setText(i18n("Extend by: %1", locale->formatByteSize(selected_size - m_lv->getSize(), 1, dialect)));
 
         if (mirror_count > 1 && !m_stripe_box->isChecked())
             m_stripe_count_label->setText(i18n("(with %1 mirror legs)", mirror_count));

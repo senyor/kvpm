@@ -564,21 +564,23 @@ void PartitionChangeDialog::updateGraphicAndLabels()
     m_display_graphic->setFollowingSectors(following_sectors);
     m_display_graphic->repaint();
 
+    KLocale::BinaryUnitDialect dialect;
     KLocale *const locale = KGlobal::locale();
+
     if (m_use_si_units)
-        locale->setBinaryUnitDialect(KLocale::MetricBinaryDialect);
+        dialect = KLocale::MetricBinaryDialect;
     else
-        locale->setBinaryUnitDialect(KLocale::IECBinaryDialect);
+        dialect = KLocale::IECBinaryDialect;
 
     if (change_size < 0) {
-        QString change = locale->formatByteSize(qAbs(change_size));
+        QString change = locale->formatByteSize(qAbs(change_size), 1, dialect);
         m_change_by_label->setText(i18n("<b>Shrink by : -%1</b>", change));
     } else {
-        QString change = locale->formatByteSize(change_size);
+        QString change = locale->formatByteSize(change_size, 1, dialect);
         m_change_by_label->setText(i18n("<b>Grow by : %1</b>", change));
     }
 
-    QString preceding_bytes_string = locale->formatByteSize(preceding_sectors * m_sector_size);
+    QString preceding_bytes_string = locale->formatByteSize(preceding_sectors * m_sector_size, 1, dialect);
     m_preceding_label->setText(i18n("Preceding space: %1", preceding_bytes_string));
 
     long long following_space = following_sectors * m_sector_size;
@@ -586,7 +588,7 @@ void PartitionChangeDialog::updateGraphicAndLabels()
     if (following_space < 0)
         following_space = 0;
 
-    QString following_bytes_string = locale->formatByteSize(following_space);
+    QString following_bytes_string = locale->formatByteSize(following_space, 1, dialect);
     m_following_label->setText(i18n("Following space: %1", following_bytes_string));
 }
 
@@ -706,11 +708,13 @@ QGroupBox *PartitionChangeDialog::buildInfoGroup(const long long maxSize)
     layout->addWidget(path);
     layout->addSpacing(10);
 
+    KLocale::BinaryUnitDialect dialect;
     KLocale *const locale = KGlobal::locale();
+
     if (m_use_si_units)
-        locale->setBinaryUnitDialect(KLocale::MetricBinaryDialect);
+        dialect = KLocale::MetricBinaryDialect;
     else
-        locale->setBinaryUnitDialect(KLocale::IECBinaryDialect);
+        dialect = KLocale::IECBinaryDialect;
 
     m_change_by_label = new QLabel();
     m_preceding_label = new QLabel();
@@ -718,8 +722,8 @@ QGroupBox *PartitionChangeDialog::buildInfoGroup(const long long maxSize)
     layout->addWidget(m_preceding_label);
     layout->addWidget(m_following_label);
     layout->addStretch();
-    layout->addWidget(new QLabel(i18n("Minimum size: %1", locale->formatByteSize(m_min_shrink_size * m_sector_size))));
-    layout->addWidget(new QLabel(i18n("Maximum size: %1", locale->formatByteSize(maxSize * m_sector_size))));
+    layout->addWidget(new QLabel(i18n("Minimum size: %1", locale->formatByteSize(m_min_shrink_size * m_sector_size, 1, dialect))));
+    layout->addWidget(new QLabel(i18n("Maximum size: %1", locale->formatByteSize(maxSize * m_sector_size, 1, dialect))));
     layout->addStretch();
     layout->addSpacing(10);
     layout->addWidget(m_change_by_label);

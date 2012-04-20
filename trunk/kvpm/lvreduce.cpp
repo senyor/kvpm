@@ -110,18 +110,20 @@ LVReduceDialog::LVReduceDialog(LogVol *const volume, QWidget *parent)
         skeleton.setCurrentGroup("General");
         skeleton.addItemBool("use_si_units", use_si_units, false);
 
+        KLocale::BinaryUnitDialect dialect;
         KLocale *const locale = KGlobal::locale();
+
         if (use_si_units)
-            locale->setBinaryUnitDialect(KLocale::MetricBinaryDialect);
+            dialect = KLocale::MetricBinaryDialect;
         else
-            locale->setBinaryUnitDialect(KLocale::IECBinaryDialect);
+            dialect = KLocale::IECBinaryDialect;
 
         QVBoxLayout *const label_layout = new QVBoxLayout();
         QWidget *const label_widget = new QWidget();
         label_widget->setLayout(label_layout);
         QLabel *const lv_name_label  = new QLabel(i18n("<b>Reduce volume: %1</b>", m_lv->getName()));
         lv_name_label->setAlignment(Qt::AlignCenter);
-        QLabel *const lv_min_label  = new QLabel(i18n("Estimated minimum size: %1", locale->formatByteSize(min_lv_extents * extent_size)));
+        QLabel *const lv_min_label  = new QLabel(i18n("Estimated minimum size: %1", locale->formatByteSize(min_lv_extents * extent_size, 1, dialect)));
 
         m_size_selector = new SizeSelectorBox(extent_size, min_lv_extents, current_lv_extents, current_lv_extents, true, false, true);
 
