@@ -22,13 +22,13 @@
 #include <signal.h>
 
 #include <KApplication>
+#include <KLocale>
 #include <KMessageBox>
 #include <KProcess>
 #include <KProgressDialog>
-#include <KLocale>
 
-#include <QEventLoop>
 #include <QDebug>
+#include <QEventLoop>
 
 
 ProcessProgress::ProcessProgress(QStringList arguments, const bool allowCancel, QObject *parent) : QObject(parent)
