@@ -27,14 +27,16 @@
 PedExceptionOption my_handler(PedException *exception)
 {
     QString error_message;
-    qApp->restoreOverrideCursor(); // reset the cursor to not-busy
 
-    if (exception->type == PED_EXCEPTION_INFORMATION)
+    if (exception->type == PED_EXCEPTION_INFORMATION){
+        qApp->restoreOverrideCursor();                   // reset the cursor to not-busy
         KMessageBox::information(0, exception->message);
-    else {
+    } else {
         error_message = QString(exception->message);
-        if (!error_message.contains("unrecognised disk label"))
+        if (!error_message.contains("unrecognised disk label")){
+            qApp->restoreOverrideCursor();
             KMessageBox::error(0, exception->message);
+        }
     }
 
     return PED_EXCEPTION_UNHANDLED;
