@@ -39,11 +39,11 @@ bool remove_vg(VolGroup *volumeGroup)
 
         progress_box->setRange(0, 3);
         progress_box->setValue(1);
-        qApp->processEvents();
+        qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
 
         if ((vg_dm = lvm_vg_open(lvm, vg_name.data(), "w", 0))) {
             progress_box->setValue(2);
-            qApp->processEvents();
+            qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
             if (lvm_vg_remove(vg_dm)) {
                 KMessageBox::error(0, QString(lvm_errmsg(lvm)));
                 success = false;
@@ -55,7 +55,7 @@ bool remove_vg(VolGroup *volumeGroup)
             }
             lvm_vg_close(vg_dm);
             progress_box->setValue(3);
-            qApp->processEvents();
+            qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
         } else {
             KMessageBox::error(0, QString(lvm_errmsg(lvm)));
             success = false;
@@ -65,6 +65,6 @@ bool remove_vg(VolGroup *volumeGroup)
     }
 
     progress_box->setValue(3);
-    qApp->processEvents();
+    qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
     return success;
 }
