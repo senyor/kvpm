@@ -50,11 +50,13 @@ PvGroupBox::PvGroupBox(QList<PhysVol *> volumes, bool const target, QWidget *par
     m_space_label   = new QLabel;
     m_extents_label = new QLabel;
 
+    KLocale::BinaryUnitDialect dialect;
     KLocale *const locale = KGlobal::locale();
+
     if (m_use_si_units)
-        locale->setBinaryUnitDialect(KLocale::MetricBinaryDialect);
+        dialect = KLocale::MetricBinaryDialect;
     else
-        locale->setBinaryUnitDialect(KLocale::IECBinaryDialect);
+        dialect = KLocale::IECBinaryDialect;
 
     if (pv_check_count < 1) {
         m_extent_size = 1;
@@ -62,7 +64,7 @@ PvGroupBox::PvGroupBox(QList<PhysVol *> volumes, bool const target, QWidget *par
         layout->addWidget(pv_label);
     } else if (pv_check_count < 2) {
         m_extent_size = m_pvs[0]->getVg()->getExtentSize();
-        QLabel *pv_label = new QLabel(m_pvs[0]->getName() + "  " + locale->formatByteSize(m_pvs[0]->getRemaining()));
+        QLabel *pv_label = new QLabel(m_pvs[0]->getName() + "  " + locale->formatByteSize(m_pvs[0]->getRemaining(), 1, dialect));
         layout->addWidget(pv_label, 0, 0, 1, -1);
 
         addLabelsAndButtons(layout, pv_check_count);
@@ -70,7 +72,7 @@ PvGroupBox::PvGroupBox(QList<PhysVol *> volumes, bool const target, QWidget *par
     } else {
         m_extent_size = m_pvs[0]->getVg()->getExtentSize();
         for (int x = 0; x < pv_check_count; x++) {
-            check = new NoMungeCheck(m_pvs[x]->getName() + "  " + locale->formatByteSize(m_pvs[x]->getRemaining()));
+            check = new NoMungeCheck(m_pvs[x]->getName() + "  " + locale->formatByteSize(m_pvs[x]->getRemaining(), 1, dialect));
             check->setAlternateText(m_pvs[x]->getName());
             check->setData(QVariant(m_pvs[x]->getRemaining()));
             m_pv_checks.append(check);
@@ -118,11 +120,13 @@ PvGroupBox::PvGroupBox(QList <StorageDevice *> devices, QList<StoragePartition *
     m_space_label   = new QLabel;
     m_extents_label = new QLabel;
 
+    KLocale::BinaryUnitDialect dialect;
     KLocale *const locale = KGlobal::locale();
+
     if (m_use_si_units)
-        locale->setBinaryUnitDialect(KLocale::MetricBinaryDialect);
+        dialect = KLocale::MetricBinaryDialect;
     else
-        locale->setBinaryUnitDialect(KLocale::IECBinaryDialect);
+        dialect = KLocale::IECBinaryDialect;
 
     if (pv_check_count < 1) {
         QLabel *pv_label = new QLabel(i18n("none found"));
@@ -135,7 +139,7 @@ PvGroupBox::PvGroupBox(QList <StorageDevice *> devices, QList<StoragePartition *
             name = m_partitions[0]->getName();
             size = m_partitions[0]->getSize();
         }
-        QLabel *pv_label = new QLabel(name + "  " + locale->formatByteSize(size));
+        QLabel *pv_label = new QLabel(name + "  " + locale->formatByteSize(size, 1, dialect));
         layout->addWidget(pv_label, 0, 0, 1, -1);
         addLabelsAndButtons(layout, pv_check_count);
 
@@ -145,7 +149,7 @@ PvGroupBox::PvGroupBox(QList <StorageDevice *> devices, QList<StoragePartition *
             dev_count++;
             name = m_devices[x]->getName();
             size = m_devices[x]->getSize();
-            check = new NoMungeCheck(name + "  " + locale->formatByteSize(size));
+            check = new NoMungeCheck(name + "  " + locale->formatByteSize(size, 1, dialect));
             check->setAlternateText(name);
             check->setData(QVariant(size));
             m_pv_checks.append(check);
@@ -164,7 +168,7 @@ PvGroupBox::PvGroupBox(QList <StorageDevice *> devices, QList<StoragePartition *
         for (int x = 0; x < m_partitions.size(); x++) {
             name = m_partitions[x]->getName();
             size = m_partitions[x]->getSize();
-            check = new NoMungeCheck(name + "  " + locale->formatByteSize(size));
+            check = new NoMungeCheck(name + "  " + locale->formatByteSize(size, 1, dialect));
             check->setAlternateText(name);
             check->setData(QVariant(size));
             m_pv_checks.append(check);
@@ -297,18 +301,19 @@ void PvGroupBox::selectNone()
 
 void PvGroupBox::calculateSpace()
 {
-
+    KLocale::BinaryUnitDialect dialect;
     KLocale *const locale = KGlobal::locale();
+
     if (m_use_si_units)
-        locale->setBinaryUnitDialect(KLocale::MetricBinaryDialect);
+        dialect = KLocale::MetricBinaryDialect;
     else
-        locale->setBinaryUnitDialect(KLocale::IECBinaryDialect);
+        dialect = KLocale::IECBinaryDialect;
 
     if (m_pv_checks.size() > 1) {
-        m_space_label->setText(i18n("Selected space: %1", locale->formatByteSize(getRemainingSpace())));
+        m_space_label->setText(i18n("Selected space: %1", locale->formatByteSize(getRemainingSpace(), 1, dialect)));
         m_extents_label->setText(i18n("Selected extents: %1", getRemainingSpace() / m_extent_size));
     } else {
-        m_space_label->setText(i18n("Space: %1", locale->formatByteSize(getRemainingSpace())));
+        m_space_label->setText(i18n("Space: %1", locale->formatByteSize(getRemainingSpace(), 1, dialect)));
         m_extents_label->setText(i18n("Extents: %1", getRemainingSpace() / m_extent_size));
     }
 

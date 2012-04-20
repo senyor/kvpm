@@ -86,11 +86,13 @@ void DeviceTree::loadData(QList<StorageDevice *> devices)
 
     setViewConfig();
 
+    KLocale::BinaryUnitDialect dialect;
     KLocale *const locale = KGlobal::locale();
+
     if (m_use_si_units)
-        locale->setBinaryUnitDialect(KLocale::MetricBinaryDialect);
+        dialect = KLocale::MetricBinaryDialect;
     else
-        locale->setBinaryUnitDialect(KLocale::IECBinaryDialect);
+        dialect = KLocale::IECBinaryDialect;
 
     if (currentItem())
         current_device = currentItem()->data(0, Qt::DisplayRole).toString();
@@ -119,18 +121,18 @@ void DeviceTree::loadData(QList<StorageDevice *> devices)
 
         if (dev->isPhysicalVolume()) {
             pv = dev->getPhysicalVolume();
-            data << dev_name << "" << locale->formatByteSize(dev->getSize());
+            data << dev_name << "" << locale->formatByteSize(dev->getSize(), 1, dialect);
 
             if (m_show_total && !m_show_percent)
-                data << locale->formatByteSize(pv->getRemaining());
+                data << locale->formatByteSize(pv->getRemaining(), 1, dialect);
             else if (!m_show_total && m_show_percent)
                 data << QString("%%1").arg(100 - pv->getPercentUsed());
             else if (m_show_both)
-                data << QString("%1 (%%2) ").arg(locale->formatByteSize(pv->getRemaining())).arg(100 - pv->getPercentUsed());
+                data << QString("%1 (%%2) ").arg(locale->formatByteSize(pv->getRemaining(), 1, dialect)).arg(100 - pv->getPercentUsed());
 
             data << "PV" << pv->getVg()->getName();
         } else {
-            data << dev_name << "" << locale->formatByteSize(dev->getSize());
+            data << dev_name << "" << locale->formatByteSize(dev->getSize(), 1, dialect);
         }
 
         parent = new QTreeWidgetItem(data);
@@ -170,17 +172,17 @@ void DeviceTree::loadData(QList<StorageDevice *> devices)
             part_variant.setValue((void *) part);
             type = part->getType();
 
-            data << part->getName() << type << locale->formatByteSize(part->getSize());
+            data << part->getName() << type << locale->formatByteSize(part->getSize(), 1, dialect);
 
             if (part->isPhysicalVolume()) {
                 pv = part->getPhysicalVolume();
 
                 if (m_show_total && !m_show_percent)
-                    data << locale->formatByteSize(pv->getRemaining());
+                    data << locale->formatByteSize(pv->getRemaining(), 1, dialect);
                 else if (!m_show_total && m_show_percent)
                     data << QString("%%1").arg(100 - pv->getPercentUsed());
                 else
-                    data << QString("%1 (%%2) ").arg(locale->formatByteSize(pv->getRemaining())).arg(100 - pv->getPercentUsed());
+                    data << QString("%1 (%%2) ").arg(locale->formatByteSize(pv->getRemaining(), 1, dialect)).arg(100 - pv->getPercentUsed());
 
                 data << "PV"
                      << pv->getVg()->getName()
@@ -190,11 +192,11 @@ void DeviceTree::loadData(QList<StorageDevice *> devices)
                 if (part->getFilesystemSize() > -1 && part->getFilesystemUsed() > -1) {
 
                     if (m_show_total && !m_show_percent)
-                        data << locale->formatByteSize(part->getFilesystemRemaining());
+                        data << locale->formatByteSize(part->getFilesystemRemaining(), 1, dialect);
                     else if (!m_show_total && m_show_percent)
                         data << QString("%%1").arg(100 - part->getFilesystemPercentUsed());
                     else
-                        data << QString("%1 (%%2) ").arg(locale->formatByteSize(part->getFilesystemRemaining())).arg(100 - part->getFilesystemPercentUsed());
+                        data << QString("%1 (%%2) ").arg(locale->formatByteSize(part->getFilesystemRemaining(), 1, dialect)).arg(100 - part->getFilesystemPercentUsed());
                 } else
                     data << "";
 

@@ -197,13 +197,15 @@ void PartitionAddDialog::updatePartition()
     if (free < 0)
         free = 0;
 
+    KLocale::BinaryUnitDialect dialect;
     KLocale *const locale = KGlobal::locale();
-    if (m_use_si_units)
-        locale->setBinaryUnitDialect(KLocale::MetricBinaryDialect);
-    else
-        locale->setBinaryUnitDialect(KLocale::IECBinaryDialect);
 
-    QString preceding_bytes_string = locale->formatByteSize(offset * m_sector_size);
+    if (m_use_si_units)
+        dialect = KLocale::MetricBinaryDialect;
+    else
+        dialect = KLocale::IECBinaryDialect;
+
+    QString preceding_bytes_string = locale->formatByteSize(offset * m_sector_size, 1, dialect);
     m_preceding_label->setText(i18n("Preceding space: %1", preceding_bytes_string));
 
     PedSector following = m_max_part_size - (size + offset);
@@ -215,7 +217,7 @@ void PartitionAddDialog::updatePartition()
     if (following_space < 32 * m_sector_size)
         following_space = 0;
 
-    QString following_bytes_string = locale->formatByteSize(following_space);
+    QString following_bytes_string = locale->formatByteSize(following_space, 1, dialect);
     m_remaining_label->setText(i18n("Following space: %1", following_bytes_string));
 
     m_display_graphic->setPrecedingSectors(offset);
@@ -311,13 +313,15 @@ QGroupBox* PartitionAddDialog::buildInfoGroup()
     m_remaining_label = new QLabel();
     layout->addWidget(m_remaining_label);
 
+    KLocale::BinaryUnitDialect dialect;
     KLocale *const locale = KGlobal::locale();
-    if (m_use_si_units)
-        locale->setBinaryUnitDialect(KLocale::MetricBinaryDialect);
-    else
-        locale->setBinaryUnitDialect(KLocale::IECBinaryDialect);
 
-    QString total_bytes = locale->formatByteSize(m_max_part_size * m_sector_size);
+    if (m_use_si_units)
+        dialect = KLocale::MetricBinaryDialect;
+    else
+        dialect = KLocale::IECBinaryDialect;
+
+    QString total_bytes = locale->formatByteSize(m_max_part_size * m_sector_size, 1, dialect);
     QLabel *const excluded_label = new QLabel(i18n("Maximum size: %1",  total_bytes));
     layout->addWidget(excluded_label);
     layout->addSpacing(10);

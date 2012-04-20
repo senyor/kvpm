@@ -208,11 +208,13 @@ void PVMoveDialog::buildDialog()
     skeleton.setCurrentGroup("General");
     skeleton.addItemBool("use_si_units", use_si_units, false);
 
+    KLocale::BinaryUnitDialect dialect;
     KLocale *const locale = KGlobal::locale();
+
     if (use_si_units)
-        locale->setBinaryUnitDialect(KLocale::MetricBinaryDialect);
+        dialect = KLocale::MetricBinaryDialect;
     else
-        locale->setBinaryUnitDialect(KLocale::IECBinaryDialect);
+        dialect = KLocale::IECBinaryDialect;
 
     QLabel *label;
     NoMungeRadioButton *radio_button;
@@ -256,15 +258,15 @@ void PVMoveDialog::buildDialog()
 
             if (m_move_segment) {
                 m_pv_used_space = (1 + m_sources[x]->end - m_sources[x]->start) * m_vg->getExtentSize();
-                radio_button = new NoMungeRadioButton(QString("%1  %2").arg(m_sources[x]->name_range).arg(locale->formatByteSize(m_pv_used_space)));
+                radio_button = new NoMungeRadioButton(QString("%1  %2").arg(m_sources[x]->name_range).arg(locale->formatByteSize(m_pv_used_space, 1, dialect)));
                 radio_button->setAlternateText(m_sources[x]->name);
             } else if (m_move_lv) {
                 m_pv_used_space = m_lv->getSpaceUsedOnPv(m_sources[x]->name);
-                radio_button = new NoMungeRadioButton(QString("%1  %2").arg(m_sources[x]->name).arg(locale->formatByteSize(m_pv_used_space)));
+                radio_button = new NoMungeRadioButton(QString("%1  %2").arg(m_sources[x]->name).arg(locale->formatByteSize(m_pv_used_space, 1, dialect)));
                 radio_button->setAlternateText(m_sources[x]->name);
             } else {
                 m_pv_used_space = m_vg->getPvByName(m_sources[x]->name)->getSize() - m_vg->getPvByName(m_sources[x]->name)->getRemaining();
-                radio_button = new NoMungeRadioButton(QString("%1  %2").arg(m_sources[x]->name).arg(locale->formatByteSize(m_pv_used_space)));
+                radio_button = new NoMungeRadioButton(QString("%1  %2").arg(m_sources[x]->name).arg(locale->formatByteSize(m_pv_used_space, 1, dialect)));
                 radio_button->setAlternateText(m_sources[x]->name);
             }
 
@@ -289,13 +291,13 @@ void PVMoveDialog::buildDialog()
 
         if (m_move_segment) {
             m_pv_used_space = (1 + m_sources[0]->end - m_sources[0]->start) * m_vg->getExtentSize();
-            radio_layout->addWidget(new QLabel(QString("%1  %2").arg(m_sources[0]->name_range).arg(locale->formatByteSize(m_pv_used_space))));
+            radio_layout->addWidget(new QLabel(QString("%1  %2").arg(m_sources[0]->name_range).arg(locale->formatByteSize(m_pv_used_space, 1, dialect))));
         } else if (m_move_lv) {
             m_pv_used_space = m_lv->getSpaceUsedOnPv(m_sources[0]->name);
-            radio_layout->addWidget(new QLabel(QString("%1  %2").arg(m_sources[0]->name).arg(locale->formatByteSize(m_pv_used_space))));
+            radio_layout->addWidget(new QLabel(QString("%1  %2").arg(m_sources[0]->name).arg(locale->formatByteSize(m_pv_used_space, 1, dialect))));
         } else {
             m_pv_used_space = m_vg->getPvByName(m_sources[0]->name)->getSize() - m_vg->getPvByName(m_sources[0]->name)->getRemaining();
-            radio_layout->addWidget(new QLabel(QString("%1  %2").arg(m_sources[0]->name).arg(locale->formatByteSize(m_pv_used_space))));
+            radio_layout->addWidget(new QLabel(QString("%1  %2").arg(m_sources[0]->name).arg(locale->formatByteSize(m_pv_used_space, 1, dialect))));
             source_layout->addWidget(extentWidget());
         }
     }
@@ -453,11 +455,13 @@ QWidget* PVMoveDialog::extentWidget()
     skeleton.addItemBool("use_si_units", use_si_units, false);
     QLabel *label = NULL;
 
+    KLocale::BinaryUnitDialect dialect;
     KLocale *const locale = KGlobal::locale();
+
     if (use_si_units)
-        locale->setBinaryUnitDialect(KLocale::MetricBinaryDialect);
+        dialect = KLocale::MetricBinaryDialect;
     else
-        locale->setBinaryUnitDialect(KLocale::IECBinaryDialect);
+        dialect = KLocale::IECBinaryDialect;
 
     QWidget *const widget = new QWidget();
     QGridLayout *const layout = new QGridLayout();
@@ -481,7 +485,7 @@ QWidget* PVMoveDialog::extentWidget()
             label = new QLabel(lv_names[x]);
             layout->addWidget(label, x + 1, 0);
 
-            label = new QLabel(QString("%1").arg(locale->formatByteSize(lv->getSpaceUsedOnPv(m_sources[0]->name))));
+            label = new QLabel(QString("%1").arg(locale->formatByteSize(lv->getSpaceUsedOnPv(m_sources[0]->name), 1, dialect)));
             label->setAlignment(Qt::AlignRight);
             layout->addWidget(label, x + 1, 1); 
 
