@@ -42,6 +42,7 @@
 #include <KMessageBox>
 #include <KPushButton>
 
+#include <QDebug>
 #include <QLabel>
 #include <QGroupBox>
 #include <QVBoxLayout>
@@ -60,10 +61,9 @@ PartitionChangeDialog::PartitionChangeDialog(StoragePartition *const partition, 
     setup();
 
     const QString fs = m_old_storage_part->getFilesystem();
-    const long long existing_offset = m_existing_part->geom.start - m_max_part_start;
-
-    const long long max_offset = m_max_part_size - m_min_shrink_size;
-    long long max_size;
+    const PedSector existing_offset = m_existing_part->geom.start - m_max_part_start;
+    const PedSector max_offset = m_max_part_size - m_min_shrink_size;
+    PedSector max_size;
 
     if (!(fs_can_extend(fs) || partition->isPhysicalVolume()))
         max_size = m_existing_part->geom.length;
@@ -103,7 +103,6 @@ PartitionChangeDialog::PartitionChangeDialog(StoragePartition *const partition, 
                                               0, max_offset, existing_offset);
     }
 
-
     layout->addWidget(m_dual_selector);
     m_dual_selector->resetSelectors();
     validateChange();
@@ -122,8 +121,8 @@ PartitionChangeDialog::PartitionChangeDialog(StoragePartition *const partition, 
 
 void PartitionChangeDialog::commitPartition()
 {
-    long long new_size   = m_dual_selector->getCurrentSize();
-    long long new_offset = m_dual_selector->getCurrentOffset();
+    PedSector new_size   = m_dual_selector->getCurrentSize();
+    PedSector new_offset = m_dual_selector->getCurrentOffset();
     bool grow   = false;
     bool shrink = false;
     bool move   = ((m_max_part_start + new_offset) != m_existing_part->geom.start);
@@ -164,22 +163,45 @@ void PartitionChangeDialog::commitPartition()
 
 void PartitionChangeDialog::validateChange()
 {
-    if (!m_dual_selector->isValid()) {
-        button(KDialog::Ok)->setEnabled(false);
-        return;
-    }
+    const PedSector ONE_MIB   = 0x100000 / m_sector_size;   // sectors per megabyte
+    const PedSector max_start = m_max_part_start;
+    const PedSector max_end   = max_start + m_max_part_size - 1;
+    const PedSector current_size  = m_existing_part->geom.length;
+    const PedSector current_start = m_existing_part->geom.start;
+    const PedSector new_start     = m_max_part_start + m_dual_selector->getCurrentOffset();
+    const PedSector preceding_sectors = m_dual_selector->getCurrentOffset();
+    const PedSector following_sectors = m_max_part_size - (m_dual_selector->getCurrentOffset() + m_dual_selector->getCurrentSize());
+    const PedSector new_size = m_dual_selector->getCurrentSize();
 
-    const long long preceding_sectors = m_dual_selector->getCurrentOffset();
-    const long long following_sectors = m_max_part_size - (m_dual_selector->getCurrentOffset() + m_dual_selector->getCurrentSize());
-
-    if (preceding_sectors < 0 || following_sectors < 0) {
+    if (!m_dual_selector->isValid() || (preceding_sectors < 0 || following_sectors < 0)) {
         (button(KDialog::Ok))->setEnabled(false);
         return;
     }
 
-    updateGraphicAndLabels();
+    bool moving = false;
+    bool resize = false;
 
-    button(KDialog::Ok)->setEnabled(true);
+    // we don't move if the move is less than 1 megabyte
+    // and check that we have at least 1 meg to spare
+
+    if (fabs(current_start - new_start) >= ONE_MIB){  // moving more than 1 MiB
+        if ((new_start < current_start) && ((current_start - max_start) >= ONE_MIB)) {  // moving left
+            moving = true;
+        } else if ((max_end - (current_start + current_size - 1)) >= ONE_MIB){          // moving right
+            moving = true;
+        }
+    }
+
+    if (fabs(current_size - new_size) >= ONE_MIB){  // resizing by more than 1 MiB?
+        resize = true;
+    }
+
+    if (resize || moving)
+        button(KDialog::Ok)->setEnabled(true);
+    else
+        button(KDialog::Ok)->setEnabled(false);
+
+    updateGraphicAndLabels();
 }
 
 void PartitionChangeDialog::setup()
@@ -285,7 +307,7 @@ void PartitionChangeDialog::setup()
     }
 }
 
-bool PartitionChangeDialog::movefs(long long from_start, long long to_start, long long length)
+bool PartitionChangeDialog::movefs(PedSector from_start, PedSector to_start, PedSector length)
 {
     const long long blocksize = 8000;    // sectors moved in each block
 
@@ -477,7 +499,7 @@ bool PartitionChangeDialog::growPartition()
 
     PedSector proposed_new_size = m_dual_selector->getCurrentSize();
 
-    if (proposed_new_size - 1 + current_start > max_end)
+    if ((proposed_new_size - 1 + current_start) > max_end)
         proposed_new_size = 1 + max_end - current_start;
 
     if (proposed_new_size <= current_size)
@@ -557,7 +579,9 @@ void PartitionChangeDialog::updateGraphicAndLabels()
 {
     const PedSector preceding_sectors = m_dual_selector->getCurrentOffset();
     const PedSector following_sectors = m_max_part_size - (preceding_sectors + m_dual_selector->getCurrentSize());
-    const long long change_size = m_sector_size * (m_dual_selector->getCurrentSize() - m_existing_part->geom.length);
+    const PedSector change_size = m_sector_size * (m_dual_selector->getCurrentSize() - m_existing_part->geom.length);
+    const PedSector existing_offset = m_existing_part->geom.start - m_max_part_start;
+    const PedSector move_size = m_sector_size * (preceding_sectors - existing_offset);
 
     m_display_graphic->setPrecedingSectors(preceding_sectors);
     m_display_graphic->setPartitionSectors(m_dual_selector->getCurrentSize());
@@ -572,23 +596,33 @@ void PartitionChangeDialog::updateGraphicAndLabels()
     else
         dialect = KLocale::IECBinaryDialect;
 
+    QString change;
+
     if (change_size < 0) {
-        QString change = locale->formatByteSize(qAbs(change_size), 1, dialect);
+        change = locale->formatByteSize(qAbs(change_size), 1, dialect);
         m_change_by_label->setText(i18n("<b>Shrink by : -%1</b>", change));
     } else {
-        QString change = locale->formatByteSize(change_size, 1, dialect);
+        change = locale->formatByteSize(change_size, 1, dialect);
         m_change_by_label->setText(i18n("<b>Grow by : %1</b>", change));
+    }
+
+    if (move_size < 0) {
+        change = locale->formatByteSize(qAbs(move_size), 1, dialect);
+        m_move_by_label->setText(i18n("<b>Move by : -%1</b>", change));
+    } else {
+        change = locale->formatByteSize(move_size, 1, dialect);
+        m_move_by_label->setText(i18n("<b>Move by : %1</b>", change));
     }
 
     QString preceding_bytes_string = locale->formatByteSize(preceding_sectors * m_sector_size, 1, dialect);
     m_preceding_label->setText(i18n("Preceding space: %1", preceding_bytes_string));
 
-    long long following_space = following_sectors * m_sector_size;
+    PedSector following_space = following_sectors * m_sector_size;
 
     if (following_space < 0)
         following_space = 0;
 
-    QString following_bytes_string = locale->formatByteSize(following_space, 1, dialect);
+    const QString following_bytes_string = locale->formatByteSize(following_space, 1, dialect);
     m_following_label->setText(i18n("Following space: %1", following_bytes_string));
 }
 
@@ -694,7 +728,7 @@ bool PartitionChangeDialog::pedCommitAndWait(PedDisk *disk)
     }
 }
 
-QGroupBox *PartitionChangeDialog::buildInfoGroup(const long long maxSize)
+QGroupBox *PartitionChangeDialog::buildInfoGroup(const PedSector maxSize)
 {
     QGroupBox   *const group = new QGroupBox();
     QVBoxLayout *const layout = new QVBoxLayout();
@@ -717,6 +751,7 @@ QGroupBox *PartitionChangeDialog::buildInfoGroup(const long long maxSize)
         dialect = KLocale::IECBinaryDialect;
 
     m_change_by_label = new QLabel();
+    m_move_by_label   = new QLabel();
     m_preceding_label = new QLabel();
     m_following_label = new QLabel();
     layout->addWidget(m_preceding_label);
@@ -727,6 +762,7 @@ QGroupBox *PartitionChangeDialog::buildInfoGroup(const long long maxSize)
     layout->addStretch();
     layout->addSpacing(10);
     layout->addWidget(m_change_by_label);
+    layout->addWidget(m_move_by_label);
 
     return group;
 }

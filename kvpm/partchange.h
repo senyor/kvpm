@@ -39,9 +39,9 @@ class PartitionChangeDialog : public KDialog
     bool m_bailout;
 
     PedSector m_min_shrink_size;     // Minimum size of the fs after shrinking
-    long long m_sector_size;         // bytes per logical sector
-    long long m_max_part_start;      // start of biggest possible partition
-    long long m_max_part_size;       // size of largest possible partition
+    PedSector m_sector_size;         // bytes per logical sector
+    PedSector m_max_part_start;      // start of biggest possible partition
+    PedSector m_max_part_size;       // size of largest possible partition
 
     PartitionGraphic *m_display_graphic; // The color bar that shows the relative
     // size of the partition graphically
@@ -49,19 +49,20 @@ class PartitionChangeDialog : public KDialog
     DualSelectorBox *m_dual_selector;
 
     QLabel *m_change_by_label,  // How much are we growing or shrinking the partition?
+           *m_move_by_label,    // How much are we moving the partition?
            *m_preceding_label,  // Free space before the proposed partition
            *m_following_label;
 
     bool m_logical;      // Are we a logical partition?
 
     void setup();
-    bool movefs(const long long from_start, const long long to_start, const long long length);
+    bool movefs(const PedSector from_start, const PedSector to_start, const PedSector length);
     bool shrinkPartition();
     bool growPartition();
     bool movePartition();
     void updateGraphicAndLabels();
     bool pedCommitAndWait(PedDisk *const disk);
-    QGroupBox *buildInfoGroup(const long long maxSize);
+    QGroupBox *buildInfoGroup(const PedSector maxSize);
 
 public:
     explicit PartitionChangeDialog(StoragePartition *const partition, QWidget *parent = 0);
