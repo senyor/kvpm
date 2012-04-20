@@ -15,6 +15,8 @@
 
 #include "progressbox.h"
 
+#include <KApplication>
+
 #include <QDebug>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -39,36 +41,49 @@ ProgressBox::ProgressBox(QWidget *parent) : QFrame(parent)
 
 void ProgressBox::setText(const QString text)
 {
-    show();
+    hide();
 
     if (!text.isEmpty())
         m_message->setText(text + " >>");
     else
         m_message->clear();
+
+    show();
+    qApp->processEvents();
 }
 
 void ProgressBox::setRange(const int start, const int end)
 {
-    show();
+    hide();
 
     m_progressbar->setRange(start, end);
     m_message->clear();
+
+    show();
+    qApp->processEvents();
+
 }
 
 void ProgressBox::setValue(const int value)
 {
-    show();
+    hide();
 
     m_progressbar->setValue(value);
     if (value >= m_progressbar->maximum())
         m_message->clear();
+
+    show();
+    qApp->processEvents();
 }
 
 void ProgressBox::reset()
 {
-    show();
+    hide();
 
     m_progressbar->setRange(0, 1);
     m_progressbar->setValue(1);
     m_message->clear();
+
+    show();
+    qApp->processEvents();
 }
