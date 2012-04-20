@@ -313,7 +313,7 @@ QWidget* LVCreateDialog::createPhysicalTab()
 
     physical_volumes = m_vg->getPhysicalVolumes();
     for (int x = physical_volumes.size() - 1; x >= 0; x--) {
-        if (physical_volumes[x]->getRemaining() < 1)   // remove pvs with no free space
+        if (physical_volumes[x]->getRemaining() < 1 || !physical_volumes[x]->isAllocatable())
             physical_volumes.removeAt(x);
     }
 
@@ -846,8 +846,13 @@ long long LVCreateDialog::roundExtentsToStripes(long long extents)
 
 bool LVCreateDialog::hasInitialErrors()
 {
-    if (!m_vg->getFreeExtents()) {
-        KMessageBox::error(this, i18n("There is no free space left in the volume group"));
+    if (!m_vg->getAllocatableExtents()) {
+        if (m_vg->getFreeExtents())
+            KMessageBox::error(this, i18n("All free physical volume extents in this group"
+                                          " are locked against allocation"));
+        else
+            KMessageBox::error(this, i18n("There are no allocatable free extents in this volume group"));
+
         return true;
     }
 

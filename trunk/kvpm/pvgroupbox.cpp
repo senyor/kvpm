@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -26,6 +26,7 @@
 #include <KLocale>
 #include <KPushButton>
 
+#include <QDebug>
 
 
 PvGroupBox::PvGroupBox(QList<PhysVol *> volumes, bool const target, QWidget *parent)
@@ -336,12 +337,9 @@ void PvGroupBox::setExtentSize(uint64_t extentSize)
 
 void PvGroupBox::disableOrigin(PhysVol *originVolume)
 {
+    if (originVolume && m_pv_checks.size()) {
 
-    QString name;
-
-    if (originVolume) {
-
-        name = originVolume->getName();
+        const QString name = originVolume->getName();
 
         for (int x = 0; x < m_pvs.size(); x++) {
             if (m_pvs[x]->getName() == name) {

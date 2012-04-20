@@ -38,8 +38,8 @@ class VolGroup
     long long m_free;      // free space in bytes
     long long m_extents;
     long long m_free_extents;         // free extents are not always useable
-    long long m_allocatable_extents; // extents on some physical volumes
-    // may not be allocateable
+    long long m_allocatable_extents;  // extents on some physical volumes
+                                      // may not be allocateable
     QString m_vg_name;                // this volume group name
     QString m_uuid;
     QString m_allocation_policy;

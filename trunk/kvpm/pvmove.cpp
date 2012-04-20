@@ -181,9 +181,8 @@ PVMoveDialog::PVMoveDialog(LogVol *const logicalVolume, int const segment, QWidg
 
 void PVMoveDialog::removeFullTargets()
 {
-
-    for (int x = (m_target_pvs.size() - 1); x >= 0; x--) {
-        if (m_target_pvs[x]->getRemaining() <= 0)
+    for (int x = m_target_pvs.size() - 1; x >= 0; x--) {
+        if (m_target_pvs[x]->getRemaining() <= 0 || !m_target_pvs[x]->isAllocatable())
             m_target_pvs.removeAt(x);
     }
 
@@ -191,7 +190,7 @@ void PVMoveDialog::removeFullTargets()
        all full then a pv move will have no place to go */
 
     if (m_target_pvs.size() < 1) {
-        KMessageBox::error(NULL, i18n("There are no available physical volumes with space to move to"));
+        KMessageBox::error(NULL, i18n("There are no allocatable physical volumes with space to move to"));
         m_bailout = true;
     }
 }
@@ -363,7 +362,6 @@ void PVMoveDialog::disableSource()  // don't allow source and target to be the s
     }
 
     m_pv_checkbox->disableOrigin(source_pv);
-
     resetOkButton();
 }
 
