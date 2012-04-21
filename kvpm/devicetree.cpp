@@ -18,6 +18,7 @@
 #include <KIcon>
 #include <KLocale>
 
+#include <QDebug>
 
 #include "deviceactionsmenu.h"
 #include "devicepropertiesstack.h"
@@ -67,7 +68,7 @@ void DeviceTree::loadData(QList<StorageDevice *> devices)
     StorageDevice *dev = NULL;
     PhysVol *pv = NULL;
     QStringList data, expanded_items, old_dev_names;
-    QString dev_name, part_name, type, current_device;
+    QString dev_name, part_name, type, current_device, current_parent;
     QVariant part_variant, dev_variant;
 
     /*
@@ -94,8 +95,14 @@ void DeviceTree::loadData(QList<StorageDevice *> devices)
     else
         dialect = KLocale::IECBinaryDialect;
 
-    if (currentItem())
+    if (currentItem()){
         current_device = currentItem()->data(0, Qt::DisplayRole).toString();
+
+        if (currentItem()->parent())
+            current_parent = currentItem()->parent()->data(0, Qt::DisplayRole).toString();
+        else
+            current_parent = current_device;
+    }
 
     old_dev_names.clear();
     for (int x = topLevelItemCount() - 1; x >= 0; x--) {
@@ -357,8 +364,18 @@ void DeviceTree::loadData(QList<StorageDevice *> devices)
                         break;
                     }
                 }
+                if ((child->data(0, Qt::DisplayRole).toString() == current_parent) && (!match)) {
+                    match = true;
+                    setCurrentItem(child);
+                    break;
+                }
                 if (match)
                     break;
+            }
+            if ((parent->data(0, Qt::DisplayRole).toString() == current_parent) && (!match)) {
+                match = true;
+                setCurrentItem(parent);
+                break;
             }
             if (match)
                 break;
