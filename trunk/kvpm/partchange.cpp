@@ -63,12 +63,7 @@ PartitionChangeDialog::PartitionChangeDialog(StoragePartition *const partition, 
     const QString fs = m_old_storage_part->getFilesystem();
     const PedSector existing_offset = m_existing_part->geom.start - m_max_part_start;
     const PedSector max_offset = m_max_part_size - m_min_shrink_size;
-    PedSector max_size;
-
-    if (!(fs_can_extend(fs) || partition->isPhysicalVolume()))
-        max_size = m_existing_part->geom.length;
-    else
-        max_size = m_max_part_size;
+    PedSector max_size = m_max_part_size;
 
     setButtons(KDialog::Ok | KDialog::Cancel | KDialog::Reset);
     setWindowTitle(i18n("Move or resize a partition"));
@@ -226,8 +221,10 @@ void PartitionChangeDialog::setup()
                                   "\n\n"
                                   "Note: currently only ext2, ext3, ext4 and physical volumes can be shrunk.");
 
-    const QString message2 = i18n("Growing or shrinking this filesystem is not supported, only"
-                                  " moving it is possible."
+
+    const QString warning3 = i18n("If this partition is enlarged, any filesystem or data on it"
+                                  " will need to be extended separately. Shrinking this"
+                                  " partition is not supported."
                                   "\n\n"
                                   "Note: currently only ext2, ext3, ext4 and physical volumes"
                                   " can be both shrunk and grown,"
@@ -257,10 +254,17 @@ void PartitionChangeDialog::setup()
 
     if (!m_bailout){
         if (!(fs == "ext2" || fs == "ext3" || fs == "ext4" || m_old_storage_part->isPhysicalVolume())){
-            if((fs == "jfs") || (fs == "xfs") || (fs == "ntfs") || (fs == "reiserfs"))
+            if((fs == "jfs") || (fs == "xfs") || (fs == "ntfs") || (fs == "reiserfs")){
                 KMessageBox::information(0, message1);
-            else
-                KMessageBox::information(0, message2);
+            } else if (KMessageBox::warningContinueCancel(NULL,
+                                                          warning3,
+                                                          QString(),
+                                                          KStandardGuiItem::cont(),
+                                                          KStandardGuiItem::cancel(),
+                                                          QString(),
+                                                          KMessageBox::Dangerous) != KMessageBox::Continue) {
+                m_bailout = true;
+            }
         }
     }
 
@@ -561,17 +565,12 @@ bool PartitionChangeDialog::growPartition()
 
         pedCommitAndWait(m_ped_disk);
 
-        if (is_pv) {
-            if (pv_extend(ped_partition_get_path(m_existing_part)))
-                return true;
-            else
-                return false;
-        } else {
-            if (fs_extend(ped_partition_get_path(m_existing_part), fs, m_old_storage_part->getMountPoints()))
-                return true;
-            else
-                return false;
-        }
+        if (is_pv)
+            return pv_extend(ped_partition_get_path(m_existing_part));
+        else if (fs_can_extend(fs))
+            return fs_extend(ped_partition_get_path(m_existing_part), fs, m_old_storage_part->getMountPoints());
+        else
+            return true;
     }
 }
 
