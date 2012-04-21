@@ -67,17 +67,14 @@ DeviceChartSeg::DeviceChartSeg(QTreeWidgetItem *storageItem, QWidget *parent) :
 
         m_partition = (StoragePartition *)((m_item->data(0, Qt::UserRole)).value<void *>());
 
-        if (m_partition->getPedType() & 0x02) {   // extended
-            setFrameStyle(QFrame::Sunken | QFrame::Panel);
-            setLineWidth(2);
+        setFrameStyle(QFrame::Sunken | QFrame::Panel);
+        setLineWidth(2);
+
+        if (m_partition->getPedType() & PED_PARTITION_EXTENDED) {
             colorset.setColor(QPalette::Window, Qt::green);
-        } else if (m_partition->getPedType() & 0x04) { // freespace
-            setFrameStyle(QFrame::Sunken | QFrame::Panel);
-            setLineWidth(2);
+        } else if (m_partition->getPedType() &  PED_PARTITION_FREESPACE) {
             colorset.setColor(QPalette::Window, Qt::green);
         } else {
-            setFrameStyle(QFrame::Sunken | QFrame::Panel);
-            setLineWidth(2);
 
             if (use == "ext2")
                 colorset.setColor(QPalette::Window, ext2_color);
@@ -113,6 +110,7 @@ DeviceChartSeg::DeviceChartSeg(QTreeWidgetItem *storageItem, QWidget *parent) :
     } else { // whole device, not a partition
         setFrameStyle(QFrame::Sunken | QFrame::Panel);
         setLineWidth(2);
+
         if (use == "PV")
             colorset.setColor(QPalette::Window, physical_color);
         else

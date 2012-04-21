@@ -29,8 +29,8 @@
 
 DeviceSizeChart::DeviceSizeChart(QWidget *parent) : QFrame(parent)
 {
-    setFrameStyle(QFrame::Sunken | QFrame::Panel);
-    setLineWidth(2);
+    //    setFrameStyle(QFrame::Sunken | QFrame::Panel);
+    //    setLineWidth(2);
 
     m_layout = new QHBoxLayout();
     m_layout->setSpacing(0);
