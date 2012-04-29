@@ -160,13 +160,14 @@ void DeviceActionsMenu::setup(QTreeWidgetItem *item)
                 m_maxfs_action->setEnabled(false);
                 m_mkfs_action->setEnabled(false);
                 m_partremove_action->setEnabled(false);
+
                 if (m_part->getPhysicalVolume()->isActive()) {
                     m_partchange_action->setEnabled(false);
-                    m_maxpv_action->setEnabled(false);
                 } else {
                     m_partchange_action->setEnabled(true);
-                    m_maxpv_action->setEnabled(true);
                 }
+
+                m_maxpv_action->setEnabled(true);
                 m_partadd_action->setEnabled(false);
                 m_removefs_action->setEnabled(false);
                 m_vgcreate_action->setEnabled(false);
@@ -212,10 +213,7 @@ void DeviceActionsMenu::setup(QTreeWidgetItem *item)
             if (m_dev->isPhysicalVolume()) {
                 m_tablecreate_action->setEnabled(false);
                 m_mkfs_action->setEnabled(false);
-                if (m_dev->getPhysicalVolume()->isActive())
-                    m_maxpv_action->setEnabled(false);
-                else
-                    m_maxpv_action->setEnabled(true);
+                m_maxpv_action->setEnabled(true);
                 m_partremove_action->setEnabled(false);
                 m_partchange_action->setEnabled(false);
                 m_partadd_action->setEnabled(false);
