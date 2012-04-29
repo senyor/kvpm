@@ -18,18 +18,19 @@
 #include "fsextend.h"
 #include "logvol.h"
 #include "processprogress.h"
+#include "physvol.h"
 #include "pvextend.h"
 #include "storagedevice.h"
 #include "storagepartition.h"
 
-#include <KMessageBox>
 #include <KLocale>
+#include <KMessageBox>
 
-#include <QString>
 #include <QDebug>
+#include <QString>
 
 
-bool max_fs(LogVol *logicalVolume)
+bool max_fs(LogVol *const logicalVolume)
 {
     const QString path = logicalVolume->getMapperPath();
     const QString fs   = logicalVolume->getFilesystem();
@@ -58,24 +59,30 @@ bool max_fs(LogVol *logicalVolume)
     }
 }
 
-bool max_fs(StoragePartition *partition)
+bool max_fs(StoragePartition *const partition)
 {
     const QString path = partition->getName();
     const QString fs = partition->getFilesystem();
-    const QString error_message = i18n("Filesystem extending is only supported for ext2, ext3, ext4, jfs, xfs, ntfs and Reiserfs. "
-                                       "Physical volumes can also be extended. "
-                                       "The correct executables for file system extension must be present");
+    const QString error_fs = i18n("Filesystem extending is only supported for ext2, ext3, ext4, jfs, xfs, ntfs and Reiserfs. "
+                                  "Physical volumes can also be extended. "
+                                  "The correct executables for file system extension must be present");
+    const QString error_active = i18n("Physical volumes cannot be extended if they contain any active logical volumes");
 
     QString message;
 
-    if (partition->isPhysicalVolume())
-        message = i18n("Extend the physical volume on: %1 to fill the entire partition?", "<b>" + path + "</b>");
-    else
+    if (partition->isPhysicalVolume()) {
+        if (partition->getPhysicalVolume()->isActive()) {
+            KMessageBox::error(0, error_active);
+            return false;
+        } else {
+            message = i18n("Extend the physical volume on: %1 to fill the entire partition?", "<b>" + path + "</b>");
+        }
+    } else {
         message = i18n("Extend the filesystem on: %1 to fill the entire partition?", "<b>" + path + "</b>");
-
+    }
 
     if (!(fs_can_extend(fs) || partition->isPhysicalVolume())) {
-        KMessageBox::error(0, error_message);
+        KMessageBox::error(0, error_fs);
         return false;
     }
 
@@ -96,13 +103,18 @@ bool max_fs(StoragePartition *partition)
     return false;
 }
 
-bool max_fs(StorageDevice *device)
+bool max_fs(StorageDevice *const device)
 {
     const QString path = device->getName();
     const QString warning = i18n("Extend the physical volume on: %1 to fill the entire partition?", "<b>" + path + "</b>");
+    const QString error_active = i18n("Physical volumes cannot be extended if they contain any active logical volumes");
 
-    if (! device->isPhysicalVolume())
+    if (!device->isPhysicalVolume()) {
         return false;
+    } else if (device->getPhysicalVolume()->isActive()) {
+        KMessageBox::error(0, error_active);
+        return false;
+    }
 
     if (KMessageBox::warningYesNo(NULL,
                                   warning,

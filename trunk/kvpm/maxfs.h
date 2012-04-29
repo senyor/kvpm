@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -19,8 +19,8 @@ class LogVol;
 class StoragePartition;
 class StorageDevice;
 
-bool max_fs(LogVol *logicalVolume);
-bool max_fs(StoragePartition *partition);
-bool max_fs(StorageDevice *device);
+bool max_fs(LogVol *const logicalVolume);
+bool max_fs(StoragePartition *const partition);
+bool max_fs(StorageDevice *const device);
 
 #endif
