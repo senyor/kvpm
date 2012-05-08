@@ -436,11 +436,12 @@ void VolGroup::processLogicalVolumes(vg_t lvmVG)
                 case 'O':
                 case 'o':
                 case 'p':
-                    lvm_lvs_all_top.append(lv_list->lv);
-                    break;
                 case 'M':
                 case 'm':
+                case 'r':
                     lvm_lvs_all_top.append(lv_list->lv);
+                    break;
+                case 'e':    // skip metadata
                     break;
                 default:
                     lvm_lvs_all_children.append(lv_list->lv);
@@ -476,6 +477,7 @@ void VolGroup::processLogicalVolumes(vg_t lvmVG)
         lv_t lvm_lv_orphan;                // non-top lvm logical volume handle with no home
         while ((lvm_lv_orphan = findOrphan(lvm_lvs_all_children)))
             m_member_lvs.append(new LogVol(lvm_lv_orphan, lvmVG, this, NULL, m_tables, true));
+
     } else {   // lv_dm_list is empty so clean up member lvs
         for (int x = m_member_lvs.size() - 1; x >= 0; x--)
             delete m_member_lvs.takeAt(x);

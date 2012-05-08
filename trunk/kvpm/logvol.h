@@ -75,8 +75,11 @@ class LogVol
     bool m_virtual;              // virtual volume
     bool m_under_conversion;     // Is going to be a mirrored volume
     bool m_mirror;               // Is a mirrored volume
+    bool m_metadata;             // Is RAID or thin pool metadata
     bool m_mirror_leg;           // Is one of the underlying legs of a mirrored volume
     bool m_mirror_log;           // Is the log for a mirrored volume
+    bool m_raid;                 // Is a raid volume
+    bool m_raid_device;          // Is a raid device under a raid volume
     bool m_fixed, m_persistent;  // fix the device minor and major number
 
     bool m_alloc_locked;         // allocation type is fixed when pvmove is underway
@@ -92,9 +95,10 @@ class LogVol
     bool m_writable;
     bool m_valid;                // is a valid snap
     bool m_merging;              // is snap or snap origin that is merging
+    bool m_thin;                 // is thin
 
     void countLegsAndLogs();
-    void processSegments(lv_t lvmLV);
+    void processSegments(lv_t lvmLV, const QByteArray flags);
     QStringList removePvNames(QStringList names);  // list lv children that are lvs and not devices or pvmove*
     QList<lv_t> getLvmSnapshots(vg_t lvmVG);
     void insertChildren(lv_t lvmLV, vg_t lvmVG);
@@ -152,6 +156,7 @@ public:
     bool isFixed();
     bool isLocked();
     bool isMerging();
+    bool isMetadata();
     bool isMirror();
     bool isMirrorLeg();
     bool isMirrorLog();
@@ -161,8 +166,11 @@ public:
     bool isOrphan();
     bool isPersistent();
     bool isPvmove();
+    bool isRaid();
+    bool isRaidDevice();
     bool isSnap();
     bool isSnapContainer();
+    bool isThin();
     bool isUnderConversion();
     bool isValid();
     bool isVirtual();

@@ -15,6 +15,7 @@
 
 #include "lvsizechart.h"
 
+#include <QDebug>
 #include <QHBoxLayout>
 #include <QHeaderView>
 #include <QResizeEvent>
@@ -76,6 +77,7 @@ void LVSizeChart::populateChart()
 
     const long long free_extents  = m_vg->getFreeExtents();
     const long long total_extents = m_vg->getExtents();
+    const long long extent_size   = m_vg->getExtentSize();
     const int lv_count = logical_volumes.size();
 
     QString usage;                   // Filesystem: blank, ext2 etc. or freespace in vg
@@ -84,20 +86,19 @@ void LVSizeChart::populateChart()
     for (int x = 0; x < lv_count; x++) {
         m_lv = logical_volumes[x];
 
-        if (!m_lv->isMirrorLeg() &&
-                !m_lv->isMirrorLog() &&
-                !m_lv->isVirtual() &&
-                !(m_lv->isMirror() && !(m_lv->getOrigin()).isEmpty())) {
-
+        if (!m_lv->isMirrorLeg()  &&
+            !m_lv->isMirrorLog()  &&
+            !m_lv->isVirtual()    &&
+            !m_lv->isRaidDevice() &&
+            !(m_lv->isMirror() && !(m_lv->getOrigin()).isEmpty())) {
+ 
             usage = m_lv->getFilesystem();
 
-            if (m_lv->isMirror())
-                seg_ratio = (m_lv->getExtents() + m_lv->getLogCount()) / (double) total_extents;
-            else
+            if (m_lv->isMirror() || m_lv->isRaid()){
+                seg_ratio = (m_lv->getTotalSize() / (double) extent_size) / (double) total_extents;
+            } else {
                 seg_ratio = m_lv->getExtents() / (double) total_extents;
-
-            if (m_lv->isMirror())
-                seg_ratio *= m_lv->getMirrorCount();
+            }
 
             m_ratios.append(seg_ratio);
             widget = new LVChartSeg(m_vg, m_lv, usage, this);
@@ -106,7 +107,6 @@ void LVSizeChart::populateChart()
         }
     }
 
-    //    if( free_extents && !m_vg->isExported() ){ // only create a free space widget if we have some
     if (free_extents) { // only create a free space widget if we have some
         seg_ratio = (free_extents / (double) total_extents) + 0.02; // allow a little "stretch" 0.02
         usage = "freespace" ;
@@ -116,7 +116,7 @@ void LVSizeChart::populateChart()
         m_layout->addWidget(widget);
         m_ratios.append(seg_ratio);
     } else if (m_widgets.size() == 0) { // if we have no chart segs then put in a blank one
-        // because lvsizechart won't work with zero segments
+                                        // because lvsizechart won't work with zero segments
         usage = "" ;
         widget = new LVChartSeg(m_vg, 0, usage, this);
         m_widgets.append(widget);
