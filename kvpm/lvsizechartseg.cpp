@@ -19,6 +19,7 @@
 #include <KLocale>
 #include <KMenu>
 
+#include <QDebug>
 #include <QHBoxLayout>
 #include <QString>
 

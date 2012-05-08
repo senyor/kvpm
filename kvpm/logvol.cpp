@@ -73,15 +73,19 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)  // lv_t seems to change -- why?
     bool was_snap_container = m_snap_container;
     m_snap_container   = false;
     m_under_conversion = false;
-    m_is_origin  = false;
-    m_merging    = false;
-    m_mirror     = false;
-    m_mirror_leg = false;
-    m_mirror_log = false;
-    m_snap       = false;
-    m_pvmove     = false;
-    m_valid      = true;
-    m_virtual    = false;
+    m_is_origin   = false;
+    m_merging     = false;
+    m_metadata    = false;
+    m_mirror      = false;
+    m_mirror_leg  = false;
+    m_mirror_log  = false;
+    m_raid        = false;
+    m_raid_device = false;
+    m_snap        = false;
+    m_thin        = false;
+    m_pvmove      = false;
+    m_valid       = true;
+    m_virtual     = false;
 
     /*
 
@@ -96,7 +100,10 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)  // lv_t seems to change -- why?
     m_lv_name = QString(value.value.string).trimmed();
     m_lv_full_name = m_vg->getName() + '/' + m_lv_name;
 
-    processSegments(lvmLV);  // sets m_mirror according to segment property "regionsize" -- total hack!
+    value = lvm_lv_get_property(lvmLV, "lv_attr");
+    flags.append(value.value.string);
+
+    processSegments(lvmLV, flags);  // sets m_mirror according to segment property "regionsize" -- total hack!
 
     value = lvm_lv_get_property(lvmLV, "lv_path");
     m_lv_mapper_path = QString(value.value.string).trimmed();
@@ -116,24 +123,47 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)  // lv_t seems to change -- why?
         m_seg_total = value.value.integer;
     }
 
-    value = lvm_lv_get_property(lvmLV, "lv_attr");
-    flags.append(value.value.string);
-
     switch (flags[0]) {
     case 'c':
         m_type = "under conversion";
         m_mirror = true;
         m_under_conversion = true;
         break;
+    case 'e':
+        m_type = "metadata";
+        m_metadata = true;
+        break;
     case 'I':
-        m_type = "mirror leg";
+        if (flags.size() <= 6) {
+            m_type = "mirror leg";
+            additional_state = "un-synced";
+            m_mirror_leg = true;
+        } else {
+            if (flags[6] == 'r'){
+                m_type = "raid device";
+                m_raid_device = true;
+            } else {
+                m_type = "mirror leg";
+                m_mirror_leg = true;
+            }
+        }
         additional_state = "un-synced";
-        m_mirror_leg = true;
         break;
     case 'i':
-        m_type = "mirror leg";
+        if (flags.size() <= 6) {
+            m_type = "mirror leg";
+            additional_state = "un-synced";
+            m_mirror_leg = true;
+        } else {
+            if (flags[6] == 'r'){
+                m_type = "raid device";
+                m_raid_device = true;
+            } else {
+                m_type = "mirror leg";
+                m_mirror_leg = true;
+            }
+        }
         additional_state = "synced";
-        m_mirror_leg = true;
         break;
     case 'L':
     case 'l':
@@ -161,6 +191,14 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)  // lv_t seems to change -- why?
     case 'p':
         m_type = "pvmove";
         m_pvmove = true;
+        break;
+    case 'r':
+        m_type = "raid";
+        m_raid = true;
+        break;
+    case 'R':
+        m_type = "raid";
+        m_raid = true;
         break;
     case 's':
         m_type = "snapshot";
@@ -380,12 +418,25 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)  // lv_t seems to change -- why?
 
     if (m_snap_container) {
         m_type = "origin";
-    } else if (m_type.contains("origin", Qt::CaseInsensitive) && ! m_snap_container) {
-
-        if (m_mirror)
-            m_type = "mirror";
-        else
-            m_type = "linear";
+    } else if (m_type.contains("origin", Qt::CaseInsensitive) && !m_snap_container) {
+        if(flags.size() <= 6){
+            if (m_mirror)
+                m_type = "mirror";
+            else
+                m_type = "linear";
+        }
+        else {
+            if (flags[6] == 'm') {
+                m_type = "mirror";
+            } else if (flags[6] == 'r') {
+                m_type = "raid";
+                m_raid = true;
+            } else if (flags[6] == 't') {
+                m_type = "thin";
+                m_thin = true;
+            } else
+                m_type = "linear";
+        }
     }
 
     insertChildren(lvmLV, lvmVG);
@@ -502,7 +553,7 @@ void LogVol::calculateTotalSize()
     }
 }
 
-void LogVol::processSegments(lv_t lvmLV)
+void LogVol::processSegments(lv_t lvmLV, const QByteArray flags)
 {
     Segment *segment;
     QStringList devices_and_starts, temp;
@@ -517,35 +568,43 @@ void LogVol::processSegments(lv_t lvmLV)
 
     if (lvseg_dm_list) {
         dm_list_iterate_items(lvseg_list, lvseg_dm_list) {
-
             lvm_lvseg = lvseg_list->lvseg;
-            value = lvm_lvseg_get_property(lvm_lvseg, "regionsize");
-            if (value.is_valid) {
-                if (value.value.integer)
+            if(flags.size() <= 6){
+                value = lvm_lvseg_get_property(lvm_lvseg, "regionsize");
+                if (value.is_valid) {
+                    if (value.value.integer)
+                        m_mirror = true;
+                }
+            } else {
+                if (flags[6] == 'm')
                     m_mirror = true;
             }
-
+   
             segment = new Segment();
 
-            if (m_mirror) {
+            if (m_mirror || flags[6] == 'r') {
                 segment->m_stripes = 1;
                 segment->m_stripe_size = 1;
                 segment->m_size = 1;
             } else {
                 value = lvm_lvseg_get_property(lvm_lvseg, "stripes");
-                segment->m_stripes = value.value.integer;
+                if (value.is_valid)
+                    segment->m_stripes = value.value.integer;
 
                 value = lvm_lvseg_get_property(lvm_lvseg, "stripesize");
-                segment->m_stripe_size = value.value.integer;
+                if (value.is_valid)
+                    segment->m_stripe_size = value.value.integer;
 
                 value = lvm_lvseg_get_property(lvm_lvseg, "seg_size");
-                segment->m_size = value.value.integer;
+                if (value.is_valid)
+                    segment->m_size = value.value.integer;
             }
 
             value = lvm_lvseg_get_property(lvm_lvseg, "devices");
             if (value.is_valid) {
                 raw_paths = value.value.string;
             }
+
             if (raw_paths.size()) {
                 devices_and_starts = raw_paths.split(',');
                 for (int x = 0; x < devices_and_starts.size(); x++) {
@@ -785,6 +844,11 @@ bool LogVol::isMerging()
     return m_merging;
 }
 
+bool LogVol::isMetadata()
+{
+    return m_metadata;
+}
+
 bool LogVol::isMounted()
 {
     return m_mounted;
@@ -840,6 +904,16 @@ bool LogVol::isVirtual()
     return m_virtual;
 }
 
+bool LogVol::isRaid()
+{
+    return m_raid;
+}
+
+bool LogVol::isRaidDevice()
+{
+    return m_raid_device;
+}
+
 bool LogVol::isSnap()
 {
     return m_snap;
@@ -873,6 +947,11 @@ bool LogVol::isFixed()
 bool LogVol::isValid()
 {
     return m_valid;
+}
+
+bool LogVol::isThin()
+{
+    return m_thin;
 }
 
 QString LogVol::getPolicy()
