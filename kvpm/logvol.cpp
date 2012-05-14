@@ -33,12 +33,13 @@
    volume keeps a list of Segment structures for segment information */
 
 struct Segment {
-    int m_stripes;               // number of stripes in segment
-    int m_stripe_size;
-    long long m_size;            // segment size (bytes)
-    QStringList m_device_path;   // full path of physical volume
-    QList<long long> m_starting_extent;   // first extent on physical volume
-    // for this segment
+    int stripes;               // number of stripes in segment
+    int stripe_size;
+    long long size;            // segment size (bytes)
+    QString type;                // linear, raid etc.
+    QStringList device_path;   // full path of physical volume
+    QList<long long> starting_extent;   // first extent on physical volume
+                                          // for this segment
 };
 
 LogVol::LogVol(lv_t lvmLV, vg_t lvmVG, VolGroup *const vg, LogVol *const lvParent, MountTables *const tables, bool orphan) :
@@ -140,7 +141,7 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)  // lv_t seems to change -- why?
             m_mirror_leg = true;
         } else {
             if (flags[6] == 'r'){
-                m_type = "raid device";
+                m_type = "raid image";
                 m_raid_device = true;
             } else {
                 m_type = "mirror leg";
@@ -156,7 +157,7 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)  // lv_t seems to change -- why?
             m_mirror_leg = true;
         } else {
             if (flags[6] == 'r'){
-                m_type = "raid device";
+                m_type = "raid image";
                 m_raid_device = true;
             } else {
                 m_type = "mirror leg";
@@ -419,24 +420,15 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)  // lv_t seems to change -- why?
     if (m_snap_container) {
         m_type = "origin";
     } else if (m_type.contains("origin", Qt::CaseInsensitive) && !m_snap_container) {
-        if(flags.size() <= 6){
-            if (m_mirror)
-                m_type = "mirror";
-            else
-                m_type = "linear";
-        }
-        else {
-            if (flags[6] == 'm') {
-                m_type = "mirror";
-            } else if (flags[6] == 'r') {
-                m_type = "raid";
+        if(flags.size() > 6){
+            if (flags[6] == 'm')
+                m_mirror = true;
+            else if (flags[6] == 'r')
                 m_raid = true;
-            } else if (flags[6] == 't') {
-                m_type = "thin";
+            else if (flags[6] == 't')
                 m_thin = true;
-            } else
-                m_type = "linear";
         }
+        m_type = m_segments[0]->type;
     }
 
     insertChildren(lvmLV, lvmVG);
@@ -582,22 +574,26 @@ void LogVol::processSegments(lv_t lvmLV, const QByteArray flags)
    
             segment = new Segment();
 
+            value = lvm_lvseg_get_property(lvm_lvseg, "segtype");
+            if (value.is_valid)
+                segment->type = value.value.string;
+
             if (m_mirror || flags[6] == 'r') {
-                segment->m_stripes = 1;
-                segment->m_stripe_size = 1;
-                segment->m_size = 1;
+                segment->stripes = 1;
+                segment->stripe_size = 1;
+                segment->size = 1;
             } else {
                 value = lvm_lvseg_get_property(lvm_lvseg, "stripes");
                 if (value.is_valid)
-                    segment->m_stripes = value.value.integer;
+                    segment->stripes = value.value.integer;
 
                 value = lvm_lvseg_get_property(lvm_lvseg, "stripesize");
                 if (value.is_valid)
-                    segment->m_stripe_size = value.value.integer;
+                    segment->stripe_size = value.value.integer;
 
                 value = lvm_lvseg_get_property(lvm_lvseg, "seg_size");
                 if (value.is_valid)
-                    segment->m_size = value.value.integer;
+                    segment->size = value.value.integer;
             }
 
             value = lvm_lvseg_get_property(lvm_lvseg, "devices");
@@ -609,8 +605,8 @@ void LogVol::processSegments(lv_t lvmLV, const QByteArray flags)
                 devices_and_starts = raw_paths.split(',');
                 for (int x = 0; x < devices_and_starts.size(); x++) {
                     temp = devices_and_starts[x].split('(');
-                    segment->m_device_path.append(temp[0]);
-                    segment->m_starting_extent.append((temp[1].remove(')')).toLongLong());
+                    segment->device_path.append(temp[0]);
+                    segment->starting_extent.append((temp[1].remove(')')).toLongLong());
                 }
             }
             m_segments.append(segment);
@@ -674,32 +670,32 @@ int LogVol::getSegmentCount()
 
 int LogVol::getSegmentStripes(const int segment)
 {
-    return m_segments[segment]->m_stripes;
+    return m_segments[segment]->stripes;
 }
 
 int LogVol::getSegmentStripeSize(const int segment)
 {
-    return m_segments[segment]->m_stripe_size;
+    return m_segments[segment]->stripe_size;
 }
 
 long long LogVol::getSegmentSize(const int segment)
 {
-    return m_segments[segment]->m_size;
+    return m_segments[segment]->size;
 }
 
 long long LogVol::getSegmentExtents(const int segment)
 {
-    return (m_segments[segment]->m_size / m_vg->getExtentSize());
+    return (m_segments[segment]->size / m_vg->getExtentSize());
 }
 
 QList<long long> LogVol::getSegmentStartingExtent(const int segment)
 {
-    return m_segments[segment]->m_starting_extent;
+    return m_segments[segment]->starting_extent;
 }
 
 QStringList LogVol::getPvNames(const int segment)
 {
-    return m_segments[segment]->m_device_path;
+    return m_segments[segment]->device_path;
 }
 
 QStringList LogVol::getPvNamesAll()
@@ -708,7 +704,7 @@ QStringList LogVol::getPvNamesAll()
     QListIterator<Segment *> seg_itr(m_segments);
 
     while (seg_itr.hasNext())
-        pv_names << seg_itr.next()->m_device_path;
+        pv_names << seg_itr.next()->device_path;
 
     pv_names.sort();
     pv_names.removeDuplicates();
@@ -762,11 +758,11 @@ long long LogVol::getSpaceUsedOnPv(const QString physicalVolume)
     while (seg_itr.hasNext()) {
 
         Segment *const seg = seg_itr.next();
-        QListIterator<QString> path_itr(seg->m_device_path);
+        QListIterator<QString> path_itr(seg->device_path);
 
         while (path_itr.hasNext()) {
             if (physicalVolume == path_itr.next())
-                space_used += (seg->m_size) / (seg->m_stripes) ;
+                space_used += (seg->size) / (seg->stripes) ;
         }
 
     }
