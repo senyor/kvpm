@@ -89,7 +89,7 @@ void LVSizeChart::populateChart()
         if (!m_lv->isMirrorLeg()  &&
             !m_lv->isMirrorLog()  &&
             !m_lv->isVirtual()    &&
-            !m_lv->isRaidDevice() &&
+            !m_lv->isRaidImage() &&
             !(m_lv->isMirror() && !(m_lv->getOrigin()).isEmpty())) {
  
             usage = m_lv->getFilesystem();
