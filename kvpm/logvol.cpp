@@ -81,7 +81,7 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)  // lv_t seems to change -- why?
     m_mirror_leg  = false;
     m_mirror_log  = false;
     m_raid        = false;
-    m_raid_device = false;
+    m_raid_image = false;
     m_snap        = false;
     m_thin        = false;
     m_pvmove      = false;
@@ -142,7 +142,7 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)  // lv_t seems to change -- why?
         } else {
             if (flags[6] == 'r'){
                 m_type = "raid image";
-                m_raid_device = true;
+                m_raid_image = true;
             } else {
                 m_type = "mirror leg";
                 m_mirror_leg = true;
@@ -158,7 +158,7 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)  // lv_t seems to change -- why?
         } else {
             if (flags[6] == 'r'){
                 m_type = "raid image";
-                m_raid_device = true;
+                m_raid_image = true;
             } else {
                 m_type = "mirror leg";
                 m_mirror_leg = true;
@@ -422,7 +422,7 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)  // lv_t seems to change -- why?
     } else if (m_type.contains("origin", Qt::CaseInsensitive) && !m_snap_container) {
         if(flags.size() > 6){
             if (flags[6] == 'm')
-                m_mirror = true;
+                m_raid = true;
             else if (flags[6] == 'r')
                 m_raid = true;
             else if (flags[6] == 't')
@@ -568,7 +568,7 @@ void LogVol::processSegments(lv_t lvmLV, const QByteArray flags)
                         m_mirror = true;
                 }
             } else {
-                if (flags[6] == 'm')
+                if (flags[6] == 'm' && !(flags[0] == 'r' || flags[0] == 'R'))
                     m_mirror = true;
             }
    
@@ -905,9 +905,9 @@ bool LogVol::isRaid()
     return m_raid;
 }
 
-bool LogVol::isRaidDevice()
+bool LogVol::isRaidImage()
 {
-    return m_raid_device;
+    return m_raid_image;
 }
 
 bool LogVol::isSnap()

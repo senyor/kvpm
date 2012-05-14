@@ -74,16 +74,16 @@ class LogVol
     int m_mirror_count;          // if mirror -- how many legs
     bool m_virtual;              // virtual volume
     bool m_under_conversion;     // Is going to be a mirrored volume
-    bool m_mirror;               // Is a mirrored volume
+    bool m_mirror;               // Is an LVM (not raid 1) mirrored volume
     bool m_metadata;             // Is RAID or thin pool metadata
     bool m_mirror_leg;           // Is one of the underlying legs of a mirrored volume
     bool m_mirror_log;           // Is the log for a mirrored volume
-    bool m_raid;                 // Is a raid volume
-    bool m_raid_device;          // Is a raid device under a raid volume
+    bool m_raid;                 // Is a raid volume, including raid 1 mirrors
+    bool m_raid_image;           // Is a raid device under a raid volume
     bool m_fixed, m_persistent;  // fix the device minor and major number
 
     bool m_alloc_locked;         // allocation type is fixed when pvmove is underway
-    // (and maybe other times)
+                                 // (and maybe other times)
     bool m_active;
     bool m_mounted;              // has a mounted filesystem
     bool m_open;                 // device is open
@@ -167,7 +167,7 @@ public:
     bool isPersistent();
     bool isPvmove();
     bool isRaid();
-    bool isRaidDevice();
+    bool isRaidImage();
     bool isSnap();
     bool isSnapContainer();
     bool isThin();
