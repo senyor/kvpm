@@ -62,7 +62,7 @@ LVProperties::LVProperties(LogVol *const volume, const int segment, QWidget *par
 
     layout->addWidget(generalFrame(segment));
 
-    if (!m_lv->isMirrorLeg() && !m_lv->isMirrorLog() &&
+    if (!m_lv->isMirrorLeg() && !m_lv->isMirrorLog() && !m_lv->isRaidDevice() &&
             !m_lv->isPvmove()    && !m_lv->isVirtual() &&
             !m_lv->isSnapContainer() && ((m_lv->getSegmentCount() == 1) || (segment == -1))) {
 
