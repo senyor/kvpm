@@ -204,7 +204,6 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
                 }
 
                 if (m_lv->isMerging()) {
-                    lv_extend_action->setEnabled(false);
                     snap_create_action->setEnabled(false);
                     add_mirror_legs_action->setEnabled(false);
                 } else {
@@ -212,6 +211,7 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
                     snap_create_action->setEnabled(true);
                 }
 
+                lv_extend_action->setEnabled(false);
                 lv_reduce_action->setEnabled(false);
                 pv_move_action->setEnabled(false);
             } else if (m_lv->isSnap()) {
