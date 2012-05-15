@@ -18,6 +18,7 @@
 #include <KIcon>
 #include <KLocale>
 
+#include <QDebug>
 #include <QPoint>
 #include <QTreeWidgetItem>
 
@@ -110,10 +111,10 @@ void VGTree::loadData()
 
     setSortingEnabled(true);
 
-    if (currentItem() == NULL && topLevelItemCount() > 0)
+    if (currentItem() == NULL && topLevelItemCount() > 0) {
         setCurrentItem(topLevelItem(0));
-
-    if (currentItem() != NULL) {
+        scrollToItem(currentItem(), QAbstractItemView::EnsureVisible);
+    } else if (currentItem() != NULL) {
         setCurrentItem(currentItem());
         scrollToItem(currentItem(), QAbstractItemView::EnsureVisible);
     }

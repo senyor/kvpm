@@ -194,11 +194,11 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)  // lv_t seems to change -- why?
         m_pvmove = true;
         break;
     case 'r':
-        m_type = "raid";
+        m_type = m_segments[0]->type;
         m_raid = true;
         break;
     case 'R':
-        m_type = "raid";
+        m_type = m_segments[0]->type;
         m_raid = true;
         break;
     case 's':
@@ -568,7 +568,7 @@ void LogVol::processSegments(lv_t lvmLV, const QByteArray flags)
                         m_mirror = true;
                 }
             } else {
-                if (flags[6] == 'm' && !(flags[0] == 'r' || flags[0] == 'R'))
+                if (flags[6] == 'm' && !(flags[0] == 'r' || flags[0] == 'R' || flags[0] == 'i' || flags[0] == 'I'))
                     m_mirror = true;
             }
    
@@ -714,20 +714,22 @@ QStringList LogVol::getPvNamesAll()
 
 QStringList LogVol::getPvNamesAllFlat()
 {
-    if (m_snap_container || m_mirror) {
+    if (m_snap_container || m_mirror || m_raid) {
 
         QListIterator<LogVol *> child_itr(getChildren());
         QStringList pv_names;
 
-        while (child_itr.hasNext())
+        while (child_itr.hasNext()){
             pv_names << child_itr.next()->getPvNamesAllFlat();
+        }
 
         pv_names.sort();
         pv_names.removeDuplicates();
 
         return pv_names;
-    } else
+    } else {
         return getPvNamesAll();
+    }
 }
 
 VolGroup* LogVol::getVg()
