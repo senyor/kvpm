@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -29,6 +29,8 @@
 
 #include <parted/parted.h>
 
+#include <QDebug>
+
 #include <KApplication>
 #include <KLocale>
 #include <KMessageBox>
@@ -44,6 +46,14 @@ lvm_t MasterList::m_lvm = NULL;
 MasterList::MasterList() : QObject()
 {
     m_lvm = lvm_init(NULL);
+
+    QStringList version = QString(lvm_library_get_version()).split('.');
+    m_LvmVersionMajor = version[0].toInt();
+    m_LvmVersionMinor = version[1].toInt();
+    version = version[2].split(QRegExp("[()]"));
+    m_LvmVersionPatchLevel = version[0].toInt();
+    m_LvmVersionApi = version[1].toInt();
+
     ped_exception_set_handler(my_handler);
     m_mount_tables = new MountTables();
 }
@@ -182,3 +192,22 @@ QStringList MasterList::getVgNames()
     return names;
 }
 
+int MasterList::getLvmVersionMajor()
+{
+    return m_LvmVersionMajor;
+}
+
+int MasterList::getLvmVersionMinor()
+{
+    return m_LvmVersionMinor;
+}
+
+int MasterList::getLvmVersionPatchLevel()
+{
+    return m_LvmVersionPatchLevel;
+}
+
+int MasterList::getLvmVersionApi()
+{
+    return m_LvmVersionApi;
+}
