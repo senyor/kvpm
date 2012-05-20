@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2009, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -39,6 +39,11 @@ class MasterList : public QObject
     static QList<StorageDevice *> m_storage_devices;
     static lvm_t m_lvm;
 
+    int m_LvmVersionMajor;
+    int m_LvmVersionMinor;
+    int m_LvmVersionPatchLevel;
+    int m_LvmVersionApi;
+
     void scanVolumeGroups();
     void scanStorageDevices();
 
@@ -46,6 +51,10 @@ public:
     MasterList();
     ~MasterList();
     void rescan();
+    int getLvmVersionMajor();
+    int getLvmVersionMinor();
+    int getLvmVersionPatchLevel();
+    int getLvmVersionApi();
     static lvm_t getLvm();
     static QList<VolGroup *> getVolGroups();
     static QList<StorageDevice *> getStorageDevices();
