@@ -568,7 +568,7 @@ void LogVol::processSegments(lv_t lvmLV, const QByteArray flags)
                         m_mirror = true;
                 }
             } else {
-                if (flags[6] == 'm' && !(flags[0] == 'r' || flags[0] == 'R' || flags[0] == 'i' || flags[0] == 'I'))
+                if (flags[6] == 'm' && !(QString(flags[0]).contains(QRegExp("[rRiIl]"))))
                     m_mirror = true;
             }
    
@@ -578,7 +578,8 @@ void LogVol::processSegments(lv_t lvmLV, const QByteArray flags)
             if (value.is_valid)
                 segment->type = value.value.string;
 
-            if (m_mirror || flags[6] == 'r') {
+            //            if (m_mirror || flags[6] == 'r') {
+            if (m_mirror || m_raid) {
                 segment->stripes = 1;
                 segment->stripe_size = 1;
                 segment->size = 1;

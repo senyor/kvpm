@@ -246,10 +246,11 @@ QFrame *LVProperties::generalFrame(int segment)
         stripes = m_lv->getSegmentStripes(segment);
         stripe_size = m_lv->getSegmentStripeSize(segment);
 
-        if (!m_lv->isSnapContainer())
+        if (!(m_lv->isSnapContainer() || m_lv->isRaid() || m_lv->isMirror())){
             layout->addWidget(new QLabel(i18n("Extents: %1", extents)));
+        }
 
-        if (!m_lv->isMirror()) {
+        if (!m_lv->isMirror() && !m_lv->isRaid()) {
 
             QHBoxLayout *const stripe_layout = new QHBoxLayout();
 
