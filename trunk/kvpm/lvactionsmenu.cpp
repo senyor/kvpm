@@ -155,7 +155,27 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
         else
             snap_merge_action->setEnabled(false);
 
-        if (m_lv->isWritable()  && !m_lv->isLocked() && !m_lv->isVirtual() &&
+        if(m_lv->isMetadata()){
+            snap_merge_action->setEnabled(false);
+            lv_maxfs_action->setEnabled(false);
+            lv_mkfs_action->setEnabled(false);
+            lv_removefs_action->setEnabled(false);
+            lv_remove_action->setEnabled(false);
+            unmount_filesystem_action->setEnabled(false);
+            mount_filesystem_action->setEnabled(false);
+            add_mirror_legs_action->setEnabled(false);
+            lv_change_action->setEnabled(false);
+            lv_extend_action->setEnabled(false);
+            lv_reduce_action->setEnabled(false);
+            lv_rename_action->setEnabled(false);
+            pv_move_action->setEnabled(false);
+            remove_mirror_action->setEnabled(false);
+            change_mirror_log_action->setEnabled(false);
+            remove_mirror_leg_action->setEnabled(false);
+            snap_create_action->setEnabled(false);
+            filesystem_menu->setEnabled(false);
+
+        } else if (m_lv->isWritable()  && !m_lv->isLocked() && !m_lv->isVirtual() &&
             !m_lv->isMirrorLeg() && !m_lv->isMirrorLog() && !m_lv->isRaidImage()) {
 
             if (m_lv->isMounted()) {

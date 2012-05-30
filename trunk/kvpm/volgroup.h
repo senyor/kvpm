@@ -46,6 +46,7 @@ class VolGroup
     QString m_lvm_format;                // lvm1 or lvm2
     QList<LogVol *>  m_member_lvs;    // lvs that belong to this group
     QList<PhysVol *> m_member_pvs;    // pvs that belong to this group
+    QStringList m_lv_names_all;       // names of all lvs and sub lvs in group, including metadata
     bool m_active;         // if any lv is active the group is active
     bool m_writable;
     bool m_resizable;
@@ -66,6 +67,7 @@ public:
     QList<LogVol *>  getLogicalVolumes();     // *TOP LEVEL ONLY* snapcontainers returned not snaps and origin
     QList<LogVol *>  getLogicalVolumesFlat(); // un-nest the volumes, snapshots and mirror legs
     QList<PhysVol *> getPhysicalVolumes();
+    QStringList getLvNamesAll();              // unsorted list of all lvs and sub lvs
     LogVol* getLvByName(QString shortName);   // lv name without the vg name and "/" -- skips snap containers
     LogVol* getLvByUuid(QString uuid);        // also skips snap containers
     PhysVol* getPvByName(QString name);       //   /dev/something

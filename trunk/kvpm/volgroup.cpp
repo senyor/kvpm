@@ -164,7 +164,7 @@ lv_t VolGroup::findOrphan(QList<lv_t> &childList)
 
     }
 
-    if (! orphan_list.isEmpty()) {
+    if (!orphan_list.isEmpty()) {
         orphan = orphan_list.takeAt(0);
         childList = orphan_list;
         return orphan;
@@ -337,6 +337,11 @@ QStringList VolGroup::getLvNames()
     return names;
 }
 
+QStringList VolGroup::getLvNamesAll()
+{
+    return m_lv_names_all;
+}
+
 bool VolGroup::isResizable()
 {
     return m_resizable;
@@ -407,11 +412,12 @@ void VolGroup::processLogicalVolumes(vg_t lvmVG)
     dm_list* lv_dm_list = lvm_vg_list_lvs(lvmVG);
     lvm_lv_list *lv_list;
     QList<lv_t> lvm_lvs_all_top;       // top level lvm logical volume handles
-    QList<lv_t> lvm_lvs_all_children;  // top level lvm logical volume handles
+    QList<lv_t> lvm_lvs_all_children;  // children of top level volumes
     QByteArray flags;
 
     QList<LogVol *> old_member_lvs = m_member_lvs;
     m_member_lvs.clear();
+    m_lv_names_all.clear();
 
     if (lv_dm_list) {
 
@@ -423,6 +429,7 @@ void VolGroup::processLogicalVolumes(vg_t lvmVG)
 
             value = lvm_lv_get_property(lv_list->lv, "lv_name");
             const QString top_name = QString(value.value.string).trimmed();
+            m_lv_names_all << top_name;
 
             if (top_name.endsWith("_mlog") || top_name.contains("_mimagetmp_") || top_name.contains("_mimage_")) {
                 lvm_lvs_all_children.append(lv_list->lv);
@@ -441,8 +448,7 @@ void VolGroup::processLogicalVolumes(vg_t lvmVG)
                 case 'r':
                     lvm_lvs_all_top.append(lv_list->lv);
                     break;
-                case 'e':    // skip metadata
-                    break;
+                case 'e':
                 default:
                     lvm_lvs_all_children.append(lv_list->lv);
                     break;

@@ -33,13 +33,13 @@
    volume keeps a list of Segment structures for segment information */
 
 struct Segment {
-    int stripes;               // number of stripes in segment
+    int stripes;                 // number of stripes in segment
     int stripe_size;
-    long long size;            // segment size (bytes)
+    long long size;              // segment size (bytes)
     QString type;                // linear, raid etc.
-    QStringList device_path;   // full path of physical volume
+    QStringList device_path;     // full path of physical volume
     QList<long long> starting_extent;   // first extent on physical volume
-                                          // for this segment
+                                        // for this segment
 };
 
 LogVol::LogVol(lv_t lvmLV, vg_t lvmVG, VolGroup *const vg, LogVol *const lvParent, MountTables *const tables, bool orphan) :
@@ -87,15 +87,6 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)  // lv_t seems to change -- why?
     m_pvmove      = false;
     m_valid       = true;
     m_virtual     = false;
-
-    /*
-
-      The child LogVols need to be re-used, and re-parented,
-      in the case of down converted containers
-
-      flag down converting in the following code
-
-    */
 
     value = lvm_lv_get_property(lvmLV, "lv_name");
     m_lv_name = QString(value.value.string).trimmed();
@@ -453,9 +444,10 @@ void LogVol::insertChildren(lv_t lvmLV, vg_t lvmVG)
 
         m_lv_children.append(new LogVol(lvmLV, lvmVG, m_vg, this, m_tables));
     } else {
-        child_name_list = removePvNames(getPvNamesAll());
+        child_name_list << removePvNames();
+        child_name_list << getMetadataNames();
 
-        if (m_mirror && (! m_log.isEmpty()))
+        if (m_mirror && (!m_log.isEmpty()))
             child_name_list.append(m_log);
 
         for (int x = child_name_list.size() - 1; x >= 0; x--) {
@@ -511,8 +503,10 @@ QList<lv_t> LogVol::getLvmSnapshots(vg_t lvmVG)
 // volumes. One pvmove can be under several lvs so isn't
 // really a child.
 
-QStringList LogVol::removePvNames(QStringList names)
+QStringList LogVol::removePvNames()
 {
+    QStringList names(getPvNamesAll());
+
     for (int x = names.size() - 1; x >= 0; x--) {
         if (names[x].startsWith("pvmove"))
             names.removeAt(x);
@@ -531,6 +525,26 @@ QStringList LogVol::removePvNames(QStringList names)
     }
 
     return names;
+}
+
+// Finds metadata child sub volumes of this volume
+
+QStringList LogVol::getMetadataNames()
+{
+    QString lv;
+    QStringList children;
+    QStringList const names(m_vg->getLvNamesAll());
+    QStringListIterator itr(names);
+
+    while (itr.hasNext()){
+        lv = itr.next();
+        if (lv.contains("_rmeta_")){
+            if (m_lv_name == lv.left(lv.indexOf("_rmeta_")))
+                children << lv;
+        }
+    }
+
+    return children;
 }
 
 void LogVol::calculateTotalSize()

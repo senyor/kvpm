@@ -37,8 +37,8 @@ class LogVol
     QList<Segment *> m_segments;
     QList<MountEntry *> m_mount_entries;
     QList<LogVol *> m_lv_children;  // For a mirror the children are the legs and log
-    // Snapshots are also children -- see m_snap_container
-
+                                    // Snapshots are also children -- see m_snap_container
+                                    // RAID Metadata is here too
     MountTables *m_tables;
     LogVol *m_lv_parent;       // NULL if this is the 'top' lv
     QString m_lv_full_name;    // volume_group/logical_volume
@@ -99,7 +99,8 @@ class LogVol
 
     void countLegsAndLogs();
     void processSegments(lv_t lvmLV, const QByteArray flags);
-    QStringList removePvNames(QStringList names);  // list lv children that are lvs and not devices or pvmove*
+    QStringList removePvNames();     // list 'devices' that are really sub lvs
+    QStringList getMetadataNames();  // names of sub lvs that are metadata for this lv
     QList<lv_t> getLvmSnapshots(vg_t lvmVG);
     void insertChildren(lv_t lvmLV, vg_t lvmVG);
     void calculateTotalSize();
