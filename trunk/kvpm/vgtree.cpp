@@ -244,7 +244,7 @@ QTreeWidgetItem *VGTree::loadItem(LogVol *lv, QTreeWidgetItem *item)
 
         item->setData(8, Qt::DisplayRole, lv->getState());
 
-        if (!lv->isSnapContainer() && !lv->isMirrorLog() && !lv->isMirrorLeg() && !lv->isVirtual()) {
+        if (!lv->isSnapContainer() && !lv->isLvmMirrorLog() && !lv->isLvmMirrorLeg() && !lv->isVirtual()) {
             if (lv->isMounted()) {
                 item->setIcon(8, KIcon("emblem-mounted"));
                 item->setToolTip(8, i18n("mounted filesystem"));

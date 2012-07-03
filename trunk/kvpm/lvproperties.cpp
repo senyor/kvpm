@@ -62,7 +62,7 @@ LVProperties::LVProperties(LogVol *const volume, const int segment, QWidget *par
 
     layout->addWidget(generalFrame(segment));
 
-    if (!m_lv->isMirrorLeg() && !m_lv->isMirrorLog() && !m_lv->isRaidImage() &&
+    if (!m_lv->isLvmMirrorLeg() && !m_lv->isLvmMirrorLog() && !m_lv->isRaidImage() &&
             !m_lv->isPvmove()    && !m_lv->isVirtual() &&
             !m_lv->isSnapContainer() && ((m_lv->getSegmentCount() == 1) || (segment == -1))) {
 
@@ -262,12 +262,12 @@ QFrame *LVProperties::generalFrame(int segment)
             }
 
             layout->addLayout(stripe_layout);
-        } else if (!m_lv->isMirrorLog() || (m_lv->isMirrorLog() && m_lv->isLvmMirror())) {
+        } else if (!m_lv->isLvmMirrorLog() || (m_lv->isLvmMirrorLog() && m_lv->isLvmMirror())) {
             layout->addWidget(new QLabel(i18n("Total extents: %1", total_extents)));
             layout->addWidget(new QLabel(i18n("Total size: %1", locale->formatByteSize(total_size, 1, dialect))));
         }
 
-        if (!(m_lv->isMirrorLeg() || m_lv->isMirrorLog())) {
+        if (!(m_lv->isLvmMirrorLeg() || m_lv->isLvmMirrorLog())) {
 
             layout->addWidget(new QLabel(i18n("Filesystem: %1", m_lv->getFilesystem())));
 
@@ -282,7 +282,7 @@ QFrame *LVProperties::generalFrame(int segment)
         extents = m_lv->getExtents();
         layout->addWidget(new QLabel(i18n("Extents: %1", extents)));
 
-        if (!(m_lv->isMirrorLeg() || m_lv->isMirrorLog())) {
+        if (!(m_lv->isLvmMirrorLeg() || m_lv->isLvmMirrorLog())) {
 
             layout->addWidget(new QLabel(i18n("Filesystem: %1", m_lv->getFilesystem())));
 
