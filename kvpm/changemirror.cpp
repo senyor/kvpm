@@ -279,7 +279,7 @@ QStringList ChangeMirrorDialog::getPvsInUse()
     if (m_lv->isLvmMirror()) {
         for (int x = mirror_legs.size() - 1; x >= 0; x--) {
 
-            if ((!mirror_legs[x]->isMirrorLeg() && !mirror_legs[x]->isMirrorLog()))
+            if ((!mirror_legs[x]->isLvmMirrorLeg() && !mirror_legs[x]->isLvmMirrorLog()))
                 mirror_legs.removeAt(x);
             else
                 pvs_in_use << mirror_legs[x]->getPvNamesAll();

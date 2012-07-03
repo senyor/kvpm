@@ -470,10 +470,10 @@ void LogVol::countLegsAndLogs()
         for (int x = all_lvs_flat.size() - 1; x >= 0; x--) {
             lv = all_lvs_flat[x];
 
-            if (lv->isMirrorLeg() && !lv->isLvmMirror() && !lv->isMirrorLog())
+            if (lv->isLvmMirrorLeg() && !lv->isLvmMirror() && !lv->isLvmMirrorLog())
                 m_mirror_count++;
 
-            if (lv->isMirrorLog() && !lv->isLvmMirror())
+            if (lv->isLvmMirrorLog() && !lv->isLvmMirror())
                 m_log_count++;
         }
     } else
@@ -878,12 +878,12 @@ bool LogVol::isLvmMirror()
     return m_mirror;
 }
 
-bool LogVol::isMirrorLeg()
+bool LogVol::isLvmMirrorLeg()
 {
     return m_mirror_leg;
 }
 
-bool LogVol::isMirrorLog()
+bool LogVol::isLvmMirrorLog()
 {
     return m_mirror_log;
 }

@@ -160,8 +160,8 @@ public:
     bool isMerging();
     bool isMetadata();
     bool isLvmMirror();
-    bool isMirrorLeg();
-    bool isMirrorLog();
+    bool isLvmMirrorLeg();
+    bool isLvmMirrorLog();
     bool isMounted();
     bool isOpen();
     bool isOrigin();

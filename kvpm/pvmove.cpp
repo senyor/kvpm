@@ -489,7 +489,7 @@ QWidget* PVMoveDialog::extentWidget()
             label->setAlignment(Qt::AlignRight);
             layout->addWidget(label, x + 1, 1); 
 
-            if (lv->isLvmMirror() || lv->isMirrorLeg() || lv->isMirrorLog() || lv->isSnap() || lv->isOrigin()){
+            if (lv->isLvmMirror() || lv->isLvmMirrorLeg() || lv->isLvmMirrorLog() || lv->isSnap() || lv->isOrigin()){
                 label = new QLabel(i18n("<Not movable>"));
                 layout->addWidget(label, x + 1, 2);
             }
@@ -508,7 +508,7 @@ bool PVMoveDialog::hasMovableExtents()
         LogVol *const lv = m_vg->getLvByName(lv_names[x]); 
 
         if (lv != NULL){
-            if (!lv->isLvmMirror() && !lv->isMirrorLeg() && !lv->isMirrorLog() && !lv->isSnap() && !lv->isOrigin()){
+            if (!lv->isLvmMirror() && !lv->isLvmMirrorLeg() && !lv->isLvmMirrorLog() && !lv->isSnap() && !lv->isOrigin()){
                 movable = true;
             }
         }
