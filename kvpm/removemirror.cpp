@@ -62,7 +62,7 @@ RemoveMirrorDialog::RemoveMirrorDialog(LogVol *logicalVolume, QWidget *parent):
     layout->addWidget(message);
 
     for (int x = lvs.size() - 1; x >= 0 ; x--) {
-        if (lvs[x]->isMirrorLeg()) {
+        if (lvs[x]->isLvmMirrorLeg()) {
 
             temp_check = new NoMungeCheck(lvs[x]->getName());
             pv_names = lvs[x]->getPvNamesAll();
