@@ -225,7 +225,7 @@ QFrame *LVProperties::generalFrame(int segment)
 
         layout->addWidget(new QLabel(i18n("Extents: %1", extents)));
 
-        if (!m_lv->isMirror()) {
+        if (!m_lv->isLvmMirror()) {
 
             QHBoxLayout *const stripe_layout = new QHBoxLayout();
 
@@ -246,11 +246,11 @@ QFrame *LVProperties::generalFrame(int segment)
         stripes = m_lv->getSegmentStripes(segment);
         stripe_size = m_lv->getSegmentStripeSize(segment);
 
-        if (!(m_lv->isSnapContainer() || m_lv->isRaid() || m_lv->isMirror())){
+        if (!(m_lv->isSnapContainer() || m_lv->isRaid() || m_lv->isLvmMirror())){
             layout->addWidget(new QLabel(i18n("Extents: %1", extents)));
         }
 
-        if (!m_lv->isMirror() && !m_lv->isRaid()) {
+        if (!m_lv->isLvmMirror() && !m_lv->isRaid()) {
 
             QHBoxLayout *const stripe_layout = new QHBoxLayout();
 
@@ -262,7 +262,7 @@ QFrame *LVProperties::generalFrame(int segment)
             }
 
             layout->addLayout(stripe_layout);
-        } else if (!m_lv->isMirrorLog() || (m_lv->isMirrorLog() && m_lv->isMirror())) {
+        } else if (!m_lv->isMirrorLog() || (m_lv->isMirrorLog() && m_lv->isLvmMirror())) {
             layout->addWidget(new QLabel(i18n("Total extents: %1", total_extents)));
             layout->addWidget(new QLabel(i18n("Total size: %1", locale->formatByteSize(total_size, 1, dialect))));
         }
@@ -315,7 +315,7 @@ QFrame *LVProperties::physicalVolumesFrame(int segment)
     label->setAlignment(Qt::AlignCenter);
     layout->addWidget(label);
 
-    if (m_lv->isMirror() || m_lv->isSnapContainer() || m_lv->isRaid()) {
+    if (m_lv->isLvmMirror() || m_lv->isSnapContainer() || m_lv->isRaid()) {
         pv_list = m_lv->getPvNamesAllFlat();
         for (int pv = 0; pv < pv_list.size(); pv++) {
             label = new QLabel(pv_list[pv]);

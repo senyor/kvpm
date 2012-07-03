@@ -56,9 +56,9 @@ LVChangeDialog::LVChangeDialog(LogVol *const volume, QWidget *parent) :
     tab_widget->addTab(buildGeneralTab(),  i18nc("The standard or basic options", "General"));
     tab_widget->addTab(buildAdvancedTab(), i18nc("Less used or complex options", "Advanced"));
 
-    if (m_lv->isSnap() || m_lv->isMirror()) {
+    if (m_lv->isSnap() || m_lv->isLvmMirror()) {
 
-        if (m_lv->isMirror())
+        if (m_lv->isLvmMirror())
             tab_widget->insertTab(1, buildMirrorTab(), i18n("Mirror"));
         else
             tab_widget->insertTab(1, buildMirrorTab(), i18n("Snapshot"));
@@ -209,7 +209,7 @@ QWidget *LVChangeDialog::buildMirrorTab()
     layout->addStretch();
 
     QGroupBox *const resync_box = new QGroupBox(i18n("Mirror Sync"));
-    if (!m_lv->isMirror()) {
+    if (!m_lv->isLvmMirror()) {
         resync_box->setEnabled(false);
         resync_box->hide();
     }
@@ -317,7 +317,7 @@ QStringList LVChangeDialog::arguments()
     if (m_refresh_check->isChecked())
         args << "--refresh";
 
-    if (m_lv->isSnap() || m_lv->isMirror()) { // These buttons are undefined if the mirrortab isn't built!
+    if (m_lv->isSnap() || m_lv->isLvmMirror()) { // These buttons are undefined if the mirrortab isn't built!
         if (m_resync_check->isChecked())
             args << "--resync";
 

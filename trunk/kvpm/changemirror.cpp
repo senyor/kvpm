@@ -81,7 +81,7 @@ QWidget *ChangeMirrorDialog::buildGeneralTab()
     QLabel  *const current_mirrors_label = new QLabel();
     QHBoxLayout *const general_layout = new QHBoxLayout;
     QVBoxLayout *const center_layout = new QVBoxLayout;
-    const bool is_mirror = m_lv->isMirror();
+    const bool is_mirror = m_lv->isLvmMirror();
 
     general_layout->addStretch();
     general_layout->addLayout(center_layout);
@@ -276,7 +276,7 @@ QStringList ChangeMirrorDialog::getPvsInUse()
     QList<LogVol *>  mirror_legs = m_lv->getAllChildrenFlat();
     QStringList pvs_in_use;
 
-    if (m_lv->isMirror()) {
+    if (m_lv->isLvmMirror()) {
         for (int x = mirror_legs.size() - 1; x >= 0; x--) {
 
             if ((!mirror_legs[x]->isMirrorLeg() && !mirror_legs[x]->isMirrorLog()))
@@ -306,7 +306,7 @@ QStringList ChangeMirrorDialog::arguments()
     else
         args << "--mirrors" << QString("+0");
 
-    if (m_change_log || !m_lv->isMirror()) {
+    if (m_change_log || !m_lv->isLvmMirror()) {
         if (m_core_log_button->isChecked())
             args << "--mirrorlog" << "core";
         else if (m_mirrored_log_button->isChecked())
@@ -371,7 +371,7 @@ void ChangeMirrorDialog::resetOkButton()
     for (int x = 0; x < total_stripes; x++)
         stripe_pv_bytes.append(0);
 
-    if (m_change_log || !m_lv->isMirror()) {
+    if (m_change_log || !m_lv->isLvmMirror()) {
         if (m_disk_log_button->isChecked())
             new_log_count = 1;
         else if (m_mirrored_log_button->isChecked())
@@ -380,7 +380,7 @@ void ChangeMirrorDialog::resetOkButton()
             new_log_count = 0;
     }
 
-    if (m_lv->isMirror()) {
+    if (m_lv->isLvmMirror()) {
         if (m_change_log && (m_lv->getLogCount() == new_log_count)) {
             enableButtonOk(false);
             return;
@@ -388,7 +388,7 @@ void ChangeMirrorDialog::resetOkButton()
             enableButtonOk(false);
             return;
         }
-    } else if (!m_lv->isMirror() && !((total_stripes > 0) || (m_lv->getLogCount() != new_log_count))) {
+    } else if (!m_lv->isLvmMirror() && !((total_stripes > 0) || (m_lv->getLogCount() != new_log_count))) {
         enableButtonOk(false);
         return;
     }
@@ -435,7 +435,7 @@ void ChangeMirrorDialog::setLogRadioButtons()
             m_disk_log_button->setChecked(true);
         else
             m_core_log_button->setChecked(true);
-    } else if (!m_lv->isMirror())
+    } else if (!m_lv->isLvmMirror())
         m_disk_log_button->setChecked(true);
 
     resetOkButton();
