@@ -90,11 +90,11 @@ void LVSizeChart::populateChart()
             !m_lv->isMirrorLog()  &&
             !m_lv->isVirtual()    &&
             !m_lv->isRaidImage() &&
-            !(m_lv->isMirror() && !(m_lv->getOrigin()).isEmpty())) {
+            !(m_lv->isLvmMirror() && !(m_lv->getOrigin()).isEmpty())) {
  
             usage = m_lv->getFilesystem();
 
-            if (m_lv->isMirror() || m_lv->isRaid()){
+            if (m_lv->isLvmMirror() || m_lv->isRaid()){
                 seg_ratio = (m_lv->getTotalSize() / (double) extent_size) / (double) total_extents;
             } else {
                 seg_ratio = m_lv->getExtents() / (double) total_extents;

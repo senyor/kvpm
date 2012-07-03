@@ -159,7 +159,7 @@ public:
     bool isLocked();
     bool isMerging();
     bool isMetadata();
-    bool isMirror();
+    bool isLvmMirror();
     bool isMirrorLeg();
     bool isMirrorLog();
     bool isMounted();

@@ -232,7 +232,7 @@ QTreeWidgetItem *VGTree::loadItem(LogVol *lv, QTreeWidgetItem *item)
         item->setData(4, Qt::DisplayRole, lv->getFilesystem());
 
         if (lv->isActive()){
-            if ((lv->isPvmove() || lv->isMirror()) && !lv->isSnapContainer())
+            if ((lv->isPvmove() || lv->isLvmMirror()) && !lv->isSnapContainer())
                 item->setData(7, Qt::DisplayRole, QString("%%1").arg(lv->getCopyPercent(), 1, 'f', 2));
             else if (lv->isSnap() || lv->isMerging())
                 item->setData(7, Qt::DisplayRole, QString("%%1").arg(lv->getSnapPercent(), 1, 'f', 2));
@@ -277,7 +277,7 @@ QTreeWidgetItem *VGTree::loadItem(LogVol *lv, QTreeWidgetItem *item)
     if (lv->getSegmentCount() == 1) {
         item->setData(1, Qt::UserRole, 0);            // 0 means segment 0 data present
 
-        if (lv->isMirror()) {
+        if (lv->isLvmMirror()) {
             item->setData(5, Qt::DisplayRole, QString(""));
             item->setData(6, Qt::DisplayRole, QString(""));
         } else {
