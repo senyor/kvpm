@@ -16,6 +16,7 @@
 #include "logvol.h"
 
 #include <QDebug>
+#include <QRegExp>
 #include <QUuid>
 #include <QWidget>
 
@@ -980,6 +981,22 @@ QString LogVol::getState()
 QString LogVol::getType()
 {
     return m_type;
+}
+
+int LogVol::getRaidType()
+{
+    int type;
+    QRegExp reg("[0-9]+");
+    QStringList matches;
+
+    if (m_raid && reg.indexIn(m_type) >= 0) {
+        matches = reg.capturedTexts();
+        type = matches[0].toInt();
+    }
+    else
+        type = -1;
+
+    return type;
 }
 
 QStringList LogVol::getTags()
