@@ -125,6 +125,7 @@ public:
     QString getPolicy();
     QString getState();
     QString getType();
+    int getRaidType();
     QString getOrigin();        // The name of the parent volume to a snapshot
     QString getUuid();
     int getSegmentCount();
