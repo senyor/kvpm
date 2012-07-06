@@ -129,7 +129,7 @@ public:
     QString getOrigin();        // The name of the parent volume to a snapshot
     QString getUuid();
     int getSegmentCount();
-    int getSegmentStripes(const int segment);     // The number of stipes in the segment
+    int getSegmentStripes(const int segment);     // The number of stipes including parity stripes
     int getSegmentStripeSize(const int segment);
     long long getSegmentSize(const int segment);
     long long getSegmentExtents(const int segment);
@@ -151,7 +151,7 @@ public:
     double getCopyPercent();
     unsigned long getMinorDevice();
     unsigned long getMajorDevice();
-    int getLogCount();
+    int getLogCount();       // RAID 1 returns 0 since it doesn't have separate logs
     int getMirrorCount();
     int getSnapshotCount();
     bool isActive();
