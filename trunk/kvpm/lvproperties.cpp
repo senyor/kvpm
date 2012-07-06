@@ -62,9 +62,9 @@ LVProperties::LVProperties(LogVol *const volume, const int segment, QWidget *par
 
     layout->addWidget(generalFrame(segment));
 
-    if (!m_lv->isLvmMirrorLeg() && !m_lv->isLvmMirrorLog() && !m_lv->isRaidImage() &&
-            !m_lv->isPvmove()    && !m_lv->isVirtual() &&
-            !m_lv->isSnapContainer() && ((m_lv->getSegmentCount() == 1) || (segment == -1))) {
+    if (!m_lv->isLvmMirrorLeg()  && !m_lv->isVirtual()      && !m_lv->isRaidImage() &&
+        !m_lv->isPvmove()        && !m_lv->isLvmMirrorLog() && !m_lv->isMetadata() &&
+        !m_lv->isSnapContainer() && ((m_lv->getSegmentCount() == 1) || (segment == -1))) {
 
         if (show_mount)
             layout->addWidget(mountPointsFrame());
@@ -218,7 +218,6 @@ QFrame *LVProperties::generalFrame(int segment)
         dialect = KLocale::IECBinaryDialect;
 
     if ((segment >= 0) && (segment_count > 1)) {
-
         extents = m_lv->getSegmentExtents(segment);
         stripes = m_lv->getSegmentStripes(segment);
         stripe_size = m_lv->getSegmentStripeSize(segment);
@@ -239,7 +238,6 @@ QFrame *LVProperties::generalFrame(int segment)
             layout->addLayout(stripe_layout);
         }
     } else if ((segment >= 0) && (segment_count == 1)) {
-
         extents = m_lv->getSegmentExtents(segment);
         total_size = m_lv->getTotalSize();
         total_extents = total_size / extent_size;
@@ -250,33 +248,41 @@ QFrame *LVProperties::generalFrame(int segment)
             layout->addWidget(new QLabel(i18n("Extents: %1", extents)));
         }
 
-        if (!m_lv->isLvmMirror() && !m_lv->isRaid()) {
 
+        if ( !(m_lv->isRaidImage() || m_lv->isMetadata()) ) {
             QHBoxLayout *const stripe_layout = new QHBoxLayout();
 
-            if (stripes != 1) {
+            if (m_lv->isRaid() && m_lv->getRaidType() != 1) {
+                layout->addWidget(new QLabel(i18n("Total extents: %1", total_extents)));
+                layout->addWidget(new QLabel(i18n("Total size: %1", locale->formatByteSize(total_size, 1, dialect))));
                 stripe_layout->addWidget(new QLabel(i18n("Stripes: %1", stripes)));
                 stripe_layout->addWidget(new QLabel(i18n("Stripe size: %1", locale->formatByteSize(stripe_size, 1, dialect))));
-            } else {
-                stripe_layout->addWidget(new QLabel(i18n("Stripes: none")));
+            } else if (!m_lv->isLvmMirror() && !(m_lv->isRaid() && m_lv->getRaidType() == 1)) {
+                
+                if (stripes != 1) {
+                    stripe_layout->addWidget(new QLabel(i18n("Stripes: %1", stripes)));
+                    stripe_layout->addWidget(new QLabel(i18n("Stripe size: %1", locale->formatByteSize(stripe_size, 1, dialect))));
+                } else
+                    stripe_layout->addWidget(new QLabel(i18n("Stripes: none")));
+                
+            } else if (!m_lv->isLvmMirrorLog() || (m_lv->isLvmMirrorLog() && m_lv->isLvmMirror())) {
+                layout->addWidget(new QLabel(i18n("Total extents: %1", total_extents)));
+                layout->addWidget(new QLabel(i18n("Total size: %1", locale->formatByteSize(total_size, 1, dialect))));
             }
 
             layout->addLayout(stripe_layout);
-        } else if (!m_lv->isLvmMirrorLog() || (m_lv->isLvmMirrorLog() && m_lv->isLvmMirror())) {
-            layout->addWidget(new QLabel(i18n("Total extents: %1", total_extents)));
-            layout->addWidget(new QLabel(i18n("Total size: %1", locale->formatByteSize(total_size, 1, dialect))));
-        }
-
-        if (!(m_lv->isLvmMirrorLeg() || m_lv->isLvmMirrorLog())) {
-
-            layout->addWidget(new QLabel(i18n("Filesystem: %1", m_lv->getFilesystem())));
-
-            if (m_lv->isWritable())
-                layout->addWidget(new QLabel(i18n("Access: r/w")));
-            else
-                layout->addWidget(new QLabel(i18n("Access: r/o")));
-
-            layout->addWidget(new QLabel(i18n("Allocation policy: %1", m_lv->getPolicy())));
+ 
+            if (!(m_lv->isLvmMirrorLeg() || m_lv->isLvmMirrorLog())) {
+                
+                layout->addWidget(new QLabel(i18n("Filesystem: %1", m_lv->getFilesystem())));
+                
+                if (m_lv->isWritable())
+                    layout->addWidget(new QLabel(i18n("Access: r/w")));
+                else
+                    layout->addWidget(new QLabel(i18n("Access: r/o")));
+                
+                layout->addWidget(new QLabel(i18n("Allocation policy: %1", m_lv->getPolicy())));
+            }
         }
     } else {
         extents = m_lv->getExtents();
