@@ -54,7 +54,7 @@ class LVCreateDialog : public KDialog
 
     VolGroup *m_vg;
     LogVol *m_lv;      // origin for snap or lv to extend
-    // set to NULL if creating a new logical volume
+                       // set to NULL if creating a new logical volume
 
     QWidget *m_general_tab,   // The tab labeled "general" in the dialog
             *m_physical_tab,  // The physical tab
@@ -71,15 +71,15 @@ class LVCreateDialog : public KDialog
               *m_skip_sync_check,   // don't synchronize empty mirror images when created
               *m_monitor_check;     // monitor with dmeventd
 
-    QGroupBox *m_persistent_box,
-              *m_mirror_box,
-              *m_stripe_box;
-
+    QGroupBox *m_persistent_box, *m_volume_box;
+   
     PvGroupBox *m_pv_checkbox;
 
     KTabWidget *m_tab_widget;
 
     KComboBox *m_stripe_size_combo;
+    KComboBox *m_type_combo;
+    KComboBox *m_log_combo;
 
     KIntSpinBox *m_mirror_count_spin,  // how many mirrors we want
                 *m_stripe_count_spin;  // how many stripes we want
@@ -94,14 +94,17 @@ class LVCreateDialog : public KDialog
                  *anywhere_button,   *inherited_button,  // the allocation policy
                  *cling_button;
 
-    QRadioButton *m_mirrored_log, *m_disk_log, *m_core_log;
+    QWidget *m_stripe_widget;
+    QWidget *m_mirror_widget;
 
+    void buildDialog();
     QWidget* createGeneralTab();
     QWidget* createAdvancedTab();
     QWidget* createPhysicalTab();
+    QWidget* createTypeWidget(int pvcount);
+    QWidget* createStripeWidget(int pvcount);
+    QWidget* createMirrorWidget(int pvcount);
     long long getLargestVolume();
-    int getStripeCount();
-    int getMirrorCount();
     void resetOkButton();
     void makeConnections();
     long long roundExtentsToStripes(long long extents);
@@ -117,7 +120,9 @@ private slots:
     void setMaxSize();
     void validateVolumeName(QString name);
     void zeroReadonlyCheck(int state);
-    void enableMonitoring(bool checked);
+    void enableMonitoring(int index);
+    void enableTypeOptions(int index);
+    void enableStripeCombo(int value);
     void commitChanges();
 };
 
