@@ -78,7 +78,7 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)  // lv_t seems to change -- why?
     m_is_origin   = false;
     m_merging     = false;
     m_metadata    = false;
-    m_mirror      = false;
+    m_lvmmirror   = false;
     m_mirror_leg  = false;
     m_mirror_log  = false;
     m_raid        = false;
@@ -96,7 +96,7 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)  // lv_t seems to change -- why?
     value = lvm_lv_get_property(lvmLV, "lv_attr");
     flags.append(value.value.string);
 
-    processSegments(lvmLV, flags);  // sets m_mirror according to segment property "regionsize" -- total hack!
+    processSegments(lvmLV, flags);
 
     value = lvm_lv_get_property(lvmLV, "lv_path");
     m_lv_mapper_path = QString(value.value.string).trimmed();
@@ -119,7 +119,7 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)  // lv_t seems to change -- why?
     switch (flags[0]) {
     case 'c':
         m_type = "under conversion";
-        m_mirror = true;
+        m_lvmmirror = true;
         m_under_conversion = true;
         break;
     case 'e':
@@ -165,11 +165,11 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)  // lv_t seems to change -- why?
         break;
     case 'M':                // mirror logs can be mirrors themselves -- see below
         m_type = "mirror";
-        m_mirror = true;
+        m_lvmmirror = true;
         break;
     case 'm':
-        m_type = "mirror";   // Origin status overides mirror status in the flags if this is both
-        m_mirror = true;     // We split it below -- snap_containers are origins and the lv is a mirror
+        m_type = "mirror";      // Origin status overides mirror status in the flags if this is both
+        m_lvmmirror = true;     // We split it below -- snap_containers are origins and the lv is a mirror
         break;
     case 'O':
         m_type = "origin";
@@ -346,7 +346,7 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)  // lv_t seems to change -- why?
 
         if (m_mirror_log && m_mirror_leg)
             m_type = m_type.replace("leg", "log");
-        else if ((m_mirror || m_virtual) && !m_mirror_log)
+        else if ((m_lvmmirror || m_virtual) && !m_mirror_log)
             m_mirror_leg = true;
 
     }
@@ -448,7 +448,7 @@ void LogVol::insertChildren(lv_t lvmLV, vg_t lvmVG)
         child_name_list << removePvNames();
         child_name_list << getMetadataNames();
 
-        if (m_mirror && (!m_log.isEmpty()))
+        if (m_lvmmirror && (!m_log.isEmpty()))
             child_name_list.append(m_log);
 
         for (int x = child_name_list.size() - 1; x >= 0; x--) {
@@ -466,7 +466,7 @@ void LogVol::countLegsAndLogs()
     QList<LogVol *> all_lvs_flat = getAllChildrenFlat();
     LogVol *lv;
 
-    if (m_mirror) {
+    if (m_lvmmirror) {
         for (int x = all_lvs_flat.size() - 1; x >= 0; x--) {
             lv = all_lvs_flat[x];
 
@@ -582,12 +582,12 @@ void LogVol::processSegments(lv_t lvmLV, const QByteArray flags)
     if (lvseg_dm_list) {
         dm_list_iterate_items(lvseg_list, lvseg_dm_list) {
             lvm_lvseg = lvseg_list->lvseg;
-            bool raid_mirror = false;
+            bool raidmirror = false;
 
             if (flags[6] == 'm' && !(QString(flags[0]).contains(QRegExp("[rRiIl]"))))
-                m_mirror = true;
-            else if (flags[6] == 'm' && (QString(flags[0]).contains(QRegExp("[rRiIl]"))))
-                raid_mirror = true;
+                m_lvmmirror = true;
+            else if (flags[6] == 'm' && (QString(flags[0]).contains(QRegExp("[rR]"))))
+                raidmirror = true;
            
             segment = new Segment();
 
@@ -595,7 +595,7 @@ void LogVol::processSegments(lv_t lvmLV, const QByteArray flags)
             if (value.is_valid)
                 segment->type = value.value.string;
 
-            if (m_mirror || raid_mirror) {
+            if (m_lvmmirror || raidmirror) {
                 segment->stripes = 1;
                 segment->stripe_size = 1;
                 segment->size = 1;
@@ -734,7 +734,7 @@ QStringList LogVol::getPvNamesAll()
 
 QStringList LogVol::getPvNamesAllFlat()
 {
-    if (m_snap_container || m_mirror || m_raid) {
+    if (m_snap_container || m_lvmmirror || m_raid) {
 
         QListIterator<LogVol *> child_itr(getChildren());
         QStringList pv_names;
@@ -879,7 +879,7 @@ bool LogVol::isActive()
 
 bool LogVol::isLvmMirror()
 {
-    return m_mirror;
+    return m_lvmmirror;
 }
 
 bool LogVol::isLvmMirrorLeg()
