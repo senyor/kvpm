@@ -35,6 +35,7 @@
 #include <KTabWidget>
 
 #include <QCheckBox>
+#include <QDebug>
 #include <QGroupBox>
 #include <QLabel>
 #include <QRadioButton>
@@ -54,37 +55,8 @@ LVCreateDialog::LVCreateDialog(VolGroup *const group, QWidget *parent):
     m_bailout  = hasInitialErrors();
     m_fs_can_extend = false;
 
-    KConfigSkeleton skeleton;
-    skeleton.setCurrentGroup("General");
-    skeleton.addItemBool("use_si_units", m_use_si_units, false);
-
-    if (!m_bailout) {
-        setCaption(i18n("Create A New Logical Volume"));
-
-        QLabel *const lv_name_label = new QLabel();
-        lv_name_label->setAlignment(Qt::AlignCenter);
-        lv_name_label->setText(i18n("<b>Create a new logical volume</b>"));
-
-        QWidget *const main_widget = new QWidget();
-        QVBoxLayout *const layout = new QVBoxLayout();
-
-        m_tab_widget = new KTabWidget(this);
-        m_physical_tab = createPhysicalTab();
-        m_advanced_tab = createAdvancedTab();
-        m_general_tab  = createGeneralTab();
-        m_tab_widget->addTab(m_general_tab,  i18nc("The standard common options", "General"));
-        m_tab_widget->addTab(m_physical_tab, i18n("Physical layout"));
-        m_tab_widget->addTab(m_advanced_tab, i18nc("Less used, dangerous or complex options", "Advanced options"));
-
-        layout->addWidget(lv_name_label);
-        layout->addSpacing(5);
-        layout->addWidget(m_tab_widget);
-        main_widget->setLayout(layout);
-
-        setMainWidget(main_widget);
-        makeConnections();
-        setMaxSize();
-    }
+    if (!m_bailout)
+        buildDialog();
 }
 
 LVCreateDialog::LVCreateDialog(LogVol *const volume, const bool snapshot, QWidget *parent):
@@ -94,45 +66,55 @@ LVCreateDialog::LVCreateDialog(LogVol *const volume, const bool snapshot, QWidge
 {
     m_extend = !m_snapshot;
     m_vg = m_lv->getVg();
-    m_bailout  = hasInitialErrors();
+    m_bailout = hasInitialErrors();
 
+    if (!m_bailout)
+        buildDialog();
+}
+
+void LVCreateDialog::buildDialog()
+{
     KConfigSkeleton skeleton;
     skeleton.setCurrentGroup("General");
     skeleton.addItemBool("use_si_units", m_use_si_units, false);
 
-    if (!m_bailout) {
-
-        QLabel *const lv_name_label = new QLabel();
-        lv_name_label->setAlignment(Qt::AlignCenter);
-
-        if (m_snapshot) {
-            setCaption(i18n("Create Snapshot Volume"));
-            lv_name_label->setText(i18n("<b>Create snapshot of: %1</b>", m_lv->getName()));
-        } else {
-            setCaption(i18n("Extend Logical Volume"));
-            lv_name_label->setText(i18n("<b>Extend volume: %1</b>", m_lv->getName()));
-        }
-
-        QWidget *const main_widget = new QWidget();
-        QVBoxLayout *const layout = new QVBoxLayout();
-
-        m_tab_widget = new KTabWidget(this);
-        m_physical_tab = createPhysicalTab();  // this order is important
-        m_advanced_tab = createAdvancedTab();
-        m_general_tab  = createGeneralTab();
-        m_tab_widget->addTab(m_general_tab,  i18nc("The standard common options", "General"));
-        m_tab_widget->addTab(m_physical_tab, i18n("Physical layout"));
-        m_tab_widget->addTab(m_advanced_tab, i18nc("Less used, dangerous or complex options", "Advanced options"));
-
-        layout->addWidget(lv_name_label);
-        layout->addSpacing(5);
-        layout->addWidget(m_tab_widget);
-        main_widget->setLayout(layout);
-
-        setMainWidget(main_widget);
-        makeConnections();
-        setMaxSize();
+    QLabel *const lv_name_label = new QLabel();
+    lv_name_label->setAlignment(Qt::AlignCenter);
+    
+    if (m_extend) {
+        setCaption(i18n("Extend Logical Volume"));
+        lv_name_label->setText(i18n("<b>Extend volume: %1</b>", m_lv->getName()));
+    } else if (m_snapshot) {
+        setCaption(i18n("Create Snapshot Volume"));
+        lv_name_label->setText(i18n("<b>Create snapshot of: %1</b>", m_lv->getName()));
+    } else {
+        setCaption(i18n("Create A New Logical Volume"));
+        lv_name_label->setText(i18n("<b>Create a new logical volume</b>"));
     }
+    
+    QWidget *const main_widget = new QWidget();
+    QVBoxLayout *const layout = new QVBoxLayout();
+    
+    m_tab_widget = new KTabWidget(this);
+    m_physical_tab = createPhysicalTab();  // this order is important
+    m_advanced_tab = createAdvancedTab();
+    m_general_tab  = createGeneralTab();
+    m_tab_widget->addTab(m_general_tab,  i18nc("The standard common options", "General"));
+    m_tab_widget->addTab(m_physical_tab, i18n("Physical layout"));
+    m_tab_widget->addTab(m_advanced_tab, i18nc("Less used, dangerous or complex options", "Advanced options"));
+    
+    layout->addWidget(lv_name_label);
+    layout->addSpacing(5);
+    layout->addWidget(m_tab_widget);
+    main_widget->setLayout(layout);
+    
+    setMaxSize();
+
+    enableTypeOptions(m_type_combo->currentIndex());
+    enableStripeCombo(m_stripe_count_spin->value());
+    makeConnections();
+
+    setMainWidget(main_widget);
 }
 
 void LVCreateDialog::makeConnections()
@@ -144,27 +126,24 @@ void LVCreateDialog::makeConnections()
             this, SLOT(setMaxSize()));
 
     connect(m_stripe_count_spin, SIGNAL(valueChanged(int)),
+            this, SLOT(enableStripeCombo(int)));
+
+    connect(m_stripe_count_spin, SIGNAL(valueChanged(int)),
             this, SLOT(setMaxSize()));
 
     connect(m_mirror_count_spin, SIGNAL(valueChanged(int)),
             this, SLOT(setMaxSize()));
 
-    connect(m_stripe_box, SIGNAL(toggled(bool)),
+    connect(m_type_combo, SIGNAL(currentIndexChanged(int)),
+            this, SLOT(enableTypeOptions(int)));
+
+    connect(m_type_combo, SIGNAL(currentIndexChanged(int)),
             this, SLOT(setMaxSize()));
 
-    connect(m_mirror_box, SIGNAL(toggled(bool)),
-            this, SLOT(setMaxSize()));
+    connect(m_type_combo, SIGNAL(currentIndexChanged(int)),
+            this, SLOT(enableMonitoring(int)));
 
-    connect(m_mirror_box, SIGNAL(toggled(bool)),
-            this, SLOT(enableMonitoring(bool)));
-
-    connect(m_mirrored_log, SIGNAL(toggled(bool)),
-            this, SLOT(setMaxSize()));
-
-    connect(m_disk_log, SIGNAL(toggled(bool)),
-            this, SLOT(setMaxSize()));
-
-    connect(m_core_log, SIGNAL(toggled(bool)),
+    connect(m_log_combo, SIGNAL(currentIndexChanged(int)),
             this, SLOT(setMaxSize()));
 
     connect(m_size_selector, SIGNAL(stateChanged()),
@@ -175,11 +154,11 @@ QWidget* LVCreateDialog::createGeneralTab()
 {
     m_tag_edit = NULL;
 
-    QWidget *general_tab = new QWidget(this);
-    QHBoxLayout *general_layout = new QHBoxLayout;
+    QWidget *const general_tab = new QWidget(this);
+    QHBoxLayout *const general_layout = new QHBoxLayout;
     general_tab->setLayout(general_layout);
-    QGroupBox *volume_box = new QGroupBox();
-    QVBoxLayout *layout = new QVBoxLayout;
+    QGroupBox *const volume_box = new QGroupBox();
+    QVBoxLayout *const layout = new QVBoxLayout;
     volume_box->setLayout(layout);
     general_layout->addStretch();
     general_layout->addWidget(volume_box);
@@ -207,7 +186,6 @@ QWidget* LVCreateDialog::createGeneralTab()
         m_current_size_label = new QLabel(i18n("Current size: %1", locale->formatByteSize(m_lv->getSize(), 1, dialect)));
         layout->insertWidget(2, m_current_size_label);
     } else {
-
         QHBoxLayout *const name_layout = new QHBoxLayout();
         m_name_edit = new KLineEdit();
 
@@ -220,7 +198,7 @@ QWidget* LVCreateDialog::createGeneralTab()
         name_layout->addWidget(m_name_edit);
         upper_layout->insertLayout(0, name_layout);
 
-        QHBoxLayout *tag_layout = new QHBoxLayout();
+        QHBoxLayout *const tag_layout = new QHBoxLayout();
         m_tag_edit = new KLineEdit();
 
         QRegExp rx2("[0-9a-zA-Z_\\.+-]*");
@@ -238,39 +216,32 @@ QWidget* LVCreateDialog::createGeneralTab()
     }
 
     if (m_extend) {
-        if (getStripeCount() > 1) {
-            m_stripe_box->setChecked(false);
-            m_size_selector = new SizeSelectorBox(m_vg->getExtentSize(), m_lv->getExtents(),
-                                                  getLargestVolume() / m_vg->getExtentSize(),
-                                                  m_lv->getExtents(), true, false);
-            m_stripe_box->setChecked(true);
-        } else {
-            m_size_selector = new SizeSelectorBox(m_vg->getExtentSize(), m_lv->getExtents(),
-                                                  getLargestVolume() / m_vg->getExtentSize(),
-                                                  m_lv->getExtents(), true, false);
-        }
+        m_size_selector = new SizeSelectorBox(m_vg->getExtentSize(), m_lv->getExtents(),
+                                              m_vg->getAllocatableExtents() + m_lv->getExtents(),
+                                              m_lv->getExtents(), true, false);
     } else {
         m_size_selector = new SizeSelectorBox(m_vg->getExtentSize(), 0,
-                                              getLargestVolume() / m_vg->getExtentSize() ,
+                                              m_vg->getAllocatableExtents(),
                                               0, true, false);
     }
 
     upper_layout->addWidget(m_size_selector);
 
-    QGroupBox *volume_limit_box = new QGroupBox(i18n("Maximum volume size"));
-    QVBoxLayout *volume_limit_layout = new QVBoxLayout();
+    QGroupBox *const volume_limit_box = new QGroupBox(i18n("Maximum volume size"));
+    QVBoxLayout *const volume_limit_layout = new QVBoxLayout();
     volume_limit_box->setLayout(volume_limit_layout);
     m_max_size_label = new QLabel();
     volume_limit_layout->addWidget(m_max_size_label);
     m_max_extents_label = new QLabel();
     volume_limit_layout->addWidget(m_max_extents_label);
     m_stripe_count_label = new QLabel();
+    m_stripe_count_label->setWordWrap(true);
     volume_limit_layout->addWidget(m_stripe_count_label);
     volume_limit_layout->addStretch();
     lower_layout->addWidget(volume_limit_box);
 
-    QGroupBox *alloc_box = new QGroupBox(i18n("Allocation Policy"));
-    QVBoxLayout *alloc_box_layout = new QVBoxLayout;
+    QGroupBox *const alloc_box = new QGroupBox(i18n("Allocation Policy"));
+    QVBoxLayout *const alloc_box_layout = new QVBoxLayout;
     normal_button     = new QRadioButton(i18nc("The usual way", "Normal"));
     contiguous_button = new QRadioButton(i18n("Contiguous"));
     anywhere_button   = new QRadioButton(i18n("Anywhere"));
@@ -306,7 +277,6 @@ QWidget* LVCreateDialog::createGeneralTab()
 QWidget* LVCreateDialog::createPhysicalTab()
 {
     QString message;
-    int stripe_index;
     QList<PhysVol *> physical_volumes;
 
     QVBoxLayout *const layout = new QVBoxLayout;
@@ -322,120 +292,26 @@ QWidget* LVCreateDialog::createPhysicalTab()
     m_pv_checkbox = new PvGroupBox(physical_volumes);
     layout->addWidget(m_pv_checkbox);
 
-    QVBoxLayout *const striped_layout = new QVBoxLayout;
-    QHBoxLayout *const stripe_size_layout = new QHBoxLayout;
-    QHBoxLayout *const stripes_number_layout = new QHBoxLayout;
-
-    m_stripe_box = new QGroupBox(i18n("Disk striping"));
-    m_stripe_box->setCheckable(true);
-    m_stripe_box->setChecked(false);
-    m_stripe_box->setLayout(striped_layout);
-
-    m_stripe_size_combo = new KComboBox();
-    m_stripe_box->setEnabled(false);
-    for (int n = 2; (pow(2, n) * 1024) <= m_vg->getExtentSize() ; n++) {
-        m_stripe_size_combo->addItem(QString("%1").arg(pow(2, n)) + " KiB");
-        m_stripe_size_combo->setItemData(n - 2, QVariant((int) pow(2, n)), Qt::UserRole);
-        m_stripe_box->setEnabled(true);   // only enabled if the combo box has at least one entry!
-    }
-    if (physical_volumes.size() < 2) {
-        m_stripe_box->setEnabled(false);
-    }
-    QLabel *const stripe_size = new QLabel(i18n("Stripe Size: "));
-    stripe_size->setBuddy(m_stripe_size_combo);
-
-    m_stripe_count_spin = new KIntSpinBox();
-    m_stripe_count_spin->setMinimum(2);
-    m_stripe_count_spin->setMaximum(m_vg->getPvCount());
-    stripe_size_layout->addWidget(stripe_size);
-    stripe_size_layout->addWidget(m_stripe_size_combo);
-    QLabel *const stripes_number = new QLabel(i18n("Number of stripes: "));
-    stripes_number->setBuddy(m_stripe_count_spin);
-    stripes_number_layout->addWidget(stripes_number);
-    stripes_number_layout->addWidget(m_stripe_count_spin);
-    striped_layout->addLayout(stripe_size_layout);
-    striped_layout->addLayout(stripes_number_layout);
-
-    /* If we are extending a volume we try to match the striping
-       of the last segment of that volume, if it was striped */
-
-    if (m_extend) {
-        int seg_count = 1;
-        int seg_stripe_count = 1;
-        int seg_stripe_size = 4;
-        QList<LogVol *>  logvols;
-
-        if (m_lv->isMirror()) {                        // Tries to match striping to last segment of first leg
-            logvols = m_lv->getAllChildrenFlat();
-            for (int x = 0; x < logvols.size(); x++) {
-                if (logvols[x]->isMirrorLeg() && !(logvols[x]->isMirrorLog())) {
-                    seg_count = logvols[x]->getSegmentCount();
-                    seg_stripe_count = logvols[x]->getSegmentStripes(seg_count - 1);
-                    seg_stripe_size = logvols[x]->getSegmentStripeSize(seg_count - 1);
-                    break;
-                }
-            }
-        } else {
-            seg_count = m_lv->getSegmentCount();
-            seg_stripe_count = m_lv->getSegmentStripes(seg_count - 1);
-            seg_stripe_size = m_lv->getSegmentStripeSize(seg_count - 1);
-        }
-
-        if (seg_stripe_count > 1 && m_stripe_box->isEnabled()) {
-            m_stripe_count_spin->setValue(seg_stripe_count);
-
-            if (physical_volumes.size() >= (seg_stripe_count * m_lv->getMirrorCount()))
-                m_stripe_box->setChecked(true);
-            else
-                m_stripe_box->setChecked(false);
-
-            stripe_index = m_stripe_size_combo->findData(QVariant(seg_stripe_size / 1024));
-            if (stripe_index == -1)
-                stripe_index = 0;
-            m_stripe_size_combo->setCurrentIndex(stripe_index);
-        }
-    }
-
-    QVBoxLayout *const mirror_layout = new QVBoxLayout;
-    m_mirror_box = new QGroupBox(i18n("Disk mirrors"));
-    m_mirror_box->setCheckable(true);
-    m_mirror_box->setChecked(false);
-    if (physical_volumes.size() < 2)
-        m_mirror_box->setEnabled(false);
-    m_mirror_box->setLayout(mirror_layout);
-
-    m_mirrored_log = new QRadioButton(i18n("Mirrored disk based log"));
-    m_disk_log = new QRadioButton(i18n("Disk based log"));
-    m_core_log = new QRadioButton(i18n("Memory based log"));
-    m_disk_log->setChecked(true);
-    mirror_layout->addWidget(m_mirrored_log);
-    mirror_layout->addWidget(m_disk_log);
-    mirror_layout->addWidget(m_core_log);
-
-    QHBoxLayout *const mirrors_spin_layout = new QHBoxLayout();
-
-    m_mirror_count_spin = new KIntSpinBox();
-    m_mirror_count_spin->setMinimum(2);
-    m_mirror_count_spin->setMaximum(m_vg->getPvCount());
-    QLabel *mirrors_number_label  = new QLabel(i18n("Number of mirror legs: "));
-    mirrors_number_label->setBuddy(m_mirror_count_spin);
-    mirrors_spin_layout->addWidget(mirrors_number_label);
-    mirrors_spin_layout->addWidget(m_mirror_count_spin);
-    mirror_layout->addLayout(mirrors_spin_layout);
-
     QHBoxLayout *const lower_h_layout = new QHBoxLayout;
     QVBoxLayout *const lower_v_layout = new QVBoxLayout;
     layout->addLayout(lower_h_layout);
     lower_h_layout->addStretch();
+
     lower_h_layout->addLayout(lower_v_layout);
     lower_h_layout->addStretch();
 
-    lower_v_layout->addWidget(m_stripe_box);
+    m_volume_box = new QGroupBox(i18n("Volume"));
+    QVBoxLayout *const volume_layout = new QVBoxLayout;
+    m_volume_box->setLayout(volume_layout);
 
-    if ((!m_extend) && (!m_snapshot))
-        lower_v_layout->addWidget(m_mirror_box);
-    else
-        m_mirror_box->setEnabled(false);
+    volume_layout->addWidget(createTypeWidget(physical_volumes.size()));
+    m_stripe_widget = createStripeWidget(physical_volumes.size());
+    m_mirror_widget = createMirrorWidget(physical_volumes.size());
+    volume_layout->addWidget(m_stripe_widget);
+    volume_layout->addWidget(m_mirror_widget);
+    volume_layout->addStretch();
+
+    lower_v_layout->addWidget(m_volume_box);
 
     return m_physical_tab;
 }
@@ -519,8 +395,8 @@ QWidget* LVCreateDialog::createAdvancedTab()
     minor_number_layout->addWidget(m_minor_number_edit);
     persistent_layout->addLayout(major_number_layout);
     persistent_layout->addLayout(minor_number_layout);
-    QIntValidator *minor_validator = new QIntValidator(m_minor_number_edit);
-    QIntValidator *major_validator = new QIntValidator(m_major_number_edit);
+    QIntValidator *const minor_validator = new QIntValidator(m_minor_number_edit);
+    QIntValidator *const major_validator = new QIntValidator(m_major_number_edit);
     minor_validator->setBottom(0);
     major_validator->setBottom(0);
     m_minor_number_edit->setValidator(minor_validator);
@@ -533,12 +409,224 @@ QWidget* LVCreateDialog::createAdvancedTab()
     return m_advanced_tab;
 }
 
+QWidget* LVCreateDialog::createStripeWidget(int pvcount)
+{
+    QWidget *const widget = new QWidget;
+    QVBoxLayout *const layout = new QVBoxLayout;
+
+    m_stripe_size_combo = new KComboBox();
+    m_stripe_size_combo->setEnabled(false);
+    for (int n = 2; (pow(2, n) * 1024) <= m_vg->getExtentSize() ; n++) {
+        m_stripe_size_combo->addItem(QString("%1").arg(pow(2, n)) + " KiB");
+        m_stripe_size_combo->setItemData(n - 2, QVariant((int) pow(2, n)), Qt::UserRole);
+        m_stripe_size_combo->setEnabled(true);   // only enabled if the combo box has at least one entry!
+
+        if ((n - 2) < 5) 
+            m_stripe_size_combo->setCurrentIndex(n - 2);
+   }
+
+    QLabel *const size_label = new QLabel(i18n("Stripe Size: "));
+    size_label->setBuddy(m_stripe_size_combo);
+
+    m_stripe_count_spin = new KIntSpinBox();
+    m_stripe_count_spin->setEnabled(m_stripe_size_combo->isEnabled());
+    m_stripe_count_spin->setRange(1, pvcount); 
+    m_stripe_count_spin->setSpecialValueText(i18n("none"));
+
+    if (m_stripe_size_combo->isEnabled()) {
+        QHBoxLayout *const size_layout = new QHBoxLayout;
+        size_layout->addWidget(size_label);
+        size_layout->addWidget(m_stripe_size_combo);
+        QLabel *const count_label = new QLabel(i18n("Number of stripes: "));
+        count_label->setBuddy(m_stripe_count_spin);
+        QHBoxLayout *const count_layout = new QHBoxLayout;
+        count_layout->addWidget(count_label);
+        count_layout->addWidget(m_stripe_count_spin);
+        
+        layout->addLayout(size_layout);
+        layout->addLayout(count_layout);
+    } else {
+        QLabel *const error_label = new QLabel(i18n("Extents smaller than 4KiB can not be striped"));
+        layout->addWidget(error_label);
+
+        for (int x = m_type_combo->count() - 1; x > 2; x--)
+            m_type_combo->removeItem(x);
+    }
+
+    widget->setLayout(layout);
+
+    /* If we are extending a volume we try to match the striping
+       of the last segment of that volume, if it was striped */
+
+    if (m_extend) {
+        int seg_count = 1;
+        int stripe_count = 1;
+        int stripe_size = 4;
+        QList<LogVol *>  logvols;
+
+        if (m_lv->isLvmMirror()) {                        // Tries to match striping to last segment of first leg
+            logvols = m_lv->getAllChildrenFlat();
+            for (int x = 0; x < logvols.size(); x++) {
+                if (logvols[x]->isLvmMirrorLeg() && !(logvols[x]->isLvmMirrorLog())) {
+                    seg_count = logvols[x]->getSegmentCount();
+                    stripe_count = logvols[x]->getSegmentStripes(seg_count - 1);
+                    stripe_size = logvols[x]->getSegmentStripeSize(seg_count - 1);
+                    break;
+                }
+            }
+        } else {
+            seg_count = m_lv->getSegmentCount();
+            stripe_count = m_lv->getSegmentStripes(seg_count - 1);
+            stripe_size = m_lv->getSegmentStripeSize(seg_count - 1);
+
+            if (m_lv->isRaid()) { 
+                m_stripe_count_spin->setEnabled(false);
+
+                if (m_lv->getRaidType() == 4 || m_lv->getRaidType() == 5){
+                    stripe_count -= 1;
+                    m_stripe_count_spin->setSuffix(i18n(" + 1 parity")); 
+                    m_stripe_count_spin->setSpecialValueText(i18n(""));
+                } else if (m_lv->getRaidType() == 6) {
+                    stripe_count -= 2;
+                    m_stripe_count_spin->setSuffix(i18n(" + 2 parity"));
+                    m_stripe_count_spin->setSpecialValueText(i18n(""));
+                }
+            }
+        }
+
+        m_stripe_count_spin->setValue(stripe_count);
+
+        if (stripe_count > 1) {
+            int stripe_index = m_stripe_size_combo->findData(QVariant(stripe_size / 1024));
+
+            if (stripe_index == -1)
+                stripe_index = 0;
+            m_stripe_size_combo->setCurrentIndex(stripe_index);
+        }
+    }
+
+    return widget;
+}
+
+QWidget* LVCreateDialog::createMirrorWidget(int pvcount)
+{
+    QWidget *const widget = new QWidget;
+
+    m_log_combo = new KComboBox;
+    m_log_combo->addItem(i18n("Mirrored disk based log"));
+    m_log_combo->addItem(i18n("Disk based log"));
+    m_log_combo->addItem(i18n("Memory based log"));
+
+    QHBoxLayout *const log_layout = new QHBoxLayout();
+    QLabel *const log_label  = new QLabel(i18n("Mirror log: "));
+    log_label->setBuddy(m_log_combo);
+    log_layout->addWidget(log_label);
+    log_layout->addWidget(m_log_combo);
+
+    QHBoxLayout *const spin_layout = new QHBoxLayout();
+    m_mirror_count_spin = new KIntSpinBox();
+    m_mirror_count_spin->setRange(1, pvcount);
+
+    if (m_extend){
+        if (m_lv->isLvmMirror() || m_lv->getRaidType() == 1)
+            m_mirror_count_spin->setValue(m_lv->getMirrorCount());
+        else
+            m_mirror_count_spin->setValue(1);
+
+        if (m_lv->isLvmMirror()) {
+            if (m_lv->getLogCount() == 0)
+                m_log_combo->setCurrentIndex(2);
+            else if (m_lv->getLogCount() == 1)
+                m_log_combo->setCurrentIndex(1);
+            else if (m_lv->getLogCount() == 2)
+                m_log_combo->setCurrentIndex(0);
+        }
+        else
+            m_log_combo->setCurrentIndex(1);
+
+        m_log_combo->setEnabled(false);
+        m_mirror_count_spin->setEnabled(false);
+    }
+
+    QLabel *const count_label  = new QLabel(i18n("Number of mirror legs: "));
+    count_label->setBuddy(m_mirror_count_spin);
+    spin_layout->addWidget(count_label);
+    spin_layout->addWidget(m_mirror_count_spin);
+
+    QVBoxLayout *const layout = new QVBoxLayout;
+    layout->addLayout(log_layout);
+    layout->addLayout(spin_layout);
+    widget->setLayout(layout);
+
+    return widget;
+}
+
+QWidget* LVCreateDialog::createTypeWidget(int pvcount)
+{
+    QWidget *const widget = new QWidget;
+
+    m_type_combo = new KComboBox();
+    m_type_combo->addItem(i18n("Linear"));
+
+    if(m_extend) {
+        QString const type = m_lv->getType();
+        m_type_combo->setEnabled(false);
+        m_type_combo->addItem(i18n("LVM2 Mirror"));
+        m_type_combo->addItem(i18n("RAID 1 Mirror"));
+        m_type_combo->addItem(i18n("RAID 4"));
+        m_type_combo->addItem(i18n("RAID 5"));
+        m_type_combo->addItem(i18n("RAID 6"));
+        
+        if (type == "mirror")
+            m_type_combo->setCurrentIndex(1);
+        else if (type == "raid1")
+            m_type_combo->setCurrentIndex(2);
+        else if (type == "raid4")
+            m_type_combo->setCurrentIndex(3);
+        else if (type == "raid5")
+            m_type_combo->setCurrentIndex(4);
+        else if (type == "raid6")
+            m_type_combo->setCurrentIndex(5);
+        else
+            m_type_combo->setCurrentIndex(0);
+    } else {
+        
+        if (pvcount > 1) {
+            m_type_combo->addItem(i18n("LVM2 Mirror"));
+            m_type_combo->addItem(i18n("RAID 1 Mirror"));
+        }
+        
+        if (pvcount > 2) {
+            m_type_combo->addItem(i18n("RAID 4"));
+            m_type_combo->addItem(i18n("RAID 5"));
+        }
+        
+        if (pvcount > 4) {
+            m_type_combo->addItem(i18n("RAID 6"));
+        }
+    }
+
+    if (m_snapshot) {
+        m_type_combo->setCurrentIndex(0);
+        m_type_combo->setEnabled(false);
+    }
+
+    QLabel *const type_label = new QLabel(i18n("Volume type: "));
+    type_label->setBuddy(m_type_combo);
+
+    QHBoxLayout *const layout = new QHBoxLayout;
+    layout->addWidget(type_label);
+    layout->addWidget(m_type_combo);
+    widget->setLayout(layout);
+
+    return widget;
+}
+
 void LVCreateDialog::setMaxSize()
 {
-    const int stripe_count = getStripeCount();
-    const int mirror_count = getMirrorCount();
-    const long long free_extents  = getLargestVolume() / m_vg->getExtentSize();
-    const long long selected_size = m_size_selector->getCurrentSize() * m_vg->getExtentSize();
+    const int stripe_count = m_stripe_count_spin->value();
+    const int mirror_count = m_mirror_count_spin->value();
+    const long long max_extents   = getLargestVolume() / m_vg->getExtentSize();
 
     KLocale::BinaryUnitDialect dialect;
     KLocale *const locale = KGlobal::locale();
@@ -548,33 +636,35 @@ void LVCreateDialog::setMaxSize()
     else
         dialect = KLocale::IECBinaryDialect;
 
-    m_size_selector->setConstrainedMax(free_extents);
+    m_size_selector->setConstrainedMax(max_extents);
     m_max_size_label->setText(i18n("Size: %1", locale->formatByteSize(getLargestVolume(), 1, dialect)));
-    m_max_extents_label->setText(i18n("Extents: %1", free_extents));
+    m_max_extents_label->setText(i18n("Extents: %1", max_extents));
 
-    if (!m_extend) {
-
-        if (m_mirror_box->isChecked() && !m_stripe_box->isChecked())
-            m_stripe_count_label->setText(i18n("(with %1 mirror legs)", mirror_count));
-        else if (!m_mirror_box->isChecked() && m_stripe_box->isChecked())
+    if (m_type_combo->currentIndex() == 0){
+        if (m_stripe_count_spin->value() > 1)
             m_stripe_count_label->setText(i18n("(with %1 stripes)", stripe_count));
-        else if (m_mirror_box->isChecked() && m_stripe_box->isChecked())
-            m_stripe_count_label->setText(i18n("(with %1 mirror legs\nand %2 stripes)", mirror_count, stripe_count));
-        else
-            m_stripe_count_label->setText(i18n("(linear volume)"));
-    } else {
-        m_extend_by_label->setText(i18n("Extend by: %1", locale->formatByteSize(selected_size - m_lv->getSize(), 1, dialect)));
-
-        if (mirror_count > 1 && !m_stripe_box->isChecked())
-            m_stripe_count_label->setText(i18n("(with %1 mirror legs)", mirror_count));
-        else if (mirror_count < 2 && m_stripe_box->isChecked())
-            m_stripe_count_label->setText(i18n("(with %1 stripes)", stripe_count));
-        else if (mirror_count > 1 && m_stripe_box->isChecked())
-            m_stripe_count_label->setText(i18n("(with %1 mirror legs\nand %2 stripes)", mirror_count, stripe_count));
         else
             m_stripe_count_label->setText(i18n("(linear volume)"));
     }
-
+    else if (m_type_combo->currentIndex() == 1){
+        if (m_stripe_count_spin->value() > 1)
+            m_stripe_count_label->setText(i18n("(LVM2 mirror with %1 legs and %2 stripes)", mirror_count, stripe_count));
+        else
+            m_stripe_count_label->setText(i18n("(LVM2 mirror with %1 legs)", mirror_count));
+    }
+    else if (m_type_combo->currentIndex() == 2){
+        m_stripe_count_label->setText(i18n("(RAID 1 mirror with %1 legs)", mirror_count));
+    }
+    else if (m_type_combo->currentIndex() == 3){
+        m_stripe_count_label->setText(i18n("(RAID 4 with %1 stripes + 1 parity)", stripe_count));
+    }
+    else if (m_type_combo->currentIndex() == 4){
+        m_stripe_count_label->setText(i18n("(RAID 5 with %1 stripes + 1 parity)", stripe_count));
+    }
+    else if (m_type_combo->currentIndex() == 5){
+        m_stripe_count_label->setText(i18n("(RAID 6 with %1 stripes + 2 parity)", stripe_count));
+    }
+    
     resetOkButton();
 }
 
@@ -594,17 +684,18 @@ void LVCreateDialog::validateVolumeName(QString name)
 
 void LVCreateDialog::resetOkButton()
 {
-    const long long max_extents = getLargestVolume() / m_vg->getExtentSize();
-    const long long volume_extents = roundExtentsToStripes(m_size_selector->getCurrentSize());
+    const long long max = getLargestVolume() / m_vg->getExtentSize();
+    const long long selected = m_size_selector->getCurrentSize();
+    const long long rounded  = roundExtentsToStripes(selected);
 
-    if (m_size_selector->isValid()) {
+    if (m_size_selector->isValid() && m_name_is_valid) {
         if (!m_extend) {
-            if ((volume_extents <= max_extents) && (volume_extents > 0) && m_name_is_valid)
+            if ((rounded <= max) && (rounded > 0))
                 enableButtonOk(true);
             else
                 enableButtonOk(false);
         } else {
-            if ((volume_extents <= max_extents) && (volume_extents > m_lv->getExtents()) && m_name_is_valid)
+            if ((rounded <= max) && (rounded > m_lv->getExtents()) && (selected > m_lv->getExtents()))
                 enableButtonOk(true);
             else
                 enableButtonOk(false);
@@ -613,9 +704,149 @@ void LVCreateDialog::resetOkButton()
         enableButtonOk(false);
 }
 
-void LVCreateDialog::enableMonitoring(bool checked)
+void LVCreateDialog::enableTypeOptions(int index)
 {
-    if (checked) {
+    const int pv_count = m_pv_checkbox->getAllNames().size();
+
+    if (index == 0) {  // linear
+        m_mirror_count_spin->setMinimum(1);
+        m_mirror_count_spin->setValue(1);
+        m_mirror_count_spin->setSpecialValueText(i18n("none"));
+        m_mirror_count_spin->setEnabled(false);
+        m_log_combo->setEnabled(false);
+        m_log_combo->setCurrentIndex(1);
+        m_stripe_count_spin->setRange(1, pv_count);
+        m_stripe_count_spin->setValue(1);
+        m_stripe_count_spin->setSuffix(i18n(""));
+        m_stripe_count_spin->setSpecialValueText(i18n("none"));
+        m_stripe_count_spin->setEnabled(true);
+
+        m_stripe_widget->show();
+        m_mirror_widget->hide();
+
+    } else if (index == 1) {  // LVM2 mirror
+
+        if(m_extend) {
+            m_mirror_count_spin->setEnabled(false);
+            m_log_combo->setEnabled(false);
+        } else {
+            m_mirror_count_spin->setEnabled(true);
+            m_log_combo->setEnabled(true);
+            m_mirror_count_spin->setMinimum(2);
+            m_mirror_count_spin->setValue(2);
+            m_mirror_count_spin->setMaximum(pv_count);
+            m_mirror_count_spin->setSpecialValueText("");
+            m_log_combo->setCurrentIndex(1);
+            m_stripe_count_spin->setMinimum(1);
+            m_stripe_count_spin->setValue(1);
+            m_stripe_count_spin->setMaximum(pv_count);
+            m_stripe_count_spin->setSuffix(i18n(""));
+            m_stripe_count_spin->setSpecialValueText(i18n("none"));
+        }
+
+        m_stripe_count_spin->setEnabled(true);
+        m_stripe_widget->show();
+        m_mirror_widget->show();
+    } else if (index == 2) {  // RAID 1
+
+        if(m_extend)
+            m_mirror_count_spin->setEnabled(false);
+        else {
+            m_mirror_count_spin->setMinimum(2);
+            m_mirror_count_spin->setValue(2);
+            m_mirror_count_spin->setMaximum(pv_count);
+            m_mirror_count_spin->setSpecialValueText("");
+            m_mirror_count_spin->setEnabled(true);
+        }
+
+        m_log_combo->setEnabled(false);
+        m_log_combo->setCurrentIndex(1);
+        m_stripe_count_spin->setMinimum(1);
+        m_stripe_count_spin->setValue(1);
+        m_stripe_count_spin->setSuffix(i18n(""));
+        m_stripe_count_spin->setSpecialValueText(i18n("none"));
+        m_stripe_count_spin->setEnabled(false);
+        m_stripe_size_combo->setEnabled(false);
+        m_stripe_widget->hide();
+        m_mirror_widget->show();
+    } else if (index == 3) {  // RAID 4
+        m_mirror_count_spin->setMinimum(1);
+        m_mirror_count_spin->setValue(1);
+        m_mirror_count_spin->setSpecialValueText(i18n("none"));
+        m_mirror_count_spin->setEnabled(false);
+        m_log_combo->setEnabled(false);
+        m_log_combo->setCurrentIndex(1);
+
+        if(m_extend) {
+            m_stripe_count_spin->setEnabled(false);
+        } else{
+            m_stripe_count_spin->setMinimum(2);
+            m_stripe_count_spin->setValue(2);
+            m_stripe_count_spin->setMaximum(pv_count - 1);
+            m_stripe_count_spin->setSpecialValueText("");
+            m_stripe_count_spin->setSuffix(i18n(" + 1 parity"));
+            m_stripe_count_spin->setEnabled(true);
+        }
+
+        m_stripe_widget->show();
+        m_mirror_widget->hide();
+
+    } else if (index == 4) {  // RAID 5
+        m_mirror_count_spin->setMinimum(1);
+        m_mirror_count_spin->setValue(1);
+        m_mirror_count_spin->setSpecialValueText(i18n("none"));
+        m_mirror_count_spin->setEnabled(false);
+        m_log_combo->setEnabled(false);
+        m_log_combo->setCurrentIndex(1);
+
+        if(m_extend) {
+            m_stripe_count_spin->setEnabled(false);
+        } else {
+            m_stripe_count_spin->setMinimum(2);
+            m_stripe_count_spin->setValue(2);
+            m_stripe_count_spin->setMaximum(pv_count - 1);
+            m_stripe_count_spin->setSpecialValueText("");
+            m_stripe_count_spin->setSuffix(i18n(" + 1 parity"));
+            m_stripe_count_spin->setEnabled(true);
+        }
+
+        m_stripe_widget->show();
+        m_mirror_widget->hide();
+    } else if (index == 5) {  // RAID 6
+        m_mirror_count_spin->setMinimum(1);
+        m_mirror_count_spin->setValue(1);
+        m_mirror_count_spin->setSpecialValueText(i18n("none"));
+        m_mirror_count_spin->setEnabled(false);
+        m_log_combo->setEnabled(false);
+        m_log_combo->setCurrentIndex(1);
+
+        if(m_extend) {
+            m_stripe_count_spin->setEnabled(false);
+        } else {
+            m_stripe_count_spin->setMinimum(3);
+            m_stripe_count_spin->setValue(3); 
+            m_stripe_count_spin->setMaximum(pv_count - 2);
+            m_stripe_count_spin->setSpecialValueText("");
+            m_stripe_count_spin->setSuffix(i18n(" + 2 parity"));
+            m_stripe_count_spin->setEnabled(true);
+        }
+
+        m_stripe_widget->show();
+        m_mirror_widget->hide();
+    }
+}
+
+void LVCreateDialog::enableStripeCombo(int value)
+{
+    if (value > 1 && m_stripe_size_combo->count() > 0)
+        m_stripe_size_combo->setEnabled(true);
+    else
+        m_stripe_size_combo->setEnabled(false);
+}
+
+void LVCreateDialog::enableMonitoring(int index)
+{
+    if (index == 1) {
         m_monitor_check->setChecked(true);
         m_monitor_check->setEnabled(true);
         m_skip_sync_check->setChecked(true);
@@ -638,22 +869,41 @@ long long LVCreateDialog::getLargestVolume()
 {
     QList <long long> available_pv_bytes = m_pv_checkbox->getRemainingSpaceList();
     QList <long long> stripe_pv_bytes;
-    const int total_stripes = getStripeCount() * getMirrorCount();
-    int log_count;
+    int total_stripes;
+    const int type = m_type_combo->currentIndex();
+    const int stripe_count = m_stripe_count_spin->value();
+    const int mirror_count = m_mirror_count_spin->value();
+    const long long extent_size = m_vg->getExtentSize();
+
+    if (type == 1)           // LVM2 mirror
+        total_stripes = stripe_count * mirror_count;
+    else if (type == 2)    // RAID 1 mirror
+        total_stripes = mirror_count;
+    else
+        total_stripes = stripe_count;
+
+    if (type == 3)         // RAID 4
+        total_stripes += 1;
+    else if (type == 4)    // RAID 5
+        total_stripes += 1;
+    else if (type == 5)    // RAID 6
+        total_stripes += 2;
+
+    int log_count = 0;
 
     for (int x = 0; x < total_stripes; x++)
         stripe_pv_bytes.append(0);
 
-    if (m_mirror_box->isChecked()) {
-        if (m_disk_log->isChecked())
-            log_count = 1;
-        else if (m_mirrored_log->isChecked())
+    if (type == 1 && !m_extend) {
+        if (m_log_combo->currentIndex() == 0)
             log_count = 2;
+        else if (m_log_combo->currentIndex() == 1)
+            log_count = 1;
         else
             log_count = 0;
     } else
         log_count = 0;
-
+    
     qSort(available_pv_bytes);
 
     for (int x = 0; x < log_count; x++) {
@@ -669,28 +919,22 @@ long long LVCreateDialog::getLargestVolume()
     }
     qSort(stripe_pv_bytes);
 
-    if (!m_extend)
-        return stripe_pv_bytes[0] * getStripeCount();
-    else
-        return (stripe_pv_bytes[0] * getStripeCount()) + m_lv->getSize();
-}
+    long long largest = stripe_pv_bytes[0];
 
-int LVCreateDialog::getStripeCount()
-{
-    if (m_stripe_box->isChecked())
-        return m_stripe_count_spin->value();
-    else
-        return 1;
-}
+    if (!m_extend) {
+        if (type == 2)
+            largest = largest - extent_size; // RAID 1 uses one extent per mirror for metadata
+        else if (type == 3 || type == 4 || type == 5) 
+            largest = (largest - extent_size) * stripe_count; // RAID 4/5/6 use one per stripe
+        else 
+            largest = largest * stripe_count;
+    } else
+        largest = (largest * stripe_count) + m_lv->getSize();
 
-int LVCreateDialog::getMirrorCount()
-{
-    if (m_extend)
-        return m_lv->getMirrorCount();
-    else if (m_mirror_box->isChecked())
-        return m_mirror_count_spin->value();
-    else
-        return 1;
+    if (largest < 0)
+        largest = 0;
+
+    return largest;
 }
 
 void LVCreateDialog::zeroReadonlyCheck(int)
@@ -718,9 +962,10 @@ QStringList LVCreateDialog::argumentsLV()
 {
     QString program_to_run;
     QStringList args;
-    QVariant stripe_size;
-    const int stripes = getStripeCount();
-    const int mirrors = getMirrorCount();
+    const QVariant stripe_size = m_stripe_size_combo->itemData(m_stripe_size_combo->currentIndex(), Qt::UserRole);
+    const int stripes = m_stripe_count_spin->value();
+    const int type    = m_type_combo->currentIndex();
+    const int mirrors = m_mirror_count_spin->value();
     long long extents = m_size_selector->getCurrentSize();
 
     if (m_tag_edit) {
@@ -734,9 +979,7 @@ QStringList LVCreateDialog::argumentsLV()
         args << "--minor" << m_minor_number_edit->text();
     }
 
-    stripe_size = m_stripe_size_combo->itemData(m_stripe_size_combo->currentIndex(), Qt::UserRole);
-
-    if (m_stripe_box->isChecked() || m_extend) {
+    if (stripes > 1) {
         args << "--stripes" << QString("%1").arg(stripes);
         args << "--stripesize" << QString("%1").arg(stripe_size.toLongLong());
     }
@@ -747,25 +990,38 @@ QStringList LVCreateDialog::argumentsLV()
         else
             args << "--permission" << "rw" ;
 
+        if (type == 1)
+            args << "--type" << "mirror" ;
+        else if (type == 2)
+            args << "--type" << "raid1" ;
+        else if (type == 3)
+            args << "--type" << "raid4" ;
+        else if (type == 4)
+            args << "--type" << "raid5" ;
+        else if (type == 5)
+            args << "--type" << "raid6" ;
+
         if (!m_snapshot && !m_extend) {
             if (m_zero_check->isChecked())
                 args << "--zero" << "y";
             else
                 args << "--zero" << "n";
 
-            if (m_mirror_box->isChecked()) {
+            if (mirrors > 1) {
                 args << "--mirrors" << QString("%1").arg(mirrors - 1);
 
                 if (m_skip_sync_check->isChecked())
                     args << "--nosync";
 
-                if (m_mirrored_log->isChecked())
-                    args << "--mirrorlog" << "mirrored";
-                else if (m_disk_log->isChecked())
-                    args << "--mirrorlog" << "disk";
-                else
-                    args << "--mirrorlog" << "core";
-            }
+                if (type == 1) { // traditional mirror
+                    if (m_log_combo->currentIndex() == 0)
+                        args << "--mirrorlog" << "mirrored";
+                    else if (m_log_combo->currentIndex() == 1)
+                        args << "--mirrorlog" << "disk";
+                    else
+                        args << "--mirrorlog" << "core";
+                }
+            } 
         }
     }
 
@@ -817,8 +1073,8 @@ QStringList LVCreateDialog::argumentsLV()
     }
 
     args << m_pv_checkbox->getNames();
-
     args.prepend(program_to_run);
+
     return args;
 }
 
@@ -826,8 +1082,8 @@ QStringList LVCreateDialog::argumentsLV()
 
 long long LVCreateDialog::roundExtentsToStripes(long long extents)
 {
-    const int stripes = getStripeCount();
-    const int mirrors = getMirrorCount();
+    const int stripes = m_stripe_count_spin->value();
+    const int mirrors = m_mirror_count_spin->value();
     const long long max_extents = getLargestVolume() / m_vg->getExtentSize();
 
     // The next part should only need to reference stripes, not the mirror count
@@ -865,6 +1121,20 @@ bool LVCreateDialog::hasInitialErrors()
         const QString warning_message = i18n("If this volume has a filesystem or data, it will need to be extended <b>separately</b>. "
                                              "Currently, only the ext2, ext3, ext4, xfs, jfs, ntfs and reiserfs file systems are "
                                              "supported for extension. The correct executable for extension must also be present. ");
+
+        if (m_lv->isRaid() || m_lv->isLvmMirror()){
+            QList<PhysVol *> pvs = m_vg->getPhysicalVolumes();
+
+            for (int x = pvs.size() - 1; x >= 0; x--) {
+                if (pvs[x]->getRemaining() < 1 || !pvs[x]->isAllocatable())
+                    pvs.removeAt(x);
+            }
+
+            if (m_lv->getMirrorCount() > pvs.size() ||  (m_lv->isRaid() && m_lv->getSegmentStripes(0) > pvs.size())) {
+                KMessageBox::error(this, i18n("Insufficient allocatable physical volumes to extend this volume"));
+                return true;
+            }
+        }
 
         if (m_lv->isOrigin()) {
             if (m_lv->isOpen()) {

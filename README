@@ -9,9 +9,9 @@ This program is currently being developed on lvm version (with library lvm2app):
 
 lvs --version
 
-  LVM version:     2.02.88(2) (2011-08-19)
-  Library version: 1.02.67 (2011-08-19)
-  Driver version:  4.20.0
+  LVM version:     2.02.95(2) (2012-03-06)
+  Library version: 1.02.74 (2012-03-06)
+  Driver version:  4.22.0
 
 
 Because kvpm relies on the exact format of the lvm program output and 
