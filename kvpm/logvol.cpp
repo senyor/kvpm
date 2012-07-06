@@ -82,7 +82,7 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)  // lv_t seems to change -- why?
     m_mirror_leg  = false;
     m_mirror_log  = false;
     m_raid        = false;
-    m_raid_image = false;
+    m_raid_image  = false;
     m_snap        = false;
     m_thin        = false;
     m_pvmove      = false;
@@ -476,6 +476,11 @@ void LogVol::countLegsAndLogs()
             if (lv->isLvmMirrorLog() && !lv->isLvmMirror())
                 m_log_count++;
         }
+    } else if (getRaidType() == 1) {
+        for (int x = all_lvs_flat.size() - 1; x >= 0; x--) {
+            if (all_lvs_flat[x]->isRaidImage())
+                m_mirror_count++;
+        }
     } else
         m_mirror_count = 1;  // linear volumes count as mirror = 1;
 }
@@ -562,6 +567,7 @@ void LogVol::calculateTotalSize()
 
 void LogVol::processSegments(lv_t lvmLV, const QByteArray flags)
 {
+    // const QString version(lvm_library_get_version());
     Segment *segment;
     QStringList devices_and_starts, temp;
     QString raw_paths;
@@ -576,25 +582,20 @@ void LogVol::processSegments(lv_t lvmLV, const QByteArray flags)
     if (lvseg_dm_list) {
         dm_list_iterate_items(lvseg_list, lvseg_dm_list) {
             lvm_lvseg = lvseg_list->lvseg;
-            if(flags.size() <= 6){
-                value = lvm_lvseg_get_property(lvm_lvseg, "regionsize");
-                if (value.is_valid) {
-                    if (value.value.integer)
-                        m_mirror = true;
-                }
-            } else {
-                if (flags[6] == 'm' && !(QString(flags[0]).contains(QRegExp("[rRiIl]"))))
-                    m_mirror = true;
-            }
-   
+            bool raid_mirror = false;
+
+            if (flags[6] == 'm' && !(QString(flags[0]).contains(QRegExp("[rRiIl]"))))
+                m_mirror = true;
+            else if (flags[6] == 'm' && (QString(flags[0]).contains(QRegExp("[rRiIl]"))))
+                raid_mirror = true;
+           
             segment = new Segment();
 
             value = lvm_lvseg_get_property(lvm_lvseg, "segtype");
             if (value.is_valid)
                 segment->type = value.value.string;
 
-            //            if (m_mirror || flags[6] == 'r') {
-            if (m_mirror || m_raid) {
+            if (m_mirror || raid_mirror) {
                 segment->stripes = 1;
                 segment->stripe_size = 1;
                 segment->size = 1;
@@ -603,9 +604,12 @@ void LogVol::processSegments(lv_t lvmLV, const QByteArray flags)
                 if (value.is_valid)
                     segment->stripes = value.value.integer;
 
+                /* Make multiplying by 512 depend on version number as defined
+                   above when stripesize gets fixed in lvm2app. */
+
                 value = lvm_lvseg_get_property(lvm_lvseg, "stripesize");
                 if (value.is_valid)
-                    segment->stripe_size = value.value.integer;
+                    segment->stripe_size = value.value.integer * 512;
 
                 value = lvm_lvseg_get_property(lvm_lvseg, "seg_size");
                 if (value.is_valid)
