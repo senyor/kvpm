@@ -67,7 +67,7 @@ LogVol::~LogVol()
         delete m_segments.takeAt(0);
 }
 
-void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)  // lv_t seems to change -- why?
+void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)
 {
     QString additional_state;
     QByteArray flags;
@@ -79,8 +79,8 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)  // lv_t seems to change -- why?
     m_merging     = false;
     m_metadata    = false;
     m_lvmmirror   = false;
-    m_mirror_leg  = false;
-    m_mirror_log  = false;
+    m_lvmmirror_leg  = false;
+    m_lvmmirror_log  = false;
     m_raid        = false;
     m_raid_image  = false;
     m_snap        = false;
@@ -127,48 +127,38 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)  // lv_t seems to change -- why?
         m_metadata = true;
         break;
     case 'I':
-        if (flags.size() <= 6) {
-            m_type = "mirror leg";
-            additional_state = "un-synced";
-            m_mirror_leg = true;
+        if (flags[6] == 'r'){
+            m_type = "raid image";
+            m_raid_image = true;
         } else {
-            if (flags[6] == 'r'){
-                m_type = "raid image";
-                m_raid_image = true;
-            } else {
-                m_type = "mirror leg";
-                m_mirror_leg = true;
-            }
+            m_type = "mirror image";
+            m_lvmmirror_leg = true;
         }
+
         additional_state = "un-synced";
         break;
     case 'i':
-        if (flags.size() <= 6) {
-            m_type = "mirror leg";
-            additional_state = "un-synced";
-            m_mirror_leg = true;
+        if (flags[6] == 'r'){
+            m_type = "raid image";
+            m_raid_image = true;
         } else {
-            if (flags[6] == 'r'){
-                m_type = "raid image";
-                m_raid_image = true;
-            } else {
-                m_type = "mirror leg";
-                m_mirror_leg = true;
-            }
+            m_type = "mirror image";
+            m_lvmmirror_leg = true;
         }
+        
         additional_state = "synced";
         break;
     case 'L':
     case 'l':
         m_type = "mirror log";
-        m_mirror_log = true;
+        m_lvmmirror_log = true;
         break;
     case 'M':                // mirror logs can be mirrors themselves -- see below
-        m_type = "mirror";
+        m_type = "lvm mirror";
         m_lvmmirror = true;
         break;
     case 'm':
-        m_type = "mirror";      // Origin status overides mirror status in the flags if this is both
+        m_type = "lvm mirror";  // Origin status overides mirror status in the flags if this is both
         m_lvmmirror = true;     // We split it below -- snap_containers are origins and the lv is a mirror
         break;
     case 'O':
@@ -312,12 +302,12 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)  // lv_t seems to change -- why?
     }
 
     if (m_lv_name.contains("_mlog", Qt::CaseSensitive)) {
-        m_mirror_log = true;    // this needs to be here in case it is a mirrored mirror log
+        m_lvmmirror_log = true;    // this needs to be here in case it is a mirrored mirror log
         m_lv_fs = "";
     } else if (m_lv_name.contains("_mimagetmp_", Qt::CaseSensitive)) {
         m_virtual = true;    // This is to get lvactionsmenu to forbid doing anything to it
         m_lv_fs = "";
-    } else if (!m_mirror_log && !m_mirror_leg && !m_virtual) {
+    } else if (!m_lvmmirror_log && !m_lvmmirror_leg && !m_virtual) {
         m_lv_fs = fsprobe_getfstype2(m_lv_mapper_path);
         m_lv_fs_label = fsprobe_getfslabel(m_lv_mapper_path);
         m_lv_fs_uuid  = fsprobe_getfsuuid(m_lv_mapper_path);
@@ -342,13 +332,14 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)  // lv_t seems to change -- why?
     } else
         m_origin = "";
 
-    if ((m_mirror_leg || m_mirror_log)) {
+    if ((m_lvmmirror_leg || m_lvmmirror_log)) {
+        if (m_lvmmirror_log && m_lvmmirror)
+            m_type = QString("log mirror");
 
-        if (m_mirror_log && m_mirror_leg)
-            m_type = m_type.replace("leg", "log");
-        else if ((m_lvmmirror || m_virtual) && !m_mirror_log)
-            m_mirror_leg = true;
-
+        if (m_lvmmirror_log && m_lvmmirror_leg)
+            m_type = QString("log image");
+        else if ((m_lvmmirror || m_virtual) && !m_lvmmirror_log)
+            m_lvmmirror_leg = true;
     }
 
     value = lvm_lv_get_property(lvmLV, "copy_percent");
@@ -591,9 +582,15 @@ void LogVol::processSegments(lv_t lvmLV, const QByteArray flags)
            
             segment = new Segment();
 
-            value = lvm_lvseg_get_property(lvm_lvseg, "segtype");
-            if (value.is_valid)
-                segment->type = value.value.string;
+            if (m_lvmmirror)
+                segment->type = QString("lvm mirror");
+            else if (raidmirror)
+                segment->type = QString("raid1 mirror");
+            else {
+                value = lvm_lvseg_get_property(lvm_lvseg, "segtype");
+                if (value.is_valid)
+                    segment->type = value.value.string;
+            }
 
             if (m_lvmmirror || raidmirror) {
                 segment->stripes = 1;
@@ -884,12 +881,12 @@ bool LogVol::isLvmMirror()
 
 bool LogVol::isLvmMirrorLeg()
 {
-    return m_mirror_leg;
+    return m_lvmmirror_leg;
 }
 
 bool LogVol::isLvmMirrorLog()
 {
-    return m_mirror_log;
+    return m_lvmmirror_log;
 }
 
 bool LogVol::isPersistent()
