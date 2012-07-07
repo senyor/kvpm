@@ -358,23 +358,21 @@ QWidget* LVCreateDialog::createAdvancedTab()
 
     m_monitor_check = new QCheckBox(i18n("Monitor with dmeventd"));
     m_skip_sync_check = new QCheckBox(i18n("Skip initial synchronization of mirror"));
+    m_skip_sync_check->setChecked(false);
 
     if (m_snapshot) {
         m_monitor_check->setChecked(true);
         m_monitor_check->setEnabled(true);
-        m_skip_sync_check->setChecked(false);
         m_skip_sync_check->setEnabled(false);
         layout->addWidget(m_monitor_check);
         layout->addWidget(m_skip_sync_check);
     } else if (m_extend) {
         m_monitor_check->setChecked(false);
         m_monitor_check->setEnabled(false);
-        m_skip_sync_check->setChecked(false);
         m_skip_sync_check->setEnabled(false);
     } else {
         m_monitor_check->setChecked(false);
         m_monitor_check->setEnabled(false);
-        m_skip_sync_check->setChecked(false);
         m_skip_sync_check->setEnabled(false);
         layout->addWidget(m_monitor_check);
         layout->addWidget(m_skip_sync_check);
@@ -846,16 +844,18 @@ void LVCreateDialog::enableStripeCombo(int value)
 
 void LVCreateDialog::enableMonitoring(int index)
 {
-    if (index == 1) {
-        m_monitor_check->setChecked(true);
+    if (index == 1 || index == 2) {           // lvm mirror or raid mirror
+        m_monitor_check->setChecked(true);    // whether a snap or not
         m_monitor_check->setEnabled(true);
-        m_skip_sync_check->setChecked(true);
         m_skip_sync_check->setEnabled(true);
-    } else {
-        if (!m_snapshot) {
-            m_monitor_check->setChecked(false);
-            m_monitor_check->setEnabled(false);
-        }
+    } else if (index > 2 || m_snapshot){      // raid stripe set
+        m_monitor_check->setChecked(true);    // and all other snaps
+        m_monitor_check->setEnabled(true);
+        m_skip_sync_check->setChecked(false);
+        m_skip_sync_check->setEnabled(false);
+    } else {                                  // linear
+        m_monitor_check->setChecked(false);
+        m_monitor_check->setEnabled(false);
         m_skip_sync_check->setChecked(false);
         m_skip_sync_check->setEnabled(false);
     }
