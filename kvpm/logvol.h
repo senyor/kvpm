@@ -74,10 +74,10 @@ class LogVol
     int m_mirror_count;          // if mirror -- how many legs
     bool m_virtual;              // virtual volume
     bool m_under_conversion;     // Is going to be a mirrored volume
-    bool m_lvmmirror;               // Is an LVM (not raid 1) mirrored volume
+    bool m_lvmmirror;            // Is an LVM (not raid 1) mirrored volume
+    bool m_lvmmirror_leg;        // Is one of the underlying legs of a mirrored volume
+    bool m_lvmmirror_log;        // Is the log for a mirrored volume
     bool m_metadata;             // Is RAID or thin pool metadata
-    bool m_mirror_leg;           // Is one of the underlying legs of a mirrored volume
-    bool m_mirror_log;           // Is the log for a mirrored volume
     bool m_raid;                 // Is a raid volume, including raid 1 mirrors
     bool m_raid_image;           // Is a raid device under a raid volume
     bool m_fixed, m_persistent;  // fix the device minor and major number
