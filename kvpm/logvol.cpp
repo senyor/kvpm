@@ -128,10 +128,18 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)
         break;
     case 'I':
         if (flags[6] == 'r'){
-            m_type = "raid image";
+            if (m_lv_parent != NULL) {
+                if (m_lv_parent->isRaid() && m_lv_parent->getRaidType() == 1)
+                    m_type = "mirror leg";
+                else
+                    m_type = "raid image";
+            }
+            else
+                m_type = "raid image";
+
             m_raid_image = true;
         } else {
-            m_type = "mirror image";
+            m_type = "mirror leg";
             m_lvmmirror_leg = true;
         }
 
@@ -139,10 +147,18 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)
         break;
     case 'i':
         if (flags[6] == 'r'){
-            m_type = "raid image";
+            if (m_lv_parent != NULL) {
+                if (m_lv_parent->isRaid() && m_lv_parent->getRaidType() == 1)
+                    m_type = "mirror leg";
+                else
+                    m_type = "raid image";
+            }
+            else
+                m_type = "raid image";
+
             m_raid_image = true;
         } else {
-            m_type = "mirror image";
+            m_type = "mirror leg";
             m_lvmmirror_leg = true;
         }
         
