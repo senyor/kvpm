@@ -353,14 +353,11 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)
     value = lvm_lv_get_property(lvmLV, "lv_kernel_minor");
     m_minor_device = value.value.integer;
 
-    /*
-    value = lvm_lv_get_property(lvm_lv, "lv_major");
-
-    if(value.value.integer != -1)
-    m_persistent = true;
+    value = lvm_lv_get_property(lvmLV, "lv_major");
+    if((int64_t)value.value.integer != -1)
+        m_persistent = true;
     else
-    m_persistent = false;
-    */
+        m_persistent = false;
 
     if (m_snap_container && !was_snap_container) {
         m_uuid = QUuid::createUuid().toString();
