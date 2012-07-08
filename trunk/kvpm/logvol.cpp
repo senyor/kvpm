@@ -78,7 +78,9 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)
     m_is_origin   = false;
     m_merging     = false;
     m_metadata    = false;
-    m_lvmmirror   = false;
+    m_raidmirror     = false;
+    m_raidmirror_leg = false;
+    m_lvmmirror      = false;
     m_lvmmirror_leg  = false;
     m_lvmmirror_log  = false;
     m_raid        = false;
@@ -129,9 +131,10 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)
     case 'I':
         if (flags[6] == 'r'){
             if (m_lv_parent != NULL) {
-                if (m_lv_parent->isRaid() && m_lv_parent->getRaidType() == 1)
+                if (m_lv_parent->isRaid() && m_lv_parent->getRaidType() == 1) {
                     m_type = "mirror leg";
-                else
+                    m_raidmirror_leg = true;
+                } else
                     m_type = "raid image";
             }
             else
@@ -148,9 +151,10 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)
     case 'i':
         if (flags[6] == 'r'){
             if (m_lv_parent != NULL) {
-                if (m_lv_parent->isRaid() && m_lv_parent->getRaidType() == 1)
+                if (m_lv_parent->isRaid() && m_lv_parent->getRaidType() == 1) {
                     m_type = "mirror leg";
-                else
+                    m_raidmirror_leg = true;
+                } else
                     m_type = "raid image";
             }
             else
@@ -586,18 +590,17 @@ void LogVol::processSegments(lv_t lvmLV, const QByteArray flags)
     if (lvseg_dm_list) {
         dm_list_iterate_items(lvseg_list, lvseg_dm_list) {
             lvm_lvseg = lvseg_list->lvseg;
-            bool raidmirror = false;
 
             if (flags[6] == 'm' && !(QString(flags[0]).contains(QRegExp("[rRiIl]"))))
                 m_lvmmirror = true;
             else if (flags[6] == 'm' && (QString(flags[0]).contains(QRegExp("[rR]"))))
-                raidmirror = true;
+                m_raidmirror = true;
            
             segment = new Segment();
 
             if (m_lvmmirror)
                 segment->type = QString("lvm mirror");
-            else if (raidmirror)
+            else if (m_raidmirror)
                 segment->type = QString("raid1 mirror");
             else {
                 value = lvm_lvseg_get_property(lvm_lvseg, "segtype");
@@ -605,7 +608,7 @@ void LogVol::processSegments(lv_t lvmLV, const QByteArray flags)
                     segment->type = value.value.string;
             }
 
-            if (m_lvmmirror || raidmirror) {
+            if (m_lvmmirror || m_raidmirror) {
                 segment->stripes = 1;
                 segment->stripe_size = 1;
                 segment->size = 1;
@@ -885,6 +888,16 @@ bool LogVol::isMounted()
 bool LogVol::isActive()
 {
     return m_active;
+}
+
+bool LogVol::isMirror()
+{
+    return (m_lvmmirror || m_raidmirror); 
+}
+
+bool LogVol::isMirrorLeg()
+{
+    return (m_lvmmirror_leg || m_raidmirror_leg); 
 }
 
 bool LogVol::isLvmMirror()

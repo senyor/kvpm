@@ -53,16 +53,16 @@ RemoveMirrorDialog::RemoveMirrorDialog(LogVol *logicalVolume, QWidget *parent):
 
     setWindowTitle(i18n("Remove mirrors"));
 
-    QWidget *dialog_body = new QWidget(this);
-    QVBoxLayout *layout = new QVBoxLayout;
+    QWidget *const dialog_body = new QWidget(this);
+    QVBoxLayout *const layout = new QVBoxLayout;
     dialog_body->setLayout(layout);
     setMainWidget(dialog_body);
 
-    QLabel *message = new QLabel(i18n("Select the mirror legs to remove:"));
+    QLabel *const message = new QLabel(i18n("Select the mirror legs to remove:"));
     layout->addWidget(message);
 
     for (int x = lvs.size() - 1; x >= 0 ; x--) {
-        if (lvs[x]->isLvmMirrorLeg()) {
+        if (lvs[x]->isMirrorLeg()) {
 
             temp_check = new NoMungeCheck(lvs[x]->getName());
             pv_names = lvs[x]->getPvNamesAll();

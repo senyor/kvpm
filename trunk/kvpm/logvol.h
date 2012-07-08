@@ -74,6 +74,8 @@ class LogVol
     int m_mirror_count;          // if mirror -- how many legs
     bool m_virtual;              // virtual volume
     bool m_under_conversion;     // Is going to be a mirrored volume
+    bool m_raidmirror;           // Is a raid 1 mirrored volume
+    bool m_raidmirror_leg;       // Is one of the underlying legs of a mirrored volume
     bool m_lvmmirror;            // Is an LVM (not raid 1) mirrored volume
     bool m_lvmmirror_leg;        // Is one of the underlying legs of a mirrored volume
     bool m_lvmmirror_log;        // Is the log for a mirrored volume
@@ -159,6 +161,8 @@ public:
     bool isLocked();
     bool isMerging();
     bool isMetadata();
+    bool isMirror();
+    bool isMirrorLeg();
     bool isLvmMirror();
     bool isLvmMirrorLeg();
     bool isLvmMirrorLog();
