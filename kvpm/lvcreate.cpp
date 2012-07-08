@@ -113,6 +113,7 @@ void LVCreateDialog::buildDialog()
     enableTypeOptions(m_type_combo->currentIndex());
     enableStripeCombo(m_stripe_count_spin->value());
     makeConnections();
+    resetOkButton();
 
     setMainWidget(main_widget);
 }
@@ -121,6 +122,15 @@ void LVCreateDialog::makeConnections()
 {
     connect(this, SIGNAL(okClicked()),
             this, SLOT(commitChanges()));
+
+    connect(m_persistent_box, SIGNAL(toggled(bool)),
+            this, SLOT(resetOkButton()));
+
+    connect(m_major_edit, SIGNAL(textEdited(QString)),
+            this, SLOT(resetOkButton()));
+
+    connect(m_minor_edit, SIGNAL(textEdited(QString)),
+            this, SLOT(resetOkButton()));
 
     connect(m_pv_checkbox, SIGNAL(stateChanged()),
             this, SLOT(setMaxSize()));
@@ -170,8 +180,6 @@ QWidget* LVCreateDialog::createGeneralTab()
     layout->addStretch();
     layout->addLayout(lower_layout);
 
-    m_name_is_valid = true;
-
     KLocale::BinaryUnitDialect dialect;
     KLocale *const locale = KGlobal::locale();
 
@@ -211,7 +219,7 @@ QWidget* LVCreateDialog::createGeneralTab()
         upper_layout->insertLayout(1, tag_layout);
 
         connect(m_name_edit, SIGNAL(textEdited(QString)),
-                this, SLOT(validateVolumeName(QString)));
+                this, SLOT(resetOkButton()));
 
     }
 
@@ -328,10 +336,6 @@ QWidget* LVCreateDialog::createAdvancedTab()
     advanced_layout->addWidget(advanced_box);
     advanced_layout->addStretch();
 
-    m_persistent_box = new QGroupBox(i18n("Device numbering"));
-    m_persistent_box->setCheckable(true);
-    m_persistent_box->setChecked(false);
-
     m_readonly_check = new QCheckBox();
     m_readonly_check->setText(i18n("Set read only"));
     layout->addWidget(m_readonly_check);
@@ -348,59 +352,76 @@ QWidget* LVCreateDialog::createAdvancedTab()
 
         m_zero_check->setChecked(true);
         m_readonly_check->setChecked(false);
-
+    } else if (m_snapshot && !m_extend) {
+        m_zero_check->setChecked(false);
+        m_zero_check->setEnabled(false);
+        m_zero_check->hide();
+        m_readonly_check->setChecked(false);
     } else {
         m_zero_check->setChecked(false);
         m_zero_check->setEnabled(false);
         m_readonly_check->setChecked(false);
         m_readonly_check->setEnabled(false);
+        m_zero_check->hide();
+        m_readonly_check->hide();
     }
 
     m_monitor_check = new QCheckBox(i18n("Monitor with dmeventd"));
     m_skip_sync_check = new QCheckBox(i18n("Skip initial synchronization of mirror"));
     m_skip_sync_check->setChecked(false);
+    layout->addWidget(m_monitor_check);
+    layout->addWidget(m_skip_sync_check);
 
     if (m_snapshot) {
         m_monitor_check->setChecked(true);
         m_monitor_check->setEnabled(true);
         m_skip_sync_check->setEnabled(false);
-        layout->addWidget(m_monitor_check);
-        layout->addWidget(m_skip_sync_check);
     } else if (m_extend) {
         m_monitor_check->setChecked(false);
         m_monitor_check->setEnabled(false);
         m_skip_sync_check->setEnabled(false);
+        m_monitor_check->hide();
+        m_skip_sync_check->hide();
     } else {
         m_monitor_check->setChecked(false);
         m_monitor_check->setEnabled(false);
         m_skip_sync_check->setEnabled(false);
-        layout->addWidget(m_monitor_check);
-        layout->addWidget(m_skip_sync_check);
     }
+
+    m_udevsync_check = new QCheckBox(i18n("Synchronize with udev"));
+    m_udevsync_check->setChecked(true);
+    layout->addWidget(m_udevsync_check);
 
     QVBoxLayout *const persistent_layout   = new QVBoxLayout;
     QHBoxLayout *const minor_number_layout = new QHBoxLayout;
     QHBoxLayout *const major_number_layout = new QHBoxLayout;
-    m_minor_number_edit = new KLineEdit();
-    m_major_number_edit = new KLineEdit();
+    m_minor_edit = new KLineEdit();
+    m_major_edit = new KLineEdit();
     QLabel *const minor_number = new QLabel(i18n("Device minor number: "));
     QLabel *const major_number = new QLabel(i18n("Device major number: "));
-    minor_number->setBuddy(m_minor_number_edit);
-    major_number->setBuddy(m_major_number_edit);
+    minor_number->setBuddy(m_minor_edit);
+    major_number->setBuddy(m_major_edit);
     major_number_layout->addWidget(major_number);
-    major_number_layout->addWidget(m_major_number_edit);
+    major_number_layout->addWidget(m_major_edit);
     minor_number_layout->addWidget(minor_number);
-    minor_number_layout->addWidget(m_minor_number_edit);
+    minor_number_layout->addWidget(m_minor_edit);
     persistent_layout->addLayout(major_number_layout);
     persistent_layout->addLayout(minor_number_layout);
-    QIntValidator *const minor_validator = new QIntValidator(m_minor_number_edit);
-    QIntValidator *const major_validator = new QIntValidator(m_major_number_edit);
+    QIntValidator *const minor_validator = new QIntValidator(m_minor_edit);
+    QIntValidator *const major_validator = new QIntValidator(m_major_edit);
     minor_validator->setBottom(0);
     major_validator->setBottom(0);
-    m_minor_number_edit->setValidator(minor_validator);
-    m_major_number_edit->setValidator(major_validator);
+    m_minor_edit->setValidator(minor_validator);
+    m_major_edit->setValidator(major_validator);
+
+    m_persistent_box = new QGroupBox(i18n("Use persistent device numbering"));
+    m_persistent_box->setCheckable(true);
+    m_persistent_box->setChecked(false);
     m_persistent_box->setLayout(persistent_layout);
     layout->addWidget(m_persistent_box);
+
+    if (m_extend)
+        m_persistent_box->hide();
 
     layout->addStretch();
 
@@ -666,27 +687,38 @@ void LVCreateDialog::setMaxSize()
     resetOkButton();
 }
 
-void LVCreateDialog::validateVolumeName(QString name)
-{
-    int pos = 0;
-
-    if (m_name_validator->validate(name, pos) == QValidator::Acceptable && name != "." && name != "..")
-        m_name_is_valid = true;
-    else if (name.isEmpty())
-        m_name_is_valid = true;
-    else
-        m_name_is_valid = false;
-
-    resetOkButton();
-}
-
 void LVCreateDialog::resetOkButton()
 {
+    bool valid_name  = true;
+    bool valid_major = true;
+    bool valid_minor = true;
+
+    if (!m_extend) {
+        int pos = 0;
+        QString name = m_name_edit->text();
+        
+        if (m_name_validator->validate(name, pos) == QValidator::Acceptable && name != "." && name != "..")
+            valid_name = true;
+        else if (name.isEmpty())
+            valid_name = true;
+        else
+            valid_name = false;
+        
+        QString major = m_major_edit->text();
+        QString minor = m_minor_edit->text();
+        const QValidator *const major_validator = m_major_edit->validator();
+        const QValidator *const minor_validator = m_minor_edit->validator();
+        valid_major = (major_validator->validate(major, pos) == QValidator::Acceptable); 
+        valid_minor = (minor_validator->validate(minor, pos) == QValidator::Acceptable); 
+    }
+
     const long long max = getLargestVolume() / m_vg->getExtentSize();
     const long long selected = m_size_selector->getCurrentSize();
     const long long rounded  = roundExtentsToStripes(selected);
 
-    if (m_size_selector->isValid() && m_name_is_valid) {
+    if (m_persistent_box->isChecked() && !(valid_major && valid_minor)) {
+        enableButtonOk(false);
+    } else if (m_size_selector->isValid() && valid_name) {
         if (!m_extend) {
             if ((rounded <= max) && (rounded > 0))
                 enableButtonOk(true);
@@ -973,10 +1005,13 @@ QStringList LVCreateDialog::argumentsLV()
             args << "--addtag" << m_tag_edit->text();
     }
 
+    if (!m_udevsync_check->isChecked())
+        args << "--noudevsync";
+
     if (m_persistent_box->isChecked()) {
         args << "--persistent" << "y";
-        args << "--major" << m_major_number_edit->text();
-        args << "--minor" << m_minor_number_edit->text();
+        args << "--major" << m_major_edit->text();
+        args << "--minor" << m_minor_edit->text();
     }
 
     if (stripes > 1) {

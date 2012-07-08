@@ -45,7 +45,6 @@ class LVCreateDialog : public KDialog
 
     bool m_snapshot;        // TRUE if a snapshot
     bool m_extend;          // TRUE if extending a volume
-    bool m_name_is_valid;   // TRUE if the new name is acceptable
     bool m_bailout;         // TRUE if we should not bother to execute this dialog
     bool m_fs_can_extend;
     bool m_use_si_units;    // TRUE Metric SI sizes = MB and GB, otherise use MiB, GiB etc.
@@ -60,8 +59,8 @@ class LVCreateDialog : public KDialog
             *m_physical_tab,  // The physical tab
             *m_advanced_tab;  // Adevanced options tab
 
-    KLineEdit *m_minor_number_edit, *m_major_number_edit,
-              *m_name_edit, *m_tag_edit;
+    KLineEdit *m_minor_edit, *m_major_edit,
+              *m_name_edit,  *m_tag_edit;
 
     QRegExpValidator *m_name_validator,
                      *m_tag_validator;
@@ -69,7 +68,8 @@ class LVCreateDialog : public KDialog
     QCheckBox *m_zero_check,
               *m_readonly_check,
               *m_skip_sync_check,   // don't synchronize empty mirror images when created
-              *m_monitor_check;     // monitor with dmeventd
+              *m_monitor_check,     // monitor with dmeventd
+              *m_udevsync_check;    // sync operation with udev
 
     QGroupBox *m_persistent_box, *m_volume_box;
    
@@ -105,7 +105,6 @@ class LVCreateDialog : public KDialog
     QWidget* createStripeWidget(int pvcount);
     QWidget* createMirrorWidget(int pvcount);
     long long getLargestVolume();
-    void resetOkButton();
     void makeConnections();
     long long roundExtentsToStripes(long long extents);
     bool hasInitialErrors();
@@ -118,7 +117,7 @@ public:
 
 private slots:
     void setMaxSize();
-    void validateVolumeName(QString name);
+    void resetOkButton();
     void zeroReadonlyCheck(int state);
     void enableMonitoring(int index);
     void enableTypeOptions(int index);
