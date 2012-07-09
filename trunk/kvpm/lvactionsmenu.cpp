@@ -212,7 +212,12 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
 
                 if (m_lv->isMirror()) {
                     add_mirror_legs_action->setEnabled(false);
-                    change_mirror_log_action->setEnabled(true);
+
+                    if (m_lv->isRaid()) 
+                        change_mirror_log_action->setEnabled(false);
+                    else
+                        change_mirror_log_action->setEnabled(true);
+
                     remove_mirror_action->setEnabled(true);
                 } else if (m_lv->isRaid()) {
                     add_mirror_legs_action->setEnabled(false);
@@ -274,11 +279,14 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
                 }
             } else if (m_lv->isMirror()) {
                 remove_mirror_action->setEnabled(true);
-                change_mirror_log_action->setEnabled(true);
                 pv_move_action->setEnabled(false);
 
-                if (m_lv->isRaid())
+                if (m_lv->isRaid()){
                     snap_create_action->setEnabled(false);
+                    change_mirror_log_action->setEnabled(false);
+                }
+                else
+                    change_mirror_log_action->setEnabled(true);
 
                 if (m_lv->isUnderConversion()) {
                     add_mirror_legs_action->setEnabled(false);
@@ -465,7 +473,12 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
             } else if (m_lv->isMirror()) {
                 add_mirror_legs_action->setEnabled(true);
                 remove_mirror_action->setEnabled(true);
-                change_mirror_log_action->setEnabled(true);
+
+                if (m_lv->isRaid())
+                    change_mirror_log_action->setEnabled(false);
+                else
+                    change_mirror_log_action->setEnabled(true);
+
                 pv_move_action->setEnabled(false);
                 snap_create_action->setEnabled(false);
             } else {

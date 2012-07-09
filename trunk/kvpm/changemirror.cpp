@@ -30,6 +30,7 @@
 #include <KIntSpinBox>
 #include <KTabWidget>
 
+#include <QDebug>
 #include <QEventLoop>
 #include <QGroupBox>
 #include <QHBoxLayout>
@@ -47,12 +48,23 @@ ChangeMirrorDialog::ChangeMirrorDialog(LogVol *logicalVolume, bool changeLog, QW
 {
     QList<LogVol *> children;
     const QString lv_name = m_lv->getName();
+    const bool is_raid_mirror = (m_lv->isMirror() && m_lv->isRaid());
+    const bool is_lvm_mirror  = (m_lv->isMirror() && !m_lv->isRaid());
 
     setWindowTitle(i18n("Change Mirror"));
 
     QWidget *const main_widget = new QWidget();
     QVBoxLayout *const layout = new QVBoxLayout();
-    QLabel  *const lv_name_label = new QLabel(i18n("<b>Change mirror: %1</b>", m_lv->getName()));
+
+    QLabel  *const lv_name_label = new QLabel();
+
+    if(is_lvm_mirror)
+        lv_name_label->setText(i18n("<b>Change LVM mirror: %1</b>", m_lv->getName()));
+    else if(is_lvm_mirror)
+        lv_name_label->setText(i18n("<b>Change RAID 1 mirror: %1</b>", m_lv->getName()));
+    else
+        lv_name_label->setText(i18n("<b>Convert to a mirror: %1</b>", m_lv->getName()));
+
     lv_name_label->setAlignment(Qt::AlignCenter);
     m_tab_widget = new KTabWidget();
     layout->addWidget(lv_name_label);
@@ -62,10 +74,19 @@ ChangeMirrorDialog::ChangeMirrorDialog(LogVol *logicalVolume, bool changeLog, QW
 
     setMainWidget(main_widget);
 
-    m_tab_widget->addTab(buildGeneralTab(),  i18nc("Common user options", "General"));
-    m_tab_widget->addTab(buildPhysicalTab(), i18n("Physical layout"));
+    m_tab_widget->addTab(buildGeneralTab(is_raid_mirror, is_lvm_mirror),  i18nc("Common user options", "General"));
+    m_tab_widget->addTab(buildPhysicalTab(is_raid_mirror, is_lvm_mirror), i18n("Physical layout"));
 
-    resetOkButton();
+    setLogRadioButtons();
+
+    connect(m_disk_log_button, SIGNAL(toggled(bool)),
+            this, SLOT(resetOkButton()));
+    
+    connect(m_core_log_button, SIGNAL(toggled(bool)),
+            this, SLOT(resetOkButton()));
+    
+    connect(m_mirrored_log_button, SIGNAL(toggled(bool)),
+            this, SLOT(resetOkButton()));
 
     connect(this, SIGNAL(okClicked()),
             this, SLOT(commitChanges()));
@@ -73,78 +94,103 @@ ChangeMirrorDialog::ChangeMirrorDialog(LogVol *logicalVolume, bool changeLog, QW
     connect(m_pv_box, SIGNAL(stateChanged()),
             this, SLOT(resetOkButton()));
 
+    connect(m_add_mirrors_spin, SIGNAL(valueChanged(int)),
+            this, SLOT(resetOkButton()));
+
+    connect(m_stripe_spin, SIGNAL(valueChanged(int)),
+            this, SLOT(resetOkButton()));
+    
+    connect(m_stripe_box, SIGNAL(toggled(bool)),
+            this, SLOT(resetOkButton()));
 }
 
-QWidget *ChangeMirrorDialog::buildGeneralTab()
+QWidget *ChangeMirrorDialog::buildGeneralTab(const bool isRaidMirror, const bool isLvmMirror)
 {
     QWidget *const general = new QWidget;
-    QLabel  *const current_mirrors_label = new QLabel();
     QHBoxLayout *const general_layout = new QHBoxLayout;
     QVBoxLayout *const center_layout = new QVBoxLayout;
-    const bool is_mirror = m_lv->isLvmMirror();
+    const bool is_mirror = (isRaidMirror || isLvmMirror);
+
+    m_type_combo = new KComboBox();
+    m_add_mirrors_spin = new KIntSpinBox(1, 10, 1, 1, this);
 
     general_layout->addStretch();
     general_layout->addLayout(center_layout);
     general_layout->addStretch();
 
-    if (!m_change_log) {
-        QGroupBox *const add_mirror_box = new QGroupBox(i18n("Add mirror legs"));
-        QVBoxLayout *const add_mirror_box_layout = new QVBoxLayout;
-        add_mirror_box->setLayout(add_mirror_box_layout);
-        center_layout->addStretch();
-        center_layout->addWidget(add_mirror_box);
+        
+    QGroupBox *const add_mirror_box = new QGroupBox();
+    QLabel  *const type_label = new QLabel(i18n("Mirror type: "));
+    
+    QHBoxLayout *const type_layout = new QHBoxLayout;
+    type_layout->addWidget(type_label);
+    type_layout->addWidget(m_type_combo);
+    
+    QVBoxLayout *const add_mirror_box_layout = new QVBoxLayout;
+    add_mirror_box_layout->addLayout(type_layout);
+    add_mirror_box->setLayout(add_mirror_box_layout);
+    center_layout->addStretch();
+    center_layout->addWidget(add_mirror_box);
 
-        if (is_mirror) {
-            current_mirrors_label->setText(i18n("Existing mirror legs: %1", m_lv->getMirrorCount()));
-            add_mirror_box_layout->addWidget(current_mirrors_label);
+
+    QLabel  *const existing_label = new QLabel(i18n("Existing mirror legs: %1", m_lv->getMirrorCount()));
+    add_mirror_box_layout->addWidget(existing_label);
+    if (!is_mirror)
+        existing_label->hide();
+    
+    QHBoxLayout *const spin_box_layout = new QHBoxLayout();
+    QLabel *const add_mirrors_label = new QLabel(i18n("Add mirror legs: "));
+    
+    add_mirrors_label->setBuddy(m_add_mirrors_spin);
+    spin_box_layout->addWidget(add_mirrors_label);
+    spin_box_layout->addWidget(m_add_mirrors_spin);
+    add_mirror_box_layout->addLayout(spin_box_layout);
+    add_mirror_box_layout->addStretch();
+    
+    if ((!m_change_log && is_mirror) || !is_mirror) {
+
+        if(is_mirror) {
+            add_mirror_box->setTitle(i18n("Add mirror legs"));
+            m_type_combo->hide();
+            type_label->hide();
+        } else {
+            add_mirror_box->setTitle(i18n("Convert to mirror"));
+            m_type_combo->addItem("RAID 1");
+            m_type_combo->addItem("Standard LVM");
+
+            connect(m_type_combo, SIGNAL(currentIndexChanged(int)),
+                    this, SLOT(enableTypeOptions(int)));
         }
-
-        QHBoxLayout *const spin_box_layout = new QHBoxLayout();
-
-        QLabel *const add_mirrors_label = new QLabel(i18n("Add mirror legs: "));
-        m_add_mirrors_spin = new KIntSpinBox(1, 10, 1, 1, this);
-        add_mirrors_label->setBuddy(m_add_mirrors_spin);
-        spin_box_layout->addWidget(add_mirrors_label);
-        spin_box_layout->addWidget(m_add_mirrors_spin);
-        add_mirror_box_layout->addLayout(spin_box_layout);
-        add_mirror_box_layout->addStretch();
-
-        connect(m_add_mirrors_spin, SIGNAL(valueChanged(int)),
-                this, SLOT(resetOkButton()));
     }
 
-    if (!is_mirror || m_change_log) {
-        QGroupBox *const log_box = new QGroupBox(i18n("Mirror logging"));
-        QVBoxLayout *const log_box_layout = new QVBoxLayout;
-        m_core_log_button = new QRadioButton(i18n("Memory based log"));
-        m_disk_log_button = new QRadioButton(i18n("Disk based log"));
-        m_mirrored_log_button = new QRadioButton(i18n("Mirrored disk based log"));
+    m_log_box = new QGroupBox(i18n("Mirror logging"));
+    QVBoxLayout *const log_box_layout = new QVBoxLayout;
+    m_core_log_button = new QRadioButton(i18n("Memory based log"));
+    m_disk_log_button = new QRadioButton(i18n("Disk based log"));
+    m_mirrored_log_button = new QRadioButton(i18n("Mirrored disk based log"));
+    
+    log_box_layout->addWidget(m_mirrored_log_button);
+    log_box_layout->addWidget(m_disk_log_button);
+    log_box_layout->addWidget(m_core_log_button);
+    m_log_box->setLayout(log_box_layout);
+    center_layout->addWidget(m_log_box);
+    m_log_box->setEnabled(false);
 
-        if (is_mirror) {
+    if (!is_mirror || m_change_log) {
+        if (m_change_log) {
+            m_log_box->setEnabled(true);
+
             if (m_lv->getLogCount() == 0)
                 m_core_log_button->setChecked(true);
             else if (m_lv->getLogCount() == 1)
                 m_disk_log_button->setChecked(true);
             else
                 m_mirrored_log_button->setChecked(true);
-        } else
+        } else 
             m_disk_log_button->setChecked(true);
-
-        log_box_layout->addWidget(m_mirrored_log_button);
-        log_box_layout->addWidget(m_disk_log_button);
-        log_box_layout->addWidget(m_core_log_button);
-        log_box->setLayout(log_box_layout);
-        center_layout->addWidget(log_box);
-
-        connect(m_disk_log_button, SIGNAL(toggled(bool)),
-                this, SLOT(resetOkButton()));
-
-        connect(m_core_log_button, SIGNAL(toggled(bool)),
-                this, SLOT(resetOkButton()));
-
-        connect(m_mirrored_log_button, SIGNAL(toggled(bool)),
-                this, SLOT(resetOkButton()));
     }
+    else
+        m_log_box->hide();
 
     QGroupBox *const alloc_box = new QGroupBox(i18n("Allocation policy"));
     QVBoxLayout *const alloc_box_layout = new QVBoxLayout;
@@ -168,7 +214,7 @@ QWidget *ChangeMirrorDialog::buildGeneralTab()
     return general;
 }
 
-QWidget *ChangeMirrorDialog::buildPhysicalTab()
+QWidget *ChangeMirrorDialog::buildPhysicalTab(const bool isRaidMirror, const bool isLvmMirror)
 {
     QWidget *const physical = new QWidget;
     QList<PhysVol *> unused_pvs = m_lv->getVg()->getPhysicalVolumes();
@@ -203,66 +249,64 @@ QWidget *ChangeMirrorDialog::buildPhysicalTab()
     h_layout->addLayout(lower_layout);
     h_layout->addStretch();
 
-    if (!m_change_log) {
-        m_stripe_box = new QGroupBox(i18n("Disk striping"));
-        QVBoxLayout *const striped_layout = new QVBoxLayout();
-        m_stripe_box->setCheckable(true);
-        m_stripe_box->setChecked(false);
-        m_stripe_box->setLayout(striped_layout);
+    m_stripe_box = new QGroupBox(i18n("Volume striping"));
+    QVBoxLayout *const striped_layout = new QVBoxLayout();
+    m_stripe_box->setLayout(striped_layout);
+    
+    m_stripe_size_combo = new KComboBox();
+    for (int n = 2; (pow(2, n) * 1024) <= m_lv->getVg()->getExtentSize() ; n++) {
+        m_stripe_size_combo->addItem(QString("%1").arg(pow(2, n)) + " KiB");
+        m_stripe_size_combo->setItemData(n - 2, QVariant((int) pow(2, n)), Qt::UserRole);
 
-        m_stripe_size_combo = new KComboBox();
-        for (int n = 2; (pow(2, n) * 1024) <= m_lv->getVg()->getExtentSize() ; n++) {
-            m_stripe_size_combo->addItem(QString("%1").arg(pow(2, n)) + " KiB");
-            m_stripe_size_combo->setItemData(n - 2, QVariant((int) pow(2, n)), Qt::UserRole);
-        }
-
-        QLabel *const stripe_size = new QLabel(i18n("Stripe Size: "));
-        m_stripes_number_spin = new KIntSpinBox();
-        m_stripes_number_spin->setMinimum(2);
-        m_stripes_number_spin->setMaximum(m_lv->getVg()->getPvCount());
-        stripe_size->setBuddy(m_stripe_size_combo);
-        QHBoxLayout *const stripe_size_layout = new QHBoxLayout();
-        stripe_size_layout->addWidget(stripe_size);
-        stripe_size_layout->addWidget(m_stripe_size_combo);
-        QLabel *const stripes_number = new QLabel(i18n("Number of stripes: "));
-        stripes_number->setBuddy(m_stripes_number_spin);
-        QHBoxLayout *const stripes_number_layout = new QHBoxLayout();
-        stripes_number_layout->addWidget(stripes_number);
-        stripes_number_layout->addWidget(m_stripes_number_spin);
-        striped_layout->addLayout(stripe_size_layout);
-        striped_layout->addLayout(stripes_number_layout);
-
-        m_error_stack = new QStackedWidget();
-        QWidget *const error_widget = new QWidget();
-        QWidget *const blank_widget = new QWidget();
-        m_error_stack->addWidget(error_widget);
-        m_error_stack->addWidget(blank_widget);
-        QHBoxLayout *const error_layout = new QHBoxLayout();
-        QVBoxLayout *const error_right_layout = new QVBoxLayout();
-
-        QLabel *const stripe_error1 = new QLabel("");
-        stripe_error1->setPixmap(KIcon("dialog-warning").pixmap(32, 32));
-        QLabel *const stripe_error2 = new QLabel(i18n("The number of extents: %1 must be evenly divisible by the number of stripes", m_lv->getExtents()));
-        stripe_error2->setWordWrap(true);
-        error_layout->addWidget(stripe_error1);
-        error_right_layout->addWidget(stripe_error2);
-        error_layout->addLayout(error_right_layout);
-        error_widget->setLayout(error_layout);
-
-        striped_layout->addWidget(m_error_stack);
-        lower_layout->addWidget(m_stripe_box);
-
-        connect(m_stripes_number_spin, SIGNAL(valueChanged(int)),
-                this, SLOT(resetOkButton()));
-
-        connect(m_stripe_box, SIGNAL(toggled(bool)),
-                this, SLOT(resetOkButton()));
+        if ((n - 2) < 5) 
+            m_stripe_size_combo->setCurrentIndex(n - 2);
+    }
+    
+    QLabel *const stripe_size = new QLabel(i18n("Stripe Size: "));
+    m_stripe_spin = new KIntSpinBox();
+    m_stripe_spin->setMinimum(1);
+    m_stripe_spin->setSpecialValueText(i18n("none"));
+    m_stripe_spin->setMaximum(m_lv->getVg()->getPvCount());
+    stripe_size->setBuddy(m_stripe_size_combo);
+    QHBoxLayout *const stripe_size_layout = new QHBoxLayout();
+    stripe_size_layout->addWidget(stripe_size);
+    stripe_size_layout->addWidget(m_stripe_size_combo);
+    QLabel *const stripes_number = new QLabel(i18n("Number of stripes: "));
+    stripes_number->setBuddy(m_stripe_spin);
+    QHBoxLayout *const stripes_number_layout = new QHBoxLayout();
+    stripes_number_layout->addWidget(stripes_number);
+    stripes_number_layout->addWidget(m_stripe_spin);
+    striped_layout->addLayout(stripe_size_layout);
+    striped_layout->addLayout(stripes_number_layout);
+    
+    m_error_stack = new QStackedWidget();
+    QWidget *const error_widget = new QWidget();
+    QWidget *const blank_widget = new QWidget();
+    m_error_stack->addWidget(error_widget);
+    m_error_stack->addWidget(blank_widget);
+    QHBoxLayout *const error_layout = new QHBoxLayout();
+    QVBoxLayout *const error_right_layout = new QVBoxLayout();
+    
+    QLabel *const stripe_error1 = new QLabel("");
+    stripe_error1->setPixmap(KIcon("dialog-warning").pixmap(32, 32));
+    QLabel *const stripe_error2 = new QLabel(i18n("The number of extents: %1 must be evenly divisible by the number of stripes", m_lv->getExtents()));
+    stripe_error2->setWordWrap(true);
+    error_layout->addWidget(stripe_error1);
+    error_right_layout->addWidget(stripe_error2);
+    error_layout->addLayout(error_right_layout);
+    error_widget->setLayout(error_layout);
+    
+    striped_layout->addWidget(m_error_stack);
+    lower_layout->addWidget(m_stripe_box);
+    
+    if (m_change_log || isRaidMirror) {
+        m_stripe_box->hide();
+        m_stripe_box->setEnabled(false);
+    } else if (!isLvmMirror && !isRaidMirror) {
+        m_stripe_box->setEnabled(false);
     }
 
     lower_layout->addStretch();
-
-    setLogRadioButtons();
-    resetOkButton();
 
     physical->setLayout(physical_layout);
     return physical;
@@ -301,12 +345,19 @@ QStringList ChangeMirrorDialog::arguments()
 
     args << "lvconvert";
 
+    if (!m_lv->isMirror()) {
+        if (m_type_combo->currentIndex() == 0)
+            args << "--type" << "raid1";
+        else
+            args << "--type" << "mirror";
+    }
+
     if (!m_change_log)
         args << "--mirrors" << QString("+%1").arg(m_add_mirrors_spin->value());
     else
         args << "--mirrors" << QString("+0");
 
-    if (m_change_log || !m_lv->isLvmMirror()) {
+    if (m_change_log || (!m_lv->isMirror() && m_type_combo->currentIndex() == 1)) {
         if (m_core_log_button->isChecked())
             args << "--mirrorlog" << "core";
         else if (m_mirrored_log_button->isChecked())
@@ -316,8 +367,8 @@ QStringList ChangeMirrorDialog::arguments()
     }
 
     if (!m_change_log) {
-        if (m_stripe_box->isChecked()) {
-            args << "--stripes" <<  QString("%1").arg(m_stripes_number_spin->value());
+        if (m_stripe_spin->value() > 1) {
+            args << "--stripes" <<  QString("%1").arg(m_stripe_spin->value());
             args << "--stripesize" << (m_stripe_size_combo->currentText()).remove("KiB").trimmed();
         }
     }
@@ -341,7 +392,6 @@ QStringList ChangeMirrorDialog::arguments()
     return args;
 }
 
-
 /* Enable or disable the OK button based on having
    enough physical volumes checked. At least one pv
    for each mirror leg and one or two for the log(s)
@@ -361,12 +411,11 @@ void ChangeMirrorDialog::resetOkButton()
             return;
         }
 
-        if (m_stripe_box->isChecked())
-            new_stripe_count = m_stripes_number_spin->value();
+        if (m_stripe_spin->value() > 1)
+            new_stripe_count = m_stripe_spin->value();
 
         total_stripes = m_add_mirrors_spin->value() * new_stripe_count;
     }
-
 
     for (int x = 0; x < total_stripes; x++)
         stripe_pv_bytes.append(0);
@@ -426,6 +475,20 @@ void ChangeMirrorDialog::resetOkButton()
     return;
 }
 
+void ChangeMirrorDialog::enableTypeOptions(int index)
+{
+    if (index == 1) {
+        m_log_box->setEnabled(true);
+        m_stripe_box->setEnabled(true);
+    }
+    else {
+        m_log_box->setEnabled(false);
+        m_disk_log_button->setChecked(true);
+        m_stripe_spin->setValue(1);
+        m_stripe_box->setEnabled(false);
+    }
+}
+
 void ChangeMirrorDialog::setLogRadioButtons()
 {
     if (m_change_log) {
@@ -451,8 +514,8 @@ void ChangeMirrorDialog::commitChanges()
 
 bool ChangeMirrorDialog::validateStripeSpin()
 {
-    if (m_stripe_box->isChecked()) {
-        if (m_lv->getExtents() % m_stripes_number_spin->value()) {
+    if (m_stripe_spin->value() > 1) {
+        if (m_lv->getExtents() % m_stripe_spin->value()) {
             m_error_stack->setCurrentIndex(0);  // unworkable stripe count
             return false;
         } else {
