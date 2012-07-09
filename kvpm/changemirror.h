@@ -42,11 +42,13 @@ class ChangeMirrorDialog : public KDialog
 
     KTabWidget  *m_tab_widget;
     KIntSpinBox *m_add_mirrors_spin;
-    KIntSpinBox *m_stripes_number_spin;
+    KIntSpinBox *m_stripe_spin;
     QStackedWidget *m_error_stack;
     PvGroupBox *m_pv_box;
     QGroupBox  *m_stripe_box;
+    QGroupBox  *m_log_box;
     KComboBox  *m_stripe_size_combo;
+    KComboBox  *m_type_combo;
 
     bool m_change_log;    // true == we just changing the logging of an existing mirror
     LogVol *m_lv;         // The volume we are adding a mirror leg to.
@@ -59,8 +61,8 @@ class ChangeMirrorDialog : public KDialog
                  *m_mirrored_log_button,
                  *m_disk_log_button;
 
-    QWidget *buildGeneralTab();
-    QWidget *buildPhysicalTab();
+    QWidget *buildGeneralTab(const bool isRaidMirror, const bool isLvmMirror);
+    QWidget *buildPhysicalTab(const bool isRaidMirror, const bool isLvmMirror);
     QStringList getPvsInUse();
     bool validateStripeSpin();
     void setLogRadioButtons();
@@ -72,7 +74,7 @@ public:
 private slots:
     void resetOkButton();
     void commitChanges();
-
+    void enableTypeOptions(int index);
 };
 
 #endif
