@@ -21,11 +21,11 @@
 #include <KComboBox>
 #include <KLineEdit>
 #include <KLocale>
-#include <KSeparator>
 #include <KTabWidget>
 
-#include <QGroupBox>
 #include <QCheckBox>
+#include <QDebug>
+#include <QGroupBox>
 #include <QLabel>
 #include <QRadioButton>
 #include <QVBoxLayout>
@@ -52,23 +52,8 @@ LVChangeDialog::LVChangeDialog(LogVol *const volume, QWidget *parent) :
     KTabWidget *const tab_widget = new KTabWidget();
     tab_widget->setAutomaticResizeTabs(true);
     layout->addWidget(tab_widget);
-
     tab_widget->addTab(buildGeneralTab(),  i18nc("The standard or basic options", "General"));
     tab_widget->addTab(buildAdvancedTab(), i18nc("Less used or complex options", "Advanced"));
-
-    if (m_lv->isSnap() || m_lv->isLvmMirror()) {
-
-        if (m_lv->isLvmMirror())
-            tab_widget->insertTab(1, buildMirrorTab(), i18n("Mirror"));
-        else
-            tab_widget->insertTab(1, buildMirrorTab(), i18n("Snapshot"));
-
-        connect(m_dmeventd_box,     SIGNAL(clicked()), this, SLOT(resetOkButton()));
-        connect(m_monitor_button,   SIGNAL(clicked()), this, SLOT(resetOkButton()));
-        connect(m_nomonitor_button, SIGNAL(clicked()), this, SLOT(resetOkButton()));
-        connect(m_ignore_button,    SIGNAL(clicked()), this, SLOT(resetOkButton()));
-        connect(m_resync_check,     SIGNAL(clicked()), this, SLOT(resetOkButton()));
-    }
 
     connect(m_alloc_box,         SIGNAL(clicked()), this, SLOT(resetOkButton()));
     connect(m_normal_button,     SIGNAL(clicked()), this, SLOT(resetOkButton()));
@@ -83,16 +68,13 @@ LVChangeDialog::LVChangeDialog(LogVol *const volume, QWidget *parent) :
     connect(m_persistent_check,  SIGNAL(clicked()), this, SLOT(resetOkButton()));
     connect(m_tag_group,         SIGNAL(clicked()), this, SLOT(resetOkButton()));
     connect(m_deltag_combo, SIGNAL(currentIndexChanged(int)), this, SLOT(resetOkButton()));
-    connect(m_tag_edit, SIGNAL(userTextChanged(QString)), this, SLOT(resetOkButton()));
-
+    connect(m_tag_edit,     SIGNAL(userTextChanged(QString)), this, SLOT(resetOkButton()));
     connect(m_polling_box,       SIGNAL(clicked()), this, SLOT(resetOkButton()));
     connect(m_poll_button,       SIGNAL(clicked()), this, SLOT(resetOkButton()));
     connect(m_nopoll_button,     SIGNAL(clicked()), this, SLOT(resetOkButton()));
     connect(m_devnum_box,        SIGNAL(clicked()), this, SLOT(resetOkButton()));
-    connect(m_udevsync_box,      SIGNAL(clicked()), this, SLOT(resetOkButton()));
-
     connect(m_available_check, SIGNAL(stateChanged(int)), this , SLOT(refreshAndAvailableCheck()));
-    connect(m_refresh_check, SIGNAL(stateChanged(int)), this , SLOT(refreshAndAvailableCheck()));
+    connect(m_refresh_check,   SIGNAL(stateChanged(int)), this , SLOT(refreshAndAvailableCheck()));
 
     connect(this, SIGNAL(okClicked()), this, SLOT(commitChanges()));
 
@@ -201,50 +183,29 @@ QWidget *LVChangeDialog::buildGeneralTab()
     return tab;
 }
 
-QWidget *LVChangeDialog::buildMirrorTab()
-{
-    QWidget *const tab = new QWidget(this);
-    QVBoxLayout *layout = new QVBoxLayout();
-    tab->setLayout(layout);
-    layout->addStretch();
-
-    QGroupBox *const resync_box = new QGroupBox(i18n("Mirror Sync"));
-    if (!m_lv->isLvmMirror()) {
-        resync_box->setEnabled(false);
-        resync_box->hide();
-    }
-
-    layout->addWidget(resync_box);
-    QVBoxLayout *const resync_layout = new QVBoxLayout();
-    resync_box->setLayout(resync_layout);
-    m_resync_check = new QCheckBox(i18n("Re-synchronize mirrors"));
-    m_resync_check->setEnabled(!m_lv->isMounted());
-    resync_layout->addWidget(m_resync_check);
-
-    m_dmeventd_box = new QGroupBox(i18n("Monitoring With dmeventd"));
-    m_dmeventd_box->setCheckable(true);
-    m_dmeventd_box->setChecked(false);
-
-    QVBoxLayout *const mirror_layout = new QVBoxLayout();
-    m_dmeventd_box->setLayout(mirror_layout);
-    m_monitor_button = new QRadioButton(i18n("Monitor with dmeventd"));
-    m_nomonitor_button = new QRadioButton(i18n("Do not monitor"));
-    m_ignore_button  = new QRadioButton(i18n("Ignore dmeventd"));
-    m_monitor_button->setChecked(true);
-    mirror_layout->addWidget(m_monitor_button);
-    mirror_layout->addWidget(m_nomonitor_button);
-    mirror_layout->addWidget(m_ignore_button);
-    layout->addWidget(m_dmeventd_box);
-    layout->addStretch();
-
-    return tab;
-}
-
 QWidget *LVChangeDialog::buildAdvancedTab()
 {
     QWidget *const tab = new QWidget();
     QVBoxLayout *const layout = new QVBoxLayout();
     tab->setLayout(layout);
+
+    QGroupBox *const sync_box = new QGroupBox();
+    layout->addWidget(sync_box);
+    QVBoxLayout *const sync_layout = new QVBoxLayout();
+    sync_box->setLayout(sync_layout);
+    m_udevsync_check = new QCheckBox(i18n("Synchronize with udev"));
+    m_udevsync_check->setChecked(true);
+    sync_layout->addWidget(m_udevsync_check);
+    m_resync_check = new QCheckBox(i18n("Re-synchronize mirrors"));
+    m_resync_check->setEnabled(!m_lv->isMounted());
+    sync_layout->addWidget(m_resync_check);
+
+    if (m_lv->isMirror()) {
+        connect(m_resync_check,     SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    } else {
+        m_resync_check->setEnabled(false);
+        m_resync_check->hide();
+    }
 
     m_polling_box = new QGroupBox(i18n("Change Volume Polling"));
     m_polling_box->setCheckable(true);
@@ -258,17 +219,36 @@ QWidget *LVChangeDialog::buildAdvancedTab()
     m_nopoll_button = new QRadioButton(i18n("Stop polling"));
     poll_layout->addWidget(m_nopoll_button);
 
-    m_udevsync_box = new QGroupBox(i18n("Udev Synchronizing"));
-    layout->addWidget(m_udevsync_box);
-    QVBoxLayout *const sync_layout = new QVBoxLayout();
-    m_udevsync_box->setLayout(sync_layout);
-    m_udevsync_check = new QCheckBox(i18n("Synchronize with udev"));
-    m_udevsync_check->setChecked(true);
-    sync_layout->addWidget(m_udevsync_check);
+    m_dmeventd_box = new QGroupBox(i18n("Change dmeventd Monitoring"));
+    m_dmeventd_box->setCheckable(true);
+    m_dmeventd_box->setChecked(false);
 
-    m_devnum_box = new QGroupBox(i18n("Set Kernel Device Numbers"));
+    QVBoxLayout *const mirror_layout = new QVBoxLayout();
+    m_dmeventd_box->setLayout(mirror_layout);
+    m_monitor_button = new QRadioButton(i18n("Monitor with dmeventd"));
+    m_nomonitor_button = new QRadioButton(i18n("Do not monitor"));
+    m_ignore_button  = new QRadioButton(i18n("Ignore dmeventd"));
+    m_monitor_button->setChecked(true);
+    mirror_layout->addWidget(m_monitor_button);
+    mirror_layout->addWidget(m_nomonitor_button);
+    mirror_layout->addWidget(m_ignore_button);
+    layout->addWidget(m_dmeventd_box);
+
+    if (m_lv->isSnap() || m_lv->isMirror() || m_lv->isRaid()) {
+        connect(m_dmeventd_box,     SIGNAL(clicked()), this, SLOT(resetOkButton()));
+        connect(m_monitor_button,   SIGNAL(clicked()), this, SLOT(resetOkButton()));
+        connect(m_nomonitor_button, SIGNAL(clicked()), this, SLOT(resetOkButton()));
+        connect(m_ignore_button,    SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    } else {
+        m_dmeventd_box->setEnabled(false);
+        m_dmeventd_box->hide();
+    }
+
+    layout->addStretch();
+
+    m_devnum_box = new QGroupBox(i18n("Change Kernel Device Numbers"));
     m_devnum_box->setCheckable(true);
-    QVBoxLayout *devnum_layout = new QVBoxLayout();
+    QVBoxLayout *const devnum_layout = new QVBoxLayout();
     m_devnum_box->setLayout(devnum_layout);
     QHBoxLayout *const major_layout = new QHBoxLayout();
     QHBoxLayout *const minor_layout = new QHBoxLayout();
@@ -317,7 +297,7 @@ QStringList LVChangeDialog::arguments()
     if (m_refresh_check->isChecked())
         args << "--refresh";
 
-    if (m_lv->isSnap() || m_lv->isLvmMirror()) { // These buttons are undefined if the mirrortab isn't built!
+    if (m_lv->isSnap() || m_lv->isMirror() || m_lv->isRaid()) {
         if (m_resync_check->isChecked())
             args << "--resync";
 
@@ -347,7 +327,7 @@ QStringList LVChangeDialog::arguments()
         if (m_poll_button->isChecked())
             args << "--poll" << "y";
         else
-            args << "--poll" << "y";
+            args << "--poll" << "n";
     }
 
     if (!m_udevsync_check->isChecked())
