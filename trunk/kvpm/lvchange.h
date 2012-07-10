@@ -58,7 +58,6 @@ class LVChangeDialog : public KDialog
     QGroupBox *m_devnum_box,
               *m_dmeventd_box,
               *m_polling_box,
-              *m_udevsync_box,
               *m_tag_group,
               *m_alloc_box;
 
@@ -69,7 +68,6 @@ class LVChangeDialog : public KDialog
     KComboBox *m_deltag_combo;
 
     QWidget *buildGeneralTab();
-    QWidget *buildMirrorTab();
     QWidget *buildAdvancedTab();
     QStringList arguments();
 
