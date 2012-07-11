@@ -53,10 +53,6 @@ class ChangeMirrorDialog : public KDialog
     bool m_change_log;    // true == we just changing the logging of an existing mirror
     LogVol *m_lv;         // The volume we are adding a mirror leg to.
 
-    QRadioButton *m_contiguous_button, *m_normal_button,   //Radio button to chose
-                 *m_anywhere_button, *m_inherited_button,  // the allocation policy
-                 *m_cling_button;
-
     QRadioButton *m_core_log_button,
                  *m_mirrored_log_button,
                  *m_disk_log_button;

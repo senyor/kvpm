@@ -248,8 +248,8 @@ void PVMoveDialog::buildDialog()
     QHBoxLayout *const lower_layout = new QHBoxLayout;
     layout->addLayout(lower_layout);
 
-    m_pv_checkbox = new PvGroupBox(m_target_pvs, true);
-    lower_layout->addWidget(m_pv_checkbox);
+    m_pv_box = new PvGroupBox(m_target_pvs, QString("cling"),true);
+    lower_layout->addWidget(m_pv_box);
 
     const int radio_count = m_sources.size();
 
@@ -302,24 +302,7 @@ void PVMoveDialog::buildDialog()
         }
     }
 
-    QGroupBox *const alloc_box = new QGroupBox(i18n("Allocation Policy"));
-    QVBoxLayout *const alloc_box_layout = new QVBoxLayout;
-    m_normal_button     = new QRadioButton(i18nc("The usual way", "Normal"));
-    m_contiguous_button = new QRadioButton(i18n("Contiguous"));
-    m_anywhere_button   = new QRadioButton(i18n("Anywhere"));
-    m_inherited_button  = new QRadioButton(i18nc("Inherited from the group", "Inherited"));
-    m_inherited_button->setChecked(true);
-    m_cling_button      = new QRadioButton(i18n("Cling"));
-    alloc_box_layout->addWidget(m_normal_button);
-    alloc_box_layout->addWidget(m_contiguous_button);
-    alloc_box_layout->addWidget(m_anywhere_button);
-    alloc_box_layout->addWidget(m_inherited_button);
-    alloc_box_layout->addWidget(m_cling_button);
-    alloc_box_layout->addStretch();
-    alloc_box->setLayout(alloc_box_layout);
-    lower_layout->addWidget(alloc_box);
-
-    connect(m_pv_checkbox, SIGNAL(stateChanged()),
+    connect(m_pv_box, SIGNAL(stateChanged()),
             this, SLOT(resetOkButton()));
 
     disableSource();
@@ -329,7 +312,7 @@ void PVMoveDialog::buildDialog()
 
 void PVMoveDialog::resetOkButton()
 {
-    const long long free_space_total = m_pv_checkbox->getRemainingSpace();
+    const long long free_space_total = m_pv_box->getRemainingSpace();
     long long needed_space_total = 0;
     QString pv_name;
 
@@ -363,7 +346,7 @@ void PVMoveDialog::disableSource()  // don't allow source and target to be the s
             source_pv = m_vg->getPvByName(m_sources[x]->name);
     }
 
-    m_pv_checkbox->disableOrigin(source_pv);
+    m_pv_box->disableOrigin(source_pv);
     resetOkButton();
 }
 
@@ -377,17 +360,10 @@ QStringList PVMoveDialog::arguments()
         args << m_lv->getFullName();
     }
 
-    if (!m_inherited_button->isChecked()) {         // "inherited" is what we get if
-        args << "--alloc";                          // we don't pass "--alloc" at all
-        if (m_contiguous_button->isChecked())       // passing "--alloc" "inherited"
-            args << "contiguous" ;                  // doesn't work
-        else if (m_anywhere_button->isChecked())
-            args << "anywhere" ;
-        else if (m_cling_button->isChecked())
-            args << "cling" ;
-        else
-            args << "normal" ;
-    }
+    const QString policy = m_pv_box->getAllocationPolicy();
+
+    if (policy != "inherited")          // "inherited" is what we get if we don't pass "--alloc" at all                                      
+        args << "--alloc" << policy;    // passing "--alloc" "inherited" won't work
 
     if (m_sources.size() > 1) {
         for (int x = m_sources.size() - 1; x >= 0; x--) {
@@ -399,7 +375,7 @@ QStringList PVMoveDialog::arguments()
     }
 
     args << source;
-    args << m_pv_checkbox->getNames(); // target(s)
+    args << m_pv_box->getNames(); // target(s)
 
     return args;
 }

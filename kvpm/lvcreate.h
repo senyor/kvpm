@@ -73,7 +73,7 @@ class LVCreateDialog : public KDialog
 
     QGroupBox *m_persistent_box, *m_volume_box;
    
-    PvGroupBox *m_pv_checkbox;
+    PvGroupBox *m_pv_box;
 
     KTabWidget *m_tab_widget;
 
@@ -89,10 +89,6 @@ class LVCreateDialog : public KDialog
            *m_max_extents_label,
            *m_extend_by_label,        // how much space we are adding to a volume
            *m_current_size_label;     // if we are extending this is the existing size
-
-    QRadioButton *contiguous_button, *normal_button,     // Radio button to chose
-                 *anywhere_button,   *inherited_button,  // the allocation policy
-                 *cling_button;
 
     QWidget *m_stripe_widget;
     QWidget *m_mirror_widget;
