@@ -242,30 +242,30 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)
     case 'C':
         m_alloc_locked = true;
     case 'c':
-        m_policy = "Contiguous";
+        m_policy = "contiguous";
         break;
     case 'L':
         m_alloc_locked = true;
     case 'l':
-        m_policy = "Cling";
+        m_policy = "cling";
         break;
     case 'N':
         m_alloc_locked = true;
     case 'n':
-        m_policy = "Normal";
+        m_policy = "normal";
         break;
     case 'A':
         m_alloc_locked = true;
     case 'a':
-        m_policy = "Anywhere";
+        m_policy = "anywhere";
         break;
     case 'I':
         m_alloc_locked = true;
     case 'i':
-        m_policy = "Inherited";
+        m_policy = "inherited";
         break;
     default:
-        m_policy = "Other";
+        m_policy = "unknown";
         break;
     }
 
