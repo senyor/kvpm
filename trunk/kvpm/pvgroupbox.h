@@ -17,6 +17,8 @@
 
 #include <stdint.h>
 
+#include <KComboBox>
+
 #include <QCheckBox>
 #include <QGridLayout>
 #include <QGroupBox>
@@ -45,10 +47,13 @@ class PvGroupBox: public QGroupBox
     QLabel *m_space_label, *m_extents_label;
     uint64_t m_extent_size;
     QHBoxLayout *getButtons();
-    void addLabelsAndButtons(QGridLayout *const layout, const int pvCount);
+    KComboBox *m_alloc_combo;
+
+    void addLabelsAndButtons(QGridLayout *const layout, const int pvCount, QString const policy);
+    QWidget *buildPolicyBox(QString const policy);
 
 public:
-    explicit PvGroupBox(QList<PhysVol *> volumes, bool const target = false, QWidget *parent = NULL);
+    explicit PvGroupBox(QList<PhysVol *> volumes, QString const policy = QString("NA"), bool const target = false, QWidget *parent = NULL);
     PvGroupBox(QList<StorageDevice *> devices, QList<StoragePartition *> partitions,
                uint64_t extentSize, QWidget *parent = NULL);
 
@@ -58,6 +63,7 @@ public:
     QList<long long> getRemainingSpaceList();  // ditto
     void setExtentSize(uint64_t extentSize);
     void disableOrigin(PhysVol *originVolume); // disable origin to prevent move from and to same pv
+    QString getAllocationPolicy();
 
 signals:
     void stateChanged();

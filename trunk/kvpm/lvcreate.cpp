@@ -132,7 +132,7 @@ void LVCreateDialog::makeConnections()
     connect(m_minor_edit, SIGNAL(textEdited(QString)),
             this, SLOT(resetOkButton()));
 
-    connect(m_pv_checkbox, SIGNAL(stateChanged()),
+    connect(m_pv_box, SIGNAL(stateChanged()),
             this, SLOT(setMaxSize()));
 
     connect(m_stripe_count_spin, SIGNAL(valueChanged(int)),
@@ -167,18 +167,17 @@ QWidget* LVCreateDialog::createGeneralTab()
     QWidget *const general_tab = new QWidget(this);
     QHBoxLayout *const general_layout = new QHBoxLayout;
     general_tab->setLayout(general_layout);
+
+    QVBoxLayout *const layout = new QVBoxLayout();
+    general_layout->addStretch();
+    general_layout->addLayout(layout);
+    general_layout->addStretch();
+
     QGroupBox *const volume_box = new QGroupBox();
-    QVBoxLayout *const layout = new QVBoxLayout;
-    volume_box->setLayout(layout);
-    general_layout->addStretch();
-    general_layout->addWidget(volume_box);
-    general_layout->addStretch();
-    QVBoxLayout *const upper_layout = new QVBoxLayout();
-    QHBoxLayout *const lower_layout = new QHBoxLayout();
-    layout->addStretch();
-    layout->addLayout(upper_layout);
-    layout->addStretch();
-    layout->addLayout(lower_layout);
+    QVBoxLayout *const volume_layout = new QVBoxLayout;
+    volume_box->setLayout(volume_layout);
+
+    layout->addWidget(volume_box);
 
     KLocale::BinaryUnitDialect dialect;
     KLocale *const locale = KGlobal::locale();
@@ -190,9 +189,9 @@ QWidget* LVCreateDialog::createGeneralTab()
 
     if (m_extend) {
         m_extend_by_label = new QLabel();
-        layout->insertWidget(1, m_extend_by_label);
+        volume_layout->insertWidget(1, m_extend_by_label);
         m_current_size_label = new QLabel(i18n("Current size: %1", locale->formatByteSize(m_lv->getSize(), 1, dialect)));
-        layout->insertWidget(2, m_current_size_label);
+        volume_layout->insertWidget(2, m_current_size_label);
     } else {
         QHBoxLayout *const name_layout = new QHBoxLayout();
         m_name_edit = new KLineEdit();
@@ -204,7 +203,7 @@ QWidget* LVCreateDialog::createGeneralTab()
         name_label->setBuddy(m_name_edit);
         name_layout->addWidget(name_label);
         name_layout->addWidget(m_name_edit);
-        upper_layout->insertLayout(0, name_layout);
+        volume_layout->insertLayout(0, name_layout);
 
         QHBoxLayout *const tag_layout = new QHBoxLayout();
         m_tag_edit = new KLineEdit();
@@ -216,7 +215,7 @@ QWidget* LVCreateDialog::createGeneralTab()
         tag_label->setBuddy(m_tag_edit);
         tag_layout->addWidget(tag_label);
         tag_layout->addWidget(m_tag_edit);
-        upper_layout->insertLayout(1, tag_layout);
+        volume_layout->insertLayout(1, tag_layout);
 
         connect(m_name_edit, SIGNAL(textEdited(QString)),
                 this, SLOT(resetOkButton()));
@@ -233,51 +232,51 @@ QWidget* LVCreateDialog::createGeneralTab()
                                               0, true, false);
     }
 
-    upper_layout->addWidget(m_size_selector);
+    layout->addWidget(m_size_selector);
 
-    QGroupBox *const volume_limit_box = new QGroupBox(i18n("Maximum volume size"));
-    QVBoxLayout *const volume_limit_layout = new QVBoxLayout();
-    volume_limit_box->setLayout(volume_limit_layout);
+    QGroupBox *const misc_box = new QGroupBox();
+    QVBoxLayout *const misc_layout = new QVBoxLayout();
+    misc_box->setLayout(misc_layout);
+
+    m_readonly_check = new QCheckBox();
+    m_readonly_check->setText(i18n("Set read only"));
+    misc_layout->addWidget(m_readonly_check);
+    m_zero_check = new QCheckBox();
+    m_zero_check->setText(i18n("Write zeros at volume start"));
+    misc_layout->addWidget(m_zero_check);
+    misc_layout->addStretch();
+
+    if (!m_snapshot && !m_extend) {
+
+        connect(m_zero_check, SIGNAL(stateChanged(int)),
+                this , SLOT(zeroReadonlyCheck(int)));
+        connect(m_readonly_check, SIGNAL(stateChanged(int)),
+                this , SLOT(zeroReadonlyCheck(int)));
+
+        m_zero_check->setChecked(true);
+        m_readonly_check->setChecked(false);
+    } else if (m_snapshot && !m_extend) {
+        m_zero_check->setChecked(false);
+        m_zero_check->setEnabled(false);
+        m_zero_check->hide();
+        m_readonly_check->setChecked(false);
+    } else {
+        m_zero_check->setChecked(false);
+        m_zero_check->setEnabled(false);
+        m_readonly_check->setChecked(false);
+        m_readonly_check->setEnabled(false);
+        m_zero_check->hide();
+        m_readonly_check->hide();
+    }
+
     m_max_size_label = new QLabel();
-    volume_limit_layout->addWidget(m_max_size_label);
+    misc_layout->addWidget(m_max_size_label);
     m_max_extents_label = new QLabel();
-    volume_limit_layout->addWidget(m_max_extents_label);
+    misc_layout->addWidget(m_max_extents_label);
     m_stripe_count_label = new QLabel();
     m_stripe_count_label->setWordWrap(true);
-    volume_limit_layout->addWidget(m_stripe_count_label);
-    volume_limit_layout->addStretch();
-    lower_layout->addWidget(volume_limit_box);
-
-    QGroupBox *const alloc_box = new QGroupBox(i18n("Allocation Policy"));
-    QVBoxLayout *const alloc_box_layout = new QVBoxLayout;
-    normal_button     = new QRadioButton(i18nc("The usual way", "Normal"));
-    contiguous_button = new QRadioButton(i18n("Contiguous"));
-    anywhere_button   = new QRadioButton(i18n("Anywhere"));
-    inherited_button  = new QRadioButton(i18nc("Inherited from the parent group", "Inherited"));
-    cling_button      = new QRadioButton(i18n("Cling"));
-
-    QString policy = "Inherited";
-    if (m_extend)
-        policy = m_lv->getPolicy();
-
-    if (policy == "Normal")
-        normal_button->setChecked(true);
-    else if (policy == "Contiguous")
-        contiguous_button->setChecked(true);
-    else if (policy == "Anywhere")
-        anywhere_button->setChecked(true);
-    else if (policy == "Cling")
-        cling_button->setChecked(true);
-    else
-        inherited_button->setChecked(true);
-
-    alloc_box_layout->addWidget(normal_button);
-    alloc_box_layout->addWidget(contiguous_button);
-    alloc_box_layout->addWidget(anywhere_button);
-    alloc_box_layout->addWidget(inherited_button);
-    alloc_box_layout->addWidget(cling_button);
-    alloc_box->setLayout(alloc_box_layout);
-    lower_layout->addWidget(alloc_box);
+    misc_layout->addWidget(m_stripe_count_label);
+    layout->addWidget(misc_box);
 
     return general_tab;
 }
@@ -297,8 +296,12 @@ QWidget* LVCreateDialog::createPhysicalTab()
             physical_volumes.removeAt(x);
     }
 
-    m_pv_checkbox = new PvGroupBox(physical_volumes);
-    layout->addWidget(m_pv_checkbox);
+    if(m_lv != NULL)
+        m_pv_box = new PvGroupBox(physical_volumes, m_lv->getPolicy());
+    else
+        m_pv_box = new PvGroupBox(physical_volumes, QString("inherited"));
+
+    layout->addWidget(m_pv_box);
 
     QHBoxLayout *const lower_h_layout = new QHBoxLayout;
     QVBoxLayout *const lower_v_layout = new QVBoxLayout;
@@ -308,7 +311,7 @@ QWidget* LVCreateDialog::createPhysicalTab()
     lower_h_layout->addLayout(lower_v_layout);
     lower_h_layout->addStretch();
 
-    m_volume_box = new QGroupBox(i18n("Volume"));
+    m_volume_box = new QGroupBox();
     QVBoxLayout *const volume_layout = new QVBoxLayout;
     m_volume_box->setLayout(volume_layout);
 
@@ -335,36 +338,6 @@ QWidget* LVCreateDialog::createAdvancedTab()
     advanced_layout->addStretch();
     advanced_layout->addWidget(advanced_box);
     advanced_layout->addStretch();
-
-    m_readonly_check = new QCheckBox();
-    m_readonly_check->setText(i18n("Set read only"));
-    layout->addWidget(m_readonly_check);
-    m_zero_check = new QCheckBox();
-    m_zero_check->setText(i18n("Write zeros at volume start"));
-    layout->addWidget(m_zero_check);
-
-    if (!m_snapshot && !m_extend) {
-
-        connect(m_zero_check, SIGNAL(stateChanged(int)),
-                this , SLOT(zeroReadonlyCheck(int)));
-        connect(m_readonly_check, SIGNAL(stateChanged(int)),
-                this , SLOT(zeroReadonlyCheck(int)));
-
-        m_zero_check->setChecked(true);
-        m_readonly_check->setChecked(false);
-    } else if (m_snapshot && !m_extend) {
-        m_zero_check->setChecked(false);
-        m_zero_check->setEnabled(false);
-        m_zero_check->hide();
-        m_readonly_check->setChecked(false);
-    } else {
-        m_zero_check->setChecked(false);
-        m_zero_check->setEnabled(false);
-        m_readonly_check->setChecked(false);
-        m_readonly_check->setEnabled(false);
-        m_zero_check->hide();
-        m_readonly_check->hide();
-    }
 
     m_monitor_check = new QCheckBox(i18n("Monitor with dmeventd"));
     m_skip_sync_check = new QCheckBox(i18n("Skip initial synchronization of mirror"));
@@ -656,8 +629,8 @@ void LVCreateDialog::setMaxSize()
         dialect = KLocale::IECBinaryDialect;
 
     m_size_selector->setConstrainedMax(max_extents);
-    m_max_size_label->setText(i18n("Size: %1", locale->formatByteSize(getLargestVolume(), 1, dialect)));
-    m_max_extents_label->setText(i18n("Extents: %1", max_extents));
+    m_max_size_label->setText(i18n("Maximum volume size: %1", locale->formatByteSize(getLargestVolume(), 1, dialect)));
+    m_max_extents_label->setText(i18n("Maximum volume extents: %1", max_extents));
 
     if (m_type_combo->currentIndex() == 0){
         if (m_stripe_count_spin->value() > 1)
@@ -736,7 +709,7 @@ void LVCreateDialog::resetOkButton()
 
 void LVCreateDialog::enableTypeOptions(int index)
 {
-    const int pv_count = m_pv_checkbox->getAllNames().size();
+    const int pv_count = m_pv_box->getAllNames().size();
 
     if (index == 0) {  // linear
         m_mirror_count_spin->setMinimum(1);
@@ -899,7 +872,7 @@ void LVCreateDialog::enableMonitoring(int index)
 
 long long LVCreateDialog::getLargestVolume()
 {
-    QList <long long> available_pv_bytes = m_pv_checkbox->getRemainingSpaceList();
+    QList <long long> available_pv_bytes = m_pv_box->getRemainingSpaceList();
     QList <long long> stripe_pv_bytes;
     int total_stripes;
     const int type = m_type_combo->currentIndex();
@@ -1068,17 +1041,11 @@ QStringList LVCreateDialog::argumentsLV()
             args << "n";
     }
 
-    if (!inherited_button->isChecked()) {         // "inherited" is what we get if
-        args << "--alloc";                        // we don't pass "--alloc" at all
-        if (contiguous_button->isChecked())       // passing "--alloc" "inherited"
-            args << "contiguous" ;                // doesn't work
-        else if (anywhere_button->isChecked())
-            args << "anywhere" ;
-        else if (cling_button->isChecked())
-            args << "cling" ;
-        else
-            args << "normal" ;
-    }
+
+    const QString policy = m_pv_box->getAllocationPolicy();
+
+    if (policy != "inherited")          // "inherited" is what we get if we don't pass "--alloc" at all
+        args << "--alloc" << policy;    // passing "--alloc" "inherited" won't work
 
     if (m_extend)
         extents -= m_lv->getExtents();
@@ -1107,7 +1074,7 @@ QStringList LVCreateDialog::argumentsLV()
         args << m_lv->getFullName();
     }
 
-    args << m_pv_checkbox->getNames();
+    args << m_pv_box->getNames();
     args.prepend(program_to_run);
 
     return args;

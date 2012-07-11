@@ -29,7 +29,7 @@
 #include <QDebug>
 
 
-PvGroupBox::PvGroupBox(QList<PhysVol *> volumes, bool const target, QWidget *parent)
+PvGroupBox::PvGroupBox(QList<PhysVol *> volumes, QString const policy, bool const target, QWidget *parent)
     : QGroupBox(parent),
       m_pvs(volumes)
 {
@@ -67,7 +67,7 @@ PvGroupBox::PvGroupBox(QList<PhysVol *> volumes, bool const target, QWidget *par
         QLabel *pv_label = new QLabel(m_pvs[0]->getName() + "  " + locale->formatByteSize(m_pvs[0]->getRemaining(), 1, dialect));
         layout->addWidget(pv_label, 0, 0, 1, -1);
 
-        addLabelsAndButtons(layout, pv_check_count);
+        addLabelsAndButtons(layout, pv_check_count, policy);
         calculateSpace();
     } else {
         m_extent_size = m_pvs[0]->getVg()->getExtentSize();
@@ -89,7 +89,7 @@ PvGroupBox::PvGroupBox(QList<PhysVol *> volumes, bool const target, QWidget *par
         }
 
         selectAll();
-        addLabelsAndButtons(layout, pv_check_count);
+        addLabelsAndButtons(layout, pv_check_count, policy);
     }
 }
 
@@ -141,7 +141,7 @@ PvGroupBox::PvGroupBox(QList <StorageDevice *> devices, QList<StoragePartition *
         }
         QLabel *pv_label = new QLabel(name + "  " + locale->formatByteSize(size, 1, dialect));
         layout->addWidget(pv_label, 0, 0, 1, -1);
-        addLabelsAndButtons(layout, pv_check_count);
+        addLabelsAndButtons(layout, pv_check_count, QString("NA"));
 
         calculateSpace();
     } else {
@@ -185,7 +185,7 @@ PvGroupBox::PvGroupBox(QList <StorageDevice *> devices, QList<StoragePartition *
         }
 
         selectAll();
-        addLabelsAndButtons(layout, pv_check_count);
+        addLabelsAndButtons(layout, pv_check_count, QString("NA"));
 
         setExtentSize(extentSize);
     }
@@ -374,7 +374,7 @@ QHBoxLayout *PvGroupBox::getButtons()
     return layout;
 }
 
-void PvGroupBox::addLabelsAndButtons(QGridLayout *const layout, const int pvCount)
+void PvGroupBox::addLabelsAndButtons(QGridLayout *const layout, const int pvCount, QString const policy)
 {
     QVBoxLayout *const spacer1 = new QVBoxLayout;
     QVBoxLayout *const spacer2 = new QVBoxLayout;
@@ -389,4 +389,67 @@ void PvGroupBox::addLabelsAndButtons(QGridLayout *const layout, const int pvCoun
 
     if (pvCount > 1)
         layout->addLayout(getButtons(), count + 4, 0, 1, -1);
+
+
+    QWidget *const policy_box = buildPolicyBox(policy);
+    layout->addWidget(policy_box, count + 5, 0, 1, -1);
+
+    if(policy == "NA")
+        policy_box->hide();
+}
+
+QString PvGroupBox::getAllocationPolicy()
+{
+    switch(m_alloc_combo->currentIndex()) {
+    case 0:
+        return QString("inherited");
+        break;
+    case 1:
+        return QString("contiguous");
+        break;
+    case 2:
+        return QString("cling");
+        break;
+    case 3:
+        return QString("normal");
+        break;
+    case 4:
+        return QString("anywhere");
+        break;
+    default:
+        return QString("inherited");
+    } 
+}
+
+QWidget* PvGroupBox::buildPolicyBox(QString const policy)
+{
+    QWidget *const widget = new QWidget;
+    QHBoxLayout *const layout = new QHBoxLayout;
+    widget->setLayout(layout);
+
+    m_alloc_combo = new KComboBox;
+    m_alloc_combo->addItem(i18n("Inherited"));
+    m_alloc_combo->addItem(i18n("Contiguous"));
+    m_alloc_combo->addItem(i18n("Cling"));
+    m_alloc_combo->addItem(i18n("Normal"));
+    m_alloc_combo->addItem(i18n("Anywhere"));
+
+    if (policy == "contiguous")
+        m_alloc_combo->setCurrentIndex(1);
+    else if (policy == "cling")
+        m_alloc_combo->setCurrentIndex(2);
+    else if (policy == "normal")
+        m_alloc_combo->setCurrentIndex(3);
+    else if (policy == "anywhere")
+        m_alloc_combo->setCurrentIndex(4);
+    else
+        m_alloc_combo->setCurrentIndex(0);
+
+    QLabel *const label = new QLabel(i18n("Allocation policy: "));
+    layout->addStretch();
+    layout->addWidget(label);
+    layout->addWidget(m_alloc_combo);
+    layout->addStretch();
+
+    return widget;
 }

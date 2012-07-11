@@ -192,22 +192,6 @@ QWidget *ChangeMirrorDialog::buildGeneralTab(const bool isRaidMirror, const bool
     else
         m_log_box->hide();
 
-    QGroupBox *const alloc_box = new QGroupBox(i18n("Allocation policy"));
-    QVBoxLayout *const alloc_box_layout = new QVBoxLayout;
-    m_normal_button     = new QRadioButton(i18nc("The usual way", "Normal"));
-    m_contiguous_button = new QRadioButton(i18n("Contiguous"));
-    m_anywhere_button   = new QRadioButton(i18n("Anywhere"));
-    m_inherited_button  = new QRadioButton(i18nc("Inherited from the parent group", "Inherited"));
-    m_cling_button      = new QRadioButton(i18n("Cling"));
-    m_normal_button->setChecked(true);
-    alloc_box_layout->addWidget(m_normal_button);
-    alloc_box_layout->addWidget(m_contiguous_button);
-    alloc_box_layout->addWidget(m_anywhere_button);
-    alloc_box_layout->addWidget(m_inherited_button);
-    alloc_box_layout->addWidget(m_cling_button);
-    alloc_box->setLayout(alloc_box_layout);
-
-    center_layout->addWidget(alloc_box);
     center_layout->addStretch();
     general->setLayout(general_layout);
 
@@ -238,7 +222,7 @@ QWidget *ChangeMirrorDialog::buildPhysicalTab(const bool isRaidMirror, const boo
 
     QVBoxLayout *const physical_layout = new QVBoxLayout();
 
-    m_pv_box = new PvGroupBox(unused_pvs);
+    m_pv_box = new PvGroupBox(unused_pvs, m_lv->getPolicy());
     physical_layout->addWidget(m_pv_box);
     physical_layout->addStretch();
 
@@ -373,18 +357,10 @@ QStringList ChangeMirrorDialog::arguments()
         }
     }
 
-    if (!m_inherited_button->isChecked()) {         // "inherited" is what we get if
-        args << "--alloc";                          // we don't pass "--alloc" at all
-        if (m_contiguous_button->isChecked())       // passing "--alloc" "inherited"
-            args << "contiguous" ;                  // doesn't work
-        else if (m_anywhere_button->isChecked())
-            args << "anywhere" ;
-        else if (m_cling_button->isChecked())
-            args << "cling" ;
-        else
-            args << "normal" ;
-    }
+    const QString policy = m_pv_box->getAllocationPolicy();
 
+    if (policy != "inherited")          // "inherited" is what we get if we don't pass "--alloc" at all                                      
+        args << "--alloc" << policy;    // passing "--alloc" "inherited" won't work                                                           
     args << "--background"
          << m_lv->getFullName()
          << m_pv_box->getNames();
