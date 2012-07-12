@@ -608,7 +608,9 @@ void LogVol::processSegments(lv_t lvmLV, const QByteArray flags)
                     segment->type = value.value.string;
             }
 
-            if (m_lvmmirror || m_raidmirror) {
+            const bool pvmove = (flags[0] == 'p');  // use m_pvmove once processSegments get moved to after the main section
+
+            if ((m_lvmmirror || m_raidmirror) && !pvmove) {
                 segment->stripes = 1;
                 segment->stripe_size = 1;
                 segment->size = 1;
@@ -752,7 +754,7 @@ QStringList LogVol::getPvNamesAllFlat()
         QListIterator<LogVol *> child_itr(getChildren());
         QStringList pv_names;
 
-        while (child_itr.hasNext()){
+        while (child_itr.hasNext()) {
             pv_names << child_itr.next()->getPvNamesAllFlat();
         }
 
