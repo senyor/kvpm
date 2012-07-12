@@ -279,14 +279,15 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
                 }
             } else if (m_lv->isMirror()) {
                 remove_mirror_action->setEnabled(true);
-                pv_move_action->setEnabled(false);
 
                 if (m_lv->isRaid()){
                     snap_create_action->setEnabled(false);
                     change_mirror_log_action->setEnabled(false);
-                }
-                else
+                    pv_move_action->setEnabled(true);
+                } else {
                     change_mirror_log_action->setEnabled(true);
+                    pv_move_action->setEnabled(false);
+                }
 
                 if (m_lv->isUnderConversion()) {
                     add_mirror_legs_action->setEnabled(false);
@@ -303,7 +304,7 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
                 lv_extend_action->setEnabled(true);
                 lv_reduce_action->setEnabled(false);
                 lv_rename_action->setEnabled(true);
-                pv_move_action->setEnabled(false);
+                pv_move_action->setEnabled(true);
                 remove_mirror_action->setEnabled(false);
                 change_mirror_log_action->setEnabled(false);
                 remove_mirror_leg_action->setEnabled(false);

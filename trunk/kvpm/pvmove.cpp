@@ -248,7 +248,7 @@ void PVMoveDialog::buildDialog()
     QHBoxLayout *const lower_layout = new QHBoxLayout;
     layout->addLayout(lower_layout);
 
-    m_pv_box = new PvGroupBox(m_target_pvs, QString("cling"),true);
+    m_pv_box = new PvGroupBox(m_target_pvs, m_vg->getPolicy(), true);
     lower_layout->addWidget(m_pv_box);
 
     const int radio_count = m_sources.size();
@@ -482,6 +482,11 @@ bool PVMoveDialog::hasMovableExtents()
 
     for (int x = 0; x < lv_names.size(); x++) {
         LogVol *const lv = m_vg->getLvByName(lv_names[x]); 
+
+
+
+
+        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!         !!!!!!!!!!!!!!!!
 
         if (lv != NULL){
             if (!lv->isLvmMirror() && !lv->isLvmMirrorLeg() && !lv->isLvmMirrorLog() && !lv->isSnap() && !lv->isOrigin()){
