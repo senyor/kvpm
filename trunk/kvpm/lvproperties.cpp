@@ -321,7 +321,7 @@ QFrame *LVProperties::physicalVolumesFrame(int segment)
     label->setAlignment(Qt::AlignCenter);
     layout->addWidget(label);
 
-    if (m_lv->isLvmMirror() || m_lv->isSnapContainer() || m_lv->isRaid()) {
+    if ((m_lv->isMirror() || m_lv->isSnapContainer() || m_lv->isRaid()) && !m_lv->isPvmove()) {
         pv_list = m_lv->getPvNamesAllFlat();
         for (int pv = 0; pv < pv_list.size(); pv++) {
             label = new QLabel(pv_list[pv]);
