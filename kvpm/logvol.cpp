@@ -1018,6 +1018,9 @@ int LogVol::getRaidType()
     QRegExp reg("[0-9]+");
     QStringList matches;
 
+    // This needs to be fixed so changes in the string
+    // m_type can't screw with it.
+
     if (m_raid && reg.indexIn(m_type) >= 0) {
         matches = reg.capturedTexts();
         type = matches[0].toInt();
