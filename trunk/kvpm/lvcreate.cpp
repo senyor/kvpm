@@ -561,26 +561,33 @@ QWidget* LVCreateDialog::createTypeWidget(int pvcount)
     m_type_combo->addItem(i18n("Linear"));
 
     if(m_extend) {
-        QString const type = m_lv->getType();
+        const bool ismirror = m_lv->isMirror();
+        const bool israid   = m_lv->isRaid();
+        const int raidtype  = m_lv->getRaidType();
+
         m_type_combo->setEnabled(false);
         m_type_combo->addItem(i18n("LVM2 Mirror"));
         m_type_combo->addItem(i18n("RAID 1 Mirror"));
         m_type_combo->addItem(i18n("RAID 4"));
         m_type_combo->addItem(i18n("RAID 5"));
         m_type_combo->addItem(i18n("RAID 6"));
-        
-        if (type == "mirror")
+
+        if (ismirror && !israid) {
             m_type_combo->setCurrentIndex(1);
-        else if (type == "raid1")
-            m_type_combo->setCurrentIndex(2);
-        else if (type == "raid4")
-            m_type_combo->setCurrentIndex(3);
-        else if (type == "raid5")
-            m_type_combo->setCurrentIndex(4);
-        else if (type == "raid6")
-            m_type_combo->setCurrentIndex(5);
-        else
+        } else if (israid){
+            if (raidtype == 1)
+                m_type_combo->setCurrentIndex(2);
+            else if (raidtype == 4)
+                m_type_combo->setCurrentIndex(3);
+            else if (raidtype == 5)
+                m_type_combo->setCurrentIndex(4);
+            else if (raidtype == 6)
+                m_type_combo->setCurrentIndex(5);
+            else
+                m_type_combo->setCurrentIndex(0);
+        } else {
             m_type_combo->setCurrentIndex(0);
+        }
     } else {
         
         if (pvcount > 1) {
