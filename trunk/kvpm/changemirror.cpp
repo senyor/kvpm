@@ -48,8 +48,8 @@ ChangeMirrorDialog::ChangeMirrorDialog(LogVol *logicalVolume, bool changeLog, QW
 {
     QList<LogVol *> children;
     const QString lv_name = m_lv->getName();
-    const bool is_raid_mirror = (m_lv->isMirror() && m_lv->isRaid());
-    const bool is_lvm_mirror  = (m_lv->isMirror() && !m_lv->isRaid());
+    const bool is_raid = (m_lv->isMirror() && m_lv->isRaid());
+    const bool is_lvm  = (m_lv->isMirror() && !m_lv->isRaid());
 
     setWindowTitle(i18n("Change Mirror"));
 
@@ -58,9 +58,9 @@ ChangeMirrorDialog::ChangeMirrorDialog(LogVol *logicalVolume, bool changeLog, QW
 
     QLabel  *const lv_name_label = new QLabel();
 
-    if(is_lvm_mirror)
+    if(is_lvm)
         lv_name_label->setText(i18n("<b>Change LVM mirror: %1</b>", m_lv->getName()));
-    else if(is_lvm_mirror)
+    else if(is_lvm)
         lv_name_label->setText(i18n("<b>Change RAID 1 mirror: %1</b>", m_lv->getName()));
     else
         lv_name_label->setText(i18n("<b>Convert to a mirror: %1</b>", m_lv->getName()));
@@ -74,8 +74,8 @@ ChangeMirrorDialog::ChangeMirrorDialog(LogVol *logicalVolume, bool changeLog, QW
 
     setMainWidget(main_widget);
 
-    m_tab_widget->addTab(buildGeneralTab(is_raid_mirror, is_lvm_mirror),  i18nc("Common user options", "General"));
-    m_tab_widget->addTab(buildPhysicalTab(is_raid_mirror, is_lvm_mirror), i18n("Physical layout"));
+    m_tab_widget->addTab(buildGeneralTab(is_raid, is_lvm),  i18nc("Common user options", "General"));
+    m_tab_widget->addTab(buildPhysicalTab(is_raid, is_lvm), i18n("Physical layout"));
 
     setLogRadioButtons();
 
@@ -147,17 +147,19 @@ QWidget *ChangeMirrorDialog::buildGeneralTab(const bool isRaidMirror, const bool
     add_mirror_box_layout->addLayout(spin_box_layout);
     add_mirror_box_layout->addStretch();
     
-    if ((!m_change_log && is_mirror) || !is_mirror) {
-
+    if (m_change_log) {
+        m_type_combo->hide();
+        type_label->hide();
+    } else {
         if(is_mirror) {
             add_mirror_box->setTitle(i18n("Add mirror legs"));
             m_type_combo->hide();
             type_label->hide();
         } else {
             add_mirror_box->setTitle(i18n("Convert to mirror"));
-            m_type_combo->addItem("RAID 1");
             m_type_combo->addItem("Standard LVM");
-
+            m_type_combo->addItem("RAID 1");
+            
             connect(m_type_combo, SIGNAL(currentIndexChanged(int)),
                     this, SLOT(enableTypeOptions(int)));
         }
@@ -330,7 +332,7 @@ QStringList ChangeMirrorDialog::arguments()
     args << "lvconvert";
 
     if (!m_lv->isMirror()) {
-        if (m_type_combo->currentIndex() == 0)
+        if (m_type_combo->currentIndex() == 1)
             args << "--type" << "raid1";
         else
             args << "--type" << "mirror";
@@ -380,6 +382,9 @@ void ChangeMirrorDialog::resetOkButton()
     int new_stripe_count = 1;
     int total_stripes = 0;   //  stripes per mirror * added mirrors
     int new_log_count = m_lv->getLogCount();
+    const bool is_mirror = m_lv->isMirror();
+    const bool is_lvm  = m_lv->isMirror() && !m_lv->isRaid();
+    const bool is_raid = m_lv->isMirror() &&  m_lv->isRaid();
 
     if (!m_change_log) {
         if (!validateStripeSpin()) {
@@ -393,19 +398,22 @@ void ChangeMirrorDialog::resetOkButton()
         total_stripes = m_add_mirrors_spin->value() * new_stripe_count;
     }
 
+
     for (int x = 0; x < total_stripes; x++)
         stripe_pv_bytes.append(0);
 
-    if (m_change_log || !m_lv->isLvmMirror()) {
-        if (m_disk_log_button->isChecked())
-            new_log_count = 1;
-        else if (m_mirrored_log_button->isChecked())
-            new_log_count = 2;
-        else
-            new_log_count = 0;
+    if (m_change_log || !is_mirror) {
+        if (m_type_combo->currentIndex() == 0) {
+            if (m_disk_log_button->isChecked())
+                new_log_count = 1;
+            else if (m_mirrored_log_button->isChecked())
+                new_log_count = 2;
+            else
+                new_log_count = 0;
+        }
     }
 
-    if (m_lv->isLvmMirror()) {
+    if (is_lvm) {
         if (m_change_log && (m_lv->getLogCount() == new_log_count)) {
             enableButtonOk(false);
             return;
@@ -413,7 +421,7 @@ void ChangeMirrorDialog::resetOkButton()
             enableButtonOk(false);
             return;
         }
-    } else if (!m_lv->isLvmMirror() && !((total_stripes > 0) || (m_lv->getLogCount() != new_log_count))) {
+    } else if (!is_lvm && !((total_stripes > 0) || (m_lv->getLogCount() != new_log_count))) {
         enableButtonOk(false);
         return;
     }
