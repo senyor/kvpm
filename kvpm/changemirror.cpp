@@ -49,7 +49,7 @@ ChangeMirrorDialog::ChangeMirrorDialog(LogVol *logicalVolume, bool changeLog, QW
     QList<LogVol *> children;
     const QString lv_name = m_lv->getName();
     const bool is_raid = (m_lv->isMirror() && m_lv->isRaid());
-    const bool is_lvm  = (m_lv->isMirror() && !m_lv->isRaid());
+    const bool is_lvm = (m_lv->isMirror() && !m_lv->isRaid());
 
     setWindowTitle(i18n("Change Mirror"));
 
@@ -176,7 +176,6 @@ QWidget *ChangeMirrorDialog::buildGeneralTab(const bool isRaidMirror, const bool
     log_box_layout->addWidget(m_core_log_button);
     m_log_box->setLayout(log_box_layout);
     center_layout->addWidget(m_log_box);
-    m_log_box->setEnabled(false);
 
     if (!is_mirror || m_change_log) {
         if (m_change_log) {
@@ -384,7 +383,6 @@ void ChangeMirrorDialog::resetOkButton()
     int new_log_count = m_lv->getLogCount();
     const bool is_mirror = m_lv->isMirror();
     const bool is_lvm  = m_lv->isMirror() && !m_lv->isRaid();
-    const bool is_raid = m_lv->isMirror() &&  m_lv->isRaid();
 
     if (!m_change_log) {
         if (!validateStripeSpin()) {
@@ -398,12 +396,11 @@ void ChangeMirrorDialog::resetOkButton()
         total_stripes = m_add_mirrors_spin->value() * new_stripe_count;
     }
 
-
     for (int x = 0; x < total_stripes; x++)
         stripe_pv_bytes.append(0);
 
     if (m_change_log || !is_mirror) {
-        if (m_type_combo->currentIndex() == 0) {
+        if (m_type_combo->currentIndex() == 1) {
             if (m_disk_log_button->isChecked())
                 new_log_count = 1;
             else if (m_mirrored_log_button->isChecked())
@@ -427,6 +424,11 @@ void ChangeMirrorDialog::resetOkButton()
     }
 
     qSort(available_pv_bytes);
+
+    if (m_pv_box->getAllocationPolicy() == "contiguous") {
+        while (available_pv_bytes.size() > total_stripes + new_log_count)  
+            available_pv_bytes.removeFirst();
+    } 
 
     for (int x = m_lv->getLogCount(); x < new_log_count; x++) {
         if (available_pv_bytes.size())
@@ -461,7 +463,7 @@ void ChangeMirrorDialog::resetOkButton()
 
 void ChangeMirrorDialog::enableTypeOptions(int index)
 {
-    if (index == 1) {
+    if (index == 0) {
         m_log_box->setEnabled(true);
         m_stripe_box->setEnabled(true);
     }
