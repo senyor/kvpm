@@ -478,10 +478,10 @@ void LogVol::countLegsAndLogs()
         for (int x = all_lvs_flat.size() - 1; x >= 0; x--) {
             lv = all_lvs_flat[x];
 
-            if (lv->isLvmMirrorLeg() && !lv->isLvmMirror() && !lv->isLvmMirrorLog())
+            if (lv->isLvmMirrorLeg() && !lv->isMirror() && !lv->isLvmMirrorLog())
                 m_mirror_count++;
 
-            if (lv->isLvmMirrorLog() && !lv->isLvmMirror())
+            if (lv->isLvmMirrorLog() && !lv->isMirror())
                 m_log_count++;
         }
     } else if (getRaidType() == 1) {

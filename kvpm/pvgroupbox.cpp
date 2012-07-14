@@ -452,5 +452,7 @@ QWidget* PvGroupBox::buildPolicyBox(QString const policy)
     layout->addWidget(m_alloc_combo);
     layout->addStretch();
 
+    connect(m_alloc_combo, SIGNAL(currentIndexChanged(int)), this, SLOT(calculateSpace()));
+
     return widget;
 }

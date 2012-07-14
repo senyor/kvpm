@@ -915,8 +915,15 @@ long long LVCreateDialog::getLargestVolume()
             log_count = 0;
     } else
         log_count = 0;
-    
+
     qSort(available_pv_bytes);
+
+    if (!m_extend) {
+        if (m_pv_box->getAllocationPolicy() == "contiguous") {
+            while (available_pv_bytes.size() > total_stripes + log_count)  
+                available_pv_bytes.removeFirst();
+        } 
+    }
 
     for (int x = 0; x < log_count; x++) {
         if (available_pv_bytes.size())
