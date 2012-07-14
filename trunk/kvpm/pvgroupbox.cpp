@@ -84,7 +84,7 @@ PvGroupBox::PvGroupBox(QList<PhysVol *> volumes, QString const policy, bool cons
             else
                 layout->addWidget(m_pv_checks[x], x % ((pv_check_count + 2) / 3), x / ((pv_check_count + 2) / 3));
 
-            connect(check, SIGNAL(toggled(bool)),
+            connect(check, SIGNAL(clicked(bool)),
                     this, SLOT(calculateSpace()));
         }
 
@@ -161,7 +161,7 @@ PvGroupBox::PvGroupBox(QList <StorageDevice *> devices, QList<StoragePartition *
             else
                 layout->addWidget(m_pv_checks[x], x % ((pv_check_count + 2) / 3), x / ((pv_check_count + 2) / 3));
 
-            connect(check, SIGNAL(toggled(bool)),
+            connect(check, SIGNAL(clicked(bool)),
                     this, SLOT(calculateSpace()));
         }
 
@@ -180,7 +180,7 @@ PvGroupBox::PvGroupBox(QList <StorageDevice *> devices, QList<StoragePartition *
             else
                 layout->addWidget(check, (dev_count + x) % ((pv_check_count + 2) / 3), (dev_count + x) / ((pv_check_count + 2) / 3));
 
-            connect(check, SIGNAL(toggled(bool)),
+            connect(check, SIGNAL(clicked(bool)),
                     this, SLOT(calculateSpace()));
         }
 
@@ -281,7 +281,8 @@ void PvGroupBox::selectAll()
                 m_pv_checks[x]->setChecked(true);
         }
     }
-    emit stateChanged();
+
+    calculateSpace();
 
     return;
 }
@@ -294,7 +295,7 @@ void PvGroupBox::selectNone()
             m_pv_checks[x]->setChecked(false);
     }
 
-    emit stateChanged();
+    calculateSpace();
 
     return;
 }
