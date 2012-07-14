@@ -301,16 +301,16 @@ QWidget *ChangeMirrorDialog::buildPhysicalTab(const bool isRaidMirror, const boo
 
 QStringList ChangeMirrorDialog::getPvsInUse()
 {
-    QList<LogVol *>  mirror_legs = m_lv->getAllChildrenFlat();
+    QList<LogVol *>  legs = m_lv->getAllChildrenFlat();
     QStringList pvs_in_use;
 
-    if (m_lv->isLvmMirror()) {
-        for (int x = mirror_legs.size() - 1; x >= 0; x--) {
+    if (m_lv->isMirror()) {
+        for (int x = legs.size() - 1; x >= 0; x--) {
 
-            if ((!mirror_legs[x]->isLvmMirrorLeg() && !mirror_legs[x]->isLvmMirrorLog()))
-                mirror_legs.removeAt(x);
+            if ((!legs[x]->isMirrorLeg() && !legs[x]->isLvmMirrorLog()))
+                legs.removeAt(x);
             else
-                pvs_in_use << mirror_legs[x]->getPvNamesAll();
+                pvs_in_use << legs[x]->getPvNamesAll();
         }
     } else {
         pvs_in_use << m_lv->getPvNamesAll();
