@@ -359,7 +359,12 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
             pv_move_action->setEnabled(true);
             remove_mirror_action->setEnabled(false);
             change_mirror_log_action->setEnabled(false);
-            remove_mirror_leg_action->setEnabled(false);
+
+            if(m_lv->isMirrorLeg())
+                remove_mirror_leg_action->setEnabled(true);
+            else
+                remove_mirror_leg_action->setEnabled(false);
+
             snap_create_action->setEnabled(false);
             filesystem_menu->setEnabled(false);
         } else if (m_lv->isPvmove()) {
