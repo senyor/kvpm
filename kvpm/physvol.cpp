@@ -18,6 +18,7 @@
 #include "volgroup.h"
 
 #include <QByteArray>
+#include <QDebug>
 #include <QtAlgorithms>
 #include <QListIterator>
 
@@ -245,3 +246,91 @@ QList<LVSegmentExtent *> PhysVol::sortByExtent()
     return lv_extents;
 }
 
+long long PhysVol::getContiguous(LogVol *const lv)
+{
+    long long contiguous = 0;
+    const long long extent_size = m_vg->getExtentSize();
+    const long long end = (m_size / extent_size) - 1;
+    const QList<LVSegmentExtent *> lv_extents = sortByExtent();
+
+    QList<LogVol *> legs;
+
+    //
+    // TEST UNDER CONVERSION !!!
+    //
+    
+    if (lv == NULL)
+        return getContiguous();
+    
+    if (lv->isMirror() || lv->isRaid()) {
+        legs.append(lv->getAllChildrenFlat());
+        
+        for (int n = legs.size() - 1; n >= 0; n--) {
+            if ( !(legs[n]->isRaidImage() || (legs[n]->isLvmMirrorLeg() && !legs[n]->isLvmMirrorLog())) ) 
+                legs.removeAt(n);
+        }
+    } else {
+        legs.append(lv);
+    }
+
+    for (int x = 0; x < legs.size(); x++) {
+        
+        const int last_segment = legs[x]->getSegmentCount() - 1;
+        const QStringList pv_names = legs[x]->getPvNames(last_segment);
+        long long last_extent;
+        
+        for (int y = 0; y < pv_names.size(); y++) {
+            if (pv_names[y] == m_device) {
+                
+                last_extent = legs[x]->getSegmentStartingExtent(last_segment)[y];
+                last_extent += (legs[x]->getSegmentExtents(last_segment) / pv_names.size()) - 1;
+                
+                for (int z = 0; z < lv_extents.size(); z++) {
+                    if (lv_extents[z]->first_extent > last_extent) {
+                        contiguous = (lv_extents[z]->first_extent - last_extent) - 1;
+                        break;
+                    } else if (z == lv_extents.size() - 1) {
+                        contiguous = end - last_extent;
+                    }
+                }
+            } 
+        }
+    }
+
+    for (int x = 0; x < lv_extents.size(); x++)
+        delete lv_extents[x];
+    
+    return contiguous * extent_size;
+}
+
+long long PhysVol::getContiguous()
+{
+    long long contiguous = 0;
+    const long long extent_size = m_vg->getExtentSize();
+    const long long end = (m_size / extent_size) - 1;
+    const QList<LVSegmentExtent *> lv_extents = sortByExtent();
+
+    if (lv_extents.size() > 0) {
+
+        for (int x = lv_extents.size() - 1; x >= 0 ; x--) {
+            if (x == (lv_extents.size() - 1)) {
+                if (end - lv_extents[x]->last_extent > contiguous)
+                    contiguous = end - lv_extents[x]->last_extent;
+            } else {
+                if ((lv_extents[x + 1]->first_extent - lv_extents[x]->last_extent) - 1 > contiguous)
+                    contiguous = (lv_extents[x + 1]->first_extent - lv_extents[x]->last_extent) - 1;
+            }
+        }
+        
+        if (lv_extents[0]->first_extent > contiguous)
+            contiguous = lv_extents[0]->first_extent;
+        
+    } else {   // empty pv
+        contiguous = end + 1;
+    }
+    
+    for (int x = 0; x < lv_extents.size(); x++)
+        delete lv_extents[x];
+
+    return contiguous * extent_size;
+}

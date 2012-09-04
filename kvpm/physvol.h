@@ -20,7 +20,7 @@
 #include <QStringList>
 
 class VolGroup;
-
+class LogVol;
 
 struct LVSegmentExtent {
     QString lv_name;
@@ -47,7 +47,7 @@ class PhysVol
     long long m_last_used_extent;
 
 public:
-    PhysVol(pv_t lvm_pv, VolGroup *vg);
+    PhysVol(pv_t lvm_pv, VolGroup *const vg);
     void rescan(pv_t pv);
     QString getName();       // eg: /dev/hde4
     QString getUuid();
@@ -56,9 +56,12 @@ public:
     bool isAllocatable();
     void setActive();               // If any lv is active on the pv, the pv is active
     bool isActive();
-    long long getSize();            // size of the physical volume in bytes
-    long long getDeviceSize();      // the physical volume might not take up all the device!
-    long long getRemaining();          // free space in bytes
+    long long getContiguous(LogVol *const lv); // the number of contiguous bytes available if the lv is on this pv
+    long long getContiguous();                 // the max contiguous bytes on the the pv.
+                                               
+    long long getSize();                       // size of the physical volume in bytes
+    long long getDeviceSize();                 // the physical volume might not take up all the device!
+    long long getRemaining();                  // free space in bytes
     long long getLastUsedExtent();  // needed for minimum shrink size determination
     void setLastUsedExtent(const long long last);
     int getPercentUsed();           // 0 - 100
