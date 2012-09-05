@@ -428,8 +428,18 @@ void ChangeMirrorDialog::resetOkButton()
 
     qSort(available_pv_bytes);
 
-    if (m_pv_box->getAllocationPolicy() == "contiguous") {
-        while (available_pv_bytes.size() > total_stripes + new_log_count)  
+    QString policy = m_pv_box->getAllocationPolicy();
+
+    if (policy == QString("inherited"))
+        policy = m_lv->getVg()->getPolicy();
+
+    if (policy == QString("contiguous")) {
+
+        int logs_added = new_log_count - m_lv->getLogCount();
+        if (logs_added < 0)
+            logs_added = 0; 
+
+        while (available_pv_bytes.size() > total_stripes + logs_added)  
             available_pv_bytes.removeFirst();
     } 
 

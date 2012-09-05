@@ -624,8 +624,12 @@ QWidget* LVCreateDialog::createTypeWidget(int pvcount)
     QLabel *const type_label = new QLabel(i18n("Volume type: "));
     type_label->setBuddy(m_type_combo);
 
-    if (m_extend || m_snapshot) {
+    if (m_snapshot) {
         m_type_combo->setCurrentIndex(0);
+        m_type_combo->setEnabled(false);
+        type_label->hide();
+        m_type_combo->hide();
+    } else if (m_extend) {
         m_type_combo->setEnabled(false);
         type_label->hide();
         m_type_combo->hide();
@@ -939,8 +943,12 @@ long long LVCreateDialog::getLargestVolume()
 
     qSort(available_pv_bytes);
 
+    QString policy = m_pv_box->getAllocationPolicy();
+    if (policy == QString("inherited"))
+        policy = m_vg->getPolicy();
+
     if (!m_extend) {
-        if (m_pv_box->getAllocationPolicy() == "contiguous") {
+        if (policy == "contiguous") {
             while (available_pv_bytes.size() > total_stripes + log_count)  
                 available_pv_bytes.removeFirst();
         } 
