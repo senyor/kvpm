@@ -98,9 +98,10 @@ class LVCreateDialog : public KDialog
     QWidget* createAdvancedTab();
     QWidget* createPhysicalTab();
     QWidget* createTypeWidget(int pvcount);
-    QWidget* createStripeWidget(int pvcount);
+    QWidget* createStripeWidget();
     QWidget* createMirrorWidget(int pvcount);
     long long getLargestVolume();
+    int getMaxStripes();
     void makeConnections();
     long long roundExtentsToStripes(long long extents);
     bool hasInitialErrors();

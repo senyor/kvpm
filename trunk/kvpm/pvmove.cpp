@@ -248,7 +248,15 @@ void PVMoveDialog::buildDialog()
     QHBoxLayout *const lower_layout = new QHBoxLayout;
     layout->addLayout(lower_layout);
 
-    m_pv_box = new PvGroupBox(m_target_pvs, m_vg->getPolicy(), true);
+    QList<long long> normal;
+    QList<long long> contiguous;
+
+    for (int x = 0; x < m_target_pvs.size(); x++) {
+        normal.append(m_target_pvs[x]->getRemaining());
+        contiguous.append(m_target_pvs[x]->getContiguous());
+    }
+
+    m_pv_box = new PvGroupBox(m_target_pvs, normal, contiguous, m_vg->getPolicy(), true);
     lower_layout->addWidget(m_pv_box);
 
     const int radio_count = m_sources.size();

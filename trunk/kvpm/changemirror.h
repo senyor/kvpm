@@ -58,7 +58,7 @@ class ChangeMirrorDialog : public KDialog
                  *m_disk_log_button;
 
     QWidget *buildGeneralTab(const bool isRaidMirror, const bool isLvmMirror);
-    QWidget *buildPhysicalTab(const bool isRaidMirror, const bool isLvmMirror);
+    QWidget *buildPhysicalTab(const bool isRaidMirror);
     QStringList getPvsInUse();
     bool validateStripeSpin();
     void setLogRadioButtons();

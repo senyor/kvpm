@@ -44,6 +44,9 @@ class PvGroupBox: public QGroupBox
     QList<StorageDevice *> m_devices;
     QList<StoragePartition *> m_partitions;
     QList<NoMungeCheck *> m_pv_checks;
+    QList<long long> m_normal;
+    QList<long long> m_contiguous;
+
     QLabel *m_space_label, *m_extents_label;
     uint64_t m_extent_size;
     QHBoxLayout *getButtons();
@@ -53,9 +56,18 @@ class PvGroupBox: public QGroupBox
     QWidget *buildPolicyBox(QString const policy);
 
 public:
-    explicit PvGroupBox(QList<PhysVol *> volumes, QString const policy = QString("NA"), bool const target = false, QWidget *parent = NULL);
-    PvGroupBox(QList<StorageDevice *> devices, QList<StoragePartition *> partitions,
-               uint64_t extentSize, QWidget *parent = NULL);
+    // Note: policy needs to be passed "inherited" here for new logical volumes
+    explicit PvGroupBox(QList<PhysVol *> volumes, 
+                        QList<long long> normal = QList<long long>(), 
+                        QList<long long> contiguous = QList<long long>(), 
+                        QString const policy = QString("NA"), 
+                        bool const target = false, 
+                        QWidget *parent = NULL);
+
+    PvGroupBox(QList<StorageDevice *> devices, 
+               QList<StoragePartition *> partitions,
+               uint64_t extentSize, 
+               QWidget *parent = NULL);
 
     QStringList getAllNames();    // names of all pvs displayed in the box
     QStringList getNames();       // names of *selected* pvs
@@ -70,6 +82,7 @@ signals:
 
 private slots:
     void calculateSpace();
+    void setChecksToPolicy();
 
 public slots:
     void selectAll();
