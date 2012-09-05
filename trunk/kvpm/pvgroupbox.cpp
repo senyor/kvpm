@@ -492,13 +492,6 @@ void PvGroupBox::setChecksToPolicy()
     else if (m_alloc_combo->currentIndex() == 3)
         policy = QString("anywhere");
 
-
-    qDebug() << "volumes:" << m_pvs.size();
-    qDebug() << "checks: " << m_pv_checks.size();
-    qDebug() << "normal: " << m_normal.size();
-    qDebug() << "contig: " << m_contiguous.size();
-
-
     for (int x = 0; x < m_pv_checks.size(); x++) {
         if (policy == "contiguous") {
             m_pv_checks[x]->setText(m_pvs[x]->getName() + "  " + locale->formatByteSize(m_contiguous[x], 1, dialect));
