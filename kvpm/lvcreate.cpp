@@ -284,22 +284,39 @@ QWidget* LVCreateDialog::createGeneralTab()
 QWidget* LVCreateDialog::createPhysicalTab()
 {
     QString message;
-    QList<PhysVol *> physical_volumes;
+
 
     QVBoxLayout *const layout = new QVBoxLayout;
     m_physical_tab = new QWidget(this);
     m_physical_tab->setLayout(layout);
 
-    physical_volumes = m_vg->getPhysicalVolumes();
+    QList<PhysVol *> physical_volumes(m_vg->getPhysicalVolumes());
+
     for (int x = physical_volumes.size() - 1; x >= 0; x--) {
         if (physical_volumes[x]->getRemaining() < 1 || !physical_volumes[x]->isAllocatable())
             physical_volumes.removeAt(x);
     }
 
-    if(m_lv != NULL)
-        m_pv_box = new PvGroupBox(physical_volumes, m_lv->getPolicy());
-    else
-        m_pv_box = new PvGroupBox(physical_volumes, QString("inherited"));
+    QList<long long> normal;
+    QList<long long> contiguous;
+
+    if (m_lv != NULL) {
+
+        for (int x = 0; x < physical_volumes.size(); x++) {
+            normal.append(physical_volumes[x]->getRemaining());
+            contiguous.append(physical_volumes[x]->getContiguous(m_lv));
+        }
+
+        m_pv_box = new PvGroupBox(physical_volumes, normal, contiguous, m_lv->getPolicy());
+    } else {
+
+        for (int x = 0; x < physical_volumes.size(); x++) {
+            normal.append(physical_volumes[x]->getRemaining());
+            contiguous.append(physical_volumes[x]->getContiguous(m_lv));
+        }
+
+        m_pv_box = new PvGroupBox(physical_volumes, normal, contiguous, QString("inherited"));
+    }
 
     layout->addWidget(m_pv_box);
 
@@ -307,7 +324,6 @@ QWidget* LVCreateDialog::createPhysicalTab()
     QVBoxLayout *const lower_v_layout = new QVBoxLayout;
     layout->addLayout(lower_h_layout);
     lower_h_layout->addStretch();
-
     lower_h_layout->addLayout(lower_v_layout);
     lower_h_layout->addStretch();
 
@@ -316,7 +332,7 @@ QWidget* LVCreateDialog::createPhysicalTab()
     m_volume_box->setLayout(volume_layout);
 
     volume_layout->addWidget(createTypeWidget(physical_volumes.size()));
-    m_stripe_widget = createStripeWidget(physical_volumes.size());
+    m_stripe_widget = createStripeWidget();
     m_mirror_widget = createMirrorWidget(physical_volumes.size());
     volume_layout->addWidget(m_stripe_widget);
     volume_layout->addWidget(m_mirror_widget);
@@ -401,7 +417,7 @@ QWidget* LVCreateDialog::createAdvancedTab()
     return m_advanced_tab;
 }
 
-QWidget* LVCreateDialog::createStripeWidget(int pvcount)
+QWidget* LVCreateDialog::createStripeWidget()
 {
     QWidget *const widget = new QWidget;
     QVBoxLayout *const layout = new QVBoxLayout;
@@ -412,17 +428,17 @@ QWidget* LVCreateDialog::createStripeWidget(int pvcount)
         m_stripe_size_combo->addItem(QString("%1").arg(pow(2, n)) + " KiB");
         m_stripe_size_combo->setItemData(n - 2, QVariant((int) pow(2, n)), Qt::UserRole);
         m_stripe_size_combo->setEnabled(true);   // only enabled if the combo box has at least one entry!
-
+        
         if ((n - 2) < 5) 
             m_stripe_size_combo->setCurrentIndex(n - 2);
-   }
-
+    }
+    
     QLabel *const size_label = new QLabel(i18n("Stripe Size: "));
     size_label->setBuddy(m_stripe_size_combo);
-
+    
     m_stripe_count_spin = new KIntSpinBox();
     m_stripe_count_spin->setEnabled(m_stripe_size_combo->isEnabled());
-    m_stripe_count_spin->setRange(1, pvcount); 
+    m_stripe_count_spin->setRange(1, getMaxStripes()); 
     m_stripe_count_spin->setSpecialValueText(i18n("none"));
 
     if (m_stripe_size_combo->isEnabled()) {
@@ -605,17 +621,20 @@ QWidget* LVCreateDialog::createTypeWidget(int pvcount)
         }
     }
 
-    if (m_snapshot) {
-        m_type_combo->setCurrentIndex(0);
-        m_type_combo->setEnabled(false);
-    }
-
     QLabel *const type_label = new QLabel(i18n("Volume type: "));
     type_label->setBuddy(m_type_combo);
+
+    if (m_extend || m_snapshot) {
+        m_type_combo->setCurrentIndex(0);
+        m_type_combo->setEnabled(false);
+        type_label->hide();
+        m_type_combo->hide();
+    }
 
     QHBoxLayout *const layout = new QHBoxLayout;
     layout->addWidget(type_label);
     layout->addWidget(m_type_combo);
+
     widget->setLayout(layout);
 
     return widget;
@@ -623,10 +642,6 @@ QWidget* LVCreateDialog::createTypeWidget(int pvcount)
 
 void LVCreateDialog::setMaxSize()
 {
-    const int stripe_count = m_stripe_count_spin->value();
-    const int mirror_count = m_mirror_count_spin->value();
-    const long long max_extents   = getLargestVolume() / m_vg->getExtentSize();
-
     KLocale::BinaryUnitDialect dialect;
     KLocale *const locale = KGlobal::locale();
 
@@ -634,6 +649,12 @@ void LVCreateDialog::setMaxSize()
         dialect = KLocale::MetricBinaryDialect;
     else
         dialect = KLocale::IECBinaryDialect;
+
+    m_stripe_count_spin->setMaximum(getMaxStripes());
+
+    const int stripe_count = m_stripe_count_spin->value();
+    const int mirror_count = m_mirror_count_spin->value();
+    const long long max_extents = getLargestVolume() / m_vg->getExtentSize();
 
     m_size_selector->setConstrainedMax(max_extents);
     m_max_size_label->setText(i18n("Maximum volume size: %1", locale->formatByteSize(getLargestVolume(), 1, dialect)));
@@ -725,7 +746,7 @@ void LVCreateDialog::enableTypeOptions(int index)
         m_mirror_count_spin->setEnabled(false);
         m_log_combo->setEnabled(false);
         m_log_combo->setCurrentIndex(1);
-        m_stripe_count_spin->setRange(1, pv_count);
+        m_stripe_count_spin->setRange(1, getMaxStripes());
         m_stripe_count_spin->setValue(1);
         m_stripe_count_spin->setSuffix(i18n(""));
         m_stripe_count_spin->setSpecialValueText(i18n("none"));
@@ -749,7 +770,7 @@ void LVCreateDialog::enableTypeOptions(int index)
             m_log_combo->setCurrentIndex(1);
             m_stripe_count_spin->setMinimum(1);
             m_stripe_count_spin->setValue(1);
-            m_stripe_count_spin->setMaximum(pv_count);
+            m_stripe_count_spin->setMaximum(getMaxStripes());
             m_stripe_count_spin->setSuffix(i18n(""));
             m_stripe_count_spin->setSpecialValueText(i18n("none"));
         }
@@ -792,7 +813,7 @@ void LVCreateDialog::enableTypeOptions(int index)
         } else{
             m_stripe_count_spin->setMinimum(2);
             m_stripe_count_spin->setValue(2);
-            m_stripe_count_spin->setMaximum(pv_count - 1);
+            m_stripe_count_spin->setMaximum(getMaxStripes() - 1);
             m_stripe_count_spin->setSpecialValueText("");
             m_stripe_count_spin->setSuffix(i18n(" + 1 parity"));
             m_stripe_count_spin->setEnabled(true);
@@ -814,7 +835,7 @@ void LVCreateDialog::enableTypeOptions(int index)
         } else {
             m_stripe_count_spin->setMinimum(2);
             m_stripe_count_spin->setValue(2);
-            m_stripe_count_spin->setMaximum(pv_count - 1);
+            m_stripe_count_spin->setMaximum(getMaxStripes() - 1);
             m_stripe_count_spin->setSpecialValueText("");
             m_stripe_count_spin->setSuffix(i18n(" + 1 parity"));
             m_stripe_count_spin->setEnabled(true);
@@ -835,7 +856,7 @@ void LVCreateDialog::enableTypeOptions(int index)
         } else {
             m_stripe_count_spin->setMinimum(3);
             m_stripe_count_spin->setValue(3); 
-            m_stripe_count_spin->setMaximum(pv_count - 2);
+            m_stripe_count_spin->setMaximum(getMaxStripes() - 2);
             m_stripe_count_spin->setSpecialValueText("");
             m_stripe_count_spin->setSuffix(i18n(" + 2 parity"));
             m_stripe_count_spin->setEnabled(true);
@@ -1055,7 +1076,6 @@ QStringList LVCreateDialog::argumentsLV()
             args << "n";
     }
 
-
     const QString policy = m_pv_box->getAllocationPolicy();
 
     if (policy != "inherited")          // "inherited" is what we get if we don't pass "--alloc" at all
@@ -1240,3 +1260,34 @@ void LVCreateDialog::commitChanges()
     }
 }
 
+int LVCreateDialog::getMaxStripes()
+{
+    int stripes = m_pv_box->getAllNames().size();
+    QString policy = m_pv_box->getAllocationPolicy();
+
+    if (policy == QString("inherited"))
+        policy = m_vg->getPolicy();
+
+    if (m_extend && (policy == QString("contiguous"))){
+        if (m_lv->isLvmMirror()){
+
+            QList<LogVol *> legs = m_lv->getChildren();
+            int next_stripes = 0;
+
+            for (int x = legs.size() - 1; x >= 0; x--){
+                if (legs[x]->isMirrorLeg()) {
+
+                    next_stripes = legs[x]->getSegmentStripes(legs[x]->getSegmentCount() - 1);
+                    
+                    if (next_stripes < stripes)
+                        stripes = next_stripes;
+                }
+            }
+        }
+    }
+
+    return stripes;
+}
+
+
+    

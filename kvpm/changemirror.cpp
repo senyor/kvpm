@@ -75,7 +75,7 @@ ChangeMirrorDialog::ChangeMirrorDialog(LogVol *logicalVolume, bool changeLog, QW
     setMainWidget(main_widget);
 
     m_tab_widget->addTab(buildGeneralTab(is_raid, is_lvm),  i18nc("Common user options", "General"));
-    m_tab_widget->addTab(buildPhysicalTab(is_raid, is_lvm), i18n("Physical layout"));
+    m_tab_widget->addTab(buildPhysicalTab(is_raid), i18n("Physical layout"));
 
     setLogRadioButtons();
 
@@ -117,7 +117,6 @@ QWidget *ChangeMirrorDialog::buildGeneralTab(const bool isRaidMirror, const bool
     general_layout->addStretch();
     general_layout->addLayout(center_layout);
     general_layout->addStretch();
-
         
     QGroupBox *const add_mirror_box = new QGroupBox();
     QLabel  *const type_label = new QLabel(i18n("Mirror type: "));
@@ -131,7 +130,6 @@ QWidget *ChangeMirrorDialog::buildGeneralTab(const bool isRaidMirror, const bool
     add_mirror_box->setLayout(add_mirror_box_layout);
     center_layout->addStretch();
     center_layout->addWidget(add_mirror_box);
-
 
     QLabel  *const existing_label = new QLabel(i18n("Existing mirror legs: %1", m_lv->getMirrorCount()));
     add_mirror_box_layout->addWidget(existing_label);
@@ -150,6 +148,7 @@ QWidget *ChangeMirrorDialog::buildGeneralTab(const bool isRaidMirror, const bool
     if (m_change_log) {
         m_type_combo->hide();
         type_label->hide();
+        add_mirror_box->hide();
     } else {
         if(is_mirror) {
             add_mirror_box->setTitle(i18n("Add mirror legs"));
@@ -199,7 +198,7 @@ QWidget *ChangeMirrorDialog::buildGeneralTab(const bool isRaidMirror, const bool
     return general;
 }
 
-QWidget *ChangeMirrorDialog::buildPhysicalTab(const bool isRaidMirror, const bool isLvmMirror)
+QWidget *ChangeMirrorDialog::buildPhysicalTab(const bool isRaidMirror)
 {
     QWidget *const physical = new QWidget;
     QList<PhysVol *> unused_pvs = m_lv->getVg()->getPhysicalVolumes();
@@ -223,7 +222,15 @@ QWidget *ChangeMirrorDialog::buildPhysicalTab(const bool isRaidMirror, const boo
 
     QVBoxLayout *const physical_layout = new QVBoxLayout();
 
-    m_pv_box = new PvGroupBox(unused_pvs, m_lv->getPolicy());
+    QList<long long> normal;
+    QList<long long> contiguous;
+
+    for (int x = 0; x < unused_pvs.size(); x++) {
+            normal.append(unused_pvs[x]->getRemaining());
+            contiguous.append(unused_pvs[x]->getContiguous());
+    }
+
+    m_pv_box = new PvGroupBox(unused_pvs, normal, contiguous, m_lv->getPolicy());
     physical_layout->addWidget(m_pv_box);
     physical_layout->addStretch();
 
@@ -286,8 +293,6 @@ QWidget *ChangeMirrorDialog::buildPhysicalTab(const bool isRaidMirror, const boo
     
     if (m_change_log || isRaidMirror) {
         m_stripe_box->hide();
-        m_stripe_box->setEnabled(false);
-    } else if (!isLvmMirror && !isRaidMirror) {
         m_stripe_box->setEnabled(false);
     }
 
@@ -399,15 +404,13 @@ void ChangeMirrorDialog::resetOkButton()
     for (int x = 0; x < total_stripes; x++)
         stripe_pv_bytes.append(0);
 
-    if (m_change_log || !is_mirror) {
-        if (m_type_combo->currentIndex() == 1) {
-            if (m_disk_log_button->isChecked())
-                new_log_count = 1;
-            else if (m_mirrored_log_button->isChecked())
-                new_log_count = 2;
-            else
-                new_log_count = 0;
-        }
+    if (m_change_log || (!is_mirror && (m_type_combo->currentIndex() == 0))) {
+        if (m_disk_log_button->isChecked())
+            new_log_count = 1;
+        else if (m_mirrored_log_button->isChecked())
+            new_log_count = 2;
+        else
+            new_log_count = 0;
     }
 
     if (is_lvm) {
@@ -466,12 +469,18 @@ void ChangeMirrorDialog::enableTypeOptions(int index)
     if (index == 0) {
         m_log_box->setEnabled(true);
         m_stripe_box->setEnabled(true);
+
+        qDebug() << "HERE I ";
+
     }
     else {
         m_log_box->setEnabled(false);
         m_disk_log_button->setChecked(true);
         m_stripe_spin->setValue(1);
         m_stripe_box->setEnabled(false);
+
+        qDebug() << "HERE II";
+
     }
 }
 

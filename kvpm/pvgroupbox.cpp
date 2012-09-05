@@ -29,9 +29,12 @@
 #include <QDebug>
 
 
-PvGroupBox::PvGroupBox(QList<PhysVol *> volumes, QString const policy, bool const target, QWidget *parent)
+PvGroupBox::PvGroupBox(QList<PhysVol *> volumes, QList<long long> normal, QList<long long> contiguous, 
+                       QString const policy, bool const target, QWidget *parent)
     : QGroupBox(parent),
-      m_pvs(volumes)
+      m_pvs(volumes),
+      m_normal(normal),
+      m_contiguous(contiguous)
 {
     KConfigSkeleton skeleton;
     skeleton.setCurrentGroup("General");
@@ -41,6 +44,13 @@ PvGroupBox::PvGroupBox(QList<PhysVol *> volumes, QString const policy, bool cons
       setTitle(i18n("Target Physical Volumes"));
     else
       setTitle(i18n("Available Physical Volumes"));
+
+    if (policy == QString("NA") || normal.size() == 0) {
+        for (int x = 0; x < volumes.size(); x++) {
+            m_normal.append(volumes[x]->getSize());
+            m_contiguous.append(volumes[x]->getSize());
+        }
+    }
 
     QGridLayout *const layout = new QGridLayout();
     setLayout(layout);
@@ -72,9 +82,9 @@ PvGroupBox::PvGroupBox(QList<PhysVol *> volumes, QString const policy, bool cons
     } else {
         m_extent_size = m_pvs[0]->getVg()->getExtentSize();
         for (int x = 0; x < pv_check_count; x++) {
+
             check = new NoMungeCheck(m_pvs[x]->getName() + "  " + locale->formatByteSize(m_pvs[x]->getRemaining(), 1, dialect));
             check->setAlternateText(m_pvs[x]->getName());
-            check->setData(QVariant(m_pvs[x]->getRemaining()));
             m_pv_checks.append(check);
 
             if (pv_check_count < 11)
@@ -91,6 +101,8 @@ PvGroupBox::PvGroupBox(QList<PhysVol *> volumes, QString const policy, bool cons
         selectAll();
         addLabelsAndButtons(layout, pv_check_count, policy);
     }
+
+    setChecksToPolicy();
 }
 
 PvGroupBox::PvGroupBox(QList <StorageDevice *> devices, QList<StoragePartition *> partitions,
@@ -193,7 +205,6 @@ PvGroupBox::PvGroupBox(QList <StorageDevice *> devices, QList<StoragePartition *
 
 QStringList PvGroupBox::getNames()
 {
-
     QStringList names;
 
     if (m_pv_checks.size()) {
@@ -213,7 +224,6 @@ QStringList PvGroupBox::getNames()
 
 QStringList PvGroupBox::getAllNames()
 {
-
     QStringList names;
 
     if (m_pv_checks.size()) {
@@ -232,7 +242,6 @@ QStringList PvGroupBox::getAllNames()
 
 long long PvGroupBox::getRemainingSpace()
 {
-
     long long space = 0;
 
     if (m_pv_checks.size()) {
@@ -254,7 +263,6 @@ long long PvGroupBox::getRemainingSpace()
 
 QList<long long> PvGroupBox::getRemainingSpaceList()
 {
-
     QList<long long> space;
 
     if (m_pv_checks.size()) {
@@ -391,7 +399,6 @@ void PvGroupBox::addLabelsAndButtons(QGridLayout *const layout, const int pvCoun
     if (pvCount > 1)
         layout->addLayout(getButtons(), count + 4, 0, 1, -1);
 
-
     QWidget *const policy_box = buildPolicyBox(policy);
     layout->addWidget(policy_box, count + 5, 0, 1, -1);
 
@@ -403,7 +410,7 @@ QString PvGroupBox::getAllocationPolicy()
 {
     switch(m_alloc_combo->currentIndex()) {
     case 0:
-        return QString("inherited");
+        return QString("normal");
         break;
     case 1:
         return QString("contiguous");
@@ -412,13 +419,13 @@ QString PvGroupBox::getAllocationPolicy()
         return QString("cling");
         break;
     case 3:
-        return QString("normal");
-        break;
-    case 4:
         return QString("anywhere");
         break;
-    default:
+    case 4:
         return QString("inherited");
+        break;
+    default:
+        return QString("normal");
     } 
 }
 
@@ -428,23 +435,28 @@ QWidget* PvGroupBox::buildPolicyBox(QString const policy)
     QHBoxLayout *const layout = new QHBoxLayout;
     widget->setLayout(layout);
 
+    QString vg_policy;
+    if (m_pvs.size())
+        vg_policy = m_pvs[0]->getVg()->getPolicy();;
+
     m_alloc_combo = new KComboBox;
-    m_alloc_combo->addItem(i18n("Inherited"));
+    m_alloc_combo->addItem(i18n("Normal"));
     m_alloc_combo->addItem(i18n("Contiguous"));
     m_alloc_combo->addItem(i18n("Cling"));
-    m_alloc_combo->addItem(i18n("Normal"));
     m_alloc_combo->addItem(i18n("Anywhere"));
 
-    if (policy == "contiguous")
+    if (policy == "normal")
+        m_alloc_combo->setCurrentIndex(0);
+    else if (policy == "contiguous")
         m_alloc_combo->setCurrentIndex(1);
     else if (policy == "cling")
         m_alloc_combo->setCurrentIndex(2);
-    else if (policy == "normal")
-        m_alloc_combo->setCurrentIndex(3);
     else if (policy == "anywhere")
+        m_alloc_combo->setCurrentIndex(3);
+    else {
+        m_alloc_combo->addItem(i18n("Inherited (%1)", vg_policy));
         m_alloc_combo->setCurrentIndex(4);
-    else
-        m_alloc_combo->setCurrentIndex(0);
+    }
 
     QLabel *const label = new QLabel(i18n("Allocation policy: "));
     layout->addStretch();
@@ -452,7 +464,51 @@ QWidget* PvGroupBox::buildPolicyBox(QString const policy)
     layout->addWidget(m_alloc_combo);
     layout->addStretch();
 
-    connect(m_alloc_combo, SIGNAL(currentIndexChanged(int)), this, SLOT(calculateSpace()));
+    connect(m_alloc_combo, SIGNAL(currentIndexChanged(int)), this, SLOT(setChecksToPolicy()));
 
     return widget;
+}
+
+void PvGroupBox::setChecksToPolicy()
+{
+    KLocale::BinaryUnitDialect dialect;
+    KLocale *const locale = KGlobal::locale();
+
+    if (m_use_si_units)
+        dialect = KLocale::MetricBinaryDialect;
+    else
+        dialect = KLocale::IECBinaryDialect;
+
+    QString policy("normal");
+
+    if (m_alloc_combo->currentIndex() == 4)
+        policy = m_pvs[0]->getVg()->getPolicy();
+    else if (m_alloc_combo->currentIndex() == 0)
+        policy = QString("normal");
+    else if (m_alloc_combo->currentIndex() == 1)
+        policy = QString("contiguous");
+    else if (m_alloc_combo->currentIndex() == 2)
+        policy = QString("cling");
+    else if (m_alloc_combo->currentIndex() == 3)
+        policy = QString("anywhere");
+
+
+    qDebug() << "volumes:" << m_pvs.size();
+    qDebug() << "checks: " << m_pv_checks.size();
+    qDebug() << "normal: " << m_normal.size();
+    qDebug() << "contig: " << m_contiguous.size();
+
+
+    for (int x = 0; x < m_pv_checks.size(); x++) {
+        if (policy == "contiguous") {
+            m_pv_checks[x]->setText(m_pvs[x]->getName() + "  " + locale->formatByteSize(m_contiguous[x], 1, dialect));
+            m_pv_checks[x]->setData(QVariant(m_contiguous[x]));
+            
+        } else {
+            m_pv_checks[x]->setText(m_pvs[x]->getName() + "  " + locale->formatByteSize(m_normal[x], 1, dialect));
+            m_pv_checks[x]->setData(QVariant(m_normal[x]));
+        }
+    }
+
+    calculateSpace();
 }
