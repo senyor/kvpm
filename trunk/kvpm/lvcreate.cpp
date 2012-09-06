@@ -938,8 +938,9 @@ long long LVCreateDialog::getLargestVolume()
             log_count = 1;
         else
             log_count = 0;
-    } else
+    } else {
         log_count = 0;
+    }
 
     qSort(available_pv_bytes);
 
@@ -948,7 +949,7 @@ long long LVCreateDialog::getLargestVolume()
         policy = m_vg->getPolicy();
 
     if (!m_extend) {
-        if (policy == "contiguous") {
+        if (policy == QString("contiguous")) {
             while (available_pv_bytes.size() > total_stripes + log_count)  
                 available_pv_bytes.removeFirst();
         } 
@@ -976,8 +977,40 @@ long long LVCreateDialog::getLargestVolume()
             largest = (largest - extent_size) * stripe_count; // RAID 4/5/6 use one per stripe
         else 
             largest = largest * stripe_count;
-    } else
-        largest = (largest * stripe_count) + m_lv->getSize();
+    } else {
+        if (m_lv->isMirror() && policy == QString("contiguous")) {
+
+            const QList<LogVol *> legs = m_lv->getChildren(); // not grandchildren because we can't extend while under conversion
+            QList<long long> leg_max;
+
+            for (int x = legs.size() - 1; x >= 0; x--) {
+                if (legs[x]->isMirrorLeg()) {
+
+                    const QStringList pv_names = legs[x]->getPvNames(legs[x]->getSegmentCount() - 1);
+                    QList<long long> stripe_max;
+                  
+                    for (int y = pv_names.size() - 1; y >= 0; y--)
+                        stripe_max.append(m_vg->getPvByName(pv_names[y])->getContiguous(m_lv));
+
+                    qSort(stripe_max);
+
+                    if (stripe_max.size() < stripe_count)
+                        return m_lv->getSize();
+
+                    while (stripe_max.size() > stripe_count)
+                        stripe_max.removeFirst();
+
+                    leg_max.append(stripe_max[0] * stripe_count);
+                }
+            }
+
+            qSort(leg_max);
+            largest = leg_max[0] +m_lv->getSize();
+
+        } else {
+            largest = (largest * stripe_count) + m_lv->getSize();
+        }
+    }
 
     if (largest < 0)
         largest = 0;
