@@ -108,12 +108,11 @@ void LVCreateDialog::buildDialog()
     layout->addSpacing(5);
     layout->addWidget(m_tab_widget);
     main_widget->setLayout(layout);
-    
-    setMaxSize();
 
     enableTypeOptions(m_type_combo->currentIndex());
     enableStripeCombo(m_stripe_count_spin->value());
     makeConnections();
+    setMaxSize();
     resetOkButton();
 
     setMainWidget(main_widget);
