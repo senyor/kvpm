@@ -16,6 +16,7 @@
 
 #include "fsextend.h"
 #include "logvol.h"
+#include "misc.h"
 #include "mountentry.h"
 #include "physvol.h"
 #include "pvgroupbox.h"
@@ -315,7 +316,7 @@ QWidget* LVCreateDialog::createPhysicalTab()
             contiguous.append(physical_volumes[x]->getContiguous(m_lv));
         }
 
-        m_pv_box = new PvGroupBox(physical_volumes, normal, contiguous, QString("inherited"));
+        m_pv_box = new PvGroupBox(physical_volumes, normal, contiguous, INHERITED);
     }
 
     layout->addWidget(m_pv_box);
@@ -944,12 +945,12 @@ long long LVCreateDialog::getLargestVolume()
 
     qSort(available_pv_bytes);
 
-    QString policy = m_pv_box->getAllocationPolicy();
-    if (policy == QString("inherited"))
+    AllocationPolicy policy = m_pv_box->getPolicy();
+    if (policy == INHERITED)
         policy = m_vg->getPolicy();
 
     if (!m_extend) {
-        if (policy == QString("contiguous")) {
+        if (policy == CONTIGUOUS) {
             while (available_pv_bytes.size() > total_stripes + log_count)  
                 available_pv_bytes.removeFirst();
         } 
@@ -978,7 +979,7 @@ long long LVCreateDialog::getLargestVolume()
         else 
             largest = largest * stripe_count;
     } else {
-        if (m_lv->isMirror() && policy == QString("contiguous")) {
+        if (m_lv->isMirror() && policy == CONTIGUOUS) {
 
             const QList<LogVol *> legs = m_lv->getChildren(); // not grandchildren because we can't extend while under conversion
             QList<long long> leg_max;
@@ -1117,7 +1118,7 @@ QStringList LVCreateDialog::argumentsLV()
             args << "n";
     }
 
-    const QString policy = m_pv_box->getAllocationPolicy();
+    const QString policy = policyToString(m_pv_box->getPolicy());
 
     if (policy != "inherited")          // "inherited" is what we get if we don't pass "--alloc" at all
         args << "--alloc" << policy;    // passing "--alloc" "inherited" won't work
@@ -1304,12 +1305,12 @@ void LVCreateDialog::commitChanges()
 int LVCreateDialog::getMaxStripes()
 {
     int stripes = m_pv_box->getAllNames().size();
-    QString policy = m_pv_box->getAllocationPolicy();
+    AllocationPolicy policy = m_pv_box->getPolicy();
 
-    if (policy == QString("inherited"))
+    if (policy == INHERITED)
         policy = m_vg->getPolicy();
 
-    if (m_extend && (policy == QString("contiguous"))){
+    if (m_extend && (policy == CONTIGUOUS)){
         if (m_lv->isLvmMirror()){
 
             QList<LogVol *> legs = m_lv->getChildren();

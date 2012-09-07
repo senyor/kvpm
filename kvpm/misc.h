@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -20,6 +20,18 @@
 #include <QRadioButton>
 #include <QVariant>
 
+
+typedef enum {
+    NO_POLICY  = 0,
+    NORMAL     = 1,
+    CONTIGUOUS = 2,
+    CLING      = 3,
+    ANYWHERE   = 4,
+    INHERITED  = 5
+} AllocationPolicy;
+
+
+QString policyToString(AllocationPolicy policy);
 QStringList splitUuid(QString const uuid);
 bool isBusy(const QString device);
 

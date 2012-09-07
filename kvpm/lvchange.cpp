@@ -148,21 +148,21 @@ QWidget *LVChangeDialog::buildGeneralTab()
     m_cling_button      = new QRadioButton(i18n("Cling"));
     m_inherit_button    = new QRadioButton(i18nc("Inherited from the parent group", "Inherited"));
 
-    QString policy = m_lv->getPolicy();
+    AllocationPolicy policy = m_lv->getPolicy();
 
-    if (policy == "Contiguous") {
+    if (policy == CONTIGUOUS) {
         m_contiguous_button->setEnabled(false);
         m_contiguous_button->setText("Contiguous (current)");
         m_normal_button->setChecked(true);
-    } else if (policy == "Inherited") {
+    } else if (policy == INHERITED) {
         m_inherit_button->setEnabled(false);
         m_inherit_button->setText("Inherited (current)");
         m_normal_button->setChecked(true);
-    } else if (policy == "Anywhere") {
+    } else if (policy == ANYWHERE) {
         m_anywhere_button->setEnabled(false);
         m_anywhere_button->setText("Anywhere (current)");
         m_normal_button->setChecked(true);
-    } else if (policy == "Cling") {
+    } else if (policy == CLING) {
         m_cling_button->setEnabled(false);
         m_cling_button->setText("Cling (current)");
         m_normal_button->setChecked(true);
