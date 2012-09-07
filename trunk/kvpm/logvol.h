@@ -19,6 +19,8 @@
 
 #include <QStringList>
 
+#include "misc.h"
+
 class QWidget;
 
 class MountEntry;
@@ -51,10 +53,10 @@ class LogVol
 
     QString m_log;           // The mirror log, if this is a mirror
     QString m_type;          // the type of volume
-    QString m_policy;        // the allocation policy
     QString m_state;         // the lv state
+    AllocationPolicy m_policy;
 
-    QString m_uuid;
+    QString     m_uuid;
     QStringList m_tags;
     QString     m_fstab_mount_point;
     QStringList m_mount_points;  // empty if not mounted
@@ -124,7 +126,7 @@ public:
     QString getFilesystemLabel();
     QString getFilesystemUuid();
     QString getMapperPath();
-    QString getPolicy();
+    AllocationPolicy getPolicy();
     QString getState();
     QString getType();
     int getRaidType();

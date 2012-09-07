@@ -94,13 +94,13 @@ void VolGroup::rescan(lvm_t lvm)
             m_resizable = false;
 
         if (vg_attr.at(4) == 'c')
-            m_allocation_policy = "contiguous";
+            m_policy = CONTIGUOUS;
         else if (vg_attr.at(4) == 'l')
-            m_allocation_policy = "cling";
-        else if (vg_attr.at(4) == 'n')
-            m_allocation_policy = "normal";
+            m_policy = CLING;
         else if (vg_attr.at(4) == 'a')
-            m_allocation_policy = "anywhere";
+            m_policy = ANYWHERE;
+        else
+            m_policy = NORMAL;
 
         processPhysicalVolumes(lvm_vg);
         processLogicalVolumes(lvm_vg);
@@ -317,9 +317,9 @@ QString VolGroup::getUuid()
     return m_uuid;
 }
 
-QString VolGroup::getPolicy()
+AllocationPolicy VolGroup::getPolicy()
 {
-    return m_allocation_policy;
+    return m_policy;
 }
 
 QString VolGroup::getFormat()

@@ -242,35 +242,32 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)
     case 'C':
         m_alloc_locked = true;
     case 'c':
-        m_policy = "contiguous";
+        m_policy = CONTIGUOUS;
         break;
     case 'L':
         m_alloc_locked = true;
     case 'l':
-        m_policy = "cling";
+        m_policy = CLING;
         break;
     case 'N':
         m_alloc_locked = true;
     case 'n':
-        m_policy = "normal";
+        m_policy = NORMAL;
         break;
     case 'A':
         m_alloc_locked = true;
     case 'a':
-        m_policy = "anywhere";
+        m_policy = ANYWHERE;
         break;
     case 'I':
         m_alloc_locked = true;
     case 'i':
-        m_policy = "inherited";
+        m_policy = INHERITED;
         break;
     default:
-        m_policy = "unknown";
+        m_policy = NORMAL;
         break;
     }
-
-    if (m_alloc_locked)
-        m_policy.append(" (locked)");
 
     switch (flags[3]) {
     case 'm':
@@ -997,7 +994,7 @@ bool LogVol::isThin()
     return m_thin;
 }
 
-QString LogVol::getPolicy()
+AllocationPolicy LogVol::getPolicy()
 {
     return m_policy;
 }

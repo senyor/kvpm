@@ -217,6 +217,13 @@ QFrame *LVProperties::generalFrame(int segment)
     else
         dialect = KLocale::IECBinaryDialect;
 
+    QString policy = policyToString(m_lv->getPolicy());
+    if (m_lv->isLocked()) {
+        policy.append(" (");
+        policy.append(i18n("locked"));
+        policy.append(")");
+    }
+
     if ((segment >= 0) && (segment_count > 1)) {
         extents = m_lv->getSegmentExtents(segment);
         stripes = m_lv->getSegmentStripes(segment);
@@ -281,7 +288,7 @@ QFrame *LVProperties::generalFrame(int segment)
                 else
                     layout->addWidget(new QLabel(i18n("Access: r/o")));
                 
-                layout->addWidget(new QLabel(i18n("Allocation policy: %1", m_lv->getPolicy())));
+                layout->addWidget(new QLabel(i18n("Policy: %1", policy)));
             }
         }
     } else {
@@ -297,7 +304,7 @@ QFrame *LVProperties::generalFrame(int segment)
             else
                 layout->addWidget(new QLabel(i18n("Access: r/o")));
 
-            layout->addWidget(new QLabel(i18n("Allocation policy: %1", m_lv->getPolicy())));
+            layout->addWidget(new QLabel(i18n("Policy: %1", policy)));
         }
     }
 

@@ -20,6 +20,8 @@
 
 #include <QStringList>
 
+#include "misc.h"
+
 class QWidget;
 
 class LogVol;
@@ -42,8 +44,8 @@ class VolGroup
                                       // may not be allocateable
     QString m_vg_name;                // this volume group name
     QString m_uuid;
-    QString m_allocation_policy;
-    QString m_lvm_format;                // lvm1 or lvm2
+    QString m_lvm_format;             // lvm1 or lvm2
+    AllocationPolicy m_policy;
     QList<LogVol *>  m_member_lvs;    // lvs that belong to this group
     QList<PhysVol *> m_member_pvs;    // pvs that belong to this group
     QStringList m_lv_names_all;       // names of all lvs and sub lvs in group, including metadata
@@ -86,8 +88,8 @@ public:
     int getMdaCount();
     QString getName();
     QString getUuid();
-    QString getPolicy();
     QString getFormat();
+    AllocationPolicy getPolicy();
     QStringList getLvNames();
     bool isWritable();
     bool isResizable();

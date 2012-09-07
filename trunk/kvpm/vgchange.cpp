@@ -67,12 +67,12 @@ VGChangeDialog::VGChangeDialog(VolGroup *const volumeGroup, QWidget *parent)
     m_contiguous = new QRadioButton(i18n("Contiguous"));
     m_anywhere   = new QRadioButton(i18n("Anwhere"));
     m_cling      = new QRadioButton(i18n("Cling"));
-    QString policy = m_vg->getPolicy();
-    if (policy == "contiguous")
+    AllocationPolicy const policy = m_vg->getPolicy();
+    if (policy == CONTIGUOUS)
         m_contiguous->setChecked(true);
-    else if (policy == "anywhere")
+    else if (policy == ANYWHERE)
         m_anywhere->setChecked(true);
-    else if (policy == "cling")
+    else if (policy == CLING)
         m_cling->setChecked(true);
     else
         m_normal->setChecked(true);
@@ -312,20 +312,20 @@ void VGChangeDialog::commitChanges()
 
 QStringList VGChangeDialog::arguments()
 {
-    QString new_policy;
+    AllocationPolicy new_policy;
     QStringList args = QStringList() << "vgchange";
 
     if (m_contiguous->isChecked())
-        new_policy = "contiguous";
+        new_policy = CONTIGUOUS;
     else if (m_anywhere->isChecked())
-        new_policy = "anywhere";
+        new_policy = ANYWHERE;
     else if (m_cling->isChecked())
-        new_policy = "cling";
+        new_policy = CLING;
     else
-        new_policy = "normal";
+        new_policy = NORMAL;
 
     if (m_vg->getPolicy() != new_policy)
-        args << "--alloc" << new_policy;
+        args << "--alloc" << policyToString(new_policy);
 
     if (m_available_box->isChecked()) {
         if (m_available_yes->isChecked())

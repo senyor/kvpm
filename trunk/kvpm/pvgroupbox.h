@@ -28,8 +28,8 @@
 #include <QStringList>
 #include <QVariant>
 
+#include "misc.h"
 
-class NoMungeCheck;
 class PhysVol;
 class StorageDevice;
 class StoragePartition;
@@ -52,15 +52,15 @@ class PvGroupBox: public QGroupBox
     QHBoxLayout *getButtons();
     KComboBox *m_alloc_combo;
 
-    void addLabelsAndButtons(QGridLayout *const layout, const int pvCount, QString const policy);
-    QWidget *buildPolicyBox(QString const policy);
+    void addLabelsAndButtons(QGridLayout *const layout, const int pvCount, AllocationPolicy const policy);
+    QWidget *buildPolicyBox(AllocationPolicy const policy);
 
 public:
     // Note: policy needs to be passed "inherited" here for new logical volumes
     explicit PvGroupBox(QList<PhysVol *> volumes, 
                         QList<long long> normal = QList<long long>(), 
                         QList<long long> contiguous = QList<long long>(), 
-                        QString const policy = QString("NA"), 
+                        AllocationPolicy const policy = NO_POLICY, 
                         bool const target = false, 
                         QWidget *parent = NULL);
 
@@ -75,7 +75,7 @@ public:
     QList<long long> getRemainingSpaceList();  // ditto
     void setExtentSize(uint64_t extentSize);
     void disableOrigin(PhysVol *originVolume); // disable origin to prevent move from and to same pv
-    QString getAllocationPolicy();
+    AllocationPolicy getPolicy();
 
 signals:
     void stateChanged();
