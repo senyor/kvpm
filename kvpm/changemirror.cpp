@@ -347,7 +347,7 @@ QStringList ChangeMirrorDialog::arguments()
     else
         args << "--mirrors" << QString("+0");
 
-    if (m_change_log || (!m_lv->isMirror() && m_type_combo->currentIndex() == 1)) {
+    if (m_change_log || (!m_lv->isMirror() && m_type_combo->currentIndex() == 0)) {
         if (m_core_log_button->isChecked())
             args << "--mirrorlog" << "core";
         else if (m_mirrored_log_button->isChecked())
