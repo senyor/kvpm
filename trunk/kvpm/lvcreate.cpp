@@ -751,7 +751,8 @@ void LVCreateDialog::enableTypeOptions(int index)
         m_log_combo->setEnabled(false);
         m_log_combo->setCurrentIndex(1);
         m_stripe_count_spin->setRange(1, getMaxStripes());
-        m_stripe_count_spin->setValue(1);
+        if(!m_extend)
+            m_stripe_count_spin->setValue(1);
         m_stripe_count_spin->setSuffix(i18n(""));
         m_stripe_count_spin->setSpecialValueText(i18n("none"));
         m_stripe_count_spin->setEnabled(true);
