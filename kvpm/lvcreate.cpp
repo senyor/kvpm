@@ -1005,7 +1005,25 @@ long long LVCreateDialog::getLargestVolume()
             }
 
             qSort(leg_max);
-            largest = leg_max[0] +m_lv->getSize();
+            largest = leg_max[0] + m_lv->getSize();
+
+        } else if (policy == CONTIGUOUS) {
+
+            const QStringList pv_names = m_lv->getPvNames(m_lv->getSegmentCount() - 1);
+            QList<long long> stripe_max;
+            
+            for (int y = pv_names.size() - 1; y >= 0; y--)
+                stripe_max.append(m_vg->getPvByName(pv_names[y])->getContiguous(m_lv));
+            
+            qSort(stripe_max);
+            
+            if (stripe_max.size() < stripe_count)
+                return m_lv->getSize();
+            
+            while (stripe_max.size() > stripe_count)
+                stripe_max.removeFirst();
+
+            largest = (stripe_max[0] * stripe_count) + m_lv->getSize();
 
         } else {
             largest = (largest * stripe_count) + m_lv->getSize();
@@ -1066,6 +1084,8 @@ QStringList LVCreateDialog::argumentsLV()
     if (stripes > 1) {
         args << "--stripes" << QString("%1").arg(stripes);
         args << "--stripesize" << QString("%1").arg(stripe_size.toLongLong());
+    } else if (m_extend && (type == 0 || type == 1)) {
+        args << "--stripes" << QString("%1").arg(1);
     }
 
     if (!m_extend) {
