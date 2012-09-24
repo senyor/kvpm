@@ -74,8 +74,12 @@ VGReduceDialog::VGReduceDialog(VolGroup *const volumeGroup, QWidget *parent) : K
         }
         
         label->setWordWrap(true);
-        layout->addWidget(label);
-        
+        QHBoxLayout *const label_layout = new QHBoxLayout;
+        QWidget *const label_widget = new QWidget;
+        label_layout->addWidget(label);
+        label_widget->setLayout(label_layout);
+
+        layout->addWidget(label_widget);
         m_pv_checkbox = new PvGroupBox(member_pvs);
 
         layout->addWidget(m_pv_checkbox);
