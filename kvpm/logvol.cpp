@@ -588,21 +588,17 @@ void LogVol::processSegments(lv_t lvmLV, const QByteArray flags)
         dm_list_iterate_items(lvseg_list, lvseg_dm_list) {
             lvm_lvseg = lvseg_list->lvseg;
 
-            if (flags[6] == 'm' && !(QString(flags[0]).contains(QRegExp("[rRiIl]"))))
-                m_lvmmirror = true;
-            else if (flags[6] == 'm' && (QString(flags[0]).contains(QRegExp("[rR]"))))
-                m_raidmirror = true;
-           
             segment = new Segment();
+            value = lvm_lvseg_get_property(lvm_lvseg, "segtype");
+            if (value.is_valid)
+                segment->type = value.value.string;
 
-            if (m_lvmmirror)
+            if (segment->type == QString("mirror")) {
+                m_lvmmirror = true;
                 segment->type = QString("lvm mirror");
-            else if (m_raidmirror)
+            } else if (segment->type == QString("raid1")) {
+                m_raidmirror = true;
                 segment->type = QString("raid1 mirror");
-            else {
-                value = lvm_lvseg_get_property(lvm_lvseg, "segtype");
-                if (value.is_valid)
-                    segment->type = value.value.string;
             }
 
             const bool pvmove = (flags[0] == 'p');  // use m_pvmove once processSegments get moved to after the main section
@@ -891,6 +887,13 @@ bool LogVol::isActive()
 
 bool LogVol::isMirror()
 {
+    qDebug();
+    qDebug() << getName();
+    qDebug() << "LVM  -->" << m_lvmmirror;
+
+    qDebug() << "RAID -->" << m_raidmirror;
+    qDebug();
+
     return (m_lvmmirror || m_raidmirror); 
 }
 
