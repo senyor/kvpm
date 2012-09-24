@@ -887,13 +887,6 @@ bool LogVol::isActive()
 
 bool LogVol::isMirror()
 {
-    qDebug();
-    qDebug() << getName();
-    qDebug() << "LVM  -->" << m_lvmmirror;
-
-    qDebug() << "RAID -->" << m_raidmirror;
-    qDebug();
-
     return (m_lvmmirror || m_raidmirror); 
 }
 
