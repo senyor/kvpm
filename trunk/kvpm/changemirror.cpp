@@ -58,7 +58,9 @@ ChangeMirrorDialog::ChangeMirrorDialog(LogVol *logicalVolume, bool changeLog, QW
 
     QLabel  *const lv_name_label = new QLabel();
 
-    if(is_lvm)
+    if(m_change_log)
+        lv_name_label->setText(i18n("<b>Change mirror log: %1</b>", m_lv->getName()));
+    else if(is_lvm)
         lv_name_label->setText(i18n("<b>Change LVM mirror: %1</b>", m_lv->getName()));
     else if(is_lvm)
         lv_name_label->setText(i18n("<b>Change RAID 1 mirror: %1</b>", m_lv->getName()));
@@ -75,13 +77,30 @@ ChangeMirrorDialog::ChangeMirrorDialog(LogVol *logicalVolume, bool changeLog, QW
     setMainWidget(main_widget);
 
     m_tab_widget->addTab(buildGeneralTab(is_raid, is_lvm),  i18nc("Common user options", "General"));
-    m_tab_widget->addTab(buildPhysicalTab(is_raid), i18n("Physical layout"));
+
+    if (!(m_change_log && (m_lv->getLogCount() == 2))) {
+
+        m_tab_widget->addTab(buildPhysicalTab(is_raid), i18n("Physical layout"));
+
+        connect(m_pv_box, SIGNAL(stateChanged()),
+                this, SLOT(resetOkButton()));
+        
+        connect(m_add_mirrors_spin, SIGNAL(valueChanged(int)),
+                this, SLOT(resetOkButton()));
+        
+        connect(m_stripe_spin, SIGNAL(valueChanged(int)),
+                this, SLOT(resetOkButton()));
+        
+        connect(m_stripe_box, SIGNAL(toggled(bool)),
+                this, SLOT(resetOkButton()));
+    } else
+        m_pv_box = NULL;
 
     setLogRadioButtons();
 
     connect(m_disk_log_button, SIGNAL(toggled(bool)),
             this, SLOT(resetOkButton()));
-    
+
     connect(m_core_log_button, SIGNAL(toggled(bool)),
             this, SLOT(resetOkButton()));
     
@@ -90,18 +109,6 @@ ChangeMirrorDialog::ChangeMirrorDialog(LogVol *logicalVolume, bool changeLog, QW
 
     connect(this, SIGNAL(okClicked()),
             this, SLOT(commitChanges()));
-
-    connect(m_pv_box, SIGNAL(stateChanged()),
-            this, SLOT(resetOkButton()));
-
-    connect(m_add_mirrors_spin, SIGNAL(valueChanged(int)),
-            this, SLOT(resetOkButton()));
-
-    connect(m_stripe_spin, SIGNAL(valueChanged(int)),
-            this, SLOT(resetOkButton()));
-    
-    connect(m_stripe_box, SIGNAL(toggled(bool)),
-            this, SLOT(resetOkButton()));
 }
 
 QWidget *ChangeMirrorDialog::buildGeneralTab(const bool isRaidMirror, const bool isLvmMirror)
@@ -192,10 +199,57 @@ QWidget *ChangeMirrorDialog::buildGeneralTab(const bool isRaidMirror, const bool
     else
         m_log_box->hide();
 
+    if (m_change_log && (m_lv->getLogCount() == 2)) {
+        m_log_widget = buildLogWidget();
+        center_layout->addWidget(m_log_widget);
+
+        connect(m_disk_log_button, SIGNAL(toggled(bool)),
+                this, SLOT(enableLogWidget()));
+        
+        connect(m_core_log_button, SIGNAL(toggled(bool)),
+                this, SLOT(enableLogWidget()));
+        
+        connect(m_mirrored_log_button, SIGNAL(toggled(bool)),
+                this, SLOT(enableLogWidget()));
+    } else
+        m_log_widget = NULL;
+
     center_layout->addStretch();
     general->setLayout(general_layout);
 
     return general;
+}
+
+QWidget *ChangeMirrorDialog::buildLogWidget()
+{
+    QGroupBox *const log = new QGroupBox("Log to remove");
+    QVBoxLayout *const layout = new QVBoxLayout();
+
+    QStringList names;
+    QList<LogVol *> const logs = m_lv->getAllChildrenFlat();
+    for (int x = logs.size() - 1; x >= 0; x--) {
+        if (logs[x]->isLvmMirrorLog() && !logs[x]->isMirror())
+            names.append(logs[x]->getPvNamesAll());
+    }
+
+    if (names.size() > 0)
+        m_log_one = new NoMungeRadioButton(names[0]);
+    else
+        m_log_one = new NoMungeRadioButton("");
+
+    if (names.size() > 1)
+        m_log_two = new NoMungeRadioButton(names[1]);
+    else
+        m_log_two = new NoMungeRadioButton("");
+
+    m_log_one->setChecked(true);
+
+    layout->addWidget(m_log_one);
+    layout->addWidget(m_log_two);
+    log->setEnabled(false);
+    log->setLayout(layout);
+
+    return log;
 }
 
 QWidget *ChangeMirrorDialog::buildPhysicalTab(const bool isRaidMirror)
@@ -342,11 +396,6 @@ QStringList ChangeMirrorDialog::arguments()
             args << "--type" << "mirror";
     }
 
-    if (!m_change_log)
-        args << "--mirrors" << QString("+%1").arg(m_add_mirrors_spin->value());
-    else
-        args << "--mirrors" << QString("+0");
-
     if (m_change_log || (!m_lv->isMirror() && m_type_combo->currentIndex() == 0)) {
         if (m_core_log_button->isChecked())
             args << "--mirrorlog" << "core";
@@ -357,21 +406,51 @@ QStringList ChangeMirrorDialog::arguments()
     }
 
     if (!m_change_log) {
+        args << "--mirrors" << QString("+%1").arg(m_add_mirrors_spin->value());
+
         if (m_stripe_spin->value() > 1) {
             args << "--stripes" <<  QString("%1").arg(m_stripe_spin->value());
             args << "--stripesize" << (m_stripe_size_combo->currentText()).remove("KiB").trimmed();
         }
+    } else
+        args << "--mirrors" << QString("+0");
+
+    args << "--background" << m_lv->getFullName();
+
+    if (m_log_widget != NULL) {
+        if (m_log_widget->isEnabled()) {
+            if (m_log_one->isChecked())
+                args << m_log_one->getUnmungedText();
+            else
+                args << m_log_two->getUnmungedText();
+        }
+    } else {
+        const AllocationPolicy policy = m_pv_box->getPolicy();
+
+        if (policy != INHERITED)                          // "inherited" is what we get if we don't pass "--alloc" at all
+            args << "--alloc" << policyToString(policy);  // passing "--alloc" "inherited" won't work                                                           
+         args << m_pv_box->getNames();
     }
 
-    const AllocationPolicy policy = m_pv_box->getPolicy();
-
-    if (policy != INHERITED)                          // "inherited" is what we get if we don't pass "--alloc" at all
-        args << "--alloc" << policyToString(policy);  // passing "--alloc" "inherited" won't work                                                           
-    args << "--background"
-         << m_lv->getFullName()
-         << m_pv_box->getNames();
-
     return args;
+}
+
+    
+int ChangeMirrorDialog::getNewLogCount()
+{
+   const bool is_mirror = m_lv->isMirror();
+   int count;
+
+    if (m_change_log || (!is_mirror && (m_type_combo->currentIndex() == 0))) {
+        if (m_disk_log_button->isChecked())
+            count = 1;
+        else if (m_mirrored_log_button->isChecked())
+            count = 2;
+        else
+            count = 0;
+    }
+
+    return count;
 }
 
 /* Enable or disable the OK button based on having
@@ -381,12 +460,9 @@ QStringList ChangeMirrorDialog::arguments()
 
 void ChangeMirrorDialog::resetOkButton()
 {
-    QList <long long> available_pv_bytes = m_pv_box->getRemainingSpaceList();;
-    QList <long long> stripe_pv_bytes;
     int new_stripe_count = 1;
     int total_stripes = 0;   //  stripes per mirror * added mirrors
-    int new_log_count = m_lv->getLogCount();
-    const bool is_mirror = m_lv->isMirror();
+    const int new_log_count = getNewLogCount();
     const bool is_lvm  = m_lv->isMirror() && !m_lv->isRaid();
 
     if (!m_change_log) {
@@ -399,19 +475,17 @@ void ChangeMirrorDialog::resetOkButton()
             new_stripe_count = m_stripe_spin->value();
 
         total_stripes = m_add_mirrors_spin->value() * new_stripe_count;
+    } else if (m_change_log && (m_lv->getLogCount() == 2)) {
+        if (new_log_count == 2)
+            enableButtonOk(false);
+        else
+            enableButtonOk(true);
+        return;
     }
 
+    QList <long long> stripe_pv_bytes;
     for (int x = 0; x < total_stripes; x++)
         stripe_pv_bytes.append(0);
-
-    if (m_change_log || (!is_mirror && (m_type_combo->currentIndex() == 0))) {
-        if (m_disk_log_button->isChecked())
-            new_log_count = 1;
-        else if (m_mirrored_log_button->isChecked())
-            new_log_count = 2;
-        else
-            new_log_count = 0;
-    }
 
     if (is_lvm) {
         if (m_change_log && (m_lv->getLogCount() == new_log_count)) {
@@ -426,6 +500,7 @@ void ChangeMirrorDialog::resetOkButton()
         return;
     }
 
+    QList <long long> available_pv_bytes = m_pv_box->getRemainingSpaceList();;
     qSort(available_pv_bytes);
 
     AllocationPolicy policy = m_pv_box->getPolicy();
@@ -479,18 +554,12 @@ void ChangeMirrorDialog::enableTypeOptions(int index)
     if (index == 0) {
         m_log_box->setEnabled(true);
         m_stripe_box->setEnabled(true);
-
-        qDebug() << "HERE I ";
-
     }
     else {
         m_log_box->setEnabled(false);
         m_disk_log_button->setChecked(true);
         m_stripe_spin->setValue(1);
         m_stripe_box->setEnabled(false);
-
-        qDebug() << "HERE II";
-
     }
 }
 
@@ -531,4 +600,12 @@ bool ChangeMirrorDialog::validateStripeSpin()
         m_error_stack->setCurrentIndex(1);
         return true;
     }
+}
+
+void ChangeMirrorDialog::enableLogWidget()
+{
+    if (m_disk_log_button->isChecked())
+        m_log_widget->setEnabled(true);
+    else
+        m_log_widget->setEnabled(false);
 }

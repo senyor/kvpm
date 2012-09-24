@@ -34,7 +34,8 @@ class QVBoxLayout;
 class LogVol;
 class PvGroupBox;
 class VolGroup;
-
+class NoMungeCheck;
+class NoMungeRadioButton;
 
 class ChangeMirrorDialog : public KDialog
 {
@@ -47,21 +48,31 @@ class ChangeMirrorDialog : public KDialog
     PvGroupBox *m_pv_box;
     QGroupBox  *m_stripe_box;
     QGroupBox  *m_log_box;
+    QWidget    *m_log_widget;
     KComboBox  *m_stripe_size_combo;
     KComboBox  *m_type_combo;
 
-    bool m_change_log;    // true == we just changing the logging of an existing mirror
+    QList<NoMungeCheck *> m_mirror_log_checks;
+
+    bool m_change_log;    // true if we just changing the logging of an existing mirror
     LogVol *m_lv;         // The volume we are adding a mirror leg to.
 
     QRadioButton *m_core_log_button,
                  *m_mirrored_log_button,
                  *m_disk_log_button;
 
+    // these are the pv names of the two mirror logs if we are changing the log 
+    // count on a mirrored log 
+    NoMungeRadioButton *m_log_one; 
+    NoMungeRadioButton *m_log_two;
+
     QWidget *buildGeneralTab(const bool isRaidMirror, const bool isLvmMirror);
     QWidget *buildPhysicalTab(const bool isRaidMirror);
+    QWidget *buildLogWidget();
     QStringList getPvsInUse();
     bool validateStripeSpin();
     void setLogRadioButtons();
+    int getNewLogCount();
 
 public:
     explicit ChangeMirrorDialog(LogVol *logicalVolume, bool changeLog, QWidget *parent = 0);
@@ -71,6 +82,7 @@ private slots:
     void resetOkButton();
     void commitChanges();
     void enableTypeOptions(int index);
+    void enableLogWidget();
 };
 
 #endif
