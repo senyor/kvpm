@@ -208,16 +208,10 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)
         m_snap = true;
         break;
     case 'S':
-        if (flags[4] != 'I') {         // When 'S' stops getting used for Invalid and only merging - remove this
-            m_type = "snapshot";
-            additional_state = "merging";
-            m_snap = true;
-            m_merging = true;
-        } else {
-            m_type = "snapshot";
-            m_snap = true;
-            m_merging = false;
-        }
+        m_type = "snapshot";
+        additional_state = "merging";
+        m_snap = true;
+        m_merging = true;
         break;
     case 'v':
         m_type = "virtual";
