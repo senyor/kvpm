@@ -1,5 +1,8 @@
+version 0.9.3
+Started adding support for thin pools and volumes.
+
 version 0.9.2
-Started adding support for raid.
+Added support for raid1, raid4, raid5 and raid6. 
 Added support for the 'contiguous' policy in all dialogs that have
 a policy option. Normal has always been supported. 
 
