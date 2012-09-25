@@ -474,7 +474,7 @@ KMenu *TopWindow::buildHelpMenu()
     KAboutData *const about_data = new KAboutData(QByteArray("kvpm"),
             QByteArray(""),
             ki18n("kvpm"),
-            QByteArray("0.9.2"),
+            QByteArray("0.9.3"),
             ki18n("Linux volume and partition manager for KDE.  "
                   "This program is still under development, "
                   "bug reports and any comments are welcomed.  "
