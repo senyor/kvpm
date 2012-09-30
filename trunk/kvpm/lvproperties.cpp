@@ -62,9 +62,10 @@ LVProperties::LVProperties(LogVol *const volume, const int segment, QWidget *par
 
     layout->addWidget(generalFrame(segment));
 
-    if (!m_lv->isLvmMirrorLeg()  && !m_lv->isVirtual()      && !m_lv->isRaidImage() &&
-        !m_lv->isPvmove()        && !m_lv->isLvmMirrorLog() && !m_lv->isMetadata() &&
-        !m_lv->isSnapContainer() && ((m_lv->getSegmentCount() == 1) || (segment == -1))) {
+    if (!m_lv->isLvmMirrorLeg()  && !m_lv->isVirtual()      && !m_lv->isRaidImage()    &&
+        !m_lv->isPvmove()        && !m_lv->isLvmMirrorLog() && !m_lv->isMetadata()     &&
+        !m_lv->isSnapContainer() && !m_lv->isThinPool()     && !m_lv->isThinPoolData() &&
+        ((m_lv->getSegmentCount() == 1) || (segment == -1))) {
 
         if (show_mount)
             layout->addWidget(mountPointsFrame());
@@ -73,7 +74,7 @@ LVProperties::LVProperties(LogVol *const volume, const int segment, QWidget *par
 
         if (show_fsuuid || show_fslabel)
             layout->addWidget(fsFrame(show_fsuuid, show_fslabel));
-    } else
+    } else if (!m_lv->isThinPool())
         layout->addWidget(physicalVolumesFrame(segment));
 
     if (show_uuid && !m_lv->isSnapContainer() && ((m_lv->getSegmentCount() == 1) || (segment == -1)))
@@ -224,7 +225,20 @@ QFrame *LVProperties::generalFrame(int segment)
         policy.append(")");
     }
 
-    if ((segment >= 0) && (segment_count > 1)) {
+    if (m_lv->isThinPool() || m_lv->isSnapContainer()) {
+        total_extents = m_lv->getTotalSize() / extent_size;
+        total_size = m_lv->getTotalSize();
+        layout->addWidget(new QLabel(i18n("Total Extents: %1", total_extents)));
+        layout->addWidget(new QLabel(i18n("Total Size: %1", locale->formatByteSize(total_size, 1, dialect))));
+
+        if (m_lv->isWritable())
+            layout->addWidget(new QLabel(i18n("Access: r/w")));
+        else
+            layout->addWidget(new QLabel(i18n("Access: r/o")));
+        
+        layout->addWidget(new QLabel(i18n("Policy: %1", policy)));
+
+    } else if ((segment >= 0) && (segment_count > 1)) {
         extents = m_lv->getSegmentExtents(segment);
         stripes = m_lv->getSegmentStripes(segment);
         stripe_size = m_lv->getSegmentStripeSize(segment);
@@ -251,10 +265,8 @@ QFrame *LVProperties::generalFrame(int segment)
         stripes = m_lv->getSegmentStripes(segment);
         stripe_size = m_lv->getSegmentStripeSize(segment);
 
-        if (!(m_lv->isSnapContainer() || m_lv->isRaid() || m_lv->isLvmMirror())){
+        if (!(m_lv->isSnapContainer() || m_lv->isRaid() || m_lv->isLvmMirror()))
             layout->addWidget(new QLabel(i18n("Extents: %1", extents)));
-        }
-
 
         if ( !(m_lv->isRaidImage() || m_lv->isMetadata()) ) {
             QHBoxLayout *const stripe_layout = new QHBoxLayout();
@@ -264,7 +276,7 @@ QFrame *LVProperties::generalFrame(int segment)
                 layout->addWidget(new QLabel(i18n("Total size: %1", locale->formatByteSize(total_size, 1, dialect))));
                 stripe_layout->addWidget(new QLabel(i18n("Stripes: %1", stripes)));
                 stripe_layout->addWidget(new QLabel(i18n("Stripe size: %1", locale->formatByteSize(stripe_size, 1, dialect))));
-            } else if (!m_lv->isLvmMirror() && !(m_lv->isRaid() && m_lv->getRaidType() == 1)) {
+            } else if (!m_lv->isThinVolume() && !m_lv->isLvmMirror() && !(m_lv->isRaid() && m_lv->getRaidType() == 1)) {
                 
                 if (stripes != 1) {
                     stripe_layout->addWidget(new QLabel(i18n("Stripes: %1", stripes)));
@@ -279,18 +291,16 @@ QFrame *LVProperties::generalFrame(int segment)
 
             layout->addLayout(stripe_layout);
  
-            if (!(m_lv->isLvmMirrorLeg() || m_lv->isLvmMirrorLog())) {
-                
+            if (!(m_lv->isLvmMirrorLeg() || m_lv->isLvmMirrorLog() || m_lv->isThinPoolData()))
                 layout->addWidget(new QLabel(i18n("Filesystem: %1", m_lv->getFilesystem())));
-                
-                if (m_lv->isWritable())
-                    layout->addWidget(new QLabel(i18n("Access: r/w")));
-                else
-                    layout->addWidget(new QLabel(i18n("Access: r/o")));
-                
-                layout->addWidget(new QLabel(i18n("Policy: %1", policy)));
-            }
         }
+
+        if (m_lv->isWritable())
+            layout->addWidget(new QLabel(i18n("Access: r/w")));
+        else
+            layout->addWidget(new QLabel(i18n("Access: r/o")));
+        
+        layout->addWidget(new QLabel(i18n("Policy: %1", policy)));
     } else {
         extents = m_lv->getExtents();
         layout->addWidget(new QLabel(i18n("Extents: %1", extents)));
@@ -325,10 +335,16 @@ QFrame *LVProperties::physicalVolumesFrame(int segment)
     frame->setLineWidth(2);
 
     QLabel *label = new QLabel(i18n("<b>Physical Volumes</b>"));
+    if (m_lv->isThinVolume())
+        label->setText(i18n("<b>Thin Pool</b>"));
     label->setAlignment(Qt::AlignCenter);
     layout->addWidget(label);
 
-    if ((m_lv->isMirror() || m_lv->isSnapContainer() || m_lv->isRaid()) && !m_lv->isPvmove()) {
+    if (m_lv->isThinVolume()) {
+        label = new QLabel(m_lv->getPoolName());
+        label->setToolTip(m_lv->getPoolName());
+        layout->addWidget(label);
+    } else if ((m_lv->isMirror() || m_lv->isSnapContainer() || m_lv->isRaid()) && !m_lv->isPvmove()) {
         pv_list = m_lv->getPvNamesAllFlat();
         for (int pv = 0; pv < pv_list.size(); pv++) {
             label = new QLabel(pv_list[pv]);
