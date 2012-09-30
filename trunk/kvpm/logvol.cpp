@@ -87,6 +87,8 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)
     m_raid_image  = false;
     m_snap        = false;
     m_thin        = false;
+    m_thin_data   = false;
+    m_thin_pool   = false;
     m_pvmove      = false;
     m_valid       = true;
     m_virtual     = false;
@@ -105,6 +107,9 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)
 
     value = lvm_lv_get_property(lvmLV, "mirror_log");
     m_log = QString(value.value.string).trimmed();
+
+    value = lvm_lv_get_property(lvmLV, "pool_lv");
+    m_pool = QString(value.value.string).trimmed();
 
     QList<lv_t> lvm_child_snapshots;
     lvm_child_snapshots.append(getLvmSnapshots(lvmVG));
@@ -213,9 +218,21 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)
         m_snap = true;
         m_merging = true;
         break;
+    case 't':
+        m_type = "thin pool";
+        m_thin_pool = true;
+        break;
+    case 'T':
+        m_type = "thin data";
+        m_thin_data = true;
+        break;
     case 'v':
         m_type = "virtual";
         m_virtual = true;
+        break;
+    case 'V':
+        m_type = "thin volume";
+        m_thin = true;
         break;
     default:
         m_type = "linear";
@@ -526,7 +543,6 @@ QStringList LogVol::removePvNames()
             if (pv->getName() == names[y])
                 names.removeAt(y);
         }
-
     }
 
     return names;
@@ -545,6 +561,9 @@ QStringList LogVol::getMetadataNames()
         lv = itr.next();
         if (lv.contains("_rmeta_")){
             if (m_lv_name == lv.left(lv.indexOf("_rmeta_")))
+                children << lv;
+        } else if (lv.contains("_tmeta")){
+            if (m_lv_name == lv.left(lv.indexOf("_tmeta")))
                 children << lv;
         }
     }
@@ -769,6 +788,11 @@ QString LogVol::getFullName()
     return m_lv_full_name;
 }
 
+QString LogVol::getPoolName()
+{
+    return m_pool;
+}
+
 QString LogVol::getMapperPath()
 {
     return m_lv_mapper_path;
@@ -979,9 +1003,19 @@ bool LogVol::isValid()
     return m_valid;
 }
 
-bool LogVol::isThin()
+bool LogVol::isThinVolume()
 {
     return m_thin;
+}
+
+bool LogVol::isThinPoolData()
+{
+    return m_thin_data;
+}
+
+bool LogVol::isThinPool()
+{
+    return m_thin_pool;
 }
 
 AllocationPolicy LogVol::getPolicy()
