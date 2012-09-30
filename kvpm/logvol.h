@@ -50,6 +50,7 @@ class LogVol
     QString m_lv_fs_label;   // Filesystem label or name
     QString m_lv_fs_uuid;    // Filesystem uuid
     QString m_origin;        // the origin if this is a snapshot
+    QString m_pool;          // the name of the thin pool if this is a thin volume, otherwise empty
 
     QString m_log;           // The mirror log, if this is a mirror
     QString m_type;          // the type of volume
@@ -99,7 +100,9 @@ class LogVol
     bool m_writable;
     bool m_valid;                // is a valid snap
     bool m_merging;              // is snap or snap origin that is merging
-    bool m_thin;                 // is thin
+    bool m_thin;                 // is thin volume
+    bool m_thin_data;            // is thin pool data
+    bool m_thin_pool;
 
     void countLegsAndLogs();
     void processSegments(lv_t lvmLV, const QByteArray flags);
@@ -121,6 +124,7 @@ public:
     LogVol *getParent();                   // NULL if this is a "top level" lv
     VolGroup* getVg();
     QString getName();
+    QString getPoolName();      // Name of this volume's thin pool if it is a thin volume, empty otherwise
     QString getFullName();
     QString getFilesystem();
     QString getFilesystemLabel();
@@ -178,7 +182,9 @@ public:
     bool isRaidImage();
     bool isSnap();
     bool isSnapContainer();
-    bool isThin();
+    bool isThinVolume();
+    bool isThinPool();
+    bool isThinPoolData();
     bool isUnderConversion();
     bool isValid();
     bool isVirtual();
