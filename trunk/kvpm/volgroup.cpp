@@ -446,6 +446,8 @@ void VolGroup::processLogicalVolumes(vg_t lvmVG)
                 case 'M':
                 case 'm':
                 case 'r':
+                case 't':
+                case 'V':
                     lvm_lvs_all_top.append(lv_list->lv);
                     break;
                 case 'e':
