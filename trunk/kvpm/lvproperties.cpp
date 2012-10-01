@@ -284,7 +284,7 @@ QFrame *LVProperties::generalFrame(int segment)
                 } else
                     stripe_layout->addWidget(new QLabel(i18n("Stripes: none")));
                 
-            } else if (!m_lv->isLvmMirrorLog() || (m_lv->isLvmMirrorLog() && m_lv->isLvmMirror())) {
+            } else if (!m_lv->isThinVolume() && (!m_lv->isLvmMirrorLog() || (m_lv->isLvmMirrorLog() && m_lv->isLvmMirror()))) {
                 layout->addWidget(new QLabel(i18n("Total extents: %1", total_extents)));
                 layout->addWidget(new QLabel(i18n("Total size: %1", locale->formatByteSize(total_size, 1, dialect))));
             }
