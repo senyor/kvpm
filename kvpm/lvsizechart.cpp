@@ -86,8 +86,8 @@ void LVSizeChart::populateChart()
     for (int x = 0; x < lv_count; x++) {
         m_lv = logical_volumes[x];
 
-        if (!m_lv->isLvmMirrorLeg()  &&
-            !m_lv->isLvmMirrorLog()  &&
+        if (!m_lv->isLvmMirrorLeg() && !m_lv->isThinVolume() &&
+            !m_lv->isLvmMirrorLog() && !m_lv->isThinPoolData() &&
             !m_lv->isVirtual()    &&
             !m_lv->isRaidImage() &&
             !(m_lv->isLvmMirror() && !(m_lv->getOrigin()).isEmpty())) {

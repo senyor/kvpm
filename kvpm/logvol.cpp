@@ -231,13 +231,16 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)
         m_virtual = true;
         break;
     case 'V':
-        m_type = "thin volume";
+        m_type = "thin volume";     // Origin status overrides this in the flags -- we add it back below
         m_thin = true;
         break;
     default:
         m_type = "linear";
         break;
     }
+
+    if ((flags[6] == 't') && m_is_origin)
+        m_thin = true;
 
     switch (flags[1]) {
     case 'w':
@@ -351,12 +354,40 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)
 
     if (m_snap || m_merging) {
         value = lvm_lv_get_property(lvmLV, "origin");
-        m_origin = value.value.string;
+        if (value.is_valid)
+            m_origin = value.value.string;
+
         value = lvm_lv_get_property(lvmLV, "snap_percent");
         if (value.is_valid)
             m_snap_percent = (double)value.value.integer / 1.0e+6;
         else
             m_snap_percent = 0;
+    } else if (m_thin || m_thin_pool) {                       // The thin 't' flag overides the 's' flag on thin snaps.
+        value = lvm_lv_get_property(lvmLV, "origin");
+        if (value.is_valid) {
+            m_origin = value.value.string;
+            m_snap = true;
+        }
+
+        //
+        //  The data_percent property is buggy. It only reports pools, not volumes.
+        //  The cast to int32_t should not be needed so look at it when the 'get property'
+        //  functions get fixed. The properties are returning (unsigned) uint64_t for percentages
+        //  which are (signed) int32_t! Also use function  lvm_percent_to_float(percent_t v) when
+        //  it gets implemented.
+        //
+        //  Relevant RedHat LVM BUGS: #861841 #862095 #838257
+        //
+
+        value = lvm_lv_get_property(lvmLV, "data_percent");
+        if (value.is_valid) {
+            m_data_percent = ((int32_t)value.value.integer) / 1.0e+6;
+            //           qDebug() << "Name" << getName() << m_data_percent;
+            //           qDebug() << "Name" << getName() << ((int32_t)value.value.integer);
+            //           qDebug() << "Name" << getName() << (value.value.integer);
+        } else {
+            m_data_percent = 0;
+        }
     } else
         m_origin = "";
 
@@ -1099,6 +1130,14 @@ double LogVol::getCopyPercent()
 {
     if (m_active)
         return m_copy_percent;
+    else
+        return -1;
+}
+
+double LogVol::getDataPercent()
+{
+    if (m_active)
+        return m_data_percent;
     else
         return -1;
 }

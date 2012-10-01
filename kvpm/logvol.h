@@ -64,6 +64,7 @@ class LogVol
 
     double  m_snap_percent;      // the percentage used, if this is a snapshot
     double  m_copy_percent;      // the percentage of extents moved, if pvmove underway
+    double  m_data_percent;      // the percentage of extents used by thin volumes
     long long m_size;            // size in bytes
     long long m_total_size;      // size in bytes, size of all children (mirror legs/logs and snaps) added together
     long long m_extents;         // size in extents
@@ -157,6 +158,7 @@ public:
     long long getFilesystemUsed();
     double getSnapPercent();
     double getCopyPercent();
+    double getDataPercent();
     unsigned long getMinorDevice();
     unsigned long getMajorDevice();
     int getLogCount();       // RAID 1 returns 0 since it doesn't have separate logs
