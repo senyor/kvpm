@@ -248,7 +248,7 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)
         break;
     }
 
-    if ((flags[6] == 't') && m_is_origin)
+    if ((flags[6] == 't') && (m_is_origin || m_snap))
         m_thin = true;
 
     if (flags[6] == 't') {
@@ -758,13 +758,13 @@ QList<LogVol *> LogVol::getAllChildrenFlat()
 QList<LogVol *> LogVol::getSnapshots()
 {
     QList<LogVol *> snapshots;
-    LogVol *top_lv = this;
+    LogVol *container = this;
 
-    while (top_lv->getParent() != NULL)
-        top_lv = top_lv->getParent();
+    while (container->getParent() != NULL && !container->isSnapContainer())
+        container = container->getParent();
 
-    if (top_lv->isSnapContainer()) {
-        snapshots = top_lv->getChildren();
+    if (container->isSnapContainer()) {
+        snapshots = container->getChildren();
 
         for (int x = snapshots.size() - 1; x >= 0; x--) { // delete the 'real' lv leaving the snaps
             if (m_lv_name == snapshots[x]->getName())
