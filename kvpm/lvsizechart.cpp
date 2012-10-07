@@ -18,6 +18,7 @@
 #include <QDebug>
 #include <QHBoxLayout>
 #include <QHeaderView>
+#include <QListIterator>
 #include <QResizeEvent>
 #include <QTreeWidget>
 #include <QTreeWidgetItem>
@@ -59,14 +60,20 @@ void LVSizeChart::populateChart()
         delete child;
 
     for (int x = 0; x < item_count; x++) {
-
         item = m_vg_tree->topLevelItem(x);
         lv = m_vg->getLvByName(item->data(0, Qt::UserRole).toString());
 
         if (lv != NULL) {
             logical_volumes.append(lv);
 
-            if (lv->getSnapshotCount()) {
+            if (lv->isThinPool()){
+                QListIterator<LogVol *> pool_itr(lv->getChildren());
+                while (pool_itr.hasNext()) {
+                    LogVol *const child = pool_itr.next();
+                    if (child->getSnapshotCount())
+                        logical_volumes.append(child->getSnapshots());
+                }
+            } else if (lv->getSnapshotCount()) {
                 logical_volumes.append(lv->getSnapshots());
             }
         }
