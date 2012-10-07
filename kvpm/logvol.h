@@ -109,6 +109,7 @@ class LogVol
     void processSegments(lv_t lvmLV, const QByteArray flags);
     QStringList removePvNames();     // list 'devices' that are really sub lvs
     QStringList getMetadataNames();  // names of sub lvs that are metadata for this lv
+    QStringList getPoolVolumeNames(vg_t lvmVG);
     QList<lv_t> getLvmSnapshots(vg_t lvmVG);
     void insertChildren(lv_t lvmLV, vg_t lvmVG);
     void calculateTotalSize();

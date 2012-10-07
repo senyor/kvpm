@@ -440,16 +440,21 @@ void VolGroup::processLogicalVolumes(vg_t lvmVG)
                 switch (flags[0]) {
                 case '-':
                 case 'c':
-                case 'O':
-                case 'o':
                 case 'p':
                 case 'M':
                 case 'm':
                 case 'r':
                 case 't':
-                case 'V':
                     lvm_lvs_all_top.append(lv_list->lv);
                     break;
+                case 'O':
+                case 'o':
+                    if (flags[6] == 't')
+                        lvm_lvs_all_children.append(lv_list->lv);
+                    else
+                        lvm_lvs_all_top.append(lv_list->lv);
+                    break;
+                case 'V':
                 case 'e':
                 default:
                     lvm_lvs_all_children.append(lv_list->lv);

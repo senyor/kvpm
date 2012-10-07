@@ -48,7 +48,7 @@ LogVol::LogVol(lv_t lvmLV, vg_t lvmVG, VolGroup *const vg, LogVol *const lvParen
     m_lv_parent(lvParent),
     m_orphan(orphan)
 {
-    m_snap_container   = false;
+    m_snap_container = false;
     m_tables = tables;
     rescan(lvmLV, lvmVG);
 }
@@ -114,9 +114,18 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)
     QList<lv_t> lvm_child_snapshots;
     lvm_child_snapshots.append(getLvmSnapshots(lvmVG));
 
-    if ((! lvm_child_snapshots.isEmpty()) && m_lv_parent == NULL) {
+    if ((!lvm_child_snapshots.isEmpty()) && m_lv_parent == NULL) {
         m_snap_container = true;
         m_seg_total = 1;
+    } else if ((!lvm_child_snapshots.isEmpty()) && m_lv_parent != NULL) {
+        if (m_lv_parent->isThinPool()) {
+            m_snap_container = true;
+            m_seg_total = 1;
+        } else {
+            m_snap_container = false;
+            value = lvm_lv_get_property(lvmLV, "seg_count");
+            m_seg_total = value.value.integer;
+        } 
     } else {
         m_snap_container = false;
         value = lvm_lv_get_property(lvmLV, "seg_count");
@@ -187,7 +196,7 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)
         m_lvmmirror = true;     // We split it below -- snap_containers are origins and the lv is a mirror
         break;
     case 'O':
-        m_type = "origin";
+        m_type = "origin";      // Thin snaps of thin volumes are flagged thin, not origin. Added back below
         additional_state = "merging";
         m_is_origin = true;
         m_merging = true;
@@ -231,7 +240,7 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)
         m_virtual = true;
         break;
     case 'V':
-        m_type = "thin volume";     // Origin status overrides this in the flags -- we add it back below
+        m_type = "thin volume";     // For Non-thin snaps origin status overrides this in the flags -- we add it back below
         m_thin = true;
         break;
     default:
@@ -241,6 +250,16 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)
 
     if ((flags[6] == 't') && m_is_origin)
         m_thin = true;
+
+    if (flags[6] == 't') {
+        value = lvm_lv_get_property(lvmLV, "origin");
+        if (value.is_valid && !QString(value.value.string).isEmpty()) {
+            m_origin = value.value.string;
+            m_snap = true;
+            m_thin = true;
+            m_type = "thin snapshot";
+        }
+    }
 
     switch (flags[1]) {
     case 'w':
@@ -370,21 +389,17 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)
         }
 
         //
-        //  The data_percent property is buggy. It only reports pools, not volumes.
         //  The cast to int32_t should not be needed so look at it when the 'get property'
         //  functions get fixed. The properties are returning (unsigned) uint64_t for percentages
         //  which are (signed) int32_t! Also use function  lvm_percent_to_float(percent_t v) when
         //  it gets implemented.
         //
-        //  Relevant RedHat LVM BUGS: #861841 #862095 #838257
+        //  Relevant RedHat LVM BUGS: #861841  #838257
         //
 
         value = lvm_lv_get_property(lvmLV, "data_percent");
         if (value.is_valid) {
             m_data_percent = ((int32_t)value.value.integer) / 1.0e+6;
-            //           qDebug() << "Name" << getName() << m_data_percent;
-            //           qDebug() << "Name" << getName() << ((int32_t)value.value.integer);
-            //           qDebug() << "Name" << getName() << (value.value.integer);
         } else {
             m_data_percent = 0;
         }
@@ -467,9 +482,13 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)
             else if (flags[6] == 't')
                 m_thin = true;
         }
-        m_type = m_segments[0]->type;
-    }
 
+        if (m_thin)
+            m_type = "thin volume";
+        else
+            m_type = m_segments[0]->type;
+    }
+    
     insertChildren(lvmLV, lvmVG);
     countLegsAndLogs();
     calculateTotalSize();
@@ -494,9 +513,12 @@ void LogVol::insertChildren(lv_t lvmLV, vg_t lvmVG)
     } else {
         child_name_list << removePvNames();
         child_name_list << getMetadataNames();
+        child_name_list << getPoolVolumeNames(lvmVG);
 
         if (m_lvmmirror && (!m_log.isEmpty()))
             child_name_list.append(m_log);
+
+        child_name_list.removeDuplicates();
 
         for (int x = child_name_list.size() - 1; x >= 0; x--) {
             child_name = child_name_list[x].toLocal8Bit();
@@ -549,6 +571,29 @@ QList<lv_t> LogVol::getLvmSnapshots(vg_t lvmVG)
     }
 
     return lvm_snapshots;
+}
+
+QStringList LogVol::getPoolVolumeNames(vg_t lvmVG)
+{
+    lvm_property_value value;
+    dm_list     *lv_dm_list = lvm_vg_list_lvs(lvmVG);
+    lvm_lv_list *lv_list;
+    QStringList names;
+
+    if (lv_dm_list) {
+        dm_list_iterate_items(lv_list, lv_dm_list) {
+            value = lvm_lv_get_property(lv_list->lv, "pool_lv");
+            if (value.is_valid) {
+                if (QString(value.value.string).trimmed() == m_lv_name) {
+                    value = lvm_lv_get_property(lv_list->lv, "lv_name");
+                    if (value.is_valid)
+                        names.append(QString(value.value.string).trimmed());
+                }
+            }
+        }
+    }
+
+    return names;
 }
 
 // Finds logical volumes that are children of this volume by
