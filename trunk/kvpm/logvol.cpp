@@ -92,6 +92,8 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)
     m_pvmove      = false;
     m_valid       = true;
     m_virtual     = false;
+    m_snap_percent = 0;
+    m_data_percent = 0;
 
     value = lvm_lv_get_property(lvmLV, "lv_name");
     m_lv_name = QString(value.value.string).trimmed();
@@ -371,16 +373,32 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)
     m_size = value.value.integer;
     m_extents = m_size / m_vg->getExtentSize();
 
-    if (m_snap || m_merging) {
+    if ((m_snap || m_merging) && !m_thin) {
         value = lvm_lv_get_property(lvmLV, "origin");
         if (value.is_valid)
             m_origin = value.value.string;
 
         value = lvm_lv_get_property(lvmLV, "snap_percent");
+
         if (value.is_valid)
             m_snap_percent = (double)value.value.integer / 1.0e+6;
         else
             m_snap_percent = 0;
+    } else if ((m_snap || m_merging) && m_thin) {
+
+        // Calling up snap_percent on thin snaps causes segfaults. When
+        // that gets fixed m_data_percent and m_snap_percent should be 
+        // done separately incase LVM starts using them differently.
+
+        value = lvm_lv_get_property(lvmLV, "data_percent");
+        
+        if (value.is_valid) {
+            m_data_percent = (double)value.value.integer / 1.0e+6;
+            m_snap_percent = m_data_percent;
+        } else {
+            m_data_percent = 0;
+            m_snap_percent = 0;
+        }
     } else if (m_thin || m_thin_pool) {                       // The thin 't' flag overides the 's' flag on thin snaps.
         value = lvm_lv_get_property(lvmLV, "origin");
         if (value.is_valid) {
@@ -403,8 +421,9 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)
         } else {
             m_data_percent = 0;
         }
-    } else
+    } else {
         m_origin = "";
+    }
 
     if ((m_lvmmirror_leg || m_lvmmirror_log)) {
         if (m_lvmmirror_log && m_lvmmirror)
@@ -573,7 +592,7 @@ QList<lv_t> LogVol::getLvmSnapshots(vg_t lvmVG)
     return lvm_snapshots;
 }
 
-QStringList LogVol::getPoolVolumeNames(vg_t lvmVG)
+QStringList LogVol::getPoolVolumeNames(vg_t lvmVG) // Excluding snapshots -- they go under the origins
 {
     lvm_property_value value;
     dm_list     *lv_dm_list = lvm_vg_list_lvs(lvmVG);
@@ -582,12 +601,19 @@ QStringList LogVol::getPoolVolumeNames(vg_t lvmVG)
 
     if (lv_dm_list) {
         dm_list_iterate_items(lv_list, lv_dm_list) {
-            value = lvm_lv_get_property(lv_list->lv, "pool_lv");
+
+            value = lvm_lv_get_property(lv_list->lv, "origin");
             if (value.is_valid) {
-                if (QString(value.value.string).trimmed() == m_lv_name) {
-                    value = lvm_lv_get_property(lv_list->lv, "lv_name");
-                    if (value.is_valid)
-                        names.append(QString(value.value.string).trimmed());
+                if (QString(value.value.string) == "") {
+
+                    value = lvm_lv_get_property(lv_list->lv, "pool_lv");
+                    if (value.is_valid) {
+                        if (QString(value.value.string).trimmed() == m_lv_name) {
+                            value = lvm_lv_get_property(lv_list->lv, "lv_name");
+                            if (value.is_valid)
+                                names.append(QString(value.value.string).trimmed());
+                        }
+                    }
                 }
             }
         }
