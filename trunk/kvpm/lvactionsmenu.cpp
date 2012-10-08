@@ -155,7 +155,27 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
         else
             snap_merge_action->setEnabled(false);
 
-        if(m_lv->isMetadata()){
+        if(m_lv->isThinPool()){
+            snap_merge_action->setEnabled(false);
+            lv_maxfs_action->setEnabled(false);
+            lv_mkfs_action->setEnabled(false);
+            lv_removefs_action->setEnabled(false);
+            lv_remove_action->setEnabled(true);
+            unmount_filesystem_action->setEnabled(false);
+            mount_filesystem_action->setEnabled(false);
+            add_mirror_legs_action->setEnabled(false);
+            lv_change_action->setEnabled(true);
+            lv_extend_action->setEnabled(true);
+            lv_reduce_action->setEnabled(true);
+            lv_rename_action->setEnabled(true);
+            pv_move_action->setEnabled(true);
+            remove_mirror_action->setEnabled(false);
+            change_mirror_log_action->setEnabled(false);
+            remove_mirror_leg_action->setEnabled(false);
+            snap_create_action->setEnabled(false);
+            filesystem_menu->setEnabled(false);
+
+        } else if(m_lv->isMetadata() || m_lv->isThinPoolData()){
             snap_merge_action->setEnabled(false);
             lv_maxfs_action->setEnabled(false);
             lv_mkfs_action->setEnabled(false);
