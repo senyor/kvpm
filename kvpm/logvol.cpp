@@ -384,12 +384,7 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)
             m_snap_percent = (double)value.value.integer / 1.0e+6;
         else
             m_snap_percent = 0;
-    } else if ((m_snap || m_merging) && m_thin) {
-
-        // Calling up snap_percent on thin snaps causes segfaults. When
-        // that gets fixed m_data_percent and m_snap_percent should be 
-        // done separately incase LVM starts using them differently.
-
+    } else if ((m_snap || m_merging) && m_thin) {    // Calling up snap_percent on thin snaps causes segfaults
         value = lvm_lv_get_property(lvmLV, "data_percent");
         
         if (value.is_valid) {
@@ -399,7 +394,7 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)
             m_data_percent = 0;
             m_snap_percent = 0;
         }
-    } else if (m_thin || m_thin_pool) {                       // The thin 't' flag overides the 's' flag on thin snaps.
+    } else if (m_thin || m_thin_pool) {              // The thin 't' flag overides the 's' flag on thin snaps.
         value = lvm_lv_get_property(lvmLV, "origin");
         if (value.is_valid) {
             m_origin = value.value.string;
