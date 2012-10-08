@@ -99,7 +99,10 @@ void LVSizeChart::populateChart()
             !m_lv->isRaidImage() &&
             !(m_lv->isLvmMirror() && !(m_lv->getOrigin()).isEmpty())) {
  
-            usage = m_lv->getFilesystem();
+            if (m_lv->isThinPool())
+                usage = "thin_pool";
+            else
+                usage = m_lv->getFilesystem();
 
             if (m_lv->isLvmMirror() || m_lv->isRaid()){
                 seg_ratio = (m_lv->getTotalSize() / (double) extent_size) / (double) total_extents;
@@ -108,7 +111,7 @@ void LVSizeChart::populateChart()
             }
 
             m_ratios.append(seg_ratio);
-            widget = new LVChartSeg(m_vg, m_lv, usage, this);
+            widget = buildFrame(new LVChartSeg(m_vg, m_lv, usage, this));
             m_layout->addWidget(widget);
             m_widgets.append(widget);
         }
@@ -117,7 +120,7 @@ void LVSizeChart::populateChart()
     if (free_extents) { // only create a free space widget if we have some
         seg_ratio = (free_extents / (double) total_extents) + 0.02; // allow a little "stretch" 0.02
         usage = "freespace" ;
-        widget = new LVChartSeg(m_vg, 0, usage, this);
+        widget = buildFrame(new LVChartSeg(m_vg, 0, usage, this));
         m_widgets.append(widget);
 
         m_layout->addWidget(widget);
@@ -125,7 +128,7 @@ void LVSizeChart::populateChart()
     } else if (m_widgets.size() == 0) { // if we have no chart segs then put in a blank one
                                         // because lvsizechart won't work with zero segments
         usage = "" ;
-        widget = new LVChartSeg(m_vg, 0, usage, this);
+        widget = buildFrame(new LVChartSeg(m_vg, 0, usage, this));
         m_widgets.append(widget);
 
         m_layout->addWidget(widget);
@@ -172,4 +175,19 @@ void LVSizeChart::resizeEvent(QResizeEvent *event)
 void LVSizeChart::vgtreeClicked()
 {
     populateChart();
+}
+
+QFrame* LVSizeChart::buildFrame(QWidget *widget) 
+{
+    QFrame *const frame = new QFrame();
+    frame->setFrameStyle(QFrame::Sunken | QFrame::Panel);
+    frame->setLineWidth(2);
+
+    QVBoxLayout *const layout = new QVBoxLayout();
+    layout->addWidget(widget);
+    layout->setSpacing(0);
+    layout->setMargin(0);
+    frame->setLayout(layout);
+
+    return frame;
 }

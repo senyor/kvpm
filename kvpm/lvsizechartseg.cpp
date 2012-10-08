@@ -21,6 +21,7 @@
 
 #include <QDebug>
 #include <QHBoxLayout>
+#include <QPainter>
 #include <QString>
 
 #include "logvol.h"
@@ -33,23 +34,13 @@
    group that is being displayed */
 
 LVChartSeg::LVChartSeg(VolGroup *const group, LogVol *const volume, const QString use, QWidget *parent) :
-    QFrame(parent),
+    QWidget(parent),
     m_vg(group),
     m_lv(volume)
 {
-    setFrameStyle(QFrame::Sunken | QFrame::Panel);
-    setLineWidth(2);
-
-    QVBoxLayout *const layout = new QVBoxLayout();
-    QWidget *const color_widget = new QWidget();
-    layout->addWidget(color_widget);
-    layout->setSpacing(0);
-    layout->setMargin(0);
-    setLayout(layout);
-
-    QPalette colorset;
-
     KConfigSkeleton skeleton;
+
+    QColor color;
 
     QColor  ext2_color,   ext3_color,    ext4_color,
             reiser_color, reiser4_color, msdos_color,
@@ -73,37 +64,42 @@ LVChartSeg::LVChartSeg(VolGroup *const group, LogVol *const volume, const QStrin
     skeleton.addItemColor("free",    free_color,  Qt::green);
     skeleton.addItemColor("swap",    swap_color,  Qt::lightGray);
 
-    if (use == "ext2")
-        colorset.setColor(QPalette::Window, ext2_color);
-    else if (use == "ext3")
-        colorset.setColor(QPalette::Window, ext3_color);
-    else if (use == "ext4")
-        colorset.setColor(QPalette::Window, ext4_color);
-    else if (use == "btrfs")
-        colorset.setColor(QPalette::Window, btrfs_color);
-    else if (use == "reiserfs")
-        colorset.setColor(QPalette::Window, reiser_color);
-    else if (use == "reiser4")
-        colorset.setColor(QPalette::Window, reiser4_color);
-    else if (use == "hfs")
-        colorset.setColor(QPalette::Window, hfs_color);
-    else if (use == "vfat")
-        colorset.setColor(QPalette::Window, msdos_color);
-    else if (use == "jfs")
-        colorset.setColor(QPalette::Window, jfs_color);
-    else if (use == "xfs")
-        colorset.setColor(QPalette::Window, xfs_color);
-    else if (use == "ntfs")
-        colorset.setColor(QPalette::Window, ntfs_color);
-    else if (use == "swap")
-        colorset.setColor(QPalette::Window, swap_color);
-    else if (use == "freespace")
-        colorset.setColor(QPalette::Window, free_color);
-    else
-        colorset.setColor(QPalette::Window, none_color);
+    if (use == "thin_pool") {
+        color = free_color;
+        m_brush = QBrush(color, Qt::Dense4Pattern);
+    } else {
 
-    color_widget->setPalette(colorset);
-    color_widget->setAutoFillBackground(true);
+        if (use == "ext2")
+            color = ext2_color;
+        else if (use == "ext3")
+            color = ext3_color;
+        else if (use == "ext4")
+            color = ext4_color;
+        else if (use == "btrfs")
+            color = btrfs_color;
+        else if (use == "reiserfs")
+            color = reiser_color;
+        else if (use == "reiser4")
+            color = reiser4_color;
+        else if (use == "hfs")
+            color = hfs_color;
+        else if (use == "vfat")
+            color = msdos_color;
+        else if (use == "jfs")
+            color = jfs_color;
+        else if (use == "xfs")
+            color = xfs_color;
+        else if (use == "ntfs")
+        color = ntfs_color;
+        else if (use == "swap")
+            color = swap_color;
+        else if (use == "freespace")
+            color = free_color;
+        else
+            color = none_color;
+
+        m_brush = QBrush(color, Qt::SolidPattern);
+    }
 
     if (!m_vg->isExported()) {
 
@@ -124,4 +120,13 @@ void LVChartSeg::popupContextMenu(QPoint)
     m_context_menu = new LVActionsMenu(m_lv, -1, m_vg, this);
     m_context_menu->exec(QCursor::pos());
     m_context_menu->deleteLater();
+}
+
+void LVChartSeg::paintEvent(QPaintEvent *)
+{
+    QPainter painter(this);
+
+    painter.setBrush(m_brush);
+    QRect rect = QRect(0, 0,  this->width(), this->height());
+    painter.fillRect(rect, m_brush);
 }
