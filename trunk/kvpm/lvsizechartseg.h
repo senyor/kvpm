@@ -20,22 +20,25 @@
 #include <QFrame>
 
 class QHBoxLayout;
+class QBrush;
 class QString;
 
 class VolGroup;
 class LogVol;
 
 
-class LVChartSeg : public QFrame
+class LVChartSeg : public QWidget
 {
     Q_OBJECT
 
     VolGroup *m_vg;
     LogVol *m_lv;
     KMenu *m_context_menu;
+    QBrush m_brush;
 
 public:
     LVChartSeg(VolGroup *const group, LogVol *const volume, const QString use, QWidget *parent);
+    void paintEvent(QPaintEvent *);
 
 private slots:
     void popupContextMenu(QPoint);

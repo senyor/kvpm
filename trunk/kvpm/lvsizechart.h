@@ -36,6 +36,7 @@ class LVSizeChart : public QFrame
     QList<QWidget *> m_widgets;    // These are segments of the bar chart
     QList<double>    m_ratios;     // These are the relative size of each segment
                                    // to the whole chart. The total should be about 1.
+    QFrame *buildFrame(QWidget *widget); 
 
 public:
     LVSizeChart(VolGroup *const group, QTreeWidget *const vgTree, QWidget *parent = 0);
