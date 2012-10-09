@@ -181,7 +181,7 @@ QTreeWidgetItem *VGTree::loadItem(LogVol *lv, QTreeWidgetItem *item)
     if (lv->hasMissingVolume()) {
         item->setIcon(0, KIcon("exclamation"));
         item->setToolTip(0, i18n("one or more physical volumes are missing"));
-    } else if (!lv->isSnapContainer() && lv->isOrigin()) {
+    } else if (!lv->isSnapContainer() && lv->isCowOrigin()) {
         item->setIcon(0, KIcon("bullet_star"));
         item->setToolTip(0, i18n("origin"));
     } else {

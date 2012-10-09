@@ -1234,7 +1234,7 @@ bool LVCreateDialog::hasInitialErrors()
             }
         }
 
-        if (m_lv->isOrigin()) {
+        if (m_lv->isCowOrigin()) {
             if (m_lv->isOpen()) {
                 KMessageBox::error(this, i18n("Snapshot origins cannot be extended while open or mounted"));
                 return true;
@@ -1285,7 +1285,7 @@ void LVCreateDialog::commitChanges()
         const QString mapper_path = m_lv->getMapperPath();
         const QString fs = m_lv->getFilesystem();
 
-        if (m_lv->isOrigin()) {
+        if (m_lv->isCowOrigin()) {
 
             lvchange_args << "lvchange" << "-an" << mapper_path;
             ProcessProgress deactivate_lv(lvchange_args);

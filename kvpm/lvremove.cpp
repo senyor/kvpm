@@ -62,7 +62,7 @@ LVRemoveDialog::LVRemoveDialog(LogVol *const lv, QWidget *parent) : KDialog(pare
     const QString msg1 = i18n("Delete the volume named: %1?", "<b>" + m_name + "</b>");
     const QString msg2 = i18n("Any data on it will be lost.");
 
-    if (m_lv->isOrigin()) {
+    if (m_lv->isCowOrigin()) {
         right_layout->addWidget(new QLabel(snap_msg1));
         right_layout->addWidget(new QLabel(snap_msg2));
         right_layout->addWidget(new QLabel(""));
