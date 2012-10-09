@@ -318,7 +318,7 @@ QFrame *LVProperties::generalFrame(int segment)
         }
     }
 
-    if (m_lv->isSnap())
+    if (m_lv->isCowSnap())
         layout->addWidget(new QLabel(i18n("Origin: %1", m_lv->getOrigin())));
 
     return frame;

@@ -1252,7 +1252,7 @@ bool LVCreateDialog::hasInitialErrors()
 
         m_fs_can_extend = fs_can_extend(m_lv->getFilesystem());
 
-        if (!(m_fs_can_extend || m_lv->isSnap())) {
+        if (!(m_fs_can_extend || m_lv->isCowSnap())) {
             if (KMessageBox::warningContinueCancel(NULL,
                                                    warning_message,
                                                    QString(),
@@ -1314,7 +1314,7 @@ void LVCreateDialog::commitChanges()
             return;
         } else {
             ProcessProgress extend_lv(argumentsLV());
-            if (!extend_lv.exitCode() && !m_lv->isSnap() && m_fs_can_extend)
+            if (!extend_lv.exitCode() && !m_lv->isCowSnap() && m_fs_can_extend)
                 fs_extend(mapper_path, fs, m_lv->getMountPoints(), true);
 
             return;

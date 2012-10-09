@@ -116,7 +116,7 @@ void LVRemoveDialog::commitChanges()
     const QString full_name = m_lv->getFullName().remove('[').remove(']');
     QStringList args;
 
-    if (m_lv->isActive() && !m_lv->isSnap()) {
+    if (m_lv->isActive() && !m_lv->isCowSnap()) {
         args << "lvchange"
              << "-an"
              << full_name;
