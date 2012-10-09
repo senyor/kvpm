@@ -354,6 +354,9 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)
         m_open = false;
     }
 
+    if (m_lv_name.endsWith("_tdata", Qt::CaseSensitive))
+        m_thin_data = true;
+
     if (m_lv_name.contains("_mlog", Qt::CaseSensitive)) {
         m_lvmmirror_log = true;    // this needs to be here in case it is a mirrored mirror log
         m_lv_fs = "";
