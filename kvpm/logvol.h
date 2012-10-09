@@ -95,13 +95,14 @@ class LogVol
     bool m_open;                 // device is open
     bool m_orphan;               // virtual device with no pvs
     bool m_pvmove;               // is a pvmove temporary volume
-    bool m_snap;                 // is a snapshot volume
+    bool m_cow_snap;             // is a traditional snapshot volume
+    bool m_thin_snap;            // is a thin snapshot volume
     bool m_snap_container;       // is a fake lv that contains the real lv and its snapshots as children
     bool m_is_origin;
     bool m_writable;
     bool m_valid;                // is a valid snap
     bool m_merging;              // is snap or snap origin that is merging
-    bool m_thin;                 // is thin volume
+    bool m_thin;                 // is thin volume or a thin snapshot
     bool m_thin_data;            // is thin pool data
     bool m_thin_pool;
 
@@ -183,7 +184,8 @@ public:
     bool isPvmove();
     bool isRaid();
     bool isRaidImage();
-    bool isSnap();
+    bool isCowSnap();
+    bool isThinSnap();
     bool isSnapContainer();
     bool isThinVolume();
     bool isThinPool();
