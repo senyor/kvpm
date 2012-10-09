@@ -75,7 +75,7 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)
     bool was_snap_container = m_snap_container;
     m_snap_container   = false;
     m_under_conversion = false;
-    m_is_origin   = false;
+    m_is_origin   = false;       // traditional snap origin - not thin snap origin
     m_merging     = false;
     m_metadata    = false;
     m_raidmirror     = false;
@@ -198,7 +198,7 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)
         m_lvmmirror = true;     // We split it below -- snap_containers are origins and the lv is a mirror
         break;
     case 'O':
-        m_type = "origin";      // Thin snaps of thin volumes are flagged thin, not origin. Added back below
+        m_type = "origin";
         additional_state = "merging";
         m_is_origin = true;
         m_merging = true;
