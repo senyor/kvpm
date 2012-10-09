@@ -1,5 +1,6 @@
 version 0.9.3
-Started adding support for thin pools and volumes.
+Added support for displaying thin pools and volumes.
+Put in a new dialog for creating thin volumes and snaps.
 
 version 0.9.2
 Added support for raid1, raid4, raid5 and raid6. 
