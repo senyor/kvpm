@@ -85,7 +85,7 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)
     m_lvmmirror_log  = false;
     m_raid        = false;
     m_raid_image  = false;
-    m_snap        = false;
+    m_cow_snap    = false;
     m_thin        = false;
     m_thin_data   = false;
     m_thin_pool   = false;
@@ -221,12 +221,12 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)
         break;
     case 's':
         m_type = "snapshot";
-        m_snap = true;
+        m_cow_snap = true;
         break;
     case 'S':
         m_type = "snapshot";
         additional_state = "merging";
-        m_snap = true;
+        m_cow_snap = true;
         m_merging = true;
         break;
     case 't':
@@ -250,14 +250,15 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)
         break;
     }
 
-    if ((flags[6] == 't') && (m_is_origin || m_snap))
+    if ((flags[6] == 't') && m_is_origin)
         m_thin = true;
 
     if (flags[6] == 't') {
         value = lvm_lv_get_property(lvmLV, "origin");
-        if (value.is_valid && !QString(value.value.string).isEmpty()) {
+        if (value.is_valid && (QString(value.value.string) != "")) {
             m_origin = value.value.string;
-            m_snap = true;
+            m_cow_snap  = false;
+            m_thin_snap = true;
             m_thin = true;
             m_type = "thin snapshot";
         }
@@ -373,7 +374,7 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)
     m_size = value.value.integer;
     m_extents = m_size / m_vg->getExtentSize();
 
-    if ((m_snap || m_merging) && !m_thin) {
+    if (m_cow_snap || m_merging) {
         value = lvm_lv_get_property(lvmLV, "origin");
         if (value.is_valid)
             m_origin = value.value.string;
@@ -384,22 +385,7 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)
             m_snap_percent = (double)value.value.integer / 1.0e+6;
         else
             m_snap_percent = 0;
-    } else if ((m_snap || m_merging) && m_thin) {    // Calling up snap_percent on thin snaps causes segfaults
-        value = lvm_lv_get_property(lvmLV, "data_percent");
-        
-        if (value.is_valid) {
-            m_data_percent = (double)value.value.integer / 1.0e+6;
-            m_snap_percent = m_data_percent;
-        } else {
-            m_data_percent = 0;
-            m_snap_percent = 0;
-        }
-    } else if (m_thin || m_thin_pool) {              // The thin 't' flag overides the 's' flag on thin snaps.
-        value = lvm_lv_get_property(lvmLV, "origin");
-        if (value.is_valid) {
-            m_origin = value.value.string;
-            m_snap = true;
-        }
+    } else if (m_thin || m_thin_pool) {    // Calling up snap_percent on thin snaps causes segfaults
 
         //
         //  The cast to int32_t should not be needed so look at it when the 'get property'
@@ -411,11 +397,10 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)
         //
 
         value = lvm_lv_get_property(lvmLV, "data_percent");
-        if (value.is_valid) {
-            m_data_percent = ((int32_t)value.value.integer) / 1.0e+6;
-        } else {
-            m_data_percent = 0;
-        }
+        
+        if (value.is_valid)
+            m_data_percent = (int32_t)value.value.integer / 1.0e+6;
+
     } else {
         m_origin = "";
     }
@@ -1065,9 +1050,14 @@ bool LogVol::isRaidImage()
     return m_raid_image;
 }
 
-bool LogVol::isSnap()
+bool LogVol::isCowSnap()
 {
-    return m_snap;
+    return m_cow_snap;
+}
+
+bool LogVol::isThinSnap()
+{
+    return m_thin_snap;
 }
 
 bool LogVol::isSnapContainer()
@@ -1182,7 +1172,7 @@ QString LogVol::getFstabMountPoint()
 
 double LogVol::getSnapPercent()
 {
-    if (m_snap || m_merging) {
+    if (m_cow_snap || m_merging) {
         if (m_active)
             return m_snap_percent;
         else
