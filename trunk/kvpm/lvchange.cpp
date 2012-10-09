@@ -102,7 +102,7 @@ QWidget *LVChangeDialog::buildGeneralTab()
     if (m_lv->isActive())
         m_available_check->setChecked(true);
 
-    if (m_lv->isMounted() || m_lv->isSnap())
+    if (m_lv->isMounted() || m_lv->isCowSnap())
         m_available_check->setEnabled(false);
 
     if (!m_lv->isWritable())
@@ -234,7 +234,7 @@ QWidget *LVChangeDialog::buildAdvancedTab()
     mirror_layout->addWidget(m_ignore_button);
     layout->addWidget(m_dmeventd_box);
 
-    if (m_lv->isSnap() || m_lv->isMirror() || m_lv->isRaid()) {
+    if (m_lv->isCowSnap() || m_lv->isMirror() || m_lv->isRaid()) {
         connect(m_dmeventd_box,     SIGNAL(clicked()), this, SLOT(resetOkButton()));
         connect(m_monitor_button,   SIGNAL(clicked()), this, SLOT(resetOkButton()));
         connect(m_nomonitor_button, SIGNAL(clicked()), this, SLOT(resetOkButton()));
@@ -282,7 +282,7 @@ QStringList LVChangeDialog::arguments()
 
     args << "lvchange" << "--yes"; // answer yes to any question
 
-    if (!m_lv->isSnap()) {
+    if (!m_lv->isCowSnap()) {
         if (m_available_check->isChecked() && (!m_lv->isActive()))
             args << "--available" << "y";
         else if ((! m_available_check->isChecked()) && (m_lv->isActive()))
@@ -297,7 +297,7 @@ QStringList LVChangeDialog::arguments()
     if (m_refresh_check->isChecked())
         args << "--refresh";
 
-    if (m_lv->isSnap() || m_lv->isMirror() || m_lv->isRaid()) {
+    if (m_lv->isCowSnap() || m_lv->isMirror() || m_lv->isRaid()) {
         if (m_resync_check->isChecked())
             args << "--resync";
 
@@ -390,7 +390,7 @@ void LVChangeDialog::resetOkButton()
 
 void LVChangeDialog::refreshAndAvailableCheck()
 {
-    if (!m_lv->isMounted() && !m_lv->isSnap()) {
+    if (!m_lv->isMounted() && !m_lv->isCowSnap()) {
 
         if (m_lv->isActive() == m_available_check->isChecked()) {
             m_refresh_check->setEnabled(true);

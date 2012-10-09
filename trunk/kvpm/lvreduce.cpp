@@ -58,7 +58,7 @@ LVReduceDialog::LVReduceDialog(LogVol *const volume, QWidget *parent)
                                           "logical volume is reduced any <b>data</b> it contains "
                                           "<b>will be lost!</b>");
 
-    if (!m_lv->isActive() && !m_lv->isSnap()) {
+    if (!m_lv->isActive() && !m_lv->isCowSnap()) {
         if (KMessageBox::warningContinueCancel(NULL,
                                                warning_message1,
                                                QString(),
@@ -70,10 +70,10 @@ LVReduceDialog::LVReduceDialog(LogVol *const volume, QWidget *parent)
         } else {
             m_bailout = true;
         }
-    } else if (m_lv->isMounted() && !m_lv->isSnap()) {
+    } else if (m_lv->isMounted() && !m_lv->isCowSnap()) {
         KMessageBox::error(0, i18n("The filesystem must be unmounted first"));
         m_bailout = true;
-    } else if (!fs_can_reduce(fs) && !m_lv->isSnap()) {
+    } else if (!fs_can_reduce(fs) && !m_lv->isCowSnap()) {
         if (KMessageBox::warningContinueCancel(NULL,
                                                warning_message2,
                                                QString(),
@@ -87,7 +87,7 @@ LVReduceDialog::LVReduceDialog(LogVol *const volume, QWidget *parent)
         }
     }
 
-    if (!m_bailout && !force && !m_lv->isSnap()) {
+    if (!m_bailout && !force && !m_lv->isCowSnap()) {
 
         const long long min_fs_size = get_min_fs_size(m_lv->getMapperPath(), m_lv->getFilesystem());
 
@@ -156,7 +156,7 @@ void LVReduceDialog::doShrink()
 
     hide();
 
-    if (m_lv->isSnap() || !m_lv->isActive())    // never reduce the fs of a snap!
+    if (m_lv->isCowSnap() || !m_lv->isActive())    // never reduce the fs of a snap!
         new_size = target_size;
     else if (fs_can_reduce(fs))
         new_size = fs_reduce(m_lv->getMapperPath(), target_size, fs);

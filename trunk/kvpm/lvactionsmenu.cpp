@@ -35,6 +35,7 @@
 #include "removemirror.h"
 #include "removemirrorleg.h"
 #include "snapmerge.h"
+#include "thincreate.h"
 #include "unmount.h"
 #include "volgroup.h"
 
@@ -60,6 +61,9 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
     lv_create_action = lv_actions->addAction("lvcreate", this, SLOT(createLogicalVolume()));
     lv_create_action->setText(i18n("Create logical volume..."));
     lv_create_action->setIcon(KIcon("document-new"));
+    thin_create_action = lv_actions->addAction("thincreate", this, SLOT(createThinVolume()));
+    thin_create_action->setText(i18n("Create thin volume..."));
+    thin_create_action->setIcon(KIcon("document-new"));
     lv_remove_action = lv_actions->addAction("lvremove", this, SLOT(removeLogicalVolume()));
     lv_remove_action->setText(i18n("Remove logical volume..."));
     lv_remove_action->setIcon(KIcon("cross"));
@@ -67,9 +71,15 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
     lv_rename_action = lv_actions->addAction("lvrename", this, SLOT(renameLogicalVolume()));
     lv_rename_action->setText(i18n("Rename logical volume..."));
     lv_rename_action->setIcon(KIcon("edit-rename"));
+
     snap_create_action = lv_actions->addAction("snapcreate", this, SLOT(createSnapshot()));
     snap_create_action->setText(i18n("Create snapshot..."));
     snap_create_action->setIcon(KIcon("camera_add"));
+
+    thin_snap_action = lv_actions->addAction("thinsnap", this, SLOT(thinSnapshot()));
+    thin_snap_action->setText(i18n("Create thin snapshot..."));
+    thin_snap_action->setIcon(KIcon("camera_add"));
+
     snap_merge_action = lv_actions->addAction("snapmerge", this, SLOT(mergeSnapshot()));
     snap_merge_action->setText(i18n("Merge snapshot..."));
     snap_merge_action->setIcon(KIcon("arrow_join"));
@@ -147,15 +157,19 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
     filesystem_menu->addAction(lv_mkfs_action);
     filesystem_menu->addAction(lv_removefs_action);
     filesystem_menu->setEnabled(false);
+    thin_create_action->setEnabled(false);
+    thin_snap_action->setEnabled(false);
 
     if (m_lv) {  // snap containers are replaced by the "real" lv before getting here, see: vg->getLvByName()
 
-        if (m_lv->isSnap() && m_lv->isValid() && !m_lv->isMerging())
+        if (!m_lv->isThinVolume() && m_lv->isCowSnap() && m_lv->isValid() && !m_lv->isMerging())
             snap_merge_action->setEnabled(true);
         else
             snap_merge_action->setEnabled(false);
 
         if(m_lv->isThinPool()){
+            lv_create_action->setEnabled(false);
+            thin_create_action->setEnabled(true);
             snap_merge_action->setEnabled(false);
             lv_maxfs_action->setEnabled(false);
             lv_mkfs_action->setEnabled(false);
@@ -227,6 +241,9 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
                 mount_filesystem_action->setEnabled(true);
             }
 
+            if (m_lv->isThinVolume())
+                thin_snap_action->setEnabled(true);
+
             if (m_lv->isOrigin()) {
                 snap_create_action->setEnabled(true);
 
@@ -260,7 +277,8 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
                 lv_extend_action->setEnabled(false);
                 lv_reduce_action->setEnabled(false);
                 pv_move_action->setEnabled(false);
-            } else if (m_lv->isSnap()) {
+
+            } else if (m_lv->isCowSnap()) {
                 add_mirror_legs_action->setEnabled(false);
                 remove_mirror_action->setEnabled(false);
                 change_mirror_log_action->setEnabled(false);
@@ -317,6 +335,7 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
                     lv_extend_action->setEnabled(true);
                     lv_reduce_action->setEnabled(true);
                 }
+
             } else if (m_lv->isRaid()) {
                 add_mirror_legs_action->setEnabled(false);
                 lv_change_action->setEnabled(false);
@@ -329,7 +348,12 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
                 remove_mirror_leg_action->setEnabled(false);
                 snap_create_action->setEnabled(false);
             } else {
-                add_mirror_legs_action->setEnabled(true);
+                if (m_lv->isThinVolume()) {
+                    add_mirror_legs_action->setEnabled(false);
+                    mirror_menu->setEnabled(false);
+                } else
+                    add_mirror_legs_action->setEnabled(true);
+
                 remove_mirror_action->setEnabled(false);
                 change_mirror_log_action->setEnabled(false);
                 pv_move_action->setEnabled(true);
@@ -338,7 +362,7 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
 
             remove_mirror_leg_action->setEnabled(false);
 
-            if (m_lv->isSnap() && m_lv->isMerging()) {
+            if (m_lv->isCowSnap() && m_lv->isMerging()) {
                 lv_rename_action->setEnabled(false);
                 lv_change_action->setEnabled(false);
             } else {
@@ -483,13 +507,13 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
                 unmount_filesystem_action->setEnabled(false);
             }
 
-            if (m_lv->isSnap() || m_lv->isOrigin()) {
+            if (m_lv->isCowSnap() || m_lv->isOrigin()) {
                 add_mirror_legs_action->setEnabled(false);
                 remove_mirror_action->setEnabled(false);
                 change_mirror_log_action->setEnabled(false);
                 pv_move_action->setEnabled(false);
 
-                if (m_lv->isSnap())
+                if (m_lv->isCowSnap())
                     snap_create_action->setEnabled(false);
                 else
                     snap_create_action->setEnabled(true);
@@ -581,6 +605,17 @@ void LVActionsMenu::createLogicalVolume()
     }
 }
 
+void LVActionsMenu::createThinVolume()
+{
+    ThinCreateDialog dialog(m_lv);
+
+    if (!dialog.bailout()) {
+        dialog.exec();
+        if (dialog.result() == QDialog::Accepted)
+            MainWindow->reRun();
+    }
+}
+
 void LVActionsMenu::reduceLogicalVolume()
 {
     LVReduceDialog dialog(m_lv);
@@ -594,12 +629,22 @@ void LVActionsMenu::reduceLogicalVolume()
 
 void LVActionsMenu::extendLogicalVolume()
 {
-    LVCreateDialog dialog(m_lv, false);
-
-    if (!dialog.bailout()) {
-        dialog.exec();
-        if (dialog.result() == QDialog::Accepted)
-            MainWindow->reRun();
+    if (m_lv->isThinVolume()) {
+        ThinCreateDialog dialog(m_lv, false);
+        
+        if (!dialog.bailout()) {
+            dialog.exec();
+            if (dialog.result() == QDialog::Accepted)
+                MainWindow->reRun();
+        }
+    } else {
+        LVCreateDialog dialog(m_lv, false);
+        
+        if (!dialog.bailout()) {
+            dialog.exec();
+            if (dialog.result() == QDialog::Accepted)
+                MainWindow->reRun();
+        }
     }
 }
 
@@ -691,6 +736,18 @@ void LVActionsMenu::renameLogicalVolume()
 void LVActionsMenu::createSnapshot()
 {
     LVCreateDialog dialog(m_lv, true);
+
+    if (!dialog.bailout()) {
+        dialog.exec();
+        if (dialog.result() == QDialog::Accepted)
+            MainWindow->reRun();
+    }
+}
+
+
+void LVActionsMenu::thinSnapshot()
+{
+    ThinCreateDialog dialog(m_lv, true);
 
     if (!dialog.bailout()) {
         dialog.exec();
