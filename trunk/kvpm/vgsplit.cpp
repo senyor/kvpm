@@ -441,7 +441,7 @@ void VGSplitDialog::volumeMobility(QStringList &mobileLvNames, QStringList &immo
         for (int x = immobileLvNames.size() - 1; x >= 0; x--) {
             temp = m_vg->getLvByName(immobileLvNames[x]);
 
-            if (temp->isOrigin() && (temp->getParent() != NULL))
+            if (temp->isCowOrigin() && (temp->getParent() != NULL))
                 immobilePvNames.append(temp->getParent()->getPvNamesAllFlat());
             else
                 immobilePvNames.append(temp->getPvNamesAllFlat());
@@ -498,7 +498,7 @@ void VGSplitDialog::pvState(QStringList &open, QStringList &closed)
     for (int x = lvs.size() - 1; x >= 0; x--) {
         if (lvs[x]->isOpen()) {
             open.append(lvs[x]->getPvNamesAllFlat());
-        } else if (lvs[x]->isSnapContainer() || lvs[x]->isOrigin()) {
+        } else if (lvs[x]->isSnapContainer() || lvs[x]->isCowOrigin()) {
             snaps = lvs[x]->getSnapshots();
             for (int y = snaps.size() - 1; y >= 0; y--) {
                 if (snaps[y]->isOpen()) {
@@ -547,7 +547,7 @@ void VGSplitDialog::movesWithVolume(const bool isLV, const QString name,
         moving_pv_count = 0;
         temp = m_vg->getLvByName(name);
 
-        if (temp->isOrigin() && (temp->getParent() != NULL))
+        if (temp->isCowOrigin() && (temp->getParent() != NULL))
             movingPvNames = temp->getParent()->getPvNamesAllFlat();
         else
             movingPvNames = temp->getPvNamesAllFlat();
@@ -560,7 +560,7 @@ void VGSplitDialog::movesWithVolume(const bool isLV, const QString name,
     while (growing) {
         for (int x = lvs.size() - 1; x >= 0 ; x--) {
 
-            if (lvs[x]->isOrigin() && (lvs[x]->getParent() != NULL))
+            if (lvs[x]->isCowOrigin() && (lvs[x]->getParent() != NULL))
                 all_pv_names = lvs[x]->getParent()->getPvNamesAllFlat();
             else
                 all_pv_names = lvs[x]->getPvNamesAllFlat();
@@ -582,7 +582,7 @@ void VGSplitDialog::movesWithVolume(const bool isLV, const QString name,
         for (int x = movingLvNames.size() - 1; x >= 0; x--) {
             temp = m_vg->getLvByName(movingLvNames[x]);
 
-            if (temp->isOrigin() && (temp->getParent() != NULL))
+            if (temp->isCowOrigin() && (temp->getParent() != NULL))
                 movingPvNames.append(temp->getParent()->getPvNamesAllFlat());
             else
                 movingPvNames.append(temp->getPvNamesAllFlat());

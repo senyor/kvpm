@@ -244,7 +244,7 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
             if (m_lv->isThinVolume())
                 thin_snap_action->setEnabled(true);
 
-            if (m_lv->isOrigin()) {
+            if (m_lv->isCowOrigin()) {
                 snap_create_action->setEnabled(true);
 
                 if (m_lv->isMirror()) {
@@ -507,7 +507,7 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
                 unmount_filesystem_action->setEnabled(false);
             }
 
-            if (m_lv->isCowSnap() || m_lv->isOrigin()) {
+            if (m_lv->isCowSnap() || m_lv->isCowOrigin()) {
                 add_mirror_legs_action->setEnabled(false);
                 remove_mirror_action->setEnabled(false);
                 change_mirror_log_action->setEnabled(false);

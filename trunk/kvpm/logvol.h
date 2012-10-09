@@ -178,7 +178,7 @@ public:
     bool isLvmMirrorLog();
     bool isMounted();
     bool isOpen();
-    bool isOrigin();
+    bool isCowOrigin();
     bool isOrphan();
     bool isPersistent();
     bool isPvmove();

@@ -1073,7 +1073,7 @@ bool LogVol::isPvmove()
     return m_pvmove;
 }
 
-bool LogVol::isOrigin()
+bool LogVol::isCowOrigin()
 {
     return m_is_origin;
 }
