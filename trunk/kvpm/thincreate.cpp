@@ -411,14 +411,6 @@ bool ThinCreateDialog::hasInitialErrors()
                                              "Currently, only the ext2, ext3, ext4, xfs, jfs, ntfs and reiserfs file systems are "
                                              "supported for extension. The correct executable for extension must also be present. ");
 
-
-
-        //
-        //
-        // Change this to isCowOrigin() then test for open COW snaps only
-        //
-        //
-
         if (m_lv->isCowOrigin()) {
             if (m_lv->isOpen()) {
                 KMessageBox::error(this, i18n("Snapshot origins cannot be extended while open or mounted"));
@@ -426,9 +418,9 @@ bool ThinCreateDialog::hasInitialErrors()
             }
 
             const QList<LogVol *> snap_shots = m_lv->getSnapshots();
-
+          
             for (int x = 0; x < snap_shots.size(); x++) {
-                if (snap_shots[x]->isOpen()) {
+                if (snap_shots[x]->isOpen() && !snap_shots[x]->isThinVolume()) {
                     KMessageBox::error(this, i18n("Volumes cannot be extended with open or mounted snapshots"));
                     return true;
                 }

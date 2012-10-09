@@ -98,7 +98,7 @@ class LogVol
     bool m_cow_snap;             // is a traditional snapshot volume
     bool m_thin_snap;            // is a thin snapshot volume
     bool m_snap_container;       // is a fake lv that contains the real lv and its snapshots as children
-    bool m_is_origin;
+    bool m_is_origin;            // is the origin of a 'COW' type snap. 
     bool m_writable;
     bool m_valid;                // is a valid snap
     bool m_merging;              // is snap or snap origin that is merging

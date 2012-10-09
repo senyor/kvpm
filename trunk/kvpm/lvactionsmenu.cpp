@@ -274,7 +274,6 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
                     lv_extend_action->setEnabled(true);
                 }
 
-                lv_extend_action->setEnabled(false);
                 lv_reduce_action->setEnabled(false);
                 pv_move_action->setEnabled(false);
 
