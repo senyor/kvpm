@@ -104,7 +104,7 @@ void LVSizeChart::populateChart()
             else
                 usage = m_lv->getFilesystem();
 
-            if (m_lv->isLvmMirror() || m_lv->isRaid()){
+            if (m_lv->isLvmMirror() || m_lv->isRaid() || m_lv->isThinPool()){
                 seg_ratio = (m_lv->getTotalSize() / (double) extent_size) / (double) total_extents;
             } else {
                 seg_ratio = m_lv->getExtents() / (double) total_extents;
