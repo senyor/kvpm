@@ -59,7 +59,7 @@ signals:
     void stateChanged();
 
 public:
-    SizeSelectorBox(long long unitSize, long long minSize, long long maxSize, long long initialSize,
+    SizeSelectorBox(long long unitSize, long long minSize, long long maxSize, long long initialSize,  // size in extents
                     bool isVolume, bool isOffset, bool isNew = false, bool startLocked = false, QWidget *parent = 0);
 
     long long getCurrentSize();
