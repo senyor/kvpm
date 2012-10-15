@@ -14,7 +14,6 @@
 
 #include "lvcreatebase.h"
 
-#include "misc.h"
 #include "mountentry.h"
 #include "processprogress.h"
 #include "sizeselectorbox.h"
@@ -48,6 +47,8 @@ LvCreateDialogBase::LvCreateDialogBase(bool extend, bool snap, bool thin,
     QWidget *const main_widget = new QWidget();
     QVBoxLayout *const layout = new QVBoxLayout();
     
+    m_size_selector = NULL;
+
     bool show_name_tag = true;
     bool show_persistent = true;
     bool show_ro = true;
@@ -63,6 +64,8 @@ LvCreateDialogBase::LvCreateDialogBase(bool extend, bool snap, bool thin,
         show_zero = false;
         show_skip_sync = false;
         show_monitor = false;
+        if (thin)
+            show_misc = false;
     } else if (snap && !thin) {
         show_zero = false;
         show_skip_sync = false;
@@ -116,22 +119,25 @@ LvCreateDialogBase::LvCreateDialogBase(bool extend, bool snap, bool thin,
     main_widget->setLayout(layout);
     setMainWidget(main_widget);
 
-    makeConnections();
-}
-
-void LvCreateDialogBase::makeConnections()
-{
     connect(this, SIGNAL(okClicked()),
             this, SLOT(commit()));
 
-    connect(m_persistent_box, SIGNAL(toggled(bool)),
-            this, SLOT(resetOkButton()));
-
-    connect(m_major_edit, SIGNAL(textEdited(QString)),
-            this, SLOT(resetOkButton()));
-
-    connect(m_minor_edit, SIGNAL(textEdited(QString)),
-            this, SLOT(resetOkButton()));
+    if (!extend) {
+        connect(m_persistent_box, SIGNAL(toggled(bool)),
+                this, SLOT(resetOkButton()));
+        
+        connect(m_major_edit, SIGNAL(textEdited(QString)),
+                this, SLOT(resetOkButton()));
+        
+        connect(m_minor_edit, SIGNAL(textEdited(QString)),
+                this, SLOT(resetOkButton()));
+        
+        connect(m_name_edit, SIGNAL(textEdited(QString)),
+                this, SLOT(resetOkButton()));
+        
+        connect(m_tag_edit, SIGNAL(textEdited(QString)),
+                this, SLOT(resetOkButton()));
+    }
 }
 
 QWidget* LvCreateDialogBase::createGeneralTab(bool showNameTag, bool showRo, bool showZero, bool showMisc)
@@ -179,10 +185,8 @@ QWidget* LvCreateDialogBase::createGeneralTab(bool showNameTag, bool showRo, boo
     } else {
         m_name_edit = NULL;
         m_tag_edit = NULL;
+        volume_box->hide();
     }
-
-    m_size_selector = NULL;
-
 
     QGroupBox *const misc_box = new QGroupBox();
     QVBoxLayout *const misc_layout = new QVBoxLayout();
@@ -195,20 +199,27 @@ QWidget* LvCreateDialogBase::createGeneralTab(bool showNameTag, bool showRo, boo
     misc_layout->addWidget(m_zero_check);
     misc_layout->addStretch();
     
-    if (!showRo) {
+    if (!showRo)
         m_readonly_check->hide();
-    }
 
-    if (!showZero) {
+    if (!showZero)
         m_zero_check->hide();
-    }
 
     if (showZero && showRo) {
+        connect(m_readonly_check, SIGNAL(toggled(bool)),
+                this, SLOT(resetOkButton()));
 
-
-        // connect them here ....
-
+        connect(m_zero_check, SIGNAL(toggled(bool)),
+                this, SLOT(resetOkButton()));
     }
+
+    m_maxextents_label = new QLabel();
+    m_stripes_label = new QLabel();
+    m_maxsize_label = new QLabel();
+    m_maxsize_label->setWordWrap(true);
+    misc_layout->addWidget(m_maxextents_label);
+    misc_layout->addWidget(m_stripes_label);
+    misc_layout->addWidget(m_maxsize_label);
 
     m_general_layout->addWidget(misc_box);
     if (!showMisc)
@@ -223,18 +234,18 @@ QWidget* LvCreateDialogBase::createAdvancedTab(bool showPersistent, bool showSki
 
     QHBoxLayout *const advanced_layout = new QHBoxLayout;
     advanced_tab->setLayout(advanced_layout);
-    QGroupBox *const advanced_box = new QGroupBox();
+    QGroupBox *const options_box = new QGroupBox();
     QVBoxLayout *const layout = new QVBoxLayout;
-    advanced_box->setLayout(layout);
-    advanced_layout->addStretch();
-    advanced_layout->addWidget(advanced_box);
-    advanced_layout->addStretch();
-
+    QVBoxLayout *const options_layout = new QVBoxLayout;
+    options_box->setLayout(options_layout);
+    layout->addStretch();
+    layout->addWidget(options_box);
+    advanced_layout->addLayout(layout);
     m_monitor_check = new QCheckBox(i18n("Monitor with dmeventd"));
     m_skip_sync_check = new QCheckBox(i18n("Skip initial synchronization of mirror"));
     m_skip_sync_check->setChecked(false);
-    layout->addWidget(m_monitor_check);
-    layout->addWidget(m_skip_sync_check);
+    options_layout->addWidget(m_monitor_check);
+    options_layout->addWidget(m_skip_sync_check);
 
     if (!showSkipSync)
         m_skip_sync_check->hide();
@@ -242,10 +253,9 @@ QWidget* LvCreateDialogBase::createAdvancedTab(bool showPersistent, bool showSki
     if (!showMonitor)
         m_monitor_check->hide();
 
-
     m_udevsync_check = new QCheckBox(i18n("Synchronize with udev"));
     m_udevsync_check->setChecked(true);
-    layout->addWidget(m_udevsync_check);
+    options_layout->addWidget(m_udevsync_check);
 
     if (showPersistent) {
         QVBoxLayout *const persistent_layout   = new QVBoxLayout;
@@ -282,6 +292,7 @@ QWidget* LvCreateDialogBase::createAdvancedTab(bool showPersistent, bool showSki
     }
         
     layout->addStretch();
+    advanced_layout->addStretch();
 
     return advanced_tab;
 }
@@ -316,7 +327,6 @@ void LvCreateDialogBase::enableSkipSync(bool skip)
     m_skip_sync_check->setEnabled(skip);
 }
 
-
 void LvCreateDialogBase::enableMonitor(bool monitor)
 {
     m_monitor_check->setEnabled(monitor);
@@ -342,13 +352,12 @@ bool LvCreateDialogBase::isValid()
     bool valid = false;
 
     bool valid_name  = true;
-    bool valid_major = true;
-    bool valid_minor = true;
+    bool valid_persistent = true;
 
     if (!m_extend) {
         int pos = 0;
         QString name = m_name_edit->text();
-        
+
         if (m_name_validator->validate(name, pos) == QValidator::Acceptable && name != "." && name != "..")
             valid_name = true;
         else if (name.isEmpty())
@@ -360,15 +369,20 @@ bool LvCreateDialogBase::isValid()
         QString minor = m_minor_edit->text();
         const QValidator *const major_validator = m_major_edit->validator();
         const QValidator *const minor_validator = m_minor_edit->validator();
-        valid_major = (major_validator->validate(major, pos) == QValidator::Acceptable); 
-        valid_minor = (minor_validator->validate(minor, pos) == QValidator::Acceptable); 
+        const bool valid_major = (major_validator->validate(major, pos) == QValidator::Acceptable); 
+        const bool valid_minor = (minor_validator->validate(minor, pos) == QValidator::Acceptable); 
+
+        if (m_persistent_box->isChecked() && !(valid_major && valid_minor))
+            valid_persistent = false;
+        else
+            valid_persistent = true;
     }
 
-    if (m_persistent_box->isChecked() && !(valid_major && valid_minor)) {
+    if (!valid_persistent || !valid_name) {
         valid = false;
     } else if (m_size_selector == NULL) {
         valid = true;
-    } else if (m_size_selector->isValid() && valid_name) {
+    } else if (m_size_selector->isValid()) {
         if (m_extend) {
             if (m_size_selector->getCurrentSize() > m_size_selector->getMinimumSize())
                 valid = true;
@@ -383,7 +397,7 @@ bool LvCreateDialogBase::isValid()
     } else {
         valid = false;
     }
-
+    
     return valid;
 }
 
@@ -397,6 +411,11 @@ bool LvCreateDialogBase::getZero()
     return m_zero_check->isChecked();
 }
 
+bool LvCreateDialogBase::getSkipSync()
+{
+    return m_skip_sync_check->isChecked();
+}
+
 QString LvCreateDialogBase::getMajor()
 {
     return m_major_edit->text();
@@ -406,8 +425,7 @@ QString LvCreateDialogBase::getMinor()
 {
     return m_minor_edit->text();
 }
-
-long long LvCreateDialogBase::getSize()
+long long LvCreateDialogBase::getSelectorExtents()
 {
     return m_size_selector->getCurrentSize();
 }
@@ -439,7 +457,64 @@ void LvCreateDialogBase::initializeSizeSelector(long long extentSize, long long 
             this, SLOT(resetOkButton()));
 }
 
-void LvCreateDialogBase::setMaxExtents(long long max)
+void LvCreateDialogBase::setSelectorMaxExtents(long long max)
 {
-    m_size_selector->setConstrainedMax(max);
+    if (m_size_selector != NULL)
+        m_size_selector->setConstrainedMax(max);
 }
+
+void LvCreateDialogBase::zeroReadOnlyEnable()
+{
+    if (m_zero_check->isChecked()) {
+        m_readonly_check->setChecked(false);
+        m_readonly_check->setEnabled(false);
+    } else
+        m_readonly_check->setEnabled(true);
+    
+    if (m_readonly_check->isChecked()) {
+        m_zero_check->setChecked(false);
+        m_zero_check->setEnabled(false);
+    } else
+        m_zero_check->setEnabled(true);
+}
+
+void LvCreateDialogBase::setPhysicalTab(QWidget *const tab)
+{
+    m_tab_widget->insertTab(1, tab, i18n("Physical layout"));
+}
+
+
+void LvCreateDialogBase::setInfoLabels(VolumeType type, int stripes, int mirrors, long long maxextents, long long maxsize)
+{
+    KLocale::BinaryUnitDialect dialect;
+    KLocale *const locale = KGlobal::locale();
+
+    if (m_use_si_units)
+        dialect = KLocale::MetricBinaryDialect;
+    else
+        dialect = KLocale::IECBinaryDialect;
+
+    m_maxsize_label->setText(i18n("Maximum volume size: %1", locale->formatByteSize(maxsize, 1, dialect)));
+    m_maxextents_label->setText(i18n("Maximum volume extents: %1", maxextents));
+
+    if (type == LINEAR) {
+        if (stripes > 1)
+            m_stripes_label->setText(i18n("(with %1 stripes)", stripes));
+        else
+            m_stripes_label->setText(i18n("(linear volume)"));
+    } else if (type == LVMMIRROR) {
+        if (stripes > 1)
+            m_stripes_label->setText(i18n("(LVM2 mirror with %1 legs and %2 stripes)", mirrors, stripes));
+        else
+            m_stripes_label->setText(i18n("(LVM2 mirror with %1 legs)", mirrors));
+    } else if (type == RAID1) {
+        m_stripes_label->setText(i18n("(RAID 1 mirror with %1 legs)", mirrors));
+    } else if (type == RAID4) {
+        m_stripes_label->setText(i18n("(RAID 4 with %1 stripes + 1 parity)", stripes));
+    } else if (type == RAID5) {
+        m_stripes_label->setText(i18n("(RAID 5 with %1 stripes + 1 parity)", stripes));
+    } else if (type == RAID5) {
+        m_stripes_label->setText(i18n("(RAID 6 with %1 stripes + 2 parity)", stripes));
+    }
+}
+

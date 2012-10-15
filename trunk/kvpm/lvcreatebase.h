@@ -20,6 +20,8 @@
 #include <QList>
 #include <QStringList>
 
+#include "misc.h"
+
 class KLineEdit;
 class KTabWidget;
 class KComboBox;
@@ -45,15 +47,8 @@ class LvCreateDialogBase : public KDialog
     bool m_extend;          // true == we are extending a volume
     SizeSelectorBox *m_size_selector;
 
-    //
-    // DO THESE NEED TO BE GLOBAL !!
-
     QRegExpValidator *m_name_validator,
                      *m_tag_validator;
-
-    //
-    //
-
 
     KLineEdit *m_minor_edit, *m_major_edit,
               *m_name_edit,  *m_tag_edit;
@@ -64,13 +59,18 @@ class LvCreateDialogBase : public KDialog
               *m_zero_check,        // write zero at start of volume
               *m_skip_sync_check;   // skip initial sync of mirror
 
-    QGroupBox *m_persistent_box, *m_volume_box;
+    QGroupBox *m_persistent_box;
    
     KTabWidget *m_tab_widget;
 
+    QLabel *m_maxextents_label, *m_stripes_label, *m_maxsize_label;
+
     QWidget* createGeneralTab(const bool showNameTag, const bool showRo, const bool showZero, const bool showMisc);
     QWidget* createAdvancedTab(const bool showPersistent, const bool showSkipSync, const bool showMonitor);
-    void makeConnections();
+
+
+private slots:
+    void zeroReadOnlyEnable();
 
 protected slots:
     virtual void commit() = 0;
@@ -86,12 +86,15 @@ protected:
     void setMonitor(const bool monitor);
     void setUdev(const bool udev);
     void initializeSizeSelector(const long long extentSize, const long long currentSize, const long long maxSize);
-    void setMaxExtents(const long long max);
+    void setPhysicalTab(QWidget *const tab);
 
     void enableMonitor(const bool monitor);
     void enableSkipSync(const bool skip);
     void enableReadOnly(const bool ro);
     void enableZero(const bool zero);
+    void setInfoLabels(VolumeType type, int stripes, int mirrors, long long maxextents, long long maxsize);
+    void setSelectorMaxExtents(const long long max);
+    long long getSelectorExtents();
 
     // Has a valid size, name, major number, minor number and tag
     virtual bool isValid();
@@ -99,13 +102,13 @@ protected:
     bool getMonitor();
     bool getUdev();
     bool getReadOnly();
+    bool getSkipSync();
     bool getZero();
     bool getPersistent();  // is the persistent major, minor number check box checked
     QString getMajor();
     QString getMinor();
     QString getName();
     QString getTag();
-    long long getSize();
 
 public:
     LvCreateDialogBase(bool extend, bool snap, bool thin,
