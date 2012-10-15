@@ -7,9 +7,10 @@ move or resize partitions.
 
 This program is currently being developed on lvm version (with library lvm2app):
 
-lvs --version
-  LVM version:     2.02.98(2)-git (2012-08-24)
-  Library version: 1.02.77-git (2012-08-24)
+
+~# lvs --version
+  LVM version:     2.02.98(2) (2012-10-15)
+  Library version: 1.02.77 (2012-10-15)
   Driver version:  4.22.0
 
 
