@@ -70,11 +70,9 @@ LvCreateDialogBase::LvCreateDialogBase(bool extend, bool snap, bool thin,
         show_zero = false;
         show_skip_sync = false;
     } else if (thin) {
-        show_ro = false;
         show_zero = false;
         show_skip_sync = false;
         show_monitor = false;
-        show_misc = false;
     }
 
     m_tab_widget = new KTabWidget(this);
@@ -238,9 +236,10 @@ QWidget* LvCreateDialogBase::createAdvancedTab(bool showPersistent, bool showSki
     QVBoxLayout *const layout = new QVBoxLayout;
     QVBoxLayout *const options_layout = new QVBoxLayout;
     options_box->setLayout(options_layout);
-    layout->addStretch();
     layout->addWidget(options_box);
+    advanced_layout->addStretch();
     advanced_layout->addLayout(layout);
+    advanced_layout->addStretch();
     m_monitor_check = new QCheckBox(i18n("Monitor with dmeventd"));
     m_skip_sync_check = new QCheckBox(i18n("Skip initial synchronization of mirror"));
     m_skip_sync_check->setChecked(false);
