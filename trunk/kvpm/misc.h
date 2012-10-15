@@ -30,6 +30,15 @@ typedef enum {
     INHERITED  = 5
 } AllocationPolicy;
 
+typedef enum {
+    LINEAR    = 0,
+    LVMMIRROR = 1,
+    RAID1     = 2,
+    RAID4     = 3,
+    RAID5     = 4,
+    RAID6     = 5
+} VolumeType;
+
 
 QString policyToString(AllocationPolicy policy);
 QStringList splitUuid(QString const uuid);
