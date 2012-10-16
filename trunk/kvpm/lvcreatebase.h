@@ -45,6 +45,8 @@ class LvCreateDialogBase : public KDialog
 
     bool m_use_si_units;    // true == Metric SI sizes = MB and GB, otherise use MiB, GiB etc.
     bool m_extend;          // true == we are extending a volume
+    bool m_ispool;        // true == creating or extending a thin pool
+
     SizeSelectorBox *m_size_selector;
 
     QRegExpValidator *m_name_validator,
@@ -79,6 +81,7 @@ protected slots:
 protected:
     virtual QStringList args() = 0;
     virtual long long getLargestVolume() = 0;
+    virtual bool isValid();    // Has a valid size, name, major number, minor number and tag
 
     void setSkipSync(const bool skip);
     void setReadOnly(const bool ro);
@@ -96,9 +99,6 @@ protected:
     void setSelectorMaxExtents(const long long max);
     long long getSelectorExtents();
 
-    // Has a valid size, name, major number, minor number and tag
-    virtual bool isValid();
-
     bool getMonitor();
     bool getUdev();
     bool getReadOnly();
@@ -111,7 +111,7 @@ protected:
     QString getTag();
 
 public:
-    LvCreateDialogBase(bool extend, bool snap, bool thin,
+    LvCreateDialogBase(const bool extend, const bool snap, const bool thin, const bool thinpool,
                        QString name = QString(""), QString pool = QString(""),  // name = origin for snap or lvname for extend 
                        QWidget *parent = NULL);
 

@@ -64,6 +64,9 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
     thin_create_action = lv_actions->addAction("thincreate", this, SLOT(createThinVolume()));
     thin_create_action->setText(i18n("Create thin volume..."));
     thin_create_action->setIcon(KIcon("document-new"));
+    thin_pool_action = lv_actions->addAction("thinpool", this, SLOT(createThinPool()));
+    thin_pool_action->setText(i18n("Create thin pool..."));
+    thin_pool_action->setIcon(KIcon("document-new"));
     lv_remove_action = lv_actions->addAction("lvremove", this, SLOT(removeLogicalVolume()));
     lv_remove_action->setText(i18n("Remove logical volume..."));
     lv_remove_action->setIcon(KIcon("cross"));
@@ -595,7 +598,7 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
 
 void LVActionsMenu::createLogicalVolume()
 {
-    LVCreateDialog dialog(m_vg);
+    LVCreateDialog dialog(m_vg, false);
 
     if (!dialog.bailout()) {
         dialog.exec();
@@ -607,6 +610,17 @@ void LVActionsMenu::createLogicalVolume()
 void LVActionsMenu::createThinVolume()
 {
     ThinCreateDialog dialog(m_lv);
+
+    if (!dialog.bailout()) {
+        dialog.exec();
+        if (dialog.result() == QDialog::Accepted)
+            MainWindow->reRun();
+    }
+}
+
+void LVActionsMenu::createThinPool()
+{
+    LVCreateDialog dialog(m_vg, true);
 
     if (!dialog.bailout()) {
         dialog.exec();

@@ -35,9 +35,11 @@
 
 
 
-LvCreateDialogBase::LvCreateDialogBase(bool extend, bool snap, bool thin,
+LvCreateDialogBase::LvCreateDialogBase(bool extend, bool snap, bool thin, bool ispool,
                                        QString name, QString pool, QWidget *parent):
-    KDialog(parent), m_extend(extend)
+    KDialog(parent), 
+    m_extend(extend),
+    m_ispool(ispool)
 {
 
     KConfigSkeleton skeleton;
@@ -96,16 +98,27 @@ LvCreateDialogBase::LvCreateDialogBase(bool extend, bool snap, bool thin,
             if (thin) {
                 banner1_label->setText(i18n("Create a new thin volume"));
                 setCaption(i18n("Create A New Thin Volume"));
+            } else if (ispool) {
+                banner1_label->setText(i18n("Create a new thin pool"));
+                setCaption(i18n("Create A New Thin Pool"));
             } else {
                 banner1_label->setText(i18n("Create a new logical volume"));
                 setCaption(i18n("Create A New Logical Volume"));
             }
         }
     } else {
-        banner1_label->setText(i18n("Extend volume: %1", name));
-        setCaption(i18n("Extend Volume"));
+        if (thin) {
+            banner1_label->setText(i18n("Extend thin volume: %1", name));
+            setCaption(i18n("Extend Thin Volume"));
+        } else if (ispool) {
+            banner1_label->setText(i18n("Extend thin pool: %1", name));
+            setCaption(i18n("Extend Thin Pool"));
+        } else {
+            banner1_label->setText(i18n("Extend volume: %1", name));
+            setCaption(i18n("Extend Volume"));
+        }
     }
-
+    
     if (thin) {
         QLabel *const banner2_label = new QLabel(i18n("Pool: %1", pool));
         banner2_label->setAlignment(Qt::AlignCenter);
@@ -359,7 +372,7 @@ bool LvCreateDialogBase::isValid()
 
         if (m_name_validator->validate(name, pos) == QValidator::Acceptable && name != "." && name != "..")
             valid_name = true;
-        else if (name.isEmpty())
+        else if (name.isEmpty() && !m_ispool)
             valid_name = true;
         else
             valid_name = false;
@@ -481,7 +494,6 @@ void LvCreateDialogBase::setPhysicalTab(QWidget *const tab)
 {
     m_tab_widget->insertTab(1, tab, i18n("Physical layout"));
 }
-
 
 void LvCreateDialogBase::setInfoLabels(VolumeType type, int stripes, int mirrors, long long maxextents, long long maxsize)
 {

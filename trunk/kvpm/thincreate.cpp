@@ -40,7 +40,7 @@
 /* Create new thin volume*/
 
 ThinCreateDialog::ThinCreateDialog(LogVol *const pool, QWidget *parent):
-    LvCreateDialogBase(false, false, true, QString(""), pool->getName(), parent),
+    LvCreateDialogBase(false, false, true, false, QString(""), pool->getName(), parent),
     m_vg(pool->getVg()),
     m_pool(pool)
 {
@@ -61,7 +61,7 @@ ThinCreateDialog::ThinCreateDialog(LogVol *const pool, QWidget *parent):
 /* extend thin volume or take snapshot */
 
 ThinCreateDialog::ThinCreateDialog(LogVol *const volume, const bool snapshot, QWidget *parent):
-    LvCreateDialogBase(!snapshot, snapshot, true, volume->getName(), volume->getPoolName(), parent),
+    LvCreateDialogBase(!snapshot, snapshot, true, false, volume->getName(), volume->getPoolName(), parent),
     m_snapshot(snapshot),
     m_extend(!snapshot),
     m_vg(volume->getVg()),
