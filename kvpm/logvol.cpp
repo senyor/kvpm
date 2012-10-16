@@ -660,7 +660,7 @@ void LogVol::calculateTotalSize()
 {
     m_total_size = 0;
 
-    if (m_lv_children.size()) {
+    if (!m_thin_pool && m_lv_children.size()) {
         for (int x = m_lv_children.size() - 1; x >= 0; x--)
             m_total_size += m_lv_children[x]->getTotalSize();
     } else {
