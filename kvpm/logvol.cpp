@@ -647,7 +647,7 @@ QStringList LogVol::getMetadataNames()
         if (lv.contains("_rmeta_")){
             if (m_lv_name == lv.left(lv.indexOf("_rmeta_")))
                 children << lv;
-        } else if (lv.contains("_tmeta")){
+        } else if (lv.endsWith("_tmeta") && m_thin_pool){
             if (m_lv_name == lv.left(lv.indexOf("_tmeta")))
                 children << lv;
         }

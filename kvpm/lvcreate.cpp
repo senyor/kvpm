@@ -204,7 +204,7 @@ int LVCreateDialog::getChunkSize()  // returns chunks size in bytes
     } else {
         long long meta = (64 * getSelectorExtents() * m_vg->getExtentSize()) / chunk;
 
-        while (meta > (0x8000000)) {  // 128MiB
+        while ((meta > 0x8000000) && (chunk < 0x40000000)) {  // meta > 128MiB and chunk < 1GB
             chunk *= 2;
             meta /= 2;
         }
@@ -222,7 +222,7 @@ int LVCreateDialog::getChunkSize(long long volumeSize)  // returns chunks size i
     } else {
         long long meta = (64 * volumeSize) / chunk;
 
-        while (meta > (0x8000000)) {  // 128MiB
+        while ((meta > 0x8000000) && (chunk < 0x40000000)) {  // meta > 128MiB and chunk < 1GB
             chunk *= 2;
             meta /= 2;
         }
