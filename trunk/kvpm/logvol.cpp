@@ -663,6 +663,11 @@ void LogVol::calculateTotalSize()
     if (!m_thin_pool && m_lv_children.size()) {
         for (int x = m_lv_children.size() - 1; x >= 0; x--)
             m_total_size += m_lv_children[x]->getTotalSize();
+    } else if (m_thin_pool) {
+        for (int x = m_lv_children.size() - 1; x >= 0; x--) {
+            if (m_lv_children[x]->isThinPoolData() || m_lv_children[x]->isMetadata())
+                m_total_size += m_lv_children[x]->getTotalSize();
+        }
     } else {
         m_total_size = m_size;
     }
