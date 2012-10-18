@@ -140,43 +140,46 @@ PVMoveDialog::PVMoveDialog(LogVol *const logicalVolume, int const segment, QWidg
     m_target_pvs = m_vg->getPhysicalVolumes();
     m_bailout = false;
 
-    if (segment >= 0) {
-        setupSegmentMove(segment);
-        m_move_segment = true;
+    if (m_lv->isThinVolume()){
+        m_bailout = true;
+        KMessageBox::error(NULL, i18n("Moving physical volumes is not supported on thin volumes"));
     } else {
-        setupFullMove();
-        m_move_segment = false;
-    }
-
-    /* if there is only one source physical volumes possible on this logical volume
-       then we eliminate it from the possible target pv list completely. */
-
-    if (m_sources.size() == 1) {
-        for (int x = m_target_pvs.size() - 1; x >= 0; x--) {
-            if (m_target_pvs[x]->getName() == m_sources[0]->name)
-                m_target_pvs.removeAt(x);
+        if (segment >= 0) {
+            setupSegmentMove(segment);
+            m_move_segment = true;
+        } else {
+            setupFullMove();
+            m_move_segment = false;
         }
-    }
 
-    /* If this is a segment move then all source pvs need to be
-       removed from the target list */
-
-    if (m_move_segment) {
-        for (int x = m_target_pvs.size() - 1; x >= 0; x--) {
-            for (int y = m_sources.size() - 1; y >= 0; y--) {
-                if (m_target_pvs[x]->getName() == m_sources[y]->name)
+        /* if there is only one source physical volumes possible on this logical volume
+           then we eliminate it from the possible target pv list completely. */
+        
+        if (m_sources.size() == 1) {
+            for (int x = m_target_pvs.size() - 1; x >= 0; x--) {
+                if (m_target_pvs[x]->getName() == m_sources[0]->name)
                     m_target_pvs.removeAt(x);
             }
         }
-    }
-
-    removeFullTargets();
-
-    if (!m_bailout)
+        
+        /* If this is a segment move then all source pvs need to be
+           removed from the target list */
+        
+        if (m_move_segment) {
+            for (int x = m_target_pvs.size() - 1; x >= 0; x--) {
+                for (int y = m_sources.size() - 1; y >= 0; y--) {
+                    if (m_target_pvs[x]->getName() == m_sources[y]->name)
+                        m_target_pvs.removeAt(x);
+                }
+            }
+        }
+        
+        removeFullTargets();
         buildDialog();
 
-    connect(this, SIGNAL(okClicked()),
-            this, SLOT(commitMove()));
+        connect(this, SIGNAL(okClicked()),
+                this, SLOT(commitMove()));
+    }
 }
 
 void PVMoveDialog::removeFullTargets()
@@ -490,12 +493,6 @@ bool PVMoveDialog::hasMovableExtents()
 
     for (int x = 0; x < lv_names.size(); x++) {
         LogVol *const lv = m_vg->getLvByName(lv_names[x]); 
-
-
-
-
-        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!         !!!!!!!!!!!!!!!!
-
         if (lv != NULL){
             if (!lv->isLvmMirror() && !lv->isLvmMirrorLeg() && !lv->isLvmMirrorLog() && !lv->isCowSnap() && !lv->isCowOrigin()){
                 movable = true;

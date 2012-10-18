@@ -190,7 +190,7 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
             add_mirror_legs_action->setEnabled(false);
             lv_change_action->setEnabled(true);
             lv_extend_action->setEnabled(true);
-            lv_reduce_action->setEnabled(true);
+            lv_reduce_action->setEnabled(false);
             lv_rename_action->setEnabled(true);
             pv_move_action->setEnabled(true);
             remove_mirror_action->setEnabled(false);
@@ -249,9 +249,6 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
                 unmount_filesystem_action->setEnabled(false);
                 mount_filesystem_action->setEnabled(true);
             }
-
-            if (m_lv->isThinVolume())
-                thin_snap_action->setEnabled(true);
 
             if (m_lv->isCowOrigin()) {
                 snap_create_action->setEnabled(true);
@@ -328,7 +325,7 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
                 pv_move_action->setEnabled(false);
 
                 if (m_lv->isRaid()){
-                    snap_create_action->setEnabled(false);
+                    snap_create_action->setEnabled(true);
                     change_mirror_log_action->setEnabled(false);
                 } else {
                     change_mirror_log_action->setEnabled(true);
@@ -359,12 +356,13 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
                 if (m_lv->isThinVolume()) {
                     add_mirror_legs_action->setEnabled(false);
                     mirror_menu->setEnabled(false);
+                    thin_snap_action->setEnabled(true);
+                    pv_move_action->setEnabled(false);
                 } else
                     add_mirror_legs_action->setEnabled(true);
 
                 remove_mirror_action->setEnabled(false);
                 change_mirror_log_action->setEnabled(false);
-                pv_move_action->setEnabled(true);
                 snap_create_action->setEnabled(true);
             }
 
