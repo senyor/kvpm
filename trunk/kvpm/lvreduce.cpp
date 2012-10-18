@@ -36,7 +36,11 @@ LVReduceDialog::LVReduceDialog(LogVol *const volume, QWidget *parent)
       m_lv(volume)
 {
     m_vg = m_lv->getVg();
-    setWindowTitle(i18n("Reduce Logical Volume"));
+
+    if (volume->isThinPool())
+        setWindowTitle(i18n("Reduce Thin Pool"));
+    else
+        setWindowTitle(i18n("Reduce Logical Volume"));
 
     QWidget *dialog_body = new QWidget(this);
     setMainWidget(dialog_body);
@@ -72,6 +76,9 @@ LVReduceDialog::LVReduceDialog(LogVol *const volume, QWidget *parent)
         }
     } else if (m_lv->isMounted() && !m_lv->isCowSnap()) {
         KMessageBox::error(0, i18n("The filesystem must be unmounted first"));
+        m_bailout = true;
+    } else if (m_lv->isThinPool()) {
+        KMessageBox::error(0, i18n("Reducing thin pools isn't supported yet"));
         m_bailout = true;
     } else if (!fs_can_reduce(fs) && !m_lv->isCowSnap()) {
         if (KMessageBox::warningContinueCancel(NULL,
@@ -121,7 +128,13 @@ LVReduceDialog::LVReduceDialog(LogVol *const volume, QWidget *parent)
         QVBoxLayout *const label_layout = new QVBoxLayout();
         QWidget *const label_widget = new QWidget();
         label_widget->setLayout(label_layout);
-        QLabel *const lv_name_label  = new QLabel(i18n("<b>Reduce volume: %1</b>", m_lv->getName()));
+
+        QLabel *lv_name_label;
+        if (m_lv->isThinPool())
+            lv_name_label = new QLabel(i18n("<b>Reduce thin pool: %1</b>", m_lv->getName()));
+        else
+            lv_name_label = new QLabel(i18n("<b>Reduce logical volume: %1</b>", m_lv->getName()));
+
         lv_name_label->setAlignment(Qt::AlignCenter);
         QLabel *const lv_min_label  = new QLabel(i18n("Estimated minimum size: %1", locale->formatByteSize(min_lv_extents * extent_size, 1, dialect)));
 
