@@ -171,8 +171,15 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
             snap_merge_action->setEnabled(false);
 
         if(m_lv->isThinPool()){
+            thin_pool_action->setText(i18n("Create thin pool..."));
+            lv_extend_action->setText(i18n("Extend thin pool..."));
+            lv_reduce_action->setText(i18n("Reduce thin pool..."));
+            lv_rename_action->setText(i18n("Rename thin pool..."));
+            lv_remove_action->setText(i18n("Remove thin pool..."));
+
             lv_create_action->setEnabled(false);
             thin_create_action->setEnabled(true);
+            thin_pool_action->setEnabled(false);
             snap_merge_action->setEnabled(false);
             lv_maxfs_action->setEnabled(false);
             lv_mkfs_action->setEnabled(false);
@@ -191,7 +198,6 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
             remove_mirror_leg_action->setEnabled(false);
             snap_create_action->setEnabled(false);
             filesystem_menu->setEnabled(false);
-
         } else if(m_lv->isMetadata() || m_lv->isThinPoolData()){
             snap_merge_action->setEnabled(false);
             lv_maxfs_action->setEnabled(false);
