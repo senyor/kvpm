@@ -44,7 +44,12 @@ LVRenameDialog::LVRenameDialog(LogVol *const volume, QWidget *parent)
     m_vg_name  = m_lv->getVg()->getName();
     m_old_name = m_lv->getName();
 
-    QLabel *label = new QLabel(i18n("<b>Rename Logical Volume</b>"));
+    QLabel *label;
+    if (m_lv->isThinPool())
+        label = new QLabel(i18n("<b>Rename Thin Pool</b>"));
+    else
+        label = new QLabel(i18n("<b>Rename Logical Volume</b>"));
+
     label->setAlignment(Qt::AlignCenter);
     layout->addWidget(label);
     layout->addSpacing(10);
