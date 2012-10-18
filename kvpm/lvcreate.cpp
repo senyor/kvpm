@@ -773,7 +773,10 @@ long long LVCreateDialog::getLargestVolume()
     }
     qSort(stripe_pv_bytes);
 
-    if (m_ispool) {
+// The next function sets aside the space needed for thin pool metadata.
+// The data doesn't grow upon extending of the pool.
+
+    if (m_ispool && !m_extend) {  
 
         m_ispool = false;
         long long meta = 64 * (getLargestVolume() / getChunkSize(getLargestVolume()));
