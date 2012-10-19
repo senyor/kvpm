@@ -181,7 +181,8 @@ QTreeWidgetItem *VGTree::loadItem(LogVol *lv, QTreeWidgetItem *item)
     if (lv->hasMissingVolume()) {
         item->setIcon(0, KIcon("exclamation"));
         item->setToolTip(0, i18n("one or more physical volumes are missing"));
-    } else if (!lv->isSnapContainer() && lv->isCowOrigin()) {
+    } else if (!lv->isSnapContainer() && lv->getSnapshotCount() > 0) {
+        item->setData(0, Qt::DisplayRole, QString(" %1").arg(lv_name));
         item->setIcon(0, KIcon("bullet_star"));
         item->setToolTip(0, i18n("origin"));
     } else {
@@ -316,7 +317,7 @@ QTreeWidgetItem *VGTree::loadItem(LogVol *lv, QTreeWidgetItem *item)
                 item->setExpanded(true);
                 if (!was_sc) {
                     for (int x = 0; x < new_child_count; x++) {
-                        if (item->child(x)->data(0, Qt::DisplayRole) == lv_name)
+                        if (item->child(x)->data(0, Qt::UserRole) == lv_name)
                             item->child(x)->setExpanded(was_expanded);
                     }
                 }
@@ -365,7 +366,7 @@ void VGTree::insertChildItems(LogVol *parentVolume, QTreeWidgetItem *parentItem)
         child_volume = immediate_children[x];
 
         for (int y = parentItem->childCount() - 1; y >= 0; y--) {
-            if (parentItem->child(y)->data(0, Qt::DisplayRole).toString() == child_volume->getName())
+            if (parentItem->child(y)->data(0, Qt::UserRole).toString() == child_volume->getName())
                 child_item = loadItem(child_volume, parentItem->child(y));
         }
 
@@ -384,7 +385,7 @@ void VGTree::insertChildItems(LogVol *parentVolume, QTreeWidgetItem *parentItem)
         for (int x = 0; x < immediate_children.size(); x++) {
             child_volume = immediate_children[x];
 
-            if (parentItem->child(y)->data(0, Qt::DisplayRole).toString() == child_volume->getName())
+            if (parentItem->child(y)->data(0, Qt::UserRole).toString() == child_volume->getName())
                 match = true;
         }
 
