@@ -123,6 +123,10 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)
         if (m_lv_parent->isThinPool()) {
             m_snap_container = true;
             m_seg_total = 1;
+
+        } else if ( m_lv_parent->getFullName() != getFullName() ) {
+            m_snap_container = true;
+            m_seg_total = 1;
         } else {
             m_snap_container = false;
             value = lvm_lv_get_property(lvmLV, "seg_count");
@@ -772,8 +776,10 @@ QList<LogVol *> LogVol::getSnapshots()
     QList<LogVol *> snapshots;
     LogVol *container = this;
 
-    while (container->getParent() != NULL && !container->isSnapContainer())
-        container = container->getParent();
+    if (container->getParent() != NULL && !container->isSnapContainer()) {
+        if (container->getFullName() == container->getParent()->getFullName())
+            container = container->getParent();
+    }
 
     if (container->isSnapContainer()) {
         snapshots = container->getChildren();
