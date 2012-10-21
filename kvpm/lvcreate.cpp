@@ -703,7 +703,7 @@ void LVCreateDialog::enableMonitoring(int index)
     }
 }
 
-/* largest volume that can be created given the pvs , striping and mirrors
+/* largest volume that can be created given the pvs, striping and mirrors
    selected. This includes the size of the already existing volume if we
    are extending a volume */
 
@@ -717,7 +717,7 @@ long long LVCreateDialog::getLargestVolume()
     const int mirror_count = m_mirror_count_spin->value();
     const long long extent_size = m_vg->getExtentSize();
 
-    if (type == 1)           // LVM2 mirror
+    if (type == 1)          // LVM2 mirror
         total_stripes = stripe_count * mirror_count;
     else if (type == 2)    // RAID 1 mirror
         total_stripes = mirror_count;
@@ -936,7 +936,7 @@ QStringList LVCreateDialog::args()
         args << "--stripes" << QString("%1").arg(1);
     }
 
-    if (type > 0) {
+    if (type > 0 && !m_extend) {
         args << "--monitor";
         if (getMonitor())
             args << "y";
