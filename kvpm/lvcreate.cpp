@@ -946,8 +946,8 @@ QStringList LVCreateDialog::args()
 
     const QString policy = policyToString(m_pv_box->getPolicy());
 
-    if (policy != "inherited")          // "inherited" is what we get if we don't pass "--alloc" at all
-        args << "--alloc" << policy;    // passing "--alloc" "inherited" won't work
+    if (m_pv_box->getPolicy() != INHERITED)  // "inherited" is what we get if we don't pass "--alloc" at all
+        args << "--alloc" << policy;         // passing "--alloc" "inherited" won't work
 
     if (m_extend)
         extents -= m_lv->getExtents();
