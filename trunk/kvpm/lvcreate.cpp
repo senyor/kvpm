@@ -709,8 +709,6 @@ void LVCreateDialog::enableMonitoring(int index)
 
 long long LVCreateDialog::getLargestVolume()
 {
-    QList <long long> available_pv_bytes = m_pv_box->getRemainingSpaceList();
-    QList <long long> stripe_pv_bytes;
     int total_stripes;
     const int type = m_type_combo->currentIndex();
     const int stripe_count = m_stripe_count_spin->value();
@@ -733,9 +731,6 @@ long long LVCreateDialog::getLargestVolume()
 
     int log_count = 0;
 
-    for (int x = 0; x < total_stripes; x++)
-        stripe_pv_bytes.append(0);
-
     if (type == 1 && !m_extend) {
         if (m_log_combo->currentIndex() == 0)
             log_count = 2;
@@ -747,24 +742,32 @@ long long LVCreateDialog::getLargestVolume()
         log_count = 0;
     }
 
-    qSort(available_pv_bytes);
-
     AllocationPolicy policy = m_pv_box->getPolicy();
     if (policy == INHERITED)
         policy = m_vg->getPolicy();
 
+    QList <long long> stripe_pv_bytes;
+    for (int x = 0; x < total_stripes; x++)
+        stripe_pv_bytes.append(0);
+
+    QList <long long> available_pv_bytes = m_pv_box->getRemainingSpaceList();
+
     if (!m_extend) {
+        qSort(available_pv_bytes);
         if (policy == CONTIGUOUS) {
             while (available_pv_bytes.size() > total_stripes + log_count)  
                 available_pv_bytes.removeFirst();
         } 
-    }
 
-    for (int x = 0; x < log_count; x++) {
-        if (available_pv_bytes.size())
-            available_pv_bytes.removeFirst();
-        else
-            return 0;
+        for (int x = 0; x < log_count; x++) {
+            if (available_pv_bytes.size())
+                available_pv_bytes.removeFirst();
+            else
+                return 0;
+        }
+
+    } else {
+        extendLastSegment(stripe_pv_bytes, available_pv_bytes);
     }
 
     while (available_pv_bytes.size()) {
@@ -985,6 +988,8 @@ QStringList LVCreateDialog::args()
     args << m_pv_box->getNames();
     args.prepend(program_to_run);
 
+    qDebug() << args;
+
     return args;
 }
 
@@ -994,17 +999,26 @@ long long LVCreateDialog::roundExtentsToStripes(long long extents)
 {
     const int stripes = m_stripe_count_spin->value();
     const int mirrors = m_mirror_count_spin->value();
-    const long long max_extents = getLargestVolume() / m_vg->getExtentSize();
+    long long max_extents;
+
+    if (m_extend)
+        max_extents = (getLargestVolume() - m_lv->getSize()) / m_vg->getExtentSize();
+    else
+        max_extents = getLargestVolume() / m_vg->getExtentSize();
 
     // The next part should only need to reference stripes, not the mirror count
     // but a bug in lvm requires it. Remove this when fixed.
 
     if (stripes > 1) {
+
         if (extents % (stripes * mirrors)) {
+
             extents = extents / (stripes * mirrors);
             extents = extents * (stripes * mirrors);
-            if (extents + (stripes * mirrors) <= max_extents)
+
+            if (extents + (stripes * mirrors) <= max_extents) {
                 extents += (stripes * mirrors);
+            }
         }
     }
 
@@ -1163,4 +1177,51 @@ int LVCreateDialog::getMaxStripes()
     return stripes;
 }
 
-    
+void LVCreateDialog::extendLastSegment(QList<long long> &committed, QList<long long> &available)
+{
+    QList<LogVol *> legs;
+    QStringList selected_names(m_pv_box->getNames());
+    LogVol *lv = m_lv;
+
+    if (lv->isThinPool()) {
+        legs = lv->getChildren();
+        for (int x = legs.size() - 1; x >= 0; x--) {
+            if (legs[x]->isThinPoolData()) {
+                lv = legs[x];
+                break; 
+            }
+        }
+    }
+
+    legs.clear();
+
+    if (lv->isMirror()) {
+        legs = lv->getChildren();    // not grandchildren because we can't extend while under conversion
+        
+        for (int x = legs.size() - 1; x >= 0; x--) {
+            if (!legs[x]->isMirrorLeg())
+                legs.removeAt(x);
+        }
+    } else {
+        legs.append(lv);
+    }
+
+    int commit_count = 0;
+
+    for (int x = legs.size() - 1; x >= 0; x--) {
+
+        const QStringList pv_names = legs[x]->getPvNames(legs[x]->getSegmentCount() - 1);
+
+        for (int y = selected_names.size() - 1; y >= 0; y--) {
+            for (int z = pv_names.size() - 1; z >= 0; z--) {
+
+                if ((selected_names[y] == pv_names[z]) && commit_count < committed.size()) {
+                    committed[commit_count] += available.takeAt(y);
+                    selected_names.removeAt(y);
+                    commit_count++;
+                    break;
+                }
+            }
+        }
+    }
+}
