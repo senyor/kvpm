@@ -725,6 +725,7 @@ void LogVol::processSegments(lv_t lvmLV, const QByteArray flags)
                     segment->stripe_size = value.value.integer * 512;
 
                 value = lvm_lvseg_get_property(lvm_lvseg, "seg_size");
+
                 if (value.is_valid)
                     segment->size = value.value.integer;
             }

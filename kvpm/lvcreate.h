@@ -72,6 +72,7 @@ class LVCreateDialog : public LvCreateDialogBase
     int getChunkSize();
     int getChunkSize(long long const volumeSize);
     void makeConnections();
+    void extendLastSegment(QList<long long> &committed, QList<long long> &available);
     long long roundExtentsToStripes(long long extents);
     bool hasInitialErrors();
     QStringList args();
