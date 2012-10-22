@@ -1177,6 +1177,10 @@ int LVCreateDialog::getMaxStripes()
     return stripes;
 }
 
+// This function tries to extend the pvs of the last segment, if they have been selected,
+// before applying the usual methods of adding segments. lvextend with "normal" allocation
+// seems to work this way.
+
 void LVCreateDialog::extendLastSegment(QList<long long> &committed, QList<long long> &available)
 {
     QList<LogVol *> legs;
