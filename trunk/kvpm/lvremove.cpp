@@ -21,7 +21,7 @@
 #include <QDebug>
 #include <QLabel>
 #include <QHBoxLayout>
-#include <QString>
+#include <QScrollArea>
 #include <QVBoxLayout>
 
 #include "logvol.h"
@@ -54,45 +54,40 @@ LVRemoveDialog::LVRemoveDialog(LogVol *const lv, QWidget *parent) : KDialog(pare
     right_layout->addWidget(label);
     right_layout->addSpacing(20);
 
-    QHBoxLayout *const lower_layout = new QHBoxLayout();
-    QVBoxLayout *const list_layout = new QVBoxLayout();
+    QStringList children(getDependentChildren(m_lv));
+    children.sort();
+    children.removeDuplicates(); 
 
-    const QString snap_msg1 = i18n("The volume: <b>%1</b> has snapshots.", m_name);
-    const QString snap_msg2 = i18n("The following volumes will all be deleted:");
-    const QString msg1 = i18n("Delete the volume named: %1?", "<b>" + m_name + "</b>");
-    const QString msg2 = i18n("Any data on it will be lost.");
+    if (children.isEmpty()) {
+        right_layout->addWidget(new QLabel(i18n("Delete the volume named: %1?", "<b>" + m_name + "</b>")));
+        right_layout->addWidget(new QLabel(i18n("Any data on it will be lost.")));
+    } else {
+        right_layout->addWidget(new QLabel(i18n("The volume: <b>%1</b> has dependent volumes.", m_name)));
+        right_layout->addWidget(new QLabel(i18n("The following volumes will all be deleted:")));
+        right_layout->addSpacing(10);
 
-    if (m_lv->isCowOrigin()) {
-        right_layout->addWidget(new QLabel(snap_msg1));
-        right_layout->addWidget(new QLabel(snap_msg2));
-        right_layout->addWidget(new QLabel(""));
-
-        right_layout->addLayout(lower_layout);
-        lower_layout->addSpacing(15);
-        lower_layout->addLayout(list_layout);
+        QWidget *const list = new QWidget();
+        QVBoxLayout *const list_layout = new QVBoxLayout();
+        list->setLayout(list_layout);
 
         label = new QLabel("<b>" + m_name + "</b>");
         label->setAlignment(Qt::AlignLeft);
         list_layout->addWidget(label);
+        list_layout->addSpacing(10);
 
-        QListIterator<LogVol *> snap_itr(m_lv->getSnapshots());
-        LogVol *snap;
-        while (snap_itr.hasNext()) {
-            snap = snap_itr.next();
-
-            if (snap->isMounted())
-                m_bailout = true;
-
-            label = new QLabel("<b>" + snap->getName() + "</b>");
+        for (int x = 0; x < children.size(); x++) {
+            label = new QLabel("<b>" + children[x] + "</b>");
             label->setAlignment(Qt::AlignLeft);
             list_layout->addWidget(label);
         }
-        right_layout->addWidget(new QLabel(""));
+
+        QScrollArea *const scroll = new QScrollArea();
+        scroll->setWidget(list);
+        right_layout->addWidget(scroll);
+
+        right_layout->addSpacing(10);
         right_layout->addWidget(new QLabel(i18n("Are you certain you want to delete these volumes?")));
         right_layout->addWidget(new QLabel(i18n("Any data on them will be lost.")));
-    } else {
-        right_layout->addWidget(new QLabel(msg1));
-        right_layout->addWidget(new QLabel(msg2));
     }
 
     dialog_body->setLayout(layout);
@@ -104,6 +99,40 @@ LVRemoveDialog::LVRemoveDialog(LogVol *const lv, QWidget *parent) : KDialog(pare
         hide();
         KMessageBox::error(this, i18n("A snapshot of this origin is busy or mounted. It can not be deleted."));
     }
+}
+
+QStringList LVRemoveDialog::getDependentChildren(LogVol *const lv)
+{
+    QStringList children;
+
+    if (lv->isCowOrigin()) {
+        QListIterator<LogVol *> snap_itr(lv->getSnapshots());
+        LogVol *snap;
+        while (snap_itr.hasNext()) {
+            snap = snap_itr.next();
+
+            if (snap->isMounted())
+                m_bailout = true;
+
+            children.append(snap->getName());
+        }
+    } else if (lv->isThinPool()){
+        QListIterator<LogVol *> thin_itr(lv->getThinVolumes());
+        LogVol *thin;
+        while (thin_itr.hasNext()) {
+            thin = thin_itr.next();
+
+            if (thin->isMounted())
+                m_bailout = true;
+
+            children.append(thin->getName());
+
+            if (thin->isCowOrigin())
+                children.append(getDependentChildren(thin));
+        }
+    }
+
+    return children;
 }
 
 bool LVRemoveDialog::bailout()
@@ -133,3 +162,4 @@ void LVRemoveDialog::commitChanges()
 
     return;
 }
+
