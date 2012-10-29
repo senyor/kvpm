@@ -798,6 +798,22 @@ QList<LogVol *> LogVol::getSnapshots()
     return snapshots;
 }
 
+QList<LogVol *> LogVol::getThinVolumes()
+{
+    QList<LogVol *> lvs;
+
+    if (m_thin_pool) {
+        lvs = getAllChildrenFlat();
+
+        for (int x = lvs.size() - 1; x >= 0; x--) {
+            if (!lvs[x]->isThinVolume())
+                lvs.removeAt(x);
+        }
+    }
+
+    return lvs;
+}
+
 LogVol *LogVol::getParent()
 {
     return m_lv_parent;
