@@ -128,6 +128,11 @@ void LVCreateDialog::makeConnections()
 
     connect(m_log_combo, SIGNAL(currentIndexChanged(int)),
             this, SLOT(setMaxSize()));
+
+    if (m_ispool) {
+        connect(m_chunk_combo, SIGNAL(currentIndexChanged(int)),
+                this, SLOT(setMaxSize()));
+    }
 }
 
 QWidget* LVCreateDialog::createPhysicalTab()
@@ -243,12 +248,13 @@ QWidget* LVCreateDialog::createChunkWidget()
 
     for (int n = 0; n < 15; n++) {
         chunk = round(64 * pow(2, n));
-        m_chunk_combo->setItemData(n, QVariant(chunk * 1024), Qt::UserRole);  // chunk size in bytes
 
         if (chunk < 1000)
             m_chunk_combo->addItem(QString("%1").arg(chunk) + " KiB");
         else 
             m_chunk_combo->addItem(QString("%1").arg(chunk/1024) + " MiB");
+
+        m_chunk_combo->setItemData(n + 1, QVariant(chunk * 1024), Qt::UserRole);  // chunk size in bytes
     }
 
     widget->setLayout(layout);
@@ -784,11 +790,15 @@ long long LVCreateDialog::getLargestVolume()
         m_ispool = false;
         long long meta = 64 * (getLargestVolume() / getChunkSize(getLargestVolume()));
         m_ispool = true;
-
         const long long ext = m_vg->getExtentSize();
         meta = ( (meta  + ext - 1 ) / ext) * ext;
 
-        long long longest = stripe_pv_bytes.takeLast() - (meta);
+        if (meta < 0x200000)   // 2 MiB 
+            meta = 0x200000;  
+        else if (meta > 0x400000000)   // 16 GiB 
+            meta = 0x400000000;
+                        
+        long long longest = stripe_pv_bytes.takeLast() - meta;
         if (longest < 0)
             longest = 0;
         stripe_pv_bytes.append(longest);
@@ -961,7 +971,7 @@ QStringList LVCreateDialog::args()
 
     if (m_ispool) {                                       // create a thin pool
         program_to_run = "lvcreate";
-        args << "--chunksize" << QString("%1b").arg(getChunkSize());
+        args << "--chunksize" << QString("%1k").arg(getChunkSize()/1024);
         args << "--thinpool" << getName();
         args << m_vg->getName();
     } else if (!m_extend && !m_snapshot) {              // create a standard volume
@@ -987,8 +997,6 @@ QStringList LVCreateDialog::args()
 
     args << m_pv_box->getNames();
     args.prepend(program_to_run);
-
-    qDebug() << args;
 
     return args;
 }
