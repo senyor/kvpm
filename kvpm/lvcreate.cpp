@@ -75,7 +75,6 @@ LVCreateDialog::LVCreateDialog(LogVol *const volume, const bool snapshot, QWidge
     m_lv(volume)
 {
     m_bailout = hasInitialErrors();
-    m_ispool = false;
 
     if (!m_bailout)
         buildDialog();
@@ -128,11 +127,6 @@ void LVCreateDialog::makeConnections()
 
     connect(m_log_combo, SIGNAL(currentIndexChanged(int)),
             this, SLOT(setMaxSize()));
-
-    if (m_ispool) {
-        connect(m_chunk_combo, SIGNAL(currentIndexChanged(int)),
-                this, SLOT(setMaxSize()));
-    }
 }
 
 QWidget* LVCreateDialog::createPhysicalTab()
@@ -188,8 +182,11 @@ QWidget* LVCreateDialog::createPhysicalTab()
     m_stripe_widget = createStripeWidget();
     m_mirror_widget = createMirrorWidget(physical_volumes.size());
 
-    if (m_ispool)
+    if (m_ispool && !m_extend) {
         volume_layout->addWidget(createChunkWidget());
+        connect(m_chunk_combo, SIGNAL(currentIndexChanged(int)),
+                this, SLOT(setMaxSize()));
+    }
 
     volume_layout->addWidget(m_stripe_widget);
     volume_layout->addWidget(m_mirror_widget);
@@ -200,11 +197,13 @@ QWidget* LVCreateDialog::createPhysicalTab()
     return m_physical_tab;
 }
 
-int LVCreateDialog::getChunkSize()  // returns chunks size in bytes
+int LVCreateDialog::getChunkSize()  // returns pool chunk size in bytes
 {
     int chunk = 0x10000; // 64KiB
 
-    if (m_chunk_combo->currentIndex() > 0) {
+    if (m_extend) {
+        chunk = m_lv->getChunkSize();
+    } else if (m_chunk_combo->currentIndex() > 0) {
         chunk = QVariant(m_chunk_combo->itemData(m_chunk_combo->currentIndex(), Qt::UserRole)).toInt();
     } else {
         long long meta = (64 * getSelectorExtents() * m_vg->getExtentSize()) / chunk;
@@ -218,11 +217,13 @@ int LVCreateDialog::getChunkSize()  // returns chunks size in bytes
     return chunk;
 }
 
-int LVCreateDialog::getChunkSize(long long volumeSize)  // returns chunks size in bytes
+int LVCreateDialog::getChunkSize(long long volumeSize)  // returns pool chunk size in bytes
 {
     int chunk = 0x10000; // 64KiB
 
-    if (m_chunk_combo->currentIndex() > 0) {
+    if (m_extend) {
+        chunk = m_lv->getChunkSize();
+    } else if (m_chunk_combo->currentIndex() > 0) {
         chunk = QVariant(m_chunk_combo->itemData(m_chunk_combo->currentIndex(), Qt::UserRole)).toInt();
     } else {
         long long meta = (64 * volumeSize) / chunk;

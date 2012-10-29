@@ -17,7 +17,7 @@
 
 #include <KDialog>
 
-class QString;
+#include <QStringList>
 
 class LogVol;
 
@@ -29,6 +29,8 @@ class LVRemoveDialog : public KDialog
     bool m_bailout;
     QString m_name;
     LogVol *m_lv;
+
+    QStringList getDependentChildren(LogVol *const lv);
 
 public:
     explicit LVRemoveDialog(LogVol *const lv, QWidget *parent = 0);
