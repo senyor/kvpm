@@ -125,6 +125,7 @@ public:
     QList<LogVol *> takeChildren();        // removes the children from the logical volume
     QList<LogVol *> getAllChildrenFlat();  // All children, grandchildren etc. un-nested.
     QList<LogVol *> getSnapshots();        // This will work the same for snapcontainers or the real lv
+    QList<LogVol *> getThinVolumes();      // Volumes under a thin pool
     LogVol *getParent();                   // NULL if this is a "top level" lv
     VolGroup* getVg();
     QString getName();
