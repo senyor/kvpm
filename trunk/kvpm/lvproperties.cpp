@@ -235,7 +235,10 @@ QFrame *LVProperties::generalFrame(int segment)
             layout->addWidget(new QLabel(i18n("Access: r/w")));
         else
             layout->addWidget(new QLabel(i18n("Access: r/o")));
-        
+
+        if (m_lv->isThinPool())
+            layout->addWidget(new QLabel(i18n("Chunk Size: %1", locale->formatByteSize(m_lv->getChunkSize(), 1, dialect))));
+
         layout->addWidget(new QLabel(i18n("Policy: %1", policy)));
 
     } else if ((segment >= 0) && (segment_count > 1)) {
