@@ -798,7 +798,7 @@ QList<LogVol *> LogVol::getSnapshots()
     return snapshots;
 }
 
-QList<LogVol *> LogVol::getThinVolumes()
+QList<LogVol *> LogVol::getThinVolumes()  // not including snap containers
 {
     QList<LogVol *> lvs;
 
@@ -806,7 +806,7 @@ QList<LogVol *> LogVol::getThinVolumes()
         lvs = getAllChildrenFlat();
 
         for (int x = lvs.size() - 1; x >= 0; x--) {
-            if (!lvs[x]->isThinVolume())
+            if (!lvs[x]->isThinVolume() || lvs[x]->isSnapContainer())
                 lvs.removeAt(x);
         }
     }

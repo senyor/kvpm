@@ -67,11 +67,15 @@ void LVSizeChart::populateChart()
             logical_volumes.append(lv);
 
             if (lv->isThinPool()){
-                QListIterator<LogVol *> pool_itr(lv->getChildren());
+                QListIterator<LogVol *> pool_itr(lv->getThinVolumes());
                 while (pool_itr.hasNext()) {
-                    LogVol *const child = pool_itr.next();
-                    if (child->getSnapshotCount())
-                        logical_volumes.append(child->getSnapshots());
+                    QList<LogVol *> cow_snaps(pool_itr.next()->getSnapshots());
+
+                    for (int n = cow_snaps.size() - 1; n >= 0; n--) {
+                        if (cow_snaps[n]->isCowSnap()) {
+                            logical_volumes.append(cow_snaps[n]);
+                        }
+                    }
                 }
             } else if (lv->getSnapshotCount()) {
                 logical_volumes.append(lv->getSnapshots());
