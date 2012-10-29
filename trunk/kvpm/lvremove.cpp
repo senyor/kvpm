@@ -32,7 +32,6 @@ LVRemoveDialog::LVRemoveDialog(LogVol *const lv, QWidget *parent) : KDialog(pare
 {
     setButtons(KDialog::Yes | KDialog::No);
     setDefaultButton(KDialog::No);
-    setCaption(i18n("Delete Volume"));
     QWidget *const dialog_body = new QWidget(this);
     setMainWidget(dialog_body);
 
@@ -49,7 +48,14 @@ LVRemoveDialog::LVRemoveDialog(LogVol *const lv, QWidget *parent) : KDialog(pare
 
     QLabel *label;
 
-    label = new QLabel("<b>Confirm Volume Deletion</b>");
+    if(m_lv->isThinPool()) {
+        setCaption(i18n("Delete Thin Pool"));
+        label = new QLabel("<b>Confirm Thin Pool Deletion</b>");
+    } else {
+        setCaption(i18n("Delete Volume"));
+        label = new QLabel("<b>Confirm Volume Deletion</b>");
+    }
+
     label->setAlignment(Qt::AlignCenter);
     right_layout->addWidget(label);
     right_layout->addSpacing(20);
@@ -59,10 +65,18 @@ LVRemoveDialog::LVRemoveDialog(LogVol *const lv, QWidget *parent) : KDialog(pare
     children.removeDuplicates(); 
 
     if (children.isEmpty()) {
-        right_layout->addWidget(new QLabel(i18n("Delete the volume named: %1?", "<b>" + m_name + "</b>")));
-        right_layout->addWidget(new QLabel(i18n("Any data on it will be lost.")));
+        if(m_lv->isThinPool()) {
+            right_layout->addWidget(new QLabel(i18n("Delete the thin pool named: %1?", "<b>" + m_name + "</b>")));
+        } else {
+            right_layout->addWidget(new QLabel(i18n("Delete the volume named: %1?", "<b>" + m_name + "</b>")));
+            right_layout->addWidget(new QLabel(i18n("Any data on it will be lost.")));
+        }
     } else {
-        right_layout->addWidget(new QLabel(i18n("The volume: <b>%1</b> has dependent volumes.", m_name)));
+        if(m_lv->isThinPool())
+            right_layout->addWidget(new QLabel(i18n("The thin pool: <b>%1</b> has dependent volumes.", m_name)));
+        else
+            right_layout->addWidget(new QLabel(i18n("The volume: <b>%1</b> has dependent volumes.", m_name)));
+
         right_layout->addWidget(new QLabel(i18n("The following volumes will all be deleted:")));
         right_layout->addSpacing(10);
 
