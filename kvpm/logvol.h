@@ -70,6 +70,7 @@ class LogVol
     long long m_extents;         // size in extents
     long long m_fs_size;         // fs size in bytes
     long long m_fs_used;         // bytes used up in fs
+    long long m_chunk_size;      // Size of thin pool chunks
 
     int m_seg_total;             // total number of segments in logical volume
     unsigned long m_major_device; // Unix device major number, if set
@@ -153,6 +154,7 @@ public:
     QString getFstabMountPoint();
     QStringList getTags();
     long long getSpaceUsedOnPv(const QString physicalVolume);
+    long long getChunkSize();
     long long getExtents();
     long long getSize();
     long long getTotalSize();

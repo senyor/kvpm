@@ -94,6 +94,7 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)
     m_virtual     = false;
     m_snap_percent = 0;
     m_data_percent = 0;
+    m_chunk_size   = 0;
 
     value = lvm_lv_get_property(lvmLV, "lv_name");
     m_lv_name = QString(value.value.string).trimmed();
@@ -236,6 +237,9 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)
     case 't':
         m_type = "thin pool";
         m_thin_pool = true;
+        value = lvm_lv_get_property(lvmLV, "chunksize");
+        if (value.is_valid)
+            m_chunk_size = value.value.integer;
         break;
     case 'T':
         m_type = "thin data";
@@ -911,6 +915,11 @@ long long LogVol::getSpaceUsedOnPv(const QString physicalVolume)
     }
 
     return space_used;
+}
+
+long long LogVol::getChunkSize()
+{
+    return m_chunk_size;
 }
 
 long long LogVol::getExtents()
