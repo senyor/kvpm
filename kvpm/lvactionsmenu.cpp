@@ -253,6 +253,9 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
             if (m_lv->isCowOrigin()) {
                 snap_create_action->setEnabled(true);
 
+                if (m_lv->isThinVolume())
+                    thin_snap_action->setEnabled(true);
+
                 if (m_lv->isMirror()) {
                     add_mirror_legs_action->setEnabled(false);
 
