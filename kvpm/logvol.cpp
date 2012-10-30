@@ -883,6 +883,23 @@ QStringList LogVol::getPvNamesAllFlat()
         pv_names.removeDuplicates();
 
         return pv_names;
+    } else if (m_thin_pool) {
+
+        QListIterator<LogVol *> child_itr(getChildren());
+        QStringList pv_names;
+
+        LogVol *child;
+        while (child_itr.hasNext()) {
+            child = child_itr.next();
+            if (child->isThinPoolData() || child->isMetadata())
+                pv_names << child->getPvNamesAllFlat();
+        }
+
+        pv_names.sort();
+        pv_names.removeDuplicates();
+
+        return pv_names;
+
     } else {
         return getPvNamesAll();
     }
