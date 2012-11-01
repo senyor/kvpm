@@ -74,7 +74,7 @@ LVProperties::LVProperties(LogVol *const volume, const int segment, QWidget *par
 
         if (show_fsuuid || show_fslabel)
             layout->addWidget(fsFrame(show_fsuuid, show_fslabel));
-    } else if (!m_lv->isThinPool())
+    } else
         layout->addWidget(physicalVolumesFrame(segment));
 
     if (show_uuid && !m_lv->isSnapContainer() && ((m_lv->getSegmentCount() == 1) || (segment == -1)))
@@ -347,7 +347,7 @@ QFrame *LVProperties::physicalVolumesFrame(int segment)
         label = new QLabel(m_lv->getPoolName());
         label->setToolTip(m_lv->getPoolName());
         layout->addWidget(label);
-    } else if ((m_lv->isMirror() || m_lv->isSnapContainer() || m_lv->isRaid()) && !m_lv->isPvmove()) {
+    } else if ((m_lv->isThinPool() || m_lv->isMirror() || m_lv->isSnapContainer() || m_lv->isRaid()) && !m_lv->isPvmove()) {
         pv_list = m_lv->getPvNamesAllFlat();
         for (int pv = 0; pv < pv_list.size(); pv++) {
             label = new QLabel(pv_list[pv]);
