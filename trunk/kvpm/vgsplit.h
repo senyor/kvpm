@@ -17,6 +17,7 @@
 
 #include <KDialog>
 
+#include <QList>
 #include <QStringList>
 
 class KLineEdit;
@@ -47,11 +48,15 @@ class VGSplitDialog : public KDialog
     QRegExpValidator *m_validator;
     VolGroup *m_vg;
 
-    QWidget *buildLvLists(const QStringList mobileLvNames, const QStringList immobileLvNames);
-    QWidget *buildPvLists(const QStringList mobilePvNames, const QStringList immobilePvNames);
+    QList<LogVol *> getFullLvList();
 
-    void volumeMobility(QStringList &mobileLvNames, QStringList &immobileLvNames,
-                        QStringList &mobilePvNames, QStringList &immobilePvNames);
+    QWidget *buildLvLists(const QStringList mobileLvNames, const QStringList fixedLvNames);
+    QWidget *buildPvLists(const QStringList mobilePvNames, const QStringList fixedPvNames);
+
+    QStringList getPvs(LogVol *const lv);
+
+    void volumeMobility(QStringList &mobileLvNames, QStringList &fixedLvNames,
+                        QStringList &mobilePvNames, QStringList &fixedPvNames);
 
     void pvState(QStringList &open, QStringList &closed);
 
