@@ -31,6 +31,7 @@
 #include <KTabWidget>
 
 #include <QCheckBox>
+#include <QDebug>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QRegExpValidator>
@@ -74,12 +75,12 @@ VGSplitDialog::VGSplitDialog(VolGroup *volumeGroup, QWidget *parent) : KDialog(p
     KTabWidget *const tw = new KTabWidget();
     layout->addWidget(tw);
 
-    QStringList mobile_lv_names, immobile_lv_names, mobile_pv_names, immobile_pv_names;
+    QStringList mobile_lv_names, fixed_lv_names, mobile_pv_names, fixed_pv_names;
 
-    volumeMobility(mobile_lv_names, immobile_lv_names, mobile_pv_names, immobile_pv_names);
+    volumeMobility(mobile_lv_names, fixed_lv_names, mobile_pv_names, fixed_pv_names);
 
-    tw->addTab(buildLvLists(mobile_lv_names, immobile_lv_names), i18n("Logical volume view"));
-    tw->addTab(buildPvLists(mobile_pv_names, immobile_pv_names), i18n("Physical volume view"));
+    tw->addTab(buildLvLists(mobile_lv_names, fixed_lv_names), i18n("Logical volume view"));
+    tw->addTab(buildPvLists(mobile_pv_names, fixed_pv_names), i18n("Physical volume view"));
 
     enableLvArrows();
     enablePvArrows();
@@ -163,7 +164,7 @@ void VGSplitDialog::deactivate()
     return;
 }
 
-QWidget *VGSplitDialog::buildLvLists(const QStringList mobileLvNames, const QStringList immobileLvNames)
+QWidget *VGSplitDialog::buildLvLists(const QStringList mobileLvNames, const QStringList fixedLvNames)
 {
     QWidget *const lv_list = new QWidget();
     QHBoxLayout *const layout = new QHBoxLayout;
@@ -187,8 +188,8 @@ QWidget *VGSplitDialog::buildLvLists(const QStringList mobileLvNames, const QStr
         lv_item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
         m_left_lv_list->addItem(lv_item);
     }
-    for (int x = immobileLvNames.size() - 1; x >= 0; x--) {
-        lv_item = new QListWidgetItem(immobileLvNames[x]);
+    for (int x = fixedLvNames.size() - 1; x >= 0; x--) {
+        lv_item = new QListWidgetItem(fixedLvNames[x]);
         lv_item->setFlags(Qt::NoItemFlags);
         m_left_lv_list->addItem(lv_item);
     }
@@ -226,7 +227,7 @@ QWidget *VGSplitDialog::buildLvLists(const QStringList mobileLvNames, const QStr
     return lv_list;
 }
 
-QWidget *VGSplitDialog::buildPvLists(const QStringList mobilePvNames, const QStringList immobilePvNames)
+QWidget *VGSplitDialog::buildPvLists(const QStringList mobilePvNames, const QStringList fixedPvNames)
 {
     QWidget *const pv_list = new QWidget();
     QHBoxLayout *const layout = new QHBoxLayout;
@@ -236,8 +237,6 @@ QWidget *VGSplitDialog::buildPvLists(const QStringList mobilePvNames, const QStr
     m_pv_add = new KPushButton(KIcon("arrow-right"), "Add");
     m_pv_remove = new KPushButton(KIcon("arrow-left"), "Remove");
 
-    QList<PhysVol *> pvs = m_vg->getPhysicalVolumes();
-    QList<LogVol *>  lvs = m_vg->getLogicalVolumes();
     QListWidgetItem *pv_item;
     QStringList open_pv_names;
     QStringList closed_pv_names;
@@ -255,8 +254,8 @@ QWidget *VGSplitDialog::buildPvLists(const QStringList mobilePvNames, const QStr
         m_left_pv_list->addItem(pv_item);
     }
 
-    for (int x = immobilePvNames.size() - 1; x >= 0; x--) {
-        pv_item = new QListWidgetItem(immobilePvNames[x]);
+    for (int x = fixedPvNames.size() - 1; x >= 0; x--) {
+        pv_item = new QListWidgetItem(fixedPvNames[x]);
         pv_item->setFlags(Qt::NoItemFlags);
         m_left_pv_list->addItem(pv_item);
     }
@@ -401,72 +400,62 @@ void VGSplitDialog::moveNames(const bool isLvMove,
     validateOK();
 }
 
-void VGSplitDialog::volumeMobility(QStringList &mobileLvNames, QStringList &immobileLvNames,
-                                   QStringList &mobilePvNames, QStringList &immobilePvNames)
+void VGSplitDialog::volumeMobility(QStringList &mobileLvNames, QStringList &fixedLvNames,
+                                   QStringList &mobilePvNames, QStringList &fixedPvNames)
 {
-    QStringList all_pv_names;
-    const QList<LogVol *>  lvs = m_vg->getLogicalVolumes();
+    const QList<LogVol *>  lvs = getFullLvList();
     const QList<PhysVol *> pvs = m_vg->getPhysicalVolumes();
-    LogVol *temp;
-    bool movable = true;
+
     bool growing = true;
-    int immobile_count = 0;
+    int list_size = 0;
 
     mobileLvNames.clear();
     mobilePvNames.clear();
-    immobileLvNames.clear();
-    immobilePvNames.clear();
+    fixedLvNames.clear();
+    fixedPvNames.clear();
 
-    pvState(immobilePvNames, mobilePvNames);
+    pvState(fixedPvNames, mobilePvNames);
+
+    QStringList lv_pv_names;
 
     while (growing) {
+
+        growing = false;
+
         for (int x = lvs.size() - 1; x >= 0 ; x--) {
+            lv_pv_names = getPvs(lvs[x]);
 
-            all_pv_names = lvs[x]->getPvNamesAllFlat();
-            movable = true;
-
-            for (int y = all_pv_names.size() - 1; y >= 0; y--) {
-                for (int z = immobilePvNames.size() - 1; z >= 0; z--) {
-                    if (immobilePvNames[z] == all_pv_names[y]) {
-                        movable = false;
+            for (int y = lv_pv_names.size() - 1; y >= 0; y--) {
+                for (int z = fixedPvNames.size() - 1; z >= 0; z--) {
+                    if (fixedPvNames[z] == lv_pv_names[y]) {
+                        fixedPvNames.append(lv_pv_names);
+                        fixedLvNames.append(lvs[x]->getName());
                         break;
                     }
                 }
             }
-
-            if (!movable)
-                immobileLvNames.append(lvs[x]->getName());
         }
 
-        for (int x = immobileLvNames.size() - 1; x >= 0; x--) {
-            temp = m_vg->getLvByName(immobileLvNames[x]);
+        fixedLvNames.removeDuplicates();
+        fixedPvNames.removeDuplicates();
 
-            if (temp->isCowOrigin() && (temp->getParent() != NULL))
-                immobilePvNames.append(temp->getParent()->getPvNamesAllFlat());
-            else
-                immobilePvNames.append(temp->getPvNamesAllFlat());
-        }
-
-        immobilePvNames.removeDuplicates();
-        immobileLvNames.removeDuplicates();
-
-        if (immobileLvNames.size() > immobile_count)
+        if (fixedLvNames.size() + fixedPvNames.size() > list_size) {
             growing = true;
-        else
-            growing = false;
-
-        immobile_count = immobileLvNames.size();
+            list_size = fixedLvNames.size() + fixedPvNames.size();
+        }
     }
 
-    mobilePvNames.clear();
+    fixedLvNames.sort();
+    fixedPvNames.sort();
     mobileLvNames.clear();
+    mobilePvNames.clear();
 
     for (int x = lvs.size() - 1; x >= 0; x--)
         mobileLvNames.append(lvs[x]->getName());
 
     for (int x = mobileLvNames.size() - 1; x >= 0; x--) {
-        for (int y = immobileLvNames.size() - 1; y >= 0; y--) {
-            if (mobileLvNames[x] == immobileLvNames[y]) {
+        for (int y = fixedLvNames.size() - 1; y >= 0; y--) {
+            if (mobileLvNames[x] == fixedLvNames[y]) {
                 mobileLvNames.removeAt(x);
                 break;
             }
@@ -477,33 +466,48 @@ void VGSplitDialog::volumeMobility(QStringList &mobileLvNames, QStringList &immo
         mobilePvNames.append(pvs[x]->getName());
 
     for (int x = mobilePvNames.size() - 1; x >= 0; x--) {
-        for (int y = immobilePvNames.size() - 1; y >= 0; y--) {
-            if (mobilePvNames[x] == immobilePvNames[y]) {
+        for (int y = fixedPvNames.size() - 1; y >= 0; y--) {
+            if (mobilePvNames[x] == fixedPvNames[y]) {
                 mobilePvNames.removeAt(x);
                 break;
             }
         }
     }
 
-    mobilePvNames.removeDuplicates();
     mobileLvNames.removeDuplicates();
+    mobilePvNames.removeDuplicates();
+    mobileLvNames.sort();
+    mobilePvNames.sort();
 }
 
 void VGSplitDialog::pvState(QStringList &open, QStringList &closed)
 {
-    const QList<PhysVol *> pvs = m_vg->getPhysicalVolumes();
-    const QList<LogVol *>  lvs = m_vg->getLogicalVolumes();
-    QList<LogVol *> snaps;
+    const QList<LogVol *>  lvs = getFullLvList();
 
     for (int x = lvs.size() - 1; x >= 0; x--) {
         if (lvs[x]->isOpen()) {
             open.append(lvs[x]->getPvNamesAllFlat());
-        } else if (lvs[x]->isSnapContainer() || lvs[x]->isCowOrigin()) {
-            snaps = lvs[x]->getSnapshots();
-            for (int y = snaps.size() - 1; y >= 0; y--) {
-                if (snaps[y]->isOpen()) {
-                    open.append(lvs[x]->getPvNamesAllFlat());   // if any snap is open the whole container is open
-                    break;
+
+            if (lvs[x]->isSnapContainer()) {
+                const QList<LogVol *> snaps(lvs[x]->getSnapshots());
+
+                for (int y = snaps.size() - 1; y >= 0; y--) {
+                    if (snaps[y]->isOpen()) {
+                        open.append(lvs[x]->getPvNamesAllFlat());   // if any snap is open the whole container is open
+                        break;
+                    }
+                }
+            }
+
+            if (lvs[x]->isThinVolume()) {
+                LogVol *const pool = m_vg->getLvByName(lvs[x]->getPoolName());
+                const QList<LogVol *> thinvols(pool->getThinVolumes());
+
+                for (int y = thinvols.size() - 1; y >= 0; y--) {
+                    if (thinvols[y]->isOpen()) {  // if any thin volume is open the whole pool is open
+                        open.append(m_vg->getLvByName(lvs[x]->getPoolName())->getPvNamesAllFlat()); 
+                        break;
+                    }
                 }
             }
         }
@@ -511,6 +515,7 @@ void VGSplitDialog::pvState(QStringList &open, QStringList &closed)
 
     open.removeDuplicates();
 
+    const QList<PhysVol *> pvs = m_vg->getPhysicalVolumes();
     QStringList all_pv_names;
 
     for (int x = pvs.size() - 1; x >= 0; x--)
@@ -531,8 +536,7 @@ void VGSplitDialog::pvState(QStringList &open, QStringList &closed)
 void VGSplitDialog::movesWithVolume(const bool isLV, const QString name,
                                     QStringList &movingPvNames, QStringList &movingLvNames)
 {
-    QStringList all_pv_names;
-    const QList<LogVol *>  lvs = m_vg->getLogicalVolumes();
+    const QList<LogVol *>  lvs = getFullLvList();
     const QList<PhysVol *> pvs = m_vg->getPhysicalVolumes();
     LogVol *temp;
     bool growing = true;
@@ -549,6 +553,8 @@ void VGSplitDialog::movesWithVolume(const bool isLV, const QString name,
 
         if (temp->isCowOrigin() && (temp->getParent() != NULL))
             movingPvNames = temp->getParent()->getPvNamesAllFlat();
+        else if (temp->isThinVolume())
+            movingPvNames = m_vg->getLvByName(temp->getPoolName())->getPvNamesAllFlat();
         else
             movingPvNames = temp->getPvNamesAllFlat();
     } else {
@@ -557,19 +563,16 @@ void VGSplitDialog::movesWithVolume(const bool isLV, const QString name,
         movingPvNames.append(name);
     }
 
+    QStringList lv_pv_names;
+
     while (growing) {
         for (int x = lvs.size() - 1; x >= 0 ; x--) {
-
-            if (lvs[x]->isCowOrigin() && (lvs[x]->getParent() != NULL))
-                all_pv_names = lvs[x]->getParent()->getPvNamesAllFlat();
-            else
-                all_pv_names = lvs[x]->getPvNamesAllFlat();
-
+            lv_pv_names = getPvs(lvs[x]);
             moving = false;
 
-            for (int y = all_pv_names.size() - 1; y >= 0; y--) {
+            for (int y = lv_pv_names.size() - 1; y >= 0; y--) {
                 for (int z = movingPvNames.size() - 1; z >= 0; z--) {
-                    if (movingPvNames[z] == all_pv_names[y]) {
+                    if (movingPvNames[z] == lv_pv_names[y]) {
                         moving = true;
                         break;
                     }
@@ -611,3 +614,48 @@ bool VGSplitDialog::bailout()
     }
 }
 
+QList<LogVol *> VGSplitDialog::getFullLvList()
+{
+    QList<LogVol *>  lvs = m_vg->getLogicalVolumes();
+
+    for (int x = lvs.size() - 1; x >= 0; x--) { // find and list any thin volumes 
+        if (lvs[x]->isThinPool())
+            lvs.append(lvs[x]->getThinVolumes());
+    }
+
+    for (int x = lvs.size() - 1; x >= 0; x--) { // find and list any snapshots 
+        if (lvs[x]->isCowOrigin()) {
+            QList<LogVol *>  snaps(lvs[x]->getSnapshots());
+            for (int y = snaps.size() - 1; y >= 0; y--) {
+                if (snaps[y]->isCowSnap())
+                    lvs.append(snaps[y]);
+            }
+        }
+    }
+
+    return lvs;
+}
+
+// Returns all the pvs associated with this volume including the pvs
+// of any snapshots under it and for the pool if it is a thin volume.
+
+QStringList VGSplitDialog::getPvs(LogVol *const lv)
+{
+    QStringList names;
+
+    if (lv->isThinVolume())
+        names = m_vg->getLvByName(lv->getPoolName())->getPvNamesAllFlat();
+    else
+        names = lv->getPvNamesAllFlat();
+    
+    if (lv->isCowOrigin()) {
+        if (lv->getParent() != NULL && !lv->isSnapContainer())
+            names.append(lv->getParent()->getPvNamesAllFlat());
+        else
+            names.append(lv->getPvNamesAllFlat());
+    }
+    
+    names.removeDuplicates();
+
+    return names;
+}
