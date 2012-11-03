@@ -444,12 +444,18 @@ long long LvCreateDialogBase::getSelectorExtents()
 
 QString LvCreateDialogBase::getName()
 {
-    return m_name_edit->text();
+    if (m_name_edit != NULL)
+        return m_name_edit->text();
+    else 
+        return QString();
 }
 
 QString LvCreateDialogBase::getTag()
 {
-    return m_tag_edit->text();
+    if (m_tag_edit != NULL)
+        return m_tag_edit->text();
+    else 
+        return QString();
 }
 
 bool LvCreateDialogBase::getPersistent()
