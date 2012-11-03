@@ -55,12 +55,6 @@ LVChangeDialog::LVChangeDialog(LogVol *const volume, QWidget *parent) :
     tab_widget->addTab(buildGeneralTab(),  i18nc("The standard or basic options", "General"));
     tab_widget->addTab(buildAdvancedTab(), i18nc("Less used or complex options", "Advanced"));
 
-    connect(m_alloc_box,         SIGNAL(clicked()), this, SLOT(resetOkButton()));
-    connect(m_normal_button,     SIGNAL(clicked()), this, SLOT(resetOkButton()));
-    connect(m_contiguous_button, SIGNAL(clicked()), this, SLOT(resetOkButton()));
-    connect(m_anywhere_button,   SIGNAL(clicked()), this, SLOT(resetOkButton()));
-    connect(m_cling_button,      SIGNAL(clicked()), this, SLOT(resetOkButton()));
-    connect(m_inherit_button,    SIGNAL(clicked()), this, SLOT(resetOkButton()));
     connect(m_available_check,   SIGNAL(clicked()), this, SLOT(resetOkButton()));
     connect(m_ro_check,          SIGNAL(clicked()), this, SLOT(resetOkButton()));
     connect(m_refresh_check,     SIGNAL(clicked()), this, SLOT(resetOkButton()));
@@ -138,47 +132,58 @@ QWidget *LVChangeDialog::buildGeneralTab()
     m_deltag_combo->setCurrentIndex(0);
     del_tag_layout->addWidget(m_deltag_combo);
 
-    m_alloc_box = new QGroupBox(i18n("Change Allocation Policy"));
-    m_alloc_box->setCheckable(true);
-    m_alloc_box->setChecked(false);
-    QVBoxLayout *alloc_box_layout = new QVBoxLayout;
-    m_normal_button     = new QRadioButton(i18nc("The usual way", "Normal"));
-    m_contiguous_button = new QRadioButton(i18n("Contiguous"));
-    m_anywhere_button   = new QRadioButton(i18n("Anywhere"));
-    m_cling_button      = new QRadioButton(i18n("Cling"));
-    m_inherit_button    = new QRadioButton(i18nc("Inherited from the parent group", "Inherited"));
+    if (!m_lv->isThinVolume()) {
+        m_alloc_box = new QGroupBox(i18n("Change Allocation Policy"));
+        m_alloc_box->setCheckable(true);
+        m_alloc_box->setChecked(false);
+        QVBoxLayout *alloc_box_layout = new QVBoxLayout;
+        m_normal_button     = new QRadioButton(i18nc("The usual way", "Normal"));
+        m_contiguous_button = new QRadioButton(i18n("Contiguous"));
+        m_anywhere_button   = new QRadioButton(i18n("Anywhere"));
+        m_cling_button      = new QRadioButton(i18n("Cling"));
+        m_inherit_button    = new QRadioButton(i18nc("Inherited from the parent group", "Inherited"));
+        
+        AllocationPolicy policy = m_lv->getPolicy();
 
-    AllocationPolicy policy = m_lv->getPolicy();
-
-    if (policy == CONTIGUOUS) {
-        m_contiguous_button->setEnabled(false);
-        m_contiguous_button->setText("Contiguous (current)");
-        m_normal_button->setChecked(true);
-    } else if (policy == INHERITED) {
-        m_inherit_button->setEnabled(false);
-        m_inherit_button->setText("Inherited (current)");
-        m_normal_button->setChecked(true);
-    } else if (policy == ANYWHERE) {
-        m_anywhere_button->setEnabled(false);
-        m_anywhere_button->setText("Anywhere (current)");
-        m_normal_button->setChecked(true);
-    } else if (policy == CLING) {
-        m_cling_button->setEnabled(false);
-        m_cling_button->setText("Cling (current)");
-        m_normal_button->setChecked(true);
+        if (policy == CONTIGUOUS) {
+            m_contiguous_button->setEnabled(false);
+            m_contiguous_button->setText("Contiguous (current)");
+            m_normal_button->setChecked(true);
+        } else if (policy == INHERITED) {
+            m_inherit_button->setEnabled(false);
+            m_inherit_button->setText("Inherited (current)");
+            m_normal_button->setChecked(true);
+        } else if (policy == ANYWHERE) {
+            m_anywhere_button->setEnabled(false);
+            m_anywhere_button->setText("Anywhere (current)");
+            m_normal_button->setChecked(true);
+        } else if (policy == CLING) {
+            m_cling_button->setEnabled(false);
+            m_cling_button->setText("Cling (current)");
+            m_normal_button->setChecked(true);
+        } else {
+            m_normal_button->setEnabled(false);
+            m_normal_button->setText("Normal (current)");
+            m_cling_button->setChecked(true);
+        }
+        
+        alloc_box_layout->addWidget(m_normal_button);
+        alloc_box_layout->addWidget(m_contiguous_button);
+        alloc_box_layout->addWidget(m_anywhere_button);
+        alloc_box_layout->addWidget(m_cling_button);
+        alloc_box_layout->addWidget(m_inherit_button);
+        m_alloc_box->setLayout(alloc_box_layout);
+        layout->addWidget(m_alloc_box);
+        
+        connect(m_alloc_box,         SIGNAL(clicked()), this, SLOT(resetOkButton()));
+        connect(m_normal_button,     SIGNAL(clicked()), this, SLOT(resetOkButton()));
+        connect(m_contiguous_button, SIGNAL(clicked()), this, SLOT(resetOkButton()));
+        connect(m_anywhere_button,   SIGNAL(clicked()), this, SLOT(resetOkButton()));
+        connect(m_cling_button,      SIGNAL(clicked()), this, SLOT(resetOkButton()));
+        connect(m_inherit_button,    SIGNAL(clicked()), this, SLOT(resetOkButton()));
     } else {
-        m_normal_button->setEnabled(false);
-        m_normal_button->setText("Normal (current)");
-        m_cling_button->setChecked(true);
+        m_alloc_box = NULL;
     }
-
-    alloc_box_layout->addWidget(m_normal_button);
-    alloc_box_layout->addWidget(m_contiguous_button);
-    alloc_box_layout->addWidget(m_anywhere_button);
-    alloc_box_layout->addWidget(m_cling_button);
-    alloc_box_layout->addWidget(m_inherit_button);
-    m_alloc_box->setLayout(alloc_box_layout);
-    layout->addWidget(m_alloc_box);
 
     return tab;
 }
@@ -340,18 +345,20 @@ QStringList LVChangeDialog::arguments()
             args << "--addtag" << m_tag_edit->text();
     }
 
-    if (m_alloc_box->isChecked()) {
-        args << "--alloc";
-        if (m_contiguous_button->isChecked())
-            args << "contiguous";
-        else if (m_anywhere_button->isChecked())
-            args << "anywhere";
-        else if (m_cling_button->isChecked())
-            args << "cling";
-        else if (m_inherit_button->isChecked())
-            args << "inherit";
-        else
-            args << "normal";
+    if (m_alloc_box != NULL) {
+        if (m_alloc_box->isChecked()) {
+            args << "--alloc";
+            if (m_contiguous_button->isChecked())
+                args << "contiguous";
+            else if (m_anywhere_button->isChecked())
+                args << "anywhere";
+            else if (m_cling_button->isChecked())
+                args << "cling";
+            else if (m_inherit_button->isChecked())
+                args << "inherit";
+            else
+                args << "normal";
+        }
     }
 
     args << m_lv->getFullName();
