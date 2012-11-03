@@ -364,6 +364,7 @@ bool LvCreateDialogBase::isValid()
     bool valid = false;
 
     bool valid_name  = true;
+    bool valid_tag   = true;
     bool valid_persistent = true;
 
     if (!m_extend) {
@@ -376,6 +377,15 @@ bool LvCreateDialogBase::isValid()
             valid_name = true;
         else
             valid_name = false;
+
+        QString tag = m_tag_edit->text();
+
+        if (m_tag_validator->validate(tag, pos) == QValidator::Acceptable)
+            valid_tag = true;
+        else if (tag.isEmpty() && !m_ispool)
+            valid_tag = true;
+        else
+            valid_tag = false;
         
         QString major = m_major_edit->text();
         QString minor = m_minor_edit->text();
@@ -390,7 +400,7 @@ bool LvCreateDialogBase::isValid()
             valid_persistent = true;
     }
 
-    if (!valid_persistent || !valid_name) {
+    if (!valid_persistent || !valid_name || !valid_tag) {
         valid = false;
     } else if (m_size_selector == NULL) {
         valid = true;
