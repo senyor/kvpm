@@ -137,7 +137,7 @@ void VGSplitDialog::deactivate()
 
     for (int x = m_right_lv_list->count() - 1; x >= 0; x--)
         moving_lvs << m_right_lv_list->item(x)->data(Qt::DisplayRole).toString();
-
+    qDebug() << "Move --->" << moving_lvs;
     if ((vg_dm = lvm_vg_open(lvm, vg_name.data(), "w", 0x0))) {
 
         for (int x = 0; x < moving_lvs.size(); x++) {
