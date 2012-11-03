@@ -970,7 +970,7 @@ QStringList LVCreateDialog::args()
 
     args << "--extents" << QString("+%1").arg(extents);
 
-    if (m_ispool) {                                       // create a thin pool
+    if (m_ispool && !m_extend) {                        // create a thin pool
         program_to_run = "lvcreate";
         args << "--chunksize" << QString("%1k").arg(getChunkSize()/1024);
         args << "--thinpool" << getName();

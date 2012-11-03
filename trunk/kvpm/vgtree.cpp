@@ -164,6 +164,9 @@ QTreeWidgetItem *VGTree::loadItem(LogVol *lv, QTreeWidgetItem *item)
     if (is_sc && !was_sc)
         was_expanded = item->isExpanded();
 
+    if (lv->isThinPool())
+        item->setExpanded(true);
+
     if (!is_sc && was_sc) {
         for (int x = 0; x < old_child_count; x++) {
             if (lv_name == item->child(x)->data(0, Qt::DisplayRole).toString())
