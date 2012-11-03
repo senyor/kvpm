@@ -239,7 +239,8 @@ QFrame *LVProperties::generalFrame(int segment)
         if (m_lv->isThinPool())
             layout->addWidget(new QLabel(i18n("Chunk Size: %1", locale->formatByteSize(m_lv->getChunkSize(), 1, dialect))));
 
-        layout->addWidget(new QLabel(i18n("Policy: %1", policy)));
+        if (!m_lv->isThinVolume())
+            layout->addWidget(new QLabel(i18n("Policy: %1", policy)));
 
     } else if ((segment >= 0) && (segment_count > 1)) {
         extents = m_lv->getSegmentExtents(segment);
@@ -302,8 +303,10 @@ QFrame *LVProperties::generalFrame(int segment)
             layout->addWidget(new QLabel(i18n("Access: r/w")));
         else
             layout->addWidget(new QLabel(i18n("Access: r/o")));
-        
-        layout->addWidget(new QLabel(i18n("Policy: %1", policy)));
+
+        if (!m_lv->isThinVolume())
+            layout->addWidget(new QLabel(i18n("Policy: %1", policy)));
+
     } else {
         extents = m_lv->getExtents();
         layout->addWidget(new QLabel(i18n("Extents: %1", extents)));
