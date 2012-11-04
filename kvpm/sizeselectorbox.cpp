@@ -91,8 +91,10 @@ SizeSelectorBox::SizeSelectorBox(long long unitSize, long long minSize, long lon
         setTitle(i18n("Volume Size"));
         if (!m_is_new) {
             m_size_box = new QCheckBox(i18n("Lock selected size"));
-            m_size_box->setChecked(false);
             layout->addWidget(m_size_box);
+            m_size_box->setChecked(false);
+            m_size_box->setEnabled(false);
+            m_size_box->hide();
             setConstraints(false);
 
             connect(m_size_box, SIGNAL(toggled(bool)),
@@ -248,8 +250,10 @@ void SizeSelectorBox::setConstrainedMax(long long max)
     if (m_constrained_min > m_constrained_max)
         m_constrained_min = m_constrained_max;
 
-    if (m_current_size > m_constrained_max)
-        setCurrentSize(m_constrained_max);
+    if (!m_is_volume) {
+        if (m_current_size > m_constrained_max)
+            setCurrentSize(m_constrained_max);
+    }
 
     updateValidator();
     updateSlider();
