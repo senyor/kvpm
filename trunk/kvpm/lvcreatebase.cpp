@@ -22,6 +22,7 @@
 
 #include <KConfigSkeleton>
 #include <KGlobal>
+#include <KIcon>
 #include <KLineEdit>
 #include <KLocale>
 #include <KMessageBox>
@@ -224,13 +225,18 @@ QWidget* LvCreateDialogBase::createGeneralTab(bool showNameTag, bool showRo, boo
                 this, SLOT(resetOkButton()));
     }
 
+    m_warning_widget = createWarningWidget();
+    misc_layout->addWidget(m_warning_widget);
+    m_warning_widget->hide();
+
     m_maxextents_label = new QLabel();
     m_stripes_label = new QLabel();
     m_maxsize_label = new QLabel();
     m_maxsize_label->setWordWrap(true);
+    misc_layout->addWidget(m_maxsize_label);
     misc_layout->addWidget(m_maxextents_label);
     misc_layout->addWidget(m_stripes_label);
-    misc_layout->addWidget(m_maxsize_label);
+    misc_layout->addStretch();
 
     m_general_layout->addWidget(misc_box);
     if (!showMisc)
@@ -357,6 +363,36 @@ bool LvCreateDialogBase::getMonitor()
 bool LvCreateDialogBase::getUdev()
 {
     return m_udevsync_check->isChecked();
+}
+
+
+// Returns true if the selected size is smaller than the current
+// size when extending or less than zero for a new volume.
+// NOTE: returns false for size zero new volumes and volumes
+// of the exact same size when extending! The function isValid()
+// will return false for those conditions however.
+
+bool LvCreateDialogBase::isLow()
+{ 
+    if (m_size_selector != NULL) {
+        if (m_size_selector->getCurrentSize() == -1) {  // if the size selector line edit is empty
+            return false;
+        } else if (!m_size_selector->isValid()) {
+            if (m_extend) {
+                if (m_size_selector->getCurrentSize() >= m_size_selector->getMinimumSize())
+                    return false;
+                else
+                    return true;
+            } else {
+                if (m_size_selector->getCurrentSize() >= 0)
+                    return false;
+                else
+                    return true;
+            }
+        }
+    }
+
+    return false;
 }
 
 bool LvCreateDialogBase::isValid()
@@ -509,6 +545,34 @@ void LvCreateDialogBase::zeroReadOnlyEnable()
 void LvCreateDialogBase::setPhysicalTab(QWidget *const tab)
 {
     m_tab_widget->insertTab(1, tab, i18n("Physical layout"));
+}
+
+QWidget* LvCreateDialogBase::createWarningWidget()
+{
+    QWidget *const widget = new QWidget();
+    QHBoxLayout *const layout = new QHBoxLayout();
+
+    QLabel *const exclamation = new QLabel(); 
+    exclamation->setPixmap(KIcon("dialog-warning").pixmap(32, 32));
+    m_warning_label = new QLabel();
+    layout->addWidget(exclamation);
+    layout->addWidget(m_warning_label);
+    layout->addStretch();
+    widget->setLayout(layout);
+
+    return widget;
+}
+
+void LvCreateDialogBase::setWarningLabel(const QString message)
+{
+    m_warning_widget->show();
+    m_warning_label->setText(message);
+}
+
+void LvCreateDialogBase::clearWarningLabel()
+{
+    m_warning_label->setText("");
+    m_warning_widget->hide();
 }
 
 void LvCreateDialogBase::setInfoLabels(VolumeType type, int stripes, int mirrors, long long maxextents, long long maxsize)

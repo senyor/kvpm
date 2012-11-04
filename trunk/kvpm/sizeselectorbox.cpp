@@ -234,6 +234,11 @@ bool SizeSelectorBox::setCurrentSize(long long size)
 void SizeSelectorBox::updateSlider()
 {
     int percent = qRound(100.0 * ((double)(m_current_size - m_constrained_min) / (m_constrained_max - m_constrained_min)));
+    if (percent > 100)
+        percent = 100;
+    else if (percent < 0)
+        percent = 0;
+
     m_size_slider->setValue(percent);
 }
 
@@ -380,9 +385,25 @@ void SizeSelectorBox::setToEdit(QString size)
         if ((proposed_size >= m_constrained_min) && (proposed_size <= m_constrained_max)) {
             m_current_size = proposed_size;
             m_is_valid = true;
-
             emit stateChanged();
             return;
+        }
+    }
+
+    if (m_is_volume) { // if the size it out of range we try to set it anyway
+
+        if (size.isEmpty()) {
+            m_current_size = -1; 
+        } else {
+            if (m_suffix_combo->currentIndex() == 0)
+                proposed_size = size.toLongLong();
+            else
+                proposed_size = convertSizeToUnits(m_suffix_combo->currentIndex(), size.toDouble());
+            
+            if (proposed_size < 0)
+                proposed_size = 0;
+            
+            m_current_size = proposed_size; 
         }
     }
 
