@@ -43,8 +43,8 @@ class LvCreateDialogBase : public KDialog
 
     QVBoxLayout *m_general_layout;
 
-    bool m_use_si_units;    // true == Metric SI sizes = MB and GB, otherise use MiB, GiB etc.
-    bool m_extend;          // true == we are extending a volume
+    bool m_use_si_units;  // true == Metric SI sizes = MB and GB, otherise use MiB, GiB etc.
+    bool m_extend;        // true == we are extending a volume
     bool m_ispool;        // true == creating or extending a thin pool
 
     SizeSelectorBox *m_size_selector;
@@ -65,7 +65,8 @@ class LvCreateDialogBase : public KDialog
    
     KTabWidget *m_tab_widget;
 
-    QLabel *m_maxextents_label, *m_stripes_label, *m_maxsize_label, *m_warning_label;
+    QLabel *m_maxextents_label, *m_stripes_label, *m_maxsize_label, 
+           *m_warning_label,    *m_current_label;
 
     QWidget *m_warning_widget;
     QWidget *createWarningWidget();
