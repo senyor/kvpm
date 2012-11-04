@@ -67,8 +67,6 @@ LvCreateDialogBase::LvCreateDialogBase(bool extend, bool snap, bool thin, bool i
         show_zero = false;
         show_skip_sync = false;
         show_monitor = false;
-        if (thin)
-            show_misc = false;
     } else if (snap && !thin) {
         show_zero = false;
         show_skip_sync = false;
@@ -229,10 +227,14 @@ QWidget* LvCreateDialogBase::createGeneralTab(bool showNameTag, bool showRo, boo
     misc_layout->addWidget(m_warning_widget);
     m_warning_widget->hide();
 
+    m_current_label    = new QLabel();
     m_maxextents_label = new QLabel();
-    m_stripes_label = new QLabel();
-    m_maxsize_label = new QLabel();
+    m_stripes_label    = new QLabel();
+    m_maxsize_label    = new QLabel();
     m_maxsize_label->setWordWrap(true);
+    misc_layout->addWidget(m_current_label);
+    if (!m_extend)
+        m_current_label->hide();
     misc_layout->addWidget(m_maxsize_label);
     misc_layout->addWidget(m_maxextents_label);
     misc_layout->addWidget(m_stripes_label);
@@ -519,6 +521,16 @@ void LvCreateDialogBase::initializeSizeSelector(long long extentSize, long long 
 
     connect(m_size_selector, SIGNAL(stateChanged()),
             this, SLOT(resetOkButton()));
+
+    KLocale::BinaryUnitDialect dialect;
+    KLocale *const locale = KGlobal::locale();
+
+    if (m_use_si_units)
+        dialect = KLocale::MetricBinaryDialect;
+    else
+        dialect = KLocale::IECBinaryDialect;
+
+    m_current_label->setText(i18n("Current size: %1", locale->formatByteSize(currentExtents * extentSize, 1, dialect)));
 }
 
 void LvCreateDialogBase::setSelectorMaxExtents(long long max)
@@ -585,8 +597,8 @@ void LvCreateDialogBase::setInfoLabels(VolumeType type, int stripes, int mirrors
     else
         dialect = KLocale::IECBinaryDialect;
 
-    m_maxsize_label->setText(i18n("Maximum volume size: %1", locale->formatByteSize(maxsize, 1, dialect)));
-    m_maxextents_label->setText(i18n("Maximum volume extents: %1", maxextents));
+    m_maxsize_label->setText(i18n("Maximum size: %1", locale->formatByteSize(maxsize, 1, dialect)));
+    m_maxextents_label->setText(i18n("Maximum extents: %1", maxextents));
 
     if (type == LINEAR) {
         if (stripes > 1)
