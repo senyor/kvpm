@@ -378,7 +378,7 @@ void SizeSelectorBox::setToEdit(QString size)
     if (m_size_validator->validate(size, x) == QValidator::Acceptable) {
 
         if (m_suffix_combo->currentIndex() == 0 && m_is_volume)
-            proposed_size = size.toLongLong();
+            proposed_size = qRound64(size.toDouble());
         else
             proposed_size = convertSizeToUnits(m_suffix_combo->currentIndex(), size.toDouble());
 
