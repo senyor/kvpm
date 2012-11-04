@@ -65,7 +65,10 @@ class LvCreateDialogBase : public KDialog
    
     KTabWidget *m_tab_widget;
 
-    QLabel *m_maxextents_label, *m_stripes_label, *m_maxsize_label;
+    QLabel *m_maxextents_label, *m_stripes_label, *m_maxsize_label, *m_warning_label;
+
+    QWidget *m_warning_widget;
+    QWidget *createWarningWidget();
 
     QWidget* createGeneralTab(const bool showNameTag, const bool showRo, const bool showZero, const bool showMisc);
     QWidget* createAdvancedTab(const bool showPersistent, const bool showSkipSync, const bool showMonitor);
@@ -82,6 +85,7 @@ protected:
     virtual QStringList args() = 0;
     virtual long long getLargestVolume() = 0;
     virtual bool isValid();    // Has a valid size, name, major number, minor number and tag
+    bool isLow();    // size too small
 
     void setSkipSync(const bool skip);
     void setReadOnly(const bool ro);
@@ -95,7 +99,9 @@ protected:
     void enableSkipSync(const bool skip);
     void enableReadOnly(const bool ro);
     void enableZero(const bool zero);
-    void setInfoLabels(VolumeType type, int stripes, int mirrors, long long maxextents, long long maxsize);
+    void setInfoLabels(const VolumeType type, const int stripes, const int mirrors, const long long maxextents, const long long maxsize);
+    void setWarningLabel(const QString message);
+    void clearWarningLabel();
     void setSelectorMaxExtents(const long long max);
     long long getSelectorExtents();
 

@@ -534,18 +534,35 @@ void LVCreateDialog::resetOkButton()
     const long long rounded  = roundExtentsToStripes(selected);
 
     if (!LvCreateDialogBase::isValid()) {
+        if (rounded > max) {
+            setWarningLabel("Selected size exceeds maximum size");
+        } else if (m_extend) {
+            if (isLow())
+                setWarningLabel(i18n("Selected size less than existing size"));
+            else
+                clearWarningLabel();
+        } else {
+            clearWarningLabel();
+        }
+
         enableButtonOk(false);
     } else {
         if (m_extend) {
-            if ((rounded <= max) && (rounded > m_lv->getExtents()) && (selected > m_lv->getExtents()))
+            if ((rounded <= max) && (rounded > m_lv->getExtents()) && (selected > m_lv->getExtents())) {
+                clearWarningLabel();
                 enableButtonOk(true);
-            else
+            } else {
+                setWarningLabel(i18n("Selected size exceeds maximum size"));
                 enableButtonOk(false);
+            }
         } else {
-            if ((rounded <= max) && (rounded > 0))
+            if ((rounded <= max) && (rounded > 0)) {
+                clearWarningLabel();
                 enableButtonOk(true);
-            else
+            } else {
+                setWarningLabel(i18n("Selected size exceeds maximum size"));
                 enableButtonOk(false);
+            }
         }
     }
 }
