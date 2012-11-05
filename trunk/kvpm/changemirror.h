@@ -54,6 +54,7 @@ class ChangeMirrorDialog : public KDialog
 
     QList<NoMungeCheck *> m_mirror_log_checks;
 
+    bool m_bailout;
     bool m_change_log;    // true if we just changing the logging of an existing mirror
     LogVol *m_lv;         // The volume we are adding a mirror leg to.
 
@@ -77,6 +78,7 @@ class ChangeMirrorDialog : public KDialog
 public:
     explicit ChangeMirrorDialog(LogVol *const mirrorVolume, bool changeLog, QWidget *parent = NULL);
     QStringList arguments();
+    bool bailout();
 
 private slots:
     void resetOkButton();
