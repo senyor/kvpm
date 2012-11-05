@@ -819,6 +819,31 @@ LogVol *LogVol::getParent()
     return m_lv_parent;
 }
 
+// Returns the lvm mirror than owns this mirror leg or mirror log. Returns
+// NULL if this is not part of an lvm mirror volume.
+LogVol *LogVol::getParentMirror()
+{
+    LogVol *mirror = this;
+
+    if (isLvmMirrorLog() || isLvmMirrorLeg() || isTemporary()) {
+
+        if (isLvmMirrorLog() && isLvmMirrorLeg()) // mirrored mirror log
+            mirror = getParent()->getParent();
+        else if (isLvmMirrorLog() || isLvmMirrorLeg())
+            mirror = getParent();
+        
+        if (mirror->isTemporary())  // under conversion temp mirror
+            mirror = mirror->getParent();
+
+    } else if (isMirrorLeg()) {
+        mirror = getParent();
+    } else {
+        mirror = NULL;
+    }
+
+    return mirror;
+}
+
 int LogVol::getSegmentCount()
 {
     return m_seg_total;
@@ -1267,3 +1292,4 @@ bool LogVol::hasMissingVolume()
 {
     return getPvNamesAllFlat().contains("unknown device");
 }
+
