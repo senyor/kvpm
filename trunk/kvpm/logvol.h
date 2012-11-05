@@ -88,7 +88,7 @@ class LogVol
     bool m_raid;                 // Is a raid volume, including raid 1 mirrors
     bool m_raid_image;           // Is a raid device under a raid volume
     bool m_fixed, m_persistent;  // fix the device minor and major number
-
+    bool m_synced;               // mirror or raid fully synced
     bool m_alloc_locked;         // allocation type is fixed when pvmove is underway
                                  // (and maybe other times)
     bool m_active;
@@ -192,6 +192,7 @@ public:
     bool isCowSnap();
     bool isThinSnap();
     bool isSnapContainer();
+    bool isSynced();
     bool isTemporary();
     bool isThinVolume();
     bool isThinPool();

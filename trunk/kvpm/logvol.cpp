@@ -91,6 +91,7 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)
     m_thin_pool   = false;
     m_pvmove      = false;
     m_valid       = true;
+    m_synced      = true;
     m_virtual     = false;
     m_snap_percent = 0;
     m_data_percent = 0;
@@ -168,6 +169,7 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)
         }
 
         additional_state = "un-synced";
+        m_synced = false;
         break;
     case 'i':
         if (flags[6] == 'r'){
@@ -188,6 +190,7 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)
         }
         
         additional_state = "synced";
+        m_synced = true;
         break;
     case 'L':
     case 'l':
@@ -1291,5 +1294,21 @@ QString LogVol::getUuid()
 bool LogVol::hasMissingVolume()
 {
     return getPvNamesAllFlat().contains("unknown device");
+}
+
+bool LogVol::isSynced()
+{
+    if (m_synced) {
+        QList<LogVol *> children(getChildren());
+
+        for (int x = children.size() - 1; x >= 0; x--) {
+            if (!children[x]->isSynced())
+                return false;
+        }        
+
+        return true;        
+    } else {
+        return false;
+    }
 }
 
