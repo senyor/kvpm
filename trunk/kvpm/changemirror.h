@@ -75,7 +75,7 @@ class ChangeMirrorDialog : public KDialog
     int getNewLogCount();
 
 public:
-    explicit ChangeMirrorDialog(LogVol *logicalVolume, bool changeLog, QWidget *parent = 0);
+    explicit ChangeMirrorDialog(LogVol *const mirrorVolume, bool changeLog, QWidget *parent = NULL);
     QStringList arguments();
 
 private slots:

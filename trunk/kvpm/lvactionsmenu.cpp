@@ -217,9 +217,27 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
             remove_mirror_leg_action->setEnabled(false);
             snap_create_action->setEnabled(false);
             filesystem_menu->setEnabled(false);
-
+        } else if(m_lv->isLvmMirrorLog() || m_lv->isTemporary()){
+            snap_merge_action->setEnabled(false);
+            lv_maxfs_action->setEnabled(false);
+            lv_mkfs_action->setEnabled(false);
+            lv_removefs_action->setEnabled(false);
+            lv_remove_action->setEnabled(false);
+            unmount_filesystem_action->setEnabled(false);
+            mount_filesystem_action->setEnabled(false);
+            add_mirror_legs_action->setEnabled(false);
+            lv_change_action->setEnabled(false);
+            lv_extend_action->setEnabled(false);
+            lv_reduce_action->setEnabled(false);
+            lv_rename_action->setEnabled(false);
+            pv_move_action->setEnabled(false);
+            remove_mirror_action->setEnabled(false);
+            change_mirror_log_action->setEnabled(true);
+            remove_mirror_leg_action->setEnabled(false);
+            snap_create_action->setEnabled(false);
+            filesystem_menu->setEnabled(false);
         } else if (m_lv->isWritable()  && !m_lv->isLocked() && !m_lv->isVirtual() && !m_lv->isThinVolume() &&
-            !m_lv->isMirrorLeg() && !m_lv->isLvmMirrorLog() && !m_lv->isRaidImage()) {
+                   !m_lv->isMirrorLeg() && !m_lv->isLvmMirrorLog() && !m_lv->isRaidImage() && !m_lv->isTemporary()) {
 
             if (m_lv->isMounted()) {
                 lv_fsck_action->setEnabled(false);
@@ -475,7 +493,7 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
             remove_mirror_leg_action->setEnabled(false);
             snap_create_action->setEnabled(false);
             filesystem_menu->setEnabled(false);
-        } else if (m_lv->isMirrorLeg() || m_lv->isLvmMirrorLog()) {
+        } else if (m_lv->isLvmMirrorLeg() && !m_lv->isLvmMirrorLog() && !m_lv->isTemporary()) {
             lv_mkfs_action->setEnabled(false);
             lv_removefs_action->setEnabled(false);
             lv_maxfs_action->setEnabled(false);
@@ -488,17 +506,11 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
             lv_reduce_action->setEnabled(false);
             pv_move_action->setEnabled(false);
             remove_mirror_action->setEnabled(false);
-            change_mirror_log_action->setEnabled(false);
+            change_mirror_log_action->setEnabled(true);
             lv_rename_action->setEnabled(false);
             snap_create_action->setEnabled(false);
             filesystem_menu->setEnabled(false);
-
-            if (!m_lv->isLvmMirrorLog())
-                remove_mirror_leg_action->setEnabled(true);
-            else {
-                remove_mirror_leg_action->setEnabled(false);
-                mirror_menu->setEnabled(false);
-            }
+            remove_mirror_leg_action->setEnabled(true);
         } else if (!(m_lv->isWritable()) && m_lv->isLocked()) {
 
             if (m_lv->isMounted())

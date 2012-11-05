@@ -369,7 +369,7 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)
         m_lvmmirror_log = true;    // this needs to be here in case it is a mirrored mirror log
         m_lv_fs = "";
     } else if (m_lv_name.contains("_mimagetmp_", Qt::CaseSensitive)) {
-        m_virtual = true;    // This is to get lvactionsmenu to forbid doing anything to it
+        m_temp = true; 
         m_lv_fs = "";
     } else if (!m_lvmmirror_log && !m_lvmmirror_leg && !m_virtual) {
         m_lv_fs = fsprobe_getfstype2(m_lv_mapper_path);
@@ -1108,6 +1108,11 @@ bool LogVol::isRaidImage()
 bool LogVol::isCowSnap()
 {
     return m_cow_snap;
+}
+
+bool LogVol::isTemporary()
+{
+    return m_temp;
 }
 
 bool LogVol::isThinSnap()
