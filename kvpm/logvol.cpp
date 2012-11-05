@@ -93,8 +93,9 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)
     m_valid       = true;
     m_synced      = true;
     m_virtual     = false;
-    m_snap_percent = 0;
+    m_copy_percent = 0;
     m_data_percent = 0;
+    m_snap_percent = 0;
     m_chunk_size   = 0;
 
     value = lvm_lv_get_property(lvmLV, "lv_name");
@@ -396,24 +397,15 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)
         value = lvm_lv_get_property(lvmLV, "snap_percent");
 
         if (value.is_valid)
-            m_snap_percent = (double)value.value.integer / 1.0e+6;
+            m_snap_percent = lvm_percent_to_float(value.value.integer);
         else
             m_snap_percent = 0;
     } else if (m_thin || m_thin_pool) {    // Calling up snap_percent on thin snaps causes segfaults
 
-        //
-        //  The cast to int32_t should not be needed so look at it when the 'get property'
-        //  functions get fixed. The properties are returning (unsigned) uint64_t for percentages
-        //  which are (signed) int32_t! Also use function  lvm_percent_to_float(percent_t v) when
-        //  it gets implemented.
-        //
-        //  Relevant RedHat LVM BUGS: #861841  #838257
-        //
-
         value = lvm_lv_get_property(lvmLV, "data_percent");
-        
+
         if (value.is_valid)
-            m_data_percent = (int32_t)value.value.integer / 1.0e+6;
+            m_data_percent = lvm_percent_to_float(value.value.integer);
 
     } else {
         m_origin = "";
@@ -431,7 +423,7 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)
 
     value = lvm_lv_get_property(lvmLV, "copy_percent");
     if (value.is_valid)
-        m_copy_percent = (double)value.value.integer / 1.0e+6;
+        m_copy_percent = lvm_percent_to_float(value.value.integer);
     else
         m_copy_percent = 0;
 
