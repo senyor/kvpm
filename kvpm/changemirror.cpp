@@ -41,11 +41,21 @@
 
 
 
-ChangeMirrorDialog::ChangeMirrorDialog(LogVol *logicalVolume, bool changeLog, QWidget *parent):
+ChangeMirrorDialog::ChangeMirrorDialog(LogVol *const mirrorVolume, bool changeLog, QWidget *parent):
     KDialog(parent),
     m_change_log(changeLog),
-    m_lv(logicalVolume)
+    m_lv(mirrorVolume)
 {
+    if (changeLog) {
+        if (mirrorVolume->isLvmMirrorLog() && mirrorVolume->isLvmMirrorLeg()) // mirrored mirror log
+            m_lv = mirrorVolume->getParent()->getParent();
+        else if (mirrorVolume->isLvmMirrorLog() || mirrorVolume->isLvmMirrorLeg())
+            m_lv = mirrorVolume->getParent();
+
+        if (m_lv->getName().contains("_mimagetmp_"))  // under conversion temp mirror
+            m_lv = m_lv->getParent();
+    }
+
     QList<LogVol *> children;
     const QString lv_name = m_lv->getName();
     const bool is_raid = (m_lv->isMirror() && m_lv->isRaid());

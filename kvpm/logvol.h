@@ -106,6 +106,7 @@ class LogVol
     bool m_thin;                 // is thin volume or a thin snapshot
     bool m_thin_data;            // is thin pool data
     bool m_thin_pool;
+    bool m_temp;                 // A temporary mirror created while converting a mirror
 
     void countLegsAndLogs();
     void processSegments(lv_t lvmLV, const QByteArray flags);
@@ -190,6 +191,7 @@ public:
     bool isCowSnap();
     bool isThinSnap();
     bool isSnapContainer();
+    bool isTemporary();
     bool isThinVolume();
     bool isThinPool();
     bool isThinPoolData();
