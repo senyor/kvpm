@@ -46,15 +46,8 @@ ChangeMirrorDialog::ChangeMirrorDialog(LogVol *const mirrorVolume, bool changeLo
     m_change_log(changeLog),
     m_lv(mirrorVolume)
 {
-    if (changeLog) {
-        if (mirrorVolume->isLvmMirrorLog() && mirrorVolume->isLvmMirrorLeg()) // mirrored mirror log
-            m_lv = mirrorVolume->getParent()->getParent();
-        else if (mirrorVolume->isLvmMirrorLog() || mirrorVolume->isLvmMirrorLeg())
-            m_lv = mirrorVolume->getParent();
-
-        if (m_lv->getName().contains("_mimagetmp_"))  // under conversion temp mirror
-            m_lv = m_lv->getParent();
-    }
+    if (m_lv->getParentMirror() != NULL)
+        m_lv = m_lv->getParentMirror();
 
     QList<LogVol *> children;
     const QString lv_name = m_lv->getName();

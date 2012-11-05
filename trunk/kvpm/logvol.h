@@ -128,6 +128,7 @@ public:
     QList<LogVol *> getSnapshots();        // This will work the same for snapcontainers or the real lv
     QList<LogVol *> getThinVolumes();      // Volumes under a thin pool
     LogVol *getParent();                   // NULL if this is a "top level" lv
+    LogVol *getParentMirror();             // NULL if this is not an lvm type mirror compnent
     VolGroup* getVg();
     QString getName();
     QString getPoolName();      // Name of this volume's thin pool if it is a thin volume, empty otherwise
