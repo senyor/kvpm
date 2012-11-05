@@ -742,19 +742,23 @@ void LVActionsMenu::extendLogicalVolume()
 void LVActionsMenu::addMirrorLegs()
 {
     ChangeMirrorDialog dialog(m_lv, false);
-    dialog.exec();
 
-    if (dialog.result() == QDialog::Accepted)
-        MainWindow->reRun();
+    if (!dialog.bailout()) {
+        dialog.exec();
+        if (dialog.result() == QDialog::Accepted)
+            MainWindow->reRun();
+    }
 }
 
 void LVActionsMenu::changeMirrorLog()
 {
     ChangeMirrorDialog dialog(m_lv, true);
-    dialog.exec();
 
-    if (dialog.result() == QDialog::Accepted)
-        MainWindow->reRun();
+    if (!dialog.bailout()) {
+        dialog.exec();
+        if (dialog.result() == QDialog::Accepted)
+            MainWindow->reRun();
+    }
 }
 
 void LVActionsMenu::removeMirror()

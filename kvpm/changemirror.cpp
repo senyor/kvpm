@@ -26,6 +26,7 @@
 #include <KApplication>
 #include <KComboBox>
 #include <KLocale>
+#include <KMessageBox>
 #include <KIcon>
 #include <KIntSpinBox>
 #include <KTabWidget>
@@ -53,65 +54,75 @@ ChangeMirrorDialog::ChangeMirrorDialog(LogVol *const mirrorVolume, bool changeLo
     const QString lv_name = m_lv->getName();
     const bool is_raid = (m_lv->isMirror() && m_lv->isRaid());
     const bool is_lvm = (m_lv->isMirror() && !m_lv->isRaid());
+    m_bailout = false;
 
     setWindowTitle(i18n("Change Mirror"));
 
-    QWidget *const main_widget = new QWidget();
-    QVBoxLayout *const layout = new QVBoxLayout();
-
-    QLabel  *const lv_name_label = new QLabel();
-
-    if(m_change_log)
-        lv_name_label->setText(i18n("<b>Change mirror log: %1</b>", m_lv->getName()));
-    else if(is_lvm)
-        lv_name_label->setText(i18n("<b>Change LVM mirror: %1</b>", m_lv->getName()));
-    else if(is_lvm)
-        lv_name_label->setText(i18n("<b>Change RAID 1 mirror: %1</b>", m_lv->getName()));
-    else
-        lv_name_label->setText(i18n("<b>Convert to a mirror: %1</b>", m_lv->getName()));
-
-    lv_name_label->setAlignment(Qt::AlignCenter);
-    m_tab_widget = new KTabWidget();
-    layout->addWidget(lv_name_label);
-    layout->addSpacing(5);
-    layout->addWidget(m_tab_widget);
-    main_widget->setLayout(layout);
-
-    setMainWidget(main_widget);
-
-    m_tab_widget->addTab(buildGeneralTab(is_raid, is_lvm),  i18nc("Common user options", "General"));
-
-    if (!(m_change_log && (m_lv->getLogCount() == 2))) {
-
-        m_tab_widget->addTab(buildPhysicalTab(is_raid), i18n("Physical layout"));
-
-        connect(m_pv_box, SIGNAL(stateChanged()),
+    if (is_raid && !m_lv->isSynced()){
+        m_bailout = true;
+        KMessageBox::error(NULL, i18n("RAID mirrors must be synced before adding new legs"));
+    } else if (is_lvm && m_lv->isCowOrigin()){
+        m_bailout = true;
+        KMessageBox::error(NULL, i18n("Non-RAID mirrors which are snapshot origins can not have new legs added"));
+    } else {
+        QWidget *const main_widget = new QWidget();
+        QVBoxLayout *const layout = new QVBoxLayout();
+        
+        QLabel  *const lv_name_label = new QLabel();
+        
+        if(m_change_log)
+            lv_name_label->setText(i18n("<b>Change mirror log: %1</b>", m_lv->getName()));
+        else if(is_lvm)
+            lv_name_label->setText(i18n("<b>Change LVM mirror: %1</b>", m_lv->getName()));
+        else if(is_lvm)
+            lv_name_label->setText(i18n("<b>Change RAID 1 mirror: %1</b>", m_lv->getName()));
+        else
+            lv_name_label->setText(i18n("<b>Convert to a mirror: %1</b>", m_lv->getName()));
+        
+        lv_name_label->setAlignment(Qt::AlignCenter);
+        m_tab_widget = new KTabWidget();
+        layout->addWidget(lv_name_label);
+        layout->addSpacing(5);
+        layout->addWidget(m_tab_widget);
+        main_widget->setLayout(layout);
+        
+        setMainWidget(main_widget);
+        
+        m_tab_widget->addTab(buildGeneralTab(is_raid, is_lvm),  i18nc("Common user options", "General"));
+        
+        if (!(m_change_log && (m_lv->getLogCount() == 2))) {
+            
+            m_tab_widget->addTab(buildPhysicalTab(is_raid), i18n("Physical layout"));
+            
+            connect(m_pv_box, SIGNAL(stateChanged()),
+                    this, SLOT(resetOkButton()));
+            
+            connect(m_add_mirrors_spin, SIGNAL(valueChanged(int)),
+                    this, SLOT(resetOkButton()));
+            
+            connect(m_stripe_spin, SIGNAL(valueChanged(int)),
+                    this, SLOT(resetOkButton()));
+            
+            connect(m_stripe_box, SIGNAL(toggled(bool)),
+                    this, SLOT(resetOkButton()));
+        } else {
+            m_pv_box = NULL;
+        }
+        
+        setLogRadioButtons();
+        
+        connect(m_disk_log_button, SIGNAL(toggled(bool)),
                 this, SLOT(resetOkButton()));
         
-        connect(m_add_mirrors_spin, SIGNAL(valueChanged(int)),
+        connect(m_core_log_button, SIGNAL(toggled(bool)),
                 this, SLOT(resetOkButton()));
         
-        connect(m_stripe_spin, SIGNAL(valueChanged(int)),
+        connect(m_mirrored_log_button, SIGNAL(toggled(bool)),
                 this, SLOT(resetOkButton()));
         
-        connect(m_stripe_box, SIGNAL(toggled(bool)),
-                this, SLOT(resetOkButton()));
-    } else
-        m_pv_box = NULL;
-
-    setLogRadioButtons();
-
-    connect(m_disk_log_button, SIGNAL(toggled(bool)),
-            this, SLOT(resetOkButton()));
-
-    connect(m_core_log_button, SIGNAL(toggled(bool)),
-            this, SLOT(resetOkButton()));
-    
-    connect(m_mirrored_log_button, SIGNAL(toggled(bool)),
-            this, SLOT(resetOkButton()));
-
-    connect(this, SIGNAL(okClicked()),
-            this, SLOT(commitChanges()));
+        connect(this, SIGNAL(okClicked()),
+                this, SLOT(commitChanges()));
+    }
 }
 
 QWidget *ChangeMirrorDialog::buildGeneralTab(const bool isRaidMirror, const bool isLvmMirror)
@@ -611,4 +622,9 @@ void ChangeMirrorDialog::enableLogWidget()
         m_log_widget->setEnabled(true);
     else
         m_log_widget->setEnabled(false);
+}
+
+bool ChangeMirrorDialog::bailout()
+{
+    return m_bailout;
 }
