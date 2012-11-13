@@ -86,6 +86,7 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)
     m_raid        = false;
     m_raid_image  = false;
     m_cow_snap    = false;
+    m_temp        = false;
     m_thin        = false;
     m_thin_data   = false;
     m_thin_pool   = false;
