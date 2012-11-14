@@ -38,6 +38,7 @@ class PhysVol
     VolGroup *m_vg;        // all pvs now must be in a vg
     bool m_active;
     bool m_allocatable;
+    bool m_missing;           // the physical volume can't be found
     uint64_t  m_mda_count;    // number of metadata areas
     uint64_t  m_mda_used;     // number of metadata areas in use
     uint64_t  m_mda_size;
@@ -56,6 +57,7 @@ public:
     bool isAllocatable();
     void setActive();               // If any lv is active on the pv, the pv is active
     bool isActive();
+    bool isMissing();
     long long getContiguous(LogVol *const lv); // the number of contiguous bytes available if the lv is on this pv
     long long getContiguous();                 // the max contiguous bytes on the the pv.
                                                

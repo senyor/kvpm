@@ -63,6 +63,11 @@ void PhysVol::rescan(pv_t lvm_pv)
     else
         m_allocatable = false;
 
+    if (flags[2] == 'm')
+        m_missing = true;
+    else
+        m_missing = false;
+
     m_last_used_extent = 0;
     m_active        = false;     // pv is active if any associated lvs are active
     m_device        = QString(lvm_pv_get_name(lvm_pv));
@@ -139,6 +144,11 @@ QStringList PhysVol::getTags()
 bool PhysVol::isAllocatable()
 {
     return m_allocatable;
+}
+
+bool PhysVol::isMissing()
+{
+    return m_missing;
 }
 
 bool PhysVol::isActive()
