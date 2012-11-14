@@ -157,6 +157,7 @@ public:
     QString getFstabMountPoint();
     QStringList getTags();
     long long getSpaceUsedOnPv(const QString physicalVolume);
+    long long getMissingSpace();  // space used on pvs that are missing
     long long getChunkSize();
     long long getExtents();
     long long getSize();

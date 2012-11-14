@@ -971,6 +971,40 @@ long long LogVol::getSpaceUsedOnPv(const QString physicalVolume)
     return space_used;
 }
 
+long long LogVol::getMissingSpace()
+{
+    QList<LogVol *> const children = getChildren();
+    long long missing;
+
+    if (hasMissingVolume()) {
+        if (children.isEmpty()) {
+
+            QStringList const pvs = getPvNamesAllFlat();
+            missing = getTotalSize();
+            
+            for (int x = pvs.size() - 1; x >= 0; x--) {
+                
+                PhysVol *const pv = m_vg->getPvByName(pvs[x]);
+                
+                if (pv != NULL) {
+                    if (!pv->isMissing()) {
+                        missing -= getSpaceUsedOnPv(pvs[x]);
+                    }
+                }
+            }
+        } else {
+            missing = 0;
+            for (int x = children.size() - 1; x >= 0; x--) {
+                missing += children[x]->getMissingSpace();
+            }
+        }
+    } else {
+        missing = 0;
+    }
+
+    return missing;
+}
+
 long long LogVol::getChunkSize()
 {
     return m_chunk_size;
