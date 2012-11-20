@@ -35,6 +35,8 @@ PvGroupBox::PvGroupBox(QList<PhysVol *> volumes, QList<long long> normal, QList<
       m_normal(normal),
       m_contiguous(contiguous)
 {
+    m_alloc_combo = NULL;
+
     KConfigSkeleton skeleton;
     skeleton.setCurrentGroup("General");
     skeleton.addItemBool("use_si_units", m_use_si_units, false);
@@ -406,6 +408,9 @@ void PvGroupBox::addLabelsAndButtons(QGridLayout *const layout, const int pvCoun
 
 AllocationPolicy PvGroupBox::getPolicy()
 {
+    if (m_alloc_combo == NULL)
+        return NORMAL;
+
     switch(m_alloc_combo->currentIndex()) {
     case 0:
         return NORMAL;
