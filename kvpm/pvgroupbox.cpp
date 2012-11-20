@@ -296,7 +296,6 @@ void PvGroupBox::selectAll()
 
 void PvGroupBox::selectNone()
 {
-
     if (m_pv_checks.size()) {
         for (int x = 0; x < m_pv_checks.size(); x++)
             m_pv_checks[x]->setChecked(false);
@@ -480,25 +479,27 @@ void PvGroupBox::setChecksToPolicy()
 
     AllocationPolicy policy = NORMAL;
 
-    if (m_alloc_combo->currentIndex() == 4)
-        policy = m_pvs[0]->getVg()->getPolicy();
-    else if (m_alloc_combo->currentIndex() == 0)
-        policy = NORMAL;
-    else if (m_alloc_combo->currentIndex() == 1)
-        policy = CONTIGUOUS;
-    else if (m_alloc_combo->currentIndex() == 2)
-        policy = CLING;
-    else if (m_alloc_combo->currentIndex() == 3)
-        policy = ANYWHERE;
+    if (!m_pvs.isEmpty()) {
+        if (m_alloc_combo->currentIndex() == 4)
+            policy = m_pvs[0]->getVg()->getPolicy();
+        else if (m_alloc_combo->currentIndex() == 0)
+            policy = NORMAL;
+        else if (m_alloc_combo->currentIndex() == 1)
+            policy = CONTIGUOUS;
+        else if (m_alloc_combo->currentIndex() == 2)
+            policy = CLING;
+        else if (m_alloc_combo->currentIndex() == 3)
+            policy = ANYWHERE;
 
-    for (int x = 0; x < m_pv_checks.size(); x++) {
-        if (policy == CONTIGUOUS) {
-            m_pv_checks[x]->setText(m_pvs[x]->getName() + "  " + locale->formatByteSize(m_contiguous[x], 1, dialect));
-            m_pv_checks[x]->setData(QVariant(m_contiguous[x]));
-            
-        } else {
-            m_pv_checks[x]->setText(m_pvs[x]->getName() + "  " + locale->formatByteSize(m_normal[x], 1, dialect));
-            m_pv_checks[x]->setData(QVariant(m_normal[x]));
+        for (int x = 0; x < m_pv_checks.size(); x++) {
+            if (policy == CONTIGUOUS) {
+                m_pv_checks[x]->setText(m_pvs[x]->getName() + "  " + locale->formatByteSize(m_contiguous[x], 1, dialect));
+                m_pv_checks[x]->setData(QVariant(m_contiguous[x]));
+                
+            } else {
+                m_pv_checks[x]->setText(m_pvs[x]->getName() + "  " + locale->formatByteSize(m_normal[x], 1, dialect));
+                m_pv_checks[x]->setData(QVariant(m_normal[x]));
+            }
         }
     }
 
