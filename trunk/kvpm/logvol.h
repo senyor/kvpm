@@ -77,7 +77,9 @@ class LogVol
     unsigned long m_minor_device; // Unix device minor number, if set
     int m_log_count;             // if a mirror -- how many logs
     int m_mirror_count;          // if mirror -- how many legs
-    bool m_virtual;              // virtual volume
+    bool m_partial;              // Is missing one or more physical volumes
+    bool m_zero;                 // Newly-allocated data blocks are overwritten with blocks of zeroes before use
+    bool m_virtual;              // Is virtual volume
     bool m_under_conversion;     // Is going to be a mirrored volume
     bool m_raidmirror;           // Is a raid 1 mirrored volume
     bool m_raidmirror_leg;       // Is one of the underlying legs of a mirrored volume
@@ -203,6 +205,7 @@ public:
     bool isVirtual();
     bool isWritable();
     bool hasMissingVolume();
+    bool willZero();
 
 };
 
