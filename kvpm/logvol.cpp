@@ -83,6 +83,7 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)
     m_lvmmirror      = false;
     m_lvmmirror_leg  = false;
     m_lvmmirror_log  = false;
+    m_partial     = false;
     m_raid        = false;
     m_raid_image  = false;
     m_cow_snap    = false;
@@ -94,6 +95,7 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)
     m_valid       = true;
     m_synced      = true;
     m_virtual     = false;
+    m_zero        = false;
     m_copy_percent = 0;
     m_data_percent = 0;
     m_snap_percent = 0;
@@ -276,6 +278,12 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)
             m_type = "thin snapshot";
         }
     }
+
+    if (flags[7] == 'z')
+        m_zero = true;
+
+    if (flags[8] == 'p')
+        m_partial = true;
 
     switch (flags[1]) {
     case 'w':
@@ -1320,7 +1328,12 @@ QString LogVol::getUuid()
 
 bool LogVol::hasMissingVolume()
 {
-    return getPvNamesAllFlat().contains("unknown device");
+    return m_partial;
+}
+
+bool LogVol::willZero()
+{
+    return m_zero;
 }
 
 bool LogVol::isSynced()
