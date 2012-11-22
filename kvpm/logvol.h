@@ -204,7 +204,7 @@ public:
     bool isValid();
     bool isVirtual();
     bool isWritable();
-    bool hasMissingVolume();
+    bool isPartial();
     bool willZero();
 
 };

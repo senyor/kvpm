@@ -31,6 +31,7 @@
 #include "maxfs.h"
 #include "mount.h"
 #include "pvmove.h"
+#include "repairmissing.h"
 #include "removefs.h"
 #include "removemirror.h"
 #include "removemirrorleg.h"
@@ -110,6 +111,7 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
     change_mirror_log_action  = new KAction(i18n("Change mirror log..."), this);
     remove_mirror_action      = new KAction(i18n("Remove mirror leg..."), this);
     remove_mirror_leg_action  = new KAction(i18n("Remove this mirror leg..."), this);
+    repair_missing_action     = new KAction(i18n("Repair volume..."), this);
 
     connect(lv_mkfs_action, SIGNAL(triggered()),
             this, SLOT(mkfsLogicalVolume()));
@@ -141,13 +143,17 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
     connect(remove_mirror_leg_action, SIGNAL(triggered()),
             this, SLOT(removeMirrorLeg()));
 
-    KMenu *mirror_menu = new KMenu(i18n("Mirror operations"), this);
+    connect(repair_missing_action, SIGNAL(triggered()),
+            this, SLOT(repairMissing()));
+
+    KMenu *mirror_menu = new KMenu(i18n("Mirrors and RAID"), this);
     mirror_menu->setIcon(KIcon("document-multiple"));
     addMenu(mirror_menu);
     mirror_menu->addAction(add_mirror_legs_action);
     mirror_menu->addAction(change_mirror_log_action);
     mirror_menu->addAction(remove_mirror_action);
     mirror_menu->addAction(remove_mirror_leg_action);
+    mirror_menu->addAction(repair_missing_action);
 
     filesystem_menu = new KMenu(i18n("Filesystem operations"), this);
     addMenu(filesystem_menu);
@@ -626,17 +632,17 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
             lv_extend_action->setEnabled(false);
             remove_mirror_leg_action->setEnabled(false);
 
-            if (!m_lv->isVirtual()) {
-                filesystem_menu->setEnabled(true);
-                mount_filesystem_action->setEnabled(true);
-                lv_change_action->setEnabled(true);
-            } else {
+            if (m_lv->isVirtual()) {
                 lv_rename_action->setEnabled(false);
                 lv_remove_action->setEnabled(false);
                 mount_filesystem_action->setEnabled(false);
                 lv_change_action->setEnabled(false);
                 filesystem_menu->setEnabled(false);
                 mirror_menu->setEnabled(false);
+            } else {
+                filesystem_menu->setEnabled(true);
+                mount_filesystem_action->setEnabled(true);
+                lv_change_action->setEnabled(true);
             }
         }
 
@@ -670,8 +676,11 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
     }
 
     if (!add_mirror_legs_action->isEnabled()   && !remove_mirror_action->isEnabled() &&
-            !remove_mirror_leg_action->isEnabled() && !change_mirror_log_action->isEnabled())
+        !remove_mirror_leg_action->isEnabled() && !change_mirror_log_action->isEnabled() &&
+        !repair_missing_action->isEnabled()) {
+
         mirror_menu->setEnabled(false);
+    }
 }
 
 void LVActionsMenu::createLogicalVolume()
@@ -815,6 +824,17 @@ void LVActionsMenu::removeLogicalVolume()
     if (!dialog.bailout()) {
         dialog.exec();
         if (dialog.result() == KDialog::Yes)
+            MainWindow->reRun();
+    }
+}
+
+void LVActionsMenu::repairMissing()
+{
+    RepairMissingDialog dialog(m_lv);
+
+    if (!dialog.bailout()) {
+        dialog.exec();
+        if (dialog.result() == QDialog::Accepted)
             MainWindow->reRun();
     }
 }

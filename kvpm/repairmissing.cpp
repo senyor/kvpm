@@ -46,7 +46,7 @@ RepairMissingDialog::RepairMissingDialog(LogVol *const volume, QWidget *parent):
 
     QList<PhysVol *> const pvs = getUsablePvs();
 
-    if (!m_lv->hasMissingVolume()){
+    if (!m_lv->isPartial()){
         m_bailout = true;
         KMessageBox::error(NULL, i18n("This volume has no missing physical volumes"));
     } else if (pvs.isEmpty() && is_raid && !m_lv->isMirror()){
@@ -123,7 +123,7 @@ QList<PhysVol *> RepairMissingDialog::getUsablePvs()
     // and be replaced the the new image. The following commented code won't be
     // enough.
     
-    /* if (((images[x]->isRaidImage() || images[x]->isMetadata())) && !images[x]->hasMissingVolume())
+    /* if (((images[x]->isRaidImage() || images[x]->isMetadata())) && !images[x]->isPartial())
        pvs_in_use << images[x]->getPvNamesAll();  */
 
 
@@ -277,7 +277,7 @@ QList<LogVol *> RepairMissingDialog::getPartialLvs()
     QList<LogVol *> partial = m_lv->getAllChildrenFlat();
 
     for (int x = partial.size() - 1; x >= 0; x--) {
-        if (!partial[x]->hasMissingVolume())
+        if (!partial[x]->isPartial())
             partial.removeAt(x);
     }
 

@@ -181,7 +181,7 @@ QTreeWidgetItem *VGTree::loadItem(LogVol *lv, QTreeWidgetItem *item)
 
     item->setData(0, Qt::DisplayRole, lv_name);
 
-    if (lv->hasMissingVolume()) {
+    if (lv->isPartial()) {
         item->setIcon(0, KIcon("exclamation"));
         item->setToolTip(0, i18n("one or more physical volumes are missing"));
     } else if (!lv->isSnapContainer() && lv->getSnapshotCount() > 0) {
