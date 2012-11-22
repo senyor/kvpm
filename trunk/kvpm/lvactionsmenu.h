@@ -32,7 +32,7 @@ class LVActionsMenu : public KMenu
 
     KAction *lv_remove_action, *lv_create_action, *pv_move_action, *lv_rename_action,
             *lv_reduce_action, *lv_extend_action, *lv_change_action,
-            *add_mirror_legs_action, *change_mirror_log_action,
+            *add_mirror_legs_action, *change_mirror_log_action, *repair_missing_action,
             *thin_create_action, *thin_snap_action, *thin_pool_action,
             *remove_mirror_action, *remove_mirror_leg_action, *snap_create_action,
             *snap_merge_action, *mount_filesystem_action, *unmount_filesystem_action,
@@ -58,6 +58,7 @@ private slots:
     void addMirrorLegs();
     void changeMirrorLog();
     void removefsLogicalVolume();
+    void repairMissing();
     void removeMirror();
     void removeMirrorLeg();
     void createSnapshot();

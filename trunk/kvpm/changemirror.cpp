@@ -74,7 +74,7 @@ ChangeMirrorDialog::ChangeMirrorDialog(LogVol *const mirrorVolume, bool changeLo
             lv_name_label->setText(i18n("<b>Change mirror log: %1</b>", m_lv->getName()));
         else if(is_lvm)
             lv_name_label->setText(i18n("<b>Change LVM mirror: %1</b>", m_lv->getName()));
-        else if(is_lvm)
+        else if(is_raid)
             lv_name_label->setText(i18n("<b>Change RAID 1 mirror: %1</b>", m_lv->getName()));
         else
             lv_name_label->setText(i18n("<b>Convert to a mirror: %1</b>", m_lv->getName()));

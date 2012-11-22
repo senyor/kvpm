@@ -984,7 +984,7 @@ long long LogVol::getMissingSpace()
     QList<LogVol *> const children = getChildren();
     long long missing;
 
-    if (hasMissingVolume()) {
+    if (isPartial()) {
         if (children.isEmpty()) {
 
             QStringList const pvs = getPvNamesAllFlat();
@@ -1326,7 +1326,7 @@ QString LogVol::getUuid()
     return m_uuid;
 }
 
-bool LogVol::hasMissingVolume()
+bool LogVol::isPartial()
 {
     return m_partial;
 }
