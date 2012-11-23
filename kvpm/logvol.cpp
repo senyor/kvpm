@@ -78,6 +78,8 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)
     m_is_origin   = false;       // traditional snap origin - not thin snap origin
     m_merging     = false;
     m_metadata    = false;
+    m_raid_metadata  = false;
+    m_thin_metadata  = false;
     m_raidmirror     = false;
     m_raidmirror_leg = false;
     m_lvmmirror      = false;
@@ -500,6 +502,11 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)
         else
             m_type = m_segments[0]->type;
     }
+
+    if (m_lv_name.contains("_rmeta_"))
+        m_raid_metadata = true;
+    else if (m_lv_name.endsWith("_tmeta"))
+        m_thin_metadata = true;
     
     insertChildren(lvmLV, lvmVG);
     countLegsAndLogs();
@@ -1091,6 +1098,16 @@ bool LogVol::isMerging()
 bool LogVol::isMetadata()
 {
     return m_metadata;
+}
+
+bool LogVol::isRaidMetadata()
+{
+    return m_raid_metadata;
+}
+
+bool LogVol::isThinMetadata()
+{
+    return m_thin_metadata;
 }
 
 bool LogVol::isMounted()
