@@ -86,7 +86,9 @@ class LogVol
     bool m_lvmmirror;            // Is an LVM (not raid 1) mirrored volume
     bool m_lvmmirror_leg;        // Is one of the underlying legs of a mirrored volume
     bool m_lvmmirror_log;        // Is the log for a mirrored volume
-    bool m_metadata;             // Is RAID or thin pool metadata
+    bool m_metadata;             // Is RAID or thin pool metadata -- we get this from the lvs attribute flags
+    bool m_raid_metadata;        // Is RAID metadata -- we get this from the name ie: *_rmeta_*
+    bool m_thin_metadata;        // Is thin pool metadata -- we get this from the name ie: *_tmeta_*
     bool m_raid;                 // Is a raid volume, including raid 1 mirrors
     bool m_raid_image;           // Is a raid device under a raid volume
     bool m_fixed, m_persistent;  // fix the device minor and major number
@@ -179,6 +181,8 @@ public:
     bool isLocked();
     bool isMerging();
     bool isMetadata();
+    bool isRaidMetadata();
+    bool isThinMetadata();
     bool isMirror();
     bool isMirrorLeg();
     bool isLvmMirror();
