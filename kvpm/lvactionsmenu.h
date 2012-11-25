@@ -30,46 +30,39 @@ class LVActionsMenu : public KMenu
 {
     Q_OBJECT
 
-    KAction *lv_remove_action, *lv_create_action, *pv_move_action, *lv_rename_action,
-            *lv_reduce_action, *lv_extend_action, *lv_change_action,
-            *add_mirror_legs_action, *change_mirror_log_action, *repair_missing_action,
-            *thin_create_action, *thin_snap_action, *thin_pool_action,
-            *remove_mirror_action, *remove_mirror_leg_action, *snap_create_action,
-            *snap_merge_action, *mount_filesystem_action, *unmount_filesystem_action,
-            *lv_removefs_action, *lv_mkfs_action, *lv_maxfs_action, *lv_fsck_action;
-
-    KMenu *filesystem_menu;
     VolGroup *m_vg;
     LogVol *m_lv;
     int m_segment;
+
+    KMenu *buildMirrorMenu(); 
 
 public:
     LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volumeGroup, QWidget *parent);
 
 private slots:
-    void createLogicalVolume();
-    void extendLogicalVolume();
+    void createLv();
+    void extendLv();
     void createThinVolume();
     void createThinPool();
-    void changeLogicalVolume();
-    void reduceLogicalVolume();
-    void removeLogicalVolume();
-    void renameLogicalVolume();
-    void addMirrorLegs();
-    void changeMirrorLog();
-    void removefsLogicalVolume();
+    void changeLv();
+    void reduceLv();
+    void removeLv();
+    void renameLv();
+    void addLegs();
+    void changeLog();
+    void removeFs();
     void repairMissing();
     void removeMirror();
-    void removeMirrorLeg();
+    void removeLeg();
     void createSnapshot();
     void thinSnapshot();
-    void mkfsLogicalVolume();
-    void fsckLogicalVolume();
-    void maxfsLogicalVolume();
+    void makeFs();
+    void checkFs();
+    void maxFs();
     void mergeSnapshot();
     void movePhysicalExtents();
-    void mountFilesystem();
-    void unmountFilesystem();
+    void mountFs();
+    void unmountFs();
 
 };
 
