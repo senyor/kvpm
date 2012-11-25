@@ -55,6 +55,7 @@ class LogVol
     QString m_log;           // The mirror log, if this is a mirror
     QString m_type;          // the type of volume
     QString m_state;         // the lv state
+    QString m_discards;      // thin volume and thin pool discard policy
     AllocationPolicy m_policy;
 
     QString     m_uuid;
@@ -160,6 +161,7 @@ public:
     QList<MountEntry *> getMountEntries();  // Calling function must delete these objects in the list
     QString getFstabMountPoint();
     QStringList getTags();
+    QString getDiscards();
     long long getSpaceUsedOnPv(const QString physicalVolume);
     long long getMissingSpace();  // space used on pvs that are missing
     long long getChunkSize();

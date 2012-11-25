@@ -239,6 +239,15 @@ QFrame *LVProperties::generalFrame(int segment)
         if (m_lv->isThinPool())
             layout->addWidget(new QLabel(i18n("Chunk Size: %1", locale->formatByteSize(m_lv->getChunkSize(), 1, dialect))));
 
+        if (m_lv->isThinVolume() || m_lv->isThinPool()) {
+            if (m_lv->willZero())
+                layout->addWidget(new QLabel(i18n("Zero new blocks: Yes")));
+            else
+                layout->addWidget(new QLabel(i18n("Zero new blocks: No")));
+            
+            layout->addWidget(new QLabel(i18n("Discards: %1", m_lv->getDiscards())));
+        }
+
         if (!m_lv->isThinVolume())
             layout->addWidget(new QLabel(i18n("Policy: %1", policy)));
 
@@ -304,8 +313,16 @@ QFrame *LVProperties::generalFrame(int segment)
         else
             layout->addWidget(new QLabel(i18n("Access: r/o")));
 
-        if (!m_lv->isThinVolume())
+        if (m_lv->isThinVolume()) {
+            if (m_lv->willZero())
+                layout->addWidget(new QLabel(i18n("Zero new blocks: Yes")));
+            else
+                layout->addWidget(new QLabel(i18n("Zero new blocks: No")));
+
+            layout->addWidget(new QLabel(i18n("Discards: %1", m_lv->getDiscards())));
+        } else {
             layout->addWidget(new QLabel(i18n("Policy: %1", policy)));
+        }
 
     } else {
         extents = m_lv->getExtents();
