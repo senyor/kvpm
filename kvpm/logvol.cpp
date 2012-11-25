@@ -281,6 +281,10 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)
         }
     }
 
+    value = lvm_lv_get_property(lvmLV, "discards");
+    if (value.is_valid)
+        m_discards = value.value.string;
+
     if (flags[7] == 'z')
         m_zero = true;
 
@@ -1282,6 +1286,11 @@ int LogVol::getRaidType()
 QStringList LogVol::getTags()
 {
     return m_tags;
+}
+
+QString LogVol::getDiscards()
+{
+    return m_discards;
 }
 
 QString LogVol::getOrigin()
