@@ -453,7 +453,7 @@ QStringList ChangeMirrorDialog::arguments()
 int ChangeMirrorDialog::getNewLogCount()
 {
    const bool is_mirror = m_lv->isMirror();
-   int count;
+   int count = 0;
 
     if (m_change_log || (!is_mirror && (m_type_combo->currentIndex() == 0))) {
         if (m_disk_log_button->isChecked())
