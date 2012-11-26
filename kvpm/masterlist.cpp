@@ -42,6 +42,10 @@ QList<VolGroup *> MasterList::m_volume_groups = QList<VolGroup *>();
 QList<StorageDevice *> MasterList::m_storage_devices = QList<StorageDevice *>();
 lvm_t MasterList::m_lvm = NULL;
 
+int MasterList::m_LvmVersionMajor = 0;
+int MasterList::m_LvmVersionMinor = 0;
+int MasterList::m_LvmVersionPatchLevel = 0;
+int MasterList::m_LvmVersionApi = 0;
 
 MasterList::MasterList() : QObject()
 {

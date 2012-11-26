@@ -39,10 +39,10 @@ class MasterList : public QObject
     static QList<StorageDevice *> m_storage_devices;
     static lvm_t m_lvm;
 
-    int m_LvmVersionMajor;
-    int m_LvmVersionMinor;
-    int m_LvmVersionPatchLevel;
-    int m_LvmVersionApi;
+    static int m_LvmVersionMajor;
+    static int m_LvmVersionMinor;
+    static int m_LvmVersionPatchLevel;
+    static int m_LvmVersionApi;
 
     void scanVolumeGroups();
     void scanStorageDevices();
@@ -51,10 +51,10 @@ public:
     MasterList();
     ~MasterList();
     void rescan();
-    int getLvmVersionMajor();
-    int getLvmVersionMinor();
-    int getLvmVersionPatchLevel();
-    int getLvmVersionApi();
+    static int getLvmVersionMajor();
+    static int getLvmVersionMinor();
+    static int getLvmVersionPatchLevel();
+    static int getLvmVersionApi();
     static lvm_t getLvm();
     static QList<VolGroup *> getVolGroups();
     static QList<StorageDevice *> getStorageDevices();

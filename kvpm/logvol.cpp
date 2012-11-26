@@ -22,6 +22,7 @@
 
 #include "fsdata.h"
 #include "fsprobe.h"
+#include "masterlist.h"
 #include "mountentry.h"
 #include "mounttables.h"
 #include "physvol.h"
@@ -696,7 +697,6 @@ void LogVol::calculateTotalSize()
 
 void LogVol::processSegments(lv_t lvmLV, const QByteArray flags)
 {
-    // const QString version(lvm_library_get_version());
     Segment *segment;
     QStringList devices_and_starts, temp;
     QString raw_paths;
@@ -735,13 +735,22 @@ void LogVol::processSegments(lv_t lvmLV, const QByteArray flags)
                 value = lvm_lvseg_get_property(lvm_lvseg, "stripes");
                 if (value.is_valid)
                     segment->stripes = value.value.integer;
+                
+                if (MasterList::getLvmVersionMajor() >= 2 && 
+                    MasterList::getLvmVersionMinor() >= 2 && 
+                    MasterList::getLvmVersionPatchLevel() >= 98 ) {
 
-                /* Make multiplying by 512 depend on version number as defined
+                /* Make multiplying by 512 depend on version number as in the example
                    above when stripesize gets fixed in lvm2app. */
 
-                value = lvm_lvseg_get_property(lvm_lvseg, "stripesize");
-                if (value.is_valid)
-                    segment->stripe_size = value.value.integer * 512;
+                    value = lvm_lvseg_get_property(lvm_lvseg, "stripesize");
+                    if (value.is_valid)
+                        segment->stripe_size = value.value.integer * 512;
+                } else {
+                    value = lvm_lvseg_get_property(lvm_lvseg, "stripesize");
+                    if (value.is_valid)
+                        segment->stripe_size = value.value.integer * 512;
+                }
 
                 value = lvm_lvseg_get_property(lvm_lvseg, "seg_size");
 
