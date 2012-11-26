@@ -440,7 +440,9 @@ QWidget* PvGroupBox::buildPolicyBox(AllocationPolicy const policy)
 
     AllocationPolicy vg_policy;
     if (m_pvs.size())
-        vg_policy = m_pvs[0]->getVg()->getPolicy();;
+        vg_policy = m_pvs[0]->getVg()->getPolicy();
+    else
+        vg_policy = NORMAL;
 
     m_alloc_combo = new KComboBox;
     m_alloc_combo->addItem(i18n("Normal"));
