@@ -55,7 +55,6 @@ class LogVol
     QString m_log;           // The mirror log, if this is a mirror
     QString m_type;          // the type of volume
     QString m_state;         // the lv state
-    QString m_discards;      // thin volume and thin pool discard policy
     AllocationPolicy m_policy;
 
     QString     m_uuid;
@@ -71,7 +70,6 @@ class LogVol
     long long m_extents;         // size in extents
     long long m_fs_size;         // fs size in bytes
     long long m_fs_used;         // bytes used up in fs
-    long long m_chunk_size;      // Size of thin pool chunks
 
     int m_seg_total;             // total number of segments in logical volume
     unsigned long m_major_device; // Unix device major number, if set
@@ -161,10 +159,10 @@ public:
     QList<MountEntry *> getMountEntries();  // Calling function must delete these objects in the list
     QString getFstabMountPoint();
     QStringList getTags();
-    QString getDiscards();
+    QString getDiscards(const int segment);
     long long getSpaceUsedOnPv(const QString physicalVolume);
     long long getMissingSpace();  // space used on pvs that are missing
-    long long getChunkSize();
+    long long getChunkSize(const int segment);
     long long getExtents();
     long long getSize();
     long long getTotalSize();

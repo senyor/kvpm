@@ -237,7 +237,7 @@ QFrame *LVProperties::generalFrame(int segment)
             layout->addWidget(new QLabel(i18n("Access: r/o")));
 
         if (m_lv->isThinPool())
-            layout->addWidget(new QLabel(i18n("Chunk Size: %1", locale->formatByteSize(m_lv->getChunkSize(), 1, dialect))));
+            layout->addWidget(new QLabel(i18n("Chunk Size: %1", locale->formatByteSize(m_lv->getChunkSize(0), 1, dialect))));
 
         if (m_lv->isThinVolume() || m_lv->isThinPool()) {
             if (m_lv->willZero())
@@ -245,7 +245,7 @@ QFrame *LVProperties::generalFrame(int segment)
             else
                 layout->addWidget(new QLabel(i18n("Zero new blocks: No")));
             
-            layout->addWidget(new QLabel(i18n("Discards: %1", m_lv->getDiscards())));
+            layout->addWidget(new QLabel(i18n("Discards: %1", m_lv->getDiscards(0))));
         }
 
         if (!m_lv->isThinVolume())
@@ -318,17 +318,23 @@ QFrame *LVProperties::generalFrame(int segment)
                 layout->addWidget(new QLabel(i18n("Zero new blocks: Yes")));
             else
                 layout->addWidget(new QLabel(i18n("Zero new blocks: No")));
-
-            layout->addWidget(new QLabel(i18n("Discards: %1", m_lv->getDiscards())));
         } else {
             layout->addWidget(new QLabel(i18n("Policy: %1", policy)));
         }
 
     } else {
-        extents = m_lv->getExtents();
-        layout->addWidget(new QLabel(i18n("Extents: %1", extents)));
+        layout->addWidget(new QLabel(i18n("Extents: %1", m_lv->getExtents())));
 
-        if (!(m_lv->isLvmMirrorLeg() || m_lv->isLvmMirrorLog())) {
+        if (m_lv->isThinPoolData() || m_lv->isThinMetadata()) {
+
+            if (m_lv->isWritable())
+                layout->addWidget(new QLabel(i18n("Access: r/w")));
+            else
+                layout->addWidget(new QLabel(i18n("Access: r/o")));
+
+            layout->addWidget(new QLabel(i18n("Policy: %1", policy)));
+
+        } else if (!(m_lv->isLvmMirrorLeg() || m_lv->isLvmMirrorLog())) {
 
             layout->addWidget(new QLabel(i18n("Filesystem: %1", m_lv->getFilesystem())));
 

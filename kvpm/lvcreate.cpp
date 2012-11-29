@@ -202,7 +202,7 @@ int LVCreateDialog::getChunkSize()  // returns pool chunk size in bytes
     int chunk = 0x10000; // 64KiB
 
     if (m_extend) {
-        chunk = m_lv->getChunkSize();
+        chunk = m_lv->getChunkSize(0);  // if chunk size can be different across segments this will need to be changed
     } else if (m_chunk_combo->currentIndex() > 0) {
         chunk = QVariant(m_chunk_combo->itemData(m_chunk_combo->currentIndex(), Qt::UserRole)).toInt();
     } else {
@@ -222,7 +222,7 @@ int LVCreateDialog::getChunkSize(long long volumeSize)  // returns pool chunk si
     int chunk = 0x10000; // 64KiB
 
     if (m_extend) {
-        chunk = m_lv->getChunkSize();
+        chunk = m_lv->getChunkSize(0);  // if chunk size can be different across segments this will need to be changed
     } else if (m_chunk_combo->currentIndex() > 0) {
         chunk = QVariant(m_chunk_combo->itemData(m_chunk_combo->currentIndex(), Qt::UserRole)).toInt();
     } else {
