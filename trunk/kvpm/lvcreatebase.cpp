@@ -175,7 +175,11 @@ QWidget* LvCreateDialogBase::createGeneralTab(bool showNameTag, bool showRo, boo
         QRegExp rx("[0-9a-zA-Z_\\.][-0-9a-zA-Z_\\.]*");
         m_name_validator = new QRegExpValidator(rx, m_name_edit);
         m_name_edit->setValidator(m_name_validator);
+
         QLabel *const name_label = new QLabel(i18n("Volume name: "));
+        if (m_ispool)
+            name_label->setText(i18n("Pool name (required): "));
+
         name_label->setBuddy(m_name_edit);
         name_layout->addWidget(name_label);
         name_layout->addWidget(m_name_edit);
@@ -187,7 +191,7 @@ QWidget* LvCreateDialogBase::createGeneralTab(bool showNameTag, bool showRo, boo
         QRegExp rx2("[0-9a-zA-Z_\\.+-]*");
         m_tag_validator = new QRegExpValidator(rx2, m_tag_edit);
         m_tag_edit->setValidator(m_tag_validator);
-        QLabel *const tag_label = new QLabel(i18n("Optional tag: "));
+        QLabel *const tag_label = new QLabel(i18n("Tag (optional): "));
         tag_label->setBuddy(m_tag_edit);
         tag_layout->addWidget(tag_label);
         tag_layout->addWidget(m_tag_edit);

@@ -42,6 +42,8 @@ struct Segment {
     QStringList device_path;     // full path of physical volume
     QList<long long> starting_extent;   // first extent on physical volume
                                         // for this segment
+    QString discards;            // May be: ignore, nopassdown, passdown
+    long long chunk_size;        // Thin pool chunk size
 };
 
 LogVol::LogVol(lv_t lvmLV, vg_t lvmVG, VolGroup *const vg, LogVol *const lvParent, MountTables *const tables, bool orphan) :
@@ -102,7 +104,6 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)
     m_copy_percent = 0;
     m_data_percent = 0;
     m_snap_percent = 0;
-    m_chunk_size   = 0;
 
     value = lvm_lv_get_property(lvmLV, "lv_name");
     m_lv_name = QString(value.value.string).trimmed();
@@ -247,9 +248,6 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)
     case 't':
         m_type = "thin pool";
         m_thin_pool = true;
-        value = lvm_lv_get_property(lvmLV, "chunksize");
-        if (value.is_valid)
-            m_chunk_size = value.value.integer;
         break;
     case 'T':
         m_type = "thin data";
@@ -281,10 +279,6 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)
             m_type = "thin snapshot";
         }
     }
-
-    value = lvm_lv_get_property(lvmLV, "discards");
-    if (value.is_valid)
-        m_discards = value.value.string;
 
     if (flags[7] == 'z')
         m_zero = true;
@@ -771,6 +765,41 @@ void LogVol::processSegments(lv_t lvmLV, const QByteArray flags)
                     segment->starting_extent.append((temp[1].remove(')')).toLongLong());
                 }
             }
+
+            if (flags[0] == 't') {
+                
+                value = lvm_lvseg_get_property(lvm_lvseg, "chunksize");
+                if (value.is_valid) {
+
+                    if (MasterList::getLvmVersionMajor() >= 2 && 
+                        MasterList::getLvmVersionMinor() >= 2 && 
+                        MasterList::getLvmVersionPatchLevel() >= 98 ) {
+                        
+                        /* Make multiplying by 512 depend on version number as in the example
+                           above when stripesize gets fixed in lvm2app. */
+
+                        segment->chunk_size = value.value.integer * 512;
+                    } else {
+                        segment->chunk_size = value.value.integer;
+                    }
+                } else {
+                    segment->chunk_size = 0;
+                }
+            } else {
+                segment->chunk_size = 0;
+            }
+            
+            /*  Un-comment and test when lvm version after 2.2.98 is installed
+
+            if (flags[0] == 't') {
+                value = lvm_lvseg_get_property(lvm_lvseg, "discards");
+                if (value.is_valid) {
+                    segment->discards = value.value.string;
+                }
+
+            }
+
+            */
             m_segments.append(segment);
         }
     }
@@ -1033,9 +1062,9 @@ long long LogVol::getMissingSpace()
     return missing;
 }
 
-long long LogVol::getChunkSize()
+long long LogVol::getChunkSize(const int segment)
 {
-    return m_chunk_size;
+    return m_segments[segment]->chunk_size;
 }
 
 long long LogVol::getExtents()
@@ -1297,9 +1326,9 @@ QStringList LogVol::getTags()
     return m_tags;
 }
 
-QString LogVol::getDiscards()
+QString LogVol::getDiscards(const int segment)
 {
-    return m_discards;
+    return m_segments[segment]->discards;
 }
 
 QString LogVol::getOrigin()
