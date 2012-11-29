@@ -71,7 +71,7 @@ class MkfsDialog : public KDialog
     QString m_path;
     bool m_bailout;
 
-    QWidget *generalTab();
+    QWidget *generalTab(const long long size);
     QWidget *advancedTab(const long strideSize, const long strideCount);
     QWidget *ext4Tab();
     QGroupBox *miscOptionsBox();
@@ -80,7 +80,7 @@ class MkfsDialog : public KDialog
     QGroupBox *stripeBox(const long strideSize, const long strideCount);
     void clobberFilesystem();
     bool hasInitialErrors(const bool mounted);
-    void buildDialog(const long strideSize, const long strideCount);
+    void buildDialog(const long long size, const long strideSize, const long strideCount);
 
 private slots:
     void enableOptions(bool);

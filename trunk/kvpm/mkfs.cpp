@@ -43,7 +43,7 @@ MkfsDialog::MkfsDialog(LogVol *const volume, QWidget *parent) : KDialog(parent)
         m_bailout = true;
     else {
         m_bailout = false;
-        buildDialog(stride_size, stride_count);
+        buildDialog(volume->getSize(), stride_size, stride_count);
     }
 }
 
@@ -58,7 +58,7 @@ MkfsDialog::MkfsDialog(StoragePartition *const partition, QWidget *parent) : KDi
         m_bailout = true;
     else {
         m_bailout = false;
-        buildDialog(stride_size, stride_count);
+        buildDialog(partition->getSize(), stride_size, stride_count);
     }
 }
 
@@ -90,7 +90,7 @@ bool MkfsDialog::hasInitialErrors(const bool mounted)
     return true;
 }
 
-void MkfsDialog::buildDialog(const long strideSize, const long strideCount)
+void MkfsDialog::buildDialog(const long long size, const long strideSize, const long strideCount)
 {
     QWidget *const dialog_body = new QWidget;
     QVBoxLayout *const layout = new QVBoxLayout;
@@ -103,7 +103,7 @@ void MkfsDialog::buildDialog(const long strideSize, const long strideCount)
     layout->addSpacing(5);
 
     m_tab_widget = new KTabWidget(this);
-    m_tab_widget->addTab(generalTab(), i18n("Filesystem Type"));
+    m_tab_widget->addTab(generalTab(size), i18n("Filesystem Type"));
     m_tab_widget->addTab(advancedTab(strideSize, strideCount), i18n("Standard Ext Options"));
     m_tab_widget->addTab(ext4Tab(), i18n("Additional Ext4 Options"));
     layout->addWidget(m_tab_widget);
@@ -117,7 +117,7 @@ void MkfsDialog::buildDialog(const long strideSize, const long strideCount)
             this, SLOT(commitFilesystem()));
 }
 
-QWidget* MkfsDialog::generalTab()
+QWidget* MkfsDialog::generalTab(const long long size)
 {
     QWidget *const tab = new QWidget();
     QVBoxLayout *const layout = new QVBoxLayout();
@@ -171,6 +171,33 @@ QWidget* MkfsDialog::generalTab()
 
     lower_layout->addStretch();
     layout->addStretch();
+
+    if (size > 0x20000000000) {    // 2TiB
+        vfat->setChecked(false);
+        vfat->setEnabled(false);
+        if (size > 0x100000000000) {  // 16TiB
+            ext2->setChecked(false);
+            ext2->setEnabled(false);
+            ext3->setChecked(false);
+            ext3->setEnabled(false);
+            reiser->setChecked(false);
+            reiser->setEnabled(false);
+        }
+
+        layout->addStretch();
+        QHBoxLayout *const info_layout = new QHBoxLayout;
+        info_layout->addStretch();
+        QLabel *const icon_label = new QLabel();
+        icon_label->setPixmap(KIcon("dialog-information").pixmap(32, 32));
+        info_layout->addWidget(icon_label);
+        QLabel *const info_label = new QLabel(i18n("Some filesystems can not use a space this large and have been disabled."));
+        info_label->setWordWrap(true);
+        info_layout->addWidget(info_label);
+        info_layout->addStretch();
+        layout->addLayout(info_layout);
+        layout->addStretch();
+    }
+
     tab->setLayout(layout);
 
     connect(ext2, SIGNAL(toggled(bool)),
