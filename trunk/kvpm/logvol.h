@@ -159,10 +159,10 @@ public:
     QList<MountEntry *> getMountEntries();  // Calling function must delete these objects in the list
     QString getFstabMountPoint();
     QStringList getTags();
-    QString getDiscards(const int segment);
+    QString getDiscards(int segment);
     long long getSpaceUsedOnPv(const QString physicalVolume);
     long long getMissingSpace();  // space used on pvs that are missing
-    long long getChunkSize(const int segment);
+    long long getChunkSize(int segment);
     long long getExtents();
     long long getSize();
     long long getTotalSize();
