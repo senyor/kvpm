@@ -339,11 +339,11 @@ QWidget* LVCreateDialog::createStripeWidget()
                 if (m_lv->getRaidType() == 4 || m_lv->getRaidType() == 5){
                     stripe_count -= 1;
                     m_stripe_count_spin->setSuffix(i18n(" + 1 parity")); 
-                    m_stripe_count_spin->setSpecialValueText(i18n(""));
+                    m_stripe_count_spin->setSpecialValueText("");
                 } else if (m_lv->getRaidType() == 6) {
                     stripe_count -= 2;
                     m_stripe_count_spin->setSuffix(i18n(" + 2 parity"));
-                    m_stripe_count_spin->setSpecialValueText(i18n(""));
+                    m_stripe_count_spin->setSpecialValueText("");
                 }
             }
         }
@@ -583,7 +583,7 @@ void LVCreateDialog::enableTypeOptions(int index)
         m_stripe_count_spin->setRange(1, getMaxStripes());
         if(!m_extend)
             m_stripe_count_spin->setValue(1);
-        m_stripe_count_spin->setSuffix(i18n(""));
+        m_stripe_count_spin->setSuffix("");
         m_stripe_count_spin->setSpecialValueText(i18n("none"));
         m_stripe_count_spin->setEnabled(true);
 
@@ -606,7 +606,7 @@ void LVCreateDialog::enableTypeOptions(int index)
             m_stripe_count_spin->setMinimum(1);
             m_stripe_count_spin->setValue(1);
             m_stripe_count_spin->setMaximum(getMaxStripes());
-            m_stripe_count_spin->setSuffix(i18n(""));
+            m_stripe_count_spin->setSuffix("");
             m_stripe_count_spin->setSpecialValueText(i18n("none"));
         }
 
@@ -629,7 +629,7 @@ void LVCreateDialog::enableTypeOptions(int index)
         m_log_combo->setCurrentIndex(1);
         m_stripe_count_spin->setMinimum(1);
         m_stripe_count_spin->setValue(1);
-        m_stripe_count_spin->setSuffix(i18n(""));
+        m_stripe_count_spin->setSuffix("");
         m_stripe_count_spin->setSpecialValueText(i18n("none"));
         m_stripe_count_spin->setEnabled(false);
         m_stripe_size_combo->setEnabled(false);
