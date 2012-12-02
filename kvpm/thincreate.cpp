@@ -86,7 +86,9 @@ void ThinCreateDialog::resetOkButton()
 
 long long ThinCreateDialog::getLargestVolume()
 {
-    return 0x1000000000000;   // 256 TiB should be enough for anyone :-)
+    // Current limitation of number of extents is 32bit unsigned
+
+    return 0xFFFFFFFF * m_vg->getExtentSize();
 }
 
 /* Here we create a stringlist of arguments based on all
