@@ -152,7 +152,11 @@ QStringList ThinCreateDialog::args()
 bool ThinCreateDialog::hasInitialErrors()
 {
     if (m_vg->isPartial()) {
-        KMessageBox::error(this, i18n("New volumes can not be created while physical volumes are missing"));
+        if (m_extend)
+            KMessageBox::error(this, i18n("Volumes can not be extended while physical volumes are missing"));
+        else
+            KMessageBox::error(this, i18n("Volumes can not be created while physical volumes are missing"));
+
         return true;
     }
 

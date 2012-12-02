@@ -1060,7 +1060,10 @@ bool LVCreateDialog::hasInitialErrors()
 {
     if (m_vg->getAllocatableExtents() == 0 || m_vg->isPartial()) {
         if (m_vg->isPartial())
-            KMessageBox::error(this, i18n("New volumes can not be created while physical volumes are missing"));
+            if (m_extend)
+                KMessageBox::error(this, i18n("Volumes can not be extended while physical volumes are missing"));
+            else
+                KMessageBox::error(this, i18n("Volumes can not be created while physical volumes are missing"));
         else if (m_vg->getFreeExtents())
             KMessageBox::error(this, i18n("All free physical volume extents in this group"
                                           " are locked against allocation"));
