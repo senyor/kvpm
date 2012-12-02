@@ -129,6 +129,7 @@ void LVCreateDialog::makeConnections()
             this, SLOT(setMaxSize()));
 }
 
+
 QWidget* LVCreateDialog::createPhysicalTab()
 {
     QString message;
@@ -137,11 +138,11 @@ QWidget* LVCreateDialog::createPhysicalTab()
     m_physical_tab = new QWidget(this);
     m_physical_tab->setLayout(layout);
 
-    QList<PhysVol *> physical_volumes(m_vg->getPhysicalVolumes());
+    QList<PhysVol *> pvs(m_vg->getPhysicalVolumes());
 
-    for (int x = physical_volumes.size() - 1; x >= 0; x--) {
-        if (physical_volumes[x]->getRemaining() < 1 || !physical_volumes[x]->isAllocatable())
-            physical_volumes.removeAt(x);
+    for (int x = pvs.size() - 1; x >= 0; x--) {
+        if (pvs[x]->getRemaining() < 1 || !pvs[x]->isAllocatable() || pvs[x]->isMissing())
+            pvs.removeAt(x);
     }
 
     QList<long long> normal;
@@ -149,20 +150,20 @@ QWidget* LVCreateDialog::createPhysicalTab()
 
     if (m_lv != NULL) {
 
-        for (int x = 0; x < physical_volumes.size(); x++) {
-            normal.append(physical_volumes[x]->getRemaining());
-            contiguous.append(physical_volumes[x]->getContiguous(m_lv));
+        for (int x = 0; x < pvs.size(); x++) {
+            normal.append(pvs[x]->getRemaining());
+            contiguous.append(pvs[x]->getContiguous(m_lv));
         }
 
-        m_pv_box = new PvGroupBox(physical_volumes, normal, contiguous, m_lv->getPolicy());
+        m_pv_box = new PvGroupBox(pvs, normal, contiguous, m_lv->getPolicy());
     } else {
 
-        for (int x = 0; x < physical_volumes.size(); x++) {
-            normal.append(physical_volumes[x]->getRemaining());
-            contiguous.append(physical_volumes[x]->getContiguous(m_lv));
+        for (int x = 0; x < pvs.size(); x++) {
+            normal.append(pvs[x]->getRemaining());
+            contiguous.append(pvs[x]->getContiguous(m_lv));
         }
 
-        m_pv_box = new PvGroupBox(physical_volumes, normal, contiguous, INHERITED);
+        m_pv_box = new PvGroupBox(pvs, normal, contiguous, INHERITED);
     }
 
     layout->addWidget(m_pv_box);
@@ -178,9 +179,9 @@ QWidget* LVCreateDialog::createPhysicalTab()
     QVBoxLayout *const volume_layout = new QVBoxLayout;
     m_volume_box->setLayout(volume_layout);
 
-    volume_layout->addWidget(createTypeWidget(physical_volumes.size()));
+    volume_layout->addWidget(createTypeWidget(pvs.size()));
     m_stripe_widget = createStripeWidget();
-    m_mirror_widget = createMirrorWidget(physical_volumes.size());
+    m_mirror_widget = createMirrorWidget(pvs.size());
 
     if (m_ispool && !m_extend) {
         volume_layout->addWidget(createChunkWidget());
@@ -497,6 +498,7 @@ void LVCreateDialog::setMaxSize()
     const long long max_extents = getLargestVolume() / m_vg->getExtentSize();
 
     m_stripe_count_spin->setMaximum(getMaxStripes());
+
     setSelectorMaxExtents(max_extents);
     resetOkButton();
 
@@ -1200,6 +1202,9 @@ int LVCreateDialog::getMaxStripes()
         }
     }
 
+    if (stripes < 1)
+        stripes = 1;
+
     return stripes;
 }
 
@@ -1255,3 +1260,4 @@ void LVCreateDialog::extendLastSegment(QList<long long> &committed, QList<long l
         }
     }
 }
+
