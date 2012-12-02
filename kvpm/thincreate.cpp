@@ -151,6 +151,11 @@ QStringList ThinCreateDialog::args()
 
 bool ThinCreateDialog::hasInitialErrors()
 {
+    if (m_vg->isPartial()) {
+        KMessageBox::error(this, i18n("New volumes can not be created while physical volumes are missing"));
+        return true;
+    }
+
     if (m_extend) {
 
         const QString warning_message = i18n("If this volume has a filesystem or data, it will need to be extended <b>separately</b>. "
