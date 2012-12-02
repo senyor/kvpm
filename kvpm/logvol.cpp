@@ -1064,6 +1064,9 @@ long long LogVol::getMissingSpace()
 
 long long LogVol::getChunkSize(const int segment)
 {
+    if (segment > m_segments.size() - 1)
+        segment = 0;
+
     return m_segments[segment]->chunk_size;
 }
 
@@ -1328,6 +1331,9 @@ QStringList LogVol::getTags()
 
 QString LogVol::getDiscards(const int segment)
 {
+    if (segment > m_segments.size() - 1)
+        segment = 0;
+
     return m_segments[segment]->discards;
 }
 
