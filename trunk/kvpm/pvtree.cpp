@@ -108,9 +108,12 @@ void PVTree::loadData()
         pv_data.clear();
         device_name = pv->getName();
 
-        if (pv->isMissing())
-            pv_data << i18n("MISSING %1", device_name);
-        else
+        if (pv->isMissing()) {
+            if (device_name == "unknown device")
+                pv_data << i18n("MISSING");
+            else
+                pv_data << i18n("MISSING %1", device_name);
+        } else
             pv_data << device_name;
 
         pv_data << locale->formatByteSize(pv->getSize(), 1, dialect)
@@ -152,9 +155,10 @@ void PVTree::loadData()
 
         item = new QTreeWidgetItem((QTreeWidgetItem *)0, pv_data);
 
-        if (pv->isMissing())
+        if (pv->isMissing()) {
             item->setIcon(0, KIcon("exclamation"));
-        else
+            item->setToolTip(0, i18n("This physical volume can not be found"));
+        } else
             item->setIcon(0, KIcon());
 
         item->setData(0, Qt::UserRole, pv->getUuid());
