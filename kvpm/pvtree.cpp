@@ -108,8 +108,12 @@ void PVTree::loadData()
         pv_data.clear();
         device_name = pv->getName();
 
-        pv_data << device_name
-                << locale->formatByteSize(pv->getSize(), 1, dialect)
+        if (pv->isMissing())
+            pv_data << i18n("MISSING %1", device_name);
+        else
+            pv_data << device_name;
+
+        pv_data << locale->formatByteSize(pv->getSize(), 1, dialect)
                 << locale->formatByteSize(pv->getRemaining(), 1, dialect)
                 << locale->formatByteSize(pv->getSize() - pv->getRemaining(), 1, dialect);
 
@@ -148,7 +152,7 @@ void PVTree::loadData()
 
         item = new QTreeWidgetItem((QTreeWidgetItem *)0, pv_data);
 
-        if (device_name == "unknown device")
+        if (pv->isMissing())
             item->setIcon(0, KIcon("exclamation"));
         else
             item->setIcon(0, KIcon());
