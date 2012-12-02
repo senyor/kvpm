@@ -3,13 +3,12 @@
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
-#: topwindow.cpp:479
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-04-19 17:19-0700\n"
+"POT-Creation-Date: 2012-12-02 14:54-0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,98 +17,103 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: changemirror.cpp:51
+#: changemirror.cpp:59
 msgid "Change Mirror"
 msgstr ""
 
-#: changemirror.cpp:55
-msgid "<b>Change mirror: %1</b>"
+#: changemirror.cpp:63
+msgid "RAID mirrors must be synced before adding new legs"
 msgstr ""
 
-#: changemirror.cpp:65
+#: changemirror.cpp:66
+msgid "Non-RAID mirrors which are snapshot origins can not have new legs added"
+msgstr ""
+
+#: changemirror.cpp:74
+msgid "<b>Change mirror log: %1</b>"
+msgstr ""
+
+#: changemirror.cpp:76
+msgid "<b>Change LVM mirror: %1</b>"
+msgstr ""
+
+#: changemirror.cpp:78
+msgid "<b>Change RAID 1 mirror: %1</b>"
+msgstr ""
+
+#: changemirror.cpp:80
+msgid "<b>Convert to a mirror: %1</b>"
+msgstr ""
+
+#: changemirror.cpp:91
 msgctxt "Common user options"
 msgid "General"
 msgstr ""
 
-#: changemirror.cpp:66 lvcreate.cpp:76 lvcreate.cpp:124
+#: changemirror.cpp:95 lvcreatebase.cpp:563
 msgid "Physical layout"
 msgstr ""
 
-#: changemirror.cpp:91
-msgid "Add mirror legs"
+#: changemirror.cpp:143
+msgid "Mirror type: "
 msgstr ""
 
-#: changemirror.cpp:98
+#: changemirror.cpp:155
 msgid "Existing mirror legs: %1"
 msgstr ""
 
-#: changemirror.cpp:104
+#: changemirror.cpp:161
 msgid "Add mirror legs: "
 msgstr ""
 
-#: changemirror.cpp:117
+#: changemirror.cpp:175
+msgid "Add mirror legs"
+msgstr ""
+
+#: changemirror.cpp:179
+msgid "Convert to mirror"
+msgstr ""
+
+#: changemirror.cpp:188
 msgid "Mirror logging"
 msgstr ""
 
-#: changemirror.cpp:119 lvcreate.cpp:407
+#: changemirror.cpp:190 lvcreate.cpp:372
 msgid "Memory based log"
 msgstr ""
 
-#: changemirror.cpp:120 lvcreate.cpp:406
+#: changemirror.cpp:191 lvcreate.cpp:371
 msgid "Disk based log"
 msgstr ""
 
-#: changemirror.cpp:121 lvcreate.cpp:405
+#: changemirror.cpp:192 lvcreate.cpp:370
 msgid "Mirrored disk based log"
 msgstr ""
 
-#: changemirror.cpp:149 vgchange.cpp:58
-msgid "Allocation policy"
+#: changemirror.cpp:312
+msgid "Volume striping"
 msgstr ""
 
-#: changemirror.cpp:151 lvchange.cpp:163 lvcreate.cpp:272 pvmove.cpp:305
-#: vgchange.cpp:66
-msgctxt "The usual way"
-msgid "Normal"
-msgstr ""
-
-#: changemirror.cpp:152 lvchange.cpp:164 lvcreate.cpp:273 pvmove.cpp:306
-#: vgchange.cpp:67
-msgid "Contiguous"
-msgstr ""
-
-#: changemirror.cpp:153 lvchange.cpp:165 lvcreate.cpp:274 pvmove.cpp:307
-msgid "Anywhere"
-msgstr ""
-
-#: changemirror.cpp:154 lvchange.cpp:167 lvcreate.cpp:275
-msgctxt "Inherited from the parent group"
-msgid "Inherited"
-msgstr ""
-
-#: changemirror.cpp:155 lvchange.cpp:166 lvcreate.cpp:276 pvmove.cpp:310
-#: vgchange.cpp:69
-msgid "Cling"
-msgstr ""
-
-#: changemirror.cpp:207 lvcreate.cpp:327
-msgid "Disk striping"
-msgstr ""
-
-#: changemirror.cpp:219 lvcreate.cpp:342
+#: changemirror.cpp:325 lvcreate.cpp:282
 msgid "Stripe Size: "
 msgstr ""
 
-#: changemirror.cpp:227 lvcreate.cpp:350
+#: changemirror.cpp:328 lvcreate.cpp:288 lvcreate.cpp:579 lvcreate.cpp:587
+#: lvcreate.cpp:610 lvcreate.cpp:633 lvcreate.cpp:641 lvcreate.cpp:663
+#: lvcreate.cpp:684
+msgid "none"
+msgstr ""
+
+#: changemirror.cpp:334 lvcreate.cpp:294
 msgid "Number of stripes: "
 msgstr ""
 
-#: changemirror.cpp:245
+#: changemirror.cpp:352
 msgid ""
 "The number of extents: %1 must be evenly divisible by the number of stripes"
 msgstr ""
 
-#: deviceactionsmenu.cpp:70 lvactionsmenu.cpp:138
+#: deviceactionsmenu.cpp:70 lvactionsmenu.cpp:140
 msgid "Filesystem operations"
 msgstr ""
 
@@ -141,7 +145,7 @@ msgstr ""
 msgid "Create or remove a partition table"
 msgstr ""
 
-#: deviceactionsmenu.cpp:79 pvtree.cpp:209
+#: deviceactionsmenu.cpp:79 pvtree.cpp:219
 msgid "Remove from volume group"
 msgstr ""
 
@@ -189,11 +193,11 @@ msgstr ""
 msgid "Flags: %1"
 msgstr ""
 
-#: deviceproperties.cpp:125 lvproperties.cpp:102
+#: deviceproperties.cpp:125 lvproperties.cpp:104
 msgid "<b>Mount Point</b>"
 msgstr ""
 
-#: deviceproperties.cpp:127 lvproperties.cpp:98
+#: deviceproperties.cpp:127 lvproperties.cpp:100
 msgid "<b>Mount Points</b>"
 msgstr ""
 
@@ -234,11 +238,11 @@ msgstr ""
 msgid "Busy: No"
 msgstr ""
 
-#: deviceproperties.cpp:202 lvproperties.cpp:171
+#: deviceproperties.cpp:202 lvproperties.cpp:173
 msgid "<b>Filesystem Label</b>"
 msgstr ""
 
-#: deviceproperties.cpp:211 lvproperties.cpp:181
+#: deviceproperties.cpp:211 lvproperties.cpp:183
 msgid "<b>Filesystem UUID</b>"
 msgstr ""
 
@@ -262,71 +266,71 @@ msgstr ""
 msgid "<b>Hardware</b>"
 msgstr ""
 
-#: devicesizechartseg.cpp:122
+#: devicesizechartseg.cpp:120
 msgid "Device: %1"
 msgstr ""
 
-#: devicetree.cpp:45
+#: devicetree.cpp:46
 msgid "The device name"
 msgstr ""
 
-#: devicetree.cpp:46
+#: devicetree.cpp:47
 msgid "The type of partition"
 msgstr ""
 
-#: devicetree.cpp:47
+#: devicetree.cpp:48
 msgid "The amount of storage space"
 msgstr ""
 
-#: devicetree.cpp:48
+#: devicetree.cpp:49
 msgid "The remaining storage space"
 msgstr ""
 
-#: devicetree.cpp:49
+#: devicetree.cpp:50
 msgid "How the device is being used"
 msgstr ""
 
-#: devicetree.cpp:50
+#: devicetree.cpp:51
 msgid "The Name of the volume group if the device is a physical volume"
 msgstr ""
 
-#: devicetree.cpp:51
+#: devicetree.cpp:52
 msgid "Any flags associated with device"
 msgstr ""
 
-#: devicetree.cpp:52
+#: devicetree.cpp:53
 msgid "Mount points of the filesystem if it is mounted"
 msgstr ""
 
-#: devicetree.cpp:144 devicetree.cpp:237 devicetree.cpp:281
+#: devicetree.cpp:153 devicetree.cpp:246 devicetree.cpp:290
 msgid "Physical volume that is running out of space"
 msgstr ""
 
-#: devicetree.cpp:149 devicetree.cpp:242 devicetree.cpp:286
+#: devicetree.cpp:158 devicetree.cpp:251 devicetree.cpp:295
 msgid "Physical volume with active logical volumes"
 msgstr ""
 
-#: devicetree.cpp:152 devicetree.cpp:245 devicetree.cpp:289
+#: devicetree.cpp:161 devicetree.cpp:254 devicetree.cpp:298
 msgid "Physical volume without active logical volumes"
 msgstr ""
 
-#: devicetree.cpp:251 devicetree.cpp:295
+#: devicetree.cpp:260 devicetree.cpp:304
 msgid "Filesystem that is running out of space"
 msgstr ""
 
-#: devicetree.cpp:255 devicetree.cpp:299 vgtree.cpp:247
+#: devicetree.cpp:264 devicetree.cpp:308 vgtree.cpp:258
 msgid "mounted filesystem"
 msgstr ""
 
-#: devicetree.cpp:258 devicetree.cpp:302 vgtree.cpp:258
+#: devicetree.cpp:267 devicetree.cpp:311 vgtree.cpp:269
 msgid "unmounted filesystem"
 msgstr ""
 
-#: devicetree.cpp:263 devicetree.cpp:307 vgtree.cpp:251
+#: devicetree.cpp:272 devicetree.cpp:316 vgtree.cpp:262
 msgid "Active swap area"
 msgstr ""
 
-#: devicetree.cpp:266 devicetree.cpp:310 vgtree.cpp:254
+#: devicetree.cpp:275 devicetree.cpp:319 vgtree.cpp:265
 msgid "Inactive swap area"
 msgstr ""
 
@@ -364,7 +368,7 @@ msgstr ""
 msgid "Shrink failed: could not determine filesystem block size"
 msgstr ""
 
-#: kvpmconfigdialog.cpp:57 lvcreate.cpp:75 lvcreate.cpp:123
+#: kvpmconfigdialog.cpp:57 lvcreatebase.cpp:80
 msgctxt "The standard common options"
 msgid "General"
 msgstr ""
@@ -507,12 +511,12 @@ msgstr ""
 msgid "Physical Volume Table"
 msgstr ""
 
-#: kvpmconfigdialog.cpp:492 kvpmconfigdialog.cpp:565 pvproperties.cpp:109
+#: kvpmconfigdialog.cpp:492 kvpmconfigdialog.cpp:565 pvproperties.cpp:111
 msgid "Volume name"
 msgstr ""
 
 #: kvpmconfigdialog.cpp:493 kvpmconfigdialog.cpp:566 pvtree.cpp:49
-#: vgtree.cpp:33
+#: vgtree.cpp:34
 msgid "Size"
 msgstr ""
 
@@ -520,7 +524,7 @@ msgstr ""
 msgid "Used space"
 msgstr ""
 
-#: kvpmconfigdialog.cpp:496 pvtree.cpp:51 vgtree.cpp:35
+#: kvpmconfigdialog.cpp:496 pvtree.cpp:51 vgtree.cpp:36
 msgid "State"
 msgstr ""
 
@@ -529,11 +533,11 @@ msgid "Allocatable"
 msgstr ""
 
 #: kvpmconfigdialog.cpp:498 kvpmconfigdialog.cpp:575 pvtree.cpp:52
-#: vgtree.cpp:36
+#: vgtree.cpp:37
 msgid "Tags"
 msgstr ""
 
-#: kvpmconfigdialog.cpp:499 pvmove.cpp:466
+#: kvpmconfigdialog.cpp:499 pvmove.cpp:457
 msgid "Logical Volumes"
 msgstr ""
 
@@ -574,7 +578,7 @@ msgstr ""
 msgid "Stripe count"
 msgstr ""
 
-#: kvpmconfigdialog.cpp:571 vgtree.cpp:35
+#: kvpmconfigdialog.cpp:571 vgtree.cpp:36
 msgid "Stripe size"
 msgstr ""
 
@@ -673,7 +677,7 @@ msgstr ""
 msgid "Device Properties Panel"
 msgstr ""
 
-#: kvpmconfigdialog.cpp:715 kvpmconfigdialog.cpp:777 vgtree.cpp:36
+#: kvpmconfigdialog.cpp:715 kvpmconfigdialog.cpp:777 vgtree.cpp:37
 msgid "Mount points"
 msgstr ""
 
@@ -729,84 +733,116 @@ msgstr ""
 msgid "Show the logical volume UUID"
 msgstr ""
 
-#: lvactionsmenu.cpp:60
+#: lvactionsmenu.cpp:64
 msgid "Create logical volume..."
 msgstr ""
 
-#: lvactionsmenu.cpp:63
-msgid "Remove logical volume..."
+#: lvactionsmenu.cpp:68
+msgid "Create thin volume..."
 msgstr ""
 
-#: lvactionsmenu.cpp:67
-msgid "Rename logical volume..."
-msgstr ""
-
-#: lvactionsmenu.cpp:70
-msgid "Create snapshot..."
-msgstr ""
-
-#: lvactionsmenu.cpp:73
-msgid "Merge snapshot..."
+#: lvactionsmenu.cpp:72 lvactionsmenu.cpp:162
+msgid "Create thin pool..."
 msgstr ""
 
 #: lvactionsmenu.cpp:76
-msgid "Reduce logical volume..."
+msgid "Remove logical volume..."
 msgstr ""
 
-#: lvactionsmenu.cpp:79
-msgid "Extend logical volume..."
-msgstr ""
-
-#: lvactionsmenu.cpp:82
-msgid "Move physical extents..."
+#: lvactionsmenu.cpp:81
+msgid "Rename logical volume..."
 msgstr ""
 
 #: lvactionsmenu.cpp:85
-msgid "Change attributes or tags..."
+msgid "Create snapshot..."
 msgstr ""
 
 #: lvactionsmenu.cpp:89
-msgid "Make filesystem..."
-msgstr ""
-
-#: lvactionsmenu.cpp:90
-msgid "Remove filesystem..."
-msgstr ""
-
-#: lvactionsmenu.cpp:91
-msgid "Extend filesystem to fill volume..."
-msgstr ""
-
-#: lvactionsmenu.cpp:92
-msgid "Run 'fsck -fp' on filesystem..."
+msgid "Create thin snapshot..."
 msgstr ""
 
 #: lvactionsmenu.cpp:93
-msgid "Mount filesystem..."
-msgstr ""
-
-#: lvactionsmenu.cpp:94
-msgid "Unmount filesystem..."
-msgstr ""
-
-#: lvactionsmenu.cpp:95
-msgid "Add mirror legs to volume..."
-msgstr ""
-
-#: lvactionsmenu.cpp:96
-msgid "Change mirror log..."
+msgid "Merge snapshot..."
 msgstr ""
 
 #: lvactionsmenu.cpp:97
-msgid "Remove mirror leg..."
+msgid "Reduce logical volume..."
 msgstr ""
 
-#: lvactionsmenu.cpp:98
+#: lvactionsmenu.cpp:101
+msgid "Extend logical volume..."
+msgstr ""
+
+#: lvactionsmenu.cpp:105
+msgid "Move physical extents..."
+msgstr ""
+
+#: lvactionsmenu.cpp:109
+msgid "Change attributes or tags..."
+msgstr ""
+
+#: lvactionsmenu.cpp:113
+msgid "Make filesystem..."
+msgstr ""
+
+#: lvactionsmenu.cpp:114
+msgid "Remove filesystem..."
+msgstr ""
+
+#: lvactionsmenu.cpp:115
+msgid "Extend filesystem to fill volume..."
+msgstr ""
+
+#: lvactionsmenu.cpp:116
+msgid "Run 'fsck -fp' on filesystem..."
+msgstr ""
+
+#: lvactionsmenu.cpp:117
+msgid "Mount filesystem..."
+msgstr ""
+
+#: lvactionsmenu.cpp:118
+msgid "Unmount filesystem..."
+msgstr ""
+
+#: lvactionsmenu.cpp:163
+msgid "Extend thin pool..."
+msgstr ""
+
+#: lvactionsmenu.cpp:164
+msgid "Reduce thin pool..."
+msgstr ""
+
+#: lvactionsmenu.cpp:165
+msgid "Rename thin pool..."
+msgstr ""
+
+#: lvactionsmenu.cpp:166
+msgid "Remove thin pool..."
+msgstr ""
+
+#: lvactionsmenu.cpp:536
+msgid "Add mirror legs to volume..."
+msgstr ""
+
+#: lvactionsmenu.cpp:537
+msgid "Change mirror log..."
+msgstr ""
+
+#: lvactionsmenu.cpp:538
+msgid "Remove mirror legs..."
+msgstr ""
+
+#: lvactionsmenu.cpp:539
 msgid "Remove this mirror leg..."
 msgstr ""
 
-#: lvactionsmenu.cpp:130
-msgid "Mirror operations"
+#: lvactionsmenu.cpp:540
+msgid "Repair volume..."
+msgstr ""
+
+#: lvactionsmenu.cpp:542
+msgid "Mirrors and RAID"
 msgstr ""
 
 #: lvchange.cpp:39
@@ -817,234 +853,353 @@ msgstr ""
 msgid "<b>Change volume: %1</b>"
 msgstr ""
 
-#: lvchange.cpp:56
+#: lvchange.cpp:55
 msgctxt "The standard or basic options"
 msgid "General"
 msgstr ""
 
-#: lvchange.cpp:57
+#: lvchange.cpp:56
 msgctxt "Less used or complex options"
 msgid "Advanced"
 msgstr ""
 
-#: lvchange.cpp:62
-msgid "Mirror"
-msgstr ""
-
-#: lvchange.cpp:64
-msgid "Snapshot"
-msgstr ""
-
-#: lvchange.cpp:113
+#: lvchange.cpp:89
 msgid "Make volume available for use"
 msgstr ""
 
-#: lvchange.cpp:114
+#: lvchange.cpp:90
 msgid "Make volume read only"
 msgstr ""
 
-#: lvchange.cpp:115
+#: lvchange.cpp:91
 msgid "Refresh volume metadata"
 msgstr ""
 
-#: lvchange.cpp:129
+#: lvchange.cpp:105
 msgid "Change Volume Tags"
 msgstr ""
 
-#: lvchange.cpp:139 pvchange.cpp:76
+#: lvchange.cpp:115 pvchange.cpp:76
 msgid "Add new tag:"
 msgstr ""
 
-#: lvchange.cpp:147 pvchange.cpp:84
+#: lvchange.cpp:123 pvchange.cpp:84
 msgid "Remove tag:"
 msgstr ""
 
-#: lvchange.cpp:159
+#: lvchange.cpp:136
 msgid "Change Allocation Policy"
 msgstr ""
 
-#: lvchange.cpp:211
-msgid "Mirror Sync"
+#: lvchange.cpp:140 vgchange.cpp:66
+msgctxt "The usual way"
+msgid "Normal"
 msgstr ""
 
-#: lvchange.cpp:220
-msgid "Re-synchronize mirrors"
+#: lvchange.cpp:141 pvgroupbox.cpp:449 vgchange.cpp:67
+msgid "Contiguous"
 msgstr ""
 
-#: lvchange.cpp:224
-msgid "Monitoring With dmeventd"
+#: lvchange.cpp:142 pvgroupbox.cpp:451
+msgid "Anywhere"
 msgstr ""
 
-#: lvchange.cpp:230 lvcreate.cpp:481
-msgid "Monitor with dmeventd"
+#: lvchange.cpp:143 pvgroupbox.cpp:450 vgchange.cpp:69
+msgid "Cling"
 msgstr ""
 
-#: lvchange.cpp:231
-msgid "Do not monitor"
+#: lvchange.cpp:144
+msgctxt "Inherited from the parent group"
+msgid "Inherited"
 msgstr ""
 
-#: lvchange.cpp:232
-msgid "Ignore dmeventd"
-msgstr ""
-
-#: lvchange.cpp:249
-msgid "Change Volume Polling"
-msgstr ""
-
-#: lvchange.cpp:255 vgchange.cpp:174
-msgid "Start polling"
-msgstr ""
-
-#: lvchange.cpp:258 vgchange.cpp:175
-msgid "Stop polling"
-msgstr ""
-
-#: lvchange.cpp:261
-msgid "Udev Synchronizing"
-msgstr ""
-
-#: lvchange.cpp:265
+#: lvchange.cpp:201 lvcreatebase.cpp:280
 msgid "Synchronize with udev"
 msgstr ""
 
-#: lvchange.cpp:269
-msgid "Set Kernel Device Numbers"
+#: lvchange.cpp:204
+msgid "Re-synchronize mirrors"
 msgstr ""
 
-#: lvchange.cpp:275
+#: lvchange.cpp:215
+msgid "Change Volume Polling"
+msgstr ""
+
+#: lvchange.cpp:221 vgchange.cpp:174
+msgid "Start polling"
+msgstr ""
+
+#: lvchange.cpp:224 vgchange.cpp:175
+msgid "Stop polling"
+msgstr ""
+
+#: lvchange.cpp:227
+msgid "Change dmeventd Monitoring"
+msgstr ""
+
+#: lvchange.cpp:233 lvcreatebase.cpp:268
+msgid "Monitor with dmeventd"
+msgstr ""
+
+#: lvchange.cpp:234
+msgid "Do not monitor"
+msgstr ""
+
+#: lvchange.cpp:235
+msgid "Ignore dmeventd"
+msgstr ""
+
+#: lvchange.cpp:254
+msgid "Change Kernel Device Numbers"
+msgstr ""
+
+#: lvchange.cpp:260
 msgid "Use persistent device numbers"
 msgstr ""
 
-#: lvchange.cpp:281
+#: lvchange.cpp:266
 msgid "Major number: "
 msgstr ""
 
-#: lvchange.cpp:287
+#: lvchange.cpp:272
 msgid "Minor number: "
 msgstr ""
 
-#: lvcreate.cpp:62
-msgid "Create A New Logical Volume"
-msgstr ""
-
-#: lvcreate.cpp:66
-msgid "<b>Create a new logical volume</b>"
-msgstr ""
-
-#: lvcreate.cpp:77 lvcreate.cpp:125
+#: lvcreatebase.cpp:81
 msgctxt "Less used, dangerous or complex options"
 msgid "Advanced options"
 msgstr ""
 
-#: lvcreate.cpp:109
-msgid "Create Snapshot Volume"
+#: lvcreatebase.cpp:90
+msgid "Create a thin snapshot of: %1"
 msgstr ""
 
-#: lvcreate.cpp:110
-msgid "<b>Create snapshot of: %1</b>"
+#: lvcreatebase.cpp:91
+msgid "Create A Thin Snapshot"
 msgstr ""
 
-#: lvcreate.cpp:112
-msgid "Extend Logical Volume"
+#: lvcreatebase.cpp:93
+msgid "Create a snapshot of: %1"
 msgstr ""
 
-#: lvcreate.cpp:113
-msgid "<b>Extend volume: %1</b>"
+#: lvcreatebase.cpp:94
+msgid "Create A Snapshot"
 msgstr ""
 
-#: lvcreate.cpp:205
-msgid "Current size: %1"
+#: lvcreatebase.cpp:98
+msgid "Create a new thin volume"
 msgstr ""
 
-#: lvcreate.cpp:215
+#: lvcreatebase.cpp:99
+msgid "Create A New Thin Volume"
+msgstr ""
+
+#: lvcreatebase.cpp:101
+msgid "Create a new thin pool"
+msgstr ""
+
+#: lvcreatebase.cpp:102
+msgid "Create A New Thin Pool"
+msgstr ""
+
+#: lvcreatebase.cpp:104
+msgid "Create a new logical volume"
+msgstr ""
+
+#: lvcreatebase.cpp:105
+msgid "Create A New Logical Volume"
+msgstr ""
+
+#: lvcreatebase.cpp:110
+msgid "Extend thin volume: %1"
+msgstr ""
+
+#: lvcreatebase.cpp:111
+msgid "Extend Thin Volume"
+msgstr ""
+
+#: lvcreatebase.cpp:113
+msgid "Extend thin pool: %1"
+msgstr ""
+
+#: lvcreatebase.cpp:114
+msgid "Extend Thin Pool"
+msgstr ""
+
+#: lvcreatebase.cpp:116
+msgid "Extend volume: %1"
+msgstr ""
+
+#: lvcreatebase.cpp:117
+msgid "Extend Volume"
+msgstr ""
+
+#: lvcreatebase.cpp:122
+msgid "Pool: %1"
+msgstr ""
+
+#: lvcreatebase.cpp:179
 msgid "Volume name: "
 msgstr ""
 
-#: lvcreate.cpp:227
-msgid "Optional tag: "
+#: lvcreatebase.cpp:181
+msgid "Pool name (required): "
 msgstr ""
 
-#: lvcreate.cpp:258
-msgid "Maximum volume size"
+#: lvcreatebase.cpp:194
+msgid "Tag (optional): "
 msgstr ""
 
-#: lvcreate.cpp:270 pvmove.cpp:303
-msgid "Allocation Policy"
-msgstr ""
-
-#: lvcreate.cpp:398
-msgid "Disk mirrors"
-msgstr ""
-
-#: lvcreate.cpp:418
-msgid "Number of mirror legs: "
-msgstr ""
-
-#: lvcreate.cpp:453
-msgid "Device numbering"
-msgstr ""
-
-#: lvcreate.cpp:458
+#: lvcreatebase.cpp:209
 msgid "Set read only"
 msgstr ""
 
-#: lvcreate.cpp:461
+#: lvcreatebase.cpp:212
 msgid "Write zeros at volume start"
 msgstr ""
 
-#: lvcreate.cpp:482
+#: lvcreatebase.cpp:269
 msgid "Skip initial synchronization of mirror"
 msgstr ""
 
-#: lvcreate.cpp:510
+#: lvcreatebase.cpp:290
 msgid "Device minor number: "
 msgstr ""
 
-#: lvcreate.cpp:511
+#: lvcreatebase.cpp:291
 msgid "Device major number: "
 msgstr ""
 
-#: lvcreate.cpp:548
-msgid "Size: %1"
+#: lvcreatebase.cpp:307
+msgid "Use persistent device numbering"
 msgstr ""
 
-#: lvcreate.cpp:549 lvproperties.cpp:223 lvproperties.cpp:247
-#: lvproperties.cpp:279 pvgroupbox.cpp:312
-msgid "Extents: %1"
+#: lvcreatebase.cpp:537
+msgid "Current size: %1"
 msgstr ""
 
-#: lvcreate.cpp:554 lvcreate.cpp:565
-msgid "(with %1 mirror legs)"
+#: lvcreatebase.cpp:604 partadd.cpp:325 partchange.cpp:760
+msgid "Maximum size: %1"
 msgstr ""
 
-#: lvcreate.cpp:556 lvcreate.cpp:567
+#: lvcreatebase.cpp:605
+msgid "Maximum extents: %1"
+msgstr ""
+
+#: lvcreatebase.cpp:609
 msgid "(with %1 stripes)"
 msgstr ""
 
-#: lvcreate.cpp:558 lvcreate.cpp:569
-msgid ""
-"(with %1 mirror legs\n"
-"and %2 stripes)"
-msgstr ""
-
-#: lvcreate.cpp:560 lvcreate.cpp:571
+#: lvcreatebase.cpp:611
 msgid "(linear volume)"
 msgstr ""
 
-#: lvcreate.cpp:562
-msgid "Extend by: %1"
+#: lvcreatebase.cpp:614
+msgid "(LVM2 mirror with %1 legs and %2 stripes)"
 msgstr ""
 
-#: lvcreate.cpp:851
+#: lvcreatebase.cpp:616
+msgid "(LVM2 mirror with %1 legs)"
+msgstr ""
+
+#: lvcreatebase.cpp:618
+msgid "(RAID 1 mirror with %1 legs)"
+msgstr ""
+
+#: lvcreatebase.cpp:620
+msgid "(RAID 4 with %1 stripes + 1 parity)"
+msgstr ""
+
+#: lvcreatebase.cpp:622
+msgid "(RAID 5 with %1 stripes + 1 parity)"
+msgstr ""
+
+#: lvcreatebase.cpp:624
+msgid "(RAID 6 with %1 stripes + 2 parity)"
+msgstr ""
+
+#: lvcreate.cpp:245
+msgid "Chunk size: "
+msgstr ""
+
+#: lvcreate.cpp:247
+msgid "default"
+msgstr ""
+
+#: lvcreate.cpp:303
+msgid "Extents smaller than 4KiB can not be striped"
+msgstr ""
+
+#: lvcreate.cpp:341 lvcreate.cpp:653 lvcreate.cpp:675
+msgid " + 1 parity"
+msgstr ""
+
+#: lvcreate.cpp:345 lvcreate.cpp:696
+msgid " + 2 parity"
+msgstr ""
+
+#: lvcreate.cpp:375
+msgid "Mirror log: "
+msgstr ""
+
+#: lvcreate.cpp:405
+msgid "Number of mirror legs: "
+msgstr ""
+
+#: lvcreate.cpp:423
+msgid "Linear"
+msgstr ""
+
+#: lvcreate.cpp:431 lvcreate.cpp:456
+msgid "LVM2 Mirror"
+msgstr ""
+
+#: lvcreate.cpp:432 lvcreate.cpp:457
+msgid "RAID 1 Mirror"
+msgstr ""
+
+#: lvcreate.cpp:433 lvcreate.cpp:461
+msgid "RAID 4"
+msgstr ""
+
+#: lvcreate.cpp:434 lvcreate.cpp:462
+msgid "RAID 5"
+msgstr ""
+
+#: lvcreate.cpp:435 lvcreate.cpp:466
+msgid "RAID 6"
+msgstr ""
+
+#: lvcreate.cpp:470
+msgid "Volume type: "
+msgstr ""
+
+#: lvcreate.cpp:543
+msgid "Selected size less than existing size"
+msgstr ""
+
+#: lvcreate.cpp:557 lvcreate.cpp:565
+msgid "Selected size exceeds maximum size"
+msgstr ""
+
+#: lvcreate.cpp:1064 thincreate.cpp:156
+msgid "Volumes can not be extended while physical volumes are missing"
+msgstr ""
+
+#: lvcreate.cpp:1066 thincreate.cpp:158
+msgid "Volumes can not be created while physical volumes are missing"
+msgstr ""
+
+#: lvcreate.cpp:1068
 msgid ""
 "All free physical volume extents in this group are locked against allocation"
 msgstr ""
 
-#: lvcreate.cpp:854
-msgid "There are no allocatable free extents in this volume group"
+#: lvcreate.cpp:1071
+msgid "There are no free extents in this volume group"
 msgstr ""
 
-#: lvcreate.cpp:861
+#: lvcreate.cpp:1078 thincreate.cpp:165
 msgid ""
 "If this volume has a filesystem or data, it will need to be extended "
 "<b>separately</b>. Currently, only the ext2, ext3, ext4, xfs, jfs, ntfs and "
@@ -1052,76 +1207,120 @@ msgid ""
 "for extension must also be present. "
 msgstr ""
 
-#: lvcreate.cpp:867
+#: lvcreate.cpp:1091
+msgid "Insufficient allocatable physical volumes to extend this volume"
+msgstr ""
+
+#: lvcreate.cpp:1098 thincreate.cpp:171
 msgid "Snapshot origins cannot be extended while open or mounted"
 msgstr ""
 
-#: lvcreate.cpp:875
+#: lvcreate.cpp:1106 thincreate.cpp:179
 msgid "Volumes cannot be extended with open or mounted snapshots"
 msgstr ""
 
-#: lvcreate.cpp:921
+#: lvcreate.cpp:1152 thincreate.cpp:225
 msgid "Volume deactivation failed, volume not extended"
 msgstr ""
 
-#: lvcreate.cpp:927
+#: lvcreate.cpp:1158 thincreate.cpp:231
 msgid "Volume extension failed"
 msgstr ""
 
-#: lvcreate.cpp:935
+#: lvcreate.cpp:1166 thincreate.cpp:239
 msgid "Volume activation failed, filesystem not extended"
 msgstr ""
 
-#: lvproperties.cpp:108
+#: lvproperties.cpp:110
 msgid "not mounted"
 msgstr ""
 
-#: lvproperties.cpp:144
+#: lvproperties.cpp:146
 msgid "<b>Logical Volume UUID</b>"
 msgstr ""
 
-#: lvproperties.cpp:230 lvproperties.cpp:254
-msgid "Stripes: %1"
+#: lvproperties.cpp:224
+msgid "locked"
 msgstr ""
 
-#: lvproperties.cpp:231 lvproperties.cpp:255
-msgid "Stripe size: %1"
+#: lvproperties.cpp:231
+msgid "Total Extents: %1"
 msgstr ""
 
-#: lvproperties.cpp:233 lvproperties.cpp:257
-msgid "Stripes: none"
+#: lvproperties.cpp:232
+msgid "Total Size: %1"
 msgstr ""
 
-#: lvproperties.cpp:262 pvproperties.cpp:185
-msgid "Total extents: %1"
-msgstr ""
-
-#: lvproperties.cpp:263
-msgid "Total size: %1"
-msgstr ""
-
-#: lvproperties.cpp:268 lvproperties.cpp:283
-msgid "Filesystem: %1"
-msgstr ""
-
-#: lvproperties.cpp:271 lvproperties.cpp:286
+#: lvproperties.cpp:235 lvproperties.cpp:312 lvproperties.cpp:331
+#: lvproperties.cpp:342
 msgid "Access: r/w"
 msgstr ""
 
-#: lvproperties.cpp:273 lvproperties.cpp:288
+#: lvproperties.cpp:237 lvproperties.cpp:314 lvproperties.cpp:333
+#: lvproperties.cpp:344
 msgid "Access: r/o"
 msgstr ""
 
-#: lvproperties.cpp:275 lvproperties.cpp:290
-msgid "Allocation policy: %1"
+#: lvproperties.cpp:240
+msgid "Chunk Size: %1"
 msgstr ""
 
-#: lvproperties.cpp:295
+#: lvproperties.cpp:244 lvproperties.cpp:318
+msgid "Zero new blocks: Yes"
+msgstr ""
+
+#: lvproperties.cpp:246 lvproperties.cpp:320
+msgid "Zero new blocks: No"
+msgstr ""
+
+#: lvproperties.cpp:248
+msgid "Discards: %1"
+msgstr ""
+
+#: lvproperties.cpp:252 lvproperties.cpp:322 lvproperties.cpp:335
+#: lvproperties.cpp:346 vginfolabels.cpp:128
+msgid "Policy: %1"
+msgstr ""
+
+#: lvproperties.cpp:259 lvproperties.cpp:282 lvproperties.cpp:326
+#: pvgroupbox.cpp:326
+msgid "Extents: %1"
+msgstr ""
+
+#: lvproperties.cpp:266 lvproperties.cpp:290 lvproperties.cpp:295
+msgid "Stripes: %1"
+msgstr ""
+
+#: lvproperties.cpp:267 lvproperties.cpp:291 lvproperties.cpp:296
+msgid "Stripe size: %1"
+msgstr ""
+
+#: lvproperties.cpp:269 lvproperties.cpp:298
+msgid "Stripes: none"
+msgstr ""
+
+#: lvproperties.cpp:288 lvproperties.cpp:301 pvproperties.cpp:187
+msgid "Total extents: %1"
+msgstr ""
+
+#: lvproperties.cpp:289 lvproperties.cpp:302
+msgid "Total size: %1"
+msgstr ""
+
+#: lvproperties.cpp:308 lvproperties.cpp:339
+msgid "Filesystem: %1"
+msgstr ""
+
+#: lvproperties.cpp:351
 msgid "Origin: %1"
 msgstr ""
 
-#: lvproperties.cpp:310
+#: lvproperties.cpp:366
 msgid "<b>Physical Volumes</b>"
+msgstr ""
+
+#: lvproperties.cpp:368
+msgid "<b>Thin Pool</b>"
 msgstr ""
 
 #: lvpropertiesstack.cpp:93
@@ -1132,68 +1331,92 @@ msgstr ""
 msgid "Snapshots"
 msgstr ""
 
-#: lvreduce.cpp:39
+#: lvreduce.cpp:41
+msgid "Reduce Thin Pool"
+msgstr ""
+
+#: lvreduce.cpp:43
 msgid "Reduce Logical Volume"
 msgstr ""
 
-#: lvreduce.cpp:53
+#: lvreduce.cpp:57
 msgid ""
 "If this <b>Inactive</b> logical volume is reduced any <b>data</b> it "
 "contains <b>will be lost!</b>"
 msgstr ""
 
-#: lvreduce.cpp:56
+#: lvreduce.cpp:60
 msgid ""
 "Only the ext2, ext3 and ext4 file systems are supported for file system "
 "reduction. If this logical volume is reduced any <b>data</b> it contains "
 "<b>will be lost!</b>"
 msgstr ""
 
-#: lvreduce.cpp:74
+#: lvreduce.cpp:78
 msgid "The filesystem must be unmounted first"
 msgstr ""
 
-#: lvreduce.cpp:100
+#: lvreduce.cpp:81
+msgid "Reducing thin pools isn't supported yet"
+msgstr ""
+
+#: lvreduce.cpp:107
 msgid "The filesystem is already as small as it can be"
 msgstr ""
 
-#: lvreduce.cpp:122
-msgid "<b>Reduce volume: %1</b>"
+#: lvreduce.cpp:134
+msgid "<b>Reduce thin pool: %1</b>"
 msgstr ""
 
-#: lvreduce.cpp:124
+#: lvreduce.cpp:136
+msgid "<b>Reduce logical volume: %1</b>"
+msgstr ""
+
+#: lvreduce.cpp:139
 msgid "Estimated minimum size: %1"
 msgstr ""
 
-#: lvremove.cpp:35
+#: lvremove.cpp:52
+msgid "Delete Thin Pool"
+msgstr ""
+
+#: lvremove.cpp:55
 msgid "Delete Volume"
 msgstr ""
 
-#: lvremove.cpp:60
-msgid "The volume: <b>%1</b> has snapshots."
+#: lvremove.cpp:69
+msgid "Delete the thin pool named: %1?"
 msgstr ""
 
-#: lvremove.cpp:61
-msgid "The following volumes will all be deleted:"
-msgstr ""
-
-#: lvremove.cpp:62
+#: lvremove.cpp:71
 msgid "Delete the volume named: %1?"
 msgstr ""
 
-#: lvremove.cpp:63
+#: lvremove.cpp:72
 msgid "Any data on it will be lost."
 msgstr ""
 
-#: lvremove.cpp:91
+#: lvremove.cpp:76
+msgid "The thin pool: <b>%1</b> has dependent volumes."
+msgstr ""
+
+#: lvremove.cpp:78
+msgid "The volume: <b>%1</b> has dependent volumes."
+msgstr ""
+
+#: lvremove.cpp:80
+msgid "The following volumes will all be deleted:"
+msgstr ""
+
+#: lvremove.cpp:103
 msgid "Are you certain you want to delete these volumes?"
 msgstr ""
 
-#: lvremove.cpp:92
+#: lvremove.cpp:104
 msgid "Any data on them will be lost."
 msgstr ""
 
-#: lvremove.cpp:105
+#: lvremove.cpp:114
 msgid "A snapshot of this origin is busy or mounted. It can not be deleted."
 msgstr ""
 
@@ -1201,23 +1424,27 @@ msgstr ""
 msgid "Rename Logical Volume"
 msgstr ""
 
-#: lvrename.cpp:47
+#: lvrename.cpp:49
+msgid "<b>Rename Thin Pool</b>"
+msgstr ""
+
+#: lvrename.cpp:51
 msgid "<b>Rename Logical Volume</b>"
 msgstr ""
 
-#: lvrename.cpp:52
+#: lvrename.cpp:57
 msgid "Current volume name: %1"
 msgstr ""
 
-#: lvrename.cpp:60
+#: lvrename.cpp:65
 msgid "New volume name: "
 msgstr ""
 
-#: lvsizechartseg.cpp:114
+#: lvsizechartseg.cpp:111
 msgid "free space"
 msgstr ""
 
-#: main.cpp:40 topwindow.cpp:471
+#: main.cpp:40 topwindow.cpp:476
 msgid "kvpm"
 msgstr ""
 
@@ -1243,29 +1470,35 @@ msgstr ""
 msgid "Insufficient Privilege"
 msgstr ""
 
-#: maxfs.cpp:39
+#: maxfs.cpp:40
 msgid "Extend the filesystem on: %1 to fill the entire volume?"
 msgstr ""
 
-#: maxfs.cpp:40
+#: maxfs.cpp:41
 msgid ""
 "Extending is only supported for ext2, ext3, ext4, jfs, xfs, ntfs and "
 "Reiserfs. The correct executables for file system extension must also be "
 "present"
 msgstr ""
 
-#: maxfs.cpp:65
+#: maxfs.cpp:66
 msgid ""
 "Filesystem extending is only supported for ext2, ext3, ext4, jfs, xfs, ntfs "
 "and Reiserfs. Physical volumes can also be extended. The correct executables "
 "for file system extension must be present"
 msgstr ""
 
-#: maxfs.cpp:72 maxfs.cpp:102
+#: maxfs.cpp:69 maxfs.cpp:110
+msgid ""
+"Physical volumes cannot be extended if they contain any active logical "
+"volumes"
+msgstr ""
+
+#: maxfs.cpp:78 maxfs.cpp:109
 msgid "Extend the physical volume on: %1 to fill the entire partition?"
 msgstr ""
 
-#: maxfs.cpp:74
+#: maxfs.cpp:81
 msgid "Extend the filesystem on: %1 to fill the entire partition?"
 msgstr ""
 
@@ -1312,100 +1545,104 @@ msgstr ""
 msgid "Optional name or label: "
 msgstr ""
 
-#: mkfs.cpp:198
+#: mkfs.cpp:193
+msgid "Some filesystems can not use a space this large and have been disabled."
+msgstr ""
+
+#: mkfs.cpp:225
 msgid ""
 "If enabled, these options override the mkfs defaults for ext2, ext3 and ext4 "
 "filesystems."
 msgstr ""
 
-#: mkfs.cpp:251
+#: mkfs.cpp:278
 msgid ""
 "If enabled, these options override the mkfs defaults for settings that only "
 "apply to ext4 filesystems."
 msgstr ""
 
-#: mkfs.cpp:296
+#: mkfs.cpp:323
 msgid "Reserved space: "
 msgstr ""
 
-#: mkfs.cpp:307
+#: mkfs.cpp:334
 msgid "Block size: "
 msgstr ""
 
-#: mkfs.cpp:311 mkfs.cpp:325 mkfs.cpp:338 mkfs.cpp:349
+#: mkfs.cpp:338 mkfs.cpp:352 mkfs.cpp:365 mkfs.cpp:376
 msgctxt "Let the program decide"
 msgid "default"
 msgstr ""
 
-#: mkfs.cpp:321
+#: mkfs.cpp:348
 msgid "Inode size: "
 msgstr ""
 
-#: mkfs.cpp:335
+#: mkfs.cpp:362
 msgid "Bytes / inode: "
 msgstr ""
 
-#: mkfs.cpp:346
+#: mkfs.cpp:373
 msgid "Total inodes: "
 msgstr ""
 
-#: mkfs.cpp:369
+#: mkfs.cpp:396
 msgid "Use extents"
 msgstr ""
 
-#: mkfs.cpp:370
+#: mkfs.cpp:397
 msgid "Flexible block group layout"
 msgstr ""
 
-#: mkfs.cpp:371
+#: mkfs.cpp:398
 msgid "Enable files over 2TB"
 msgstr ""
 
-#: mkfs.cpp:372
+#: mkfs.cpp:399
 msgid "Don't init all block groups"
 msgstr ""
 
-#: mkfs.cpp:373
+#: mkfs.cpp:400
 msgid "Don't init all inodes"
 msgstr ""
 
-#: mkfs.cpp:374
+#: mkfs.cpp:401
 msgid "Unlimited subdirectories"
 msgstr ""
 
-#: mkfs.cpp:375
+#: mkfs.cpp:402
 msgid "Nanosecond timestamps"
 msgstr ""
 
-#: mkfs.cpp:391
+#: mkfs.cpp:418
 msgid "Striping"
 msgstr ""
 
-#: mkfs.cpp:400
+#: mkfs.cpp:427
 msgid "Stride size in blocks: "
 msgstr ""
 
-#: mkfs.cpp:412
+#: mkfs.cpp:439
 msgid "Strides per stripe: "
 msgstr ""
 
-#: mkfs.cpp:433
+#: mkfs.cpp:460
 msgid "Extended attributes"
 msgstr ""
 
-#: mkfs.cpp:434
+#: mkfs.cpp:461
 msgid "Resize inode"
 msgstr ""
 
-#: mkfs.cpp:436
+#: mkfs.cpp:463
 msgid "Directory B-Tree index"
 msgstr ""
 
-#: mkfs.cpp:437
+#: mkfs.cpp:464
 msgid "Store filetype in inode"
 msgstr ""
 
-#: mkfs.cpp:438
+#: mkfs.cpp:465
 msgid "Sparse superblock"
 msgstr ""
 
@@ -1515,71 +1752,67 @@ msgstr ""
 msgid "Partitions less than two MiB are not supported"
 msgstr ""
 
-#: partadd.cpp:207 partchange.cpp:582
+#: partadd.cpp:209 partchange.cpp:617
 msgid "Preceding space: %1"
 msgstr ""
 
-#: partadd.cpp:219 partchange.cpp:590
+#: partadd.cpp:221 partchange.cpp:625
 msgid "Following space: %1"
 msgstr ""
 
-#: partadd.cpp:303 partchange.cpp:704
+#: partadd.cpp:305 partchange.cpp:739
 msgid "<b>Device: %1</b>"
 msgstr ""
 
-#: partadd.cpp:321 partchange.cpp:722
-msgid "Maximum size: %1"
-msgstr ""
-
-#: partadd.cpp:325
+#: partadd.cpp:329
 msgid "Select type: "
 msgstr ""
 
-#: partadd.cpp:364
+#: partadd.cpp:368
 msgid "Primary"
 msgstr ""
 
-#: partadd.cpp:365
+#: partadd.cpp:369
 msgid "Extended"
 msgstr ""
 
-#: partadd.cpp:368
+#: partadd.cpp:372
 msgid "Logical"
 msgstr ""
 
-#: partadd.cpp:388
+#: partadd.cpp:392
 msgid "This disk already has %1 primary partitions, the maximum"
 msgstr ""
 
-#: partadd.cpp:391
+#: partadd.cpp:395
 msgid ""
 "This should not happen. Try selecting the freespace and not the partiton "
 "itself"
 msgstr ""
 
-#: partchange.cpp:74
+#: partchange.cpp:69
 msgid "Move or resize a partition"
 msgstr ""
 
-#: partchange.cpp:81
+#: partchange.cpp:76
 msgid "<b>Resize Or Move A Partition</b>"
 msgstr ""
 
-#: partchange.cpp:194
+#: partchange.cpp:211
 msgid ""
 "This partition is on the same device with partitions that are busy or "
 "mounted. If at all possible they should be unmounted before proceeding. "
 "Otherise changes to the partition table may not be recognized by the kernel."
 msgstr ""
 
-#: partchange.cpp:198
+#: partchange.cpp:215
 msgid ""
 "Changes to the partition table can cause unintentional and permanent data "
 "loss. If the partition holds important data, you really should back it up "
 "before continuing."
 msgstr ""
 
-#: partchange.cpp:202
+#: partchange.cpp:219
 msgid ""
 "Shrinking this filesystem is not supported, only growing or moving it is "
 "possible.\n"
@@ -1587,48 +1820,56 @@ msgid ""
 "Note: currently only ext2, ext3, ext4 and physical volumes can be shrunk."
 msgstr ""
 
-#: partchange.cpp:207
+#: partchange.cpp:225
 msgid ""
-"Growing or shrinking this filesystem is not supported, only moving it is "
-"possible.\n"
+"If this partition is enlarged, any filesystem or data on it will need to be "
+"extended separately. Shrinking this partition is not supported.\n"
 "\n"
 "Note: currently only ext2, ext3, ext4 and physical volumes can be both "
 "shrunk and grown, while Reiserfs, ntfs, jfs and xfs can be grown only."
 msgstr ""
 
-#: partchange.cpp:303
+#: partchange.cpp:329
 msgid "Moving data"
 msgstr ""
 
-#: partchange.cpp:317 partchange.cpp:329 partchange.cpp:340 partchange.cpp:356
+#: partchange.cpp:343 partchange.cpp:355 partchange.cpp:366 partchange.cpp:382
 msgid "Move failed: could not read from device"
 msgstr ""
 
-#: partchange.cpp:322 partchange.cpp:334 partchange.cpp:345 partchange.cpp:361
+#: partchange.cpp:348 partchange.cpp:360 partchange.cpp:371 partchange.cpp:387
 msgid "Move failed: could not write to device"
 msgstr ""
 
-#: partchange.cpp:453
+#: partchange.cpp:479
 msgid "Partition shrink failed"
 msgstr ""
 
-#: partchange.cpp:516 partchange.cpp:534
+#: partchange.cpp:542 partchange.cpp:560
 msgid "Partition extension failed"
 msgstr ""
 
-#: partchange.cpp:575
+#: partchange.cpp:602
 msgid "<b>Shrink by : -%1</b>"
 msgstr ""
 
-#: partchange.cpp:578
+#: partchange.cpp:605
 msgid "<b>Grow by : %1</b>"
 msgstr ""
 
-#: partchange.cpp:661
+#: partchange.cpp:610
+msgid "<b>Move by : -%1</b>"
+msgstr ""
+
+#: partchange.cpp:613
+msgid "<b>Move by : %1</b>"
+msgstr ""
+
+#: partchange.cpp:696
 msgid "Repartitioning failed: data not moved"
 msgstr ""
 
-#: partchange.cpp:721
+#: partchange.cpp:759
 msgid "Minimum size: %1"
 msgstr ""
 
@@ -1668,7 +1909,7 @@ msgstr ""
 msgid "Waiting for process to finish"
 msgstr ""
 
-#: pvchange.cpp:35 pvtree.cpp:210
+#: pvchange.cpp:35 pvtree.cpp:220
 msgid "Change physical volume attributes"
 msgstr ""
 
@@ -1696,44 +1937,56 @@ msgstr ""
 msgid "Change tags"
 msgstr ""
 
-#: pvgroupbox.cpp:41
+#: pvgroupbox.cpp:45
 msgid "Target Physical Volumes"
 msgstr ""
 
-#: pvgroupbox.cpp:43 pvgroupbox.cpp:106
+#: pvgroupbox.cpp:47 pvgroupbox.cpp:121
 msgid "Available Physical Volumes"
 msgstr ""
 
-#: pvgroupbox.cpp:61
+#: pvgroupbox.cpp:74
 msgid "<b>No suitable volumes found</b>"
 msgstr ""
 
-#: pvgroupbox.cpp:108
+#: pvgroupbox.cpp:123
 msgid "Physical Volume"
 msgstr ""
 
-#: pvgroupbox.cpp:128
+#: pvgroupbox.cpp:145
 msgid "none found"
 msgstr ""
 
-#: pvgroupbox.cpp:308
+#: pvgroupbox.cpp:322
 msgid "Selected space: %1"
 msgstr ""
 
-#: pvgroupbox.cpp:309
+#: pvgroupbox.cpp:323
 msgid "Selected extents: %1"
 msgstr ""
 
-#: pvgroupbox.cpp:311
+#: pvgroupbox.cpp:325
 msgid "Space: %1"
 msgstr ""
 
-#: pvgroupbox.cpp:357
+#: pvgroupbox.cpp:371
 msgid "Select all"
 msgstr ""
 
-#: pvgroupbox.cpp:358
+#: pvgroupbox.cpp:372
 msgid "Clear all"
+msgstr ""
+
+#: pvgroupbox.cpp:448
+msgid "Normal"
+msgstr ""
+
+#: pvgroupbox.cpp:462
+msgid "Inherited (%1)"
+msgstr ""
+
+#: pvgroupbox.cpp:466
+msgid "Allocation policy: "
 msgstr ""
 
 #: pvmove.cpp:55
@@ -1748,57 +2001,56 @@ msgstr ""
 msgid "None of the extents on this volume can be moved"
 msgstr ""
 
-#: pvmove.cpp:193
+#: pvmove.cpp:145
+msgid "Moving physical volumes is not supported on thin volumes"
+msgstr ""
+
+#: pvmove.cpp:196
 msgid "There are no allocatable physical volumes with space to move to"
 msgstr ""
 
-#: pvmove.cpp:220
+#: pvmove.cpp:225
 msgid "Move Physical Extents"
 msgstr ""
 
-#: pvmove.cpp:225
+#: pvmove.cpp:230
 msgid "<b>Move physical extents</b>"
 msgstr ""
 
-#: pvmove.cpp:231
+#: pvmove.cpp:236
 msgid "<b>Move only physical extents on:</b>"
 msgstr ""
 
-#: pvmove.cpp:240
+#: pvmove.cpp:245
 msgid "Source Physical Volumes"
 msgstr ""
 
-#: pvmove.cpp:288
+#: pvmove.cpp:301
 msgid "Source Physical Volume"
 msgstr ""
 
-#: pvmove.cpp:308
-msgctxt "Inherited from the group"
-msgid "Inherited"
-msgstr ""
-
-#: pvmove.cpp:469
+#: pvmove.cpp:460
 msgid "Space Used"
 msgstr ""
 
-#: pvmove.cpp:489
+#: pvmove.cpp:480
 msgid "<Not movable>"
 msgstr ""
 
-#: pvproperties.cpp:112
+#: pvproperties.cpp:114
 msgid "Start"
 msgstr ""
 
-#: pvproperties.cpp:115
+#: pvproperties.cpp:117
 msgid "End"
 msgstr ""
 
-#: pvproperties.cpp:118 sizeselectorbox.cpp:71
+#: pvproperties.cpp:120 sizeselectorbox.cpp:71
 msgid "Extents"
 msgstr ""
 
-#: pvproperties.cpp:138 pvproperties.cpp:144 pvproperties.cpp:150
-#: pvproperties.cpp:162 pvproperties.cpp:168 pvproperties.cpp:174
+#: pvproperties.cpp:140 pvproperties.cpp:146 pvproperties.cpp:152
+#: pvproperties.cpp:164 pvproperties.cpp:170 pvproperties.cpp:176
 msgid "%1"
 msgstr ""
 
@@ -1845,7 +2097,7 @@ msgstr ""
 msgid "If physical volume allows more extents to be allocated"
 msgstr ""
 
-#: pvtree.cpp:68 vgtree.cpp:53
+#: pvtree.cpp:68 vgtree.cpp:54
 msgid "Optional tags for physical volume"
 msgstr ""
 
@@ -1853,15 +2105,27 @@ msgstr ""
 msgid "Logical volumes on physical volume"
 msgstr ""
 
+#: pvtree.cpp:113
+msgid "MISSING"
+msgstr ""
+
+#: pvtree.cpp:115
+msgid "MISSING %1"
+msgstr ""
+
 #: pvtree.cpp:160
+msgid "This physical volume can not be found"
+msgstr ""
+
+#: pvtree.cpp:170
 msgid "Active"
 msgstr ""
 
-#: pvtree.cpp:163
+#: pvtree.cpp:173
 msgid "Inactive"
 msgstr ""
 
-#: pvtree.cpp:208
+#: pvtree.cpp:218
 msgid "Move physical extents"
 msgstr ""
 
@@ -1897,35 +2161,71 @@ msgid ""
 "extreme care.</b>"
 msgstr ""
 
+#: repairmissing.cpp:51
+msgid "This volume has no missing physical volumes"
+msgstr ""
+
+#: repairmissing.cpp:54
+msgid "No suitable physical volumes found"
+msgstr ""
+
+#: repairmissing.cpp:61
+msgid "<b>Repair mirror: %1</b>"
+msgstr ""
+
+#: repairmissing.cpp:62
+msgid "Repair Mirror"
+msgstr ""
+
+#: repairmissing.cpp:64
+msgid "<b>Repair RAID device: %1</b>"
+msgstr ""
+
+#: repairmissing.cpp:65
+msgid "Repair RAID device"
+msgstr ""
+
+#: repairmissing.cpp:73
+msgid "Replace missing physical volumes"
+msgstr ""
+
+#: repairmissing.cpp:76
+msgid "Replacement will be disabled: No suitable physical volumes found"
+msgstr ""
+
+#: repairmissing.cpp:77
+msgid "<b>Remove missing physcial volumes from mirror: %1?</b>"
+msgstr ""
+
 #: sizeselectorbox.cpp:91
 msgid "Volume Size"
 msgstr ""
 
-#: sizeselectorbox.cpp:93 sizeselectorbox.cpp:111
+#: sizeselectorbox.cpp:93 sizeselectorbox.cpp:113
 msgid "Lock selected size"
 msgstr ""
 
-#: sizeselectorbox.cpp:102
+#: sizeselectorbox.cpp:104
 msgid "Partition Start"
 msgstr ""
 
-#: sizeselectorbox.cpp:103
+#: sizeselectorbox.cpp:105
 msgid "Lock partition start"
 msgstr ""
 
-#: sizeselectorbox.cpp:110
+#: sizeselectorbox.cpp:112
 msgid "Partition Size"
 msgstr ""
 
-#: sizeselectorbox.cpp:118
+#: sizeselectorbox.cpp:120
 msgid "Prevent shrinking"
 msgstr ""
 
-#: sizeselectorbox.cpp:134
+#: sizeselectorbox.cpp:136
 msgid "New start:"
 msgstr ""
 
-#: sizeselectorbox.cpp:136
+#: sizeselectorbox.cpp:138
 msgid "New size:"
 msgstr ""
 
@@ -1951,112 +2251,112 @@ msgstr ""
 msgid "Storage Devices"
 msgstr ""
 
-#: topwindow.cpp:403
+#: topwindow.cpp:408
 msgid "Settings"
 msgstr ""
 
-#: topwindow.cpp:404
+#: topwindow.cpp:409
 msgid "Show Volume Group Information"
 msgstr ""
 
-#: topwindow.cpp:405
+#: topwindow.cpp:410
 msgid "Show Volume Group Bar Graph"
 msgstr ""
 
-#: topwindow.cpp:406
+#: topwindow.cpp:411
 msgid "Use Metric SI Units"
 msgstr ""
 
-#: topwindow.cpp:407
+#: topwindow.cpp:412
 msgid "Configure kvpm..."
 msgstr ""
 
-#: topwindow.cpp:445
+#: topwindow.cpp:450
 msgid "Tools"
 msgstr ""
 
-#: topwindow.cpp:446
+#: topwindow.cpp:451
 msgid "Rescan System"
 msgstr ""
 
-#: topwindow.cpp:447
+#: topwindow.cpp:452
 msgid "Restart interrupted pvmove"
 msgstr ""
 
-#: topwindow.cpp:448
+#: topwindow.cpp:453
 msgid "Abort pvmove"
 msgstr ""
 
-#: topwindow.cpp:473
+#: topwindow.cpp:478
 msgid ""
 "Linux volume and partition manager for KDE.  This program is still under "
 "development, bug reports and any comments are welcomed.  Licensed under GNU "
 "General Public License v3.0"
 msgstr ""
 
-#: topwindow.cpp:478
+#: topwindow.cpp:483
 msgid "(c) 2008, 2009, 2010, 2011, 2012 Benjamin Scott"
 msgstr ""
 
-#: topwindow.cpp:483
+#: topwindow.cpp:488
 msgid "Mark James"
 msgstr ""
 
-#: topwindow.cpp:484
+#: topwindow.cpp:489
 msgid ""
 "Additional icons taken from the Silk icon set by Mark James under the "
 "Creative Commons Attribution 3.0 License."
 msgstr ""
 
-#: topwindow.cpp:496
+#: topwindow.cpp:501
 msgid "File"
 msgstr ""
 
-#: topwindow.cpp:505
+#: topwindow.cpp:510
 msgid "Volume Groups"
 msgstr ""
 
-#: topwindow.cpp:507
+#: topwindow.cpp:512
 msgid "Delete Volume Group..."
 msgstr ""
 
-#: topwindow.cpp:508
+#: topwindow.cpp:513
 msgid "Reduce Volume Group..."
 msgstr ""
 
-#: topwindow.cpp:509
+#: topwindow.cpp:514
 msgid "Extend Volume Group..."
 msgstr ""
 
-#: topwindow.cpp:510
+#: topwindow.cpp:515
 msgid "Rename Volume Group..."
 msgstr ""
 
-#: topwindow.cpp:511
+#: topwindow.cpp:516
 msgid "Remove Missing Physcial Volumes..."
 msgstr ""
 
-#: topwindow.cpp:512
+#: topwindow.cpp:517
 msgid "Merge Volume Group..."
 msgstr ""
 
-#: topwindow.cpp:513
+#: topwindow.cpp:518
 msgid "Split Volume Group..."
 msgstr ""
 
-#: topwindow.cpp:514
+#: topwindow.cpp:519
 msgid "Change Volume Group Attributes..."
 msgstr ""
 
-#: topwindow.cpp:515
+#: topwindow.cpp:520
 msgid "Create Volume Group..."
 msgstr ""
 
-#: topwindow.cpp:516
+#: topwindow.cpp:521
 msgid "Export Volume Group..."
 msgstr ""
 
-#: topwindow.cpp:517
+#: topwindow.cpp:522
 msgid "Import Volume Group..."
 msgstr ""
 
@@ -2110,6 +2410,10 @@ msgstr ""
 
 #: vgchange.cpp:50
 msgid "<b>Change volume group: %1</b>"
+msgstr ""
+
+#: vgchange.cpp:58
+msgid "Allocation policy"
 msgstr ""
 
 #: vgchange.cpp:68
@@ -2211,73 +2515,65 @@ msgid "Import volume group: <b>%1</b>?"
 msgstr ""
 
 #: vginfolabels.cpp:106
-msgid "<b>Warning: Partial Volume Group</b>"
-msgstr ""
-
-#: vginfolabels.cpp:110
 msgid "<b>Exported Volume Group</b>"
 msgstr ""
 
-#: vginfolabels.cpp:126
+#: vginfolabels.cpp:124
 msgctxt "Space used up"
 msgid "Used: %1"
 msgstr ""
 
-#: vginfolabels.cpp:127
+#: vginfolabels.cpp:125
 msgctxt "Space not used"
 msgid "Free: %1"
 msgstr ""
 
-#: vginfolabels.cpp:128
+#: vginfolabels.cpp:126
 msgctxt "Total space on device"
 msgid "Total: %1"
 msgstr ""
 
-#: vginfolabels.cpp:129
+#: vginfolabels.cpp:127
 msgid "Format: %1"
 msgstr ""
 
-#: vginfolabels.cpp:130
-msgid "Policy: %1"
-msgstr ""
-
-#: vginfolabels.cpp:131
+#: vginfolabels.cpp:129
 msgid "Resizable: %1"
 msgstr ""
 
-#: vginfolabels.cpp:132
+#: vginfolabels.cpp:130
 msgid "Clustered: %1"
 msgstr ""
 
-#: vginfolabels.cpp:133
+#: vginfolabels.cpp:131
 msgid "Allocatable: %1"
 msgstr ""
 
-#: vginfolabels.cpp:134
+#: vginfolabels.cpp:132
 msgid "Extent size: %1"
 msgstr ""
 
-#: vginfolabels.cpp:135
+#: vginfolabels.cpp:133
 msgid "MDA count: %1"
 msgstr ""
 
-#: vginfolabels.cpp:136
+#: vginfolabels.cpp:134
 msgid "UUID: %1"
 msgstr ""
 
-#: vginfolabels.cpp:159
+#: vginfolabels.cpp:157
 msgid "Max pvs: %1"
 msgstr ""
 
-#: vginfolabels.cpp:161
+#: vginfolabels.cpp:159
 msgid "Max pvs: Unlimited"
 msgstr ""
 
-#: vginfolabels.cpp:164
+#: vginfolabels.cpp:162
 msgid "Max lvs: %1"
 msgstr ""
 
-#: vginfolabels.cpp:166
+#: vginfolabels.cpp:164
 msgid "Max lvs: Unlimited"
 msgstr ""
 
@@ -2331,7 +2627,7 @@ msgid ""
 "volume group"
 msgstr ""
 
-#: vgreduce.cpp:81
+#: vgreduce.cpp:86
 msgid "Unused physical volumes"
 msgstr ""
 
@@ -2355,128 +2651,132 @@ msgstr ""
 msgid "New volume group name: "
 msgstr ""
 
-#: vgsplit.cpp:45
+#: vgsplit.cpp:46
 msgid "Split Volume Group"
 msgstr ""
 
-#: vgsplit.cpp:51
+#: vgsplit.cpp:52
 msgid "<b>Volume group to split: %1</b>"
 msgstr ""
 
-#: vgsplit.cpp:59
+#: vgsplit.cpp:60
 msgid "New Volume Group Name"
 msgstr ""
 
-#: vgsplit.cpp:81
+#: vgsplit.cpp:82
 msgid "Logical volume view"
 msgstr ""
 
-#: vgsplit.cpp:82
+#: vgsplit.cpp:83
 msgid "Physical volume view"
 msgstr ""
 
-#: vgsplit.cpp:173
+#: vgsplit.cpp:174
 msgid "Add"
 msgstr ""
 
-#: vgsplit.cpp:174
+#: vgsplit.cpp:175
 msgid "Remove"
 msgstr ""
 
-#: vgsplit.cpp:196 vgsplit.cpp:264
+#: vgsplit.cpp:197 vgsplit.cpp:263
 msgid "Original volume group"
 msgstr ""
 
-#: vgsplit.cpp:206 vgsplit.cpp:276
+#: vgsplit.cpp:207 vgsplit.cpp:275
 msgid "New volume group"
 msgstr ""
 
-#: vgsplit.cpp:607
+#: vgsplit.cpp:610
 msgid "A volume group must have at least two physical volumes to split group"
 msgstr ""
 
-#: vgtree.cpp:33
+#: vgtree.cpp:34
 msgid "Volume"
 msgstr ""
 
-#: vgtree.cpp:33
+#: vgtree.cpp:34
 msgid "type"
 msgstr ""
 
-#: vgtree.cpp:34
+#: vgtree.cpp:35
 msgid "Remaining"
 msgstr ""
 
-#: vgtree.cpp:34
+#: vgtree.cpp:35
 msgid "Filesystem"
 msgstr ""
 
-#: vgtree.cpp:34
+#: vgtree.cpp:35
 msgid "Stripes"
 msgstr ""
 
-#: vgtree.cpp:35
+#: vgtree.cpp:36
 msgid "Snap/Copy"
 msgstr ""
 
-#: vgtree.cpp:36
+#: vgtree.cpp:37
 msgid "Access"
 msgstr ""
 
-#: vgtree.cpp:43
+#: vgtree.cpp:44
 msgid "Logical volume name"
 msgstr ""
 
-#: vgtree.cpp:44
+#: vgtree.cpp:45
 msgid "Type of logical volume"
 msgstr ""
 
-#: vgtree.cpp:45
+#: vgtree.cpp:46
 msgid "Total size of the logical volume"
 msgstr ""
 
-#: vgtree.cpp:46
+#: vgtree.cpp:47
 msgid "Free space on logical volume"
 msgstr ""
 
-#: vgtree.cpp:47
+#: vgtree.cpp:48
 msgid "Filesystem type on logical volume, if any"
 msgstr ""
 
-#: vgtree.cpp:48
+#: vgtree.cpp:49
 msgid "Number of stripes if the volume is striped"
 msgstr ""
 
-#: vgtree.cpp:49
+#: vgtree.cpp:50
 msgid "Size of stripes if the volume is striped"
 msgstr ""
 
-#: vgtree.cpp:50
+#: vgtree.cpp:51
 msgid "Percentage of pvmove completed, of mirror synced or of snapshot used up"
 msgstr ""
 
-#: vgtree.cpp:51
+#: vgtree.cpp:52
 msgid "Logical volume state"
 msgstr ""
 
-#: vgtree.cpp:52
+#: vgtree.cpp:53
 msgid "Read and write or Read Only"
 msgstr ""
 
-#: vgtree.cpp:54
+#: vgtree.cpp:55
 msgid "Filesystem mount points, if mounted"
 msgstr ""
 
-#: vgtree.cpp:180 vgtree.cpp:525
+#: vgtree.cpp:186 vgtree.cpp:537
 msgid "one or more physical volumes are missing"
 msgstr ""
 
-#: vgtree.cpp:183
+#: vgtree.cpp:190
 msgid "origin"
 msgstr ""
 
-#: vgtree.cpp:218
+#: vgtree.cpp:225
 msgid "This filesystem is running out of space"
+msgstr ""
+
+#: volumegrouptab.cpp:173
+msgid "<b>Warning: Partial volume group, some physical volumes are missing</b>"
 msgstr ""
 
 #: rc.cpp:1

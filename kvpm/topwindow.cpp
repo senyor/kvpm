@@ -472,7 +472,7 @@ KMenu *TopWindow::buildToolsMenu()
 KMenu *TopWindow::buildHelpMenu()
 {
     KAboutData *const about_data = new KAboutData(QByteArray("kvpm"),
-            QByteArray(""),
+            QByteArray("kvpm"),
             ki18n("kvpm"),
             QByteArray("0.9.4"),
             ki18n("Linux volume and partition manager for KDE.  "
@@ -481,7 +481,7 @@ KMenu *TopWindow::buildHelpMenu()
                   "Licensed under GNU General Public License v3.0"),
             KAboutData::License_GPL_V3,
             ki18n("(c) 2008, 2009, 2010, 2011, 2012 Benjamin Scott"),
-            ki18n(""),
+            KLocalizedString(),
             QByteArray("http://sourceforge.net/projects/kvpm/"),
             QByteArray("benscott@nwlink.com"));
 

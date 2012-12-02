@@ -1,4 +1,6 @@
 version 0.9.4
+Put in a new dialog for repairing RAID and mirror volumes that
+are missing physical volumes.
 
 version 0.9.3
 Added support for displaying thin pools and volumes.
