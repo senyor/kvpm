@@ -28,6 +28,7 @@ class PVTree;
 class VGTree;
 class VGInfoLabels;
 class LVSizeChart;
+class QFrame;
 
 class VolumeGroupTab : public QWidget
 {
@@ -42,7 +43,9 @@ class VolumeGroupTab : public QWidget
     PVTree *m_pv_tree;
     VGTree *m_vg_tree;
     QString m_group_name;
+    QFrame *m_partial_warning;
 
+    QFrame* buildPartialWarning();
     void readConfig();
 
 public:

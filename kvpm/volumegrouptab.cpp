@@ -17,11 +17,14 @@
 
 #include <KConfigSkeleton>
 
+#include <QFrame>
 #include <QLabel>
 #include <QScrollArea>
 #include <QSplitter>
 #include <QString>
 #include <QVBoxLayout>
+
+#include <KLocale>
 
 #include "lvpropertiesstack.h"
 #include "lvsizechart.h"
@@ -43,6 +46,7 @@ VolumeGroupTab::VolumeGroupTab(VolGroup *volumeGroup, QWidget *parent) : QWidget
     m_lv_size_chart  = NULL;
     m_lv_properties_stack = NULL;
     m_pv_properties_stack = NULL;
+    m_partial_warning = NULL;
 
     m_layout = new QVBoxLayout;
     setLayout(m_layout);
@@ -107,13 +111,25 @@ void VolumeGroupTab::rescan()
     m_vg_tree->loadData(); // This needs to be done after the lv property stack is built
     m_pv_tree->loadData(); // This needs to be done after the pv property stack is loaded
 
+    if (m_partial_warning) {
+        m_layout->removeWidget(m_partial_warning);
+        m_partial_warning->setParent(NULL);
+        m_partial_warning->deleteLater();
+    }
+    m_partial_warning  = buildPartialWarning();
+    m_layout->insertWidget(1, m_partial_warning);
+    if (m_vg->isPartial())
+        m_partial_warning->show();
+    else
+        m_partial_warning->hide();
+
     if (m_lv_size_chart) { // This needs to be after the vgtree is loaded
         m_layout->removeWidget(m_lv_size_chart);
         m_lv_size_chart->setParent(NULL);
         m_lv_size_chart->deleteLater();
     }
     m_lv_size_chart  = new LVSizeChart(m_vg, m_vg_tree);
-    m_layout->insertWidget(1, m_lv_size_chart);
+    m_layout->insertWidget(2, m_lv_size_chart);
 
     readConfig();
 
@@ -145,5 +161,23 @@ void VolumeGroupTab::readConfig()
         m_lv_size_chart->hide();
 }
 
+QFrame* VolumeGroupTab::buildPartialWarning()
+{
+    QFrame *const warning = new QFrame();
+    warning->setFrameStyle(QFrame::Sunken | QFrame::StyledPanel);
+    warning->setLineWidth(2);
+
+    QHBoxLayout *const layout = new QHBoxLayout();
+    layout->setSpacing(0);
+    layout->setMargin(0);
+    QLabel *const label = new QLabel(i18n("<b>Warning: Partial volume group, some physical volumes are missing</b>"));
+    label->setBackgroundRole(QPalette::Base);
+    label->setAutoFillBackground(true);
+    label->setAlignment(Qt::AlignCenter);
+    layout->addWidget(label);
+    warning->setLayout(layout);
+
+    return warning;
+}
 
 
