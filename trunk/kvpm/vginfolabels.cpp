@@ -48,7 +48,7 @@ VGInfoLabels::VGInfoLabels(VolGroup *const group, QWidget *parent) : QFrame(pare
     hlayout1->setMargin(0);
     hlayout2->setMargin(0);
     hlayout1->setSpacing(0);
-    hlayout1->setSpacing(0);
+    hlayout2->setSpacing(0);
     upper_layout->addLayout(hlayout1);
     upper_layout->addLayout(hlayout2);
 
@@ -101,11 +101,7 @@ VGInfoLabels::VGInfoLabels(VolGroup *const group, QWidget *parent) : QFrame(pare
     else
         clustered = "No";
 
-    if (group->isPartial()) {
-        hlayout2->addStretch();
-        hlayout2->addWidget(new QLabel(i18n("<b>Warning: Partial Volume Group</b>")));
-        hlayout2->addStretch();
-    } else if (group->isExported()) {
+    if (group->isExported()) {
         hlayout2->addStretch();
         hlayout2->addWidget(new QLabel(i18n("<b>Exported Volume Group</b>")));
         hlayout2->addStretch();
