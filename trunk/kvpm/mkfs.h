@@ -43,7 +43,7 @@ class MkfsDialog : public KDialog
                 *m_ext4_options_box, *m_misc_options_box;
 
     QRadioButton *ext2, *ext3, *ext4, *reiser, *reiser4, *ntfs,
-                 *jfs,  *xfs,  *vfat, *swap,   *btrfs;
+                 *jfs,  *xfs,  *vfat, *swap,   *btrfs,   *wipefs;
 
     KIntSpinBox *m_reserved_spin;  // space reserved for root processes
     KComboBox *m_block_combo;      // blocksize
@@ -59,7 +59,7 @@ class MkfsDialog : public KDialog
     QCheckBox *m_dir_index_check;
     QCheckBox *m_filetype_check;
     QCheckBox *m_sparse_super_check;
-    QCheckBox *m_clobber_fs_check;
+    QCheckBox *m_wipe_fs_check;
 
     QCheckBox *m_flex_bg_check;
     QCheckBox *m_huge_file_check;
@@ -78,7 +78,7 @@ class MkfsDialog : public KDialog
     QGroupBox *baseOptionsBox();
     QGroupBox *ext4OptionsBox();
     QGroupBox *stripeBox(const long strideSize, const long strideCount);
-    void clobberFilesystem();
+    void wipeFilesystem();
     bool hasInitialErrors(const bool mounted);
     void buildDialog(const long long size, const long strideSize, const long strideCount);
 

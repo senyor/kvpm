@@ -42,7 +42,6 @@ class DeviceActionsMenu : public KMenu
             *m_partremove_action,
             *m_partadd_action,
             *m_partchange_action,
-            *m_removefs_action,
             *m_vgcreate_action,
             *m_tablecreate_action,
             *m_vgreduce_action,
@@ -66,7 +65,6 @@ private slots:
     void addPartition();
     void changePartition();
     void removePartition();
-    void removefsPartition();
     void vgcreatePartition();
     void tablecreatePartition();
     void vgreducePartition();

@@ -50,7 +50,6 @@ private slots:
     void renameLv();
     void addLegs();
     void changeLog();
-    void removeFs();
     void repairMissing();
     void removeMirror();
     void removeLeg();

@@ -96,7 +96,7 @@ void MkfsDialog::buildDialog(const long long size, const long strideSize, const 
     QVBoxLayout *const layout = new QVBoxLayout;
     dialog_body->setLayout(layout);
 
-    QLabel *const label = new QLabel(i18n("<b>Write filesystem on: %1</b>", m_path));
+    QLabel *const label = new QLabel(i18n("<b>Write or remove filesystem on: %1</b>", m_path));
     label->setAlignment(Qt::AlignCenter);
     layout->addSpacing(5);
     layout->addWidget(label);
@@ -140,8 +140,9 @@ QWidget* MkfsDialog::generalTab(const long long size)
     xfs     = new QRadioButton("xfs", this);
     swap    = new QRadioButton(i18n("Linux swap"), this);
     vfat    = new QRadioButton("ms-dos", this);
-    m_clobber_fs_check = new QCheckBox("Remove old filesystem first", this);
-    m_clobber_fs_check->setChecked(true);
+    wipefs  = new QRadioButton("remove existing filesystem", this);
+    m_wipe_fs_check = new QCheckBox("Remove existing filesystem before writing new one", this);
+    m_wipe_fs_check->setChecked(true);
     radio_layout->addWidget(ext2, 1, 0);
     radio_layout->addWidget(ext3, 2, 0);
     radio_layout->addWidget(ext4, 3, 0);
@@ -153,8 +154,9 @@ QWidget* MkfsDialog::generalTab(const long long size)
     radio_layout->addWidget(jfs, 1, 2);
     radio_layout->addWidget(xfs, 2, 2);
     radio_layout->addWidget(vfat, 3, 2);
+    radio_layout->addWidget(wipefs, 4, 2);
     radio_layout->setRowStretch(5, 1);
-    radio_layout->addWidget(m_clobber_fs_check, 6, 0, 1, -1, Qt::AlignLeft);
+    radio_layout->addWidget(m_wipe_fs_check, 6, 0, 1, -1, Qt::AlignLeft);
     ext4->setChecked(true);
 
     upper_layout->addWidget(radio_box);
@@ -199,6 +201,9 @@ QWidget* MkfsDialog::generalTab(const long long size)
     }
 
     tab->setLayout(layout);
+
+    connect(wipefs, SIGNAL(toggled(bool)),
+            this, SLOT(enableOptions(bool)));
 
     connect(ext2, SIGNAL(toggled(bool)),
             this, SLOT(enableOptions(bool)));
@@ -476,6 +481,14 @@ QGroupBox* MkfsDialog::baseOptionsBox()
 
 void MkfsDialog::enableOptions(bool)
 {
+    if (wipefs->isChecked()) {
+        m_wipe_fs_check->setChecked(false);
+        m_wipe_fs_check->setEnabled(false);
+    } else {
+        m_wipe_fs_check->setChecked(true);
+        m_wipe_fs_check->setEnabled(true);
+    }
+
     if (ext2->isChecked() || ext3->isChecked() || ext4->isChecked()) {
         m_tab_widget->setTabEnabled(1, true);
         m_base_options_box->setEnabled(true);
@@ -507,28 +520,21 @@ void MkfsDialog::enableOptions(bool)
     }
 }
 
-void MkfsDialog::clobberFilesystem()
+void MkfsDialog::wipeFilesystem()
 {
-    if (!isBusy(m_path)) {  // Last check -- just to be sure
+    QStringList args = QStringList() << "wipefs" << "--all" << m_path;
 
-        QByteArray zero_array(128 * 1024, '\0');
-
-        if (m_clobber_fs_check->isChecked()) {
-            QFile *const device = new QFile(m_path);
-            if (device->open(QIODevice::ReadWrite)) { // nuke the old filesystem with zeros
-                device->write(zero_array);
-                device->flush();
-                device->close();
-            }
-            delete device;
-        }
-    }
+    if (m_wipe_fs_check->isChecked() || wipefs->isChecked())
+        ProcessProgress wipefs(args, true);
 }
 
 void MkfsDialog::commitFilesystem()
 {
     hide();
-    clobberFilesystem();
+    wipeFilesystem();
+
+    if (wipefs->isChecked())
+        return;
 
     QStringList arguments;
     QStringList mkfs_options;

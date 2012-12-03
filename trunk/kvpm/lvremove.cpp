@@ -156,6 +156,7 @@ bool LVRemoveDialog::bailout()
 
 void LVRemoveDialog::commitChanges()
 {
+    hide();
     const QString full_name = m_lv->getFullName().remove('[').remove(']');
     QStringList args;
 

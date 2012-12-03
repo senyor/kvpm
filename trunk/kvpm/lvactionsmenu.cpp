@@ -32,7 +32,6 @@
 #include "mount.h"
 #include "pvmove.h"
 #include "repairmissing.h"
-#include "removefs.h"
 #include "removemirror.h"
 #include "removemirrorleg.h"
 #include "snapmerge.h"
@@ -110,8 +109,7 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
     lv_change->setIcon(KIcon("wrench"));
     addSeparator();
 
-    KAction *const mkfs      = new KAction(KIcon("lightning_add"), i18n("Make filesystem..."), this);
-    KAction *const remove_fs = new KAction(KIcon("lightning_delete"), i18n("Remove filesystem..."), this);
+    KAction *const mkfs      = new KAction(KIcon("lightning_add"), i18n("Make or remove filesystem..."), this);
     KAction *const max_fs    = new KAction(KIcon("resultset_last"), i18n("Extend filesystem to fill volume..."), this);
     KAction *const fsck      = new KAction(i18n("Run 'fsck -fp' on filesystem..."), this);
     KAction *const mount     = new KAction(KIcon("emblem-mounted"), i18n("Mount filesystem..."), this);
@@ -122,9 +120,6 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
 
     connect(fsck, SIGNAL(triggered()),
             this, SLOT(checkFs()));
-
-    connect(remove_fs, SIGNAL(triggered()),
-            this, SLOT(removeFs()));
 
     connect(max_fs, SIGNAL(triggered()),
             this, SLOT(maxFs()));
@@ -146,7 +141,6 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
     fs_menu->addAction(fsck);
     fs_menu->addSeparator();
     fs_menu->addAction(mkfs);
-    fs_menu->addAction(remove_fs);
     fs_menu->setEnabled(false);
     thin_create->setEnabled(false);
     thin_snap->setEnabled(false);
@@ -171,7 +165,6 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
             snap_merge->setEnabled(false);
             max_fs->setEnabled(false);
             mkfs->setEnabled(false);
-            remove_fs->setEnabled(false);
             lv_remove->setEnabled(true);
             unmount->setEnabled(false);
             mount->setEnabled(false);
@@ -186,7 +179,6 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
             snap_merge->setEnabled(false);
             max_fs->setEnabled(false);
             mkfs->setEnabled(false);
-            remove_fs->setEnabled(false);
             lv_remove->setEnabled(false);
             unmount->setEnabled(false);
             mount->setEnabled(false);
@@ -201,7 +193,6 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
             snap_merge->setEnabled(false);
             max_fs->setEnabled(false);
             mkfs->setEnabled(false);
-            remove_fs->setEnabled(false);
             lv_remove->setEnabled(false);
             unmount->setEnabled(false);
             mount->setEnabled(false);
@@ -218,7 +209,6 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
             if (m_lv->isMounted()) {
                 fsck->setEnabled(false);
                 mkfs->setEnabled(false);
-                remove_fs->setEnabled(false);
                 lv_reduce->setEnabled(false);
                 lv_extend->setEnabled(true);
                 lv_remove->setEnabled(false);
@@ -227,7 +217,6 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
             } else if (m_lv->isOpen() && m_lv->getFilesystem() == "swap") {
                 fsck->setEnabled(false);
                 mkfs->setEnabled(false);
-                remove_fs->setEnabled(false);
                 lv_reduce->setEnabled(false);
                 lv_extend->setEnabled(false);
                 lv_remove->setEnabled(false);
@@ -236,7 +225,6 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
                 mount->setEnabled(false);
             } else {
                 mkfs->setEnabled(true);
-                remove_fs->setEnabled(true);
                 lv_reduce->setEnabled(true);
                 lv_extend->setEnabled(true);
                 lv_remove->setEnabled(true);
@@ -270,7 +258,6 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
                     mount->setEnabled(false);
                     fsck->setEnabled(false);
                     mkfs->setEnabled(false);
-                    remove_fs->setEnabled(false);
 
                     if (m_lv->isMounted())
                         fs_menu->setEnabled(true);
@@ -284,13 +271,11 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
                     lv_reduce->setEnabled(false);
                     fsck->setEnabled(false);
                     mkfs->setEnabled(false);
-                    remove_fs->setEnabled(false);
                 } else {
                     lv_extend->setEnabled(true);
                     lv_reduce->setEnabled(true);
                     fsck->setEnabled(true);
                     mkfs->setEnabled(true);
-                    remove_fs->setEnabled(true);
                 }
             } else if (m_lv->isMirror()) {
                 pv_move->setEnabled(false);
@@ -332,7 +317,6 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
             if (m_lv->isMounted()) {
                 fsck->setEnabled(false);
                 mkfs->setEnabled(false);
-                remove_fs->setEnabled(false);
                 lv_reduce->setEnabled(false);
                 lv_extend->setEnabled(true);
                 lv_remove->setEnabled(false);
@@ -341,7 +325,6 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
             } else if (m_lv->isOpen() && m_lv->getFilesystem() == "swap") {
                 fsck->setEnabled(false);
                 mkfs->setEnabled(false);
-                remove_fs->setEnabled(false);
                 lv_reduce->setEnabled(false);
                 lv_extend->setEnabled(false);
                 lv_remove->setEnabled(false);
@@ -350,7 +333,6 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
                 mount->setEnabled(false);
             } else {
                 mkfs->setEnabled(true);
-                remove_fs->setEnabled(true);
                 lv_extend->setEnabled(true);
                 lv_remove->setEnabled(true);
                 unmount->setEnabled(false);
@@ -360,7 +342,6 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
             if (!m_lv->isWritable()) {
                 fsck->setEnabled(false);
                 mkfs->setEnabled(false);
-                remove_fs->setEnabled(false);
                 lv_reduce->setEnabled(false);
                 lv_extend->setEnabled(false);
                 max_fs->setEnabled(false);
@@ -369,7 +350,6 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
 
         } else if (m_lv->isOrphan()) {
             mkfs->setEnabled(false);
-            remove_fs->setEnabled(false);
             max_fs->setEnabled(false);
             lv_remove->setEnabled(true);
             unmount->setEnabled(false);
@@ -383,7 +363,6 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
             fs_menu->setEnabled(false);
         } else if (m_lv->isRaidImage()) {
             mkfs->setEnabled(false);
-            remove_fs->setEnabled(false);
             max_fs->setEnabled(false);
             lv_remove->setEnabled(false);
             unmount->setEnabled(false);
@@ -397,7 +376,6 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
             fs_menu->setEnabled(false);
         } else if (m_lv->isPvmove()) {
             mkfs->setEnabled(false);
-            remove_fs->setEnabled(false);
             max_fs->setEnabled(false);
             lv_remove->setEnabled(false);
             unmount->setEnabled(false);
@@ -411,7 +389,6 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
             fs_menu->setEnabled(false);
         } else if (m_lv->isLvmMirrorLeg() && !m_lv->isLvmMirrorLog() && !m_lv->isTemporary()) {
             mkfs->setEnabled(false);
-            remove_fs->setEnabled(false);
             max_fs->setEnabled(false);
             lv_remove->setEnabled(false);
             unmount->setEnabled(false);
@@ -431,7 +408,6 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
                 unmount->setEnabled(false);
 
             mount->setEnabled(true);
-            remove_fs->setEnabled(false);
             mkfs->setEnabled(false);
             max_fs->setEnabled(false);
             lv_remove->setEnabled(false);
@@ -450,7 +426,6 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
                 unmount->setEnabled(false);
 
             mount->setEnabled(true);
-            remove_fs->setEnabled(true);
             mkfs->setEnabled(true);
             lv_remove->setEnabled(false);
             lv_rename->setEnabled(false);
@@ -485,7 +460,6 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
                 snap_create->setEnabled(true);
             }
 
-            remove_fs->setEnabled(false);
             mkfs->setEnabled(false);
             fsck->setEnabled(false);
             max_fs->setEnabled(false);
@@ -506,7 +480,6 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
         }
 
         if (!m_lv->isActive()) {
-            remove_fs->setEnabled(false);
             mkfs->setEnabled(false);
             unmount->setEnabled(false);
             mount->setEnabled(false);
@@ -517,7 +490,6 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
         snap_merge->setEnabled(false);
         max_fs->setEnabled(false);
         mkfs->setEnabled(false);
-        remove_fs->setEnabled(false);
         lv_remove->setEnabled(false);
         unmount->setEnabled(false);
         mount->setEnabled(false);
@@ -852,12 +824,6 @@ void LVActionsMenu::makeFs()
 void LVActionsMenu::checkFs()
 {
     if (manual_fsck(m_lv))
-        MainWindow->reRun();
-}
-
-void LVActionsMenu::removeFs()
-{
-    if (remove_fs(m_lv->getMapperPath()))
         MainWindow->reRun();
 }
 
