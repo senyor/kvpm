@@ -897,6 +897,16 @@ LogVol *LogVol::getParentMirror()
     return mirror;
 }
 
+// Returns the RAID volume than owns this RAID component
+// NULL if this is not part of a RAID volume.
+LogVol *LogVol::getParentRaid()
+{
+    if (m_raid_metadata || m_raid_image)
+        return getParent();
+    else
+        return NULL;
+}
+
 int LogVol::getSegmentCount()
 {
     return m_seg_total;

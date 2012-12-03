@@ -49,6 +49,8 @@ ChangeMirrorDialog::ChangeMirrorDialog(LogVol *const mirrorVolume, bool changeLo
 {
     if (m_lv->getParentMirror() != NULL)
         m_lv = m_lv->getParentMirror();
+    else if (m_lv->getParentRaid() != NULL)
+        m_lv = m_lv->getParentRaid();
 
     QList<LogVol *> children;
     const QString lv_name = m_lv->getName();
@@ -58,7 +60,10 @@ ChangeMirrorDialog::ChangeMirrorDialog(LogVol *const mirrorVolume, bool changeLo
 
     setWindowTitle(i18n("Change Mirror"));
 
-    if (is_raid && !m_lv->isSynced()){
+    if ((is_raid && !m_lv->isMirror()) || m_lv->isCowSnap()){
+        m_bailout = true;
+        KMessageBox::error(NULL, i18n("This type of volume can not be mirrored "));
+    } else if (is_raid && !m_lv->isSynced()){
         m_bailout = true;
         KMessageBox::error(NULL, i18n("RAID mirrors must be synced before adding new legs"));
     } else if (is_lvm && m_lv->isCowOrigin()){
