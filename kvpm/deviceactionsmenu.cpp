@@ -30,7 +30,6 @@
 #include "storagepartition.h"
 #include "tablecreate.h"
 #include "topwindow.h"
-#include "removefs.h"
 #include "vgreduce.h"
 #include "vgreduceone.h"
 #include "vgcreate.h"
@@ -55,7 +54,6 @@ DeviceActionsMenu::DeviceActionsMenu(QTreeWidgetItem *item, QWidget *parent) : K
     connect(m_partremove_action, SIGNAL(triggered()), this, SLOT(removePartition()));
     connect(m_partadd_action,    SIGNAL(triggered()), this, SLOT(addPartition()));
     connect(m_partchange_action, SIGNAL(triggered()), this, SLOT(changePartition()));
-    connect(m_removefs_action,   SIGNAL(triggered()), this, SLOT(removefsPartition()));
     connect(m_vgcreate_action,   SIGNAL(triggered()), this, SLOT(vgcreatePartition()));
     connect(m_tablecreate_action, SIGNAL(triggered()), this, SLOT(tablecreatePartition()));
     connect(m_vgreduce_action,   SIGNAL(triggered()), this, SLOT(vgreducePartition()));
@@ -82,8 +80,7 @@ void DeviceActionsMenu::setup(QTreeWidgetItem *item)
     m_unmount_action    = new KAction(KIcon("emblem-unmounted"), i18n("Unmount filesystem"), this);
     m_maxfs_action      = new KAction(KIcon("resultset_last"),   i18n("Extend filesystem to fill partition"), this);
     m_fsck_action       = new KAction(i18n("Run 'fsck -fp' on filesystem"), this);
-    m_mkfs_action       = new KAction(KIcon("lightning_add"),    i18n("Make filesystem"), this);
-    m_removefs_action   = new KAction(KIcon("lightning_delete"), i18n("Remove filesystem"), this);
+    m_mkfs_action       = new KAction(KIcon("lightning_add"),    i18n("Make or remove filesystem"), this);
 
     addAction(m_tablecreate_action);
     addSeparator();
@@ -104,7 +101,6 @@ void DeviceActionsMenu::setup(QTreeWidgetItem *item)
     filesystem_menu->addAction(m_fsck_action);
     filesystem_menu->addSeparator();
     filesystem_menu->addAction(m_mkfs_action);
-    filesystem_menu->addAction(m_removefs_action);
 
     m_vg_name  = item->data(5, Qt::DisplayRole).toString(); // only set if this is a pv in a vg
 
@@ -135,7 +131,6 @@ void DeviceActionsMenu::setup(QTreeWidgetItem *item)
                 m_partremove_action->setEnabled(false);
                 m_partchange_action->setEnabled(false);
                 m_partadd_action->setEnabled(true);
-                m_removefs_action->setEnabled(false);
                 m_vgcreate_action->setEnabled(false);
                 m_vgextend_menu->setEnabled(false);
                 m_vgreduce_action->setEnabled(false);
@@ -148,7 +143,6 @@ void DeviceActionsMenu::setup(QTreeWidgetItem *item)
                 else
                     m_partadd_action->setEnabled(false);
                 m_partchange_action->setEnabled(false);
-                m_removefs_action->setEnabled(false);
                 m_vgcreate_action->setEnabled(false);
                 m_vgextend_menu->setEnabled(false);
                 m_vgreduce_action->setEnabled(false);
@@ -169,7 +163,6 @@ void DeviceActionsMenu::setup(QTreeWidgetItem *item)
 
                 m_maxpv_action->setEnabled(true);
                 m_partadd_action->setEnabled(false);
-                m_removefs_action->setEnabled(false);
                 m_vgcreate_action->setEnabled(false);
                 m_vgextend_menu->setEnabled(false);
                 if (m_part->getPhysicalVolume()->getPercentUsed() == 0)
@@ -185,7 +178,6 @@ void DeviceActionsMenu::setup(QTreeWidgetItem *item)
                     m_partchange_action->setEnabled(false);
                     m_mkfs_action->setEnabled(false);
                     m_maxfs_action->setEnabled(false);
-                    m_removefs_action->setEnabled(false);
                     m_vgcreate_action->setEnabled(false);
                     m_vgextend_menu->setEnabled(false);
                 } else {                                            // not mounted or busy
@@ -193,7 +185,6 @@ void DeviceActionsMenu::setup(QTreeWidgetItem *item)
                     m_partchange_action->setEnabled(true);
                     m_maxfs_action->setEnabled(true);
                     m_mkfs_action->setEnabled(true);
-                    m_removefs_action->setEnabled(true);
                     m_vgcreate_action->setEnabled(true);
                     if (group_names.size())
                         m_vgextend_menu->setEnabled(true);
@@ -217,7 +208,6 @@ void DeviceActionsMenu::setup(QTreeWidgetItem *item)
                 m_partremove_action->setEnabled(false);
                 m_partchange_action->setEnabled(false);
                 m_partadd_action->setEnabled(false);
-                m_removefs_action->setEnabled(false);
                 m_vgcreate_action->setEnabled(false);
                 m_vgextend_menu->setEnabled(false);
                 if (m_dev->getPhysicalVolume()->getPercentUsed() == 0)
@@ -229,7 +219,6 @@ void DeviceActionsMenu::setup(QTreeWidgetItem *item)
                 m_partchange_action->setEnabled(false);
                 m_partadd_action->setEnabled(false);
                 m_mkfs_action->setEnabled(false);
-                m_removefs_action->setEnabled(false);
                 m_vgreduce_action->setEnabled(false);
                 m_maxpv_action->setEnabled(false);
                 if (m_dev->isBusy() || m_dev->getRealPartitionCount() != 0) {
@@ -374,12 +363,6 @@ void DeviceActionsMenu::mountPartition()
     dialog.exec();
 
     if (dialog.result() == QDialog::Accepted)
-        MainWindow->reRun();
-}
-
-void DeviceActionsMenu::removefsPartition()
-{
-    if (remove_fs(m_part->getName()))
         MainWindow->reRun();
 }
 

@@ -60,6 +60,7 @@ ExecutableFinder::ExecutableFinder(QObject *parent) : QObject(parent)
            << "vgrename"
            << "vgs"
            << "vgsplit"
+           << "wipefs"
            << "xfs_growfs";
 
     m_default_search_paths << "/sbin/"
