@@ -161,8 +161,10 @@ QTreeWidgetItem *VGTree::loadItem(LogVol *lv, QTreeWidgetItem *item)
     */
 
 
-    if (is_sc && !was_sc)
+    if (is_sc && !was_sc) {
         was_expanded = item->isExpanded();
+        qDeleteAll(item->takeChildren());
+    }
 
     if (lv->isThinPool())
         item->setExpanded(true);
@@ -184,7 +186,7 @@ QTreeWidgetItem *VGTree::loadItem(LogVol *lv, QTreeWidgetItem *item)
     if (lv->isPartial()) {
         item->setIcon(0, KIcon("exclamation"));
         item->setToolTip(0, i18n("one or more physical volumes are missing"));
-    } else if (!lv->isSnapContainer() && lv->getSnapshotCount() > 0) {
+    } else if (!is_sc && lv->getSnapshotCount() > 0) {
         item->setData(0, Qt::DisplayRole, QString(" %1").arg(lv_name));
         item->setIcon(0, KIcon("bullet_star"));
         item->setToolTip(0, i18n("origin"));
@@ -195,7 +197,7 @@ QTreeWidgetItem *VGTree::loadItem(LogVol *lv, QTreeWidgetItem *item)
 
     item->setData(1, Qt::DisplayRole, lv->getType());
 
-    if (lv->isSnapContainer()) {
+    if (is_sc) {
         item->setData(2, Qt::DisplayRole, locale->formatByteSize(lv->getTotalSize(), 1, dialect));
 
         for (int x = 3; x < 12; x++)
@@ -361,7 +363,7 @@ void VGTree::setupContextMenu()
 void VGTree::insertChildItems(LogVol *parentVolume, QTreeWidgetItem *parentItem)
 {
     LogVol *child_volume;
-    const QList<LogVol *>  immediate_children = parentVolume->getChildren();
+    const QList<LogVol *> immediate_children = parentVolume->getChildren();
 
     for (int x = 0; x < immediate_children.size(); x++) {
 
