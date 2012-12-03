@@ -132,6 +132,7 @@ public:
     QList<LogVol *> getThinVolumes();      // Volumes under a thin pool
     LogVol *getParent();                   // NULL if this is a "top level" lv
     LogVol *getParentMirror();             // NULL if this is not an lvm type mirror compnent
+    LogVol *getParentRaid();               // NULL if this is not a RAID type compnent
     VolGroup* getVg();
     QString getName();
     QString getPoolName();      // Name of this volume's thin pool if it is a thin volume, empty otherwise
