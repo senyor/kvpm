@@ -21,6 +21,7 @@
 
 bool fs_extend(const QString dev, const QString fs, const QStringList mps, const bool isLV = false);
 bool fs_can_extend(const QString fs);
+long long fs_max_extend(const QString dev, const QString fs);
 
 
 #endif
