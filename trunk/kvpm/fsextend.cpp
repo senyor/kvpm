@@ -26,6 +26,7 @@
 
 #include "executablefinder.h"
 #include "fsck.h"
+#include "fsblocksize.h"
 #include "mountentry.h"
 #include "mounttables.h"
 #include "processprogress.h"
@@ -51,16 +52,55 @@ bool fs_can_extend(const QString fs)
         else if (fs == "xfs")
             executable = "xfs_growfs";
 
-        if (!ExecutableFinder::getPath(executable).isEmpty())
+        if (!ExecutableFinder::getPath(executable).isEmpty()) {
             return true;
-        else {
+        } else {
             KMessageBox::error(NULL, i18n("Executable: '%1' not found, this filesystem cannot be extended", executable));
             return false;
         }
-    } else if (fs == "jfs")
+    } else if (fs == "jfs") {
         return true;
-    else
-        return false;
+    }
+
+    return false;
+}
+
+// The largest size the filesystem can extend to in bytes or -1 if the fs
+// type can't be extended.
+long long fs_max_extend(const QString dev, const QString fs)
+{
+    long long max = -1;
+    
+    if (fs_can_extend(fs)) {
+
+        if (fs == "ext2" || fs == "ext3") {
+            const long bs = get_fs_block_size(dev);
+
+            if (bs == 1024)
+                max = 0x20000000000 - 1;   // 2 TiB
+            else if (bs == 2048)
+                max = 0x80000000000 - 1;   // 8 TiB
+            else
+                max = 0x100000000000 - 1;  // 16 TiB
+            
+ //     } else if (fs == "ext4") {
+ //         max = 0x1000000000000000 - 1;  // 1 EiB ext4 theoretical limit
+        } else if (fs == "ext4") {
+            max = 0x100000000000 - 1;      // 16 TiB seems to be the current limit for the ext fs resize tools
+        } else if (fs == "reiserfs") {
+            max = 0x100000000000 - 1;      // 16 TiB
+        } else if (fs == "ntfs") {
+            max = 0x100000000000 - 4096;   // 16 TiB -- assumes small cluster size
+        } else if (fs == "xfs") {
+            max = 0x8000000000000000 - 1;  // 8 EiB
+        } else if (fs == "jfs") { 
+            max = 0x2000000000000 - 1;     // 512 TiB -- assumes 512 Bytes block size
+        } else { 
+            max = -1;
+        }
+    }
+
+    return max;
 }
 
 // dev is the full path to the device or volume, fs == filesystem, mps == mountpoints
