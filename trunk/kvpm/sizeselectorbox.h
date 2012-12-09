@@ -70,6 +70,7 @@ public:
     bool isLocked();
     bool setCurrentSize(long long size);  // return false if size is outside min or max
     bool isValid();
+    bool usingBytes(); // Whether the combo set to bytes (MiB, GiB or TiB) vs. extents
 
 private slots:
     void setToSlider(int value);

@@ -552,3 +552,11 @@ bool SizeSelectorBox::isLocked()
         return m_size_box->isChecked();
 }
 
+bool SizeSelectorBox::usingBytes()
+{
+    if (m_is_volume && (m_suffix_combo->currentIndex() == 0))
+        return false;
+    else
+        return true;
+}
+
