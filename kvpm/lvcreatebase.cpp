@@ -17,6 +17,7 @@
 #include "mountentry.h"
 #include "processprogress.h"
 #include "sizeselectorbox.h"
+#include "volgroup.h"
 
 #include <math.h>
 
@@ -36,9 +37,10 @@
 
 
 
-LvCreateDialogBase::LvCreateDialogBase(bool extend, bool snap, bool thin, bool ispool,
+LvCreateDialogBase::LvCreateDialogBase(VolGroup *vg, bool extend, bool snap, bool thin, bool ispool,
                                        QString name, QString pool, QWidget *parent):
-    KDialog(parent), 
+    KDialog(parent),
+    m_vg(vg), 
     m_extend(extend),
     m_ispool(ispool)
 {
@@ -589,6 +591,11 @@ void LvCreateDialogBase::clearWarningLabel()
 {
     m_warning_label->setText("");
     m_warning_widget->hide();
+}
+
+VolGroup* LvCreateDialogBase::getVg()
+{
+    return m_vg;
 }
 
 void LvCreateDialogBase::setInfoLabels(VolumeType type, int stripes, int mirrors, long long maxextents, long long maxsize)

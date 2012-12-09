@@ -22,6 +22,8 @@
 
 #include "misc.h"
 
+class VolGroup;
+
 class KLineEdit;
 class KTabWidget;
 class KComboBox;
@@ -40,6 +42,8 @@ class SizeSelectorBox;
 class LvCreateDialogBase : public KDialog
 {
     Q_OBJECT
+
+    VolGroup *m_vg;
 
     QVBoxLayout *m_general_layout;
 
@@ -83,6 +87,7 @@ protected slots:
     virtual void resetOkButton() = 0;
 
 protected:
+    VolGroup *getVg();
     virtual QStringList args() = 0;
     virtual long long getLargestVolume() = 0;
     virtual bool isValid();    // Has a valid size, name, major number, minor number and tag
@@ -118,7 +123,7 @@ protected:
     QString getTag();
 
 public:
-    LvCreateDialogBase(const bool extend, const bool snap, const bool thin, const bool thinpool,
+    LvCreateDialogBase(VolGroup *const vg, const bool extend, const bool snap, const bool thin, const bool thinpool,
                        QString name = QString(""), QString pool = QString(""),  // name = origin for snap or lvname for extend 
                        QWidget *parent = NULL);
 

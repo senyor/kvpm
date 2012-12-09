@@ -48,10 +48,9 @@
 
 // Creating a new volume
 
-LVCreateDialog::LVCreateDialog(VolGroup *const group, const bool ispool, QWidget *parent):
-    LvCreateDialogBase(false, false, false, ispool, QString(""), QString(""), parent),
-    m_ispool(ispool),
-    m_vg(group)
+LVCreateDialog::LVCreateDialog(VolGroup *const vg, const bool ispool, QWidget *parent):
+    LvCreateDialogBase(vg, false, false, false, ispool, QString(""), QString(""), parent),
+    m_ispool(ispool)
 {
     m_lv = NULL;
     m_extend = false;
@@ -67,11 +66,10 @@ LVCreateDialog::LVCreateDialog(VolGroup *const group, const bool ispool, QWidget
 // Extending an existing volume or creating a snapshot
 
 LVCreateDialog::LVCreateDialog(LogVol *const volume, const bool snapshot, QWidget *parent):
-    LvCreateDialogBase(!snapshot, snapshot, false, volume->isThinPool(), volume->getName(), QString(""), parent),
+    LvCreateDialogBase(volume->getVg(),!snapshot, snapshot, false, volume->isThinPool(), volume->getName(), QString(""), parent),
     m_ispool(volume->isThinPool()),
     m_snapshot(snapshot),
     m_extend(!snapshot),
-    m_vg(volume->getVg()),
     m_lv(volume)
 {
     m_bailout = hasInitialErrors();
@@ -82,10 +80,12 @@ LVCreateDialog::LVCreateDialog(LogVol *const volume, const bool snapshot, QWidge
 
 void LVCreateDialog::buildDialog()
 {
+    VolGroup *const vg = getVg();
+
     if (m_extend)
-        initializeSizeSelector(m_vg->getExtentSize(), m_lv->getExtents(), m_vg->getAllocatableExtents() + m_lv->getExtents());
+        initializeSizeSelector(vg->getExtentSize(), m_lv->getExtents(), vg->getAllocatableExtents() + m_lv->getExtents());
     else
-        initializeSizeSelector(m_vg->getExtentSize(), 0, m_vg->getAllocatableExtents());
+        initializeSizeSelector(vg->getExtentSize(), 0, vg->getAllocatableExtents());
         
     m_physical_tab = createPhysicalTab();
     setPhysicalTab(m_physical_tab);
@@ -138,7 +138,7 @@ QWidget* LVCreateDialog::createPhysicalTab()
     m_physical_tab = new QWidget(this);
     m_physical_tab->setLayout(layout);
 
-    QList<PhysVol *> pvs(m_vg->getPhysicalVolumes());
+    QList<PhysVol *> pvs(getVg()->getPhysicalVolumes());
 
     for (int x = pvs.size() - 1; x >= 0; x--) {
         if (pvs[x]->getRemaining() < 1 || !pvs[x]->isAllocatable() || pvs[x]->isMissing())
@@ -207,7 +207,7 @@ int LVCreateDialog::getChunkSize()  // returns pool chunk size in bytes
     } else if (m_chunk_combo->currentIndex() > 0) {
         chunk = QVariant(m_chunk_combo->itemData(m_chunk_combo->currentIndex(), Qt::UserRole)).toInt();
     } else {
-        long long meta = (64 * getSelectorExtents() * m_vg->getExtentSize()) / chunk;
+        long long meta = (64 * getSelectorExtents() * getVg()->getExtentSize()) / chunk;
 
         while ((meta > 0x8000000) && (chunk < 0x40000000)) {  // meta > 128MiB and chunk < 1GB
             chunk *= 2;
@@ -270,7 +270,7 @@ QWidget* LVCreateDialog::createStripeWidget()
 
     m_stripe_size_combo = new KComboBox();
     m_stripe_size_combo->setEnabled(false);
-    for (int n = 2; (round(pow(2, n) * 1024)) <= m_vg->getExtentSize() ; n++) {
+    for (int n = 2; (round(pow(2, n) * 1024)) <= getVg()->getExtentSize() ; n++) {
         m_stripe_size_combo->addItem(QString("%1").arg(round(pow(2, n))) + " KiB");
         m_stripe_size_combo->setItemData(n - 2, QVariant(round(pow(2, n))), Qt::UserRole);
         m_stripe_size_combo->setEnabled(true);   // only enabled if the combo box has at least one entry!
@@ -495,7 +495,7 @@ void LVCreateDialog::setMaxSize()
     VolumeType type;
     const int stripes = m_stripe_count_spin->value();
     const int mirrors = m_mirror_count_spin->value();
-    const long long max_extents = getLargestVolume() / m_vg->getExtentSize();
+    const long long max_extents = getLargestVolume() / getVg()->getExtentSize();
 
     m_stripe_count_spin->setMaximum(getMaxStripes());
 
@@ -531,7 +531,7 @@ void LVCreateDialog::setMaxSize()
 
 void LVCreateDialog::resetOkButton()
 {
-    const long long max = getLargestVolume() / m_vg->getExtentSize();
+    const long long max = getLargestVolume() / getVg()->getExtentSize();
     const long long selected = getSelectorExtents();
     const long long rounded  = roundExtentsToStripes(selected);
 
@@ -739,7 +739,7 @@ long long LVCreateDialog::getLargestVolume()
     const int type = m_type_combo->currentIndex();
     const int stripe_count = m_stripe_count_spin->value();
     const int mirror_count = m_mirror_count_spin->value();
-    const long long extent_size = m_vg->getExtentSize();
+    const long long extent_size = getVg()->getExtentSize();
 
     if (type == 1)          // LVM2 mirror
         total_stripes = stripe_count * mirror_count;
@@ -770,7 +770,7 @@ long long LVCreateDialog::getLargestVolume()
 
     AllocationPolicy policy = m_pv_box->getPolicy();
     if (policy == INHERITED)
-        policy = m_vg->getPolicy();
+        policy = getVg()->getPolicy();
 
     QList <long long> stripe_pv_bytes;
     for (int x = 0; x < total_stripes; x++)
@@ -810,7 +810,7 @@ long long LVCreateDialog::getLargestVolume()
         m_ispool = false;
         long long meta = 64 * (getLargestVolume() / getChunkSize(getLargestVolume()));
         m_ispool = true;
-        const long long ext = m_vg->getExtentSize();
+        const long long ext = getVg()->getExtentSize();
         meta = ( (meta  + ext - 1 ) / ext) * ext;
 
         if (meta < 0x200000)   // 2 MiB 
@@ -847,7 +847,7 @@ long long LVCreateDialog::getLargestVolume()
                     QList<long long> stripe_max;
                   
                     for (int y = pv_names.size() - 1; y >= 0; y--)
-                        stripe_max.append(m_vg->getPvByName(pv_names[y])->getContiguous(m_lv));
+                        stripe_max.append(getVg()->getPvByName(pv_names[y])->getContiguous(m_lv));
 
                     qSort(stripe_max);
 
@@ -870,7 +870,7 @@ long long LVCreateDialog::getLargestVolume()
             QList<long long> stripe_max;
             
             for (int y = pv_names.size() - 1; y >= 0; y--)
-                stripe_max.append(m_vg->getPvByName(pv_names[y])->getContiguous(m_lv));
+                stripe_max.append(getVg()->getPvByName(pv_names[y])->getContiguous(m_lv));
             
             qSort(stripe_max);
             
@@ -993,14 +993,14 @@ QStringList LVCreateDialog::args()
         program_to_run = "lvcreate";
         args << "--chunksize" << QString("%1k").arg(getChunkSize()/1024);
         args << "--thinpool" << getName();
-        args << m_vg->getName();
+        args << getVg()->getName();
     } else if (!m_extend && !m_snapshot) {              // create a standard volume
         program_to_run = "lvcreate";
 
         if (!getName().isEmpty())
             args << "--name" << getName();
 
-        args << m_vg->getName();
+        args << getVg()->getName();
     } else if (m_snapshot) {                            // create a snapshot
         program_to_run = "lvcreate";
 
@@ -1030,9 +1030,9 @@ long long LVCreateDialog::roundExtentsToStripes(long long extents)
     long long max_extents;
 
     if (m_extend)
-        max_extents = (getLargestVolume() - m_lv->getSize()) / m_vg->getExtentSize();
+        max_extents = (getLargestVolume() - m_lv->getSize()) / getVg()->getExtentSize();
     else
-        max_extents = getLargestVolume() / m_vg->getExtentSize();
+        max_extents = getLargestVolume() / getVg()->getExtentSize();
 
     // The next part should only need to reference stripes, not the mirror count
     // but a bug in lvm requires it. Remove this when fixed.
@@ -1053,18 +1053,25 @@ long long LVCreateDialog::roundExtentsToStripes(long long extents)
     return extents;
 }
 
+
+
+
+
+
 // This function checks for problems that would make showing this dialog pointless
 // returns true if there are problems and is used to set m_bailout.
 
 bool LVCreateDialog::hasInitialErrors()
 {
-    if (m_vg->getAllocatableExtents() == 0 || m_vg->isPartial()) {
-        if (m_vg->isPartial())
+    VolGroup *const vg = getVg();
+
+    if (vg->getAllocatableExtents() == 0 || vg->isPartial()) {
+        if (vg->isPartial())
             if (m_extend)
                 KMessageBox::error(this, i18n("Volumes can not be extended while physical volumes are missing"));
             else
                 KMessageBox::error(this, i18n("Volumes can not be created while physical volumes are missing"));
-        else if (m_vg->getFreeExtents())
+        else if (vg->getFreeExtents())
             KMessageBox::error(this, i18n("All free physical volume extents in this group"
                                           " are locked against allocation"));
         else
@@ -1080,7 +1087,7 @@ bool LVCreateDialog::hasInitialErrors()
                                              "supported for extension. The correct executable for extension must also be present. ");
 
         if (m_lv->isRaid() || m_lv->isLvmMirror()){
-            QList<PhysVol *> pvs = m_vg->getPhysicalVolumes();
+            QList<PhysVol *> pvs = vg->getPhysicalVolumes();
 
             for (int x = pvs.size() - 1; x >= 0; x--) {
                 if (pvs[x]->getRemaining() < 1 || !pvs[x]->isAllocatable())
@@ -1187,7 +1194,7 @@ int LVCreateDialog::getMaxStripes()
     AllocationPolicy policy = m_pv_box->getPolicy();
 
     if (policy == INHERITED)
-        policy = m_vg->getPolicy();
+        policy = getVg()->getPolicy();
 
     if (m_extend && (policy == CONTIGUOUS)){
         if (m_lv->isLvmMirror()){

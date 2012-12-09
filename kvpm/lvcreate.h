@@ -26,7 +26,6 @@ class KComboBox;
 class QGroupBox;
 
 class LogVol;
-class VolGroup;
 class PvGroupBox;
 
 
@@ -41,7 +40,6 @@ class LVCreateDialog : public LvCreateDialogBase
     bool m_fs_can_extend;
     bool m_use_si_units;    // TRUE Metric SI sizes = MB and GB, otherise use MiB, GiB etc.
 
-    VolGroup *m_vg;
     LogVol *m_lv;      // origin for snap or lv to extend
                        // set to NULL if creating a new logical volume
 
@@ -78,7 +76,7 @@ class LVCreateDialog : public LvCreateDialogBase
     QStringList args();
 
 public:
-    explicit LVCreateDialog(VolGroup *const group, bool ispool, QWidget *parent = 0);
+    explicit LVCreateDialog(VolGroup *const vg, bool ispool, QWidget *parent = 0);
     LVCreateDialog(LogVol *const volume, const bool snapshot, QWidget *parent = 0);
     bool bailout();
 

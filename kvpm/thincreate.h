@@ -21,7 +21,6 @@
 
 
 class LogVol;
-class VolGroup;
 
 
 
@@ -36,7 +35,6 @@ class ThinCreateDialog : public LvCreateDialogBase
     bool m_use_si_units;    // TRUE Metric SI sizes = MB and GB, otherise use MiB, GiB etc.
 
 
-    VolGroup *m_vg;
     LogVol *m_lv;      // origin for snap or lv to extend
                        // set to NULL if creating a new logical volume
     LogVol *m_pool;    // The thin pool we are using if creating a new volume, set to NULL otherwise.

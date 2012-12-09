@@ -40,8 +40,7 @@
 /* Create new thin volume*/
 
 ThinCreateDialog::ThinCreateDialog(LogVol *const pool, QWidget *parent):
-    LvCreateDialogBase(false, false, true, false, QString(""), pool->getName(), parent),
-    m_vg(pool->getVg()),
+    LvCreateDialogBase(pool->getVg(),false, false, true, false, QString(""), pool->getName(), parent),
     m_pool(pool)
 {
     m_lv = NULL;
@@ -49,10 +48,11 @@ ThinCreateDialog::ThinCreateDialog(LogVol *const pool, QWidget *parent):
     m_snapshot = false;
     m_bailout  = hasInitialErrors();
     m_fs_can_extend = false;
+    const long long extent_size = getVg()->getExtentSize();
 
     setCaption("Create A New Thin Volume");
 
-    initializeSizeSelector(m_vg->getExtentSize(), 0, getLargestVolume() / m_vg->getExtentSize());
+    initializeSizeSelector(extent_size, 0, getLargestVolume() / extent_size);
 
     resetOkButton();
 }
@@ -61,17 +61,17 @@ ThinCreateDialog::ThinCreateDialog(LogVol *const pool, QWidget *parent):
 /* extend thin volume or take snapshot */
 
 ThinCreateDialog::ThinCreateDialog(LogVol *const volume, const bool snapshot, QWidget *parent):
-    LvCreateDialogBase(!snapshot, snapshot, true, false, volume->getName(), volume->getPoolName(), parent),
+    LvCreateDialogBase(volume->getVg(), !snapshot, snapshot, true, false, volume->getName(), volume->getPoolName(), parent),
     m_snapshot(snapshot),
     m_extend(!snapshot),
-    m_vg(volume->getVg()),
     m_lv(volume)
 {
     m_bailout = hasInitialErrors();
+    const long long extent_size = getVg()->getExtentSize();
 
     if (!snapshot) {
         setCaption("Extend Thin Volume");
-        initializeSizeSelector(m_vg->getExtentSize(), m_lv->getExtents(), getLargestVolume() / m_vg->getExtentSize());
+        initializeSizeSelector(extent_size, m_lv->getExtents(), getLargestVolume() / extent_size);
     } else {
         setCaption("Create Thin Snapshot");
     }
@@ -88,7 +88,7 @@ long long ThinCreateDialog::getLargestVolume()
 {
     // Current limitation of number of extents is 32bit unsigned
 
-    return 0xFFFFFFFF * m_vg->getExtentSize();
+    return 0xFFFFFFFF * getVg()->getExtentSize();
 }
 
 /* Here we create a stringlist of arguments based on all
@@ -108,7 +108,7 @@ QStringList ThinCreateDialog::args()
         else
             args << "--virtualsize";
  
-        args << QString("%1b").arg(getSelectorExtents() * m_vg->getExtentSize());
+        args << QString("%1b").arg(getSelectorExtents() * getVg()->getExtentSize());
     }
 
     if (!m_extend) {
@@ -151,7 +151,7 @@ QStringList ThinCreateDialog::args()
 
 bool ThinCreateDialog::hasInitialErrors()
 {
-    if (m_vg->isPartial()) {
+    if (getVg()->isPartial()) {
         if (m_extend)
             KMessageBox::error(this, i18n("Volumes can not be extended while physical volumes are missing"));
         else
