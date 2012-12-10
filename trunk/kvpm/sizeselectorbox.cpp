@@ -260,10 +260,7 @@ void SizeSelectorBox::setConstrainedMax(long long max)
             setCurrentSize(m_constrained_max);
     }
 
-    if (m_current_size > m_constrained_max)
-        m_is_valid = false;
-
-    updateValidator();
+    updateEdit();
     updateSlider();
 }
 
