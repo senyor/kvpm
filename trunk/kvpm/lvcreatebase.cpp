@@ -256,15 +256,18 @@ QWidget* LvCreateDialogBase::createGeneralTab(bool showNameTag, bool showRo, boo
     m_warning_widget->hide();
     
     m_current_label    = new QLabel();
+    m_extend_label     = new QLabel();
     m_maxfs_size_label = new QLabel();
     m_stripes_label    = new QLabel();
     m_max_size_label   = new QLabel();
     misc_layout->addWidget(m_current_label);
+    misc_layout->addWidget(m_extend_label);
     misc_layout->addWidget(m_max_size_label);
     misc_layout->addWidget(m_maxfs_size_label);
     misc_layout->addWidget(m_stripes_label);
     if (!m_extend) {
         m_current_label->hide();
+        m_extend_label->hide();
         m_maxfs_size_label->hide();
     }
     misc_layout->addStretch();
@@ -542,6 +545,13 @@ bool LvCreateDialogBase::getPersistent()
 
 void LvCreateDialogBase::initializeSizeSelector(long long extentSize, long long currentExtents, long long maxExtents)
 {
+
+    if (currentExtents >= m_maxfs_size / extentSize) {
+        m_maxfs_size = -1;
+        m_extend_fs_check->setChecked(false);
+        m_extend_fs_check->setEnabled(false);
+    }
+
     m_size_selector = new SizeSelectorBox(extentSize, currentExtents,
                                           maxExtents, currentExtents,
                                           true, false);
@@ -635,22 +645,39 @@ void LvCreateDialogBase::setSizeLabels()
         dialect = KLocale::IECBinaryDialect;
 
     if (m_size_selector != NULL) {
+
+        const long long extend = m_size_selector->getCurrentSize() - m_size_selector->getMinimumSize(); 
+        const long long extent_size = m_vg->getExtentSize();
+
+        if (m_size_selector->usingBytes()) {
+            if (extend >= 0)
+                m_extend_label->setText(i18n("Increasing size: +%1", locale->formatByteSize(extend * extent_size, 1, dialect)));
+            else
+                m_extend_label->setText(i18n("Increasing size: %1", locale->formatByteSize(extend * extent_size, 1, dialect)));
+        } else {
+            if (extend >= 0)
+                m_extend_label->setText(i18n("Increasing extents: +%1", extend));
+            else
+                m_extend_label->setText(i18n("Increasing extents: %1", extend));
+        }
+
         if (m_maxfs_size < 0) {
             if (m_size_selector->usingBytes()) {
                 m_max_size_label->setText(i18n("Maximum volume size: %1", locale->formatByteSize(m_max_size, 1, dialect)));
             } else {
-                m_max_size_label->setText(i18n("Maximum volume extents: %1", m_max_size / getVg()->getExtentSize()));
+                m_max_size_label->setText(i18n("Maximum volume extents: %1", m_max_size / extent_size));
             }
         } else {
             if (m_size_selector->usingBytes()) {
                 m_max_size_label->setText(i18n("Maximum volume size: %1", locale->formatByteSize(m_max_size, 1, dialect)));
                 m_maxfs_size_label->setText(i18n("Maximum filesystem size: %1", locale->formatByteSize(m_maxfs_size, 1, dialect)));
             } else {
-                m_max_size_label->setText(i18n("Maximum volume extents: %1", m_max_size / getVg()->getExtentSize()));
-                m_maxfs_size_label->setText(i18n("Maximum filesystem extents: %1", m_maxfs_size / getVg()->getExtentSize()));
+                m_max_size_label->setText(i18n("Maximum volume extents: %1", m_max_size / extent_size));
+                m_maxfs_size_label->setText(i18n("Maximum filesystem extents: %1", m_maxfs_size / extent_size));
             }
         }
     } else {
+        m_extend_label->hide();
         m_max_size_label->hide();
         m_maxfs_size_label->hide();
     }
@@ -698,3 +725,4 @@ bool  LvCreateDialogBase::getExtendFs()
 {
     return m_extend_fs_check->isChecked();
 }
+
