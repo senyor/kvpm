@@ -40,7 +40,7 @@
 /* Create new thin volume*/
 
 ThinCreateDialog::ThinCreateDialog(LogVol *const pool, QWidget *parent):
-    LvCreateDialogBase(pool->getVg(),false, false, true, false, QString(""), pool->getName(), parent),
+    LvCreateDialogBase(pool->getVg(), -1, false, false, true, false, QString(""), pool->getName(), parent),
     m_pool(pool)
 {
     m_lv = NULL;
@@ -49,11 +49,18 @@ ThinCreateDialog::ThinCreateDialog(LogVol *const pool, QWidget *parent):
     m_bailout  = hasInitialErrors();
     m_fs_can_extend = false;
     const long long extent_size = getVg()->getExtentSize();
+    const long long max_size = getLargestVolume();
 
     setCaption("Create A New Thin Volume");
 
-    initializeSizeSelector(extent_size, 0, getLargestVolume() / extent_size);
+    initializeSizeSelector(extent_size, 0, max_size / extent_size);
+    
+    setInfoLabels(THIN, 0, 0, max_size);
 
+    connect(this, SIGNAL(extendFs()),
+            this, SLOT(setMaxSize()));
+
+    setMaxSize();
     resetOkButton();
 }
 
@@ -61,19 +68,44 @@ ThinCreateDialog::ThinCreateDialog(LogVol *const pool, QWidget *parent):
 /* extend thin volume or take snapshot */
 
 ThinCreateDialog::ThinCreateDialog(LogVol *const volume, const bool snapshot, QWidget *parent):
-    LvCreateDialogBase(volume->getVg(), !snapshot, snapshot, true, false, volume->getName(), volume->getPoolName(), parent),
+    LvCreateDialogBase(volume->getVg(), fs_max_extend(volume->getMapperPath(), volume->getFilesystem()), 
+                       !snapshot, snapshot, true, false, volume->getName(), volume->getPoolName(), parent),
     m_snapshot(snapshot),
     m_extend(!snapshot),
     m_lv(volume)
 {
     m_bailout = hasInitialErrors();
     const long long extent_size = getVg()->getExtentSize();
+    const long long max_size = getLargestVolume();
 
     if (!snapshot) {
         setCaption("Extend Thin Volume");
-        initializeSizeSelector(extent_size, m_lv->getExtents(), getLargestVolume() / extent_size);
+        initializeSizeSelector(extent_size, m_lv->getExtents(), max_size / extent_size);
     } else {
         setCaption("Create Thin Snapshot");
+    }
+
+    setInfoLabels(THIN, 0, 0, max_size);
+
+    connect(this, SIGNAL(extendFs()),
+            this, SLOT(setMaxSize()));
+
+    setMaxSize();
+    resetOkButton();
+}
+
+void ThinCreateDialog::setMaxSize()
+{
+    const long long max = getLargestVolume() / getVg()->getExtentSize();
+    const long long maxfs = getMaxFsSize() / getVg()->getExtentSize();
+
+    if (getExtendFs()) {
+        if (max < maxfs)
+            setSelectorMaxExtents(max);
+        else
+            setSelectorMaxExtents(maxfs);
+    } else {
+        setSelectorMaxExtents(max);
     }
 
     resetOkButton();
@@ -236,17 +268,18 @@ void ThinCreateDialog::commit()
             lvchange_args << "lvchange" << "-ay" << mapper_path;
             ProcessProgress activate_lv(lvchange_args);
             if (activate_lv.exitCode()) {
-                KMessageBox::error(0, i18n("Volume activation failed, filesystem not extended"));
-                return;
-            }
-
-            if (m_fs_can_extend)
+                if (getExtendFs())
+                    KMessageBox::error(0, i18n("Volume activation failed, filesystem not extended"));
+                else
+                    KMessageBox::error(0, i18n("Volume activation failed"));
+            } else if (getExtendFs()) {
                 fs_extend(m_lv->getMapperPath(), fs, m_lv->getMountPoints(), true);
+            }
 
             return;
         } else {
             ProcessProgress extend_lv(args());
-            if (!extend_lv.exitCode() && !m_lv->isCowSnap() && m_fs_can_extend)
+            if (!extend_lv.exitCode() && getExtendFs())
                 fs_extend(mapper_path, fs, m_lv->getMountPoints(), true);
 
             return;

@@ -49,6 +49,7 @@ public:
     bool bailout();
 
 private slots:
+    void setMaxSize();
     void resetOkButton();
     void commit();
 };
