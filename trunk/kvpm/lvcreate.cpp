@@ -49,14 +49,13 @@
 // Creating a new volume
 
 LVCreateDialog::LVCreateDialog(VolGroup *const vg, const bool ispool, QWidget *parent):
-    LvCreateDialogBase(vg, false, false, false, ispool, QString(""), QString(""), parent),
+    LvCreateDialogBase(vg, -1, false, false, false, ispool, QString(""), QString(""), parent),
     m_ispool(ispool)
 {
     m_lv = NULL;
     m_extend = false;
     m_snapshot = false;
     m_bailout  = hasInitialErrors();
-    m_fs_can_extend = false;
 
     if (!m_bailout)
         buildDialog();
@@ -66,7 +65,11 @@ LVCreateDialog::LVCreateDialog(VolGroup *const vg, const bool ispool, QWidget *p
 // Extending an existing volume or creating a snapshot
 
 LVCreateDialog::LVCreateDialog(LogVol *const volume, const bool snapshot, QWidget *parent):
-    LvCreateDialogBase(volume->getVg(),!snapshot, snapshot, false, volume->isThinPool(), volume->getName(), QString(""), parent),
+    LvCreateDialogBase(volume->getVg(), 
+                       volume->isCowSnap() ? -1 : fs_max_extend(volume->getMapperPath(), volume->getFilesystem()),
+                       !snapshot, snapshot, false, volume->isThinPool(), volume->getName(), 
+                       QString(""), parent),
+
     m_ispool(volume->isThinPool()),
     m_snapshot(snapshot),
     m_extend(!snapshot),
@@ -93,8 +96,8 @@ void LVCreateDialog::buildDialog()
     enableTypeOptions(m_type_combo->currentIndex());
     enableStripeCombo(m_stripe_count_spin->value());
     makeConnections();
-    resetOkButton();
     setMaxSize();
+    resetOkButton();
 
     if (!m_snapshot && !m_extend && !m_ispool)
         setZero(true);
@@ -126,6 +129,9 @@ void LVCreateDialog::makeConnections()
             this, SLOT(enableMonitoring(int)));
 
     connect(m_log_combo, SIGNAL(currentIndexChanged(int)),
+            this, SLOT(setMaxSize()));
+
+    connect(this, SIGNAL(extendFs()),
             this, SLOT(setMaxSize()));
 }
 
@@ -495,11 +501,21 @@ void LVCreateDialog::setMaxSize()
     VolumeType type;
     const int stripes = m_stripe_count_spin->value();
     const int mirrors = m_mirror_count_spin->value();
-    const long long max_extents = getLargestVolume() / getVg()->getExtentSize();
 
     m_stripe_count_spin->setMaximum(getMaxStripes());
 
-    setSelectorMaxExtents(max_extents);
+    const long long max = getLargestVolume() / getVg()->getExtentSize();
+    const long long maxfs = getMaxFsSize() / getVg()->getExtentSize();
+
+    if (getExtendFs()) {
+        if (max < maxfs)
+            setSelectorMaxExtents(max);
+        else
+            setSelectorMaxExtents(maxfs);
+    } else {
+        setSelectorMaxExtents(max);
+    }
+
     resetOkButton();
 
     switch (m_type_combo->currentIndex()) {
@@ -526,7 +542,7 @@ void LVCreateDialog::setMaxSize()
         break;
     }
 
-    setInfoLabels(type, stripes, mirrors, max_extents, getLargestVolume());
+    setInfoLabels(type, stripes, mirrors, getLargestVolume());
 }
 
 void LVCreateDialog::resetOkButton()
@@ -1116,9 +1132,7 @@ bool LVCreateDialog::hasInitialErrors()
             }
         }
 
-        m_fs_can_extend = fs_can_extend(m_lv->getFilesystem());
-
-        if (!(m_lv->isThinPool() || m_fs_can_extend || m_lv->isCowSnap())) {
+        if (!(m_lv->isThinPool() || fs_can_extend(m_lv->getFilesystem()) || m_lv->isCowSnap())) {
             if (KMessageBox::warningContinueCancel(NULL,
                                                    warning_message,
                                                    QString(),
@@ -1170,17 +1184,18 @@ void LVCreateDialog::commit()
             lvchange_args << "lvchange" << "-ay" << mapper_path;
             ProcessProgress activate_lv(lvchange_args);
             if (activate_lv.exitCode()) {
-                KMessageBox::error(0, i18n("Volume activation failed, filesystem not extended"));
-                return;
-            }
-
-            if (m_fs_can_extend)
+                if (getExtendFs())
+                    KMessageBox::error(0, i18n("Volume activation failed, filesystem not extended"));
+                else
+                    KMessageBox::error(0, i18n("Volume activation failed"));
+            } else if (getExtendFs()) {
                 fs_extend(m_lv->getMapperPath(), fs, m_lv->getMountPoints(), true);
+            }
 
             return;
         } else {
             ProcessProgress extend_lv(args());
-            if (!extend_lv.exitCode() && !m_lv->isCowSnap() && m_fs_can_extend)
+            if (!extend_lv.exitCode() && !m_lv->isCowSnap() && getExtendFs())
                 fs_extend(mapper_path, fs, m_lv->getMountPoints(), true);
 
             return;

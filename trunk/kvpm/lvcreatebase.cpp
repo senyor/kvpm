@@ -37,12 +37,14 @@
 
 
 
-LvCreateDialogBase::LvCreateDialogBase(VolGroup *vg, bool extend, bool snap, bool thin, bool ispool,
+LvCreateDialogBase::LvCreateDialogBase(VolGroup *vg, long long maxFsSize, 
+                                       bool extend, bool snap, bool thin, bool ispool,
                                        QString name, QString pool, QWidget *parent):
     KDialog(parent),
     m_vg(vg), 
     m_extend(extend),
-    m_ispool(ispool)
+    m_ispool(ispool),
+    m_maxfs_size(maxFsSize)
 {
 
     KConfigSkeleton skeleton;
@@ -53,6 +55,7 @@ LvCreateDialogBase::LvCreateDialogBase(VolGroup *vg, bool extend, bool snap, boo
     QVBoxLayout *const layout = new QVBoxLayout();
     
     m_size_selector = NULL;
+    m_max_size = 0;
 
     bool show_name_tag = true;
     bool show_persistent = true;
@@ -209,11 +212,9 @@ QWidget* LvCreateDialogBase::createGeneralTab(bool showNameTag, bool showRo, boo
     misc_box->setLayout(misc_layout);
 
     m_readonly_check = new QCheckBox(i18n("Set read only"));
-    misc_layout->addWidget(m_readonly_check);
-    
     m_zero_check = new QCheckBox(i18n("Write zeros at volume start"));
+    misc_layout->addWidget(m_readonly_check);
     misc_layout->addWidget(m_zero_check);
-    misc_layout->addStretch();
     
     if (!showRo)
         m_readonly_check->hide();
@@ -229,20 +230,42 @@ QWidget* LvCreateDialogBase::createGeneralTab(bool showNameTag, bool showRo, boo
                 this, SLOT(resetOkButton()));
     }
 
+    m_extend_fs_check = new QCheckBox(i18n("Extend filesystem with volume"));
+    misc_layout->addWidget(m_extend_fs_check);
+
+    if (!m_extend) {
+        m_extend_fs_check->setChecked(false);
+        m_extend_fs_check->setEnabled(false);
+        m_extend_fs_check->hide();
+    } else {
+        if (m_maxfs_size < 0) {
+            m_extend_fs_check->setChecked(false);
+            m_extend_fs_check->setEnabled(false);
+        } else {
+            m_extend_fs_check->setChecked(true);
+
+            connect(m_extend_fs_check, SIGNAL(toggled(bool)),
+                    this, SIGNAL(extendFs()));
+        }
+    }
+
+    misc_layout->addSpacing(10);
+
     m_warning_widget = createWarningWidget();
     misc_layout->addWidget(m_warning_widget);
     m_warning_widget->hide();
-
+    
     m_current_label    = new QLabel();
-    m_maxextents_label = new QLabel();
+    m_maxfs_size_label = new QLabel();
     m_stripes_label    = new QLabel();
-    m_maxsize_label    = new QLabel();
-    m_maxsize_label->setWordWrap(true);
+    m_max_size_label   = new QLabel();
     misc_layout->addWidget(m_current_label);
-    if (!m_extend)
+    if (!m_extend) {
         m_current_label->hide();
-    misc_layout->addWidget(m_maxsize_label);
-    misc_layout->addWidget(m_maxextents_label);
+        m_maxfs_size_label->hide();
+    }
+    misc_layout->addWidget(m_max_size_label);
+    misc_layout->addWidget(m_maxfs_size_label);
     misc_layout->addWidget(m_stripes_label);
     misc_layout->addStretch();
 
@@ -528,6 +551,9 @@ void LvCreateDialogBase::initializeSizeSelector(long long extentSize, long long 
     connect(m_size_selector, SIGNAL(stateChanged()),
             this, SLOT(resetOkButton()));
 
+    connect(m_size_selector, SIGNAL(stateChanged()),
+            this, SLOT(setSizeLabels()));
+
     KLocale::BinaryUnitDialect dialect;
     KLocale *const locale = KGlobal::locale();
 
@@ -598,7 +624,7 @@ VolGroup* LvCreateDialogBase::getVg()
     return m_vg;
 }
 
-void LvCreateDialogBase::setInfoLabels(VolumeType type, int stripes, int mirrors, long long maxextents, long long maxsize)
+void LvCreateDialogBase::setSizeLabels()
 {
     KLocale::BinaryUnitDialect dialect;
     KLocale *const locale = KGlobal::locale();
@@ -608,27 +634,70 @@ void LvCreateDialogBase::setInfoLabels(VolumeType type, int stripes, int mirrors
     else
         dialect = KLocale::IECBinaryDialect;
 
-    m_maxsize_label->setText(i18n("Maximum size: %1", locale->formatByteSize(maxsize, 1, dialect)));
-    m_maxextents_label->setText(i18n("Maximum extents: %1", maxextents));
+    if (m_size_selector != NULL) {
+        m_max_size_label->show();
+        m_maxfs_size_label->show();
 
-    if (type == LINEAR) {
-        if (stripes > 1)
-            m_stripes_label->setText(i18n("(with %1 stripes)", stripes));
-        else
-            m_stripes_label->setText(i18n("(linear volume)"));
-    } else if (type == LVMMIRROR) {
-        if (stripes > 1)
-            m_stripes_label->setText(i18n("(LVM2 mirror with %1 legs and %2 stripes)", mirrors, stripes));
-        else
-            m_stripes_label->setText(i18n("(LVM2 mirror with %1 legs)", mirrors));
-    } else if (type == RAID1) {
-        m_stripes_label->setText(i18n("(RAID 1 mirror with %1 legs)", mirrors));
-    } else if (type == RAID4) {
-        m_stripes_label->setText(i18n("(RAID 4 with %1 stripes + 1 parity)", stripes));
-    } else if (type == RAID5) {
-        m_stripes_label->setText(i18n("(RAID 5 with %1 stripes + 1 parity)", stripes));
-    } else if (type == RAID5) {
-        m_stripes_label->setText(i18n("(RAID 6 with %1 stripes + 2 parity)", stripes));
+        if (m_maxfs_size < 0) {
+            if (m_size_selector->usingBytes()) {
+                m_max_size_label->setText(i18n("Maximum volume size: %1", locale->formatByteSize(m_max_size, 1, dialect)));
+            } else {
+                m_max_size_label->setText(i18n("Maximum volume extents: %1", m_max_size / getVg()->getExtentSize()));
+            }
+        } else {
+            if (m_size_selector->usingBytes()) {
+                m_max_size_label->setText(i18n("Maximum volume size: %1", locale->formatByteSize(m_max_size, 1, dialect)));
+                m_maxfs_size_label->setText(i18n("Maximum filesystem size: %1", locale->formatByteSize(m_maxfs_size, 1, dialect)));
+            } else {
+                m_max_size_label->setText(i18n("Maximum volume extents: %1", m_max_size / getVg()->getExtentSize()));
+                m_maxfs_size_label->setText(i18n("Maximum filesystem extents: %1", m_maxfs_size / getVg()->getExtentSize()));
+            }
+        }
+    } else {
+        m_max_size_label->hide();
+        m_maxfs_size_label->hide();
     }
 }
 
+void LvCreateDialogBase::setInfoLabels(VolumeType type, int stripes, int mirrors, long long maxSize)
+{
+    m_max_size = maxSize;
+    setSizeLabels();
+
+    if (m_size_selector != NULL) {
+        m_stripes_label->show();
+
+        if (type == LINEAR) {
+            if (stripes > 1)
+                m_stripes_label->setText(i18n("(with %1 stripes)", stripes));
+            else
+                m_stripes_label->setText(i18n("(linear volume)"));
+        } else if (type == LVMMIRROR) {
+            if (stripes > 1)
+                m_stripes_label->setText(i18n("(LVM2 mirror with %1 legs and %2 stripes)", mirrors, stripes));
+            else
+                m_stripes_label->setText(i18n("(LVM2 mirror with %1 legs)", mirrors));
+        } else if (type == RAID1) {
+            m_stripes_label->setText(i18n("(RAID 1 mirror with %1 legs)", mirrors));
+        } else if (type == RAID4) {
+            m_stripes_label->setText(i18n("(RAID 4 with %1 stripes + 1 parity)", stripes));
+        } else if (type == RAID5) {
+            m_stripes_label->setText(i18n("(RAID 5 with %1 stripes + 1 parity)", stripes));
+        } else if (type == RAID5) {
+            m_stripes_label->setText(i18n("(RAID 6 with %1 stripes + 2 parity)", stripes));
+        }
+    } else {
+        m_stripes_label->hide();
+    }
+}
+
+long long LvCreateDialogBase::getMaxFsSize()
+{
+    return m_maxfs_size;
+
+}
+
+bool  LvCreateDialogBase::getExtendFs()
+{
+    return m_extend_fs_check->isChecked();
+}

@@ -63,14 +63,18 @@ class LvCreateDialogBase : public KDialog
               *m_monitor_check,     // monitor with dmeventd
               *m_udevsync_check,    // sync operation with udev
               *m_zero_check,        // write zero at start of volume
-              *m_skip_sync_check;   // skip initial sync of mirror
+              *m_skip_sync_check,   // skip initial sync of mirror
+              *m_extend_fs_check;   // extend filesystem along with volume
 
     QGroupBox *m_persistent_box;
    
     KTabWidget *m_tab_widget;
 
-    QLabel *m_maxextents_label, *m_stripes_label, *m_maxsize_label, 
-           *m_warning_label,    *m_current_label;
+    QLabel *m_max_size_label, *m_stripes_label, *m_maxfs_size_label, 
+           *m_warning_label,  *m_current_label;
+
+    long long m_max_size;    // only used for setting the labels.
+    long long m_maxfs_size;  // can be retrieved and used by subclasses
 
     QWidget *m_warning_widget;
     QWidget *createWarningWidget();
@@ -78,6 +82,8 @@ class LvCreateDialogBase : public KDialog
     QWidget* createGeneralTab(const bool showNameTag, const bool showRo, const bool showZero, const bool showMisc);
     QWidget* createAdvancedTab(const bool showPersistent, const bool showSkipSync, const bool showMonitor);
 
+signals:
+    void extendFs();
 
 private slots:
     void zeroReadOnlyEnable();
@@ -85,6 +91,7 @@ private slots:
 protected slots:
     virtual void commit() = 0;
     virtual void resetOkButton() = 0;
+    void setSizeLabels();
 
 protected:
     VolGroup *getVg();
@@ -105,12 +112,13 @@ protected:
     void enableSkipSync(const bool skip);
     void enableReadOnly(const bool ro);
     void enableZero(const bool zero);
-    void setInfoLabels(const VolumeType type, const int stripes, const int mirrors, const long long maxextents, const long long maxsize);
+    void setInfoLabels(const VolumeType type, const int stripes, const int mirrors, const long long maxSize);
     void setWarningLabel(const QString message);
     void clearWarningLabel();
     void setSelectorMaxExtents(const long long max);
     long long getSelectorExtents();
-
+    long long getMaxFsSize();
+    bool getExtendFs();    // is the extend fs check boxed checked
     bool getMonitor();
     bool getUdev();
     bool getReadOnly();
@@ -123,7 +131,8 @@ protected:
     QString getTag();
 
 public:
-    LvCreateDialogBase(VolGroup *const vg, const bool extend, const bool snap, const bool thin, const bool thinpool,
+    LvCreateDialogBase(VolGroup *const vg, const long long maxFsSize, 
+                       const bool extend, const bool snap, const bool thin, const bool thinpool,
                        QString name = QString(""), QString pool = QString(""),  // name = origin for snap or lvname for extend 
                        QWidget *parent = NULL);
 
