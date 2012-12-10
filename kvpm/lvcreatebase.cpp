@@ -233,7 +233,7 @@ QWidget* LvCreateDialogBase::createGeneralTab(bool showNameTag, bool showRo, boo
     m_extend_fs_check = new QCheckBox(i18n("Extend filesystem with volume"));
     misc_layout->addWidget(m_extend_fs_check);
 
-    if (!m_extend) {
+    if (!m_extend || m_ispool) {
         m_extend_fs_check->setChecked(false);
         m_extend_fs_check->setEnabled(false);
         m_extend_fs_check->hide();
