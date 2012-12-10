@@ -260,13 +260,13 @@ QWidget* LvCreateDialogBase::createGeneralTab(bool showNameTag, bool showRo, boo
     m_stripes_label    = new QLabel();
     m_max_size_label   = new QLabel();
     misc_layout->addWidget(m_current_label);
+    misc_layout->addWidget(m_max_size_label);
+    misc_layout->addWidget(m_maxfs_size_label);
+    misc_layout->addWidget(m_stripes_label);
     if (!m_extend) {
         m_current_label->hide();
         m_maxfs_size_label->hide();
     }
-    misc_layout->addWidget(m_max_size_label);
-    misc_layout->addWidget(m_maxfs_size_label);
-    misc_layout->addWidget(m_stripes_label);
     misc_layout->addStretch();
 
     m_general_layout->addWidget(misc_box);
@@ -635,9 +635,6 @@ void LvCreateDialogBase::setSizeLabels()
         dialect = KLocale::IECBinaryDialect;
 
     if (m_size_selector != NULL) {
-        m_max_size_label->show();
-        m_maxfs_size_label->show();
-
         if (m_maxfs_size < 0) {
             if (m_size_selector->usingBytes()) {
                 m_max_size_label->setText(i18n("Maximum volume size: %1", locale->formatByteSize(m_max_size, 1, dialect)));
