@@ -194,9 +194,12 @@ bool ThinCreateDialog::hasInitialErrors()
 
     if (m_extend) {
 
-        const QString warning_message = i18n("If this volume has a filesystem or data, it will need to be extended <b>separately</b>. "
-                                             "Currently, only the ext2, ext3, ext4, xfs, jfs, ntfs and reiserfs file systems are "
-                                             "supported for extension. The correct executable for extension must also be present. ");
+        const QString warning1 = i18n("If this volume has a filesystem or data, it will need to be extended later "
+                                      "by an appropriate tool. \n \n"
+                                      "Currently, only the ext2, ext3, ext4, xfs, jfs, ntfs and reiserfs file systems are "
+                                      "supported for extension. ");
+
+        const QString warning2 = i18n("This filesystem seems to be as large as it can get, it will not be extended with the volume");
 
         if (m_lv->isCowOrigin()) {
             if (m_lv->isOpen()) {
@@ -215,10 +218,22 @@ bool ThinCreateDialog::hasInitialErrors()
         }
 
         m_fs_can_extend = fs_can_extend(m_lv->getFilesystem());
+        const long long maxfs = getMaxFsSize() / m_lv->getVg()->getExtentSize();
+        const long long current = m_lv->getExtents(); 
 
         if (!(m_fs_can_extend || m_lv->isCowSnap())) {
             if (KMessageBox::warningContinueCancel(NULL,
-                                                   warning_message,
+                                                   warning1,
+                                                   QString(),
+                                                   KStandardGuiItem::cont(),
+                                                   KStandardGuiItem::cancel(),
+                                                   QString(),
+                                                   KMessageBox::Dangerous) != KMessageBox::Continue) {
+                return true;
+            }
+        } else if (current >= maxfs) {
+            if (KMessageBox::warningContinueCancel(NULL,
+                                                   warning2,
                                                    QString(),
                                                    KStandardGuiItem::cont(),
                                                    KStandardGuiItem::cancel(),
@@ -227,6 +242,8 @@ bool ThinCreateDialog::hasInitialErrors()
                 return true;
             }
         }
+
+
     }
 
     return false;

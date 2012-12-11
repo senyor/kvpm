@@ -71,7 +71,7 @@ class LvCreateDialogBase : public KDialog
     KTabWidget *m_tab_widget;
 
     QLabel *m_max_size_label, *m_stripes_label, *m_maxfs_size_label, 
-           *m_warning_label,  *m_current_label;
+           *m_warning_label,  *m_current_label, *m_extend_label;
 
     long long m_max_size;    // only used for setting the labels.
     long long m_maxfs_size;  // can be retrieved and used by subclasses
