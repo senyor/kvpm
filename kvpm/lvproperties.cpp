@@ -259,17 +259,10 @@ QFrame *LVProperties::generalFrame(int segment)
         layout->addWidget(new QLabel(i18n("Extents: %1", extents)));
 
         if (!m_lv->isLvmMirror()) {
-
-            QHBoxLayout *const stripe_layout = new QHBoxLayout();
-
-            if (stripes != 1) {
-                stripe_layout->addWidget(new QLabel(i18n("Stripes: %1", stripes)));
-                stripe_layout->addWidget(new QLabel(i18n("Stripe size: %1", locale->formatByteSize(stripe_size, 1, dialect))));
-            } else {
-                stripe_layout->addWidget(new QLabel(i18n("Stripes: none")));
-            }
-
-            layout->addLayout(stripe_layout);
+            if (stripes != 1)
+                layout->addWidget(new QLabel(i18n("Stripes: %1 of %2", stripes, locale->formatByteSize(stripe_size, 1, dialect)))); 
+            else
+                layout->addWidget(new QLabel(i18n("Stripes: none")));
         }
     } else if ((segment >= 0) && (segment_count == 1)) {
         extents = m_lv->getSegmentExtents(segment);
@@ -282,27 +275,19 @@ QFrame *LVProperties::generalFrame(int segment)
             layout->addWidget(new QLabel(i18n("Extents: %1", extents)));
 
         if ( !(m_lv->isRaidImage() || m_lv->isMetadata()) ) {
-            QHBoxLayout *const stripe_layout = new QHBoxLayout();
-
             if (m_lv->isRaid() && m_lv->getRaidType() != 1) {
                 layout->addWidget(new QLabel(i18n("Total extents: %1", total_extents)));
                 layout->addWidget(new QLabel(i18n("Total size: %1", locale->formatByteSize(total_size, 1, dialect))));
-                stripe_layout->addWidget(new QLabel(i18n("Stripes: %1", stripes)));
-                stripe_layout->addWidget(new QLabel(i18n("Stripe size: %1", locale->formatByteSize(stripe_size, 1, dialect))));
+                layout->addWidget(new QLabel(i18n("Stripes: %1 of %2", stripes, locale->formatByteSize(stripe_size, 1, dialect)))); 
             } else if (!m_lv->isThinVolume() && !m_lv->isLvmMirror() && !(m_lv->isRaid() && m_lv->getRaidType() == 1)) {
-                
-                if (stripes != 1) {
-                    stripe_layout->addWidget(new QLabel(i18n("Stripes: %1", stripes)));
-                    stripe_layout->addWidget(new QLabel(i18n("Stripe size: %1", locale->formatByteSize(stripe_size, 1, dialect))));
-                } else
-                    stripe_layout->addWidget(new QLabel(i18n("Stripes: none")));
-                
+                if (stripes != 1)
+                    layout->addWidget(new QLabel(i18n("Stripes: %1 of %2", stripes, locale->formatByteSize(stripe_size, 1, dialect)))); 
+                else
+                    layout->addWidget(new QLabel(i18n("Stripes: none")));
             } else if (!m_lv->isThinVolume() && (!m_lv->isLvmMirrorLog() || (m_lv->isLvmMirrorLog() && m_lv->isLvmMirror()))) {
                 layout->addWidget(new QLabel(i18n("Total extents: %1", total_extents)));
                 layout->addWidget(new QLabel(i18n("Total size: %1", locale->formatByteSize(total_size, 1, dialect))));
             }
-
-            layout->addLayout(stripe_layout);
  
             if (!(m_lv->isLvmMirrorLeg() || m_lv->isLvmMirrorLog() || m_lv->isThinPoolData()))
                 layout->addWidget(new QLabel(i18n("Filesystem: %1", m_lv->getFilesystem())));
