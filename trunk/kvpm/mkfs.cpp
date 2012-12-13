@@ -36,14 +36,14 @@ MkfsDialog::MkfsDialog(LogVol *const volume, QWidget *parent) : KDialog(parent)
 {
     m_path = volume->getMapperPath();
 
-    const long stride_size = 1; // volume->getSegmentStripeSize( 0 ); <-- must convert to blocks!
-    const long stride_count = volume->getSegmentStripes(0);
+    m_stride_size = volume->getSegmentStripeSize(0);
+    m_stride_count = volume->getSegmentStripes(0);
 
     if (hasInitialErrors(volume->isMounted()))
         m_bailout = true;
     else {
         m_bailout = false;
-        buildDialog(volume->getSize(), stride_size, stride_count);
+        buildDialog(volume->getSize());
     }
 }
 
@@ -51,14 +51,14 @@ MkfsDialog::MkfsDialog(StoragePartition *const partition, QWidget *parent) : KDi
 {
     m_path = partition->getName();
 
-    const long stride_size = 1;
-    const long stride_count = 1;
+    m_stride_size = 1;
+    m_stride_count = 1;
 
     if (hasInitialErrors(partition->isMounted()))
         m_bailout = true;
     else {
         m_bailout = false;
-        buildDialog(partition->getSize(), stride_size, stride_count);
+        buildDialog(partition->getSize());
     }
 }
 
@@ -90,7 +90,7 @@ bool MkfsDialog::hasInitialErrors(const bool mounted)
     return true;
 }
 
-void MkfsDialog::buildDialog(const long long size, const long strideSize, const long strideCount)
+void MkfsDialog::buildDialog(const long long size)
 {
     QWidget *const dialog_body = new QWidget;
     QVBoxLayout *const layout = new QVBoxLayout;
@@ -104,7 +104,7 @@ void MkfsDialog::buildDialog(const long long size, const long strideSize, const 
 
     m_tab_widget = new KTabWidget(this);
     m_tab_widget->addTab(generalTab(size), i18n("Filesystem Type"));
-    m_tab_widget->addTab(advancedTab(strideSize, strideCount), i18n("Standard Ext Options"));
+    m_tab_widget->addTab(advancedTab(), i18n("Standard Ext Options"));
     m_tab_widget->addTab(ext4Tab(), i18n("Additional Ext4 Options"));
     layout->addWidget(m_tab_widget);
 
@@ -115,6 +115,9 @@ void MkfsDialog::buildDialog(const long long size, const long strideSize, const 
 
     connect(this, SIGNAL(okClicked()),
             this, SLOT(commitFilesystem()));
+
+    connect(m_block_combo, SIGNAL(currentIndexChanged(int)),
+            this, SLOT(adjustStrideEdit(int)));
 }
 
 QWidget* MkfsDialog::generalTab(const long long size)
@@ -217,7 +220,7 @@ QWidget* MkfsDialog::generalTab(const long long size)
     return tab;
 }
 
-QWidget* MkfsDialog::advancedTab(const long strideSize, const long strideCount)
+QWidget* MkfsDialog::advancedTab()
 {
     QWidget *const tab = new QWidget();
 
@@ -249,7 +252,7 @@ QWidget* MkfsDialog::advancedTab(const long strideSize, const long strideCount)
     lower_layout->addLayout(left_layout);
     lower_layout->addLayout(right_layout);
 
-    m_stripe_box = stripeBox(strideSize, strideCount);
+    m_stripe_box = stripeBox();
     right_layout->addWidget(m_stripe_box);
 
     m_misc_options_box = miscOptionsBox();
@@ -418,7 +421,7 @@ QGroupBox* MkfsDialog::ext4OptionsBox()
     return options_box;
 }
 
-QGroupBox* MkfsDialog::stripeBox(const long strideSize, const long strideCount)
+QGroupBox* MkfsDialog::stripeBox()
 {
     QGroupBox *const stripe_box = new QGroupBox(i18n("Striping"));
     stripe_box->setCheckable(true);
@@ -431,11 +434,11 @@ QGroupBox* MkfsDialog::stripeBox(const long strideSize, const long strideCount)
     QHBoxLayout *const stride_layout = new QHBoxLayout;
     label = new QLabel(i18n("Stride size in blocks: "));
     stride_layout->addWidget(label);
-    m_stride_edit = new KLineEdit(QString("%1").arg(strideSize));
+    m_stride_edit = new KLineEdit(QString("%1").arg(m_stride_size / 4096));
     label->setBuddy(m_stride_edit);
     QIntValidator *const stride_validator = new QIntValidator(m_stride_edit);
     m_stride_edit->setValidator(stride_validator);
-    stride_validator->setBottom(512);
+    stride_validator->setBottom(1);
     stride_layout->addWidget(m_stride_edit);
     stride_layout->addStretch();
     stripe_layout->addLayout(stride_layout);
@@ -443,7 +446,7 @@ QGroupBox* MkfsDialog::stripeBox(const long strideSize, const long strideCount)
     QHBoxLayout *const count_layout  = new QHBoxLayout;
     label = new QLabel(i18n("Strides per stripe: "));
     count_layout->addWidget(label);
-    m_count_edit = new KLineEdit(QString("%1").arg(strideCount));
+    m_count_edit = new KLineEdit(QString("%1").arg(m_stride_count));
     label->setBuddy(m_count_edit);
     QIntValidator *const count_validator = new QIntValidator(m_count_edit);
     m_count_edit->setValidator(count_validator);
@@ -704,4 +707,18 @@ void MkfsDialog::commitFilesystem()
 bool MkfsDialog::bailout()
 {
     return m_bailout;
+}
+
+void MkfsDialog::adjustStrideEdit(int index)
+{
+    long stride = m_stride_size;
+
+    if (index == 1)
+        stride /= 1024;
+    else if (index == 2)
+        stride /= 2048;
+    else
+        stride /= 4096;
+
+    m_stride_edit->setText(QString("%1").arg(stride));
 }

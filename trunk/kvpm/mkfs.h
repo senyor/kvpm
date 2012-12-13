@@ -37,6 +37,9 @@ class MkfsDialog : public KDialog
 {
     Q_OBJECT
 
+    long m_stride_size; // stride size is in bytes here, not fs blocks
+    int m_stride_count;
+
     KTabWidget  *m_tab_widget;
 
     QGroupBox   *m_stripe_box,       *m_base_options_box,
@@ -72,19 +75,20 @@ class MkfsDialog : public KDialog
     bool m_bailout;
 
     QWidget *generalTab(const long long size);
-    QWidget *advancedTab(const long strideSize, const long strideCount);
+    QWidget *advancedTab();
     QWidget *ext4Tab();
     QGroupBox *miscOptionsBox();
     QGroupBox *baseOptionsBox();
     QGroupBox *ext4OptionsBox();
-    QGroupBox *stripeBox(const long strideSize, const long strideCount);
+    QGroupBox *stripeBox();
     void wipeFilesystem();
     bool hasInitialErrors(const bool mounted);
-    void buildDialog(const long long size, const long strideSize, const long strideCount);
+    void buildDialog(const long long size);
 
 private slots:
     void enableOptions(bool);
     void commitFilesystem();
+    void adjustStrideEdit(int index);
 
 public:
     explicit MkfsDialog(LogVol *const volume, QWidget *parent = 0);
