@@ -58,9 +58,9 @@ class PvGroupBox: public QGroupBox
 public:
     // Note: policy needs to be passed "inherited" here for new logical volumes
     explicit PvGroupBox(QList<PhysVol *> volumes, 
-                        QList<long long> normal = QList<long long>(), 
-                        QList<long long> contiguous = QList<long long>(), 
-                        AllocationPolicy const policy = NO_POLICY, 
+                        QList<long long> normal,
+                        QList<long long> contiguous,
+                        AllocationPolicy const policy, // = NO_POLICY, 
                         bool const target = false, 
                         QWidget *parent = NULL);
 
