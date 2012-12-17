@@ -80,7 +80,7 @@ VGReduceDialog::VGReduceDialog(VolGroup *const volumeGroup, QWidget *parent) : K
         label_widget->setLayout(label_layout);
 
         layout->addWidget(label_widget);
-        m_pv_checkbox = new PvGroupBox(member_pvs);
+        m_pv_checkbox = new PvGroupBox(member_pvs, QList<long long>(), QList<long long >(), NO_POLICY);
 
         layout->addWidget(m_pv_checkbox);
         m_pv_checkbox->setTitle(i18n("Unused physical volumes"));
