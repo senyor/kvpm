@@ -444,11 +444,10 @@ QStringList ChangeMirrorDialog::arguments()
                 args << m_log_two->getUnmungedText();
         }
     } else {
-        const AllocationPolicy policy = m_pv_box->getPolicy();
+        if (m_pv_box->getPolicy() <= ANYWHERE) // don't pass INHERITED_*
+            args << "--alloc" << policyToString(m_pv_box->getEffectivePolicy());
 
-        if (policy != INHERITED)                          // "inherited" is what we get if we don't pass "--alloc" at all
-            args << "--alloc" << policyToString(policy);  // passing "--alloc" "inherited" won't work                                                           
-         args << m_pv_box->getNames();
+        args << m_pv_box->getNames();
     }
 
     return args;
@@ -522,10 +521,7 @@ void ChangeMirrorDialog::resetOkButton()
     QList <long long> available_pv_bytes = m_pv_box->getRemainingSpaceList();;
     qSort(available_pv_bytes);
 
-    AllocationPolicy policy = m_pv_box->getPolicy();
-
-    if (policy == INHERITED)
-        policy = m_lv->getVg()->getPolicy();
+    const AllocationPolicy policy = m_pv_box->getEffectivePolicy();
 
     if (policy == CONTIGUOUS) {
 
