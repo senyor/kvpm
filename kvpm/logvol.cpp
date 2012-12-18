@@ -320,7 +320,14 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)
     case 'I':
         m_alloc_locked = true;
     case 'i':
-        m_policy = INHERITED;
+        if (m_vg->getPolicy() == CLING)
+            m_policy = INHERITED_CLING;
+        else if (m_vg->getPolicy() == ANYWHERE)
+            m_policy = INHERITED_ANYWHERE;
+        else if (m_vg->getPolicy() == CONTIGUOUS)
+            m_policy = INHERITED_CONTIGUOUS;
+        else
+            m_policy = INHERITED_NORMAL;
         break;
     default:
         m_policy = NORMAL;

@@ -35,7 +35,7 @@ PvGroupBox::PvGroupBox(QList<PhysVol *> volumes, QList<long long> normal, QList<
       m_normal(normal),
       m_contiguous(contiguous)
 {
-    m_alloc_combo = NULL;
+    m_policy_combo = NULL;
 
     KConfigSkeleton skeleton;
     skeleton.setCurrentGroup("General");
@@ -383,7 +383,7 @@ QHBoxLayout *PvGroupBox::getButtons()
     return layout;
 }
 
-void PvGroupBox::addLabelsAndButtons(QGridLayout *const layout, const int pvCount, AllocationPolicy const policy)
+void PvGroupBox::addLabelsAndButtons(QGridLayout *layout, int pvCount, AllocationPolicy policy)
 {
     QVBoxLayout *const spacer1 = new QVBoxLayout;
     QVBoxLayout *const spacer2 = new QVBoxLayout;
@@ -399,79 +399,29 @@ void PvGroupBox::addLabelsAndButtons(QGridLayout *const layout, const int pvCoun
     if (pvCount > 1)
         layout->addLayout(getButtons(), count + 4, 0, 1, -1);
 
-    QWidget *const policy_box = buildPolicyBox(policy);
-    layout->addWidget(policy_box, count + 5, 0, 1, -1);
+    m_policy_combo = new PolicyComboBox(policy, policy != NO_POLICY);
+    connect(m_policy_combo,  SIGNAL(policyChanged(AllocationPolicy)), this, SLOT(setChecksToPolicy()));
+
+    layout->addWidget(m_policy_combo, count + 5, 0, 1, -1);
 
     if(policy == NO_POLICY)
-        policy_box->hide();
+        m_policy_combo->hide();
 }
 
 AllocationPolicy PvGroupBox::getPolicy()
 {
-    if (m_alloc_combo == NULL)
+    if (m_policy_combo == NULL)
         return NORMAL;
-
-    switch(m_alloc_combo->currentIndex()) {
-    case 0:
-        return NORMAL;
-        break;
-    case 1:
-        return CONTIGUOUS;
-        break;
-    case 2:
-        return CLING;
-        break;
-    case 3:
-        return ANYWHERE;
-        break;
-    case 4:
-        return INHERITED;
-        break;
-    default:
-        return NORMAL;
-    } 
+    else
+        return m_policy_combo->getPolicy();
 }
 
-QWidget* PvGroupBox::buildPolicyBox(AllocationPolicy const policy)
+AllocationPolicy PvGroupBox::getEffectivePolicy()
 {
-    QWidget *const widget = new QWidget;
-    QHBoxLayout *const layout = new QHBoxLayout;
-    widget->setLayout(layout);
-
-    AllocationPolicy vg_policy;
-    if (m_pvs.size())
-        vg_policy = m_pvs[0]->getVg()->getPolicy();
+    if (m_policy_combo == NULL)
+        return NORMAL;
     else
-        vg_policy = NORMAL;
-
-    m_alloc_combo = new KComboBox;
-    m_alloc_combo->addItem(i18n("Normal"));
-    m_alloc_combo->addItem(i18n("Contiguous"));
-    m_alloc_combo->addItem(i18n("Cling"));
-    m_alloc_combo->addItem(i18n("Anywhere"));
-
-    if (policy == NORMAL)
-        m_alloc_combo->setCurrentIndex(0);
-    else if (policy == CONTIGUOUS)
-        m_alloc_combo->setCurrentIndex(1);
-    else if (policy == CLING)
-        m_alloc_combo->setCurrentIndex(2);
-    else if (policy == ANYWHERE)
-        m_alloc_combo->setCurrentIndex(3);
-    else {
-        m_alloc_combo->addItem(i18n("Inherited (%1)", policyToString(vg_policy)));
-        m_alloc_combo->setCurrentIndex(4);
-    }
-
-    QLabel *const label = new QLabel(i18n("Allocation policy: "));
-    layout->addStretch();
-    layout->addWidget(label);
-    layout->addWidget(m_alloc_combo);
-    layout->addStretch();
-
-    connect(m_alloc_combo, SIGNAL(currentIndexChanged(int)), this, SLOT(setChecksToPolicy()));
-
-    return widget;
+        return m_policy_combo->getEffectivePolicy();
 }
 
 void PvGroupBox::setChecksToPolicy()
@@ -484,19 +434,9 @@ void PvGroupBox::setChecksToPolicy()
     else
         dialect = KLocale::IECBinaryDialect;
 
-    AllocationPolicy policy = NORMAL;
+    if (!m_pvs.isEmpty() && m_policy_combo != NULL) {
 
-    if (!m_pvs.isEmpty()) {
-        if (m_alloc_combo->currentIndex() == 4)
-            policy = m_pvs[0]->getVg()->getPolicy();
-        else if (m_alloc_combo->currentIndex() == 0)
-            policy = NORMAL;
-        else if (m_alloc_combo->currentIndex() == 1)
-            policy = CONTIGUOUS;
-        else if (m_alloc_combo->currentIndex() == 2)
-            policy = CLING;
-        else if (m_alloc_combo->currentIndex() == 3)
-            policy = ANYWHERE;
+        const AllocationPolicy policy = getEffectivePolicy();
 
         for (int x = 0; x < m_pv_checks.size(); x++) {
             if (policy == CONTIGUOUS) {
@@ -512,3 +452,4 @@ void PvGroupBox::setChecksToPolicy()
 
     calculateSpace();
 }
+

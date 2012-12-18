@@ -149,17 +149,17 @@ QWidget *LVChangeDialog::buildGeneralTab()
             m_contiguous_button->setEnabled(false);
             m_contiguous_button->setText("Contiguous (current)");
             m_normal_button->setChecked(true);
-        } else if (policy == INHERITED) {
-            m_inherit_button->setEnabled(false);
-            m_inherit_button->setText("Inherited (current)");
+        } else if (policy == CLING) {
+            m_cling_button->setEnabled(false);
+            m_cling_button->setText("Cling (current)");
             m_normal_button->setChecked(true);
         } else if (policy == ANYWHERE) {
             m_anywhere_button->setEnabled(false);
             m_anywhere_button->setText("Anywhere (current)");
             m_normal_button->setChecked(true);
-        } else if (policy == CLING) {
-            m_cling_button->setEnabled(false);
-            m_cling_button->setText("Cling (current)");
+        } else if (policy > ANYWHERE) {
+            m_inherit_button->setEnabled(false);
+            m_inherit_button->setText("Inherited (current)");
             m_normal_button->setChecked(true);
         } else {
             m_normal_button->setEnabled(false);

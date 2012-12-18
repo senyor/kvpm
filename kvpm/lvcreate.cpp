@@ -169,7 +169,7 @@ QWidget* LVCreateDialog::createPhysicalTab()
             contiguous.append(pvs[x]->getContiguous(m_lv));
         }
 
-        m_pv_box = new PvGroupBox(pvs, normal, contiguous, INHERITED);
+        m_pv_box = new PvGroupBox(pvs, normal, contiguous, INHERITED_NORMAL);
     }
 
     layout->addWidget(m_pv_box);
@@ -784,9 +784,7 @@ long long LVCreateDialog::getLargestVolume()
         log_count = 0;
     }
 
-    AllocationPolicy policy = m_pv_box->getPolicy();
-    if (policy == INHERITED)
-        policy = getVg()->getPolicy();
+    const AllocationPolicy policy = m_pv_box->getEffectivePolicy();
 
     QList <long long> stripe_pv_bytes;
     for (int x = 0; x < total_stripes; x++)
@@ -993,10 +991,8 @@ QStringList LVCreateDialog::args()
             args << "n";
     }
 
-    const QString policy = policyToString(m_pv_box->getPolicy());
-
-    if (m_pv_box->getPolicy() != INHERITED)  // "inherited" is what we get if we don't pass "--alloc" at all
-        args << "--alloc" << policy;         // passing "--alloc" "inherited" won't work
+    if (m_pv_box->getPolicy() <= ANYWHERE) // don't pass INHERITED_*
+        args << "--alloc" << policyToString(m_pv_box->getEffectivePolicy());
 
     if (m_extend)
         extents -= m_lv->getExtents();
@@ -1224,10 +1220,7 @@ void LVCreateDialog::commit()
 int LVCreateDialog::getMaxStripes()
 {
     int stripes = m_pv_box->getAllNames().size();
-    AllocationPolicy policy = m_pv_box->getPolicy();
-
-    if (policy == INHERITED)
-        policy = getVg()->getPolicy();
+    AllocationPolicy policy = m_pv_box->getEffectivePolicy();
 
     if (m_extend && (policy == CONTIGUOUS)){
         if (m_lv->isLvmMirror()){

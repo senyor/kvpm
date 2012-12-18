@@ -28,6 +28,7 @@
 #include <QStringList>
 #include <QVariant>
 
+#include "allocationpolicy.h"
 #include "misc.h"
 
 class PhysVol;
@@ -50,17 +51,16 @@ class PvGroupBox: public QGroupBox
     QLabel *m_space_label, *m_extents_label;
     uint64_t m_extent_size;
     QHBoxLayout *getButtons();
-    KComboBox *m_alloc_combo;
+    PolicyComboBox *m_policy_combo;
 
     void addLabelsAndButtons(QGridLayout *const layout, const int pvCount, AllocationPolicy const policy);
-    QWidget *buildPolicyBox(AllocationPolicy const policy);
 
 public:
     // Note: policy needs to be passed "inherited" here for new logical volumes
     explicit PvGroupBox(QList<PhysVol *> volumes, 
                         QList<long long> normal,
                         QList<long long> contiguous,
-                        AllocationPolicy const policy, // = NO_POLICY, 
+                        AllocationPolicy const policy,
                         bool const target = false, 
                         QWidget *parent = NULL);
 
@@ -76,6 +76,7 @@ public:
     void setExtentSize(uint64_t extentSize);
     void disableOrigin(PhysVol *originVolume); // disable origin to prevent move from and to same pv
     AllocationPolicy getPolicy();
+    AllocationPolicy getEffectivePolicy();  // convert inherited policy to the vg default policy
 
 signals:
     void stateChanged();

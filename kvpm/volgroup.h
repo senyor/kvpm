@@ -20,6 +20,7 @@
 
 #include <QStringList>
 
+#include "allocationpolicy.h"
 #include "misc.h"
 
 class QWidget;

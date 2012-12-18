@@ -170,10 +170,8 @@ QStringList RepairMissingDialog::arguments()
 
     args << "lvconvert" << "--repair" << "-y";  // -y: answer all prompts with "yes"
 
-    const AllocationPolicy policy = m_pv_box->getPolicy();
-
-    if (policy != INHERITED)                          // "inherited" is what we get if we don't pass "--alloc" at all
-        args << "--alloc" << policyToString(policy);  // passing "--alloc" "inherited" won't work 
+    if (m_pv_box->getPolicy() <= ANYWHERE) // don't pass INHERITED_*
+        args << "--alloc" << policyToString(m_pv_box->getEffectivePolicy());
 
     if (!m_replace_box->isChecked())
         args << "-f" << m_lv->getFullName();  // no replace

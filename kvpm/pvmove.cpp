@@ -371,10 +371,8 @@ QStringList PVMoveDialog::arguments()
         args << m_lv->getFullName();
     }
 
-    AllocationPolicy const policy = m_pv_box->getPolicy();
-
-    if (policy != INHERITED)                          // "inherited" is what we get if we don't pass "--alloc" at all  
-        args << "--alloc" << policyToString(policy);  // passing "--alloc" "inherited" won't work
+    if (m_pv_box->getPolicy() <= ANYWHERE) // don't pass INHERITED_*
+        args << "--alloc" << policyToString(m_pv_box->getEffectivePolicy());
 
     if (m_sources.size() > 1) {
         for (int x = m_sources.size() - 1; x >= 0; x--) {

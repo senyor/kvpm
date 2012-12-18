@@ -22,15 +22,6 @@
 
 
 typedef enum {
-    NO_POLICY  = 0,
-    NORMAL     = 1,
-    CONTIGUOUS = 2,
-    CLING      = 3,
-    ANYWHERE   = 4,
-    INHERITED  = 5
-} AllocationPolicy;
-
-typedef enum {
     LINEAR    = 0,
     LVMMIRROR = 1,
     RAID1     = 2,
@@ -41,7 +32,6 @@ typedef enum {
 } VolumeType;
 
 
-QString policyToString(AllocationPolicy policy);
 QStringList splitUuid(QString const uuid);
 bool isBusy(const QString device);
 

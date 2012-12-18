@@ -218,11 +218,9 @@ QFrame *LVProperties::generalFrame(int segment)
     else
         dialect = KLocale::IECBinaryDialect;
 
-    QString policy = policyToString(m_lv->getPolicy());
+    QString policy = policyToLocalString(m_lv->getPolicy());
     if (m_lv->isLocked()) {
-        policy.append(" (");
-        policy.append(i18n("locked"));
-        policy.append(")");
+        policy.append(i18n(", locked"));
     }
 
     if (m_lv->isThinPool() || m_lv->isSnapContainer()) {

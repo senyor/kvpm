@@ -125,7 +125,7 @@ VGInfoLabels::VGInfoLabels(VolGroup *const group, QWidget *parent) : QFrame(pare
     free_label = new QLabel(i18nc("Space not used", "Free: %1", locale->formatByteSize(group->getFreeSpace(), 1, dialect)));
     size_label = new QLabel(i18nc("Total space on device", "Total: %1", locale->formatByteSize(group->getSize(), 1, dialect)));
     lvm_fmt_label   = new QLabel(i18n("Format: %1", group->getFormat()));
-    policy_label    = new QLabel(i18n("Policy: %1", policyToString(group->getPolicy())));
+    policy_label    = new QLabel(i18n("Policy: %1", policyToLocalString(group->getPolicy())));
     resizable_label = new QLabel(i18n("Resizable: %1", resizable));
     clustered_label = new QLabel(i18n("Clustered: %1", clustered));
     allocatable_label = new QLabel(i18n("Allocatable: %1", locale->formatByteSize(group->getAllocatableSpace(), 1, dialect)));

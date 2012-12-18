@@ -137,28 +137,3 @@ bool isBusy(const QString device)
     return false;
 }
 
-QString policyToString(AllocationPolicy policy)
-{
-    switch(policy) {
-    case NO_POLICY:
-        return QString("");
-        break;
-    case NORMAL:
-        return QString("normal");
-        break;
-    case CONTIGUOUS:
-        return QString("contiguous");
-        break;
-    case CLING:
-        return QString("cling");
-        break;
-    case ANYWHERE:
-        return QString("anywhere");
-        break;
-    case INHERITED:
-        return QString("inherited");
-        break;
-    default:
-        return QString("normal");
-    } 
-}
