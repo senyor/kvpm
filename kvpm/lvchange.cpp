@@ -15,6 +15,7 @@
 
 #include "lvchange.h"
 
+#include "allocationpolicy.h"
 #include "logvol.h"
 #include "processprogress.h"
 
@@ -41,7 +42,6 @@ LVChangeDialog::LVChangeDialog(LogVol *const volume, QWidget *parent) :
     QWidget *const dialog_body = new QWidget();
     setMainWidget(dialog_body);
     QVBoxLayout *const layout = new QVBoxLayout;
-    dialog_body->setLayout(layout);
 
     QLabel *const name = new QLabel(i18n("<b>Change volume: %1</b>", m_lv->getName()));
     name->setAlignment(Qt::AlignCenter);
@@ -54,13 +54,14 @@ LVChangeDialog::LVChangeDialog(LogVol *const volume, QWidget *parent) :
     layout->addWidget(tab_widget);
     tab_widget->addTab(buildGeneralTab(),  i18nc("The standard or basic options", "General"));
     tab_widget->addTab(buildAdvancedTab(), i18nc("Less used or complex options", "Advanced"));
+    layout->addStretch();
+    dialog_body->setLayout(layout);
 
     connect(m_available_check,   SIGNAL(clicked()), this, SLOT(resetOkButton()));
     connect(m_ro_check,          SIGNAL(clicked()), this, SLOT(resetOkButton()));
     connect(m_refresh_check,     SIGNAL(clicked()), this, SLOT(resetOkButton()));
     connect(m_udevsync_check,    SIGNAL(clicked()), this, SLOT(resetOkButton()));
     connect(m_persistent_check,  SIGNAL(clicked()), this, SLOT(resetOkButton()));
-    connect(m_tag_group,         SIGNAL(clicked()), this, SLOT(resetOkButton()));
     connect(m_deltag_combo, SIGNAL(currentIndexChanged(int)), this, SLOT(resetOkButton()));
     connect(m_tag_edit,     SIGNAL(userTextChanged(QString)), this, SLOT(resetOkButton()));
     connect(m_polling_box,       SIGNAL(clicked()), this, SLOT(resetOkButton()));
@@ -102,16 +103,14 @@ QWidget *LVChangeDialog::buildGeneralTab()
     if (!m_lv->isWritable())
         m_ro_check->setChecked(true);
 
-    m_tag_group = new QGroupBox(i18n("Change Volume Tags"));
-    m_tag_group->setCheckable(true);
-    m_tag_group->setChecked(false);
-    layout->addWidget(m_tag_group);
+    QGroupBox *const tag_group = new QGroupBox(i18n("Volume Tags"));
+    layout->addWidget(tag_group);
     QHBoxLayout *add_tag_layout = new QHBoxLayout();
     QHBoxLayout *del_tag_layout = new QHBoxLayout();
     QVBoxLayout *tag_group_layout = new QVBoxLayout();
     tag_group_layout->addLayout(add_tag_layout);
     tag_group_layout->addLayout(del_tag_layout);
-    m_tag_group->setLayout(tag_group_layout);
+    tag_group->setLayout(tag_group_layout);
     QLabel *const add_tag_label = new QLabel(i18n("Add new tag:"));
     add_tag_layout->addWidget(add_tag_label);
     m_tag_edit = new KLineEdit();
@@ -133,56 +132,11 @@ QWidget *LVChangeDialog::buildGeneralTab()
     del_tag_layout->addWidget(m_deltag_combo);
 
     if (!m_lv->isThinVolume()) {
-        m_alloc_box = new QGroupBox(i18n("Change Allocation Policy"));
-        m_alloc_box->setCheckable(true);
-        m_alloc_box->setChecked(false);
-        QVBoxLayout *alloc_box_layout = new QVBoxLayout;
-        m_normal_button     = new QRadioButton(i18nc("The usual way", "Normal"));
-        m_contiguous_button = new QRadioButton(i18n("Contiguous"));
-        m_anywhere_button   = new QRadioButton(i18n("Anywhere"));
-        m_cling_button      = new QRadioButton(i18n("Cling"));
-        m_inherit_button    = new QRadioButton(i18nc("Inherited from the parent group", "Inherited"));
-        
-        AllocationPolicy policy = m_lv->getPolicy();
-
-        if (policy == CONTIGUOUS) {
-            m_contiguous_button->setEnabled(false);
-            m_contiguous_button->setText("Contiguous (current)");
-            m_normal_button->setChecked(true);
-        } else if (policy == CLING) {
-            m_cling_button->setEnabled(false);
-            m_cling_button->setText("Cling (current)");
-            m_normal_button->setChecked(true);
-        } else if (policy == ANYWHERE) {
-            m_anywhere_button->setEnabled(false);
-            m_anywhere_button->setText("Anywhere (current)");
-            m_normal_button->setChecked(true);
-        } else if (policy > ANYWHERE) {
-            m_inherit_button->setEnabled(false);
-            m_inherit_button->setText("Inherited (current)");
-            m_normal_button->setChecked(true);
-        } else {
-            m_normal_button->setEnabled(false);
-            m_normal_button->setText("Normal (current)");
-            m_cling_button->setChecked(true);
-        }
-        
-        alloc_box_layout->addWidget(m_normal_button);
-        alloc_box_layout->addWidget(m_contiguous_button);
-        alloc_box_layout->addWidget(m_anywhere_button);
-        alloc_box_layout->addWidget(m_cling_button);
-        alloc_box_layout->addWidget(m_inherit_button);
-        m_alloc_box->setLayout(alloc_box_layout);
-        layout->addWidget(m_alloc_box);
-        
-        connect(m_alloc_box,         SIGNAL(clicked()), this, SLOT(resetOkButton()));
-        connect(m_normal_button,     SIGNAL(clicked()), this, SLOT(resetOkButton()));
-        connect(m_contiguous_button, SIGNAL(clicked()), this, SLOT(resetOkButton()));
-        connect(m_anywhere_button,   SIGNAL(clicked()), this, SLOT(resetOkButton()));
-        connect(m_cling_button,      SIGNAL(clicked()), this, SLOT(resetOkButton()));
-        connect(m_inherit_button,    SIGNAL(clicked()), this, SLOT(resetOkButton()));
+        m_policy_combo = new PolicyComboBox(m_lv->getPolicy(), true);
+        general_layout->addWidget(m_policy_combo);
+        connect(m_policy_combo,         SIGNAL(policyChanged(AllocationPolicy)), this, SLOT(resetOkButton()));
     } else {
-        m_alloc_box = NULL;
+        m_policy_combo = NULL;
     }
 
     return tab;
@@ -338,27 +292,14 @@ QStringList LVChangeDialog::arguments()
     if (!m_udevsync_check->isChecked())
         args << "--noudevsync";
 
-    if (m_tag_group->isChecked()) {
-        if (m_deltag_combo->currentIndex())
-            args << "--deltag" << m_deltag_combo->currentText();
-        if (!(m_tag_edit->text()).isEmpty())
-            args << "--addtag" << m_tag_edit->text();
-    }
+    if (m_deltag_combo->currentIndex())
+        args << "--deltag" << m_deltag_combo->currentText();
+    if (!(m_tag_edit->text()).isEmpty())
+        args << "--addtag" << m_tag_edit->text();
 
-    if (m_alloc_box != NULL) {
-        if (m_alloc_box->isChecked()) {
-            args << "--alloc";
-            if (m_contiguous_button->isChecked())
-                args << "contiguous";
-            else if (m_anywhere_button->isChecked())
-                args << "anywhere";
-            else if (m_cling_button->isChecked())
-                args << "cling";
-            else if (m_inherit_button->isChecked())
-                args << "inherit";
-            else
-                args << "normal";
-        }
+    if (m_policy_combo != NULL) {
+        if (m_lv->getPolicy() != m_policy_combo->getPolicy())
+            args << "--alloc" << policyToString(m_policy_combo->getPolicy());
     }
 
     args << m_lv->getFullName();

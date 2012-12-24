@@ -29,10 +29,10 @@ typedef enum {
     CONTIGUOUS = 2,
     CLING      = 3,
     ANYWHERE   = 4,
-    INHERITED_NORMAL     = 5,  // Don't change order, INHERITED_* must be after other policies 
-    INHERITED_CONTIGUOUS = 6,
-    INHERITED_CLING      = 7,
-    INHERITED_ANYWHERE   = 8,
+    INHERIT_NORMAL     = 5,  // Don't change order, INHERIT_* must be after other policies 
+    INHERIT_CONTIGUOUS = 6,
+    INHERIT_CLING      = 7,
+    INHERIT_ANYWHERE   = 8,
 } AllocationPolicy;
 
 
