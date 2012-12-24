@@ -28,6 +28,7 @@ class QGroupBox;
 class QRadioButton;
 
 class LogVol;
+class PolicyComboBox;
 
 
 class LVChangeDialog : public KDialog
@@ -35,6 +36,7 @@ class LVChangeDialog : public KDialog
     Q_OBJECT
 
     LogVol *m_lv;
+    PolicyComboBox *m_policy_combo;
 
     QCheckBox *m_available_check,    // Make the volume available
               *m_ro_check,           // make the volume read only
@@ -42,12 +44,6 @@ class LVChangeDialog : public KDialog
               *m_resync_check,       // re-sync mirrors
               *m_udevsync_check,     // sync with udev
               *m_persistent_check;   // Set persistent kernel device numbers
-
-    QRadioButton *m_normal_button,      // allocation policy
-                 *m_contiguous_button,
-                 *m_inherit_button,
-                 *m_anywhere_button,
-                 *m_cling_button;
 
     QRadioButton *m_poll_button,
                  *m_nopoll_button,
@@ -57,9 +53,7 @@ class LVChangeDialog : public KDialog
 
     QGroupBox *m_devnum_box,
               *m_dmeventd_box,
-              *m_polling_box,
-              *m_tag_group,
-              *m_alloc_box;
+              *m_polling_box;
 
     KLineEdit *m_minor_edit,  // User entered device minor number
               *m_major_edit,  // User entered device major number

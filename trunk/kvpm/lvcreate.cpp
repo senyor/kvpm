@@ -169,7 +169,7 @@ QWidget* LVCreateDialog::createPhysicalTab()
             contiguous.append(pvs[x]->getContiguous(m_lv));
         }
 
-        m_pv_box = new PvGroupBox(pvs, normal, contiguous, INHERITED_NORMAL);
+        m_pv_box = new PvGroupBox(pvs, normal, contiguous, INHERIT_NORMAL);
     }
 
     layout->addWidget(m_pv_box);
@@ -991,7 +991,7 @@ QStringList LVCreateDialog::args()
             args << "n";
     }
 
-    if (m_pv_box->getPolicy() <= ANYWHERE) // don't pass INHERITED_*
+    if (m_pv_box->getPolicy() <= ANYWHERE) // don't pass INHERIT_*
         args << "--alloc" << policyToString(m_pv_box->getEffectivePolicy());
 
     if (m_extend)
