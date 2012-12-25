@@ -15,6 +15,7 @@
 
 #include "vgchange.h"
 
+#include "allocationpolicy.h"
 #include "logvol.h"
 #include "misc.h"
 #include "processprogress.h"
@@ -52,42 +53,31 @@ VGChangeDialog::VGChangeDialog(VolGroup *const volumeGroup, QWidget *parent)
     layout->addWidget(name_label);
     layout->addSpacing(5);
 
-    QGroupBox *const upper_box = new QGroupBox();
-    QHBoxLayout *const upper_layout = new QHBoxLayout();
-    QVBoxLayout *const upper_left_layout = new QVBoxLayout();
-    QGroupBox *const alloc_box = new QGroupBox(i18n("Allocation policy"));
-    QVBoxLayout *const alloc_layout = new QVBoxLayout();
-    upper_box->setLayout(upper_layout);
-    alloc_box->setLayout(alloc_layout);
-    upper_layout->addLayout(upper_left_layout);
-    upper_left_layout->addWidget(alloc_box);
-    layout->addWidget(upper_box);
+    QGroupBox *const misc_box = new QGroupBox();
+    QVBoxLayout *const misc_layout = new QVBoxLayout();
+    misc_box->setLayout(misc_layout);
+    layout->addWidget(misc_box);
+    m_resize = new QCheckBox(i18n("Allow physical volume addition and removal"));
+    m_resize->setChecked(m_vg->isResizable());
+    misc_layout->addWidget(m_resize);
+    m_clustered = new QCheckBox(i18n("Cluster aware"));
+    m_clustered->setChecked(m_vg->isClustered());
+    misc_layout->addWidget(m_clustered);
+    m_refresh = new QCheckBox(i18n("Refresh metadata"));
+    misc_layout->addWidget(m_refresh);
 
-    m_normal     = new QRadioButton(i18nc("The usual way", "Normal"));
-    m_contiguous = new QRadioButton(i18n("Contiguous"));
-    m_anywhere   = new QRadioButton(i18n("Anwhere"));
-    m_cling      = new QRadioButton(i18n("Cling"));
+    m_uuid = new QCheckBox(i18n("Generate new UUID fo group"));
+    if (m_vg->isActive())
+        m_uuid->setEnabled(false);
+    misc_layout->addWidget(m_uuid);
+
     AllocationPolicy const policy = m_vg->getPolicy();
-    if (policy == CONTIGUOUS)
-        m_contiguous->setChecked(true);
-    else if (policy == ANYWHERE)
-        m_anywhere->setChecked(true);
-    else if (policy == CLING)
-        m_cling->setChecked(true);
-    else
-        m_normal->setChecked(true);
-    alloc_layout->addWidget(m_normal);
-    alloc_layout->addWidget(m_contiguous);
-    alloc_layout->addWidget(m_anywhere);
-    alloc_layout->addWidget(m_cling);
+    m_policy_combo = new PolicyComboBox(policy);
+    QHBoxLayout *const policy_layout = new QHBoxLayout();
+    policy_layout->addWidget(m_policy_combo);
+    policy_layout->addStretch();
+    misc_layout->addLayout(policy_layout);
 
-    QGroupBox *extent_box = new QGroupBox(i18n("Extent size"));
-    QVBoxLayout *extent_layout = new QVBoxLayout();
-    extent_box->setLayout(extent_layout);
-
-    extent_layout->addStretch();
-    upper_left_layout->addWidget(extent_box);
-    upper_left_layout->addStretch();
 
     m_extent_size_combo = new KComboBox();
     m_extent_size_combo->insertItem(0, "1");
@@ -126,39 +116,27 @@ VGChangeDialog::VGChangeDialog(VolGroup *const volumeGroup, QWidget *parent)
             m_extent_size_combo->setCurrentIndex(x);
     }
 
-    QHBoxLayout *combo_layout = new QHBoxLayout();
-    extent_layout->addLayout(combo_layout);
-    extent_layout->addStretch();
-
+    QHBoxLayout *const combo_layout = new QHBoxLayout();
+    combo_layout->addWidget(new QLabel(i18n("Extent size:")));
     combo_layout->addWidget(m_extent_size_combo);
     combo_layout->addWidget(m_extent_suffix_combo);
+    combo_layout->addStretch();
+    misc_layout->addLayout(combo_layout);
 
     connect(m_extent_suffix_combo, SIGNAL(activated(int)),
             this, SLOT(limitExtentSize(int)));
 
-    QGroupBox *misc_box = new QGroupBox();
-    QVBoxLayout *misc_layout = new QVBoxLayout();
-    misc_box->setLayout(misc_layout);
-    upper_layout->addWidget(misc_box);
-    m_resize = new QCheckBox(i18n("Allow physical volume addition and removal"));
-    m_resize->setChecked(m_vg->isResizable());
-    misc_layout->addWidget(m_resize);
-    m_clustered = new QCheckBox(i18n("Cluster aware"));
-    m_clustered->setChecked(m_vg->isClustered());
-    misc_layout->addWidget(m_clustered);
-    m_refresh = new QCheckBox(i18n("Refresh metadata"));
-    misc_layout->addWidget(m_refresh);
 
-    m_uuid = new QCheckBox(i18n("Generate new UUID fo group"));
-    if (m_vg->isActive())
-        m_uuid->setEnabled(false);
-    misc_layout->addWidget(m_uuid);
 
-    QHBoxLayout *middle_layout = new QHBoxLayout();
+
+
+
+
+    QHBoxLayout *const middle_layout = new QHBoxLayout();
     layout->addLayout(middle_layout);
 
     m_available_box = new QGroupBox("Change group availability");
-    QVBoxLayout *available_layout = new QVBoxLayout();
+    QVBoxLayout *const available_layout = new QVBoxLayout();
     m_available_yes = new QRadioButton(i18n("Make all logical volumes available"));
     m_available_no = new QRadioButton(i18n("Make all logical volumes unavailable"));
     m_available_yes->setChecked(true);
@@ -275,10 +253,6 @@ VGChangeDialog::VGChangeDialog(VolGroup *const volumeGroup, QWidget *parent)
 
     layout->addWidget(m_limit_box);
 
-    connect(m_normal,        SIGNAL(clicked()), this, SLOT(resetOkButton()));
-    connect(m_cling,         SIGNAL(clicked()), this, SLOT(resetOkButton()));
-    connect(m_anywhere,      SIGNAL(clicked()), this, SLOT(resetOkButton()));
-    connect(m_contiguous,    SIGNAL(clicked()), this, SLOT(resetOkButton()));
     connect(m_available_yes, SIGNAL(clicked()), this, SLOT(resetOkButton()));
     connect(m_available_no,  SIGNAL(clicked()), this, SLOT(resetOkButton()));
     connect(m_polling_yes,   SIGNAL(clicked()), this, SLOT(resetOkButton()));
@@ -294,6 +268,7 @@ VGChangeDialog::VGChangeDialog(VolGroup *const volumeGroup, QWidget *parent)
     connect(m_max_pvs_spin,  SIGNAL(valueChanged(int)), this, SLOT(resetOkButton()));
     connect(m_extent_size_combo,   SIGNAL(currentIndexChanged(int)), this, SLOT(resetOkButton()));
     connect(m_extent_suffix_combo, SIGNAL(currentIndexChanged(int)), this, SLOT(resetOkButton()));
+    connect(m_policy_combo,  SIGNAL(policyChanged(AllocationPolicy)), this, SLOT(resetOkButton()));
 
     connect(this, SIGNAL(okClicked()), this, SLOT(commitChanges()));
 
@@ -312,20 +287,10 @@ void VGChangeDialog::commitChanges()
 
 QStringList VGChangeDialog::arguments()
 {
-    AllocationPolicy new_policy;
     QStringList args = QStringList() << "vgchange";
 
-    if (m_contiguous->isChecked())
-        new_policy = CONTIGUOUS;
-    else if (m_anywhere->isChecked())
-        new_policy = ANYWHERE;
-    else if (m_cling->isChecked())
-        new_policy = CLING;
-    else
-        new_policy = NORMAL;
-
-    if (m_vg->getPolicy() != new_policy)
-        args << "--alloc" << policyToString(new_policy);
+    if (m_vg->getPolicy() != m_policy_combo->getPolicy())
+        args << "--alloc" << policyToString(m_policy_combo->getPolicy());
 
     if (m_available_box->isChecked()) {
         if (m_available_yes->isChecked())
@@ -404,7 +369,6 @@ void VGChangeDialog::resetOkButton()
 
 void VGChangeDialog::limitExtentSize(int index)
 {
-
     int extent_index;
 
     if (index > 1) {  // Gigabytes selected as suffix, more than 2Gib forbidden

@@ -117,10 +117,8 @@ PolicyComboBox::PolicyComboBox(AllocationPolicy policy, AllocationPolicy vgpolic
         m_combo->setCurrentIndex(0);
 
     QHBoxLayout *const layout = new QHBoxLayout;
-    layout->addStretch();
     layout->addWidget(label);
     layout->addWidget(m_combo);
-    layout->addStretch();
 
     connect(m_combo, SIGNAL(currentIndexChanged(int)),
             this, SLOT(emitNewPolicy()));
