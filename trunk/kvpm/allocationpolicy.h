@@ -46,15 +46,15 @@ class PolicyComboBox: public QWidget
 
 private:
     KComboBox *m_combo;
+    AllocationPolicy m_vg_policy;
 
 public:
-    explicit PolicyComboBox(const AllocationPolicy policy, const bool canInherit = true, QWidget *parent = NULL);
+    explicit PolicyComboBox(const AllocationPolicy policy, const AllocationPolicy vgpolicy = NO_POLICY, QWidget *parent = NULL);
     AllocationPolicy getEffectivePolicy();
     AllocationPolicy getPolicy();
-    AllocationPolicy getPolicy(const int index);
 
 private slots:
-    void emitNewPolicy(const int index);
+    void emitNewPolicy();
 
 signals:
     void policyChanged(AllocationPolicy policy);

@@ -303,7 +303,7 @@ QWidget *ChangeMirrorDialog::buildPhysicalTab(const bool isRaidMirror)
             contiguous.append(unused_pvs[x]->getContiguous());
     }
 
-    m_pv_box = new PvGroupBox(unused_pvs, normal, contiguous, m_lv->getPolicy());
+    m_pv_box = new PvGroupBox(unused_pvs, normal, contiguous, m_lv->getPolicy(), m_lv->getVg()->getPolicy());
     physical_layout->addWidget(m_pv_box);
     physical_layout->addStretch();
 

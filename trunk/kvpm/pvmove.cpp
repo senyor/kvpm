@@ -259,7 +259,7 @@ void PVMoveDialog::buildDialog()
         contiguous.append(m_target_pvs[x]->getContiguous());
     }
 
-    m_pv_box = new PvGroupBox(m_target_pvs, normal, contiguous, m_vg->getPolicy(), true);
+    m_pv_box = new PvGroupBox(m_target_pvs, normal, contiguous, m_vg->getPolicy(), NO_POLICY, true);
     lower_layout->addWidget(m_pv_box);
 
     const int radio_count = m_sources.size();

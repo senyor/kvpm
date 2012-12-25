@@ -53,7 +53,7 @@ class PvGroupBox: public QGroupBox
     QHBoxLayout *getButtons();
     PolicyComboBox *m_policy_combo;
 
-    void addLabelsAndButtons(QGridLayout *const layout, const int pvCount, AllocationPolicy const policy);
+    void addLabelsAndButtons(QGridLayout *const layout, const int pvCount, AllocationPolicy const policy, AllocationPolicy const vgpolicy);
 
 public:
     // Note: policy needs to be passed "inherited" here for new logical volumes
@@ -61,6 +61,7 @@ public:
                         QList<long long> normal,
                         QList<long long> contiguous,
                         AllocationPolicy const policy,
+                        AllocationPolicy const vgpolicy,   // this is only used for lvs, to pass the policy to inherit, if needed
                         bool const target = false, 
                         QWidget *parent = NULL);
 

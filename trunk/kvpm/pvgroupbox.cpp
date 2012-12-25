@@ -29,7 +29,7 @@
 
 
 PvGroupBox::PvGroupBox(QList<PhysVol *> volumes, QList<long long> normal, QList<long long> contiguous, 
-                       AllocationPolicy const policy, bool const target, QWidget *parent)
+                       AllocationPolicy policy, AllocationPolicy vgpolicy, bool target, QWidget *parent)
     : QGroupBox(parent),
       m_pvs(volumes),
       m_normal(normal),
@@ -78,7 +78,7 @@ PvGroupBox::PvGroupBox(QList<PhysVol *> volumes, QList<long long> normal, QList<
         QLabel *pv_label = new QLabel(m_pvs[0]->getName() + "  " + locale->formatByteSize(m_pvs[0]->getRemaining(), 1, dialect));
         layout->addWidget(pv_label, 0, 0, 1, -1);
 
-        addLabelsAndButtons(layout, pv_check_count, policy);
+        addLabelsAndButtons(layout, pv_check_count, policy, vgpolicy);
         calculateSpace();
     } else {
         m_extent_size = m_pvs[0]->getVg()->getExtentSize();
@@ -100,7 +100,7 @@ PvGroupBox::PvGroupBox(QList<PhysVol *> volumes, QList<long long> normal, QList<
         }
 
         selectAll();
-        addLabelsAndButtons(layout, pv_check_count, policy);
+        addLabelsAndButtons(layout, pv_check_count, policy, vgpolicy);
     }
 
     setChecksToPolicy();
@@ -154,7 +154,7 @@ PvGroupBox::PvGroupBox(QList <StorageDevice *> devices, QList<StoragePartition *
         }
         QLabel *pv_label = new QLabel(name + "  " + locale->formatByteSize(size, 1, dialect));
         layout->addWidget(pv_label, 0, 0, 1, -1);
-        addLabelsAndButtons(layout, pv_check_count, NO_POLICY);
+        addLabelsAndButtons(layout, pv_check_count, NO_POLICY, NO_POLICY);
 
         calculateSpace();
     } else {
@@ -198,7 +198,7 @@ PvGroupBox::PvGroupBox(QList <StorageDevice *> devices, QList<StoragePartition *
         }
 
         selectAll();
-        addLabelsAndButtons(layout, pv_check_count, NO_POLICY);
+        addLabelsAndButtons(layout, pv_check_count, NO_POLICY, NO_POLICY);
 
         setExtentSize(extentSize);
     }
@@ -383,7 +383,7 @@ QHBoxLayout *PvGroupBox::getButtons()
     return layout;
 }
 
-void PvGroupBox::addLabelsAndButtons(QGridLayout *layout, int pvCount, AllocationPolicy policy)
+void PvGroupBox::addLabelsAndButtons(QGridLayout *layout, int pvCount, AllocationPolicy policy, AllocationPolicy vgpolicy)
 {
     QVBoxLayout *const spacer1 = new QVBoxLayout;
     QVBoxLayout *const spacer2 = new QVBoxLayout;
@@ -399,7 +399,7 @@ void PvGroupBox::addLabelsAndButtons(QGridLayout *layout, int pvCount, Allocatio
     if (pvCount > 1)
         layout->addLayout(getButtons(), count + 4, 0, 1, -1);
 
-    m_policy_combo = new PolicyComboBox(policy, policy != NO_POLICY);
+    m_policy_combo = new PolicyComboBox(policy, vgpolicy);
     connect(m_policy_combo,  SIGNAL(policyChanged(AllocationPolicy)), this, SLOT(setChecksToPolicy()));
 
     layout->addWidget(m_policy_combo, count + 5, 0, 1, -1);
