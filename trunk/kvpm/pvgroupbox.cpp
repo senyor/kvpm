@@ -401,8 +401,12 @@ void PvGroupBox::addLabelsAndButtons(QGridLayout *layout, int pvCount, Allocatio
 
     m_policy_combo = new PolicyComboBox(policy, vgpolicy);
     connect(m_policy_combo,  SIGNAL(policyChanged(AllocationPolicy)), this, SLOT(setChecksToPolicy()));
+    QHBoxLayout *const policy_layout = new QHBoxLayout;
+    policy_layout->addStretch();
+    policy_layout->addWidget(m_policy_combo);
+    policy_layout->addStretch();
 
-    layout->addWidget(m_policy_combo, count + 5, 0, 1, -1);
+    layout->addLayout(policy_layout, count + 5, 0, 1, -1);
 
     if(policy == NO_POLICY)
         m_policy_combo->hide();

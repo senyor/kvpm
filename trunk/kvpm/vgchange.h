@@ -27,6 +27,7 @@ class QCheckBox;
 class QGroupBox;
 
 class VolGroup;
+class PolicyComboBox;
 
 class VGChangeDialog : public KDialog
 {
@@ -34,21 +35,21 @@ class VGChangeDialog : public KDialog
 
     VolGroup *m_vg;
     QString m_vg_name;
-    QRadioButton *m_normal, *m_contiguous, *m_anywhere, *m_cling,
-                 *m_available_yes, *m_available_no, *m_polling_yes, *m_polling_no;
+    QRadioButton *m_available_yes, *m_available_no, *m_polling_yes, *m_polling_no;
 
     QCheckBox *m_resize, *m_clustered, *m_refresh, *m_uuid;
     KComboBox *m_extent_size_combo, *m_extent_suffix_combo;
     QGroupBox *m_limit_box, *m_lvlimit_box, *m_pvlimit_box, *m_available_box, *m_polling_box;
     KIntSpinBox  *m_max_lvs_spin, *m_max_pvs_spin;
+    PolicyComboBox *m_policy_combo;
     QStringList arguments();
 
 public:
-    explicit VGChangeDialog(VolGroup *const volumeGroup, QWidget *parent = 0);
+    explicit VGChangeDialog(VolGroup *const volumeGroup, QWidget *parent = NULL);
     bool bailout();
 
 private slots:
-    void limitExtentSize(int index);
+    void limitExtentSize(const int index);
     void resetOkButton();
     void commitChanges();
 
