@@ -223,7 +223,7 @@ QFrame *LVProperties::generalFrame(int segment)
         policy.append(i18n(", locked"));
     }
 
-    if (m_lv->isThinPool() || m_lv->isSnapContainer()) {
+    if (m_lv->isThinPool()) {
         total_extents = m_lv->getTotalSize() / extent_size;
         total_size = m_lv->getTotalSize();
         layout->addWidget(new QLabel(i18n("Total Extents: %1", total_extents)));
@@ -234,21 +234,20 @@ QFrame *LVProperties::generalFrame(int segment)
         else
             layout->addWidget(new QLabel(i18n("Access: r/o")));
 
-        if (m_lv->isThinPool())
-            layout->addWidget(new QLabel(i18n("Chunk Size: %1", locale->formatByteSize(m_lv->getChunkSize(0), 1, dialect))));
+        layout->addWidget(new QLabel(i18n("Chunk Size: %1", locale->formatByteSize(m_lv->getChunkSize(0), 1, dialect))));
 
-        if (m_lv->isThinVolume() || m_lv->isThinPool()) {
-            if (m_lv->willZero())
-                layout->addWidget(new QLabel(i18n("Zero new blocks: Yes")));
-            else
-                layout->addWidget(new QLabel(i18n("Zero new blocks: No")));
+        if (m_lv->willZero())
+            layout->addWidget(new QLabel(i18n("Zero new blocks: Yes")));
+        else
+            layout->addWidget(new QLabel(i18n("Zero new blocks: No")));
             
-            layout->addWidget(new QLabel(i18n("Discards: %1", m_lv->getDiscards(0))));
-        }
-
-        if (!m_lv->isThinVolume())
-            layout->addWidget(new QLabel(i18n("Policy: %1", policy)));
-
+        layout->addWidget(new QLabel(i18n("Discards: %1", m_lv->getDiscards(0))));
+        layout->addWidget(new QLabel(i18n("Policy: %1", policy)));
+    } else if (m_lv->isSnapContainer()) {
+        total_extents = m_lv->getTotalSize() / extent_size;
+        total_size = m_lv->getTotalSize();
+        layout->addWidget(new QLabel(i18n("Total Extents: %1", total_extents)));
+        layout->addWidget(new QLabel(i18n("Total Size: %1", locale->formatByteSize(total_size, 1, dialect))));
     } else if ((segment >= 0) && (segment_count > 1)) {
         extents = m_lv->getSegmentExtents(segment);
         stripes = m_lv->getSegmentStripes(segment);
@@ -352,7 +351,25 @@ QFrame *LVProperties::physicalVolumesFrame(int segment)
     label->setAlignment(Qt::AlignCenter);
     layout->addWidget(label);
 
-    if (m_lv->isThinVolume()) {
+    if (m_lv->isThinVolume() && m_lv->isSnapContainer()) {
+        label = new QLabel(m_lv->getPoolName());
+        label->setToolTip(m_lv->getPoolName());
+        layout->addWidget(label);
+
+        pv_list = m_lv->getPvNamesAllFlat();
+        if (!pv_list.isEmpty()) {
+
+            label = new QLabel(i18n("<b>Physical Volumes</b>"));
+            label->setAlignment(Qt::AlignCenter);
+            layout->addWidget(label);
+            
+            for (int pv = 0; pv < pv_list.size(); pv++) {
+                label = new QLabel(pv_list[pv]);
+                label->setToolTip(pv_list[pv]);
+                layout->addWidget(label);
+            }
+        }
+    } else if (m_lv->isThinVolume()) {
         label = new QLabel(m_lv->getPoolName());
         label->setToolTip(m_lv->getPoolName());
         layout->addWidget(label);
