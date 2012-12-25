@@ -991,8 +991,10 @@ QStringList LVCreateDialog::args()
             args << "n";
     }
 
-    if (m_pv_box->getPolicy() <= ANYWHERE) // don't pass INHERIT_*
-        args << "--alloc" << policyToString(m_pv_box->getEffectivePolicy());
+    if (m_extend || (m_pv_box->getPolicy() <= ANYWHERE))
+        args << "--alloc" << policyToString(m_pv_box->getEffectivePolicy()); // don't pass INHERIT_*
+    else
+        args << "--alloc" << "inherit";
 
     if (m_extend)
         extents -= m_lv->getExtents();
