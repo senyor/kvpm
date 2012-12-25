@@ -569,7 +569,7 @@ QGroupBox *KvpmConfigDialog::logicalGroup()
     QCheckBox *const filesystem_check  = new QCheckBox(i18n("Filesystem type"));
     QCheckBox *const stripes_check     = new QCheckBox(i18n("Stripe count"));
     QCheckBox *const stripesize_check  = new QCheckBox(i18n("Stripe size"));
-    QCheckBox *const snapmove_check    = new QCheckBox(i18n("(\%)Snap/Copy"));
+    QCheckBox *const snapmove_check    = new QCheckBox(i18n("(\%)Data/Copy"));
     QCheckBox *const state_check       = new QCheckBox(i18n("Volume state"));
     QCheckBox *const access_check      = new QCheckBox(i18n("Volume access"));
     QCheckBox *const tags_check        = new QCheckBox(i18n("Tags"));

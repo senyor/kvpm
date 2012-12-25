@@ -33,7 +33,7 @@ VGTree::VGTree(VolGroup *const group) : QTreeWidget(), m_vg(group)
 
     const QStringList headers = QStringList() << i18n("Volume")      << i18n("type")       << i18n("Size")
                                 << i18n("Remaining")   << i18n("Filesystem") << i18n("Stripes")
-                                << i18n("Stripe size") << i18n("Snap/Copy")  << i18n("State")
+                                << i18n("Stripe size") << i18n("Data/Copy")  << i18n("State")
                                 << i18n("Access")      << i18n("Tags")       << i18n("Mount points");
 
     QTreeWidgetItem *item = new QTreeWidgetItem((QTreeWidgetItem *)0, headers);
