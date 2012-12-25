@@ -89,8 +89,8 @@ QString policyToString(AllocationPolicy policy)
     } 
 }
 
-PolicyComboBox::PolicyComboBox(AllocationPolicy policy, bool canInherit, QWidget *parent) 
-    :  QWidget(parent)
+PolicyComboBox::PolicyComboBox(AllocationPolicy policy, AllocationPolicy vgpolicy, QWidget *parent) 
+    :  QWidget(parent), m_vg_policy(vgpolicy)
 {
     QLabel *const label = new QLabel(i18n("Allocation policy: "));
 
@@ -100,22 +100,21 @@ PolicyComboBox::PolicyComboBox(AllocationPolicy policy, bool canInherit, QWidget
     m_combo->addItem(i18n("Cling"));
     m_combo->addItem(i18n("Anywhere"));
 
-    if (canInherit)
-        m_combo->addItem(i18n("Inherit"));
+    if (m_vg_policy != NO_POLICY)
+        m_combo->addItem(i18n("Inherit (%1)", policyToString(vgpolicy)));
 
-    if (policy == NORMAL) {
+    if (policy == NORMAL)
         m_combo->setCurrentIndex(0);
-    } else if (policy == CONTIGUOUS) {
+    else if (policy == CONTIGUOUS)
         m_combo->setCurrentIndex(1);
-    } else if (policy == CLING) {
+    else if (policy == CLING)
         m_combo->setCurrentIndex(2);
-    } else if (policy == ANYWHERE) {
+    else if (policy == ANYWHERE)
         m_combo->setCurrentIndex(3);
-    } else if (policy > ANYWHERE && canInherit){
+    else if ((policy > ANYWHERE) && (m_combo->count() > 4))
         m_combo->setCurrentIndex(4);
-    } else {
+    else
         m_combo->setCurrentIndex(0);
-    }
 
     QHBoxLayout *const layout = new QHBoxLayout;
     layout->addStretch();
@@ -124,14 +123,14 @@ PolicyComboBox::PolicyComboBox(AllocationPolicy policy, bool canInherit, QWidget
     layout->addStretch();
 
     connect(m_combo, SIGNAL(currentIndexChanged(int)),
-            this, SLOT(emitNewPolicy(int)));
+            this, SLOT(emitNewPolicy()));
 
     setLayout(layout);
 }
 
-void PolicyComboBox::emitNewPolicy(const int index)
+void PolicyComboBox::emitNewPolicy()
 {
-    emit policyChanged(getPolicy(index));
+    emit policyChanged(getPolicy());
 }
 
 AllocationPolicy PolicyComboBox::getPolicy()
@@ -150,17 +149,23 @@ AllocationPolicy PolicyComboBox::getPolicy()
         return ANYWHERE;
         break;
     case 4:
-        return INHERIT_NORMAL;
-        break;
-    case 5:
-        return INHERIT_CONTIGUOUS;
-        break;
-    case 6:
-        return INHERIT_CLING;
-        break;
-    case 7:
-        return INHERIT_ANYWHERE;
-        break;
+        switch(m_vg_policy) {
+        case NORMAL:
+            return INHERIT_NORMAL;
+            break;
+        case CONTIGUOUS:
+            return INHERIT_CONTIGUOUS;
+            break;
+        case CLING:
+            return INHERIT_CLING;
+            break;
+        case ANYWHERE:
+            return INHERIT_ANYWHERE;
+            break;
+        default:
+            return INHERIT_NORMAL;
+            break;
+        }
     default:
         return NORMAL;
     } 
@@ -168,23 +173,7 @@ AllocationPolicy PolicyComboBox::getPolicy()
 
 AllocationPolicy PolicyComboBox::getEffectivePolicy()
 {
-    AllocationPolicy policy = getPolicy();
-
-    if (policy == INHERIT_NORMAL)
-        policy = NORMAL;
-    else if (policy == INHERIT_CLING)
-        policy = CLING;
-    else if (policy == INHERIT_CONTIGUOUS)
-        policy = CONTIGUOUS;
-    else if (policy == INHERIT_ANYWHERE)
-        policy = ANYWHERE;
-
-    return policy;
-}
-
-AllocationPolicy PolicyComboBox::getPolicy(int index)
-{
-    switch(index) {
+    switch(m_combo->currentIndex()) {
     case 0:
         return NORMAL;
         break;
@@ -198,16 +187,7 @@ AllocationPolicy PolicyComboBox::getPolicy(int index)
         return ANYWHERE;
         break;
     case 4:
-        return INHERIT_NORMAL;
-        break;
-    case 5:
-        return INHERIT_CONTIGUOUS;
-        break;
-    case 6:
-        return INHERIT_CLING;
-        break;
-    case 7:
-        return INHERIT_ANYWHERE;
+        return m_vg_policy;
         break;
     default:
         return NORMAL;

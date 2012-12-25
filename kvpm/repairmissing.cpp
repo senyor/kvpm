@@ -208,7 +208,7 @@ QWidget *RepairMissingDialog::buildPhysicalWidget(QList<PhysVol *> const pvs)
             contiguous.append(pvs[x]->getContiguous());
     }
 
-    m_pv_box = new PvGroupBox(pvs, normal, contiguous, m_lv->getPolicy());
+    m_pv_box = new PvGroupBox(pvs, normal, contiguous, m_lv->getPolicy(), m_lv->getVg()->getPolicy());
     physical_layout->addWidget(m_pv_box);
     physical_layout->addStretch();
 

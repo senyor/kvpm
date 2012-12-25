@@ -161,7 +161,7 @@ QWidget* LVCreateDialog::createPhysicalTab()
             contiguous.append(pvs[x]->getContiguous(m_lv));
         }
 
-        m_pv_box = new PvGroupBox(pvs, normal, contiguous, m_lv->getPolicy());
+        m_pv_box = new PvGroupBox(pvs, normal, contiguous, m_lv->getPolicy(), getVg()->getPolicy());
     } else {
 
         for (int x = 0; x < pvs.size(); x++) {
@@ -169,7 +169,7 @@ QWidget* LVCreateDialog::createPhysicalTab()
             contiguous.append(pvs[x]->getContiguous(m_lv));
         }
 
-        m_pv_box = new PvGroupBox(pvs, normal, contiguous, INHERIT_NORMAL);
+        m_pv_box = new PvGroupBox(pvs, normal, contiguous, INHERIT_NORMAL, getVg()->getPolicy());
     }
 
     layout->addWidget(m_pv_box);
@@ -1064,10 +1064,6 @@ long long LVCreateDialog::roundExtentsToStripes(long long extents)
 
     return extents;
 }
-
-
-
-
 
 
 // This function checks for problems that would make showing this dialog pointless

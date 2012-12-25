@@ -18,6 +18,7 @@
 #include "allocationpolicy.h"
 #include "logvol.h"
 #include "processprogress.h"
+#include "volgroup.h"
 
 #include <KComboBox>
 #include <KLineEdit>
@@ -132,7 +133,7 @@ QWidget *LVChangeDialog::buildGeneralTab()
     del_tag_layout->addWidget(m_deltag_combo);
 
     if (!m_lv->isThinVolume()) {
-        m_policy_combo = new PolicyComboBox(m_lv->getPolicy(), true);
+        m_policy_combo = new PolicyComboBox(m_lv->getPolicy(), m_lv->getVg()->getPolicy());
         general_layout->addWidget(m_policy_combo);
         connect(m_policy_combo,         SIGNAL(policyChanged(AllocationPolicy)), this, SLOT(resetOkButton()));
     } else {
