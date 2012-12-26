@@ -300,6 +300,7 @@ QFrame *LVProperties::generalFrame(int segment)
                 layout->addWidget(new QLabel(i18n("Zero new blocks: Yes")));
             else
                 layout->addWidget(new QLabel(i18n("Zero new blocks: No")));
+            layout->addWidget(new QLabel(i18n("Discards: %1", m_lv->getDiscards(0))));
         } else {
             layout->addWidget(new QLabel(i18n("Policy: %1", policy)));
         }
