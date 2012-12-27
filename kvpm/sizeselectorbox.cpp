@@ -244,7 +244,7 @@ void SizeSelectorBox::updateSlider()
 
 void SizeSelectorBox::setConstrainedMax(long long max)
 {
-    if (isLocked() || !m_size_edit->isEnabled())
+    if (isLocked() || !m_size_edit->isEnabled() || max == m_constrained_max)
         return;
 
     if ((max < 0) || (max > m_max_size))
@@ -256,8 +256,9 @@ void SizeSelectorBox::setConstrainedMax(long long max)
         m_constrained_min = m_constrained_max;
 
     if (!m_is_volume) {
-        if (m_current_size > m_constrained_max)
+        if (m_current_size > m_constrained_max) {
             setCurrentSize(m_constrained_max);
+        }
     }
 
     updateEdit();
