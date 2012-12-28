@@ -63,13 +63,21 @@ PartitionAddDialog::PartitionAddDialog(StoragePartition *const partition, QWidge
             QVBoxLayout *const layout = new QVBoxLayout();
             dialog_body->setLayout(layout);
 
-            QLabel *const label = new QLabel(i18n("<b>Create A New Partition</b>"));
+            QLabel *label = new QLabel(i18n("<b>Create A New Partition</b>"));
             label->setAlignment(Qt::AlignCenter);
             layout->addSpacing(5);
             layout->addWidget(label);
             layout->addSpacing(5);
 
-            layout->addWidget(buildInfoGroup());
+            label = new QLabel(i18n("<b>Device: %1</b>", m_partition->getName()));
+            label->setAlignment(Qt::AlignHCenter);
+            layout->addWidget(label);
+            layout->addSpacing(5);
+
+            m_display_graphic = new PartitionGraphic(m_max_part_size * m_sector_size, true);
+            layout->addWidget(m_display_graphic);
+
+            layout->addWidget(buildTypeWidget());
             m_dual_selector = new DualSelectorBox(m_sector_size, m_max_part_size);
             validateChange();
 
@@ -174,7 +182,6 @@ long long PartitionAddDialog::convertSizeToSectors(int index, double size)
 
 void PartitionAddDialog::validateChange()
 {
-
     const PedSector ONE_MIB  = 0x100000 / m_sector_size;   // sectors per megabyte
     const long long offset = m_dual_selector->getCurrentOffset();
     const long long size   = m_dual_selector->getCurrentSize();
@@ -185,45 +192,7 @@ void PartitionAddDialog::validateChange()
     } else
         enableButtonOk(false);
 
-    updatePartition();
-}
-
-void PartitionAddDialog::updatePartition()
-{
-
-    const long long offset = m_dual_selector->getCurrentOffset();
-    const long long size = m_dual_selector->getCurrentSize();
-    long long free = m_max_part_size - offset;
-    if (free < 0)
-        free = 0;
-
-    KLocale::BinaryUnitDialect dialect;
-    KLocale *const locale = KGlobal::locale();
-
-    if (m_use_si_units)
-        dialect = KLocale::MetricBinaryDialect;
-    else
-        dialect = KLocale::IECBinaryDialect;
-
-    QString preceding_bytes_string = locale->formatByteSize(offset * m_sector_size, 1, dialect);
-    m_preceding_label->setText(i18n("Preceding space: %1", preceding_bytes_string));
-
-    PedSector following = m_max_part_size - (size + offset);
-    if (following < 0)
-        following = 0;
-
-    PedSector following_space = following * m_sector_size;
-
-    if (following_space < 32 * m_sector_size)
-        following_space = 0;
-
-    QString following_bytes_string = locale->formatByteSize(following_space, 1, dialect);
-    m_remaining_label->setText(i18n("Following space: %1", following_bytes_string));
-
-    m_display_graphic->setPrecedingSectors(offset);
-    m_display_graphic->setPartitionSectors(size);
-    m_display_graphic->setFollowingSectors(following);
-    m_display_graphic->repaint();
+    m_display_graphic->update(size * m_sector_size, offset * m_sector_size);
 }
 
 void PartitionAddDialog::getMaximumPartition(PedSector &start, PedSector &end, PedSector &sectorSize)
@@ -294,55 +263,15 @@ void PartitionAddDialog::getMaximumPartition(PedSector &start, PedSector &end, P
     ped_disk_destroy(disk);
 }
 
-QGroupBox* PartitionAddDialog::buildInfoGroup()
+QGroupBox* PartitionAddDialog::buildTypeWidget()
 {
     QGroupBox *const group = new QGroupBox(this);
     QVBoxLayout *const layout = new QVBoxLayout();
     layout->addSpacing(10);
 
-    m_display_graphic = new PartitionGraphic();
-    layout->addWidget(m_display_graphic, 0, Qt::AlignCenter);
-    QLabel *const path = new QLabel(i18n("<b>Device: %1</b>", m_partition->getName()));
-    path->setAlignment(Qt::AlignHCenter);
-    layout->addWidget(path);
-    layout->addSpacing(10);
-
-    m_preceding_label = new QLabel();
-    layout->addWidget(m_preceding_label);
-
-    m_remaining_label = new QLabel();
-    layout->addWidget(m_remaining_label);
-
-    KLocale::BinaryUnitDialect dialect;
-    KLocale *const locale = KGlobal::locale();
-
-    if (m_use_si_units)
-        dialect = KLocale::MetricBinaryDialect;
-    else
-        dialect = KLocale::IECBinaryDialect;
-
-    QString total_bytes = locale->formatByteSize(m_max_part_size * m_sector_size, 1, dialect);
-    QLabel *const excluded_label = new QLabel(i18n("Maximum size: %1",  total_bytes));
-    layout->addWidget(excluded_label);
-    layout->addSpacing(10);
-
     QLabel *const type_label = new QLabel(i18n("Select type: "));
     QHBoxLayout *const type_layout = new QHBoxLayout;
-    m_type_combo = buildTypeCombo();
-    type_label->setBuddy(m_type_combo);
-    type_layout->addWidget(type_label);
-    type_layout->addWidget(m_type_combo);
-    type_layout->addStretch();
-    layout->addLayout(type_layout);
-
-    group->setLayout(layout);
-
-    return group;
-}
-
-KComboBox* PartitionAddDialog::buildTypeCombo()
-{
-    KComboBox *const combo = new KComboBox;
+    m_type_combo = new KComboBox;
     PedPartition *const free_space = m_partition->getPedPartition();
 
     bool logical_freespace;      // true if we are inside an extended partition
@@ -365,19 +294,28 @@ KComboBox* PartitionAddDialog::buildTypeCombo()
     else
         logical_freespace = false;
 
-    combo->insertItem(0, i18n("Primary"));
-    combo->insertItem(1, i18n("Extended"));
+    m_type_combo->insertItem(0, i18n("Primary"));
+    m_type_combo->insertItem(1, i18n("Extended"));
 
     if (logical_freespace) {
-        combo->insertItem(2, i18n("Logical"));
-        combo->setEnabled(false);
-        combo->setCurrentIndex(2);
+        m_type_combo->insertItem(2, i18n("Logical"));
+        m_type_combo->setEnabled(false);
+        m_type_combo->setCurrentIndex(2);
     } else if (!extended_allowed) {
-        combo->setEnabled(false);
-        combo->setCurrentIndex(0);
+        m_type_combo->setEnabled(false);
+        m_type_combo->setCurrentIndex(0);
     }
 
-    return combo;
+    type_label->setBuddy(m_type_combo);
+    type_layout->addWidget(type_label);
+    type_layout->addWidget(m_type_combo);
+    type_layout->addStretch();
+    layout->addLayout(type_layout);
+    layout->addSpacing(10);
+
+    group->setLayout(layout);
+
+    return group;
 }
 
 bool PartitionAddDialog::hasInitialErrors()

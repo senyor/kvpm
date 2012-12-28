@@ -44,14 +44,9 @@ class PartitionChangeDialog : public KDialog
     PedSector m_max_part_size;       // size of largest possible partition
 
     PartitionGraphic *m_display_graphic; // The color bar that shows the relative
-    // size of the partition graphically
+                                         // size of the partition graphically
 
     DualSelectorBox *m_dual_selector;
-
-    QLabel *m_change_by_label,  // How much are we growing or shrinking the partition?
-           *m_move_by_label,    // How much are we moving the partition?
-           *m_preceding_label,  // Free space before the proposed partition
-           *m_following_label;
 
     bool m_logical;      // Are we a logical partition?
 
@@ -62,11 +57,10 @@ class PartitionChangeDialog : public KDialog
     bool movePartition();
     void updateGraphicAndLabels();
     bool pedCommitAndWait(PedDisk *const disk);
-    QGroupBox *buildInfoGroup(const PedSector maxSize);
+    void getMaximumPartition(PedSector &start, PedSector &end, PedSector &sectorSize);
 
 public:
     explicit PartitionChangeDialog(StoragePartition *const partition, QWidget *parent = 0);
-    void getMaximumPartition(PedSector &start, PedSector &end, PedSector &sectorSize);
     bool bailout();
 
 private slots:
