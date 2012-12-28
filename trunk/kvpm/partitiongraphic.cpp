@@ -19,6 +19,9 @@
 #include <QPainter>
 #include <QVBoxLayout>
 
+#include <KConfigSkeleton>
+#include <KGlobal>
+#include <KLocale>
 
 
 // Two classes are set defined. Graphic body is privately used by PartitionGraphic
@@ -29,18 +32,21 @@ class GraphicBody : public QWidget
     
 public:
     GraphicBody(QWidget *parent = NULL);
-    long long  m_preceding_sectors;
-    long long  m_following_sectors;
-    long long  m_partition_sectors;
+    long long  m_preceding;
+    long long  m_following;
+    long long  m_size;
     
     void paintEvent(QPaintEvent *);
 };
 
 GraphicBody::GraphicBody(QWidget *parent) : QWidget(parent)
 {
-    m_preceding_sectors = 0;
-    m_following_sectors = 0;
-    m_partition_sectors = 1;
+    setMinimumWidth(250);
+    setMinimumHeight(30);
+
+    m_preceding = 0;
+    m_following = 0;
+    m_size = 1;
 }
 
 void GraphicBody::paintEvent(QPaintEvent *)
@@ -48,19 +54,19 @@ void GraphicBody::paintEvent(QPaintEvent *)
     QPainter painter(this);
     painter.setPen(Qt::blue);
     
-    const long double total_sectors = m_preceding_sectors + m_following_sectors + m_partition_sectors;
+    const long double total = m_preceding + m_following + m_size;
     double offset = 0;
-    double length = (m_preceding_sectors / total_sectors) * width();
+    double length = (m_preceding / total) * width();
     QRectF preceding_rectangle(offset, 0.0, length, (double)height());
     
     offset += length;
-    length = (m_partition_sectors / total_sectors) * width();
+    length = (m_size / total) * width();
     if (length < 1.0)                                      // always show at least a sliver
         length = 1.0;
     QRectF partition_rectangle(offset, 0.0, length, (double)height());
     
     offset += length;
-    length = (m_following_sectors / total_sectors) * width();
+    length = (m_following / total) * width();
     QRectF following_rectangle(offset, 0.0, length, (double)height());
     
     QBrush free_brush(Qt::green, Qt::SolidPattern);
@@ -73,35 +79,103 @@ void GraphicBody::paintEvent(QPaintEvent *)
 
 
 
-PartitionGraphic::PartitionGraphic(QWidget *parent) : QFrame(parent)
+PartitionGraphic::PartitionGraphic(long long space, bool isNewPart, QWidget *parent) 
+    : QGroupBox(parent),
+      m_total_space(space)
 {
-    setFixedWidth(250);
-    setMinimumHeight(30);
+    if (m_total_space < 0)
+        m_total_space = 0;
+
+    KConfigSkeleton skeleton;
+    skeleton.setCurrentGroup("General");
+    skeleton.addItemBool("use_si_units", m_use_si_units, false);
 
     QVBoxLayout *const layout = new QVBoxLayout();
-    layout->setSpacing(0);
-    layout->setMargin(0);
-    setFrameStyle(QFrame::Sunken | QFrame::Panel);
-    setLineWidth(2);
-    setLayout(layout);
+
+    QFrame *const graphic_frame = new QFrame();
+    QVBoxLayout *const graphic_layout = new QVBoxLayout();
+    graphic_frame->setFrameStyle(QFrame::Sunken | QFrame::Panel);
+    graphic_frame->setLineWidth(2);
+    graphic_layout->setSpacing(0);
+    graphic_layout->setMargin(0);
+    graphic_frame->setLayout(graphic_layout);
 
     m_body = new GraphicBody();
-    layout->addWidget(m_body);
+    graphic_layout->addWidget(m_body);
+    layout->addWidget(graphic_frame);
+
+    QHBoxLayout *const lower_layout = new QHBoxLayout();
+    QVBoxLayout *const info_layout = new QVBoxLayout();
+    m_preceding_label = new QLabel();
+    m_following_label = new QLabel();
+    m_change_label = new QLabel();
+    m_move_label = new QLabel();
+    info_layout->addSpacing(5);
+    info_layout->addWidget(m_preceding_label);
+    info_layout->addWidget(m_following_label);
+    info_layout->addSpacing(5);
+    info_layout->addWidget(m_change_label);
+    info_layout->addWidget(m_move_label);
+
+    if (isNewPart) {
+        m_change_label->hide();
+        m_move_label->hide();
+    }
+
+    info_layout->addSpacing(5);
+    lower_layout->addLayout(info_layout);
+    lower_layout->addStretch();
+    layout->addLayout(lower_layout);
+
+    setLayout(layout);
 }
 
-void PartitionGraphic::setPrecedingSectors(const long long precedingSectors)
+void PartitionGraphic::update(long long size, long long offset, long long  move, long long change)
 {
-    m_body->m_preceding_sectors = precedingSectors;
+    if (size < 0)
+        size = 0;
+
+    if (offset < 0)
+        offset = 0;
+
+    long long following = m_total_space - (size + offset);
+
+    if (following < 0)
+        following = 0;
+    
+    m_body->m_preceding = offset;
+    m_body->m_following = following;
+    m_body->m_size = size;
+    m_body->repaint();
+
+    KLocale::BinaryUnitDialect dialect;
+    KLocale *const locale = KGlobal::locale();
+
+    if (m_use_si_units)
+        dialect = KLocale::MetricBinaryDialect;
+    else
+        dialect = KLocale::IECBinaryDialect;
+
+    if (change < 0)
+        m_change_label->setText(i18n("Reduce size: -%1", locale->formatByteSize(qAbs(change), 1, dialect)));
+    else if (change == 0)
+        m_change_label->setText(i18n("Size: no change"));
+    else
+        m_change_label->setText(i18n("Extend size: %1", locale->formatByteSize(change, 1, dialect)));
+    
+    if (move < 0)
+        m_move_label->setText(i18n("Move (left): -%1", locale->formatByteSize(qAbs(move), 1, dialect)));
+    else if (move == 0)
+        m_move_label->setText(i18n("Move: no change"));
+    else
+        m_move_label->setText(i18n("Move (right): %1", locale->formatByteSize(move, 1, dialect)));
+
+    m_preceding_label->setText(i18n("Preceding free space: %1", locale->formatByteSize(offset, 1, dialect)));
+    m_following_label->setText(i18n("Following free space: %1", locale->formatByteSize(following, 1, dialect)));
 }
 
-void PartitionGraphic::setFollowingSectors(const long long followingSectors)
+void PartitionGraphic::update(long long size, long long offset)
 {
-    m_body->m_following_sectors = followingSectors;
+    update(size, offset, 0, 0);
 }
-
-void PartitionGraphic::setPartitionSectors(const long long partitionSectors)
-{
-    m_body->m_partition_sectors = partitionSectors;
-}
-
 

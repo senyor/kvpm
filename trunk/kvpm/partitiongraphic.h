@@ -16,22 +16,31 @@
 #ifndef PARTITIONGRAPHIC_H
 #define PARTITIONGRAPHIC_H
 
-#include <QFrame>
+
+#include <QLabel>
+#include <QGroupBox>
 
 class GraphicBody;
 
 
-class PartitionGraphic : public QFrame
+class PartitionGraphic : public QGroupBox
 {
     Q_OBJECT
 
-    GraphicBody  *m_body;
+    bool m_use_si_units;
+
+    GraphicBody *m_body;
+    long long m_total_space;
+
+    QLabel *m_preceding_label,
+           *m_following_label,
+           *m_change_label,
+           *m_move_label;
 
 public:
-    PartitionGraphic(QWidget *parent = 0);
-    void setPrecedingSectors(const long long precedingSectors);
-    void setFollowingSectors(const long long followingSectors);
-    void setPartitionSectors(const long long partitionSectors);
+    PartitionGraphic(const long long space, const bool isNewPart,QWidget *parent = 0);
+    void update(long long size, long long offset, const long long move, const long long change);
+    void update(const long long size, const long long offset);
 
 };
 

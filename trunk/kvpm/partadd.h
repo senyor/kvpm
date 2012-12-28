@@ -56,11 +56,9 @@ class PartitionAddDialog : public KDialog
 
     KComboBox *m_type_combo;
 
-    void updatePartition();
     long long convertSizeToSectors(int index, double size);
     void getMaximumPartition(PedSector &start, PedSector &end, PedSector &sectorSize);
-    QGroupBox *buildInfoGroup();
-    KComboBox *buildTypeCombo();
+    QGroupBox *buildTypeWidget();
     bool hasInitialErrors();
 
 public:
