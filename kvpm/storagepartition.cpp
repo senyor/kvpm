@@ -289,7 +289,7 @@ bool StoragePartition::isMounted()
 /* function returns true if the partition is extended
    and has no logical partitions */
 
-bool StoragePartition::isEmpty()
+bool StoragePartition::isEmptyExtended()
 {
     return m_is_empty;
 }

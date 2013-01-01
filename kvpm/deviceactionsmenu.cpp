@@ -138,7 +138,7 @@ void DeviceActionsMenu::setup(QTreeWidgetItem *item)
                 m_maxfs_action->setEnabled(false);
                 m_maxpv_action->setEnabled(false);
                 m_mkfs_action->setEnabled(false);
-                if (m_part->isEmpty())
+                if (m_part->isEmptyExtended())
                     m_partadd_action->setEnabled(true);
                 else
                     m_partadd_action->setEnabled(false);
@@ -146,7 +146,7 @@ void DeviceActionsMenu::setup(QTreeWidgetItem *item)
                 m_vgcreate_action->setEnabled(false);
                 m_vgextend_menu->setEnabled(false);
                 m_vgreduce_action->setEnabled(false);
-                if (m_part->isEmpty())
+                if (m_part->isEmptyExtended())
                     m_partremove_action->setEnabled(true);
                 else
                     m_partremove_action->setEnabled(false);
