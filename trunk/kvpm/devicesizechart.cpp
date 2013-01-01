@@ -105,7 +105,7 @@ void DeviceSizeChart::setNewDevice(QTreeWidgetItem *deviceItem)
             m_extended_layout->setSpacing(0);
             m_extended_layout->setMargin(0);
             m_extended_layout->setSizeConstraint(QLayout::SetNoConstraint);
-            if (! partition->isEmpty()) {
+            if (!partition->isEmptyExtended()) {
                 for (int y = 0 ; y < partition_item->childCount(); y++) {
                     extended_item = partition_item->child(y);
                     partition = (StoragePartition *)((extended_item->data(0, Qt::UserRole)).value<void *>());
