@@ -42,9 +42,10 @@ StoragePartition::StoragePartition(PedPartition *const part,
     m_partition_size = geometry.length * sector_size; // in bytes
     m_ped_type       = m_ped_partition->type;
     m_is_writable    = !ped_device->read_only;
-    m_is_pv      = false;
-    m_is_normal  = false;
-    m_is_logical = false;
+    m_is_pv       = false;
+    m_is_normal   = false;
+    m_is_extended = false;
+    m_is_logical  = false;
     m_is_freespace = false;
     m_pv = NULL;
 
@@ -64,6 +65,7 @@ StoragePartition::StoragePartition(PedPartition *const part,
         m_partition_path = ped_partition_get_path(part);
     } else if (m_ped_type & PED_PARTITION_EXTENDED) {
         m_partition_type = "extended";
+        m_is_extended = true;
         m_partition_path = ped_partition_get_path(part);
     } else if ((m_ped_type & PED_PARTITION_LOGICAL) && !(m_ped_type & PED_PARTITION_FREESPACE)) {
         m_partition_type = "logical";
@@ -286,7 +288,12 @@ bool StoragePartition::isMounted()
     return m_is_mounted;
 }
 
-/* function returns true if the partition is extended
+bool StoragePartition::isExtended()
+{
+    return m_is_extended;
+}
+
+/* This function returns true if the partition is extended
    and has no logical partitions */
 
 bool StoragePartition::isEmptyExtended()

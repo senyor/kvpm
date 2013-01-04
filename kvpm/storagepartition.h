@@ -48,6 +48,7 @@ class StoragePartition
     bool m_is_writable;
     bool m_is_pv;
     bool m_is_mounted;
+    bool m_is_extended;
     bool m_is_empty;   // empty extended partition
     bool m_is_busy;
     bool m_is_mountable;
@@ -92,6 +93,7 @@ public:
     bool isPhysicalVolume();
     bool isMounted();
     bool isEmptyExtended();
+    bool isExtended();
     bool isBusy();
     bool isMountable();
     bool isNormal();
