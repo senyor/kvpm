@@ -19,6 +19,8 @@
 
 #include <KDialog>
 
+#include "partbase.h"
+
 class QFrame;
 class KLineEdit;
 class KComboBox;
@@ -32,37 +34,22 @@ class DualSelectorBox;
 class StoragePartition;
 
 
-class PartitionAddDialog : public KDialog
+class PartitionAddDialog : public PartitionDialogBase
 {
     Q_OBJECT
 
-    StoragePartition *m_partition;
+    StoragePartition *m_storage_partition;
     PedConstraint    *m_ped_constraints;
-    DualSelectorBox  *m_dual_selector;
 
-    bool m_use_si_units, m_bailout;
-
-    PedSector m_max_part_start,   // first available sector of free space
-              m_max_part_end,     // last available sector of free space
-              m_max_part_size;    // sectors available of free space
-
-    long long m_sector_size;    // bytes per logical sector
-
-    PartitionGraphic *m_display_graphic; // The color bar that shows the relative
-    // size of the partition graphically
-
-    QLabel *m_remaining_label,  // space left past the end of the proposed partition
-           *m_preceding_label;  // ditto for the preceding space
+    bool m_bailout;
 
     KComboBox *m_type_combo;
 
-    long long convertSizeToSectors(int index, double size);
     void getMaximumPartition(PedSector &start, PedSector &end, PedSector &sectorSize);
     QGroupBox *buildTypeWidget();
-    bool hasInitialErrors();
 
 public:
-    explicit PartitionAddDialog(StoragePartition *const partition, QWidget *parent = 0);
+    explicit PartitionAddDialog(StoragePartition *const partition, QWidget *parent = NULL);
     bool bailout();
 
 private slots:

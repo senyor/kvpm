@@ -19,48 +19,29 @@
 
 #include <KDialog>
 
-class QGroupBox;
-class QLabel;
+#include "partbase.h"
 
-class PartitionGraphic;
-class DualSelectorBox;
 class StoragePartition;
 
 
-class PartitionChangeDialog : public KDialog
+class PartitionChangeDialog : public PartitionDialogBase
 {
     Q_OBJECT
 
     StoragePartition *m_old_storage_part;
-    PedDisk          *m_ped_disk;
-    PedPartition     *m_existing_part; // The partition on the disk now
 
-    bool m_use_si_units;
     bool m_bailout;
 
-    PedSector m_min_shrink_size;     // Minimum size of the fs after shrinking
-    PedSector m_sector_size;         // bytes per logical sector
-    PedSector m_max_part_start;      // start of biggest possible partition
-    PedSector m_max_part_size;       // size of largest possible partition
-
-    PartitionGraphic *m_display_graphic; // The color bar that shows the relative
-                                         // size of the partition graphically
-
-    DualSelectorBox *m_dual_selector;
-
-    bool m_logical;      // Are we a logical partition?
-
-    void setup();
     bool movefs(const PedSector from_start, const PedSector to_start, const PedSector length);
     bool shrinkPartition();
     bool growPartition();
     bool movePartition();
-    void updateGraphicAndLabels();
-    bool pedCommitAndWait(PedDisk *const disk);
-    void getMaximumPartition(PedSector &start, PedSector &end, PedSector &sectorSize);
+    bool continueBackup();
+    bool continueResize();
+    bool continueBusy();
 
 public:
-    explicit PartitionChangeDialog(StoragePartition *const partition, QWidget *parent = 0);
+    explicit PartitionChangeDialog(StoragePartition *const partition, QWidget *parent = NULL);
     bool bailout();
 
 private slots:

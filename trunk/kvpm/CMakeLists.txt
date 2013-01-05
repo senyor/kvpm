@@ -7,7 +7,7 @@ set(kvpm_SRCS allocationpolicy.cpp changemirror.cpp kvpmconfigdialog.cpp devicep
 	      lvcreate.cpp lvcreatebase.cpp lvproperties.cpp lvpropertiesstack.cpp lvreduce.cpp 
 	      lvremove.cpp lvsizechart.cpp main.cpp maxfs.cpp mkfs.cpp masterlist.cpp  mount.cpp 
 	      lvsizechartseg.cpp mountentry.cpp mounttables.cpp maintabwidget.cpp 
-	      pvextend.cpp pvreduce.cpp partremove.cpp pvgroupbox.cpp
+	      pvextend.cpp pvreduce.cpp partremove.cpp pvgroupbox.cpp partbase.cpp
 	      partitiongraphic.cpp partadd.cpp pvproperties.cpp  pvpropertiesstack.cpp 
 	      physvol.cpp partchange.cpp progressbox.cpp repairmissing.cpp
 	      misc.cpp pedexceptions.cpp processprogress.cpp pvchange.cpp snapmerge.cpp
