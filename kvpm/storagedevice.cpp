@@ -15,6 +15,7 @@
 
 #include <parted/parted.h>
 
+#include <QDebug>
 
 #include "storagedevice.h"
 #include "storagepartition.h"
@@ -39,8 +40,8 @@ StorageDevice::StorageDevice(PedDevice *const pedDevice,
     m_physical_sector_size = pedDevice->phys_sector_size;
     m_hardware = QString(pedDevice->model);
 
-    m_device_size = (pedDevice->length) * m_sector_size;
-    m_device_path = QString("%1").arg(pedDevice->path);
+    m_device_size = pedDevice->length * m_sector_size;
+    m_device_path = QString(pedDevice->path);
 
     if (pedDevice->read_only)
         m_is_writable = false;
@@ -58,7 +59,6 @@ StorageDevice::StorageDevice(PedDevice *const pedDevice,
             m_is_pv = true;
         }
     }
-
     disk = ped_disk_new(pedDevice);
 
     if (disk && !m_is_pv) {
@@ -83,10 +83,11 @@ StorageDevice::StorageDevice(PedDevice *const pedDevice,
                 m_storage_partitions.append(new StoragePartition(part, m_freespace_count, pvList, mountTables));
             }
         }
-    } else if (m_is_pv)
+    } else if (m_is_pv) {
         m_disk_label = "physical volume";
-    else
+    } else {
         m_disk_label = "unknown";
+    }
 }
 
 StorageDevice::~StorageDevice()
