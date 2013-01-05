@@ -18,9 +18,7 @@
 #include "dualselectorbox.h"
 #include "fsextend.h"
 #include "fsreduce.h"
-#include "masterlist.h"
 #include "pedexceptions.h"
-#include "partitiongraphic.h"
 #include "physvol.h"
 #include "processprogress.h"
 #include "progressbox.h"
@@ -28,7 +26,6 @@
 #include "pvreduce.h"
 #include "storagepartition.h"
 #include "topwindow.h"
-#include "volgroup.h"
 
 #include <math.h>
 
@@ -36,7 +33,6 @@
 #include <KLineEdit>
 #include <KApplication>
 #include <KButtonGroup>
-#include <KConfigSkeleton>
 #include <KGlobal>
 #include <KLocale>
 #include <KMessageBox>
@@ -45,97 +41,121 @@
 #include <QDebug>
 #include <QLabel>
 #include <QGroupBox>
-#include <QVBoxLayout>
 
 
 
 PartitionChangeDialog::PartitionChangeDialog(StoragePartition *const partition, QWidget *parent)
-    : KDialog(parent),
+    : PartitionDialogBase(partition, parent),
       m_old_storage_part(partition)
 {
-    m_bailout = false;
-    KConfigSkeleton skeleton;
-    skeleton.setCurrentGroup("General");
-    skeleton.addItemBool("use_si_units", m_use_si_units, false);
+    m_bailout = true;
 
-    setup();
+    if (!hasInitialErrors()) {
+        if (continueBackup()) {
+            if (continueResize()) {
+                if (continueBusy()) {
+                    validateChange();
+        
+                    connect(this, SIGNAL(changed()),
+                            this, SLOT(validateChange()));
+                    
+                    connect(this, SIGNAL(okClicked()),
+                            this, SLOT(commitPartition()));
 
-    const QString fs = m_old_storage_part->getFilesystem();
-    const PedSector existing_offset = m_existing_part->geom.start - m_max_part_start;
-    const PedSector max_offset = m_max_part_size - m_min_shrink_size;
-    PedSector max_size = m_max_part_size;
-
-    setButtons(KDialog::Ok | KDialog::Cancel | KDialog::Reset);
-    setWindowTitle(i18n("Move or resize a partition"));
-
-    QWidget *const dialog_body = new QWidget(this);
-    setMainWidget(dialog_body);
-    QVBoxLayout *const layout = new QVBoxLayout();
-
-    QLabel *label = new QLabel(i18n("<b>Resize Or Move A Partition</b>"));
-    label->setAlignment(Qt::AlignCenter);
-    layout->addSpacing(5);
-    layout->addWidget(label);
-    layout->addSpacing(5);
-    label = new QLabel(i18n("<b>Device: %1</b>", m_old_storage_part->getName()));
-    label->setAlignment(Qt::AlignHCenter);
-    layout->addWidget(label);
-    layout->addSpacing(5);
-
-
-
-    m_display_graphic = new PartitionGraphic(m_sector_size * max_size, false);
-
-
-    layout->addWidget(m_display_graphic);
-
-
-    if (m_old_storage_part->isPhysicalVolume()) {
-        if (m_old_storage_part->getPhysicalVolume()->isActive()) {
-            max_size -= existing_offset;
-            m_dual_selector = new DualSelectorBox(m_sector_size, m_max_part_size,
-                                                  m_min_shrink_size, max_size, m_existing_part->geom.length,
-                                                  existing_offset, existing_offset, existing_offset);
-        } else {
-            m_dual_selector = new DualSelectorBox(m_sector_size, m_max_part_size,
-                                                  m_min_shrink_size, max_size, m_existing_part->geom.length,
-                                                  0, max_offset, existing_offset);
+                    m_bailout = false;
+                }
+            }
         }
-    } else {
-        m_dual_selector = new DualSelectorBox(m_sector_size, m_max_part_size,
-                                              m_min_shrink_size, max_size, m_existing_part->geom.length,
-                                              0, max_offset, existing_offset);
+    }
+}
+
+bool PartitionChangeDialog::continueBackup()
+{
+    const QString warning2 = i18n("Changes to the partition table can cause unintentional and permanent data"
+                                  " loss. If the partition holds important data, you really should back it"
+                                  " up before continuing.");
+
+    if (KMessageBox::warningContinueCancel(NULL,
+                                           warning2,
+                                           QString(),
+                                           KStandardGuiItem::cont(),
+                                           KStandardGuiItem::cancel(),
+                                           QString(),
+                                           KMessageBox::Dangerous) != KMessageBox::Continue) {
+        return false;
     }
 
-    layout->addWidget(m_dual_selector);
-    m_dual_selector->resetSelectors();
-    validateChange();
+    return true;
+}
 
-    connect(m_dual_selector, SIGNAL(changed()),
-            this, SLOT(validateChange()));
+bool PartitionChangeDialog::continueResize()
+{
+    const QString message = i18n("Shrinking this filesystem is not supported, only growing or"
+                                 " moving it is possible."
+                                 "\n\n"
+                                 "Note: currently only ext2, ext3, ext4 and physical volumes can be shrunk.");
 
-    connect(this, SIGNAL(resetClicked()),
-            m_dual_selector, SLOT(resetSelectors()));
+    const QString warning = i18n("If this partition is enlarged, any filesystem or data on it"
+                                 " will need to be extended separately. Shrinking this"
+                                 " partition is not supported."
+                                 "\n\n"
+                                 "Note: currently only ext2, ext3, ext4 and physical volumes"
+                                 " can be both shrunk and grown,"
+                                 " while Reiserfs, ntfs, jfs and xfs can be grown only.");
 
-    connect(this, SIGNAL(okClicked()),
-            this, SLOT(commitPartition()));
 
-    setDefaultButton(KDialog::Ok);
-    dialog_body->setLayout(layout);
+    const QString fs = m_old_storage_part->getFilesystem();
+
+    if (!(fs_can_reduce(fs) || m_old_storage_part->isPhysicalVolume())) {
+        if(fs_can_extend(fs)) {
+            KMessageBox::information(0, message);
+        } else if (KMessageBox::warningContinueCancel(NULL,
+                                                      warning,
+                                                      QString(),
+                                                      KStandardGuiItem::cont(),
+                                                      KStandardGuiItem::cancel(),
+                                                      QString(),
+                                                      KMessageBox::Dangerous) != KMessageBox::Continue) {
+            return false;
+        }
+    }
+    
+    return true;
+}
+
+bool PartitionChangeDialog::continueBusy()
+{
+    const QString warning = i18n("This partition is on the same device with partitions that are busy or mounted. "
+                                 "If at all possible they should be unmounted before proceeding. Otherise "
+                                 "changes to the partition table may not be recognized by the kernel.");
+
+    if (ped_device_is_busy(getPedPartition()->disk->dev)) {
+        if (KMessageBox::warningContinueCancel(NULL,
+                                               warning,
+                                               QString(),
+                                               KStandardGuiItem::cont(),
+                                               KStandardGuiItem::cancel(),
+                                               QString(),
+                                               KMessageBox::Dangerous) != KMessageBox::Continue) {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 void PartitionChangeDialog::commitPartition()
 {
-    PedSector new_size   = m_dual_selector->getCurrentSize();
-    PedSector new_offset = m_dual_selector->getCurrentOffset();
+    const PedSector new_size   = getNewSize();
+    const PedSector new_offset = getNewOffset();
     bool grow   = false;
     bool shrink = false;
-    bool move   = ((m_max_part_start + new_offset) != m_existing_part->geom.start);
+    bool move   = ((getMaxStart() + new_offset) != getCurrentStart());
 
-    if (new_size < m_existing_part->geom.length) {
+    if (new_size < getCurrentSize()) {
         grow   = false;
         shrink = true;
-    } else if (new_size > m_existing_part->geom.length) {
+    } else if (new_size > getCurrentSize()) {
         grow   = true;
         shrink = false;
     } else {
@@ -168,156 +188,44 @@ void PartitionChangeDialog::commitPartition()
 
 void PartitionChangeDialog::validateChange()
 {
-    const PedSector ONE_MIB   = 0x100000 / m_sector_size;   // sectors per megabyte
-    const PedSector max_start = m_max_part_start;
-    const PedSector max_end   = max_start + m_max_part_size - 1;
-    const PedSector current_size  = m_existing_part->geom.length;
-    const PedSector current_start = m_existing_part->geom.start;
-    const PedSector new_start     = m_max_part_start + m_dual_selector->getCurrentOffset();
-    const PedSector preceding_sectors = m_dual_selector->getCurrentOffset();
-    const PedSector following_sectors = m_max_part_size - (m_dual_selector->getCurrentOffset() + m_dual_selector->getCurrentSize());
-    const PedSector new_size = m_dual_selector->getCurrentSize();
+    const PedSector ONE_MIB   = 0x100000 / getSectorSize();   // sectors per megabyte
+    const PedSector max_start = getMaxStart();
+    const PedSector max_end   = getMaxEnd();
+    const PedSector current_size  = getCurrentSize();
+    const PedSector current_start = getCurrentStart();
+    const PedSector new_start     = getMaxStart() + getNewOffset();
+    const PedSector preceding_sectors = getNewOffset();
+    const PedSector following_sectors = getMaxSize() - (getNewOffset() + getNewSize());
+    const PedSector new_size = getNewSize();
 
-    if (!m_dual_selector->isValid() || (preceding_sectors < 0 || following_sectors < 0)) {
+    if (!isValid() || (preceding_sectors < 0) || (following_sectors < 0)) {
         (button(KDialog::Ok))->setEnabled(false);
         return;
-    }
+    } else {
+        updateGraphicAndLabels();
 
-    bool moving = false;
-    bool resize = false;
-
-    // we don't move if the move is less than 1 megabyte
-    // and check that we have at least 1 meg to spare
-
-    if (fabs(current_start - new_start) >= ONE_MIB){  // moving more than 1 MiB
-        if ((new_start < current_start) && ((current_start - max_start) >= ONE_MIB)) {  // moving left
-            moving = true;
-        } else if ((max_end - (current_start + current_size - 1)) >= ONE_MIB){          // moving right
-            moving = true;
-        }
-    }
-
-    if (fabs(current_size - new_size) >= ONE_MIB){  // resizing by more than 1 MiB?
-        resize = true;
-    }
-
-    if (resize || moving)
-        button(KDialog::Ok)->setEnabled(true);
-    else
-        button(KDialog::Ok)->setEnabled(false);
-
-    updateGraphicAndLabels();
-}
-
-void PartitionChangeDialog::setup()
-{
-    const QString fs = m_old_storage_part->getFilesystem();
-
-    m_existing_part = m_old_storage_part->getPedPartition();
-    m_ped_disk = m_existing_part->disk;
-
-    PedDevice *const ped_device = m_ped_disk->dev;
-
-    const QString warning1 = i18n("This partition is on the same device with partitions that are busy or mounted. "
-                                  "If at all possible they should be unmounted before proceeding. Otherise "
-                                  "changes to the partition table may not be recognized by the kernel.");
-
-    const QString warning2 = i18n("Changes to the partition table can cause unintentional and permanent data"
-                                  " loss. If the partition holds important data, you really should back it"
-                                  " up before continuing.");
-
-    const QString message1 = i18n("Shrinking this filesystem is not supported, only growing or"
-                                  " moving it is possible."
-                                  "\n\n"
-                                  "Note: currently only ext2, ext3, ext4 and physical volumes can be shrunk.");
-
-
-    const QString warning3 = i18n("If this partition is enlarged, any filesystem or data on it"
-                                  " will need to be extended separately. Shrinking this"
-                                  " partition is not supported."
-                                  "\n\n"
-                                  "Note: currently only ext2, ext3, ext4 and physical volumes"
-                                  " can be both shrunk and grown,"
-                                  " while Reiserfs, ntfs, jfs and xfs can be grown only.");
-
-    if (KMessageBox::warningContinueCancel(NULL,
-                                           warning2,
-                                           QString(),
-                                           KStandardGuiItem::cont(),
-                                           KStandardGuiItem::cancel(),
-                                           QString(),
-                                           KMessageBox::Dangerous) != KMessageBox::Continue) {
-        m_bailout = true;
-    }
-
-    if (ped_device_is_busy(ped_device) && !m_bailout) {
-        if (KMessageBox::warningContinueCancel(NULL,
-                                               warning1,
-                                               QString(),
-                                               KStandardGuiItem::cont(),
-                                               KStandardGuiItem::cancel(),
-                                               QString(),
-                                               KMessageBox::Dangerous) != KMessageBox::Continue) {
-            m_bailout = true;
-        }
-    }
-
-    if (!m_bailout){
-        if (!(fs == "ext2" || fs == "ext3" || fs == "ext4" || m_old_storage_part->isPhysicalVolume())){
-            if((fs == "jfs") || (fs == "xfs") || (fs == "ntfs") || (fs == "reiserfs")){
-                KMessageBox::information(0, message1);
-            } else if (KMessageBox::warningContinueCancel(NULL,
-                                                          warning3,
-                                                          QString(),
-                                                          KStandardGuiItem::cont(),
-                                                          KStandardGuiItem::cancel(),
-                                                          QString(),
-                                                          KMessageBox::Dangerous) != KMessageBox::Continue) {
-                m_bailout = true;
+        bool moving = false;
+        bool resize = false;
+        
+        // we don't move if the move is less than 1 megabyte
+        // and check that we have at least 1 meg to spare
+        
+        if (fabs(current_start - new_start) >= ONE_MIB){  // moving more than 1 MiB
+            if ((new_start < current_start) && ((current_start - max_start) >= ONE_MIB)) {  // moving left
+                moving = true;
+            } else if ((max_end - (current_start + current_size - 1)) >= ONE_MIB){          // moving right
+                moving = true;
             }
         }
-    }
-
-    /* Switch off cylinder alignment */
-    PedDiskFlag cylinder_flag = ped_disk_flag_get_by_name("cylinder_alignment");
-    if (ped_disk_is_flag_available(m_ped_disk, cylinder_flag))
-        ped_disk_set_flag(m_ped_disk, cylinder_flag, 0);
-
-    PedSector max_part_end;
-    getMaximumPartition(m_max_part_start, max_part_end, m_sector_size);
-    m_max_part_size = max_part_end - m_max_part_start + 1;
-
-    if (m_existing_part->type & PED_PARTITION_LOGICAL)
-        m_logical = true;
-    else
-        m_logical = false;
-
-    if (m_old_storage_part->isPhysicalVolume()) {
-
-        PhysVol *const pv = m_old_storage_part->getPhysicalVolume();
-        const long mda_count = pv->getMdaCount();
-        const long long extent_size = pv->getVg()->getExtentSize();
-        const long long mda_extents = (pv->getMdaSize() / extent_size) + 1;
-
-        m_min_shrink_size = 1 + (mda_extents * mda_count) + pv->getLastUsedExtent();
-        m_min_shrink_size *= extent_size;
-        m_min_shrink_size /= m_sector_size;
-    } else {
-        if (fs_can_reduce(fs))
-            m_min_shrink_size = get_min_fs_size(ped_partition_get_path(m_existing_part), fs) / m_sector_size;
+        
+        if (fabs(current_size - new_size) >= ONE_MIB){  // resizing by more than 1 MiB?
+            resize = true;
+        }
+        
+        if (resize || moving)
+            button(KDialog::Ok)->setEnabled(true);
         else
-            m_min_shrink_size = m_existing_part->geom.length;
-    }
-
-    const PedSector TWO_MIB = 0x200000 / m_sector_size;
-
-    if (m_min_shrink_size == 0)                            // 0 means we can't shrink it
-        m_min_shrink_size = m_existing_part->geom.length;
-    else if (m_min_shrink_size <= TWO_MIB) {               // Don't allow shrinking below 2 MiB
-        if (m_existing_part->geom.length > TWO_MIB)
-            m_min_shrink_size  = TWO_MIB;
-        else
-            m_min_shrink_size  = m_existing_part->geom.length;
+            button(KDialog::Ok)->setEnabled(false);
     }
 }
 
@@ -325,9 +233,9 @@ bool PartitionChangeDialog::movefs(PedSector from_start, PedSector to_start, Ped
 {
     const long long blocksize = 8000;    // sectors moved in each block
 
-    PedDevice *const device = m_ped_disk->dev;
+    PedDevice *const device = getPedPartition()->disk->dev;
 
-    char *const buff = static_cast<char *>(malloc(blocksize * m_sector_size)) ;
+    char *const buff = static_cast<char *>(malloc(blocksize * getSectorSize())) ;
 
     const long long blockcount = length / blocksize;
     const long long extra = length % blocksize;
@@ -415,31 +323,31 @@ bool PartitionChangeDialog::shrinkPartition()
 {
     hide();
 
-    const PedSector ONE_MIB  = 0x100000 / m_sector_size;   // sectors per megabyte
-    PedDevice *const device = m_ped_disk->dev;
-    const PedSector current_start = m_existing_part->geom.start;
-    const PedSector current_size  = m_existing_part->geom.length;
+    const PedSector ONE_MIB  = 0x100000 / getSectorSize();   // sectors per megabyte
+    PedDisk *const disk = getPedPartition()->disk;
+    PedDevice *const device = disk->dev;
+    const PedSector current_start = getCurrentStart();
+    const PedSector current_size  = getCurrentSize();
     const QString fs   = m_old_storage_part->getFilesystem();
-    const QString path = ped_partition_get_path(m_existing_part);
     const bool is_pv   = m_old_storage_part->isPhysicalVolume();
-    PedSector new_size = m_dual_selector->getCurrentSize();
+    PedSector new_size = getNewSize();
 
     if (new_size >= current_size)
         return false;
 
-    if (new_size < m_min_shrink_size)
-        new_size = m_min_shrink_size;
-    else if (new_size > m_max_part_size)
-        new_size = m_max_part_size;
+    if (new_size < getMinSize())
+        new_size = getMinSize();
+    else if (new_size > getMaxSize())
+        new_size = 1 + getMaxSize();
 
-    PedSector reduced_size = m_dual_selector->getCurrentSize();
+    PedSector reduced_size = getNewSize();
     if (is_pv)
-        reduced_size = pv_reduce(path, new_size * m_sector_size);
+        reduced_size = pv_reduce(getPath(), new_size * getSectorSize());
     else
-        reduced_size = fs_reduce(path, new_size * m_sector_size, fs);
+        reduced_size = fs_reduce(getPath(), new_size * getSectorSize(), fs);
 
-    new_size = reduced_size / m_sector_size;
-    if (reduced_size % m_sector_size)
+    new_size = reduced_size / getSectorSize();
+    if (reduced_size % getSectorSize())
         new_size++;
 
     if (new_size == 0)   // The shrink failed
@@ -456,7 +364,7 @@ bool PartitionChangeDialog::shrinkPartition()
     PedSector maximum_size;
     PedSector minimum_size = new_size;
 
-    if (current_start + new_size - 1 > m_max_part_start + m_max_part_size - 1) {
+    if (current_start + new_size - 1 > getMaxEnd()) {
         end_alignment = ped_alignment_new(0, 1);
         end_range = ped_geometry_new(device, current_start + new_size - 1, 1);
         maximum_size = minimum_size;
@@ -470,11 +378,11 @@ bool PartitionChangeDialog::shrinkPartition()
     qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
 
     PedConstraint *constraint = ped_constraint_new(start_alignment, end_alignment,
-                                start_range, end_range,
-                                minimum_size, maximum_size);
+                                                   start_range, end_range,
+                                                   minimum_size, maximum_size);
 
-    int success = ped_disk_set_partition_geom(m_ped_disk, m_existing_part, constraint,
-                  current_start, current_start + maximum_size);
+    int success = ped_disk_set_partition_geom(disk, getPedPartition(), constraint,
+                                              current_start, current_start + maximum_size);
 
     qApp->restoreOverrideCursor();
     qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
@@ -489,7 +397,7 @@ bool PartitionChangeDialog::shrinkPartition()
         KMessageBox::error(0, i18n("Partition shrink failed"));
         return false;
     } else {
-        pedCommitAndWait(m_ped_disk);
+        pedCommitAndWait(disk);
         return true;
     }
 }
@@ -498,20 +406,21 @@ bool PartitionChangeDialog::growPartition()
 {
     hide();
 
-    const PedSector ONE_MIB  = 0x100000 / m_sector_size;   // sectors per megabyte
-    PedDevice *const device = m_ped_disk->dev;
+    const PedSector ONE_MIB  = 0x100000 / getSectorSize();   // sectors per megabyte
+    PedDisk *const disk = getPedPartition()->disk;
+    PedDevice *const device = disk->dev;
     const QString fs = m_old_storage_part->getFilesystem();
     const bool is_pv = m_old_storage_part->isPhysicalVolume();
-    const PedSector current_start = m_existing_part->geom.start;
-    const PedSector current_size  = m_existing_part->geom.length;
-    const PedSector max_end   = m_max_part_start + m_max_part_size - 1;
-    const PedSector max_start = m_max_part_start;
+    const PedSector current_start = getCurrentStart();
+    const PedSector current_size  = getCurrentSize();
+    const PedSector max_end   = getMaxEnd();
+    const PedSector max_start = getMaxStart();
 
     int success;
     PedSector min_new_size,
               max_new_size;  // max desired size
 
-    PedSector proposed_new_size = m_dual_selector->getCurrentSize();
+    PedSector proposed_new_size = getNewSize();
 
     if ((proposed_new_size - 1 + current_start) > max_end)
         proposed_new_size = 1 + max_end - current_start;
@@ -558,7 +467,7 @@ bool PartitionChangeDialog::growPartition()
         return false;
     }
 
-    success = ped_disk_set_partition_geom(m_ped_disk, m_existing_part, constraint, max_start, max_end);
+    success = ped_disk_set_partition_geom(disk, getPedPartition(), constraint, max_start, max_end);
     qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
     qApp->restoreOverrideCursor();
 
@@ -573,40 +482,30 @@ bool PartitionChangeDialog::growPartition()
         // Here we wait for linux and udev to re-read the partition table before doing anything else.
         // Otherwise the resize program will fail.
 
-        pedCommitAndWait(m_ped_disk);
+        pedCommitAndWait(disk);
 
         if (is_pv)
-            return pv_extend(ped_partition_get_path(m_existing_part));
+            return pv_extend(getPath());
         else if (fs_can_extend(fs))
-            return fs_extend(ped_partition_get_path(m_existing_part), fs, m_old_storage_part->getMountPoints());
+            return fs_extend(getPath(), fs, m_old_storage_part->getMountPoints());
         else
             return true;
     }
-}
-
-void PartitionChangeDialog::updateGraphicAndLabels()
-{
-    const long long change = m_sector_size * (m_dual_selector->getCurrentSize() - m_existing_part->geom.length);
-    const long long move = m_sector_size * (m_dual_selector->getCurrentOffset() - (m_existing_part->geom.start - m_max_part_start));
-    const long long current = m_dual_selector->getCurrentSize() * m_sector_size;
-    const long long offset = m_dual_selector->getCurrentOffset() * m_sector_size;
-
-    m_display_graphic->update(current, offset, move, change);
-    m_display_graphic->repaint();
 }
 
 bool PartitionChangeDialog::movePartition()
 {
     hide();
 
-    PedDevice *const device = m_ped_disk->dev;
+    PedDisk *const disk = getPedPartition()->disk;
+    PedDevice *const device = disk->dev;
 
-    const PedSector ONE_MIB   = 0x100000 / m_sector_size;   // sectors per megabyte
-    const PedSector max_start = m_max_part_start;
-    const PedSector max_end   = max_start + m_max_part_size - 1;
-    const PedSector current_size  = m_existing_part->geom.length;
-    PedSector current_start = m_existing_part->geom.start;
-    PedSector new_start     = m_max_part_start + m_dual_selector->getCurrentOffset();
+    const PedSector ONE_MIB   = 0x100000 / getSectorSize();   // sectors per megabyte
+    const PedSector max_start = getMaxStart();
+    const PedSector max_end   = getMaxEnd();
+    const PedSector current_size  = getCurrentSize();
+    PedSector current_start = getCurrentStart();
+    PedSector new_start     = max_start + getNewOffset();
 
     // don't move if the move is less than 1 megabyte
     // and check that we have at least 1 meg to spare
@@ -647,12 +546,12 @@ bool PartitionChangeDialog::movePartition()
     int success = 0;
 
     if (constraint_1MiB) {
-        success = ped_disk_set_partition_geom(m_ped_disk, m_existing_part, constraint_1MiB,
+        success = ped_disk_set_partition_geom(disk, getPedPartition(), constraint_1MiB,
                                               max_start, max_end);
     }
 
     ped_exception_set_handler(my_handler);
-    current_start = m_existing_part->geom.start;
+    current_start = getPedPartition()->geom.start;  // getCurrentStart() won't return the correct value here
     qApp->restoreOverrideCursor();
     qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
 
@@ -669,31 +568,9 @@ bool PartitionChangeDialog::movePartition()
         if (!movefs(old_start, current_start, old_size)) {
             return false;
         } else {
-            pedCommitAndWait(m_ped_disk);
+            pedCommitAndWait(disk);
             return true;
         }
-    }
-}
-
-/* The following function waits for udev to acknowledge the partion changes before exiting */
-
-bool PartitionChangeDialog::pedCommitAndWait(PedDisk *disk)
-{
-    QStringList args;
-
-    qApp->setOverrideCursor(Qt::WaitCursor);
-    qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
-
-    if (!ped_disk_commit(disk)) {
-        qApp->restoreOverrideCursor();
-        qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
-        return false;
-    } else {
-        args << "udevadm" << "settle";
-        ProcessProgress wait_settle(args);
-        qApp->restoreOverrideCursor();
-        qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
-        return true;
     }
 }
 
@@ -701,49 +578,3 @@ bool PartitionChangeDialog::bailout()
 {
     return m_bailout;
 }
-
-void PartitionChangeDialog::getMaximumPartition(PedSector &start, PedSector &end, PedSector &sectorSize)
-{
-    PedPartition *const part = m_old_storage_part->getPedPartition();
-    PedDevice  *const device = part->disk->dev;
-    PedDisk    *const disk   = part->disk;
-    sectorSize = device->sector_size;
-    const PedSector ONE_MIB = 0x100000 / m_sector_size;
-
-    PedSector const old_start = part->geom.start;
-    PedSector const old_end = part->geom.length + old_start - 1;
-
-    PedDiskFlag cylinder_flag = ped_disk_flag_get_by_name("cylinder_alignment");
-    if (ped_disk_is_flag_available(disk, cylinder_flag))
-        ped_disk_set_flag(disk, cylinder_flag, 0);
-
-    PedConstraint *constraint = ped_constraint_any(device);
-    PedGeometry *max_geometry = ped_disk_get_max_partition_geometry(disk, part, constraint);
-    start = max_geometry->start;
-    end = max_geometry->length + max_geometry->start - 1;
-    ped_constraint_destroy(constraint);
-
-    PedAlignment *const start_align  = ped_alignment_new(0, ONE_MIB);
-    PedAlignment *const end_align    = ped_alignment_new(-1, ONE_MIB);
-    PedGeometry  *const start_range  = ped_geometry_new(device, start, max_geometry->length);
-    PedGeometry  *const end_range    = ped_geometry_new(device, start, max_geometry->length);
-
-    constraint = ped_constraint_new(start_align, end_align,
-                                    start_range, end_range,
-                                    1, max_geometry->length);
-
-    ped_geometry_destroy(max_geometry);
-    max_geometry = ped_disk_get_max_partition_geometry(disk, part, constraint);
-    start = max_geometry->start;
-    end = max_geometry->length + max_geometry->start - 1;
-
-    // Don't return a size smaller than partition already is
-    if (start > old_start)
-        start = old_start;
-    if (end < old_end)
-        end = old_end;
-
-    ped_constraint_destroy(constraint);
-    ped_geometry_destroy(max_geometry);
-}
-
