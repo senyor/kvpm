@@ -18,6 +18,8 @@
 #include <sys/types.h>
 #include <kde_file.h>
 
+#include <QDebug>
+
 #include "fsdata.h"
 #include "fsprobe.h"
 #include "misc.h"
@@ -71,6 +73,11 @@ StoragePartition::StoragePartition(PedPartition *const part,
         m_partition_type = "logical";
         m_is_logical = true;
         m_partition_path = ped_partition_get_path(part);
+
+
+        // NOTE: the device paths in PED for freespace are always numered "1" (like /dev/sda-1).
+        // We change the "1" to an incremented number for each expanse of freespace found.
+
     } else if ((m_ped_type & PED_PARTITION_LOGICAL) && (m_ped_type & PED_PARTITION_FREESPACE)) {
         m_partition_type = "freespace (logical)";
         m_partition_path = ped_partition_get_path(part);
