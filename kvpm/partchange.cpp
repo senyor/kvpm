@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2009, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2009, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -15,7 +15,6 @@
 
 #include "partchange.h"
 
-#include "dualselectorbox.h"
 #include "fsextend.h"
 #include "fsreduce.h"
 #include "pedexceptions.h"
@@ -29,8 +28,6 @@
 
 #include <math.h>
 
-#include <KComboBox>
-#include <KLineEdit>
 #include <KApplication>
 #include <KButtonGroup>
 #include <KGlobal>
@@ -39,8 +36,6 @@
 #include <KPushButton>
 
 #include <QDebug>
-#include <QLabel>
-#include <QGroupBox>
 
 
 
