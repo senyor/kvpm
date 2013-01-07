@@ -188,10 +188,10 @@ void PartitionChangeDialog::validateChange()
     const PedSector max_end   = getMaxEnd();
     const PedSector current_size  = getCurrentSize();
     const PedSector current_start = getCurrentStart();
-    const PedSector new_start     = getMaxStart() + getNewOffset();
     const PedSector preceding_sectors = getNewOffset();
-    const PedSector following_sectors = getMaxSize() - (getNewOffset() + getNewSize());
-    const PedSector new_size = getNewSize();
+    const PedSector new_start = max_start + preceding_sectors;
+    const PedSector new_size  = getNewSize();
+    const PedSector following_sectors = getMaxSize() - (preceding_sectors + new_size);
 
     if (!isValid() || (preceding_sectors < 0) || (following_sectors < 0)) {
         (button(KDialog::Ok))->setEnabled(false);

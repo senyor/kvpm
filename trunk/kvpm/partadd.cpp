@@ -80,34 +80,34 @@ QGroupBox* PartitionAddDialog::buildTypeWidget()
     m_type_combo = new KComboBox;
     PedPartition *const free_space = getPedPartition();
 
-    bool logical_freespace;      // true if we are inside an extended partition
-    bool extended_allowed;       // true if we can create an extended partition here
+    bool in_extended;    // true if we are inside an extended partition
+    bool extended_ok;    // true if we can create an extended partition here
 
-    /* check to see if partition table supports extended
-       partitions and if it already has one */
+    // check to see if partition table supports extended
+    // partitions and if it already has one
 
     PedDisk *const disk  = getPedPartition()->disk;
 
     if ((PED_DISK_TYPE_EXTENDED & disk->type->features) && (!ped_disk_extended_partition(disk)))
-        extended_allowed = true;
+        extended_ok = true;
     else
-        extended_allowed = false;
+        extended_ok = false;
 
     if (free_space->type & PED_PARTITION_LOGICAL)
-        logical_freespace = true;
+        in_extended = true;
     else if (free_space->type & PED_PARTITION_EXTENDED)
-        logical_freespace = true;
+        in_extended = true;
     else
-        logical_freespace = false;
+        in_extended = false;
 
     m_type_combo->insertItem(0, i18n("Primary"));
     m_type_combo->insertItem(1, i18n("Extended"));
 
-    if (logical_freespace) {
+    if (in_extended) {
         m_type_combo->insertItem(2, i18n("Logical"));
         m_type_combo->setEnabled(false);
         m_type_combo->setCurrentIndex(2);
-    } else if (!extended_allowed) {
+    } else if (!extended_ok) {
         m_type_combo->setEnabled(false);
         m_type_combo->setCurrentIndex(0);
     }
