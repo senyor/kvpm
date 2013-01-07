@@ -93,13 +93,13 @@ PartitionDialogBase::PartitionDialogBase(StoragePartition *const partition, QWid
                 m_bailout = true;
             }
         } else {
-            const PedSector current_end = (getNewSize() + getCurrentStart()) - 1;
+            const PedSector current_end = (getCurrentSize() + getCurrentStart()) - 1;
 
             m_min_shrink_size = setMinSize();
             setMaxPart(m_max_start, m_max_end);
 
-            if (((getNewSize() - getMinSize()) < ONE_MIB) && 
-                ((getMaxEnd() - current_end) < ONE_MIB)       &&
+            if (((getCurrentSize() - getMinSize()) < ONE_MIB) && 
+                ((getMaxEnd() - current_end) < ONE_MIB)   &&
                 ((getCurrentStart() - getMaxStart()) < ONE_MIB)) {
 
                 KMessageBox::error(0, i18n("Not enough free space to move or extend this partition and it can not be shrunk"));
@@ -404,7 +404,7 @@ void PartitionDialogBase::insertWidget(QWidget *widget)
 }
 
 /* The following function waits for udev to acknowledge the partion changes before exiting
-   It also sets what getNewSize() and getCurrentStart() return to the new current values  */
+   It also sets what getCurrentSize() and getCurrentStart() return to the new current values  */
 
 bool PartitionDialogBase::pedCommitAndWait(PedDisk *disk)
 {
