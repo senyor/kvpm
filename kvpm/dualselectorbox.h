@@ -39,8 +39,8 @@ public:
 
     DualSelectorBox(const long long sectorSize, const long long totalSpace, QWidget *parent = 0);
 
-    long long getCurrentSize();
-    long long getCurrentOffset();
+    long long getNewSize();
+    long long getNewOffset();
     bool isValid();
 
 public slots:
