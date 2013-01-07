@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -164,7 +164,7 @@ void LVReduceDialog::doShrink()
 {
     QStringList lv_arguments;
     const QString fs =  m_lv->getFilesystem();
-    const long long target_size = m_size_selector->getCurrentSize() * m_vg->getExtentSize();
+    const long long target_size = m_size_selector->getNewSize() * m_vg->getExtentSize();
     long long new_size;
 
     hide();

@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -159,7 +159,7 @@ SizeSelectorBox::SizeSelectorBox(long long unitSize, long long minSize, long lon
             this, SLOT(updateEdit()));
 
     if (m_min_size == m_max_size) {
-        setCurrentSize(m_min_size);
+        setNewSize(m_min_size);
 
         if (m_is_offset) {
             m_offset_box->setChecked(true);
@@ -215,7 +215,7 @@ void SizeSelectorBox::setToSlider(int value)
     updateEdit();
 }
 
-bool SizeSelectorBox::setCurrentSize(long long size)
+bool SizeSelectorBox::setNewSize(long long size)
 {
     if (isLocked()) {
         return false;
@@ -257,7 +257,7 @@ void SizeSelectorBox::setConstrainedMax(long long max)
 
     if (!m_is_volume) {
         if (m_current_size > m_constrained_max) {
-            setCurrentSize(m_constrained_max);
+            setNewSize(m_constrained_max);
         }
     }
 
@@ -265,7 +265,7 @@ void SizeSelectorBox::setConstrainedMax(long long max)
     updateSlider();
 }
 
-long long  SizeSelectorBox::getCurrentSize()
+long long  SizeSelectorBox::getNewSize()
 {
     return m_current_size;
 }

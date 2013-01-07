@@ -409,16 +409,16 @@ bool LvCreateDialogBase::getUdev()
 bool LvCreateDialogBase::isLow()
 { 
     if (m_size_selector != NULL) {
-        if (m_size_selector->getCurrentSize() == -1) {  // if the size selector line edit is empty
+        if (m_size_selector->getNewSize() == -1) {  // if the size selector line edit is empty
             return false;
         } else if (!m_size_selector->isValid()) {
             if (m_extend) {
-                if (m_size_selector->getCurrentSize() >= m_size_selector->getMinimumSize())
+                if (m_size_selector->getNewSize() >= m_size_selector->getMinimumSize())
                     return false;
                 else
                     return true;
             } else {
-                if (m_size_selector->getCurrentSize() >= 0)
+                if (m_size_selector->getNewSize() >= 0)
                     return false;
                 else
                     return true;
@@ -476,12 +476,12 @@ bool LvCreateDialogBase::isValid()
         valid = true;
     } else if (m_size_selector->isValid()) {
         if (m_extend) {
-            if (m_size_selector->getCurrentSize() > m_size_selector->getMinimumSize())
+            if (m_size_selector->getNewSize() > m_size_selector->getMinimumSize())
                 valid = true;
             else
                 valid = false;
         } else {
-            if (m_size_selector->getCurrentSize() > 0)
+            if (m_size_selector->getNewSize() > 0)
                 valid = true;
             else
                 valid = false;
@@ -519,7 +519,7 @@ QString LvCreateDialogBase::getMinor()
 }
 long long LvCreateDialogBase::getSelectorExtents()
 {
-    return m_size_selector->getCurrentSize();
+    return m_size_selector->getNewSize();
 }
 
 QString LvCreateDialogBase::getName()
@@ -646,7 +646,7 @@ void LvCreateDialogBase::setSizeLabels()
 
     if (m_size_selector != NULL) {
 
-        const long long extend = m_size_selector->getCurrentSize() - m_size_selector->getMinimumSize(); 
+        const long long extend = m_size_selector->getNewSize() - m_size_selector->getMinimumSize(); 
         const long long extent_size = m_vg->getExtentSize();
 
         if (m_size_selector->usingBytes()) {

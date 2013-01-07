@@ -93,12 +93,12 @@ PartitionDialogBase::PartitionDialogBase(StoragePartition *const partition, QWid
                 m_bailout = true;
             }
         } else {
-            const PedSector current_end = (getCurrentSize() + getCurrentStart()) - 1;
+            const PedSector current_end = (getNewSize() + getCurrentStart()) - 1;
 
             m_min_shrink_size = setMinSize();
             setMaxPart(m_max_start, m_max_end);
 
-            if (((getCurrentSize() - getMinSize()) < ONE_MIB) && 
+            if (((getNewSize() - getMinSize()) < ONE_MIB) && 
                 ((getMaxEnd() - current_end) < ONE_MIB)       &&
                 ((getCurrentStart() - getMaxStart()) < ONE_MIB)) {
 
@@ -181,14 +181,14 @@ void PartitionDialogBase::buildDialog()
 
 void PartitionDialogBase::updateGraphicAndLabels()
 {
-    const long long current = m_dual_selector->getCurrentSize() * m_sector_size;
-    const long long offset = m_dual_selector->getCurrentOffset() * m_sector_size;
+    const long long current = m_dual_selector->getNewSize() * m_sector_size;
+    const long long offset = m_dual_selector->getNewOffset() * m_sector_size;
 
     if (m_is_new) {
         m_display_graphic->update(current, offset);
     } else {
-        const long long change = m_sector_size * (m_dual_selector->getCurrentSize() - m_existing_part->geom.length);
-        const long long move = m_sector_size * (m_dual_selector->getCurrentOffset() - (m_existing_part->geom.start - m_max_start));
+        const long long change = m_sector_size * (m_dual_selector->getNewSize() - m_existing_part->geom.length);
+        const long long move = m_sector_size * (m_dual_selector->getNewOffset() - (m_existing_part->geom.start - m_max_start));
 
         m_display_graphic->update(current, offset, move, change);
     }
@@ -301,12 +301,12 @@ void PartitionDialogBase::setMaxPart(PedSector &start, PedSector &end)
 
 PedSector PartitionDialogBase::getNewOffset()
 {
-    return m_dual_selector->getCurrentOffset();
+    return m_dual_selector->getNewOffset();
 }
 
 PedSector PartitionDialogBase::getNewSize()
 {
-    return m_dual_selector->getCurrentSize();
+    return m_dual_selector->getNewSize();
 }
 
 PedSector PartitionDialogBase::getSectorSize()
@@ -404,7 +404,7 @@ void PartitionDialogBase::insertWidget(QWidget *widget)
 }
 
 /* The following function waits for udev to acknowledge the partion changes before exiting
-   It also sets what getCurrentSize() and getCurrentStart() return to the new current values  */
+   It also sets what getNewSize() and getCurrentStart() return to the new current values  */
 
 bool PartitionDialogBase::pedCommitAndWait(PedDisk *disk)
 {

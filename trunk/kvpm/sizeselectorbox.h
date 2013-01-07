@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2011, 2012, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -62,13 +62,13 @@ public:
     SizeSelectorBox(long long unitSize, long long minSize, long long maxSize, long long initialSize,  // size in extents
                     bool isVolume, bool isOffset, bool isNew = false, bool startLocked = false, QWidget *parent = 0);
 
-    long long getCurrentSize();
+    long long getNewSize();
     long long getMinimumSize();
     long long getMaximumSize();
     void resetToInitial();
     void setConstrainedMax(long long max);
     bool isLocked();
-    bool setCurrentSize(long long size);  // return false if size is outside min or max
+    bool setNewSize(long long size);  // return false if size is outside min or max
     bool isValid();
     bool usingBytes(); // Whether the combo set to bytes (MiB, GiB or TiB) vs. extents
 
