@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2009, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2009, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -15,31 +15,25 @@
 
 #include "partadd.h"
 
-#include "dualselectorbox.h"
-#include "partitiongraphic.h"
 #include "pedexceptions.h"
-#include "sizeselectorbox.h"
 #include "storagepartition.h"
 
 #include <KComboBox>
 #include <KConfigSkeleton>
 #include <KGlobal>
 #include <KLocale>
-#include <KLineEdit>
 #include <KMessageBox>
 
-#include <QCheckBox>
 #include <QDebug>
-#include <QFrame>
 #include <QGroupBox>
 #include <QLabel>
 #include <QVBoxLayout>
 
 
-/*
-   The "partition" we get here is usually a ped pointer to a the freespace
-   between partitions. It can also be an *empty* extended partition however.
-*/
+
+//   The "partition" we get here is usually a ped pointer to a the freespace
+//   between partitions. It can also be an *empty* extended partition however.
+
 
 PartitionAddDialog::PartitionAddDialog(StoragePartition *const partition, QWidget *parent)
     : PartitionDialogBase(partition, parent),

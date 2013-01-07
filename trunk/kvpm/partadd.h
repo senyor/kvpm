@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2009, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2009, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -21,16 +21,9 @@
 
 #include "partbase.h"
 
-class QFrame;
-class KLineEdit;
 class KComboBox;
 class QGroupBox;
-class QCheckBox;
-class QLabel;
 
-class QDoubleValidator;
-class PartitionGraphic;
-class DualSelectorBox;
 class StoragePartition;
 
 
