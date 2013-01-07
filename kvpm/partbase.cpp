@@ -78,6 +78,7 @@ PartitionDialogBase::PartitionDialogBase(StoragePartition *const partition, QWid
         
         PedDisk *const disk = m_existing_part->disk;
         m_sector_size = disk->dev->sector_size;
+        const PedSector ONE_MIB   = 0x100000 / getSectorSize();
         
         if (m_is_new) {
             m_min_shrink_size = 1;
@@ -87,17 +88,28 @@ PartitionDialogBase::PartitionDialogBase(StoragePartition *const partition, QWid
                 m_bailout = true;
             }
 
-            if (getMaxSize() * getSectorSize() < 0x300000) { // 3 MiB
-                KMessageBox::error(0, i18n("Not enough usable space for a new partition"));
+            if (getMaxSize() < (3 * ONE_MIB)) {
+                KMessageBox::error(0, i18n("Not enough free space for a new partition"));
                 m_bailout = true;
             }
         } else {
+            const PedSector current_end = (getCurrentSize() + getCurrentStart()) - 1;
+
             m_min_shrink_size = setMinSize();
             setMaxPart(m_max_start, m_max_end);
+
+            if (((getCurrentSize() - getMinSize()) < ONE_MIB) && 
+                ((getMaxEnd() - current_end) < ONE_MIB)       &&
+                ((getCurrentStart() - getMaxStart()) < ONE_MIB)) {
+
+                KMessageBox::error(0, i18n("Not enough free space to move or extend this partition and it can not be shrunk"));
+                m_bailout = true;
+            }
+
             m_path = QString(ped_partition_get_path(m_existing_part));
         }
     }        
-    
+
     if (!m_bailout) {
         buildDialog();
     }
