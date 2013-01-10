@@ -227,91 +227,107 @@ void PartitionChangeDialog::validateChange()
 bool PartitionChangeDialog::movefs(PedSector from_start, PedSector to_start, PedSector length)
 {
     const long long blocksize = 8000;    // sectors moved in each block
-
     PedDevice *const device = getPedPartition()->disk->dev;
-
-    char *const buff = static_cast<char *>(malloc(blocksize * getSectorSize())) ;
 
     const long long blockcount = length / blocksize;
     const long long extra = length % blocksize;
 
-    ped_device_open(device);
+    bool success = true;
 
-    ProgressBox *const progress_box = TopWindow::getProgressBox();
-    progress_box->setRange(0, blockcount);
-    progress_box->setText(i18n("Moving data"));
-    int event_timer = 0;
-    qApp->setOverrideCursor(Qt::WaitCursor);
-    qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
+    if (ped_device_open(device)) {
+        void *const buff = malloc(blocksize * getSectorSize());
+        
+        ProgressBox *const progress_box = TopWindow::getProgressBox();
+        progress_box->setRange(0, blockcount);
+        progress_box->setText(i18n("Moving data"));
+        qApp->setOverrideCursor(Qt::WaitCursor);
+        qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
+        
+        if (to_start < from_start) {                       // moving left
+            for (long long x = 0; x < blockcount; x++) {
+                if ( !(x % 5) )
+                    qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
 
-    if (to_start < from_start) {                       // moving left
-        for (long long x = 0; x < blockcount; x++) {
-            event_timer++;
-            if (event_timer > 5) {
-                qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
-                event_timer = 0;
+                if (!ped_device_read(device, buff, from_start + (x * blocksize), blocksize)) {
+                    qApp->restoreOverrideCursor();
+                    KMessageBox::error(0, i18n("Move failed: could not read from device"));
+                    success = false;
+                    break;
+                } else if (!ped_device_write(device, buff, to_start + (x * blocksize), blocksize)) {
+                    qApp->restoreOverrideCursor();
+                    KMessageBox::error(0, i18n("Move failed: could not write to device"));
+                    success = false;
+                    break;
+                }
+                progress_box->setValue(x);
             }
-            if (! ped_device_read(device, buff, from_start + (x * blocksize), blocksize)) {
+
+            if (success) {
+                if (!ped_device_read(device,  buff, from_start + (blockcount * blocksize), extra)) {
+                    qApp->restoreOverrideCursor();
+                    KMessageBox::error(0, i18n("Move failed: could not read from device"));
+                    success = false;
+                } else if (!ped_device_write(device, buff, to_start + (blockcount * blocksize), extra)) {
+                    qApp->restoreOverrideCursor();
+                    KMessageBox::error(0, i18n("Move failed: could not write to device"));
+                    success = false;
+                }
+            }
+        } else {                                           // moving right
+            if (!ped_device_read(device,  buff, from_start + (blockcount * blocksize), extra)) {
                 qApp->restoreOverrideCursor();
                 KMessageBox::error(0, i18n("Move failed: could not read from device"));
-                return false;
-            }
-            if (! ped_device_write(device, buff, to_start   + (x * blocksize), blocksize)) {
+                success = false;
+            } else if (!ped_device_write(device, buff, to_start   + (blockcount * blocksize), extra)) {
                 qApp->restoreOverrideCursor();
                 KMessageBox::error(0, i18n("Move failed: could not write to device"));
-                return false;
+                success = false;
             }
-            progress_box->setValue(x);
-        }
-        if (! ped_device_read(device,  buff, from_start + (blockcount * blocksize), extra)) {
-            qApp->restoreOverrideCursor();
-            KMessageBox::error(0, i18n("Move failed: could not read from device"));
-            return false;
-        }
-        if (! ped_device_write(device, buff, to_start   + (blockcount * blocksize), extra)) {
-            qApp->restoreOverrideCursor();
-            KMessageBox::error(0, i18n("Move failed: could not write to device"));
-            return false;
-        }
-    } else {                                           // moving right
-        if (! ped_device_read(device,  buff, from_start + (blockcount * blocksize), extra)) {
-            qApp->restoreOverrideCursor();
-            KMessageBox::error(0, i18n("Move failed: could not read from device"));
-            return false;
-        }
-        if (! ped_device_write(device, buff, to_start   + (blockcount * blocksize), extra)) {
-            qApp->restoreOverrideCursor();
-            KMessageBox::error(0, i18n("Move failed: could not write to device"));
-            return false;
-        }
-        for (long long x = blockcount - 1; x >= 0 ; x--) {
-            event_timer++;
-            if (event_timer > 5) {
-                qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
-                event_timer = 0;
+
+            if (success) {
+                for (long long x = blockcount - 1; x >= 0 ; x--) {
+                    if ( !(x % 5) )
+                        qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
+
+                    if (!ped_device_read(device, buff, from_start + (x * blocksize), blocksize)) {
+                        qApp->restoreOverrideCursor();
+                        KMessageBox::error(0, i18n("Move failed: could not read from device"));
+                        success = false;
+                        break;
+                    } else if (!ped_device_write(device, buff, to_start   + (x * blocksize), blocksize)) {
+                        qApp->restoreOverrideCursor();
+                        KMessageBox::error(0, i18n("Move failed: could not write to device"));
+                        success = false;
+                        break;
+                    }
+                    progress_box->setValue(blockcount - x);
+                }
             }
-            if (! ped_device_read(device, buff, from_start + (x * blocksize), blocksize)) {
-                qApp->restoreOverrideCursor();
-                KMessageBox::error(0, i18n("Move failed: could not read from device"));
-                return false;
-            }
-            if (! ped_device_write(device, buff, to_start   + (x * blocksize), blocksize)) {
-                qApp->restoreOverrideCursor();
-                KMessageBox::error(0, i18n("Move failed: could not write to device"));
-                return false;
-            }
-            progress_box->setValue(blockcount - x);
         }
+        
+        free(buff);
+
+        progress_box->reset();
+        progress_box->setRange(0, 0);
+        qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
+
+        progress_box->setText(i18n("Syncing device"));
+        qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
+        if (!ped_device_sync(device))
+            success = false;
+
+        qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
+        if (!ped_device_close(device))
+            success = false;
+
+        progress_box->reset();
+        qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
+        qApp->restoreOverrideCursor();
+    } else {
+        success = false;
     }
 
-    qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
-    ped_device_sync(device);
-    qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
-    ped_device_close(device);
-    qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
-    qApp->restoreOverrideCursor();
-
-    return true;
+    return success;
 }
 
 bool PartitionChangeDialog::shrinkPartition()
