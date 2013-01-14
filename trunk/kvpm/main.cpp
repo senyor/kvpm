@@ -37,7 +37,7 @@ int main(int argc, char **argv)
 {
 
     KAboutData aboutData("kvpm", 0,
-                         ki18n("kvpm"), "0.9.4",
+                         ki18n("kvpm"), "0.9.5",
                          ki18n("The Linux volume and partition manager for KDE.\n"
                                "Licensed under the GPL v3.0\n \n"
                                "Additional icons taken from the Silk icon set by Mark James.\n"
