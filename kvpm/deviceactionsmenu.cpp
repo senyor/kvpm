@@ -25,6 +25,7 @@
 #include "partremove.h"
 #include "partadd.h"
 #include "partchange.h"
+#include "partflag.h"
 #include "physvol.h"
 #include "storagedevice.h"
 #include "storagepartition.h"
@@ -39,6 +40,7 @@
 #include <KIcon>
 #include <KAction>
 
+#include <QDebug>
 #include <QTreeWidgetItem>
 
 
@@ -53,6 +55,7 @@ DeviceActionsMenu::DeviceActionsMenu(QTreeWidgetItem *item, QWidget *parent) : K
     connect(m_mkfs_action,       SIGNAL(triggered()), this, SLOT(mkfsPartition()));
     connect(m_partremove_action, SIGNAL(triggered()), this, SLOT(removePartition()));
     connect(m_partadd_action,    SIGNAL(triggered()), this, SLOT(addPartition()));
+    connect(m_partflag_action,   SIGNAL(triggered()), this, SLOT(changeFlags()));
     connect(m_partchange_action, SIGNAL(triggered()), this, SLOT(changePartition()));
     connect(m_vgcreate_action,   SIGNAL(triggered()), this, SLOT(vgcreatePartition()));
     connect(m_tablecreate_action, SIGNAL(triggered()), this, SLOT(tablecreatePartition()));
@@ -68,10 +71,11 @@ void DeviceActionsMenu::setup(QTreeWidgetItem *item)
     KMenu *const filesystem_menu = new KMenu(i18n("Filesystem operations"), this);
     m_vgextend_menu = new KMenu(i18n("Extend volume group"), this);
     m_vgextend_menu->setIcon(KIcon("add"));
-    m_partchange_action = new KAction(i18n("Move or resize disk partition"), this);
+    m_partchange_action  = new KAction(i18n("Move or resize disk partition"), this);
+    m_partflag_action    = new KAction(KIcon("flag-blue"), i18n("Change partition flags"), this);
     m_maxpv_action       = new KAction(KIcon("resultset_last"), i18n("Extend physical volume to fill device"), this);
     m_partadd_action     = new KAction(i18n("Add disk partition"), this);
-    m_partremove_action  = new KAction(i18n("Remove disk partition"), this);
+    m_partremove_action  = new KAction(KIcon("cross"),        i18n("Remove disk partition"), this);
     m_vgcreate_action    = new KAction(KIcon("document-new"), i18n("Create volume group"), this);
     m_tablecreate_action = new KAction(KIcon("exclamation"),  i18n("Create or remove a partition table"), this);
     m_vgreduce_action    = new KAction(KIcon("delete"),       i18n("Remove from volume group"), this);
@@ -87,6 +91,7 @@ void DeviceActionsMenu::setup(QTreeWidgetItem *item)
     addAction(m_partremove_action);
     addAction(m_partadd_action);
     addAction(m_partchange_action);
+    addAction(m_partflag_action);
     addAction(m_maxpv_action);
     addSeparator();
     addAction(m_vgcreate_action);
@@ -102,7 +107,7 @@ void DeviceActionsMenu::setup(QTreeWidgetItem *item)
     filesystem_menu->addSeparator();
     filesystem_menu->addAction(m_mkfs_action);
 
-    m_vg_name  = item->data(5, Qt::DisplayRole).toString(); // only set if this is a pv in a vg
+    m_vg_name = item->data(5, Qt::DisplayRole).toString(); // only set if this is a pv in a vg
 
     const QStringList group_names = MasterList::getVgNames();
     for (int x = 0; x < group_names.size(); x++) {
@@ -134,41 +139,46 @@ void DeviceActionsMenu::setup(QTreeWidgetItem *item)
                 m_vgcreate_action->setEnabled(false);
                 m_vgextend_menu->setEnabled(false);
                 m_vgreduce_action->setEnabled(false);
+                m_partflag_action->setEnabled(false);
             } else if (m_part->getPedType() & 0x02) { // extended partition
                 m_maxfs_action->setEnabled(false);
                 m_maxpv_action->setEnabled(false);
                 m_mkfs_action->setEnabled(false);
-                if (m_part->isEmptyExtended())
+
+                if (m_part->isEmptyExtended()) {
                     m_partadd_action->setEnabled(true);
-                else
+                    m_partremove_action->setEnabled(true);
+                } else {
                     m_partadd_action->setEnabled(false);
+                    m_partremove_action->setEnabled(false);
+                }
+
                 m_partchange_action->setEnabled(false);
                 m_vgcreate_action->setEnabled(false);
                 m_vgextend_menu->setEnabled(false);
                 m_vgreduce_action->setEnabled(false);
-                if (m_part->isEmptyExtended())
-                    m_partremove_action->setEnabled(true);
-                else
-                    m_partremove_action->setEnabled(false);
+                m_partflag_action->setEnabled(true);
             } else if (m_part->isPhysicalVolume()) {
                 m_maxfs_action->setEnabled(false);
                 m_mkfs_action->setEnabled(false);
                 m_partremove_action->setEnabled(false);
 
-                if (m_part->getPhysicalVolume()->isActive()) {
+                if (m_part->getPhysicalVolume()->isActive())
                     m_partchange_action->setEnabled(false);
-                } else {
+                else
                     m_partchange_action->setEnabled(true);
-                }
-
+                
                 m_maxpv_action->setEnabled(true);
                 m_partadd_action->setEnabled(false);
                 m_vgcreate_action->setEnabled(false);
                 m_vgextend_menu->setEnabled(false);
+
                 if (m_part->getPhysicalVolume()->getPercentUsed() == 0)
                     m_vgreduce_action->setEnabled(true);
                 else
                     m_vgreduce_action->setEnabled(false);
+
+                m_partflag_action->setEnabled(true);
             } else if (m_part->isNormal() || m_part->isLogical()) {
                 filesystem_menu->setEnabled(true);
                 m_maxpv_action->setEnabled(false);
@@ -193,6 +203,7 @@ void DeviceActionsMenu::setup(QTreeWidgetItem *item)
                 }
                 m_partadd_action->setEnabled(false);
                 m_vgreduce_action->setEnabled(false);
+                m_partflag_action->setEnabled(true);
             }
         } else { // its a whole device
             m_part = NULL;
@@ -200,6 +211,7 @@ void DeviceActionsMenu::setup(QTreeWidgetItem *item)
             m_unmount_action->setEnabled(false);
             m_maxfs_action->setEnabled(false);
             m_fsck_action->setEnabled(false);
+            m_partflag_action->setEnabled(false);
 
             if (m_dev->isPhysicalVolume()) {
                 m_tablecreate_action->setEnabled(false);
@@ -288,6 +300,18 @@ void DeviceActionsMenu::changePartition()
 
     if (!dialog.bailout()) {
         dialog.exec();
+        if (dialog.result() == QDialog::Accepted)
+            MainWindow->reRun();
+    }
+}
+
+void DeviceActionsMenu::changeFlags()
+{
+    PartitionFlagDialog dialog(m_part);
+
+    if (!dialog.bailout()) {
+        dialog.exec();
+
         if (dialog.result() == QDialog::Accepted)
             MainWindow->reRun();
     }

@@ -39,6 +39,7 @@ class DeviceActionsMenu : public KMenu
             *m_fsck_action,
             *m_maxfs_action,
             *m_maxpv_action,
+            *m_partflag_action,
             *m_partremove_action,
             *m_partadd_action,
             *m_partchange_action,
@@ -64,6 +65,7 @@ private slots:
     void maxfsPartition();
     void addPartition();
     void changePartition();
+    void changeFlags();
     void removePartition();
     void vgcreatePartition();
     void tablecreatePartition();

@@ -1,3 +1,7 @@
+version 0.9.5
+Added a dialog for setting the flags on a partitions. Ie: boot, swap
+and bios_grub.
+
 version 0.9.4
 Put in a new dialog for repairing RAID and mirror volumes that
 are missing physical volumes. Combined the remove filesystem dialog
