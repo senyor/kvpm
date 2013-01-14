@@ -11,7 +11,6 @@ add_subdirectory( images )
 add_subdirectory( icons/local )
 add_subdirectory( icons/app )
  
-set_target_properties(kvpm PROPERTIES COMPILE_FLAGS "-std=gnu++98")
 
 IF(NOT CMAKE_BUILD_TYPE)
   SET(CMAKE_BUILD_TYPE "RelWithDebInfo")
