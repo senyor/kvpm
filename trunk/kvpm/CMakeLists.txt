@@ -9,7 +9,7 @@ set(kvpm_SRCS allocationpolicy.cpp changemirror.cpp kvpmconfigdialog.cpp devicep
 	      lvsizechartseg.cpp mountentry.cpp mounttables.cpp maintabwidget.cpp 
 	      pvextend.cpp pvreduce.cpp partremove.cpp pvgroupbox.cpp partbase.cpp
 	      partitiongraphic.cpp partadd.cpp pvproperties.cpp  pvpropertiesstack.cpp 
-	      physvol.cpp partchange.cpp progressbox.cpp repairmissing.cpp
+	      physvol.cpp partchange.cpp progressbox.cpp repairmissing.cpp partflag.cpp
 	      misc.cpp pedexceptions.cpp processprogress.cpp pvchange.cpp snapmerge.cpp
 	      pvmove.cpp pvtree.cpp removemissing.cpp removemirror.cpp sizeselectorbox.cpp
 	      removemirrorleg.cpp storagepartition.cpp storagedevice.cpp thincreate.cpp
@@ -23,9 +23,9 @@ target_link_libraries(kvpm ${KDE4_KDEUI_LIBS} ${KDE4_KFILE_LIBS} ${QT_LIBRARIES}
 
 INSTALL( TARGETS kvpm DESTINATION ${SBIN_INSTALL_DIR} )
 
-
 IF (CMAKE_COMPILER_IS_GNUCXX)
-set_target_properties(kvpm PROPERTIES COMPILE_FLAGS "-std=gnu++98 -Wno-psabi -Wno-cast-align")
+set_target_properties(kvpm PROPERTIES COMPILE_FLAGS "-std=gnu++98 -Wno-psabi -Wno-cast-align -O0")
+#set_target_properties(kvpm PROPERTIES COMPILE_FLAGS "-std=gnu++98 -Wno-psabi -Wno-cast-align -O2 -Wstrict-aliasing")
 set_target_properties(kvpm PROPERTIES LINK_FLAGS "-Wl,--as-needed")
 ENDIF(CMAKE_COMPILER_IS_GNUCXX)
 
