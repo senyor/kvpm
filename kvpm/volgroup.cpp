@@ -18,7 +18,6 @@
 #include <QDebug>
 #include <QWidget>
 
-#include "logvol.h"
 #include "mounttables.h"
 #include "physvol.h"
 
@@ -131,7 +130,7 @@ void VolGroup::rescan(lvm_t lvm)
 
 lv_t VolGroup::findOrphan(QList<lv_t> &childList)
 {
-    QList<LogVol *> all_lvs = getLogicalVolumesFlat();
+    LogVolList all_lvs = getLogicalVolumesFlat();
     QList<lv_t> orphan_list;
     lvm_property_value value;
     QString child_name;
@@ -174,18 +173,18 @@ lv_t VolGroup::findOrphan(QList<lv_t> &childList)
     return NULL;
 }
 
-QList<LogVol *>  VolGroup::getLogicalVolumes()
+LogVolList VolGroup::getLogicalVolumes()
 {
     return m_member_lvs;
 }
 
-QList<LogVol *>  VolGroup::getLogicalVolumesFlat()
+LogVolList VolGroup::getLogicalVolumesFlat()
 {
-    QListIterator<LogVol *> tree_list(m_member_lvs);
-    QList<LogVol *> flat_list;
+    QListIterator<LogVolPointer> tree_list(m_member_lvs);
+    LogVolList flat_list;
 
     while (tree_list.hasNext()) {
-        LogVol *const lv = tree_list.next();
+        LogVol *lv = tree_list.next();
         flat_list.append(lv);
         flat_list.append(lv->getAllChildrenFlat());
     }
@@ -198,13 +197,13 @@ QList<PhysVol *> VolGroup::getPhysicalVolumes()
     return m_member_pvs;
 }
 
-LogVol* VolGroup::getLvByName(QString shortName)  // Do not return snap container, just the "real" lv
+LogVolPointer VolGroup::getLvByName(QString shortName)  // Do not return snap container, just the "real" lv
 {
-    QListIterator<LogVol *> lvs_itr(getLogicalVolumesFlat());
+    QListIterator<LogVolPointer> lvs_itr(getLogicalVolumesFlat());
     shortName = shortName.trimmed();
 
     while (lvs_itr.hasNext()) {
-        LogVol *const lv = lvs_itr.next();
+        LogVol *lv = lvs_itr.next();
         if (shortName == lv->getName() && !lv->isSnapContainer())
             return lv;
     }
@@ -212,13 +211,13 @@ LogVol* VolGroup::getLvByName(QString shortName)  // Do not return snap containe
     return NULL;
 }
 
-LogVol* VolGroup::getLvByUuid(QString uuid)   // Do not return snap container, just the "real" lv
+LogVolPointer VolGroup::getLvByUuid(QString uuid)   // Do not return snap container, just the "real" lv
 {
-    QListIterator<LogVol *> lvs_itr(getLogicalVolumesFlat());
+    QListIterator<LogVolPointer> lvs_itr(getLogicalVolumesFlat());
     uuid = uuid.trimmed();
 
     while (lvs_itr.hasNext()) {
-        LogVol *const lv = lvs_itr.next();
+        LogVol *lv = lvs_itr.next();
         if (uuid == lv->getUuid() && !lv->isSnapContainer())
             return lv;
     }
@@ -415,7 +414,7 @@ void VolGroup::processLogicalVolumes(vg_t lvmVG)
     QList<lv_t> lvm_lvs_all_children;  // children of top level volumes
     QByteArray flags;
 
-    QList<LogVol *> old_member_lvs = m_member_lvs;
+    LogVolList old_member_lvs = m_member_lvs;
     m_member_lvs.clear();
     m_lv_names_all.clear();
 
@@ -500,7 +499,7 @@ void VolGroup::processLogicalVolumes(vg_t lvmVG)
 void VolGroup::setActivePhysicalVolumes()
 {
     PhysVol *pv;
-    const QList<LogVol *> all_lvs = getLogicalVolumesFlat();
+    const LogVolList all_lvs = getLogicalVolumesFlat();
 
     for (int x = all_lvs.size() - 1; x >= 0; x--) {
         if (all_lvs[x]->isActive()) {
@@ -527,7 +526,7 @@ void VolGroup::setLastUsedExtent()
         long long last_used_extent = 0;
         const QString pv_name = pv->getName();
 
-        QListIterator<LogVol *> lv_itr(m_member_lvs);
+        QListIterator<LogVolPointer> lv_itr(m_member_lvs);
 
         while (lv_itr.hasNext()) {
             LogVol *const lv = lv_itr.next();

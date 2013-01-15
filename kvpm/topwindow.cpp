@@ -161,7 +161,7 @@ void TopWindow::setupMenus()
 {
     int index = m_tab_widget->getCurrentIndex();
     bool has_active = false;
-    QList<LogVol *> lvs;
+    LogVolList lvs;
 
     if (index) {
         m_vg = MasterList::getVgByName(m_tab_widget->getUnmungedText(index));

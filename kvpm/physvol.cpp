@@ -230,7 +230,7 @@ QList<LVSegmentExtent *> PhysVol::sortByExtent()
     LVSegmentExtent *temp;
     LogVol *lv;
 
-    QListIterator<LogVol *> lv_itr(getVg()->getLogicalVolumesFlat());
+    QListIterator<QPointer<LogVol> > lv_itr(getVg()->getLogicalVolumesFlat());
 
     while (lv_itr.hasNext()) {
         lv = lv_itr.next();
@@ -263,7 +263,7 @@ long long PhysVol::getContiguous(LogVol *const lv)
     const long long end = (m_size / extent_size) - 1;
     const QList<LVSegmentExtent *> lv_extents = sortByExtent();
 
-    QList<LogVol *> legs;
+    LogVolList legs;
 
     //
     // TEST UNDER CONVERSION !!!

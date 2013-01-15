@@ -74,7 +74,7 @@ PVTree::PVTree(VolGroup *const group, QWidget *parent)
 void PVTree::loadData()
 {
     QList<QTreeWidgetItem *> pv_tree_items;
-    QList<LogVol *>  lvs = m_vg->getLogicalVolumesFlat();
+    LogVolList  lvs = m_vg->getLogicalVolumesFlat();
     QList<PhysVol *> pvs = m_vg->getPhysicalVolumes();
 
     QStringList lv_name_list;

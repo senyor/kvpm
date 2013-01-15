@@ -50,7 +50,7 @@ LVSizeChart::LVSizeChart(VolGroup *const group, QTreeWidget *const vgTree, QWidg
 
 void LVSizeChart::populateChart()
 {
-    QList<LogVol *> logical_volumes;
+    LogVolList logical_volumes;
     QTreeWidgetItem *item;
     LogVol *lv;
     QLayoutItem *child;
@@ -67,9 +67,9 @@ void LVSizeChart::populateChart()
             logical_volumes.append(lv);
 
             if (lv->isThinPool()){
-                QListIterator<LogVol *> pool_itr(lv->getThinVolumes());
+                QListIterator<QPointer<LogVol> > pool_itr(lv->getThinVolumes());
                 while (pool_itr.hasNext()) {
-                    QList<LogVol *> cow_snaps(pool_itr.next()->getSnapshots());
+                    LogVolList cow_snaps(pool_itr.next()->getSnapshots());
 
                     for (int n = cow_snaps.size() - 1; n >= 0; n--) {
                         if (cow_snaps[n]->isCowSnap()) {

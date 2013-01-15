@@ -20,6 +20,8 @@
 #include <QList>
 #include <QStringList>
 
+#include "logvol.h"
+
 class KLineEdit;
 class KListWidget;
 
@@ -48,7 +50,7 @@ class VGSplitDialog : public KDialog
     QRegExpValidator *m_validator;
     VolGroup *m_vg;
 
-    QList<LogVol *> getFullLvList();
+    LogVolList getFullLvList();
 
     QWidget *buildLvLists(const QStringList mobileLvNames, const QStringList fixedLvNames);
     QWidget *buildPvLists(const QStringList mobilePvNames, const QStringList fixedPvNames);

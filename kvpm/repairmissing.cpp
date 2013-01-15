@@ -14,7 +14,6 @@
 
 #include "repairmissing.h"
 
-#include "logvol.h"
 #include "physvol.h"
 #include "pvgroupbox.h"
 #include "processprogress.h"
@@ -38,7 +37,7 @@ RepairMissingDialog::RepairMissingDialog(LogVol *const volume, QWidget *parent):
 {
     if (m_lv->getParentMirror() != NULL)
         m_lv = m_lv->getParentMirror();
-    QList<LogVol *> children;
+    LogVolList children;
     const QString lv_name = m_lv->getName();
     const bool is_raid = m_lv->isRaid();
     const bool is_lvm = m_lv->isLvmMirror();
@@ -113,7 +112,7 @@ RepairMissingDialog::RepairMissingDialog(LogVol *const volume, QWidget *parent):
 
 QList<PhysVol *> RepairMissingDialog::getUsablePvs()
 {
-    QList<LogVol *>  const images = m_lv->getAllChildrenFlat();
+    LogVolList  const images = m_lv->getAllChildrenFlat();
     QStringList pvs_in_use;
 
     
@@ -270,9 +269,9 @@ QList<PhysVol *> RepairMissingDialog::getSelectedPvs()
     return pvs;
 }
 
-QList<LogVol *> RepairMissingDialog::getPartialLvs()
+LogVolList RepairMissingDialog::getPartialLvs()
 {
-    QList<LogVol *> partial = m_lv->getAllChildrenFlat();
+    LogVolList partial = m_lv->getAllChildrenFlat();
 
     for (int x = partial.size() - 1; x >= 0; x--) {
         if (!partial[x]->isPartial())
@@ -292,7 +291,7 @@ void RepairMissingDialog::resetOkButton()
         return;
     }
 
-    QList<LogVol *> partial_lvs = getPartialLvs();
+    LogVolList partial_lvs = getPartialLvs();
 
 
       /* RETEST THIS WHEN NEW LVM VERSION IS INSTALLED

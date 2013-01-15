@@ -322,7 +322,7 @@ QWidget* LVCreateDialog::createStripeWidget()
         int seg_count = 1;
         int stripe_count = 1;
         int stripe_size = 4;
-        QList<LogVol *>  logvols;
+        LogVolList  logvols;
 
         if (m_lv->isLvmMirror()) {                        // Tries to match striping to last segment of first leg
             logvols = m_lv->getAllChildrenFlat();
@@ -851,7 +851,7 @@ long long LVCreateDialog::getLargestVolume()
     } else {
         if (m_lv->isMirror() && policy == CONTIGUOUS) {
 
-            const QList<LogVol *> legs = m_lv->getChildren(); // not grandchildren because we can't extend while under conversion
+            const LogVolList legs = m_lv->getChildren(); // not grandchildren because we can't extend while under conversion
             QList<long long> leg_max;
 
             for (int x = legs.size() - 1; x >= 0; x--) {
@@ -1121,7 +1121,7 @@ bool LVCreateDialog::hasInitialErrors()
                 return true;
             }
 
-            const QList<LogVol *> snap_shots = m_lv->getSnapshots();
+            const LogVolList snap_shots = m_lv->getSnapshots();
 
             for (int x = 0; x < snap_shots.size(); x++) {
                 if (snap_shots[x]->isOpen()) {
@@ -1223,7 +1223,7 @@ int LVCreateDialog::getMaxStripes()
     if (m_extend && (policy == CONTIGUOUS)){
         if (m_lv->isLvmMirror()){
 
-            QList<LogVol *> legs = m_lv->getChildren();
+            LogVolList legs = m_lv->getChildren();
             int next_stripes = 0;
 
             for (int x = legs.size() - 1; x >= 0; x--){
@@ -1250,7 +1250,7 @@ int LVCreateDialog::getMaxStripes()
 
 void LVCreateDialog::extendLastSegment(QList<long long> &committed, QList<long long> &available)
 {
-    QList<LogVol *> legs;
+    LogVolList legs;
     QStringList selected_names(m_pv_box->getNames());
     LogVol *lv = m_lv;
 
