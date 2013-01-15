@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -21,6 +21,7 @@
 #include <QStringList>
 
 #include "allocationpolicy.h"
+#include "logvol.h"
 #include "misc.h"
 
 class QWidget;
@@ -47,9 +48,9 @@ class VolGroup
     QString m_uuid;
     QString m_lvm_format;             // lvm1 or lvm2
     AllocationPolicy m_policy;
-    QList<LogVol *>  m_member_lvs;    // lvs that belong to this group
-    QList<PhysVol *> m_member_pvs;    // pvs that belong to this group
-    QStringList m_lv_names_all;       // names of all lvs and sub lvs in group, including metadata
+    LogVolList m_member_lvs;        // lvs that belong to this group
+    QList<PhysVol *> m_member_pvs;  // pvs that belong to this group
+    QStringList m_lv_names_all;     // names of all lvs and sub lvs in group, including metadata
     bool m_active;         // if any lv is active the group is active
     bool m_writable;
     bool m_resizable;
@@ -67,13 +68,13 @@ public:
     VolGroup(lvm_t lvm, const char *vgname, MountTables *const tables);
     ~VolGroup();
     void rescan(lvm_t lvm);
-    QList<LogVol *>  getLogicalVolumes();     // *TOP LEVEL ONLY* snapcontainers returned not snaps and origin
-    QList<LogVol *>  getLogicalVolumesFlat(); // un-nest the volumes, snapshots and mirror legs
+    LogVolList getLogicalVolumes();        // *TOP LEVEL ONLY* snapcontainers returned not snaps and origin
+    LogVolList getLogicalVolumesFlat();    // un-nest the volumes, snapshots and mirror legs
     QList<PhysVol *> getPhysicalVolumes();
-    QStringList getLvNamesAll();              // unsorted list of all lvs and sub lvs
-    LogVol* getLvByName(QString shortName);   // lv name without the vg name and "/" -- skips snap containers
-    LogVol* getLvByUuid(QString uuid);        // also skips snap containers
-    PhysVol* getPvByName(QString name);       //   /dev/something
+    QStringList getLvNamesAll();                  // unsorted list of all lvs and sub lvs
+    LogVolPointer getLvByName(QString shortName); // lv name without the vg name and "/" -- skips snap containers
+    LogVolPointer getLvByUuid(QString uuid);      // also skips snap containers
+    PhysVol* getPvByName(QString name);           //   /dev/something
     long long getExtents();
     long long getFreeExtents();
     long long getAllocatableExtents();

@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -46,7 +46,9 @@ struct Segment {
     long long chunk_size;        // Thin pool chunk size
 };
 
-LogVol::LogVol(lv_t lvmLV, vg_t lvmVG, VolGroup *const vg, LogVol *const lvParent, MountTables *const tables, bool orphan) :
+LogVol::LogVol(lv_t lvmLV, vg_t lvmVG, VolGroup *const vg, LogVol *const lvParent, 
+               MountTables *const tables, bool orphan) :
+    QObject(lvParent),
     m_vg(vg),
     m_lv_parent(lvParent),
     m_orphan(orphan)
@@ -58,13 +60,10 @@ LogVol::LogVol(lv_t lvmLV, vg_t lvmVG, VolGroup *const vg, LogVol *const lvParen
 
 LogVol::~LogVol()
 {
-    QList<LogVol *> children = getChildren();
+    LogVolList children = getChildren();
 
     for (int x = m_mount_entries.size() - 1; x >= 0; x--)
         delete m_mount_entries.takeAt(x);
-
-    while (children.size())
-        delete children.takeAt(0);
 
     while (m_segments.size())
         delete m_segments.takeAt(0);
@@ -557,7 +556,7 @@ void LogVol::countLegsAndLogs()
 {
     m_mirror_count = 0;
     m_log_count = 0;
-    QList<LogVol *> all_lvs_flat = getAllChildrenFlat();
+    LogVolList all_lvs_flat = getAllChildrenFlat();
     LogVol *lv;
 
     if (m_lvmmirror) {
@@ -812,22 +811,22 @@ void LogVol::processSegments(lv_t lvmLV, const QByteArray flags)
     }
 }
 
-QList<LogVol *> LogVol::getChildren()
+LogVolList LogVol::getChildren()
 {
     return m_lv_children;
 }
 
-QList<LogVol *> LogVol::takeChildren()
+LogVolList LogVol::takeChildren()
 {
-    QList<LogVol *> children = m_lv_children;
+    LogVolList children = m_lv_children;
     m_lv_children.clear();
 
     return children;
 }
 
-QList<LogVol *> LogVol::getAllChildrenFlat()
+LogVolList LogVol::getAllChildrenFlat()
 {
-    QList<LogVol *> flat_list = m_lv_children;
+    LogVolList flat_list = m_lv_children;
     long child_size = m_lv_children.size();
 
     for (int x = 0; x < child_size; x++)
@@ -836,9 +835,9 @@ QList<LogVol *> LogVol::getAllChildrenFlat()
     return flat_list;
 }
 
-QList<LogVol *> LogVol::getSnapshots()
+LogVolList LogVol::getSnapshots()
 {
-    QList<LogVol *> snapshots;
+    LogVolList snapshots;
     LogVol *container = this;
 
     if (container->getParent() != NULL && !container->isSnapContainer()) {
@@ -858,9 +857,9 @@ QList<LogVol *> LogVol::getSnapshots()
     return snapshots;
 }
 
-QList<LogVol *> LogVol::getThinVolumes()  // not including snap containers
+LogVolList LogVol::getThinVolumes()  // not including snap containers
 {
-    QList<LogVol *> lvs;
+    LogVolList lvs;
 
     if (m_thin_pool) {
         lvs = getAllChildrenFlat();
@@ -874,14 +873,14 @@ QList<LogVol *> LogVol::getThinVolumes()  // not including snap containers
     return lvs;
 }
 
-LogVol *LogVol::getParent()
+LogVolPointer LogVol::getParent()
 {
     return m_lv_parent;
 }
 
 // Returns the lvm mirror than owns this mirror leg or mirror log. Returns
 // NULL if this is not part of an lvm mirror volume.
-LogVol *LogVol::getParentMirror()
+LogVolPointer LogVol::getParentMirror()
 {
     LogVol *mirror = this;
 
@@ -906,7 +905,7 @@ LogVol *LogVol::getParentMirror()
 
 // Returns the RAID volume than owns this RAID component
 // NULL if this is not part of a RAID volume.
-LogVol *LogVol::getParentRaid()
+LogVolPointer LogVol::getParentRaid()
 {
     if (m_raid_metadata || m_raid_image)
         return getParent();
@@ -967,7 +966,7 @@ QStringList LogVol::getPvNamesAllFlat()
 {
     if (m_snap_container || m_lvmmirror || m_raid) {
 
-        QListIterator<LogVol *> child_itr(getChildren());
+        QListIterator<LogVolPointer> child_itr(getChildren());
         QStringList pv_names;
 
         while (child_itr.hasNext()) {
@@ -980,7 +979,7 @@ QStringList LogVol::getPvNamesAllFlat()
         return pv_names;
     } else if (m_thin_pool) {
 
-        QListIterator<LogVol *> child_itr(getChildren());
+        QListIterator<LogVolPointer> child_itr(getChildren());
         QStringList pv_names;
 
         LogVol *child;
@@ -1047,7 +1046,7 @@ long long LogVol::getSpaceUsedOnPv(const QString physicalVolume)
 
 long long LogVol::getMissingSpace()
 {
-    QList<LogVol *> const children = getChildren();
+    LogVolList const children = getChildren();
     long long missing;
 
     if (isPartial()) {
@@ -1426,7 +1425,7 @@ bool LogVol::willZero()
 bool LogVol::isSynced()
 {
     if (m_synced) {
-        QList<LogVol *> children(getChildren());
+        LogVolList children(getChildren());
 
         for (int x = children.size() - 1; x >= 0; x--) {
             if (!children[x]->isSynced())

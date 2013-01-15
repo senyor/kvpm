@@ -245,7 +245,7 @@ QWidget *ChangeMirrorDialog::buildLogWidget()
     QVBoxLayout *const layout = new QVBoxLayout();
 
     QStringList names;
-    QList<LogVol *> const logs = m_lv->getAllChildrenFlat();
+    LogVolList const logs = m_lv->getAllChildrenFlat();
     for (int x = logs.size() - 1; x >= 0; x--) {
         if (logs[x]->isLvmMirrorLog() && !logs[x]->isMirror())
             names.append(logs[x]->getPvNamesAll());
@@ -380,7 +380,7 @@ QWidget *ChangeMirrorDialog::buildPhysicalTab(const bool isRaidMirror)
 
 QStringList ChangeMirrorDialog::getPvsInUse()
 {
-    QList<LogVol *>  legs = m_lv->getAllChildrenFlat();
+    LogVolList  legs = m_lv->getAllChildrenFlat();
     QStringList pvs_in_use;
 
     if (m_lv->isMirror()) {

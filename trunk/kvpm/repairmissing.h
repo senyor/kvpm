@@ -23,7 +23,8 @@ class QCheckBox;
 class QGroupBox;
 class QWidget;
 
-class LogVol;
+#include "logvol.h"
+
 class PhysVol;
 class PvGroupBox;
 
@@ -41,7 +42,7 @@ class RepairMissingDialog : public KDialog
     QStringList arguments();
     QList<PhysVol *> getUsablePvs();
     QList<PhysVol *> getSelectedPvs();
-    QList<LogVol *>  getPartialLvs();
+    LogVolList  getPartialLvs();
     QWidget *buildPhysicalWidget(QList<PhysVol *> const pvs);
     int getImageNumber(QString name);
 

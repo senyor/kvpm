@@ -49,7 +49,7 @@ RemoveMirrorDialog::RemoveMirrorDialog(LogVol *logicalVolume, QWidget *parent):
     QStringList   pv_names;
 
     m_vg = m_lv->getVg();
-    QList<LogVol *> lvs = m_lv->getChildren();
+    LogVolList lvs = m_lv->getChildren();
 
     setWindowTitle(i18n("Remove mirrors"));
 

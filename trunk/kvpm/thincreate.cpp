@@ -207,7 +207,7 @@ bool ThinCreateDialog::hasInitialErrors()
                 return true;
             }
 
-            const QList<LogVol *> snap_shots = m_lv->getSnapshots();
+            const LogVolList snap_shots = m_lv->getSnapshots();
           
             for (int x = 0; x < snap_shots.size(); x++) {
                 if (snap_shots[x]->isOpen() && !snap_shots[x]->isThinVolume()) {

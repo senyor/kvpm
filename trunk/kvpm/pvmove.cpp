@@ -84,7 +84,7 @@ PVMoveDialog::PVMoveDialog(PhysVol *const physicalVolume, QWidget *parent) : KDi
     m_bailout = false;
 
     const QString name = physicalVolume->getName();
-    const QList<LogVol *> lvs = m_vg->getLogicalVolumes();
+    const LogVolList lvs = m_vg->getLogicalVolumes();
     QStringList forbidden_targets;  // A whole pv can't be moved to a pv it is striped with along any segment
     QStringList striped_targets;
 

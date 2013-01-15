@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -17,6 +17,8 @@
 
 #include <lvm2app.h>
 
+#include <QObject>
+#include <QPointer>
 #include <QStringList>
 
 #include "allocationpolicy.h"
@@ -24,34 +26,40 @@
 
 class QWidget;
 
+class LogVol;
 class MountEntry;
 class MountTables;
 class VolGroup;
 class Segment;
 
+
 // This class takes the handles for volumes provided
 // by liblvm2app and converts the information into
 // a more Qt/KDE friendly form.
 
+typedef QPointer<LogVol> LogVolPointer;
+typedef QList<LogVolPointer> LogVolList;
 
-class LogVol
+class LogVol : public QObject
 {
+    Q_OBJECT
     VolGroup *m_vg;
     QList<Segment *> m_segments;
     QList<MountEntry *> m_mount_entries;
-    QList<LogVol *> m_lv_children;  // For a mirror the children are the legs and log
-                                    // Snapshots are also children -- see m_snap_container
-                                    // RAID Metadata is here too
+
+    LogVolList m_lv_children;  // For a mirror the children are the legs and log
+                               // Snapshots are also children -- see m_snap_container
+                               // RAID Metadata is here too
     MountTables *m_tables;
     LogVol *m_lv_parent;       // NULL if this is the 'top' lv
     QString m_lv_full_name;    // volume_group/logical_volume
     QString m_lv_name;         // name of this logical volume
     QString m_lv_mapper_path;  // full path to volume, ie: /dev/vg1/lvol1
-    QString m_lv_fs;         // Filesystem on volume, if known
-    QString m_lv_fs_label;   // Filesystem label or name
-    QString m_lv_fs_uuid;    // Filesystem uuid
-    QString m_origin;        // the origin if this is a snapshot
-    QString m_pool;          // the name of the thin pool if this is a thin volume, otherwise empty
+    QString m_lv_fs;           // Filesystem on volume, if known
+    QString m_lv_fs_label;     // Filesystem label or name
+    QString m_lv_fs_uuid;      // Filesystem uuid
+    QString m_origin;          // the origin if this is a snapshot
+    QString m_pool;            // the name of the thin pool if this is a thin volume, otherwise empty
 
     QString m_log;           // The mirror log, if this is a mirror
     QString m_type;          // the type of volume
@@ -122,18 +130,19 @@ class LogVol
     void calculateTotalSize();
 
 public:
-    LogVol(lv_t lvmLV, vg_t lvmVG, VolGroup *const vg, LogVol *const lvParent, MountTables *const tables, bool orphan = false);
+    LogVol(lv_t lvmLV, vg_t lvmVG, VolGroup *const vg, LogVol *const lvParent, 
+           MountTables *const tables, bool orphan = false);
     ~LogVol();
 
     void rescan(lv_t lvmLV, vg_t lvmVG);
-    QList<LogVol *> getChildren();         // just the children -- not grandchildren etc.
-    QList<LogVol *> takeChildren();        // removes the children from the logical volume
-    QList<LogVol *> getAllChildrenFlat();  // All children, grandchildren etc. un-nested.
-    QList<LogVol *> getSnapshots();        // This will work the same for snapcontainers or the real lv
-    QList<LogVol *> getThinVolumes();      // Volumes under a thin pool
-    LogVol *getParent();                   // NULL if this is a "top level" lv
-    LogVol *getParentMirror();             // NULL if this is not an lvm type mirror compnent
-    LogVol *getParentRaid();               // NULL if this is not a RAID type compnent
+    LogVolList getChildren();         // just the children -- not grandchildren etc.
+    LogVolList takeChildren();        // removes the children from the logical volume
+    LogVolList getAllChildrenFlat();  // All children, grandchildren etc. un-nested.
+    LogVolList getSnapshots();        // This will work the same for snapcontainers or the real lv
+    LogVolList getThinVolumes();      // Volumes under a thin pool
+    LogVolPointer getParent();                   // NULL if this is a "top level" lv
+    LogVolPointer getParentMirror();             // NULL if this is not an lvm type mirror compnent
+    LogVolPointer getParentRaid();               // NULL if this is not a RAID type compnent
     VolGroup* getVg();
     QString getName();
     QString getPoolName();      // Name of this volume's thin pool if it is a thin volume, empty otherwise

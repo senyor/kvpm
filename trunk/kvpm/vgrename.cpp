@@ -34,7 +34,7 @@
 
 bool rename_vg(VolGroup *volumeGroup)
 {
-    QList<LogVol *> lvs;
+    LogVolList lvs;
     QString new_path, old_path;
     QString new_name, old_name;
 
