@@ -135,30 +135,30 @@ public:
     ~LogVol();
 
     void rescan(lv_t lvmLV, vg_t lvmVG);
-    LogVolList getChildren();         // just the children -- not grandchildren etc.
-    LogVolList takeChildren();        // removes the children from the logical volume
+    LogVolList getChildren() const { return m_lv_children; } // just the children -- not grandchildren etc.
     LogVolList getAllChildrenFlat();  // All children, grandchildren etc. un-nested.
     LogVolList getSnapshots();        // This will work the same for snapcontainers or the real lv
     LogVolList getThinVolumes();      // Volumes under a thin pool
-    LogVolPointer getParent();                   // NULL if this is a "top level" lv
+    LogVolList takeChildren();        // removes the children from the logical volume
+    LogVolPointer getParent() const { return m_lv_parent; }   // NULL if this is a "top level" lv
     LogVolPointer getParentMirror();             // NULL if this is not an lvm type mirror compnent
     LogVolPointer getParentRaid();               // NULL if this is not a RAID type compnent
-    VolGroup* getVg();
-    QString getName();
-    QString getPoolName();      // Name of this volume's thin pool if it is a thin volume, empty otherwise
-    QString getFullName();
-    QString getFilesystem();
-    QString getFilesystemLabel();
-    QString getFilesystemUuid();
-    QString getMapperPath();
-    AllocationPolicy getPolicy();
-    QString getState();
-    QString getType();
+    VolGroup* getVg() const { return m_vg; }
+    QString getName() const { return m_lv_name; }
+    QString getPoolName() const { return m_pool; } // Name of this volume's thin pool if it is a thin volume, empty otherwise
+    QString getFullName() const { return m_lv_full_name; }
+    QString getFilesystem() const { return m_lv_fs; }
+    QString getFilesystemLabel() const { return m_lv_fs_label; }
+    QString getFilesystemUuid() const { return m_lv_fs_uuid; }
+    QString getMapperPath() const { return m_lv_mapper_path; }
+    AllocationPolicy getPolicy() const { return m_policy; }
+    QString getState() const { return m_state; }
+    QString getType() const { return m_type; }
     int getRaidType();
-    QString getOrigin();        // The name of the parent volume to a snapshot
-    QString getUuid();
-    int getSegmentCount();
-    int getSegmentStripes(const int segment);     // The number of stipes including parity stripes
+    QString getOrigin() const { return  m_origin; }        // The name of the parent volume to a snapshot
+    QString getUuid() const { return m_uuid; }
+    int getSegmentCount() const { return m_seg_total; }
+    int getSegmentStripes(const int segment);
     int getSegmentStripeSize(const int segment);
     long long getSegmentSize(const int segment);
     long long getSegmentExtents(const int segment);
@@ -166,62 +166,61 @@ public:
     QStringList getPvNames(const int segment);
     QStringList getPvNamesAll();         // full path of physical volumes for all segments
     QStringList getPvNamesAllFlat();     // full path of physical volumes including child lvs, un-nested
-    QStringList getMountPoints();
+    QStringList getMountPoints() const { return m_mount_points; }
     QList<MountEntry *> getMountEntries();  // Calling function must delete these objects in the list
-    QString getFstabMountPoint();
-    QStringList getTags();
+    QString getFstabMountPoint() const { return m_fstab_mount_point; }
+    QStringList getTags() const { return m_tags; }
     QString getDiscards(int segment);
     long long getSpaceUsedOnPv(const QString physicalVolume);
     long long getMissingSpace();  // space used on pvs that are missing
     long long getChunkSize(int segment);
-    long long getExtents();
-    long long getSize();
-    long long getTotalSize();
-    long long getFilesystemSize();
-    long long getFilesystemUsed();
+    long long getExtents() const { return m_extents; }
+    long long getSize() const { return m_size; }
+    long long getTotalSize() const { return m_total_size; }
+    long long getFilesystemSize() const { return m_fs_size; }
+    long long getFilesystemUsed() const { return m_fs_used; }
     double getSnapPercent();
     double getCopyPercent();
     double getDataPercent();
-    unsigned long getMinorDevice();
-    unsigned long getMajorDevice();
-    int getLogCount();       // RAID 1 returns 0 since it doesn't have separate logs
-    int getMirrorCount();
-    int getSnapshotCount();
-    bool isActive();
-    bool isFixed();
-    bool isLocked();
-    bool isMerging();
-    bool isMetadata();
-    bool isRaidMetadata();
-    bool isThinMetadata();
-    bool isMirror();
-    bool isMirrorLeg();
-    bool isLvmMirror();
-    bool isLvmMirrorLeg();
-    bool isLvmMirrorLog();
-    bool isMounted();
-    bool isOpen();
-    bool isCowOrigin();
-    bool isOrphan();
-    bool isPersistent();
-    bool isPvmove();
-    bool isRaid();
-    bool isRaidImage();
-    bool isCowSnap();
-    bool isThinSnap();
-    bool isSnapContainer();
+    unsigned long getMinorDevice() const { return m_minor_device; }
+    unsigned long getMajorDevice() const { return m_major_device; }
+    int getLogCount() const { return m_log_count; }      // RAID 1 returns 0 since it doesn't have separate logs
+    int getMirrorCount() const { return m_mirror_count; }
+    int getSnapshotCount() { return getSnapshots().size(); }
+    bool isActive() const { return m_active; }
+    bool isFixed() const { return m_fixed; }
+    bool isLocked() const { return m_alloc_locked; }
+    bool isMerging() const { return m_merging; }
+    bool isMetadata() const { return m_metadata; }
+    bool isRaidMetadata() const { return m_raid_metadata; }
+    bool isThinMetadata() const { return m_thin_metadata; }
+    bool isMirror() const { return (m_lvmmirror || m_raidmirror); }
+    bool isMirrorLeg() const { return (m_lvmmirror_leg || m_raidmirror_leg); }
+    bool isLvmMirror() const { return m_lvmmirror; }
+    bool isLvmMirrorLeg() const { return m_lvmmirror_leg; }
+    bool isLvmMirrorLog() const { return m_lvmmirror_log; }
+    bool isMounted() const { return m_mounted; }
+    bool isOpen() const { return m_open; }
+    bool isCowOrigin() const { return m_is_origin; }
+    bool isOrphan() const { return m_orphan; }
+    bool isPersistent() const { return m_persistent; }
+    bool isPvmove() const { return m_pvmove; }
+    bool isRaid() const { return m_raid; }
+    bool isRaidImage() const { return m_raid_image; }
+    bool isCowSnap() const { return m_cow_snap; }
+    bool isThinSnap() { return m_thin_snap; }
+    bool isSnapContainer() { return m_snap_container; }
     bool isSynced();
-    bool isTemporary();
-    bool isThinVolume();
-    bool isThinPool();
-    bool isThinPoolData();
-    bool isUnderConversion();
-    bool isValid();
-    bool isVirtual();
-    bool isWritable();
-    bool isPartial();
-    bool willZero();
-
+    bool isTemporary() const { return m_temp; }
+    bool isThinVolume() const { return m_thin; }
+    bool isThinPool() const { return m_thin_pool; }
+    bool isThinPoolData() const { return m_thin_data; }
+    bool isUnderConversion() const { return m_under_conversion; }
+    bool isValid() const { return m_valid; }
+    bool isVirtual() const { return m_virtual; }
+    bool isWritable() const { return m_writable; }
+    bool isPartial() const { return m_partial; }
+    bool willZero() const { return m_zero; }
 };
 
 #endif

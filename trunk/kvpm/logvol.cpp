@@ -20,6 +20,8 @@
 #include <QUuid>
 #include <QWidget>
 
+#include <QElapsedTimer>
+
 #include "fsdata.h"
 #include "fsprobe.h"
 #include "masterlist.h"
@@ -60,8 +62,6 @@ LogVol::LogVol(lv_t lvmLV, vg_t lvmVG, VolGroup *const vg, LogVol *const lvParen
 
 LogVol::~LogVol()
 {
-    LogVolList children = getChildren();
-
     for (int x = m_mount_entries.size() - 1; x >= 0; x--)
         delete m_mount_entries.takeAt(x);
 
@@ -683,12 +683,12 @@ void LogVol::calculateTotalSize()
     m_total_size = 0;
 
     if (!m_thin_pool && m_lv_children.size()) {
-        for (int x = m_lv_children.size() - 1; x >= 0; x--)
-            m_total_size += m_lv_children[x]->getTotalSize();
+        for (auto &child : m_lv_children)
+            m_total_size += child->getTotalSize();
     } else if (m_thin_pool) {
-        for (int x = m_lv_children.size() - 1; x >= 0; x--) {
-            if (m_lv_children[x]->isThinPoolData() || m_lv_children[x]->isMetadata())
-                m_total_size += m_lv_children[x]->getTotalSize();
+        for (auto &child : m_lv_children) {
+            if (child->isThinPoolData() || child->isMetadata())
+                m_total_size += child->getTotalSize();
         }
     } else {
         m_total_size = m_size;
@@ -811,11 +811,6 @@ void LogVol::processSegments(lv_t lvmLV, const QByteArray flags)
     }
 }
 
-LogVolList LogVol::getChildren()
-{
-    return m_lv_children;
-}
-
 LogVolList LogVol::takeChildren()
 {
     LogVolList children = m_lv_children;
@@ -873,11 +868,6 @@ LogVolList LogVol::getThinVolumes()  // not including snap containers
     return lvs;
 }
 
-LogVolPointer LogVol::getParent()
-{
-    return m_lv_parent;
-}
-
 // Returns the lvm mirror than owns this mirror leg or mirror log. Returns
 // NULL if this is not part of an lvm mirror volume.
 LogVolPointer LogVol::getParentMirror()
@@ -911,41 +901,6 @@ LogVolPointer LogVol::getParentRaid()
         return getParent();
     else
         return NULL;
-}
-
-int LogVol::getSegmentCount()
-{
-    return m_seg_total;
-}
-
-int LogVol::getSegmentStripes(const int segment)
-{
-    return m_segments[segment]->stripes;
-}
-
-int LogVol::getSegmentStripeSize(const int segment)
-{
-    return m_segments[segment]->stripe_size;
-}
-
-long long LogVol::getSegmentSize(const int segment)
-{
-    return m_segments[segment]->size;
-}
-
-long long LogVol::getSegmentExtents(const int segment)
-{
-    return (m_segments[segment]->size / m_vg->getExtentSize());
-}
-
-QList<long long> LogVol::getSegmentStartingExtent(const int segment)
-{
-    return m_segments[segment]->starting_extent;
-}
-
-QStringList LogVol::getPvNames(const int segment)
-{
-    return m_segments[segment]->device_path;
 }
 
 QStringList LogVol::getPvNamesAll()
@@ -997,31 +952,6 @@ QStringList LogVol::getPvNamesAllFlat()
     } else {
         return getPvNamesAll();
     }
-}
-
-VolGroup* LogVol::getVg()
-{
-    return m_vg;
-}
-
-QString LogVol::getName()
-{
-    return m_lv_name;
-}
-
-QString LogVol::getFullName()
-{
-    return m_lv_full_name;
-}
-
-QString LogVol::getPoolName()
-{
-    return m_pool;
-}
-
-QString LogVol::getMapperPath()
-{
-    return m_lv_mapper_path;
 }
 
 long long LogVol::getSpaceUsedOnPv(const QString physicalVolume)
@@ -1086,241 +1016,6 @@ long long LogVol::getChunkSize(int segment)
     return m_segments[segment]->chunk_size;
 }
 
-long long LogVol::getExtents()
-{
-    return m_extents;
-}
-
-long long LogVol::getSize()
-{
-    return m_size;
-}
-
-long long LogVol::getTotalSize()
-{
-    return m_total_size;
-}
-
-QString LogVol::getFilesystem()
-{
-    return m_lv_fs;
-}
-
-QString LogVol::getFilesystemLabel()
-{
-    return m_lv_fs_label;
-}
-
-QString LogVol::getFilesystemUuid()
-{
-    return m_lv_fs_uuid;
-}
-
-long long LogVol::getFilesystemSize()
-{
-    return m_fs_size;
-}
-
-long long LogVol::getFilesystemUsed()
-{
-    return m_fs_used;
-}
-
-unsigned long LogVol::getMinorDevice()
-{
-    return m_minor_device;
-}
-
-unsigned long LogVol::getMajorDevice()
-{
-    return m_major_device;
-}
-
-int LogVol::getLogCount()
-{
-    return m_log_count;
-}
-
-int LogVol::getMirrorCount()
-{
-    return m_mirror_count;
-}
-
-int LogVol::getSnapshotCount()
-{
-    return getSnapshots().size();
-}
-
-bool LogVol::isMerging()
-{
-    return m_merging;
-}
-
-bool LogVol::isMetadata()
-{
-    return m_metadata;
-}
-
-bool LogVol::isRaidMetadata()
-{
-    return m_raid_metadata;
-}
-
-bool LogVol::isThinMetadata()
-{
-    return m_thin_metadata;
-}
-
-bool LogVol::isMounted()
-{
-    return m_mounted;
-}
-
-bool LogVol::isActive()
-{
-    return m_active;
-}
-
-bool LogVol::isMirror()
-{
-    return (m_lvmmirror || m_raidmirror); 
-}
-
-bool LogVol::isMirrorLeg()
-{
-    return (m_lvmmirror_leg || m_raidmirror_leg); 
-}
-
-bool LogVol::isLvmMirror()
-{
-    return m_lvmmirror;
-}
-
-bool LogVol::isLvmMirrorLeg()
-{
-    return m_lvmmirror_leg;
-}
-
-bool LogVol::isLvmMirrorLog()
-{
-    return m_lvmmirror_log;
-}
-
-bool LogVol::isPersistent()
-{
-    return m_persistent;
-}
-
-bool LogVol::isOpen()
-{
-    return m_open;
-}
-
-bool LogVol::isLocked()
-{
-    return m_alloc_locked;
-}
-
-bool LogVol::isUnderConversion()
-{
-    return m_under_conversion;
-}
-
-bool LogVol::isWritable()
-{
-    return m_writable;
-}
-
-bool LogVol::isVirtual()
-{
-    return m_virtual;
-}
-
-bool LogVol::isRaid()
-{
-    return m_raid;
-}
-
-bool LogVol::isRaidImage()
-{
-    return m_raid_image;
-}
-
-bool LogVol::isCowSnap()
-{
-    return m_cow_snap;
-}
-
-bool LogVol::isTemporary()
-{
-    return m_temp;
-}
-
-bool LogVol::isThinSnap()
-{
-    return m_thin_snap;
-}
-
-bool LogVol::isSnapContainer()
-{
-    return m_snap_container;
-}
-
-bool LogVol::isPvmove()
-{
-    return m_pvmove;
-}
-
-bool LogVol::isCowOrigin()
-{
-    return m_is_origin;
-}
-
-bool LogVol::isOrphan()
-{
-    return m_orphan;
-}
-
-bool LogVol::isFixed()
-{
-    return m_fixed;
-}
-
-bool LogVol::isValid()
-{
-    return m_valid;
-}
-
-bool LogVol::isThinVolume()
-{
-    return m_thin;
-}
-
-bool LogVol::isThinPoolData()
-{
-    return m_thin_data;
-}
-
-bool LogVol::isThinPool()
-{
-    return m_thin_pool;
-}
-
-AllocationPolicy LogVol::getPolicy()
-{
-    return m_policy;
-}
-
-QString LogVol::getState()
-{
-    return m_state;
-}
-
-QString LogVol::getType()
-{
-    return m_type;
-}
-
 int LogVol::getRaidType()
 {
     int type;
@@ -1340,22 +1035,12 @@ int LogVol::getRaidType()
     return type;
 }
 
-QStringList LogVol::getTags()
-{
-    return m_tags;
-}
-
 QString LogVol::getDiscards(int segment)
 {
     if (segment > m_segments.size() - 1)
         segment = 0;
 
     return m_segments[segment]->discards;
-}
-
-QString LogVol::getOrigin()
-{
-    return  m_origin;
 }
 
 QList<MountEntry *> LogVol::getMountEntries()
@@ -1367,16 +1052,6 @@ QList<MountEntry *> LogVol::getMountEntries()
         copy.append(new MountEntry(itr.next()));
 
     return copy;
-}
-
-QStringList LogVol::getMountPoints()
-{
-    return m_mount_points;
-}
-
-QString LogVol::getFstabMountPoint()
-{
-    return m_fstab_mount_point;
 }
 
 double LogVol::getSnapPercent()
@@ -1407,21 +1082,6 @@ double LogVol::getDataPercent()
         return -1;
 }
 
-QString LogVol::getUuid()
-{
-    return m_uuid;
-}
-
-bool LogVol::isPartial()
-{
-    return m_partial;
-}
-
-bool LogVol::willZero()
-{
-    return m_zero;
-}
-
 bool LogVol::isSynced()
 {
     if (m_synced) {
@@ -1436,5 +1096,35 @@ bool LogVol::isSynced()
     } else {
         return false;
     }
+}
+
+int LogVol::getSegmentStripes(const int segment)
+{
+    return m_segments[segment]->stripes;
+}
+
+int LogVol::getSegmentStripeSize(const int segment)
+{
+    return m_segments[segment]->stripe_size;
+}
+
+long long LogVol::getSegmentSize(const int segment)
+{
+    return m_segments[segment]->size;
+}
+
+long long LogVol::getSegmentExtents(const int segment)
+{
+    return (m_segments[segment]->size / m_vg->getExtentSize());
+}
+
+QList<long long> LogVol::getSegmentStartingExtent(const int segment)
+{
+    return m_segments[segment]->starting_extent;
+}
+
+QStringList LogVol::getPvNames(const int segment)
+{
+    return m_segments[segment]->device_path;
 }
 
