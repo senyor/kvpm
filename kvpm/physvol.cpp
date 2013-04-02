@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -121,76 +121,6 @@ void PhysVol::rescan(pv_t lvm_pv)
     return;
 }
 
-VolGroup* PhysVol::getVg()
-{
-    return m_vg;
-}
-
-QString PhysVol::getName()
-{
-    return m_device.trimmed();
-}
-
-QString PhysVol::getUuid()
-{
-    return m_uuid.trimmed();
-}
-
-QStringList PhysVol::getTags()
-{
-    return m_tags;
-}
-
-bool PhysVol::isAllocatable()
-{
-    return m_allocatable;
-}
-
-bool PhysVol::isMissing()
-{
-    return m_missing;
-}
-
-bool PhysVol::isActive()
-{
-    return m_active;
-}
-
-void PhysVol::setActive()
-{
-    m_active = true;
-}
-
-long PhysVol::getMdaCount()
-{
-    return m_mda_count;
-}
-
-long PhysVol::getMdaUsed()
-{
-    return m_mda_used;
-}
-
-long long PhysVol::getMdaSize()
-{
-    return m_mda_size;   // size in bytes
-}
-
-long long PhysVol::getSize()
-{
-    return m_size;
-}
-
-long long PhysVol::getDeviceSize()
-{
-    return m_device_size;
-}
-
-long long PhysVol::getRemaining()
-{
-    return m_unused;
-}
-
 int PhysVol::getPercentUsed()
 {
     int percent;
@@ -206,17 +136,6 @@ int PhysVol::getPercentUsed()
 
     return percent;
 }
-
-long long PhysVol::getLastUsedExtent()
-{
-    return m_last_used_extent;
-}
-
-void PhysVol::setLastUsedExtent(const long long last)
-{
-    m_last_used_extent = last;
-}
-
 
 // Returns a list of all the lv segments on the pv sorted by the
 // extent. Ordered from extent first to last extent.
@@ -235,10 +154,10 @@ QList<LVSegmentExtent *> PhysVol::sortByExtent()
     while (lv_itr.hasNext()) {
         lv = lv_itr.next();
         if (!lv->isSnapContainer()) {
-            for (int segment = lv->getSegmentCount() - 1; segment >= 0; segment--) {
+            for (int segment = lv->getSegmentCount() - 1; segment >= 0; --segment) {
                 pv_name_list = lv->getPvNames(segment);
                 first_extent_list = lv->getSegmentStartingExtent(segment);
-                for (int y = pv_name_list.size() - 1; y >= 0; y--) {
+                for (int y = pv_name_list.size() - 1; y >= 0; --y) {
                     if (pv_name_list[y] == getName()) {
                         temp = new LVSegmentExtent;
                         temp->lv_name = lv->getName();
@@ -275,7 +194,7 @@ long long PhysVol::getContiguous(LogVol *const lv)
     if (lv->isMirror() || lv->isRaid()) {
         legs.append(lv->getAllChildrenFlat());
         
-        for (int n = legs.size() - 1; n >= 0; n--) {
+        for (int n = legs.size() - 1; n >= 0; --n) {
             if ( !(legs[n]->isRaidImage() || (legs[n]->isLvmMirrorLeg() && !legs[n]->isLvmMirrorLog())) ) 
                 legs.removeAt(n);
         }
@@ -283,19 +202,19 @@ long long PhysVol::getContiguous(LogVol *const lv)
         legs.append(lv);
     }
 
-    for (int x = 0; x < legs.size(); x++) {
+    for (int x = 0; x < legs.size(); ++x) {
         
         const int last_segment = legs[x]->getSegmentCount() - 1;
         const QStringList pv_names = legs[x]->getPvNames(last_segment);
         long long last_extent;
         
-        for (int y = 0; y < pv_names.size(); y++) {
+        for (int y = 0; y < pv_names.size(); ++y) {
             if (pv_names[y] == m_device) {
                 
                 last_extent = legs[x]->getSegmentStartingExtent(last_segment)[y];
                 last_extent += (legs[x]->getSegmentExtents(last_segment) / pv_names.size()) - 1;
                 
-                for (int z = 0; z < lv_extents.size(); z++) {
+                for (int z = 0; z < lv_extents.size(); ++z) {
                     if (lv_extents[z]->first_extent > last_extent) {
                         contiguous = (lv_extents[z]->first_extent - last_extent) - 1;
                         break;

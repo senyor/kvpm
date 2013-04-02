@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -50,26 +50,26 @@ class PhysVol
 public:
     PhysVol(pv_t lvm_pv, VolGroup *const vg);
     void rescan(pv_t pv);
-    QString getName();       // eg: /dev/hde4
-    QString getUuid();
-    QStringList getTags();
-    VolGroup* getVg();
-    bool isAllocatable();
-    void setActive();               // If any lv is active on the pv, the pv is active
-    bool isActive();
-    bool isMissing();
-    long long getContiguous(LogVol *const lv); // the number of contiguous bytes available if the lv is on this pv
-    long long getContiguous();                 // the max contiguous bytes on the the pv.
+    QString getName() const { return m_device.trimmed(); }       // eg: /dev/hde4
+    QString getUuid() const { return m_uuid.trimmed(); } 
+    QStringList getTags() const { return m_tags; }
+    VolGroup* getVg() const { return m_vg; }
+    bool isAllocatable() const { return m_allocatable; }
+    void setActive() { m_active = true; }        // If any lv is active on the pv, the pv is active
+    bool isActive() const { return m_active; }
+    bool isMissing() const { return m_missing; }
+    long long getContiguous(LogVol *const lv);   // the number of contiguous bytes available if the lv is on this pv
+    long long getContiguous();                   // the max contiguous bytes on the the pv.
                                                
-    long long getSize();                       // size of the physical volume in bytes
-    long long getDeviceSize();                 // the physical volume might not take up all the device!
-    long long getRemaining();                  // free space in bytes
-    long long getLastUsedExtent();  // needed for minimum shrink size determination
-    void setLastUsedExtent(const long long last);
+    long long getSize() const { return m_size; }              // size of the physical volume in bytes
+    long long getDeviceSize() const { return m_device_size; } // the physical volume might not take up all the device!
+    long long getRemaining() const { return m_unused; }      // free space in bytes
+    long long getLastUsedExtent() const { return m_last_used_extent; }    // needed for minimum shrink size determination
+    void setLastUsedExtent(const long long last) { m_last_used_extent = last; }
     int getPercentUsed();           // 0 - 100
-    long getMdaCount();
-    long getMdaUsed();              // Meta Data areas in use
-    long long getMdaSize();         // Meta Data Area size in bytes
+    long getMdaCount() const { return m_mda_count; }
+    long getMdaUsed() const { return m_mda_used; }           // Meta Data areas in use
+    long long getMdaSize() const { return m_mda_size; }      // Meta Data Area size in bytes
     QList<LVSegmentExtent *> sortByExtent();
 };
 
