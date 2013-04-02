@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -20,6 +20,7 @@
 #include "mountentry.h"
 #include "mounttables.h"
 #include "pedexceptions.h"
+#include "pedthread.h"
 #include "physvol.h"
 #include "processprogress.h"
 #include "progressbox.h"
@@ -30,10 +31,14 @@
 #include <parted/parted.h>
 
 #include <QDebug>
+#include <QElapsedTimer>
+#include <QSemaphore>
+#include <QThread>
 
 #include <KApplication>
 #include <KLocale>
 #include <KMessageBox>
+
 
 
 // These are static being variables initialized here
@@ -76,11 +81,17 @@ void MasterList::rescan()
 
     progress_box->setRange(0, 3);
     progress_box->setValue(0);
-    progress_box->setText("Scan lvm");
+    progress_box->setText("Scan system");
     qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
 
+    // The lvm and PED scan can both be slow so we
+    // run the PED system scan in a background thread
+    QSemaphore semaphore(1);
+    PedThread ped_thread(&semaphore);
+    ped_thread.start();
     lvm_scan(m_lvm);
     lvm_config_reload(m_lvm);
+    semaphore.acquire(1);      // wait for thread to finish
 
     qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
     progress_box->setValue(1);
@@ -143,8 +154,7 @@ void MasterList::scanStorageDevices()
 
     m_storage_devices.clear();
 
-    ped_device_free_all();
-    ped_device_probe_all();
+
 
     PedDevice *dev = NULL;
 
