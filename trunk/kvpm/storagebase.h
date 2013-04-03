@@ -41,7 +41,7 @@ public:
     StorageBase(PedPartition *const part, const QList<PhysVol *> &pvList);
     virtual ~StorageBase() {}
 
-    virtual long long getSize() = 0;
+    virtual long long getSize() const = 0;
     QString getName() const { return m_name; }           // the full device path
     PhysVol *getPhysicalVolume() const { return m_pv; }
     long long getSectorSize() const { return m_sector_size; }   // Size in bytes

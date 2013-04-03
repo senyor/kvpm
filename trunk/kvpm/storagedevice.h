@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2009, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -21,46 +21,33 @@
 #include <QObject>
 #include <QStringList>
 
+#include "storagebase.h"
+
 class MountTables;
 class PhysVol;
 class StoragePartition;
 
-class StorageDevice : public QObject
+class StorageDevice : public StorageBase
 {
-    Q_OBJECT
-
     long long m_device_size; // Size in bytes
-    QString   m_device_path;
     QString   m_disk_label;
     QString   m_hardware;
-    long long m_sector_size;
     long long m_physical_sector_size;
-    bool      m_is_writable;
-    bool      m_is_busy;
-    bool      m_is_pv;
-    PhysVol  *m_pv;
     int       m_freespace_count;
 
     QList<StoragePartition *> m_storage_partitions;
 
 public:
-    StorageDevice(PedDevice * const pedDevice, const QList<PhysVol *> pvList, MountTables *const mountTables);
+    StorageDevice(PedDevice *const pedDevice, const QList<PhysVol *> pvList, MountTables *const mountTables);
     ~StorageDevice();
 
-    QString getName();
-    QString getDiskLabel();
-    QString getHardware();
-    QList<StoragePartition *> getStoragePartitions();
-    int getPartitionCount();
-    int getRealPartitionCount();
-    long long getSize();                // Size in bytes
-    long long getSectorSize();
-    long long getPhysicalSectorSize();
-    bool isWritable();
-    bool isBusy();
-    bool isPhysicalVolume();
-    PhysVol *getPhysicalVolume();
-
+    QString getDiskLabel() const { return m_disk_label; }
+    QString getHardware() const { return m_hardware; }
+    QList<StoragePartition *> getStoragePartitions() const { return m_storage_partitions; }
+    int getPartitionCount() const { return m_storage_partitions.size(); }
+    int getRealPartitionCount() const { return m_storage_partitions.size() - m_freespace_count; }
+    long long getSize() const { return m_device_size; }               // Size in bytes
+    long long getPhysicalSectorSize() const { return m_physical_sector_size; }
 };
 
 #endif
