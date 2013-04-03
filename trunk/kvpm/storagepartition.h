@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -20,17 +20,19 @@
 #include <QObject>
 #include <QStringList>
 
+#include "storagebase.h"
+
 class PhysVol;
 class MountEntry;
 class MountTables;
 
-class StoragePartition
+class StoragePartition : public StorageBase
 {
     QList<MountEntry *> m_mount_entries;
     QString m_fstab_mount_point;
-    PhysVol *m_pv;
+    QStringList m_mount_points;
     PedPartition *m_ped_partition;
-    QString m_partition_path;
+    QString m_name;
     QString m_partition_type;
     unsigned int m_ped_type;
     QString m_fs_type;
@@ -43,14 +45,12 @@ class StoragePartition
     PedSector m_true_first_sector;   // unaligned first sector
     long long m_fs_size;
     long long m_fs_used;
-    int m_major;            // block dev numbers
-    int m_minor;
-    bool m_is_writable;
-    bool m_is_pv;
+ 
+  
     bool m_is_mounted;
     bool m_is_extended;
     bool m_is_empty;   // empty extended partition
-    bool m_is_busy;
+ 
     bool m_is_mountable;
     bool m_is_normal;
     bool m_is_logical;
@@ -60,45 +60,37 @@ class StoragePartition
     PedSector getFreespaceEnd();
 
 public:
-    StoragePartition(PedPartition *const part,
-                     const int freespaceCount,
-                     const QList<PhysVol *> pvList,
-                     MountTables *const mountTables);
+    StoragePartition(PedPartition *const part, const int freespaceCount,
+                     const QList<PhysVol *> pvList, MountTables *const tables);
 
     ~StoragePartition();
 
-    PedPartition *getPedPartition();
-    QString getFilesystem();
-    QString getFilesystemUuid();
-    QString getFilesystemLabel();
-    QString getName();
-    PhysVol *getPhysicalVolume();
-    QString getType();
-    unsigned int getPedType();
-    QString getFstabMountPoint();
-    QStringList getMountPoints();
-    QList<MountEntry *> getMountEntries();  // These need to be deleted by the calling function!
-    QStringList getFlags();
-    long long getSize();
-    PedSector getFirstSector();
-    PedSector getTrueFirstSector();
-    PedSector getLastSector();
-    long long getFilesystemSize();
-    long long getFilesystemUsed();
-    long long getFilesystemRemaining();
-    int getFilesystemPercentUsed();
-    int getMajorNumber();
-    int getMinorNumber();
-    bool isWritable();
-    bool isPhysicalVolume();
-    bool isMounted();
-    bool isEmptyExtended();
-    bool isExtended();
-    bool isBusy();
-    bool isMountable();
-    bool isNormal();
-    bool isLogical();
-    bool isFreespace();
+    QString getName() const { return m_name; }
+    PedPartition *getPedPartition() const { return m_ped_partition; }
+    QString getFilesystem() const { return m_fs_type; }
+    QString getFilesystemUuid() const { return m_fs_uuid; }
+    QString getFilesystemLabel() const { return m_fs_label; }
+    QString getType() const { return m_partition_type; }
+    unsigned int getPedType() const { return m_ped_type; }
+    QString getFstabMountPoint() const { return m_fstab_mount_point; }
+    QStringList getMountPoints() const { return m_mount_points; }
+    QList<MountEntry *> getMountEntries() const ;  // These need to be deleted by the calling function!
+    QStringList getFlags() const { return m_flags; }
+    long long getSize() const { return m_partition_size; }
+    PedSector getFirstSector() const { return m_first_sector; }
+    PedSector getTrueFirstSector() const { return m_true_first_sector; }
+    PedSector getLastSector() const { return m_last_sector; }
+    long long getFilesystemSize() const { return m_fs_size; }
+    long long getFilesystemUsed() const { return m_fs_used; }
+    long long getFilesystemRemaining() const { return m_fs_size - m_fs_used; }
+    int getFilesystemPercentUsed() const ;
+    bool isMounted() const { return m_is_mounted; }
+    bool isEmptyExtended() const ;
+    bool isExtended() const { return m_is_extended; }
+    bool isMountable() const { return m_is_mountable; }
+    bool isNormal() const { return m_is_normal; }
+    bool isLogical() const { return m_is_logical; }
+    bool isFreespace() const { return m_is_freespace; }
 };
 
 #endif
