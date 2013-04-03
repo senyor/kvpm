@@ -62,11 +62,11 @@ LogVol::LogVol(lv_t lvmLV, vg_t lvmVG, VolGroup *const vg, LogVol *const lvParen
 
 LogVol::~LogVol()
 {
-    for (int x = m_mount_entries.size() - 1; x >= 0; x--)
-        delete m_mount_entries.takeAt(x);
+    for (auto ptr : m_mount_entries)
+        delete ptr;
 
-    while (m_segments.size())
-        delete m_segments.takeAt(0);
+    for (auto ptr : m_segments)
+        delete ptr;
 }
 
 void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)

@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -31,11 +31,11 @@ VolGroup::VolGroup(lvm_t lvm, const char *vgname, MountTables *const tables)
 
 VolGroup::~VolGroup()
 {
-    for (int x = m_member_lvs.size() - 1; x >= 0; x--)
-        delete m_member_lvs.takeAt(x);
+    for (auto ptr : m_member_lvs)
+        delete ptr;
 
-    for (int x = m_member_pvs.size() - 1; x >= 0; x--)
-        delete m_member_pvs.takeAt(x);
+    for (auto ptr : m_member_pvs)
+        delete ptr;
 }
 
 void VolGroup::rescan(lvm_t lvm)
