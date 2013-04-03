@@ -27,8 +27,12 @@ StorageBase::StorageBase(PedPartition *const part, const QList<PhysVol *> &pvLis
     m_sector_size = part->disk->dev->sector_size;
     m_name = QString(ped_partition_get_path(part)).trimmed();
     m_is_writable = !part->disk->dev->read_only;
-    m_is_busy = ped_device_is_busy(part->disk->dev);
     commonConstruction(pvList);
+
+    if (m_is_pv)
+        m_is_busy = m_pv->isActive();
+    else
+        m_is_busy = ped_partition_is_busy(part);
 }
 
 StorageBase::StorageBase(PedDevice *const device, const QList<PhysVol *> &pvList)
@@ -36,8 +40,8 @@ StorageBase::StorageBase(PedDevice *const device, const QList<PhysVol *> &pvList
     m_sector_size = device->sector_size;
     m_name = QString(device->path).trimmed();
     m_is_writable = !device->read_only;
-    m_is_busy = ped_device_is_busy(device);
     commonConstruction(pvList);
+    m_is_busy = ped_device_is_busy(device);
 }
 
 
