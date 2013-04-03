@@ -12,7 +12,7 @@ set(kvpm_SRCS allocationpolicy.cpp changemirror.cpp kvpmconfigdialog.cpp devicep
 	      physvol.cpp partchange.cpp progressbox.cpp repairmissing.cpp partflag.cpp
 	      misc.cpp pedexceptions.cpp processprogress.cpp pvchange.cpp snapmerge.cpp
 	      pvmove.cpp pvtree.cpp removemissing.cpp removemirror.cpp sizeselectorbox.cpp
-	      removemirrorleg.cpp storagepartition.cpp storagedevice.cpp thincreate.cpp
+	      removemirrorleg.cpp storagepartition.cpp storagedevice.cpp storagebase.cpp thincreate.cpp
 	      topwindow.cpp tablecreate.cpp unmount.cpp vgchange.cpp vgexport.cpp vgimport.cpp
 	      vgcreate.cpp vgextend.cpp vginfolabels.cpp 
 	      vgreduce.cpp vgremove.cpp vgtree.cpp volgroup.cpp vgreduceone.cpp
