@@ -78,7 +78,7 @@ void LVPropertiesStack::changeLVStackIndex(QTreeWidgetItem *item, QTreeWidgetIte
     if (item && (members.size() == m_lv_stack_list.size())) {   // These *should* be equal
         const QString lv_uuid = QVariant(item->data(2, Qt::UserRole)).toString();
 
-        for (int x = members.size() - 1; x >= 0; x--) {
+        for (int x = members.size() - 1; x >= 0; --x) {
             if (lv_uuid == (members[x])->getUuid()) {
 
                 m_stack_widget->setCurrentIndex(x);
@@ -110,12 +110,11 @@ void LVPropertiesStack::loadData()
 {
     const LogVolList members  = m_vg->getLogicalVolumesFlat();
 
-
     delete m_vscroll->takeWidget();
     m_stack_widget = new QStackedWidget;
     m_lv_stack_list.clear();
 
-    for (int x = 0; x < members.size(); x++) {
+    for (int x = 0; x < members.size(); ++x) {
 
         QStackedWidget *const segment_properties_stack = new QStackedWidget();
 
