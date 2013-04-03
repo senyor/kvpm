@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2009, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -29,11 +29,9 @@
 
 
 
-StoragePartition::StoragePartition(PedPartition *const part,
-                                   const int freespaceCount,
-                                   const QList<PhysVol *> pvList,
-                                   MountTables *const mountTables) :
-    m_ped_partition(part)
+StoragePartition::StoragePartition(PedPartition *const part, const int freespaceCount, 
+                                   const QList<PhysVol *> pvList, MountTables *const tables)
+    : StorageBase(part, pvList), m_ped_partition(part)
 {
     PedDevice *const ped_device = m_ped_partition->disk->dev;
     PedGeometry const geometry  = m_ped_partition->geom;
@@ -43,13 +41,13 @@ StoragePartition::StoragePartition(PedPartition *const part,
     m_last_sector    = geometry.end;
     m_partition_size = geometry.length * sector_size; // in bytes
     m_ped_type       = m_ped_partition->type;
-    m_is_writable    = !ped_device->read_only;
-    m_is_pv       = false;
+
+    const bool is_pv = isPhysicalVolume();
+ 
     m_is_normal   = false;
     m_is_extended = false;
     m_is_logical  = false;
     m_is_freespace = false;
-    m_pv = NULL;
 
     if (m_ped_type & PED_PARTITION_FREESPACE) {
         if (m_ped_type & PED_PARTITION_LOGICAL) {
@@ -64,15 +62,15 @@ StoragePartition::StoragePartition(PedPartition *const part,
     if (m_ped_type == PED_PARTITION_NORMAL) {
         m_partition_type = "normal";
         m_is_normal = true;
-        m_partition_path = ped_partition_get_path(part);
+        m_name = ped_partition_get_path(part);
     } else if (m_ped_type & PED_PARTITION_EXTENDED) {
         m_partition_type = "extended";
         m_is_extended = true;
-        m_partition_path = ped_partition_get_path(part);
+        m_name = ped_partition_get_path(part);
     } else if ((m_ped_type & PED_PARTITION_LOGICAL) && !(m_ped_type & PED_PARTITION_FREESPACE)) {
         m_partition_type = "logical";
         m_is_logical = true;
-        m_partition_path = ped_partition_get_path(part);
+        m_name = ped_partition_get_path(part);
 
 
         // NOTE: the device paths in PED for freespace are always numered "1" (like /dev/sda-1).
@@ -80,36 +78,20 @@ StoragePartition::StoragePartition(PedPartition *const part,
 
     } else if ((m_ped_type & PED_PARTITION_LOGICAL) && (m_ped_type & PED_PARTITION_FREESPACE)) {
         m_partition_type = "freespace (logical)";
-        m_partition_path = ped_partition_get_path(part);
-        m_partition_path.chop(1);
-        m_partition_path.append(QString("%1").arg(freespaceCount));
+        m_name = ped_partition_get_path(part);
+        m_name.chop(1);
+        m_name.append(QString("%1").arg(freespaceCount));
     } else {
         m_partition_type = "freespace";
-        m_partition_path = ped_partition_get_path(part);
-        m_partition_path.chop(1);
-        m_partition_path.append(QString("%1").arg(freespaceCount));
+        m_name = ped_partition_get_path(part);
+        m_name.chop(1);
+        m_name.append(QString("%1").arg(freespaceCount));
     }
 
-    for (int x = 0; x < pvList.size(); x++) {
-        if (m_partition_path == pvList[x]->getName()) {
-            m_is_pv = true;
-            m_pv = pvList[x];
-        }
-    }
-
-    KDE_struct_stat buf;
-    QByteArray path = m_partition_path.toLocal8Bit();
-
-    if (KDE_stat(path.data(), &buf) == 0) {
-        m_major =  major(buf.st_rdev);
-        m_minor =  minor(buf.st_rdev);
-    } else {
-        m_major = -1;
-        m_minor = -1;
-    }
+    m_name = m_name.trimmed();
+    m_partition_type = m_partition_type.trimmed();
 
     // Iterate though all the possible flags and check each one
-
     PedPartitionFlag ped_flag = PED_PARTITION_BOOT;
 
     if (!m_partition_type.contains("freespace", Qt::CaseInsensitive)) {
@@ -127,23 +109,27 @@ StoragePartition::StoragePartition(PedPartition *const part,
         m_is_mountable = false;
         m_fs_type = "";
     } else {
-        m_fs_type  = fsprobe_getfstype2(m_partition_path).trimmed();
-        m_fs_uuid  = fsprobe_getfsuuid(m_partition_path).trimmed();
-        m_fs_label = fsprobe_getfslabel(m_partition_path).trimmed();
+        m_fs_type  = fsprobe_getfstype2(m_name).trimmed();
+        m_fs_uuid  = fsprobe_getfsuuid(m_name).trimmed();
+        m_fs_label = fsprobe_getfslabel(m_name).trimmed();
 
-        if (m_fs_type == "swap" || m_is_pv || m_partition_type.contains("freespace", Qt::CaseInsensitive))
+        if (m_fs_type == "swap" || is_pv || m_partition_type.contains("freespace", Qt::CaseInsensitive))
             m_is_mountable = false;
         else
             m_is_mountable = true;
     }
 
-    for (int x = m_mount_entries.size() - 1; x >= 0; x--)
+    // This isn't needed until we start reusing StoragePartition
+
+    for (int x = m_mount_entries.size() - 1; x >= 0; --x)
         delete m_mount_entries.takeAt(x);
 
-    m_mount_entries = mountTables->getMtabEntries(m_major, m_minor);
-    m_fstab_mount_point = mountTables->getFstabMountPoint(this);
-
+    m_mount_entries = tables->getMtabEntries(getMajorNumber(), getMinorNumber());
+    m_fstab_mount_point = tables->getFstabMountPoint(this);
     m_is_mounted = !m_mount_entries.isEmpty();
+
+    for (auto entry : m_mount_entries)
+        m_mount_points.append(entry->getMountPoint());
 
     if (m_is_mounted) {
         FSData fs_data = get_fs_data(m_mount_entries[0]->getMountPoint());
@@ -158,11 +144,6 @@ StoragePartition::StoragePartition(PedPartition *const part,
         m_fs_size = -1;
         m_fs_used = -1;
     }
-
-    if (m_is_pv)
-        m_is_busy = m_pv->isActive();
-    else
-        m_is_busy = ped_partition_is_busy(m_ped_partition);
 
     if (m_partition_type == "extended") {
 
@@ -179,8 +160,9 @@ StoragePartition::StoragePartition(PedPartition *const part,
             }
             ped_disk_destroy(temp_disk);
         }
-    } else
+    } else {
         m_is_empty = false;
+    }
 }
 
 StoragePartition::~StoragePartition()
@@ -189,92 +171,7 @@ StoragePartition::~StoragePartition()
         delete m_mount_entries[x];
 }
 
-QString StoragePartition::getType()
-{
-    return m_partition_type.trimmed();
-}
-
-unsigned int StoragePartition::getPedType()
-{
-    return m_ped_type;
-}
-
-PedPartition* StoragePartition::getPedPartition()
-{
-    return m_ped_partition;
-}
-
-QString StoragePartition::getFilesystem()
-{
-    return m_fs_type;
-}
-
-QString StoragePartition::getFilesystemUuid()
-{
-    return m_fs_uuid;
-}
-
-QString StoragePartition::getFilesystemLabel()
-{
-    return m_fs_label;
-}
-
-PhysVol* StoragePartition::getPhysicalVolume()
-{
-    return m_pv;
-}
-
-QString StoragePartition::getName()
-{
-    return m_partition_path.trimmed();
-}
-
-long long StoragePartition::getSize()
-{
-    return m_partition_size;
-}
-
-PedSector StoragePartition::getFirstSector()
-{
-    return m_first_sector;
-}
-
-PedSector StoragePartition::getTrueFirstSector()
-{
-    return m_true_first_sector;
-}
-
-PedSector StoragePartition::getLastSector()
-{
-    return m_last_sector;
-}
-
-long long StoragePartition::getFilesystemSize()
-{
-    return m_fs_size;
-}
-
-long long StoragePartition::getFilesystemUsed()
-{
-    return m_fs_used;
-}
-
-long long StoragePartition::getFilesystemRemaining()
-{
-    return m_fs_size - m_fs_used;
-}
-
-int StoragePartition::getMajorNumber()
-{
-    return m_major;
-}
-int StoragePartition::getMinorNumber()
-{
-    return m_minor;
-}
-
-
-int StoragePartition::getFilesystemPercentUsed()
+int StoragePartition::getFilesystemPercentUsed() const
 {
     int percent;
 
@@ -290,75 +187,15 @@ int StoragePartition::getFilesystemPercentUsed()
     return percent;
 }
 
-bool StoragePartition::isMounted()
-{
-    return m_is_mounted;
-}
-
-bool StoragePartition::isExtended()
-{
-    return m_is_extended;
-}
-
 /* This function returns true if the partition is extended
    and has no logical partitions */
 
-bool StoragePartition::isEmptyExtended()
+bool StoragePartition::isEmptyExtended() const
 {
     return m_is_empty;
 }
 
-bool StoragePartition::isWritable()
-{
-    return m_is_writable;
-}
-
-bool StoragePartition::isNormal()
-{
-    return m_is_normal;
-}
-
-bool StoragePartition::isLogical()
-{
-    return m_is_logical;
-}
-
-bool StoragePartition::isBusy()
-{
-    return m_is_busy;
-}
-
-bool StoragePartition::isMountable()
-{
-    return m_is_mountable;
-}
-
-bool StoragePartition::isFreespace()
-{
-    return m_is_freespace;
-}
-
-bool StoragePartition::isPhysicalVolume()
-{
-    return m_is_pv;
-}
-
-QString StoragePartition::getFstabMountPoint()
-{
-    return m_fstab_mount_point;
-}
-
-QStringList StoragePartition::getMountPoints()
-{
-    QStringList mount_points;
-
-    for (int x = 0; x < m_mount_entries.size(); x++)
-        mount_points.append(m_mount_entries[x]->getMountPoint());
-
-    return mount_points;
-}
-
-QList<MountEntry *> StoragePartition::getMountEntries()
+QList<MountEntry *> StoragePartition::getMountEntries() const
 {
     QList<MountEntry *> copy;
     QListIterator<MountEntry *> itr(m_mount_entries);
@@ -367,11 +204,6 @@ QList<MountEntry *> StoragePartition::getMountEntries()
         copy.append(new MountEntry(itr.next()));
 
     return copy;
-}
-
-QStringList StoragePartition::getFlags()
-{
-    return m_flags;
 }
 
 PedSector StoragePartition::getAlignedStart()
