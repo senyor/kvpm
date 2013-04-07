@@ -136,6 +136,7 @@ public:
                        QString name = QString(""), QString pool = QString(""),  // name = origin for snap or lvname for extend 
                        QWidget *parent = NULL);
 
+    virtual ~LvCreateDialogBase() {}     
 };
 
 #endif
