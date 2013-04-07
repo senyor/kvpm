@@ -91,6 +91,7 @@ protected:
 
 public:
     explicit PartitionDialogBase(StoragePartition *const partition, QWidget *parent = NULL);
+    virtual ~PartitionDialogBase() {}
 
 };
 
