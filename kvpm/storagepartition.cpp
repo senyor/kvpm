@@ -59,31 +59,29 @@ StoragePartition::StoragePartition(PedPartition *const part, const int freespace
         m_partition_size = (1 + m_last_sector - m_first_sector) * sector_size;
     }
 
+    char *const ped_path = ped_partition_get_path(part);
+    m_name = QString(ped_path);
+    free(ped_path);
+
     if (m_ped_type == PED_PARTITION_NORMAL) {
         m_partition_type = "normal";
         m_is_normal = true;
-        m_name = ped_partition_get_path(part);
     } else if (m_ped_type & PED_PARTITION_EXTENDED) {
         m_partition_type = "extended";
         m_is_extended = true;
-        m_name = ped_partition_get_path(part);
     } else if ((m_ped_type & PED_PARTITION_LOGICAL) && !(m_ped_type & PED_PARTITION_FREESPACE)) {
         m_partition_type = "logical";
         m_is_logical = true;
-        m_name = ped_partition_get_path(part);
-
 
         // NOTE: the device paths in PED for freespace are always numered "1" (like /dev/sda-1).
         // We change the "1" to an incremented number for each expanse of freespace found.
 
     } else if ((m_ped_type & PED_PARTITION_LOGICAL) && (m_ped_type & PED_PARTITION_FREESPACE)) {
         m_partition_type = "freespace (logical)";
-        m_name = ped_partition_get_path(part);
         m_name.chop(1);
         m_name.append(QString("%1").arg(freespaceCount));
     } else {
         m_partition_type = "freespace";
-        m_name = ped_partition_get_path(part);
         m_name.chop(1);
         m_name.append(QString("%1").arg(freespaceCount));
     }

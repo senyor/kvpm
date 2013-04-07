@@ -95,6 +95,10 @@ PartitionDialogBase::PartitionDialogBase(StoragePartition *const partition, QWid
         } else {
             const PedSector current_end = (getCurrentSize() + getCurrentStart()) - 1;
 
+            char *const ped_path = ped_partition_get_path(m_existing_part);
+            m_path = QString(ped_path).trimmed();
+            free(ped_path);
+
             m_min_shrink_size = setMinSize();
             setMaxPart(m_max_start, m_max_end);
 
@@ -105,8 +109,6 @@ PartitionDialogBase::PartitionDialogBase(StoragePartition *const partition, QWid
                 KMessageBox::error(0, i18n("Not enough free space to move or extend this partition and it can not be shrunk"));
                 m_bailout = true;
             }
-
-            m_path = QString(ped_partition_get_path(m_existing_part));
         }
     }        
 
@@ -364,7 +366,7 @@ PedSector PartitionDialogBase::setMinSize()
         min = 1;
     } else {
         if (fs_can_reduce(fs))
-            min = get_min_fs_size(ped_partition_get_path(m_existing_part), fs) / m_sector_size;
+            min = get_min_fs_size(m_path, fs) / m_sector_size;
         else
             min = m_existing_part->geom.length;
     }
