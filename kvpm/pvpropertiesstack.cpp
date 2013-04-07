@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -51,12 +51,17 @@ PVPropertiesStack::PVPropertiesStack(VolGroup *volumeGroup, QWidget *parent)
     vlayout->addWidget(m_vscroll);
     vlayout->addLayout(hlayout);
 
-    setLayout(vlayout);
     m_vscroll->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     m_vscroll->setBackgroundRole(QPalette::Base);
     m_vscroll->setAutoFillBackground(true);
     m_vscroll->verticalScrollBar()->setBackgroundRole(QPalette::Window);
     m_vscroll->verticalScrollBar()->setAutoFillBackground(true);
+
+    m_vscroll->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding);
+    m_vscroll->setWidgetResizable(true);
+    m_vscroll->setFrameShape(QFrame::NoFrame);
+
+    setLayout(vlayout);
 }
 
 
@@ -73,7 +78,7 @@ void PVPropertiesStack::changePVStackIndex(QTreeWidgetItem *item, QTreeWidgetIte
     if (item) {
         const QString pv_uuid = QVariant(item->data(0, Qt::UserRole)).toString();
 
-        for (int x = devices.size() - 1; x >= 0; x--) {
+        for (int x = devices.size() - 1; x >= 0; --x) {
             if (pv_uuid == devices[x]->getUuid()) {
                 m_stack_widget->setCurrentIndex(x);
                 m_pv_label->setText("<b>" + devices[x]->getName() + "</b>");
@@ -87,18 +92,15 @@ void PVPropertiesStack::changePVStackIndex(QTreeWidgetItem *item, QTreeWidgetIte
 
 void PVPropertiesStack::loadData()
 {
-    const QList<PhysVol *> devices  = m_vg->getPhysicalVolumes();
+    const QList<PhysVol *> volumes  = m_vg->getPhysicalVolumes();
 
     m_stack_widget = new QStackedWidget;
 
-    for (int x = 0; x < devices.size(); x++)
-        m_stack_widget->addWidget(new PVProperties(devices[x]));
+    for (auto pv : volumes)
+        m_stack_widget->addWidget(new PVProperties(pv));
 
-    if (devices.size())
+    if (!volumes.isEmpty())
         m_stack_widget->setCurrentIndex(0);
 
-    m_vscroll->setWidget(m_stack_widget);
-    m_vscroll->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding);
-    m_vscroll->setWidgetResizable(true);
-    m_vscroll->setFrameShape(QFrame::NoFrame);
+    m_vscroll->setWidget(m_stack_widget); // QScrollArea auto deletes old widget
 }
