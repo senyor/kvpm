@@ -235,6 +235,7 @@ bool PartitionChangeDialog::movefs(PedSector from_start, PedSector to_start, Ped
     bool success = true;
 
     if (ped_device_open(device)) {
+
         void *const buff = malloc(blocksize * getSectorSize());
         
         ProgressBox *const progress_box = TopWindow::getProgressBox();
@@ -576,12 +577,8 @@ bool PartitionChangeDialog::movePartition()
         KMessageBox::error(0, i18n("Repartitioning failed: data not moved"));
         return false;
     } else {
-        if (!movefs(old_start, current_start, old_size)) {
-            return false;
-        } else {
-            pedCommitAndWait(disk);
-            return true;
-        }
+        pedCommitAndWait(disk);
+        return(movefs(old_start, current_start, old_size));
     }
 }
 
