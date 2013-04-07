@@ -49,7 +49,7 @@ class PvGroupBox: public QGroupBox
     QList<long long> m_contiguous;
 
     QLabel *m_space_label, *m_extents_label;
-    uint64_t m_extent_size;
+    long long m_extent_size;
     QHBoxLayout *getButtons();
     PolicyComboBox *m_policy_combo;
 
@@ -67,14 +67,14 @@ public:
 
     PvGroupBox(QList<StorageDevice *> devices, 
                QList<StoragePartition *> partitions,
-               uint64_t extentSize, 
+               long long extentSize, 
                QWidget *parent = NULL);
 
     QStringList getAllNames();    // names of all pvs displayed in the box
     QStringList getNames();       // names of *selected* pvs
     long long getRemainingSpace();   // total unused space on selected pvs
     QList<long long> getRemainingSpaceList();  // ditto
-    void setExtentSize(uint64_t extentSize);
+    void setExtentSize(long long extentSize);
     void disableOrigin(PhysVol *originVolume); // disable origin to prevent move from and to same pv
     AllocationPolicy getPolicy();
     AllocationPolicy getEffectivePolicy();  // convert inherited policy to the vg default policy

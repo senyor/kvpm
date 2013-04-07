@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -107,7 +107,7 @@ PvGroupBox::PvGroupBox(QList<PhysVol *> volumes, QList<long long> normal, QList<
 }
 
 PvGroupBox::PvGroupBox(QList <StorageDevice *> devices, QList<StoragePartition *> partitions,
-                       uint64_t extentSize, QWidget *parent)
+                       long long extentSize, QWidget *parent)
     : QGroupBox(parent),
       m_devices(devices),
       m_partitions(partitions),
@@ -331,16 +331,16 @@ void PvGroupBox::calculateSpace()
     return;
 }
 
-void PvGroupBox::setExtentSize(uint64_t extentSize)
+void PvGroupBox::setExtentSize(long long extentSize)
 {
-    m_extent_size = extentSize;
+    m_extent_size = (extentSize >= 1024) ? extentSize : 1024;
 
     if (m_pv_checks.size()) {
         for (int x = 0; x < m_pv_checks.size(); x++) {
-            if ((m_pv_checks[x]->getData()).toULongLong() > (m_extent_size + 0xfffff))    // 1 MiB for MDA, fix this
-                m_pv_checks[x]->setEnabled(true);                                         // when MDA size is put in
-            else {                                                                        // liblvm2app
-                m_pv_checks[x]->setChecked(false);
+            if ((m_pv_checks[x]->getData()).toLongLong() > (m_extent_size + 0xfffffLL))    // 1 MiB for MDA, fix this
+                m_pv_checks[x]->setEnabled(true);                                          // when MDA size is put in
+            else {                                                                         // liblvm2app
+                m_pv_checks[x]->setChecked(false); 
                 m_pv_checks[x]->setEnabled(false);
             }
         }

@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2009, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -96,10 +96,9 @@ VGCreateDialog::VGCreateDialog(StorageDevice *const device, StoragePartition *co
 
 void VGCreateDialog::extentSizeChanged()
 {
-
     limitExtentSize(m_extent_suffix->currentIndex());
 
-    uint32_t new_extent_size = m_extent_size->currentText().toULong();
+    long long new_extent_size = m_extent_size->currentText().toLongLong();
 
     new_extent_size *= 1024;
     if (m_extent_suffix->currentIndex() > 0)
@@ -112,7 +111,6 @@ void VGCreateDialog::extentSizeChanged()
 
 void VGCreateDialog::limitExtentSize(int index)
 {
-
     int extent_index;
 
     if (index > 1) {  // Gigabytes selected as suffix, more than 2Gib forbidden
