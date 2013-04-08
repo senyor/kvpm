@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -18,6 +18,7 @@
 #include <mntent.h>
 #include <stdio.h>
 
+#include <QDebug>
 #include <QString>
 
 #include "logvol.h"
@@ -64,6 +65,10 @@ MountEntry::MountEntry(const QString mountinfo, const int major, const int minor
     m_minor = minor;
 
     m_mount_position = 0;
+}
+
+MountEntry::~MountEntry()
+{
 }
 
 QString MountEntry::getDeviceName()

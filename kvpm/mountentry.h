@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -44,6 +44,7 @@ class MountEntry : public QObject
 public:
     explicit MountEntry(MountEntry *const copy, QObject *parent = 0);
     explicit MountEntry(mntent *const entry, QObject *parent = 0);
+    ~MountEntry();
     MountEntry(QString const mountinfo, const int major, const int minor, QObject *parent = 0);
     QString getDeviceName();
     QString getMountPoint();
