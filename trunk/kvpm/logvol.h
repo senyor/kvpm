@@ -23,6 +23,7 @@
 
 #include "allocationpolicy.h"
 #include "misc.h"
+#include "mounttables.h"
 
 class QWidget;
 
@@ -45,7 +46,7 @@ class LogVol : public QObject
     Q_OBJECT
     VolGroup *m_vg;
     QList<Segment *> m_segments;
-    QList<MountEntry *> m_mount_entries;
+    MountList m_mount_entries;
 
     LogVolList m_lv_children;  // For a mirror the children are the legs and log
                                // Snapshots are also children -- see m_snap_container
@@ -167,7 +168,7 @@ public:
     QStringList getPvNamesAll();         // full path of physical volumes for all segments
     QStringList getPvNamesAllFlat();     // full path of physical volumes including child lvs, un-nested
     QStringList getMountPoints() const { return m_mount_points; }
-    QList<MountEntry *> getMountEntries();  // Calling function must delete these objects in the list
+    MountList getMountEntries();
     QString getFstabMountPoint() const { return m_fstab_mount_point; }
     QStringList getTags() const { return m_tags; }
     QString getDiscards(int segment);

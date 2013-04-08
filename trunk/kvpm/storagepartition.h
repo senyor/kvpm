@@ -20,15 +20,16 @@
 #include <QObject>
 #include <QStringList>
 
+#include "mounttables.h"
 #include "storagebase.h"
 
 class PhysVol;
 class MountEntry;
-class MountTables;
+
 
 class StoragePartition : public StorageBase
 {
-    QList<MountEntry *> m_mount_entries;
+    MountList m_mount_entries;
     QString m_fstab_mount_point;
     QStringList m_mount_points;
     PedPartition *m_ped_partition;
@@ -74,7 +75,7 @@ public:
     unsigned int getPedType() const { return m_ped_type; }
     QString getFstabMountPoint() const { return m_fstab_mount_point; }
     QStringList getMountPoints() const { return m_mount_points; }
-    QList<MountEntry *> getMountEntries() const ;  // These need to be deleted by the calling function!
+    MountList getMountEntries() const ;
     QStringList getFlags() const { return m_flags; }
     long long getSize() const { return m_partition_size; }
     PedSector getFirstSector() const { return m_first_sector; }

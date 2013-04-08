@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -113,38 +113,28 @@ MountTables::MountTables()
 
 MountTables::~MountTables()
 {
-    for (int x = 0; x < m_fstab_list.size(); x++)
-        delete(m_fstab_list[x]);
-
-    for (int x = 0; x < m_mount_list.size(); x++)
-        delete(m_mount_list[x]);
 }
 
 void MountTables::loadData()
 {
-    for (int x = m_fstab_list.size() - 1; x >= 0; x--)
-        m_fstab_list.takeAt(x)->deleteLater();
-
-    for (int x = m_mount_list.size() - 1; x >= 0; x--)
-        m_mount_list.takeAt(x)->deleteLater();
+    m_fstab_list.clear();  // smart pointers delete data
+    m_mount_list.clear();  // when the lists are cleared
 
     QString line;
     QFile file("/proc/self/mountinfo");
 
     if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-
         QTextStream in(&file);
 
         while (!(line = in.readLine()).isEmpty()) {
             QStringList subs = line.section(' ', 2, 2).split(':');  // major and minor dev numbers
-
-            m_mount_list.append(new MountEntry(line, subs[0].toInt(), subs[1].toInt()));
+            m_mount_list.append(MountPtr(new MountEntry(line, subs[0].toInt(), subs[1].toInt())));
         }
     }
 
     file.close();
 
-    for (int x = m_mount_list.size() - 1; x >= 0; x--) {
+    for (int x = m_mount_list.size() - 1; x >= 0; --x) {
         int pos = 1;
 
         if (m_mount_list[x]->getMountPosition() > 0)
@@ -154,6 +144,7 @@ void MountTables::loadData()
             if (m_mount_list[y]->getMountPoint() == m_mount_list[x]->getMountPoint())
                 m_mount_list[y]->setMountPosition(++pos);
         }
+
         if (pos > 1)
             m_mount_list[x]->setMountPosition(1);
     }
@@ -162,9 +153,8 @@ void MountTables::loadData()
     FILE *fp;
 
     if ((fp = setmntent(_PATH_FSTAB, "r"))) {
-
         while ((entry = getmntent(fp)))
-            m_fstab_list.append(new MountEntry(entry));
+            m_fstab_list.append(MountPtr(new MountEntry(entry)));
 
         endmntent(fp);
     }
@@ -173,13 +163,13 @@ void MountTables::loadData()
 // Major and minor numbers don't change when lv or vg names are changed
 // Also lookups by fs uuid won't work with snaps since they will match the origin
 // and each other.
-QList<MountEntry *> MountTables::getMtabEntries(const int major, const int minor)
+MountList MountTables::getMtabEntries(const int major, const int minor)
 {
-    QList<MountEntry *> device_mounts;
+    MountList device_mounts;
 
-    for (int x = 0; x < m_mount_list.size(); x++) {
+    for (int x = 0; x < m_mount_list.size(); ++x) {
         if (m_mount_list[x]->getMajorNumber() == major && m_mount_list[x]->getMinorNumber() == minor) {
-            device_mounts.append(new MountEntry(m_mount_list[x]));
+            device_mounts.append(MountPtr(new MountEntry(m_mount_list[x].data())));
         }
     }
 
@@ -199,9 +189,9 @@ QString MountTables::getFstabMountPoint(StoragePartition *const partition)
 QString MountTables::getFstabMountPoint(const QString name, const QString label, const QString uuid)
 {
     QString entry_name;
-    MountEntry *entry;
+    MountPtr  entry; 
 
-    QListIterator<MountEntry *> entry_itr(m_fstab_list);
+    QMutableListIterator<MountPtr > entry_itr(m_fstab_list);
     while (entry_itr.hasNext()) {
         entry = entry_itr.next();
         entry_name = entry->getDeviceName();

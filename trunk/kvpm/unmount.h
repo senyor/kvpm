@@ -19,6 +19,8 @@
 
 #include <QStringList>
 
+#include "mounttables.h"
+
 class LogVol;
 class MountEntry;
 class NoMungeCheck;
@@ -37,7 +39,7 @@ class UnmountDialog : public KDialog
 public:
     UnmountDialog(StoragePartition *const partition, QWidget *parent = NULL);
     UnmountDialog(LogVol *const volume, QWidget *parent = NULL);
-    void buildDialog(QString const device, const QList<MountEntry *> entries);
+    void buildDialog(QString const device, const MountList entries);
     bool bailout();
 
 private slots:

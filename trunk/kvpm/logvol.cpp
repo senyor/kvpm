@@ -26,7 +26,6 @@
 #include "fsprobe.h"
 #include "masterlist.h"
 #include "mountentry.h"
-#include "mounttables.h"
 #include "physvol.h"
 #include "storagedevice.h"
 #include "volgroup.h"
@@ -62,9 +61,6 @@ LogVol::LogVol(lv_t lvmLV, vg_t lvmVG, VolGroup *const vg, LogVol *const lvParen
 
 LogVol::~LogVol()
 {
-    for (auto ptr : m_mount_entries)
-        delete ptr;
-
     for (auto ptr : m_segments)
         delete ptr;
 }
@@ -465,15 +461,13 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)
     QString tag = value.value.string;
     m_tags = tag.split(',', QString::SkipEmptyParts);
 
-    for (int x = m_mount_entries.size() - 1; x >= 0; x--)
-        delete m_mount_entries.takeAt(x);
-
+    m_mount_entries.clear();
     m_mount_entries = m_tables->getMtabEntries(m_major_device, m_minor_device);
 
     m_fstab_mount_point = m_tables->getFstabMountPoint(this);
 
     m_mount_points.clear();
-    for (int x = 0; x < m_mount_entries.size(); x++)
+    for (int x = 0; x < m_mount_entries.size(); ++x)
         m_mount_points.append(m_mount_entries[x]->getMountPoint());
 
     m_mounted = !m_mount_points.isEmpty();
@@ -1043,15 +1037,9 @@ QString LogVol::getDiscards(int segment)
     return m_segments[segment]->discards;
 }
 
-QList<MountEntry *> LogVol::getMountEntries()
+MountList LogVol::getMountEntries()
 {
-    QList<MountEntry *> copy;
-    QListIterator<MountEntry *> itr(m_mount_entries);
-
-    while (itr.hasNext())
-        copy.append(new MountEntry(itr.next()));
-
-    return copy;
+    return m_mount_entries;
 }
 
 double LogVol::getSnapPercent()

@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -15,6 +15,7 @@
 #ifndef MOUNTTABLES_H
 #define MOUNTTABLES_H
 
+#include <QSharedPointer>
 #include <QStringList>
 
 class LogVol;
@@ -22,10 +23,14 @@ class StoragePartition;
 class MountEntry;
 
 
+using MountPtr = QSharedPointer<MountEntry>;
+using MountList = QList<MountPtr>;
+
+
 class MountTables
 {
-    QList<MountEntry *> m_mount_list;
-    QList<MountEntry *> m_fstab_list;
+    MountList m_mount_list;
+    MountList m_fstab_list;
 
     QString getFstabMountPoint(const QString name, const QString label, const QString uuid);
 
@@ -34,7 +39,7 @@ public:
     ~MountTables();
 
     void loadData();
-    QList<MountEntry *> getMtabEntries(const int major, const int minor); // The list entries must be freed/deleted by the reciever
+    MountList getMtabEntries(const int major, const int minor);
     QString getFstabMountPoint(LogVol *const lv);
     QString getFstabMountPoint(StoragePartition *const partition);
 

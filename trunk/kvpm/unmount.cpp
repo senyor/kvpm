@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -36,7 +36,7 @@
 
 UnmountDialog::UnmountDialog(LogVol *const volume, QWidget *parent) : KDialog(parent)
 {
-    const QList<MountEntry *> entries = volume->getMountEntries();
+    const MountList entries = volume->getMountEntries();
     const QString name = volume->getName();
 
     buildDialog(name, entries);
@@ -44,7 +44,7 @@ UnmountDialog::UnmountDialog(LogVol *const volume, QWidget *parent) : KDialog(pa
 
 UnmountDialog::UnmountDialog(StoragePartition *const partition, QWidget *parent) : KDialog(parent)
 {
-    const QList<MountEntry *> entries = partition->getMountEntries();
+    const MountList entries = partition->getMountEntries();
     const QString name = partition->getName();
 
     buildDialog(name, entries);
@@ -55,7 +55,7 @@ bool UnmountDialog::bailout()
     return m_bailout;
 }
 
-void UnmountDialog::buildDialog(QString const device, const QList<MountEntry *> entries)
+void UnmountDialog::buildDialog(QString const device, const MountList entries)
 {
     m_bailout = false;
 
@@ -77,7 +77,7 @@ void UnmountDialog::buildDialog(QString const device, const QList<MountEntry *> 
     } else {
         m_single = false;
         bool unmountable = false;
-        QListIterator<MountEntry *> entry(entries);
+        QListIterator<MountPtr> entry(entries);
         while (entry.hasNext()) {
             if (entry.next()->getMountPosition() < 2)
                 unmountable = true;
@@ -121,7 +121,7 @@ void UnmountDialog::buildDialog(QString const device, const QList<MountEntry *> 
         label = new QLabel(i18n("Select the ones to unmount:"));
         layout->addWidget(label);
 
-        for (int x = 0; x < entries.size(); x++) {
+        for (int x = 0; x < entries.size(); ++x) {
             check = new NoMungeCheck(entries[x]->getMountPoint());
             if (entries[x]->getMountPosition() > 1) {
                 check->setChecked(false);
@@ -149,10 +149,6 @@ void UnmountDialog::buildDialog(QString const device, const QList<MountEntry *> 
 
     connect(this, SIGNAL(okClicked()),
             this, SLOT(commitChanges()));
-
-    QListIterator<MountEntry *> entry(entries);
-    while (entry.hasNext())
-        delete entry.next();
 }
 
 void UnmountDialog::resetOkButton()
