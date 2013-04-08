@@ -16,6 +16,7 @@
 #include "pvpropertiesstack.h"
 
 #include <QDebug>
+#include <QElapsedTimer>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QScrollArea>
@@ -35,8 +36,7 @@ PVPropertiesStack::PVPropertiesStack(VolGroup *volumeGroup, QWidget *parent)
       m_vg(volumeGroup)
 {
     m_vscroll = new QScrollArea;
-    m_stack_widget = NULL;
-
+    m_stack_widget = new QStackedWidget();
     QVBoxLayout *const vlayout = new QVBoxLayout();
     QHBoxLayout *const hlayout = new QHBoxLayout();
     vlayout->setMargin(0);
@@ -56,9 +56,6 @@ PVPropertiesStack::PVPropertiesStack(VolGroup *volumeGroup, QWidget *parent)
     m_vscroll->setAutoFillBackground(true);
     m_vscroll->verticalScrollBar()->setBackgroundRole(QPalette::Window);
     m_vscroll->verticalScrollBar()->setAutoFillBackground(true);
-
-    m_vscroll->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding);
-    m_vscroll->setWidgetResizable(true);
     m_vscroll->setFrameShape(QFrame::NoFrame);
 
     setLayout(vlayout);
@@ -93,14 +90,25 @@ void PVPropertiesStack::changePVStackIndex(QTreeWidgetItem *item, QTreeWidgetIte
 void PVPropertiesStack::loadData()
 {
     const QList<PhysVol *> volumes  = m_vg->getPhysicalVolumes();
+    if (!m_stack_widget)
+        m_stack_widget = new QStackedWidget;
 
-    m_stack_widget = new QStackedWidget;
+    for (int x = m_stack_widget->count() - 1; x >=0; --x) {
+        QWidget *widget = m_stack_widget->widget(x);
+        m_stack_widget->removeWidget(widget);
+        widget->deleteLater();
+    }
 
     for (auto pv : volumes)
         m_stack_widget->addWidget(new PVProperties(pv));
 
+    if (m_vscroll->widget() == 0)
+        m_vscroll->setWidget(m_stack_widget);
+
     if (!volumes.isEmpty())
         m_stack_widget->setCurrentIndex(0);
 
-    m_vscroll->setWidget(m_stack_widget); // QScrollArea auto deletes old widget
+    m_vscroll->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding);
+    m_vscroll->setWidgetResizable(true);
 }
+
