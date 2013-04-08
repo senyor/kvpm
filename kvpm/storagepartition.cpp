@@ -1,3 +1,4 @@
+
 /*
  *
  *
@@ -24,7 +25,6 @@
 #include "fsprobe.h"
 #include "misc.h"
 #include "mountentry.h"
-#include "mounttables.h"
 #include "physvol.h"
 
 
@@ -117,11 +117,6 @@ StoragePartition::StoragePartition(PedPartition *const part, const int freespace
             m_is_mountable = true;
     }
 
-    // This isn't needed until we start reusing StoragePartition
-
-    for (int x = m_mount_entries.size() - 1; x >= 0; --x)
-        delete m_mount_entries.takeAt(x);
-
     m_mount_entries = tables->getMtabEntries(getMajorNumber(), getMinorNumber());
     m_fstab_mount_point = tables->getFstabMountPoint(this);
     m_is_mounted = !m_mount_entries.isEmpty();
@@ -165,8 +160,6 @@ StoragePartition::StoragePartition(PedPartition *const part, const int freespace
 
 StoragePartition::~StoragePartition()
 {
-    for (int x = 0; x < m_mount_entries.size(); x++)
-        delete m_mount_entries[x];
 }
 
 int StoragePartition::getFilesystemPercentUsed() const
@@ -193,15 +186,9 @@ bool StoragePartition::isEmptyExtended() const
     return m_is_empty;
 }
 
-QList<MountEntry *> StoragePartition::getMountEntries() const
+MountList StoragePartition::getMountEntries() const
 {
-    QList<MountEntry *> copy;
-    QListIterator<MountEntry *> itr(m_mount_entries);
-
-    while (itr.hasNext())
-        copy.append(new MountEntry(itr.next()));
-
-    return copy;
+    return m_mount_entries;
 }
 
 PedSector StoragePartition::getAlignedStart()

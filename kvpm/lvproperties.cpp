@@ -28,6 +28,7 @@
 #include "logvol.h"
 #include "misc.h"
 #include "mountentry.h"
+#include "mounttables.h"
 #include "volgroup.h"
 
 
@@ -94,7 +95,7 @@ QFrame *LVProperties::mountPointsFrame()
     frame->setFrameStyle(QFrame::Sunken | QFrame::StyledPanel);
     frame->setLineWidth(2);
 
-    const QList<MountEntry *> entries = m_lv->getMountEntries();
+    auto entries = m_lv->getMountEntries();
 
     if (entries.size() > 1) {
         label = new QLabel(i18n("<b>Mount Points</b>"));
@@ -106,12 +107,12 @@ QFrame *LVProperties::mountPointsFrame()
         layout->addWidget(label);
     }
 
-    if (entries.size() == 0) {
+    if (entries.isEmpty()) {
         label = new QLabel(i18n("not mounted")) ;
         label->setAlignment(Qt::AlignLeft);
         layout->addWidget(label);
     } else {
-        for (int x = 0; x < entries.size(); x++) {
+        for (int x = 0; x < entries.size(); ++x) {
             const int pos = entries[x]->getMountPosition();
             const QString mp = entries[x]->getMountPoint();
 
@@ -126,10 +127,6 @@ QFrame *LVProperties::mountPointsFrame()
             }
         }
     }
-
-    QListIterator<MountEntry *> entry_itr(entries);
-    while (entry_itr.hasNext())
-        delete entry_itr.next();
 
     return frame;
 }

@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2009, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -117,7 +117,7 @@ QFrame *DeviceProperties::mpFrame(StoragePartition *const partition)
     frame->setFrameStyle(QFrame::Sunken | QFrame::StyledPanel);
     frame->setLineWidth(2);
 
-    const QList<MountEntry *> entries = partition->getMountEntries();
+    auto entries = partition->getMountEntries();
 
     QLabel *label;
 
@@ -147,10 +147,6 @@ QFrame *DeviceProperties::mpFrame(StoragePartition *const partition)
     } else {
         layout->addWidget(new QLabel(i18n("Not mounted")));
     }
-
-    QListIterator<MountEntry *> entry_itr(entries);
-    while (entry_itr.hasNext())
-        delete entry_itr.next();
 
     return frame;
 }
