@@ -68,7 +68,12 @@ PartitionDialogBase::PartitionDialogBase(StoragePartition *const partition, QWid
             m_bailout = false;
         }
     } else {
-        m_bailout = false;
+        if (m_old_storage_part->isMounted()) {
+            KMessageBox::error(0, i18n("Mounted partitions cannot be changed"));
+            m_bailout = true;
+        } else {
+            m_bailout = false;
+        }
     }
     
     if (!m_bailout) {
