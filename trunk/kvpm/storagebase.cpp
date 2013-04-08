@@ -25,7 +25,11 @@
 StorageBase::StorageBase(PedPartition *const part, const QList<PhysVol *> &pvList)
 {
     m_sector_size = part->disk->dev->sector_size;
-    m_name = QString(ped_partition_get_path(part)).trimmed();
+
+    char *const ped_path = ped_partition_get_path(part);
+    m_name = QString(ped_path).trimmed();
+    free(ped_path);
+
     m_is_writable = !part->disk->dev->read_only;
     commonConstruction(pvList);
 
