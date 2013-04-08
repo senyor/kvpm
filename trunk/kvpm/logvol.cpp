@@ -25,7 +25,6 @@
 #include "fsdata.h"
 #include "fsprobe.h"
 #include "masterlist.h"
-#include "mountentry.h"
 #include "physvol.h"
 #include "storagedevice.h"
 #include "volgroup.h"
@@ -461,9 +460,7 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)
     QString tag = value.value.string;
     m_tags = tag.split(',', QString::SkipEmptyParts);
 
-    m_mount_entries.clear();
     m_mount_entries = m_tables->getMtabEntries(m_major_device, m_minor_device);
-
     m_fstab_mount_point = m_tables->getFstabMountPoint(this);
 
     m_mount_points.clear();
@@ -1035,11 +1032,6 @@ QString LogVol::getDiscards(int segment)
         segment = 0;
 
     return m_segments[segment]->discards;
-}
-
-MountList LogVol::getMountEntries()
-{
-    return m_mount_entries;
 }
 
 double LogVol::getSnapPercent()

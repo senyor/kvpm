@@ -24,7 +24,6 @@
 #include "fsdata.h"
 #include "fsprobe.h"
 #include "misc.h"
-#include "mountentry.h"
 #include "physvol.h"
 
 
@@ -184,11 +183,6 @@ int StoragePartition::getFilesystemPercentUsed() const
 bool StoragePartition::isEmptyExtended() const
 {
     return m_is_empty;
-}
-
-MountList StoragePartition::getMountEntries() const
-{
-    return m_mount_entries;
 }
 
 PedSector StoragePartition::getAlignedStart()

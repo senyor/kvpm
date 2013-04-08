@@ -23,13 +23,12 @@
 
 #include "allocationpolicy.h"
 #include "misc.h"
+#include "mountentry.h"
 #include "mounttables.h"
 
 class QWidget;
 
 class LogVol;
-class MountEntry;
-class MountTables;
 class VolGroup;
 class Segment;
 
@@ -168,7 +167,7 @@ public:
     QStringList getPvNamesAll();         // full path of physical volumes for all segments
     QStringList getPvNamesAllFlat();     // full path of physical volumes including child lvs, un-nested
     QStringList getMountPoints() const { return m_mount_points; }
-    MountList getMountEntries();
+    MountList getMountEntries() const { return m_mount_entries; }
     QString getFstabMountPoint() const { return m_fstab_mount_point; }
     QStringList getTags() const { return m_tags; }
     QString getDiscards(int segment);
