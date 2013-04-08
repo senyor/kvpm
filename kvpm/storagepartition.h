@@ -20,11 +20,11 @@
 #include <QObject>
 #include <QStringList>
 
+#include "mountentry.h"
 #include "mounttables.h"
 #include "storagebase.h"
 
 class PhysVol;
-class MountEntry;
 
 
 class StoragePartition : public StorageBase
@@ -75,7 +75,7 @@ public:
     unsigned int getPedType() const { return m_ped_type; }
     QString getFstabMountPoint() const { return m_fstab_mount_point; }
     QStringList getMountPoints() const { return m_mount_points; }
-    MountList getMountEntries() const ;
+    MountList getMountEntries() const { return m_mount_entries; }
     QStringList getFlags() const { return m_flags; }
     long long getSize() const { return m_partition_size; }
     PedSector getFirstSector() const { return m_first_sector; }
