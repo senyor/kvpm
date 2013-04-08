@@ -112,7 +112,6 @@ ProgressBox* TopWindow::getProgressBox()
 void TopWindow::updateTabs()
 {
     VolumeGroupTab *tab;
-    QList<VolGroup *> groups;
     bool vg_exists;
 
     disconnect(m_tab_widget, SIGNAL(currentIndexChanged()),
@@ -120,18 +119,19 @@ void TopWindow::updateTabs()
 
     m_device_tab->rescan(MasterList::getStorageDevices());
 
-    groups = MasterList::getVolGroups();
+    QList<VolGroup *> groups = MasterList::getVolGroups();
     // if there is a tab for a deleted vg then delete the tab
 
-    for (int x = 1; x < m_tab_widget->getCount(); x++) {
+    for (int x = 1; x < m_tab_widget->getCount(); ++x) {
         vg_exists = false;
-        for (int y = 0; y < groups.size(); y++) {
-            if (m_tab_widget->getUnmungedText(x) == groups[y]->getName())
+
+        for (auto vg : groups) {
+            if (m_tab_widget->getUnmungedText(x) == vg->getName())
                 vg_exists = true;
         }
-        if (!vg_exists) {
+
+        if (!vg_exists)
             m_tab_widget->deleteTab(x);
-        }
     }
     // if there is a new vg and no tab then create one
 
