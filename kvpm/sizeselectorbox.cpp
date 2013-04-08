@@ -39,6 +39,15 @@ SizeSelectorBox::SizeSelectorBox(long long unitSize, long long minSize, long lon
     m_is_new(isNew),
     m_start_locked(startLocked)
 {
+    if (m_min_size < 0)
+        m_min_size = 0;
+
+    if (m_max_size < 0)
+        m_max_size = 0;
+
+    if (m_min_size > m_max_size)
+        m_min_size = m_max_size;
+
     m_initial_size = initialSize;
     m_current_size = initialSize;
     m_is_valid = true;
