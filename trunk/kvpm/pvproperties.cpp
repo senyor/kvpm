@@ -81,7 +81,6 @@ QFrame *PVProperties::buildMdaBox()
     QFrame *const frame = new QFrame;
     frame->setFrameStyle(QFrame::Sunken | QFrame::StyledPanel);
     frame->setLineWidth(2);
-    frame->setLayout(layout);
 
     label = new QLabel("<b>MDA</b>");
     label->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
@@ -92,6 +91,8 @@ QFrame *PVProperties::buildMdaBox()
     layout->addWidget(label);
     label = new QLabel(QString("Size: %1").arg(locale->formatByteSize(m_pv->getMdaSize(), 1, dialect)));
     layout->addWidget(label);
+
+    frame->setLayout(layout);
 
     return frame;
 }
@@ -106,7 +107,6 @@ QFrame *PVProperties::buildLvBox()
     QFrame *const frame = new QFrame;
     frame->setFrameStyle(QFrame::Sunken | QFrame::StyledPanel);
     frame->setLineWidth(2);
-    frame->setLayout(layout);
 
     label = new QLabel(i18n("Volume name"));
     label->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
@@ -190,6 +190,8 @@ QFrame *PVProperties::buildLvBox()
     for (int x = 0; x < lv_extents.size(); x++)
         delete lv_extents[x];
 
+    frame->setLayout(layout);
+
     return frame;
 }
 
@@ -200,7 +202,6 @@ QFrame *PVProperties::buildUuidBox()
     QFrame *const frame = new QFrame;
     frame->setFrameStyle(QFrame::Sunken | QFrame::StyledPanel);
     frame->setLineWidth(2);
-    frame->setLayout(layout);
 
     label = new QLabel("<b>UUID</b>");
     label->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
@@ -210,6 +211,8 @@ QFrame *PVProperties::buildUuidBox()
     label->setAlignment(Qt::AlignCenter);
     label->setWordWrap(true);
     layout->addWidget(label);
+
+    frame->setLayout(layout);
 
     return frame;
 }
