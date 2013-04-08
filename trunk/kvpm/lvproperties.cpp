@@ -91,7 +91,6 @@ QFrame *LVProperties::mountPointsFrame()
     QLabel *label;
     QFrame *const frame = new QFrame();
     QVBoxLayout *const layout = new QVBoxLayout();
-    frame->setLayout(layout);
     frame->setFrameStyle(QFrame::Sunken | QFrame::StyledPanel);
     frame->setLineWidth(2);
 
@@ -128,6 +127,8 @@ QFrame *LVProperties::mountPointsFrame()
         }
     }
 
+    frame->setLayout(layout);
+
     return frame;
 }
 
@@ -136,7 +137,6 @@ QFrame *LVProperties::uuidFrame()
     QStringList uuid;
     QFrame *const frame = new QFrame();
     QVBoxLayout *const layout = new QVBoxLayout();
-    frame->setLayout(layout);
     frame->setFrameStyle(QFrame::Sunken | QFrame::StyledPanel);
     frame->setLineWidth(2);
 
@@ -153,6 +153,8 @@ QFrame *LVProperties::uuidFrame()
     label->setToolTip(m_lv->getUuid());
     layout->addWidget(label);
 
+    frame->setLayout(layout);
+
     return frame;
 }
 
@@ -161,7 +163,6 @@ QFrame *LVProperties::fsFrame(const bool showFsUuid, const bool showFsLabel)
     QStringList uuid;
     QFrame *const frame = new QFrame();
     QVBoxLayout *const layout = new QVBoxLayout();
-    frame->setLayout(layout);
     frame->setFrameStyle(QFrame::Sunken | QFrame::StyledPanel);
     frame->setLineWidth(2);
     QLabel *label;
@@ -190,6 +191,8 @@ QFrame *LVProperties::fsFrame(const bool showFsUuid, const bool showFsLabel)
         layout->addWidget(label);
     }
 
+    frame->setLayout(layout);
+
     return frame;
 }
 
@@ -203,7 +206,6 @@ QFrame *LVProperties::generalFrame(int segment)
 
     QFrame *const frame = new QFrame();
     QVBoxLayout *const layout = new QVBoxLayout();
-    frame->setLayout(layout);
     frame->setFrameStyle(QFrame::Sunken | QFrame::StyledPanel);
     frame->setLineWidth(2);
 
@@ -330,6 +332,8 @@ QFrame *LVProperties::generalFrame(int segment)
     if (m_lv->isCowSnap())
         layout->addWidget(new QLabel(i18n("Origin: %1", m_lv->getOrigin())));
 
+    frame->setLayout(layout);
+
     return frame;
 }
 
@@ -339,7 +343,6 @@ QFrame *LVProperties::physicalVolumesFrame(int segment)
     QFrame *const frame = new QFrame();
     QVBoxLayout *const layout = new QVBoxLayout();
 
-    frame->setLayout(layout);
     frame->setFrameStyle(QFrame::Sunken | QFrame::StyledPanel);
     frame->setLineWidth(2);
 
@@ -393,6 +396,8 @@ QFrame *LVProperties::physicalVolumesFrame(int segment)
             layout->addWidget(label);
         }
     }
+
+    frame->setLayout(layout);
 
     return frame;
 }
