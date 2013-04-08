@@ -37,13 +37,14 @@ DeviceProperties::DeviceProperties(StorageDevice *const device, QWidget *parent)
     QVBoxLayout *const layout = new QVBoxLayout();
     layout->setSpacing(0);
     layout->setMargin(0);
-    setLayout(layout);
 
     layout->addWidget(generalFrame(device));
     layout->addWidget(hardwareFrame(device));
 
     if (device->isPhysicalVolume())
         layout->addWidget(pvFrame(device->getPhysicalVolume()));
+
+    setLayout(layout);
 
     layout->addStretch();
 }
@@ -52,7 +53,6 @@ DeviceProperties::DeviceProperties(StoragePartition *const partition, QWidget *p
     : QWidget(parent)
 {
     QVBoxLayout *const layout = new QVBoxLayout();
-    setLayout(layout);
     layout->setSpacing(0);
     layout->setMargin(0);
     layout->addWidget(generalFrame(partition));
@@ -77,6 +77,8 @@ DeviceProperties::DeviceProperties(StoragePartition *const partition, QWidget *p
     } else if (partition->isPhysicalVolume())
         layout->addWidget(pvFrame(partition->getPhysicalVolume()));
 
+    setLayout(layout);
+
     layout->addStretch();
 }
 
@@ -84,7 +86,6 @@ QFrame *DeviceProperties::generalFrame(StoragePartition *const partition)
 {
     QFrame *const frame = new QFrame;
     QVBoxLayout *const layout = new QVBoxLayout();
-    frame->setLayout(layout);
     frame->setFrameStyle(QFrame::Sunken | QFrame::StyledPanel);
     frame->setLineWidth(2);
 
@@ -106,6 +107,8 @@ QFrame *DeviceProperties::generalFrame(StoragePartition *const partition)
         layout->addWidget(new QLabel(i18n("Flags: %1", flags.join(", "))));
     }
 
+    frame->setLayout(layout);
+
     return frame;
 }
 
@@ -113,7 +116,6 @@ QFrame *DeviceProperties::mpFrame(StoragePartition *const partition)
 {
     QFrame *const frame = new QFrame();
     QVBoxLayout *const layout = new QVBoxLayout();
-    frame->setLayout(layout);
     frame->setFrameStyle(QFrame::Sunken | QFrame::StyledPanel);
     frame->setLineWidth(2);
 
@@ -148,6 +150,8 @@ QFrame *DeviceProperties::mpFrame(StoragePartition *const partition)
         layout->addWidget(new QLabel(i18n("Not mounted")));
     }
 
+    frame->setLayout(layout);
+
     return frame;
 }
 
@@ -155,7 +159,6 @@ QFrame *DeviceProperties::generalFrame(StorageDevice *const device)
 {
     QFrame *frame = new QFrame;
     QVBoxLayout *layout = new QVBoxLayout();
-    frame->setLayout(layout);
     frame->setFrameStyle(QFrame::Sunken | QFrame::StyledPanel);
     frame->setLineWidth(2);
 
@@ -182,6 +185,8 @@ QFrame *DeviceProperties::generalFrame(StorageDevice *const device)
     else
         layout->addWidget(new QLabel(i18n("Busy: No")));
 
+    frame->setLayout(layout);
+
     return frame;
 }
 
@@ -190,7 +195,6 @@ QFrame *DeviceProperties::fsFrame(StoragePartition *const partition, const bool 
     QLabel *label;
     QFrame *const frame = new QFrame;
     QVBoxLayout *const layout = new QVBoxLayout();
-    frame->setLayout(layout);
     frame->setFrameStyle(QFrame::Sunken | QFrame::StyledPanel);
     frame->setLineWidth(2);
 
@@ -213,6 +217,8 @@ QFrame *DeviceProperties::fsFrame(StoragePartition *const partition, const bool 
         layout->addWidget(new QLabel(uuid[1]));
     }
 
+    frame->setLayout(layout);
+
     return frame;
 }
 
@@ -220,7 +226,6 @@ QFrame *DeviceProperties::pvFrame(PhysVol *const pv)
 {
     QFrame *const frame = new QFrame;
     QVBoxLayout *const layout = new QVBoxLayout();
-    frame->setLayout(layout);
     frame->setFrameStyle(QFrame::Sunken | QFrame::StyledPanel);
     frame->setLineWidth(2);
 
@@ -243,6 +248,8 @@ QFrame *DeviceProperties::pvFrame(PhysVol *const pv)
     layout->addWidget(new QLabel(uuid[0]));
     layout->addWidget(new QLabel(uuid[1]));
 
+    frame->setLayout(layout);
+
     return frame;
 }
 
@@ -250,7 +257,6 @@ QFrame *DeviceProperties::hardwareFrame(StorageDevice *const device)
 {
     QFrame *const frame = new QFrame;
     QVBoxLayout *const layout = new QVBoxLayout();
-    frame->setLayout(layout);
     frame->setFrameStyle(QFrame::Sunken | QFrame::StyledPanel);
     frame->setLineWidth(2);
 
@@ -261,6 +267,8 @@ QFrame *DeviceProperties::hardwareFrame(StorageDevice *const device)
     label = new QLabel(device->getHardware());
     label->setWordWrap(true);
     layout->addWidget(label);
+
+    frame->setLayout(layout);
 
     return frame;
 }
