@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -21,6 +21,7 @@
 #include <KLocale>
 
 #include <QDebug>
+#include <QElapsedTimer>
 #include <QFrame>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -65,6 +66,10 @@ LVPropertiesStack::LVPropertiesStack(VolGroup *Group, QWidget *parent)
     m_vscroll->setAutoFillBackground(true);
     m_vscroll->verticalScrollBar()->setBackgroundRole(QPalette::Window);
     m_vscroll->verticalScrollBar()->setAutoFillBackground(true);
+
+    m_vscroll->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding);
+    m_vscroll->setWidgetResizable(true);
+    m_vscroll->setFrameShape(QFrame::NoFrame);
 }
 
 
@@ -109,10 +114,16 @@ void LVPropertiesStack::changeLVStackIndex(QTreeWidgetItem *item, QTreeWidgetIte
 
 void LVPropertiesStack::loadData()
 {
-    const LogVolList members  = m_vg->getLogicalVolumesFlat();
+    const LogVolList members = m_vg->getLogicalVolumesFlat();
 
-    delete m_vscroll->takeWidget();
-    m_stack_widget = new QStackedWidget;
+    if (m_stack_widget == NULL)
+        m_stack_widget = new QStackedWidget;
+
+    for (int x = m_stack_widget->count() - 1; x >= 0; --x) {
+        QWidget *widget = m_stack_widget->widget(x);
+        m_stack_widget->removeWidget(widget);
+        widget->deleteLater();
+    }
     m_lv_stack_list.clear();
 
     for (int x = 0; x < members.size(); ++x) {
@@ -134,11 +145,9 @@ void LVPropertiesStack::loadData()
     if (members.size())
         m_stack_widget->setCurrentIndex(0);
 
-    m_vscroll->setWidget(m_stack_widget);
-    m_vscroll->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding);
-    m_vscroll->setWidgetResizable(true);
-    m_vscroll->setFrameShape(QFrame::NoFrame);
+    if (m_vscroll->widget() == 0)
+        m_vscroll->setWidget(m_stack_widget);
 
-    const QSize min_size_hint = minimumSizeHint();
-    setMinimumWidth(min_size_hint.width() + 18);
+    setMinimumWidth(minimumSizeHint().width() + 18);
 }
+
