@@ -20,6 +20,7 @@
 
 #include <KLocale>
 
+#include <QDebug>
 #include <QFrame>
 #include <QHBoxLayout>
 #include <QLabel>
