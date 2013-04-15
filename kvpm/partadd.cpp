@@ -147,7 +147,7 @@ void PartitionAddDialog::commitPartition()
         last_sector = max_end;
 
     if ((1 + last_sector - first_sector) < (2 * ONE_MIB)) {
-        KMessageBox::error(0, i18n("Partitions less than two MiB are not supported"));
+        KMessageBox::sorry(0, i18n("Partitions less than two MiB are not supported"));
         return;
     }
 
