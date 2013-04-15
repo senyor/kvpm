@@ -22,7 +22,7 @@
 QMap<QString, QString> ExecutableFinder::m_path_map = QMap<QString, QString>(); // Static initialization
 
 
-/* The purpoise of this class is to map the name of a program
+/* The purpose of this class is to map the name of a program
    with the full path of the executable */
 
 ExecutableFinder::ExecutableFinder(QObject *parent) : QObject(parent)
@@ -33,6 +33,7 @@ ExecutableFinder::ExecutableFinder(QObject *parent) : QObject(parent)
            << "lvconvert"
            << "lvcreate"
            << "lvextend"
+           << "lvm"
            << "lvreduce"
            << "lvremove"
            << "lvrename"
