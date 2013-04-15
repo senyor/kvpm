@@ -59,17 +59,17 @@ PartitionDialogBase::PartitionDialogBase(StoragePartition *const partition, QWid
         const int max_count = ped_disk_get_max_primary_partition_count(m_old_storage_part->getPedPartition()->disk);
         
         if (count >= max_count  && (!(logical_freespace || m_old_storage_part->isExtended()))) {
-            KMessageBox::error(0, i18n("This disk already has %1 primary partitions, the maximum", count));
+            KMessageBox::sorry(0, i18n("This disk already has %1 primary partitions, the maximum", count));
             m_bailout = true;
         } else if (m_old_storage_part->isExtended() && (!m_old_storage_part->isEmptyExtended())) {
-            KMessageBox::error(0, i18n("This should not happen. Try selecting the freespace and not the partiton itself"));
+            KMessageBox::sorry(0, i18n("This should not happen. Try selecting the freespace and not the partiton itself"));
             m_bailout = true;
         } else {
             m_bailout = false;
         }
     } else {
         if (m_old_storage_part->isMounted()) {
-            KMessageBox::error(0, i18n("Mounted partitions cannot be changed"));
+            KMessageBox::sorry(0, i18n("Mounted partitions cannot be changed"));
             m_bailout = true;
         } else {
             m_bailout = false;
@@ -89,12 +89,12 @@ PartitionDialogBase::PartitionDialogBase(StoragePartition *const partition, QWid
             m_min_shrink_size = 1;
  
             if (!setMaxFreespace(m_max_start, m_max_end)) {
-                KMessageBox::error(0, i18n("No free space found"));
+                KMessageBox::sorry(0, i18n("No free space found"));
                 m_bailout = true;
             }
 
             if (getMaxSize() < (3 * ONE_MIB)) {
-                KMessageBox::error(0, i18n("Not enough free space for a new partition"));
+                KMessageBox::sorry(0, i18n("Not enough free space for a new partition"));
                 m_bailout = true;
             }
         } else {
@@ -111,7 +111,7 @@ PartitionDialogBase::PartitionDialogBase(StoragePartition *const partition, QWid
                 ((getMaxEnd() - current_end) < ONE_MIB)   &&
                 ((getCurrentStart() - getMaxStart()) < ONE_MIB)) {
 
-                KMessageBox::error(0, i18n("Not enough free space to move or extend this partition and it can not be shrunk"));
+                KMessageBox::sorry(0, i18n("Not enough free space to move or extend this partition and it can not be shrunk"));
                 m_bailout = true;
             }
         }
