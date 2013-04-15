@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2009, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -13,6 +13,7 @@
  */
 
 #include "executablefinder.h"
+#include "lvmconfig.h"
 #include "masterlist.h"
 #include "topwindow.h"
 
@@ -63,9 +64,11 @@ int main(int argc, char **argv)
     splash.show();
 
     ExecutableFinder *executable_finder = new ExecutableFinder();
+    LvmConfig config;
+    config.initialize();
+
     MasterList *master_list = new MasterList();
     TopWindow  *top_window  = new TopWindow(master_list, executable_finder, NULL);
-
     MainWindow = top_window;
 
     top_window->setAutoSaveSettings();
