@@ -1078,14 +1078,14 @@ bool LVCreateDialog::hasInitialErrors()
     if (vg->getAllocatableExtents() == 0 || vg->isPartial()) {
         if (vg->isPartial())
             if (m_extend)
-                KMessageBox::error(this, i18n("Volumes can not be extended while physical volumes are missing"));
+                KMessageBox::sorry(this, i18n("Volumes can not be extended while physical volumes are missing"));
             else
-                KMessageBox::error(this, i18n("Volumes can not be created while physical volumes are missing"));
+                KMessageBox::sorry(this, i18n("Volumes can not be created while physical volumes are missing"));
         else if (vg->getFreeExtents())
-            KMessageBox::error(this, i18n("All free physical volume extents in this group"
+            KMessageBox::sorry(this, i18n("All free physical volume extents in this group"
                                           " are locked against allocation"));
         else
-            KMessageBox::error(this, i18n("There are no free extents in this volume group"));
+            KMessageBox::sorry(this, i18n("There are no free extents in this volume group"));
 
         return true;
     }
@@ -1110,14 +1110,14 @@ bool LVCreateDialog::hasInitialErrors()
             }
 
             if (m_lv->getMirrorCount() > pvs.size() ||  (m_lv->isRaid() && m_lv->getSegmentStripes(0) > pvs.size())) {
-                KMessageBox::error(this, i18n("Insufficient allocatable physical volumes to extend this volume"));
+                KMessageBox::sorry(this, i18n("Insufficient allocatable physical volumes to extend this volume"));
                 return true;
             }
         }
 
         if (m_lv->isCowOrigin()) {
             if (m_lv->isOpen()) {
-                KMessageBox::error(this, i18n("Snapshot origins cannot be extended while open or mounted"));
+                KMessageBox::sorry(this, i18n("Snapshot origins cannot be extended while open or mounted"));
                 return true;
             }
 
@@ -1125,7 +1125,7 @@ bool LVCreateDialog::hasInitialErrors()
 
             for (int x = 0; x < snap_shots.size(); x++) {
                 if (snap_shots[x]->isOpen()) {
-                    KMessageBox::error(this, i18n("Volumes cannot be extended with open or mounted snapshots"));
+                    KMessageBox::sorry(this, i18n("Volumes cannot be extended with open or mounted snapshots"));
                     return true;
                 }
             }
