@@ -93,12 +93,12 @@ void TopWindow::reRun()
 
     m_master_list->rescan(); // loads the list with new data
 
-    QElapsedTimer timer;
-    timer.start();
+    //   QElapsedTimer timer;
+    //   timer.start();
 
     updateTabs();
 
-    qDebug() << "Elapsed: " << timer.elapsed();
+    //   qDebug() << "Elapsed: " << timer.elapsed();
 
     qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
     qApp->restoreOverrideCursor();
