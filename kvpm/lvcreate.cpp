@@ -763,28 +763,7 @@ long long LVCreateDialog::getLargestVolume()
     if (!getPvsByPolicy(stripe_pv_bytes))
         return 0;
 
-// The next function sets aside the space needed for thin pool metadata.
-// The data doesn't grow upon extending of the pool.
-
-    if (m_ispool && !m_extend) {  
-
-        m_ispool = false;
-        long long meta = 64 * (getLargestVolume() / getChunkSize(getLargestVolume()));
-        m_ispool = true;
-        const long long ext = getVg()->getExtentSize();
-        meta = ( (meta  + ext - 1 ) / ext) * ext;
-
-        if (meta < 0x200000)   // 2 MiB 
-            meta = 0x200000;  
-        else if (meta > 0x400000000)   // 16 GiB 
-            meta = 0x400000000;
-                        
-        long long longest = stripe_pv_bytes.takeLast() - meta;
-        if (longest < 0)
-            longest = 0;
-        stripe_pv_bytes.append(longest);
-        qSort(stripe_pv_bytes);
-    }
+    reservePoolMetadata(stripe_pv_bytes);
 
     long long largest = stripe_pv_bytes[0];
 
@@ -1348,4 +1327,31 @@ bool LVCreateDialog::getPvsByPolicy(QList<long long> &usableBytes)
     qSort(usableBytes);
 
     return true;
+}
+
+// The next function sets aside the space needed for thin pool metadata.
+// The data doesn't grow upon extending of the pool.
+
+void LVCreateDialog::reservePoolMetadata(QList<long long> &usableBytes)
+{
+    if (m_ispool && !m_extend) {  
+
+        m_ispool = false;
+        long long meta = 64 * (getLargestVolume() / getChunkSize(getLargestVolume()));
+        m_ispool = true;
+
+        const long long ext = getVg()->getExtentSize();
+        meta = ( (meta  + ext - 1 ) / ext) * ext;
+
+        if (meta < 0x200000)   // 2 MiB 
+            meta = 0x200000;  
+        else if (meta > 0x400000000)   // 16 GiB 
+            meta = 0x400000000;
+                        
+        long long longest = usableBytes.takeLast() - meta;
+        if (longest < 0)
+            longest = 0;
+        usableBytes.append(longest);
+        qSort(usableBytes);
+    }
 }

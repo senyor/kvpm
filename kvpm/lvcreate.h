@@ -75,6 +75,7 @@ class LVCreateDialog : public LvCreateDialogBase
     long long roundExtentsToStripes(long long extents);
     bool hasInitialErrors();
     bool getPvsByPolicy(QList<long long> &usableBytes);
+    void reservePoolMetadata(QList<long long> &usableBytes);
     QStringList args();
 
 public:
