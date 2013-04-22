@@ -65,6 +65,8 @@ class LVCreateDialog : public LvCreateDialogBase
     QWidget* createChunkWidget();
     QWidget* createMirrorWidget(int pvcount);
     long long getLargestVolume();
+    int getNeededStripes();
+    int getLogCount();
     int getMaxStripes();
     int getChunkSize();
     int getChunkSize(long long const volumeSize);
@@ -72,6 +74,7 @@ class LVCreateDialog : public LvCreateDialogBase
     void extendLastSegment(QList<long long> &committed, QList<long long> &available);
     long long roundExtentsToStripes(long long extents);
     bool hasInitialErrors();
+    bool getPvsByPolicy(QList<long long> &usableBytes);
     QStringList args();
 
 public:

@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2009, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -16,6 +16,7 @@
 
 #include "fsextend.h"
 #include "logvol.h"
+#include "lvmconfig.h"
 #include "misc.h"
 #include "mountentry.h"
 #include "physvol.h"
@@ -387,7 +388,7 @@ QWidget* LVCreateDialog::createMirrorWidget(int pvcount)
     m_mirror_count_spin = new KIntSpinBox();
     m_mirror_count_spin->setRange(1, pvcount);
 
-    if (m_extend){
+    if (m_extend) {
         if (m_lv->isLvmMirror() || m_lv->getRaidType() == 1)
             m_mirror_count_spin->setValue(m_lv->getMirrorCount());
         else
@@ -401,8 +402,9 @@ QWidget* LVCreateDialog::createMirrorWidget(int pvcount)
             else if (m_lv->getLogCount() == 2)
                 m_log_combo->setCurrentIndex(0);
         }
-        else
+        else {
             m_log_combo->setCurrentIndex(1);
+        }
 
         m_log_combo->setEnabled(false);
         m_mirror_count_spin->setEnabled(false);
@@ -751,70 +753,15 @@ void LVCreateDialog::enableMonitoring(int index)
 
 long long LVCreateDialog::getLargestVolume()
 {
-    int total_stripes;
     const int type = m_type_combo->currentIndex();
     const int stripe_count = m_stripe_count_spin->value();
-    const int mirror_count = m_mirror_count_spin->value();
     const long long extent_size = getVg()->getExtentSize();
-
-    if (type == 1)          // LVM2 mirror
-        total_stripes = stripe_count * mirror_count;
-    else if (type == 2)    // RAID 1 mirror
-        total_stripes = mirror_count;
-    else
-        total_stripes = stripe_count;
-
-    if (type == 3)         // RAID 4
-        total_stripes += 1;
-    else if (type == 4)    // RAID 5
-        total_stripes += 1;
-    else if (type == 5)    // RAID 6
-        total_stripes += 2;
-
-    int log_count = 0;
-
-    if (type == 1 && !m_extend) {
-        if (m_log_combo->currentIndex() == 0)
-            log_count = 2;
-        else if (m_log_combo->currentIndex() == 1)
-            log_count = 1;
-        else
-            log_count = 0;
-    } else {
-        log_count = 0;
-    }
-
     const AllocationPolicy policy = m_pv_box->getEffectivePolicy();
 
     QList <long long> stripe_pv_bytes;
-    for (int x = 0; x < total_stripes; x++)
-        stripe_pv_bytes.append(0);
 
-    QList <long long> available_pv_bytes = m_pv_box->getRemainingSpaceList();
-
-    if (!m_extend) {
-        qSort(available_pv_bytes);
-        if (policy == CONTIGUOUS) {
-            while (available_pv_bytes.size() > total_stripes + log_count)  
-                available_pv_bytes.removeFirst();
-        } 
-
-        for (int x = 0; x < log_count; x++) {
-            if (available_pv_bytes.size())
-                available_pv_bytes.removeFirst();
-            else
-                return 0;
-        }
-
-    } else {
-        extendLastSegment(stripe_pv_bytes, available_pv_bytes);
-    }
-
-    while (available_pv_bytes.size()) {
-        qSort(stripe_pv_bytes);
-        stripe_pv_bytes[0] += available_pv_bytes.takeLast();
-    }
-    qSort(stripe_pv_bytes);
+    if (!getPvsByPolicy(stripe_pv_bytes))
+        return 0;
 
 // The next function sets aside the space needed for thin pool metadata.
 // The data doesn't grow upon extending of the pool.
@@ -1297,3 +1244,108 @@ void LVCreateDialog::extendLastSegment(QList<long long> &committed, QList<long l
     }
 }
 
+int LVCreateDialog::getLogCount()
+{
+    const int type = m_type_combo->currentIndex();
+    int count = 0;
+
+    if (type == 1 && !m_extend) {
+        if (m_log_combo->currentIndex() == 0)
+            count = 2;
+        else if (m_log_combo->currentIndex() == 1)
+            count = 1;
+        else
+            count = 0;
+    } else {
+        count = 0;
+    }
+
+    return count;
+}
+
+int LVCreateDialog::getNeededStripes()
+{
+    int total;
+    const int type = m_type_combo->currentIndex();
+    const int stripes = m_stripe_count_spin->value();
+    const int mirrors = m_mirror_count_spin->value();
+
+    if (type == 1)          // LVM2 mirror
+        total = stripes * mirrors;
+    else if (type == 2)    // RAID 1 mirror
+        total = mirrors;
+    else
+        total = stripes;
+
+    if (type == 3)         // RAID 4
+        total += 1;
+    else if (type == 4)    // RAID 5
+        total += 1;
+    else if (type == 5)    // RAID 6
+        total += 2;
+
+    return total;
+}
+
+// Remove pvs that are selected but cannot be used because of policy
+// and set aside some space on the usable ones for a mirror log if
+// one is needed.
+
+bool LVCreateDialog::getPvsByPolicy(QList<long long> &usableBytes)
+{
+    const AllocationPolicy policy = m_pv_box->getEffectivePolicy();
+    const long long extent_size = getVg()->getExtentSize();
+    const int log_count = getLogCount();
+    const bool separate_pvs = LvmConfig::getMirrorLogsRequireSeparatePvs();
+    long long reserved = 0;
+    
+    while (reserved < 0x100000)          // reserve 1 Meg for each mirror log
+        reserved += extent_size;
+
+    for (int x = 0; x < getNeededStripes(); ++x)
+        usableBytes.append(0);
+    
+    QList <long long> pv_bytes = m_pv_box->getRemainingSpaceList();
+    qSort(pv_bytes);
+    
+    if (!m_extend) {
+
+        // Specifying CONTIGUOUS seems to trigger the need for separate pvs too    
+        if (separate_pvs || policy == CONTIGUOUS) {
+            
+            if (policy == CONTIGUOUS) {
+                while (pv_bytes.size() > getNeededStripes() + log_count)  
+                    pv_bytes.removeFirst();
+            } 
+            
+            for (int x = 0; x < log_count; ++x) {
+                if (pv_bytes.size())
+                    pv_bytes.removeFirst();
+                else
+                    return false;
+            }
+        } else {
+            if (pv_bytes.size() >= log_count) {
+                
+                for (int x = pv_bytes.size() - 1; x >= (pv_bytes.size() - log_count); --x) {
+                    pv_bytes[x] -= reserved;
+                    
+                    if (pv_bytes[x] < 0)
+                        return false;
+                }
+            } else {
+                return false;
+            }
+        }
+    } else {
+        extendLastSegment(usableBytes, pv_bytes);
+    }
+    
+    while (pv_bytes.size()) {
+        qSort(usableBytes);
+        usableBytes[0] += pv_bytes.takeLast();
+    }
+    qSort(usableBytes);
+
+    return true;
+}
