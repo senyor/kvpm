@@ -175,7 +175,14 @@ QList<LVSegmentExtent *> PhysVol::sortByExtent()
     return lv_extents;
 }
 
-long long PhysVol::getContiguous(LogVol *const lv)
+/*  Find the contiguous additional free space on this pv for
+    the specified lv. For thin pools, RAID and mirrors
+    it drills down to the lower levels. Returns zero if
+    the lv isn't using this pv already or it is only used
+    for an element that normally isn't extensible such as a 
+    log or metadata */
+
+long long PhysVol::getContiguous(LogVol *lv)
 {
     long long contiguous = 0;
     const long long extent_size = m_vg->getExtentSize();
@@ -183,21 +190,25 @@ long long PhysVol::getContiguous(LogVol *const lv)
     const QList<LVSegmentExtent *> lv_extents = sortByExtent();
 
     LogVolList legs;
-
-    //
-    // TEST UNDER CONVERSION !!!
-    //
     
     if (lv == NULL)
         return getContiguous();
+
+    if (lv->isThinPool()) {
+        for (auto data : lv->getAllChildrenFlat()) {
+            if (data->isThinPoolData()) {
+                lv = data;
+                break;
+            }
+        }
+    }
     
     if (lv->isMirror() || lv->isRaid()) {
-        legs.append(lv->getAllChildrenFlat());
-        
-        for (int n = legs.size() - 1; n >= 0; --n) {
-            if ( !(legs[n]->isRaidImage() || (legs[n]->isLvmMirrorLeg() && !legs[n]->isLvmMirrorLog())) ) 
-                legs.removeAt(n);
+        for (auto image : lv->getAllChildrenFlat()) {
+            if (image->isRaidImage() || (image->isLvmMirrorLeg() && !image->isLvmMirrorLog())) 
+                legs.append(image);
         }
+        
     } else {
         legs.append(lv);
     }
@@ -226,8 +237,8 @@ long long PhysVol::getContiguous(LogVol *const lv)
         }
     }
 
-    for (int x = 0; x < lv_extents.size(); x++)
-        delete lv_extents[x];
+    for (auto ext : lv_extents)
+        delete ext;
     
     return contiguous * extent_size;
 }
