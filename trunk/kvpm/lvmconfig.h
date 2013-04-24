@@ -21,19 +21,22 @@
 
 class LvmConfig
 {
+    static long long m_mirror_region_size;
     static QString m_mirror_segtype_default;
     static bool m_mirror_logs_require_separate_pvs;
     static bool m_thin_pool_metadata_require_separate_pvs;
     static bool m_maximise_cling;
 
     QStringList getConfig();
-    void setGlobal(QStringList &variables);
-    void setAllocation(QStringList &variables);
+    void setGlobal(const QStringList &variables);
+    void setAllocation(const QStringList &variables);
+    void setActivation(const QStringList &variables);
 
 public:
     LvmConfig();
     ~LvmConfig();
     void initialize();
+    static long long getMirrorRegionSize();
     static QString getMirrorSegtypeDefault();
     static bool getMirrorLogsRequireSeparatePvs();
     static bool getThinPoolMetadataRequireSeparatePvs();
