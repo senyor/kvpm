@@ -27,11 +27,11 @@
 
 // These are static being variables initialized here
 
+long long LvmConfig::m_mirror_region_size = 0x80000;   // 512KiB
 QString LvmConfig::m_mirror_segtype_default = QString("mirror");
 bool LvmConfig::m_mirror_logs_require_separate_pvs = false;
 bool LvmConfig::m_thin_pool_metadata_require_separate_pvs = false;
 bool LvmConfig::m_maximise_cling = false;
-
 
 // This class holds the lvm2 system configuration settings. It
 // is meant to be initialized once, at startup, and then 
@@ -48,13 +48,12 @@ LvmConfig::~LvmConfig()
 void LvmConfig::initialize()
 {
     QStringList output = getConfig();
-    QStringList global;
-    QStringList allocation;
     
     auto line = output.constBegin();
     
     while (line != output.constEnd()) {
         if (line->contains("allocation {")) {
+            QStringList allocation;
             ++line;
             
             while ((line != output.constEnd()) && (!line->startsWith("}"))) {
@@ -64,6 +63,7 @@ void LvmConfig::initialize()
             
             setAllocation(allocation);
         } else if (line->contains("global {")) {
+            QStringList global;
             ++line;
             
             while ((line != output.constEnd()) && (!line->startsWith("}"))) {
@@ -72,6 +72,16 @@ void LvmConfig::initialize()
             }
             
             setGlobal(global);
+        } else if (line->contains("activation {")) {
+            QStringList activation;
+            ++line;
+            
+            while ((line != output.constEnd()) && (!line->startsWith("}"))) {
+                activation << line->trimmed();
+                ++line;
+            }
+            
+            setActivation(activation);
         } else {
             ++line;
         }
@@ -120,7 +130,7 @@ QStringList LvmConfig::getConfig()
     return output;
 }
 
-void LvmConfig::setGlobal(QStringList &variables)
+void LvmConfig::setGlobal(const QStringList &variables)
 {
     for (auto line : variables) {
         if (line.contains("mirror_segtype_default"))  {
@@ -132,7 +142,7 @@ void LvmConfig::setGlobal(QStringList &variables)
     }
 }
 
-void LvmConfig::setAllocation(QStringList &variables)
+void LvmConfig::setAllocation(const QStringList &variables)
 {
     for (auto line : variables) {
         if (line.contains("mirror_logs_require_separate_pvs"))
@@ -141,6 +151,16 @@ void LvmConfig::setAllocation(QStringList &variables)
             m_thin_pool_metadata_require_separate_pvs = line.contains("=1");
         if (line.contains("maximise_cling"))
             m_maximise_cling = line.contains("=1");
+    }
+}
+
+void LvmConfig::setActivation(const QStringList &variables)
+{
+    for (auto line : variables) {
+        if (line.contains("mirror_region_size"))  {
+            line.remove(0, 1 + line.indexOf('='));
+            m_mirror_region_size = line.toLongLong() * 1024;
+        }
     }
 }
 
@@ -163,9 +183,11 @@ bool LvmConfig::getMaximiseCling()
 {
     return m_maximise_cling;
 }
-
     
-
+long long LvmConfig::getMirrorRegionSize()
+{
+    return m_mirror_region_size;
+}
     
 
     
