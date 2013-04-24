@@ -47,9 +47,9 @@
    volumes and snapshots since both processes are so similar. */
 
 
-// Creating a new volume
+// Creating a new volume or thin pool
 
-LVCreateDialog::LVCreateDialog(VolGroup *const vg, const bool ispool, QWidget *parent):
+LVCreateDialog::LVCreateDialog(VolGroup *const vg, const bool ispool, QWidget *parent) :
     LvCreateDialogBase(vg, -1, false, false, false, ispool, QString(""), QString(""), parent),
     m_ispool(ispool)
 {
@@ -65,7 +65,7 @@ LVCreateDialog::LVCreateDialog(VolGroup *const vg, const bool ispool, QWidget *p
 
 // Extending an existing volume or creating a snapshot
 
-LVCreateDialog::LVCreateDialog(LogVol *const volume, const bool snapshot, QWidget *parent):
+LVCreateDialog::LVCreateDialog(LogVol *const volume, const bool snapshot, QWidget *parent) :
     LvCreateDialogBase(volume->getVg(), 
                        volume->isCowSnap() ? -1 : fs_max_extend(volume->getMapperPath(), volume->getFilesystem()),
                        !snapshot, snapshot, false, volume->isThinPool(), volume->getName(), 
@@ -122,7 +122,7 @@ void LVCreateDialog::makeConnections()
 
     connect(m_type_combo, SIGNAL(currentIndexChanged(int)),
             this, SLOT(enableTypeOptions(int)));
-
+  
     connect(m_type_combo, SIGNAL(currentIndexChanged(int)),
             this, SLOT(setMaxSize()));
 
@@ -139,15 +139,13 @@ void LVCreateDialog::makeConnections()
 
 QWidget* LVCreateDialog::createPhysicalTab()
 {
-    QString message;
-
     QVBoxLayout *const layout = new QVBoxLayout;
     m_physical_tab = new QWidget(this);
     m_physical_tab->setLayout(layout);
 
     QList<PhysVol *> pvs(getVg()->getPhysicalVolumes());
 
-    for (int x = pvs.size() - 1; x >= 0; x--) {
+    for (int x = pvs.size() - 1; x >= 0; --x) {
         if (pvs[x]->getRemaining() < 1 || !pvs[x]->isAllocatable() || pvs[x]->isMissing())
             pvs.removeAt(x);
     }
@@ -568,7 +566,7 @@ void LVCreateDialog::resetOkButton()
         enableButtonOk(false);
     } else {
         if (m_extend) {
-            if ((rounded <= max) && (rounded > m_lv->getExtents()) && (selected > m_lv->getExtents())) {
+            if ((rounded <= max) && (rounded >= m_lv->getExtents()) && (selected >= m_lv->getExtents())) {
                 clearWarningLabel();
                 enableButtonOk(true);
             } else {
@@ -663,6 +661,7 @@ void LVCreateDialog::enableTypeOptions(int index)
 
         if(m_extend) {
             m_stripe_count_spin->setEnabled(false);
+            m_stripe_size_combo->setEnabled(false);
         } else{
             m_stripe_count_spin->setMinimum(2);
             m_stripe_count_spin->setValue(2);
@@ -685,6 +684,7 @@ void LVCreateDialog::enableTypeOptions(int index)
 
         if(m_extend) {
             m_stripe_count_spin->setEnabled(false);
+            m_stripe_size_combo->setEnabled(false);
         } else {
             m_stripe_count_spin->setMinimum(2);
             m_stripe_count_spin->setValue(2);
@@ -706,6 +706,7 @@ void LVCreateDialog::enableTypeOptions(int index)
 
         if(m_extend) {
             m_stripe_count_spin->setEnabled(false);
+            m_stripe_size_combo->setEnabled(false);
         } else {
             m_stripe_count_spin->setMinimum(3);
             m_stripe_count_spin->setValue(3); 
@@ -722,10 +723,14 @@ void LVCreateDialog::enableTypeOptions(int index)
 
 void LVCreateDialog::enableStripeCombo(int value)
 {
-    if (value > 1 && m_stripe_size_combo->count() > 0)
-        m_stripe_size_combo->setEnabled(true);
-    else
+    if (m_extend && m_type_combo->currentIndex() > 2) {
         m_stripe_size_combo->setEnabled(false);
+    } else {
+        if (value > 1 && m_stripe_size_combo->count() > 0)
+            m_stripe_size_combo->setEnabled(true);
+        else
+            m_stripe_size_combo->setEnabled(false);
+    }
 }
 
 void LVCreateDialog::enableMonitoring(int index)
@@ -763,7 +768,8 @@ long long LVCreateDialog::getLargestVolume()
     if (!getPvsByPolicy(stripe_pv_bytes))
         return 0;
 
-    reservePoolMetadata(stripe_pv_bytes);
+    if (!reservePoolMetadata(stripe_pv_bytes))
+        return 0;
 
     long long largest = stripe_pv_bytes[0];
 
@@ -775,9 +781,20 @@ long long LVCreateDialog::getLargestVolume()
         else 
             largest = largest * stripe_count;
     } else {
-        if (m_lv->isMirror() && policy == CONTIGUOUS) {
+        LogVol *effective_lv = m_lv;
 
-            const LogVolList legs = m_lv->getChildren(); // not grandchildren because we can't extend while under conversion
+        if (effective_lv->isThinPool()) {
+            for (auto data : effective_lv->getChildren()) {
+                if (data->isThinPoolData()) {
+                    effective_lv = data;
+                    break;
+                }
+            }
+        }
+        
+        if (effective_lv->isMirror() && policy == CONTIGUOUS) {
+
+            const LogVolList legs = effective_lv->getChildren(); // not grandchildren because we can't extend while under conversion
             QList<long long> leg_max;
 
             for (int x = legs.size() - 1; x >= 0; x--) {
@@ -787,12 +804,12 @@ long long LVCreateDialog::getLargestVolume()
                     QList<long long> stripe_max;
                   
                     for (int y = pv_names.size() - 1; y >= 0; y--)
-                        stripe_max.append(getVg()->getPvByName(pv_names[y])->getContiguous(m_lv));
+                        stripe_max.append(getVg()->getPvByName(pv_names[y])->getContiguous(effective_lv));
 
                     qSort(stripe_max);
 
                     if (stripe_max.size() < stripe_count)
-                        return m_lv->getSize();
+                        return effective_lv->getSize();
 
                     while (stripe_max.size() > stripe_count)
                         stripe_max.removeFirst();
@@ -802,28 +819,44 @@ long long LVCreateDialog::getLargestVolume()
             }
 
             qSort(leg_max);
-            largest = leg_max[0] + m_lv->getSize();
+            largest = leg_max[0] + effective_lv->getSize();
+            
+        } else if (effective_lv->isRaid() && policy == CONTIGUOUS) {
+
+            const LogVolList images = effective_lv->getChildren();
+            QList<long long> image_max;
+            
+            for (auto img : images) {
+                if (img->isRaidImage()) {
+                    const QStringList pv_names = img->getPvNames(img->getSegmentCount() - 1);
+                    long long stripe_max = getVg()->getPvByName(pv_names[0])->getContiguous(effective_lv);
+                    image_max.append(stripe_max);
+                }
+            }
+            
+            qSort(image_max);
+
+            largest = (image_max[0] * stripe_count) + effective_lv->getSize();
 
         } else if (policy == CONTIGUOUS) {
-
-            const QStringList pv_names = m_lv->getPvNames(m_lv->getSegmentCount() - 1);
+            
+            const QStringList pv_names = effective_lv->getPvNames(effective_lv->getSegmentCount() - 1);
             QList<long long> stripe_max;
             
             for (int y = pv_names.size() - 1; y >= 0; y--)
-                stripe_max.append(getVg()->getPvByName(pv_names[y])->getContiguous(m_lv));
+                stripe_max.append(getVg()->getPvByName(pv_names[y])->getContiguous(effective_lv));
             
             qSort(stripe_max);
             
             if (stripe_max.size() < stripe_count)
-                return m_lv->getSize();
+                return effective_lv->getSize();
             
             while (stripe_max.size() > stripe_count)
                 stripe_max.removeFirst();
 
-            largest = (stripe_max[0] * stripe_count) + m_lv->getSize();
-
+            largest = (stripe_max[0] * stripe_count) + effective_lv->getSize();
         } else {
-            largest = (largest * stripe_count) + m_lv->getSize();
+            largest = (largest * stripe_count) + effective_lv->getSize();
         }
     }
 
@@ -1152,7 +1185,7 @@ int LVCreateDialog::getMaxStripes()
             LogVolList legs = m_lv->getChildren();
             int next_stripes = 0;
 
-            for (int x = legs.size() - 1; x >= 0; x--){
+            for (int x = legs.size() - 1; x >= 0; --x){
                 if (legs[x]->isMirrorLeg()) {
 
                     next_stripes = legs[x]->getSegmentStripes(legs[x]->getSegmentCount() - 1);
@@ -1275,7 +1308,8 @@ bool LVCreateDialog::getPvsByPolicy(QList<long long> &usableBytes)
     const AllocationPolicy policy = m_pv_box->getEffectivePolicy();
     const long long extent_size = getVg()->getExtentSize();
     const int log_count = getLogCount();
-    const bool separate_pvs = LvmConfig::getMirrorLogsRequireSeparatePvs();
+    const bool separate_logs = LvmConfig::getMirrorLogsRequireSeparatePvs();
+    const bool separate_meta = LvmConfig::getThinPoolMetadataRequireSeparatePvs();
     long long reserved = 0;
     
     while (reserved < 0x100000)          // reserve 1 Meg for each mirror log
@@ -1288,15 +1322,20 @@ bool LVCreateDialog::getPvsByPolicy(QList<long long> &usableBytes)
     qSort(pv_bytes);
     
     if (!m_extend) {
+        int extra_pvs = log_count;
+        if (m_ispool && (separate_meta || policy == CONTIGUOUS)) {
+            ++extra_pvs;
+            usableBytes.append(0);
+        }
 
         // Specifying CONTIGUOUS seems to trigger the need for separate pvs too    
-        if (separate_pvs || policy == CONTIGUOUS) {
-            
+        if ((policy == CONTIGUOUS) || ((log_count > 0) && separate_logs) || (m_ispool && separate_meta)) { 
+
             if (policy == CONTIGUOUS) {
-                while (pv_bytes.size() > getNeededStripes() + log_count)  
+                while (pv_bytes.size() > getNeededStripes() + extra_pvs)  
                     pv_bytes.removeFirst();
             } 
-            
+
             for (int x = 0; x < log_count; ++x) {
                 if (pv_bytes.size())
                     pv_bytes.removeFirst();
@@ -1332,7 +1371,7 @@ bool LVCreateDialog::getPvsByPolicy(QList<long long> &usableBytes)
 // The next function sets aside the space needed for thin pool metadata.
 // The data doesn't grow upon extending of the pool.
 
-void LVCreateDialog::reservePoolMetadata(QList<long long> &usableBytes)
+bool  LVCreateDialog::reservePoolMetadata(QList<long long> &usableBytes)
 {
     if (m_ispool && !m_extend) {  
 
@@ -1341,17 +1380,39 @@ void LVCreateDialog::reservePoolMetadata(QList<long long> &usableBytes)
         m_ispool = true;
 
         const long long ext = getVg()->getExtentSize();
-        meta = ( (meta  + ext - 1 ) / ext) * ext;
+        meta = ((meta + ext - 1) / ext) * ext;
 
         if (meta < 0x200000)   // 2 MiB 
             meta = 0x200000;  
         else if (meta > 0x400000000)   // 16 GiB 
             meta = 0x400000000;
-                        
-        long long longest = usableBytes.takeLast() - meta;
-        if (longest < 0)
-            longest = 0;
-        usableBytes.append(longest);
+
+        const AllocationPolicy policy = m_pv_box->getEffectivePolicy();
+        const bool separate_pvs = LvmConfig::getThinPoolMetadataRequireSeparatePvs();
+
+        if(policy == CONTIGUOUS || separate_pvs) {
+
+            if (usableBytes.size() > getNeededStripes()) { 
+                int x = usableBytes.size() - (1 + getNeededStripes());
+                
+                usableBytes[x] -= meta;
+                if (usableBytes[x] < 0)
+                    return false;
+                else
+                    usableBytes.removeAt(x); // not usable for main pool volume so discard
+            } else {
+                return false;
+            }
+        } else {
+            usableBytes.last() -= meta;
+            if (usableBytes.last() < 0)
+                return false;
+        }
+
         qSort(usableBytes);
     }
+
+    return true;
 }
+
+
