@@ -867,12 +867,12 @@ LogVolPointer LogVol::getParentMirror()
 
     if (isLvmMirrorLog() || isLvmMirrorLeg() || isTemporary()) {
 
-        if (isLvmMirrorLog() && isLvmMirrorLeg()) // mirrored mirror log
+        if (isLvmMirrorLog() && isLvmMirrorLeg() && mirror->getParent()) // mirrored mirror log
             mirror = getParent()->getParent();
         else if (isLvmMirrorLog() || isLvmMirrorLeg())
             mirror = getParent();
         
-        if (mirror->isTemporary())  // under conversion temp mirror
+        if (mirror && mirror->isTemporary())  // under conversion temp mirror
             mirror = mirror->getParent();
 
     } else if (isMirrorLeg()) {
