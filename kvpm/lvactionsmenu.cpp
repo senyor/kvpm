@@ -193,7 +193,12 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
             snap_merge->setEnabled(false);
             max_fs->setEnabled(false);
             mkfs->setEnabled(false);
-            lv_remove->setEnabled(false);
+
+            if (m_lv->getParentMirror() == NULL)   // allow removal of bogus log
+                lv_remove->setEnabled(true);
+            else
+                lv_remove->setEnabled(false);
+
             unmount->setEnabled(false);
             mount->setEnabled(false);
             lv_change->setEnabled(false);
@@ -524,9 +529,9 @@ KMenu* LVActionsMenu::buildMirrorMenu()
 
     if (m_lv) {
 
-        if (m_lv->isRaidImage() || m_lv->isRaidMetadata())
+        if ((m_lv->isRaidImage() || m_lv->isRaidMetadata()) && (m_lv->getParent()))
             partial = m_lv->getParent()->isPartial();
-        else if (m_lv->isLvmMirrorLog() || m_lv->isLvmMirrorLeg() || m_lv->isTemporary())
+        else if ((m_lv->isLvmMirrorLog() || m_lv->isLvmMirrorLeg() || m_lv->isTemporary()) && (m_lv->getParentMirror()))
             partial = m_lv->getParentMirror()->isPartial();
         else
             partial = m_lv->isPartial();
@@ -571,7 +576,6 @@ KMenu* LVActionsMenu::buildMirrorMenu()
             } else {
                 add_legs->setEnabled(false);
             }
-
         } else if (m_lv->isRaidImage()) {
             remove_mirror->setEnabled(false);
             change_log->setEnabled(false);
