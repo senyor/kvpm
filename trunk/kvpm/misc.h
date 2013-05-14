@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -18,8 +18,10 @@
 #include <QStringList>
 #include <QCheckBox>
 #include <QRadioButton>
+#include <QSharedPointer>
 #include <QVariant>
 
+class PhysVol;
 
 typedef enum {
     LINEAR    = 0,
@@ -31,6 +33,16 @@ typedef enum {
     THIN      = 6 
 } VolumeType;
 
+struct PvSpace {
+    PhysVol *pv;
+    long long normal;
+    long long contiguous;
+
+    PvSpace(PhysVol *volume, long long norm, long long cont) {pv = volume; normal = norm; contiguous = cont;}
+};
+
+
+typedef QList<QSharedPointer<PvSpace>> PvSpaceList;
 
 QStringList splitUuid(QString const uuid);
 bool isBusy(const QString device);
