@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -17,6 +17,7 @@
 
 #include <KDialog>
 
+#include <QSharedPointer>
 #include <QStringList>
 
 class KComboBox;
@@ -33,9 +34,10 @@ class QVBoxLayout;
 
 class LogVol;
 class PvGroupBox;
-class VolGroup;
 class NoMungeCheck;
 class NoMungeRadioButton;
+
+class PvSpace;
 
 class ChangeMirrorDialog : public KDialog
 {
@@ -52,6 +54,9 @@ class ChangeMirrorDialog : public KDialog
     KComboBox  *m_stripe_size_combo;
     KComboBox  *m_type_combo;
 
+    QStringList m_log_pvs;
+    QStringList m_image_pvs;
+    QList<QSharedPointer<PvSpace>> m_space_list; 
     QList<NoMungeCheck *> m_mirror_log_checks;
 
     bool m_bailout;
@@ -70,10 +75,18 @@ class ChangeMirrorDialog : public KDialog
     QWidget *buildGeneralTab(const bool isRaidMirror, const bool isLvmMirror);
     QWidget *buildPhysicalTab(const bool isRaidMirror);
     QWidget *buildLogWidget();
-    QStringList getPvsInUse();
+
+    QStringList getLogPvs();
+    QStringList getImagePvs();
+    QStringList getUnusablePvs();
+    QList<QSharedPointer<PvSpace>> getPvSpaceList();
+    bool pvHasLog(QString const pv);
+    bool pvHasImage(QString const pv);
     bool validateStripeSpin();
     void setLogRadioButtons();
     int getNewLogCount();
+    long long getNewLogSize();
+    bool getAvailableByteList(QList<long long> &byte_list, int &unhandledLogs);
 
 public:
     explicit ChangeMirrorDialog(LogVol *const mirrorVolume, bool changeLog, QWidget *parent = NULL);

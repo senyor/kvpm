@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2009, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -15,6 +15,7 @@
 #include "changemirror.h"
 
 #include "logvol.h"
+#include "lvmconfig.h"
 #include "misc.h"
 #include "physvol.h"
 #include "pvgroupbox.h"
@@ -42,6 +43,7 @@
 
 
 
+
 ChangeMirrorDialog::ChangeMirrorDialog(LogVol *const mirrorVolume, bool changeLog, QWidget *parent):
     KDialog(parent),
     m_change_log(changeLog),
@@ -57,6 +59,9 @@ ChangeMirrorDialog::ChangeMirrorDialog(LogVol *const mirrorVolume, bool changeLo
     const bool is_raid = (m_lv->isMirror() && m_lv->isRaid());
     const bool is_lvm = (m_lv->isMirror() && !m_lv->isRaid());
     m_bailout = false;
+
+    m_log_pvs = getLogPvs();
+    m_image_pvs = getImagePvs();
 
     setWindowTitle(i18n("Change Mirror"));
 
@@ -145,7 +150,7 @@ QWidget *ChangeMirrorDialog::buildGeneralTab(const bool isRaidMirror, const bool
     general_layout->addStretch();
         
     QGroupBox *const add_mirror_box = new QGroupBox();
-    QLabel  *const type_label = new QLabel(i18n("Mirror type: "));
+    QLabel *const type_label = new QLabel(i18n("Mirror type: "));
     
     QHBoxLayout *const type_layout = new QHBoxLayout;
     type_layout->addWidget(type_label);
@@ -157,7 +162,7 @@ QWidget *ChangeMirrorDialog::buildGeneralTab(const bool isRaidMirror, const bool
     center_layout->addStretch();
     center_layout->addWidget(add_mirror_box);
 
-    QLabel  *const existing_label = new QLabel(i18n("Existing mirror legs: %1", m_lv->getMirrorCount()));
+    QLabel *const existing_label = new QLabel(i18n("Existing mirror legs: %1", m_lv->getMirrorCount()));
     add_mirror_box_layout->addWidget(existing_label);
     if (!is_mirror)
         existing_label->hide();
@@ -182,8 +187,8 @@ QWidget *ChangeMirrorDialog::buildGeneralTab(const bool isRaidMirror, const bool
             type_label->hide();
         } else {
             add_mirror_box->setTitle(i18n("Convert to mirror"));
-            m_type_combo->addItem("Standard LVM");
-            m_type_combo->addItem("RAID 1");
+            m_type_combo->addItem(i18n("Standard LVM"));
+            m_type_combo->addItem(i18n("RAID 1"));
             
             connect(m_type_combo, SIGNAL(currentIndexChanged(int)),
                     this, SLOT(enableTypeOptions(int)));
@@ -274,33 +279,17 @@ QWidget *ChangeMirrorDialog::buildLogWidget()
 QWidget *ChangeMirrorDialog::buildPhysicalTab(const bool isRaidMirror)
 {
     QWidget *const physical = new QWidget;
-    QList<PhysVol *> unused_pvs = m_lv->getVg()->getPhysicalVolumes();
-    const QStringList pvs_in_use = getPvsInUse();
-
-// pvs with a mirror leg or log already on them aren't
-// suitable for another so we remove those here
-
-    for (int x = unused_pvs.size() - 1; x >= 0; x--) {
-        if (!unused_pvs[x]->isAllocatable() || unused_pvs[x]->getRemaining() <= 0) {
-            unused_pvs.removeAt(x);
-        } else {
-            for (int y = 0; y < pvs_in_use.size() ; y++) {
-                if (unused_pvs[x]->getName() == pvs_in_use[y]) {
-                    unused_pvs.removeAt(x);
-                    break;
-                }
-            }
-        }
-    }
-
     QVBoxLayout *const physical_layout = new QVBoxLayout();
 
+    m_space_list = getPvSpaceList();
     QList<long long> normal;
     QList<long long> contiguous;
+    QList<PhysVol *> unused_pvs;
 
-    for (int x = 0; x < unused_pvs.size(); x++) {
-            normal.append(unused_pvs[x]->getRemaining());
-            contiguous.append(unused_pvs[x]->getContiguous());
+    for (auto space : m_space_list) {
+        unused_pvs.append(space->pv);
+        normal.append(space->normal);
+        contiguous.append(space->contiguous);
     }
 
     m_pv_box = new PvGroupBox(unused_pvs, normal, contiguous, m_lv->getPolicy(), m_lv->getVg()->getPolicy());
@@ -375,27 +364,139 @@ QWidget *ChangeMirrorDialog::buildPhysicalTab(const bool isRaidMirror)
     return physical;
 }
 
-/* The next function returns a list of physical volumes in
-   use by the mirror as legs or logs. */
-
-QStringList ChangeMirrorDialog::getPvsInUse()
+QStringList ChangeMirrorDialog::getLogPvs()
 {
-    LogVolList  legs = m_lv->getAllChildrenFlat();
-    QStringList pvs_in_use;
+    QStringList pvs;
+
+    if (m_lv->isLvmMirror()) {
+        for (auto child : m_lv->getAllChildrenFlat()) {
+            if (child->isLvmMirrorLog() && !child->isMirror())
+                pvs << child->getPvNamesAll();
+        } 
+    } 
+    pvs.removeDuplicates();
+
+    return pvs;   
+}
+   
+QStringList ChangeMirrorDialog::getImagePvs()
+{
+    QStringList pvs;
 
     if (m_lv->isMirror()) {
-        for (int x = legs.size() - 1; x >= 0; x--) {
+        for (auto child : m_lv->getAllChildrenFlat()) {
+            if (child->isMirrorLeg() && !child->isMirror() && !child->isLvmMirrorLog())
+                pvs << child->getPvNamesAll();
+        } 
+    } else {
+        pvs << m_lv->getPvNamesAll();
+    }
+    pvs.removeDuplicates();
 
-            if ((!legs[x]->isMirrorLeg() && !legs[x]->isLvmMirrorLog()))
-                legs.removeAt(x);
-            else
-                pvs_in_use << legs[x]->getPvNamesAll();
+    return pvs;   
+}
+
+/* The next function returns a list of physical volumes in
+   use by the mirror as legs or logs if they need separate
+   pvs or in use as both if they don't. */
+
+QStringList ChangeMirrorDialog::getUnusablePvs()
+{
+    QStringList unusable;
+
+    if (LvmConfig::getMirrorLogsRequireSeparatePvs()) {
+        if (m_lv->isMirror()) {
+            for (auto leg : m_lv->getAllChildrenFlat()) {
+                if (leg->isMirrorLeg() || leg->isLvmMirrorLog())
+                    unusable << leg->getPvNamesAll();
+            }
+        } else {
+            unusable << m_lv->getPvNamesAll();
         }
     } else {
-        pvs_in_use << m_lv->getPvNamesAll();
+        if (m_lv->isMirror()) {
+            QStringList leg_names, log_names;
+
+            for (auto leg : m_lv->getAllChildrenFlat()) {
+                if (leg->isMirrorLeg())
+                    leg_names << leg->getPvNamesAll();
+                else if (leg->isLvmMirrorLog())
+                    log_names << leg->getPvNamesAll();
+
+                for (auto leg_pv : leg_names) {      // find the two list's intersection
+                    for (auto log_pv : log_names) {
+                        if (leg_pv == log_pv)
+                            unusable << log_pv;
+                    } 
+                } 
+            }
+        }
     }
 
-    return pvs_in_use;
+    unusable.removeDuplicates();
+    return unusable;
+}
+
+// If a pv holds all or part of a mirror image return true, else false.
+// Also return true for pvs used by the current lv if that lv is being
+// changed into a mirror.
+bool ChangeMirrorDialog::pvHasImage(QString const pv)
+{
+    for (auto img_pv : m_image_pvs) {
+        if (pv == img_pv)
+            return true;
+    }
+
+    return false;
+}
+
+// If a pv holds all or part of a log return true, else false.
+bool  ChangeMirrorDialog::pvHasLog(QString const pv)
+{
+    for (auto log_pv : m_log_pvs) {
+        if (pv == log_pv)
+            return true;
+    }
+
+    return false;
+}
+
+QList<QSharedPointer<PvSpace>> ChangeMirrorDialog::getPvSpaceList()
+{
+    QList<QSharedPointer<PvSpace>> list;
+    const bool separate = LvmConfig::getMirrorLogsRequireSeparatePvs();
+
+    QList<PhysVol *> available_pvs = m_lv->getVg()->getPhysicalVolumes();
+
+    if (m_lv->isMirror() && !m_change_log) {
+        for (auto pv : available_pvs) {
+            if (pv->isAllocatable() && pv->getRemaining() > 0) {
+                if ( !(pvHasImage(pv->getName())) )
+                    list << QSharedPointer<PvSpace>(new PvSpace(pv, pv->getRemaining(), pv->getContiguous()));
+            }
+        }
+    } else if (m_change_log) {
+        for (auto pv : available_pvs) {
+            if (pv->isAllocatable() && pv->getRemaining() > 0) {
+                if ( !(pvHasLog(pv->getName())) )
+                    list << QSharedPointer<PvSpace>(new PvSpace(pv, pv->getRemaining(), pv->getContiguous()));
+            }
+        }
+    } else {
+        for (auto pv : available_pvs) {
+            if (pv->isAllocatable() && pv->getRemaining() > 0) {
+                if (separate) {
+                    if ( !(pvHasLog(pv->getName()) || pvHasImage(pv->getName())) )
+                        list << QSharedPointer<PvSpace>(new PvSpace(pv, pv->getRemaining(), pv->getContiguous()));
+                } else {
+                    if ( !(pvHasLog(pv->getName()) && pvHasImage(pv->getName())) )
+                        list << QSharedPointer<PvSpace>(new PvSpace(pv, pv->getRemaining(), pv->getContiguous()));
+                }
+            }
+        }
+    }
+
+    return list;
 }
 
 /* Here we create a string based on all
@@ -412,7 +513,7 @@ QStringList ChangeMirrorDialog::arguments()
         if (m_type_combo->currentIndex() == 1)
             args << "--type" << "raid1";
         else
-            args << "--type" << "mirror";
+            args << "--type" << "mirror" << "--regionsize" << "512k";
     }
 
     if (m_change_log || (!m_lv->isMirror() && m_type_combo->currentIndex() == 0)) {
@@ -453,7 +554,24 @@ QStringList ChangeMirrorDialog::arguments()
     return args;
 }
 
-    
+
+/* This function is supposed to find the space needed
+   for a log of a new mirror. The formula is not reliable
+   though and the --regionsize parameter can be ignored by
+   the lvm tools.  */    
+
+long long ChangeMirrorDialog::getNewLogSize()
+{
+    /*
+        long long size = LvmConfig::getMirrorRegionSize();
+        size = 1 + m_lv->getExtents() / (size * 8);
+        return size * m_lv->getVg()->getExtentSize();
+    */
+
+    // reserve 4 megs ... and hope its enough
+    return ((0x3fffff / m_lv->getVg()->getExtentSize()) + 1) * m_lv->getVg()->getExtentSize();
+}
+
 int ChangeMirrorDialog::getNewLogCount()
 {
    const bool is_mirror = m_lv->isMirror();
@@ -474,7 +592,8 @@ int ChangeMirrorDialog::getNewLogCount()
 /* Enable or disable the OK button based on having
    enough physical volumes checked. At least one pv
    for each mirror leg and one or two for the log(s)
-   are needed. We also total up the space needed.   */
+   if separate pvs are needed. We also total up the 
+   space required. */
 
 void ChangeMirrorDialog::resetOkButton()
 {
@@ -501,10 +620,6 @@ void ChangeMirrorDialog::resetOkButton()
         return;
     }
 
-    QList <long long> stripe_pv_bytes;
-    for (int x = 0; x < total_stripes; x++)
-        stripe_pv_bytes.append(0);
-
     if (is_lvm) {
         if (m_change_log && (m_lv->getLogCount() == new_log_count)) {
             enableButtonOk(false);
@@ -513,33 +628,37 @@ void ChangeMirrorDialog::resetOkButton()
             enableButtonOk(false);
             return;
         }
-    } else if (!is_lvm && !((total_stripes > 0) || (m_lv->getLogCount() != new_log_count))) {
+    } else if (!is_lvm && total_stripes <= 0) {
         enableButtonOk(false);
         return;
     }
 
-    QList <long long> available_pv_bytes = m_pv_box->getRemainingSpaceList();;
-    qSort(available_pv_bytes);
+    QList <long long> available_pv_bytes;
+    int logs;
+    if (!getAvailableByteList(available_pv_bytes, logs)) {
+        enableButtonOk(false);
+        return;
+    }
 
-    const AllocationPolicy policy = m_pv_box->getEffectivePolicy();
+    /* if there are not enough new mirror legs to pair with any unhandled
+       new logs we put the logs on selected pvs and discard those pvs. */
 
-    if (policy == CONTIGUOUS) {
+    while (!available_pv_bytes.isEmpty() && logs > total_stripes) {
+        available_pv_bytes.removeFirst(); 
+        --logs;
+    }
 
-        int logs_added = new_log_count - m_lv->getLogCount();
-        if (logs_added < 0)
-            logs_added = 0; 
+    if (available_pv_bytes.isEmpty() && logs > 0) {
+        enableButtonOk(false);
+        return;
+    }
 
-        while (available_pv_bytes.size() > total_stripes + logs_added)  
-            available_pv_bytes.removeFirst();
-    } 
-
-    for (int x = m_lv->getLogCount(); x < new_log_count; x++) {
-        if (available_pv_bytes.size())
-            available_pv_bytes.removeFirst();
-        else {
-            enableButtonOk(false);
-            return;
-        }
+    QList <long long> stripe_pv_bytes;
+    for (int x = 0; x < total_stripes; ++x) {
+        if (x < logs)
+            stripe_pv_bytes.append(0 - getNewLogSize());
+        else
+            stripe_pv_bytes.append(0);
     }
 
     if (total_stripes) {
@@ -628,4 +747,75 @@ void ChangeMirrorDialog::enableLogWidget()
 bool ChangeMirrorDialog::bailout()
 {
     return m_bailout;
+}
+
+
+/* Generate a list of the space available on each selected pv 
+   usable for a new mirror leg. If a pv is selected by the user 
+   that cannot be used for a leg, it tries to put a log there.
+   The unhandledLogs parameter returns the number of logs that
+   will need to go with the legs.
+   Returns true on success. */ 
+
+bool ChangeMirrorDialog::getAvailableByteList(QList<long long> &byte_list, int &unhandledLogs)
+{
+    const AllocationPolicy policy = m_pv_box->getEffectivePolicy();
+    const bool separate_logs = LvmConfig::getMirrorLogsRequireSeparatePvs();
+    int total_stripes = 0;   //  stripes per mirror * added mirrors
+    const int new_log_count = getNewLogCount();
+
+    if (policy == CONTIGUOUS) {
+        byte_list = m_pv_box->getRemainingSpaceList();
+        qSort(byte_list);
+
+        int logs_added = new_log_count - m_lv->getLogCount();
+        if (logs_added < 0)
+            logs_added = 0; 
+
+        while (byte_list.size() > total_stripes + logs_added)  
+            byte_list.removeFirst();
+    } else if (separate_logs) {
+        byte_list = m_pv_box->getRemainingSpaceList();
+        qSort(byte_list);
+
+        int logs_added = new_log_count - m_lv->getLogCount();
+        if (logs_added < 0)
+            logs_added = 0; 
+
+        for (int x = 0; x < logs_added && byte_list.size(); ++x)
+            byte_list.removeFirst();
+    } else {
+        int logs_added = new_log_count - m_lv->getLogCount();
+        if (logs_added < 0)
+            logs_added = 0; 
+ 
+        for (auto pv_name : m_pv_box->getNames()) {
+            if (pvHasImage(pv_name) && !pvHasLog(pv_name)) {
+                --logs_added;
+            } else if (!pvHasImage(pv_name)) { 
+                
+                for (auto available_space : m_space_list) {
+                    
+                    if (available_space->pv->getName() == pv_name) {
+                        byte_list << available_space->normal;
+                    }
+                }
+            }
+        }
+
+        if (logs_added <= 0)
+            unhandledLogs = 0;
+        else
+            unhandledLogs = logs_added;
+        
+        if (unhandledLogs > byte_list.size())
+            return false;
+    
+        qSort(byte_list);
+    }
+    
+    while (!byte_list.isEmpty() && byte_list[0] <= 0)
+        byte_list.removeAt(0);
+    
+    return true;
 }
