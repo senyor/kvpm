@@ -1329,7 +1329,7 @@ bool LVCreateDialog::getPvsByPolicy(QList<long long> &usableBytes)
         }
 
         // Specifying CONTIGUOUS seems to trigger the need for separate pvs too    
-        if ((policy == CONTIGUOUS) || ((log_count > 0) && separate_logs) || (m_ispool && separate_meta)) { 
+        if ((policy == CONTIGUOUS) || ((log_count > 0) && separate_logs)) { 
 
             if (policy == CONTIGUOUS) {
                 while (pv_bytes.size() > getNeededStripes() + extra_pvs)  
