@@ -15,6 +15,7 @@
 
 #include "pvgroupbox.h"
 
+#include "misc.h"
 #include "physvol.h"
 #include "storagedevice.h"
 #include "storagepartition.h"
@@ -27,6 +28,81 @@
 
 #include <QDebug>
 
+
+PvGroupBox::PvGroupBox(QList<QSharedPointer<PvSpace>> spaceList, 
+                       AllocationPolicy policy, AllocationPolicy vgpolicy, 
+                       bool target, QWidget *parent)
+    : QGroupBox(parent)
+{
+    for (auto space : spaceList) {
+        m_pvs.append(space->pv);
+        m_normal.append(space->normal);
+        m_contiguous.append(space->contiguous);
+    }
+
+    m_policy_combo = NULL;
+
+    KConfigSkeleton skeleton;
+    skeleton.setCurrentGroup("General");
+    skeleton.addItemBool("use_si_units", m_use_si_units, false);
+
+    if (target)
+      setTitle(i18n("Target Physical Volumes"));
+    else
+      setTitle(i18n("Available Physical Volumes"));
+
+    QGridLayout *const layout = new QGridLayout();
+    setLayout(layout);
+
+    NoMungeCheck *check;
+    const int pv_check_count = m_pvs.size();
+    m_space_label   = new QLabel;
+    m_extents_label = new QLabel;
+
+    KLocale::BinaryUnitDialect dialect;
+    KLocale *const locale = KGlobal::locale();
+
+    if (m_use_si_units)
+        dialect = KLocale::MetricBinaryDialect;
+    else
+        dialect = KLocale::IECBinaryDialect;
+
+    if (pv_check_count < 1) {
+        m_extent_size = 1;
+        QLabel *pv_label = new QLabel(i18n("<b>No suitable volumes found</b>"));
+        layout->addWidget(pv_label);
+    } else if (pv_check_count < 2) {
+        m_extent_size = m_pvs[0]->getVg()->getExtentSize();
+        QLabel *pv_label = new QLabel(m_pvs[0]->getName() + "  " + locale->formatByteSize(m_pvs[0]->getRemaining(), 1, dialect));
+        layout->addWidget(pv_label, 0, 0, 1, -1);
+
+        addLabelsAndButtons(layout, pv_check_count, policy, vgpolicy);
+        calculateSpace();
+    } else {
+        m_extent_size = m_pvs[0]->getVg()->getExtentSize();
+        for (int x = 0; x < pv_check_count; x++) {
+
+            check = new NoMungeCheck(m_pvs[x]->getName() + "  " + locale->formatByteSize(m_pvs[x]->getRemaining(), 1, dialect));
+            check->setAlternateText(m_pvs[x]->getName());
+            m_pv_checks.append(check);
+
+            if (pv_check_count < 11)
+                layout->addWidget(m_pv_checks[x], x % 5, x / 5);
+            else if (pv_check_count % 3 == 0)
+                layout->addWidget(m_pv_checks[x], x % (pv_check_count / 3), x / (pv_check_count / 3));
+            else
+                layout->addWidget(m_pv_checks[x], x % ((pv_check_count + 2) / 3), x / ((pv_check_count + 2) / 3));
+
+            connect(check, SIGNAL(clicked(bool)),
+                    this, SLOT(calculateSpace()));
+        }
+
+        selectAll();
+        addLabelsAndButtons(layout, pv_check_count, policy, vgpolicy);
+    }
+
+    setChecksToPolicy();
+}
 
 PvGroupBox::PvGroupBox(QList<PhysVol *> volumes, QList<long long> normal, QList<long long> contiguous, 
                        AllocationPolicy policy, AllocationPolicy vgpolicy, bool target, QWidget *parent)
