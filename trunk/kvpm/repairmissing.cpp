@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -196,18 +196,15 @@ bool RepairMissingDialog::bailout()
 QWidget *RepairMissingDialog::buildPhysicalWidget(QList<PhysVol *> const pvs)
 {
     QWidget *const physical = new QWidget;
-
     QVBoxLayout *const physical_layout = new QVBoxLayout();
 
-    QList<long long> normal;
-    QList<long long> contiguous;
+    QList<QSharedPointer<PvSpace>> pv_space_list;
 
-    for (int x = 0; x < pvs.size(); x++) {
-            normal.append(pvs[x]->getRemaining());
-            contiguous.append(pvs[x]->getContiguous());
+    for (auto pv : pvs) {
+        pv_space_list << QSharedPointer<PvSpace>(new PvSpace(pv, pv->getRemaining(), pv->getContiguous()));
     }
 
-    m_pv_box = new PvGroupBox(pvs, normal, contiguous, m_lv->getPolicy(), m_lv->getVg()->getPolicy());
+    m_pv_box = new PvGroupBox(pv_space_list, m_lv->getPolicy(), m_lv->getVg()->getPolicy());
     physical_layout->addWidget(m_pv_box);
     physical_layout->addStretch();
 
