@@ -67,13 +67,13 @@ ChangeMirrorDialog::ChangeMirrorDialog(LogVol *const mirrorVolume, bool changeLo
 
     if ((is_raid && !m_lv->isMirror()) || m_lv->isCowSnap()){
         m_bailout = true;
-        KMessageBox::error(NULL, i18n("This type of volume can not be mirrored "));
+        KMessageBox::sorry(NULL, i18n("This type of volume can not be mirrored "));
     } else if (is_raid && !m_lv->isSynced()){
         m_bailout = true;
-        KMessageBox::error(NULL, i18n("RAID mirrors must be synced before adding new legs"));
+        KMessageBox::sorry(NULL, i18n("RAID mirrors must be synced before adding new legs"));
     } else if (is_lvm && m_lv->isCowOrigin()){
         m_bailout = true;
-        KMessageBox::error(NULL, i18n("Non-RAID mirrors which are snapshot origins can not have new legs added"));
+        KMessageBox::sorry(NULL, i18n("Non-RAID mirrors which are snapshot origins can not have new legs added"));
     } else {
         QWidget *const main_widget = new QWidget();
         QVBoxLayout *const layout = new QVBoxLayout();
@@ -282,20 +282,6 @@ QWidget *ChangeMirrorDialog::buildPhysicalTab(const bool isRaidMirror)
     QVBoxLayout *const physical_layout = new QVBoxLayout();
 
     m_space_list = getPvSpaceList();
-
-
-    /*
-    QList<long long> normal;
-    QList<long long> contiguous;
-    QList<PhysVol *> unused_pvs;
-
-    for (auto space : m_space_list) {
-        unused_pvs.append(space->pv);
-        normal.append(space->normal);
-        contiguous.append(space->contiguous);
-    }
-    */
-    //    m_pv_box = new PvGroupBox(unused_pvs, normal, contiguous, m_lv->getPolicy(), m_lv->getVg()->getPolicy());
     m_pv_box = new PvGroupBox(m_space_list, m_lv->getPolicy(), m_lv->getVg()->getPolicy());
     physical_layout->addWidget(m_pv_box);
     physical_layout->addStretch();
