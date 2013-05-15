@@ -143,33 +143,8 @@ QWidget* LVCreateDialog::createPhysicalTab()
     m_physical_tab = new QWidget(this);
     m_physical_tab->setLayout(layout);
 
-    QList<PhysVol *> pvs(getVg()->getPhysicalVolumes());
-
-    for (int x = pvs.size() - 1; x >= 0; --x) {
-        if (pvs[x]->getRemaining() < 1 || !pvs[x]->isAllocatable() || pvs[x]->isMissing())
-            pvs.removeAt(x);
-    }
-
-    QList<long long> normal;
-    QList<long long> contiguous;
-
-    if (m_lv != NULL) {
-
-        for (int x = 0; x < pvs.size(); x++) {
-            normal.append(pvs[x]->getRemaining());
-            contiguous.append(pvs[x]->getContiguous(m_lv));
-        }
-
-        m_pv_box = new PvGroupBox(pvs, normal, contiguous, m_lv->getPolicy(), getVg()->getPolicy());
-    } else {
-
-        for (int x = 0; x < pvs.size(); x++) {
-            normal.append(pvs[x]->getRemaining());
-            contiguous.append(pvs[x]->getContiguous(m_lv));
-        }
-
-        m_pv_box = new PvGroupBox(pvs, normal, contiguous, INHERIT_NORMAL, getVg()->getPolicy());
-    }
+    QList<QSharedPointer<PvSpace>> pv_space_list = getPvSpaceList();
+    m_pv_box = new PvGroupBox(pv_space_list, INHERIT_NORMAL, getVg()->getPolicy());
 
     layout->addWidget(m_pv_box);
 
@@ -184,9 +159,9 @@ QWidget* LVCreateDialog::createPhysicalTab()
     QVBoxLayout *const volume_layout = new QVBoxLayout;
     m_volume_box->setLayout(volume_layout);
 
-    volume_layout->addWidget(createTypeWidget(pvs.size()));
+    volume_layout->addWidget(createTypeWidget(pv_space_list.size()));
     m_stripe_widget = createStripeWidget();
-    m_mirror_widget = createMirrorWidget(pvs.size());
+    m_mirror_widget = createMirrorWidget(pv_space_list.size());
 
     if (m_ispool && !m_extend) {
         volume_layout->addWidget(createChunkWidget());
@@ -1415,4 +1390,16 @@ bool  LVCreateDialog::reservePoolMetadata(QList<long long> &usableBytes)
     return true;
 }
 
+QList<QSharedPointer<PvSpace>> LVCreateDialog::getPvSpaceList()
+{
+    QList<QSharedPointer<PvSpace>> list;
+    QList<PhysVol *> pvs(getVg()->getPhysicalVolumes());
+
+    for (auto pv : pvs) {
+        if (pv->getRemaining() > 0 && pv->isAllocatable() && !pv->isMissing())
+            list << QSharedPointer<PvSpace>(new PvSpace(pv, pv->getRemaining(), pv->getContiguous(m_lv)));
+    }
+
+    return list;
+}
 
