@@ -52,10 +52,10 @@ VGReduceDialog::VGReduceDialog(VolGroup *const volumeGroup, QWidget *parent) : K
 
     if (pv_space_list.isEmpty()){
         m_bailout = true;
-        KMessageBox::error(0, i18n("There are no physical volumes that can be removed"));
+        KMessageBox::sorry(0, i18n("There are no physical volumes that can be removed"));
     } else if (pv_space_list.size() == 1 && !m_unremovable_pvs_present) {
         m_bailout = true;
-        KMessageBox::error(0, i18n("There is only one physical volume in this group"));
+        KMessageBox::sorry(0, i18n("There is only one physical volume in this group"));
     } else {
         m_bailout = false;
         QLabel *label;
@@ -119,10 +119,8 @@ void VGReduceDialog::commitChanges()
 
 void VGReduceDialog::excludeOneVolume()
 {
-    QStringList names = m_pv_checkbox->getNames();
-    QStringList all_names = m_pv_checkbox->getAllNames();
-    int boxes_checked = names.size();
-    int boxes_count   = all_names.size();
+    const int boxes_checked = m_pv_checkbox->getNames().size();
+    const int boxes_count   = m_pv_checkbox->getAllNames().size();
 
     if (boxes_checked > 0) {
         if (m_unremovable_pvs_present || (boxes_checked < boxes_count))
