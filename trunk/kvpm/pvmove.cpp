@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -251,15 +251,12 @@ void PVMoveDialog::buildDialog()
     QHBoxLayout *const lower_layout = new QHBoxLayout;
     layout->addLayout(lower_layout);
 
-    QList<long long> normal;
-    QList<long long> contiguous;
-
-    for (int x = 0; x < m_target_pvs.size(); x++) {
-        normal.append(m_target_pvs[x]->getRemaining());
-        contiguous.append(m_target_pvs[x]->getContiguous());
+    QList<QSharedPointer<PvSpace>> pv_space_list;
+    for (auto pv : m_target_pvs) {
+        pv_space_list << QSharedPointer<PvSpace>(new PvSpace(pv, pv->getRemaining(), pv->getContiguous()));
     }
 
-    m_pv_box = new PvGroupBox(m_target_pvs, normal, contiguous, m_vg->getPolicy(), NO_POLICY, true);
+    m_pv_box = new PvGroupBox(pv_space_list, m_vg->getPolicy(), NO_POLICY, true);
     lower_layout->addWidget(m_pv_box);
 
     const int radio_count = m_sources.size();
