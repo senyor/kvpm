@@ -47,10 +47,10 @@ RepairMissingDialog::RepairMissingDialog(LogVol *const volume, QWidget *parent):
 
     if (!m_lv->isPartial()){
         m_bailout = true;
-        KMessageBox::error(NULL, i18n("This volume has no missing physical volumes"));
+        KMessageBox::sorry(NULL, i18n("This volume has no missing physical volumes"));
     } else if (pvs.isEmpty() && is_raid && !m_lv->isMirror()){
         m_bailout = true;
-        KMessageBox::error(NULL, i18n("No suitable physical volumes found"));
+        KMessageBox::sorry(NULL, i18n("No suitable physical volumes found"));
     } else {
         QVBoxLayout *const layout = new QVBoxLayout();
         QWidget *const main_widget = new QWidget();        
@@ -300,7 +300,7 @@ void RepairMissingDialog::resetOkButton()
 
                 The allocation policy of lvconvert isn't using contiguous the same
                 way as lvcreate and is probably being ignored.
-                Anywhere policy not tested yet but should be impemented when contiguous is.  */
+                Anywhere policy not tested yet but should be implemented when contiguous is.  */
 
 
     /*  AllocationPolicy policy = m_pv_box->getPolicy();
