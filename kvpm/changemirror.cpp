@@ -282,6 +282,9 @@ QWidget *ChangeMirrorDialog::buildPhysicalTab(const bool isRaidMirror)
     QVBoxLayout *const physical_layout = new QVBoxLayout();
 
     m_space_list = getPvSpaceList();
+
+
+    /*
     QList<long long> normal;
     QList<long long> contiguous;
     QList<PhysVol *> unused_pvs;
@@ -291,8 +294,9 @@ QWidget *ChangeMirrorDialog::buildPhysicalTab(const bool isRaidMirror)
         normal.append(space->normal);
         contiguous.append(space->contiguous);
     }
-
-    m_pv_box = new PvGroupBox(unused_pvs, normal, contiguous, m_lv->getPolicy(), m_lv->getVg()->getPolicy());
+    */
+    //    m_pv_box = new PvGroupBox(unused_pvs, normal, contiguous, m_lv->getPolicy(), m_lv->getVg()->getPolicy());
+    m_pv_box = new PvGroupBox(m_space_list, m_lv->getPolicy(), m_lv->getVg()->getPolicy());
     physical_layout->addWidget(m_pv_box);
     physical_layout->addStretch();
 
