@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -26,35 +26,34 @@
 #include <KMessageBox>
 
 #include <QLabel>
+#include <QSharedPointer>
 #include <QVBoxLayout>
 
 
 VGReduceDialog::VGReduceDialog(VolGroup *const volumeGroup, QWidget *parent) : KDialog(parent), m_vg(volumeGroup)
 {
     setWindowTitle(i18n("Reduce Volume Group"));
-    QWidget *dialog_body = new QWidget(this);
+    QWidget *const dialog_body = new QWidget(this);
     setMainWidget(dialog_body);
-    QVBoxLayout *layout = new QVBoxLayout;
+    QVBoxLayout *const layout = new QVBoxLayout;
     dialog_body->setLayout(layout);
 
-    m_unremovable_pvs_present = false;
     const QString vg_name = m_vg->getName();
 
-    QList<PhysVol *> member_pvs = m_vg->getPhysicalVolumes();
-    int pv_count = m_vg->getPvCount();
+    QList<QSharedPointer<PvSpace>> pv_space_list;
     m_unremovable_pvs_present = false;
-
-    for (int x = pv_count - 1; x >= 0; x--) {
-        if (member_pvs[x]->getSize() - member_pvs[x]->getRemaining()) { // only unused pvs can be removed
-            member_pvs.removeAt(x);
+    for (auto pv : m_vg->getPhysicalVolumes()) {
+        if (pv->getSize() - pv->getRemaining()) { // only unused pvs can be removed
             m_unremovable_pvs_present = true;
+        } else {
+            pv_space_list << QSharedPointer<PvSpace>(new PvSpace(pv, pv->getSize(), pv->getSize()));
         }
     }
 
-    if (member_pvs.isEmpty()){
+    if (pv_space_list.isEmpty()){
         m_bailout = true;
         KMessageBox::error(0, i18n("There are no physical volumes that can be removed"));
-    } else if (member_pvs.size() == 1 && !m_unremovable_pvs_present) {
+    } else if (pv_space_list.size() == 1 && !m_unremovable_pvs_present) {
         m_bailout = true;
         KMessageBox::error(0, i18n("There is only one physical volume in this group"));
     } else {
@@ -80,7 +79,7 @@ VGReduceDialog::VGReduceDialog(VolGroup *const volumeGroup, QWidget *parent) : K
         label_widget->setLayout(label_layout);
 
         layout->addWidget(label_widget);
-        m_pv_checkbox = new PvGroupBox(member_pvs, QList<long long>(), QList<long long >(), NO_POLICY, NO_POLICY);
+        m_pv_checkbox = new PvGroupBox(pv_space_list, NO_POLICY, NO_POLICY);
 
         layout->addWidget(m_pv_checkbox);
         m_pv_checkbox->setTitle(i18n("Unused physical volumes"));
