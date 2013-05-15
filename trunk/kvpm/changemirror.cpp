@@ -77,7 +77,6 @@ ChangeMirrorDialog::ChangeMirrorDialog(LogVol *const mirrorVolume, bool changeLo
     } else {
         QWidget *const main_widget = new QWidget();
         QVBoxLayout *const layout = new QVBoxLayout();
-        
         QLabel  *const lv_name_label = new QLabel();
         
         if(m_change_log)
@@ -678,8 +677,7 @@ void ChangeMirrorDialog::enableTypeOptions(int index)
     if (index == 0) {
         m_log_box->setEnabled(true);
         m_stripe_box->setEnabled(true);
-    }
-    else {
+    } else {
         m_log_box->setEnabled(false);
         m_disk_log_button->setChecked(true);
         m_stripe_spin->setValue(1);
@@ -696,8 +694,9 @@ void ChangeMirrorDialog::setLogRadioButtons()
             m_disk_log_button->setChecked(true);
         else
             m_core_log_button->setChecked(true);
-    } else if (!m_lv->isLvmMirror())
+    } else if (!m_lv->isLvmMirror()) {
         m_disk_log_button->setChecked(true);
+    }
 
     resetOkButton();
 }
