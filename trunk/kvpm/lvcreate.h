@@ -17,6 +17,7 @@
 
 #include <KDialog>
 
+#include <QSharedPointer>
 #include <QStringList>
 
 #include "lvcreatebase.h"
@@ -27,7 +28,7 @@ class QGroupBox;
 
 class LogVol;
 class PvGroupBox;
-
+class PvSpace;
 
 class LVCreateDialog : public LvCreateDialogBase
 {
@@ -76,6 +77,7 @@ class LVCreateDialog : public LvCreateDialogBase
     bool hasInitialErrors();
     bool getPvsByPolicy(QList<long long> &usableBytes);
     bool reservePoolMetadata(QList<long long> &usableBytes);
+    QList<QSharedPointer<PvSpace>> getPvSpaceList();
     QStringList args();
 
 public:
