@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -56,16 +56,7 @@ class PvGroupBox: public QGroupBox
 
     void addLabelsAndButtons(QGridLayout *const layout, const int pvCount, AllocationPolicy const policy, AllocationPolicy const vgpolicy);
 
-public:
-    // Note: policy needs to be passed "inherited" here for new logical volumes
-       PvGroupBox(QList<PhysVol *> volumes, 
-               QList<long long> normal,
-               QList<long long> contiguous,
-               AllocationPolicy const policy,
-               AllocationPolicy const vgpolicy,   // this is only used for lvs, to pass the policy to inherit, if needed
-               bool const target = false, 
-               QWidget *parent = NULL);
-
+public:    
     // Note: policy needs to be passed "inherited" here for new logical volumes
     PvGroupBox(QList<QSharedPointer<PvSpace>> spaceList, 
                AllocationPolicy const policy, 
