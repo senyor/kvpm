@@ -19,6 +19,7 @@
 #include <parted/parted.h>
 
 #include <QDebug>
+#include <QList>
 #include <QSemaphore>
 #include <QThread>
 
@@ -34,7 +35,26 @@ public:
 
 protected:
     void run() {     
-        ped_device_free_all();
+
+        // the ped_device_free_all() sometimes causes ped to freeze up completely
+        // during ped_device_probe_all() if a device is removed, even if the device come back.
+
+        //        ped_device_free_all();
+
+        PedDevice *dev = NULL;
+        QList<PedDevice *> dev_list;
+
+        // removing them one by one seems to work ok.
+
+        while ((dev = ped_device_get_next(dev))) {
+            dev_list << dev;            
+        }
+        
+        for (auto device : dev_list) {
+            ped_device_cache_remove(device);
+            ped_device_destroy(device);
+        }
+        
         ped_device_probe_all();
         m_semaphore->release();
     }
