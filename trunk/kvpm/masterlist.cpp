@@ -146,16 +146,13 @@ void MasterList::scanStorageDevices()
 {
     QList<PhysVol *>  physical_volumes;
 
-    for (int x = 0; x < m_volume_groups.size(); x++)
-        physical_volumes.append(m_volume_groups[x]->getPhysicalVolumes());
+    for (auto vg : m_volume_groups)
+        physical_volumes << vg->getPhysicalVolumes();
 
-    for (int x = m_storage_devices.size() - 1; x >= 0;  x--)
-        delete m_storage_devices[x];
+    for (auto sd : m_storage_devices)
+        delete sd;
 
     m_storage_devices.clear();
-
-
-
     PedDevice *dev = NULL;
 
     while ((dev = ped_device_get_next(dev))) {
