@@ -51,10 +51,11 @@ class PvGroupBox: public QGroupBox
     QList<long long> m_normal;
     QList<long long> m_contiguous;
 
-    QLabel *m_space_label, *m_extents_label;
+    QLabel *m_space_label = nullptr; 
+    QLabel *m_extents_label = nullptr;
     long long m_extent_size;
     QHBoxLayout *getButtons();
-    PolicyComboBox *m_policy_combo;
+    PolicyComboBox *m_policy_combo = nullptr;
 
     long long getLargestSelectedSpace();
     void addLabelsAndButtons(QGridLayout *const layout, const int pvCount, AllocationPolicy const policy, AllocationPolicy const vgpolicy);

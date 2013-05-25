@@ -40,8 +40,6 @@ PvGroupBox::PvGroupBox(QList<QSharedPointer<PvSpace>> spaceList,
         m_contiguous.append(space->contiguous);
     }
     
-    m_policy_combo = nullptr;
-    
     if (m_target)
         setTitle(i18n("Target Physical Volumes"));
     else
@@ -88,7 +86,6 @@ PvGroupBox::PvGroupBox(QList<QSharedPointer<PvSpace>> spaceList,
                     this, SLOT(calculateSpace()));
         }
 
-        selectAll();
         addLabelsAndButtons(layout, pv_check_count, policy, vgpolicy);
     }
 
@@ -177,9 +174,7 @@ PvGroupBox::PvGroupBox(QList <StorageDevice *> devices, QList<StoragePartition *
                     this, SLOT(calculateSpace()));
         }
 
-        selectAll();
         addLabelsAndButtons(layout, pv_check_count, NO_POLICY, NO_POLICY);
-
         setExtentSize(extentSize);
     }
 }
@@ -405,6 +400,8 @@ void PvGroupBox::addLabelsAndButtons(QGridLayout *layout, int pvCount, Allocatio
 
     if(policy == NO_POLICY)
         m_policy_combo->hide();
+
+    selectAll();
 }
 
 AllocationPolicy PvGroupBox::getPolicy()
