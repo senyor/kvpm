@@ -54,7 +54,7 @@ bool restart_pvmove()
     const QStringList args = QStringList() << "pvmove";
     const QString message = i18n("Do you wish to restart all interrupted physical volume moves?");
 
-    if (KMessageBox::questionYesNo(0, message) == KMessageBox::Yes) {
+    if (KMessageBox::questionYesNo(nullptr, message) == KMessageBox::Yes) {
         ProcessProgress resize(args);
         return true;
     } else {
@@ -67,7 +67,7 @@ bool stop_pvmove()
     const QStringList args = QStringList() << "pvmove" << "--abort";
     const QString message = i18n("Do you wish to abort all physical volume moves currently in progress?");
 
-    if (KMessageBox::questionYesNo(0, message) == KMessageBox::Yes) {
+    if (KMessageBox::questionYesNo(nullptr, message) == KMessageBox::Yes) {
         ProcessProgress resize(args);
         return true;
     } else {
@@ -121,14 +121,15 @@ PVMoveDialog::PVMoveDialog(PhysVol *const physicalVolume, QWidget *parent) : KDi
 
     if (!hasMovableExtents()){
         m_bailout = true;
-        KMessageBox::error(NULL, i18n("None of the extents on this volume can be moved"));
+        KMessageBox::sorry(nullptr, i18n("None of the extents on this volume can be moved"));
     }
 
-    if (!m_bailout)
+    if (!m_bailout) {
         buildDialog();
 
-    connect(this, SIGNAL(okClicked()),
-            this, SLOT(commitMove()));
+        connect(this, SIGNAL(okClicked()),
+                this, SLOT(commitMove()));
+    }
 }
 
 PVMoveDialog::PVMoveDialog(LogVol *const logicalVolume, int const segment, QWidget *parent) :
@@ -140,9 +141,10 @@ PVMoveDialog::PVMoveDialog(LogVol *const logicalVolume, int const segment, QWidg
     m_target_pvs = m_vg->getPhysicalVolumes();
     m_bailout = false;
 
-    if (m_lv->isThinVolume()){
+
+    if (!hasMovableExtents()){
         m_bailout = true;
-        KMessageBox::error(NULL, i18n("Moving physical volumes is not supported on thin volumes"));
+        KMessageBox::sorry(nullptr, i18n("None of the extents on this volume can be moved"));
     } else {
         if (segment >= 0) {
             setupSegmentMove(segment);
@@ -156,7 +158,7 @@ PVMoveDialog::PVMoveDialog(LogVol *const logicalVolume, int const segment, QWidg
            then we eliminate it from the possible target pv list completely. */
         
         if (m_sources.size() == 1) {
-            for (int x = m_target_pvs.size() - 1; x >= 0; x--) {
+            for (int x = m_target_pvs.size() - 1; x >= 0; --x) {
                 if (m_target_pvs[x]->getName() == m_sources[0]->name)
                     m_target_pvs.removeAt(x);
             }
@@ -166,8 +168,8 @@ PVMoveDialog::PVMoveDialog(LogVol *const logicalVolume, int const segment, QWidg
            removed from the target list */
         
         if (m_move_segment) {
-            for (int x = m_target_pvs.size() - 1; x >= 0; x--) {
-                for (int y = m_sources.size() - 1; y >= 0; y--) {
+            for (int x = m_target_pvs.size() - 1; x >= 0; --x) {
+                for (int y = m_sources.size() - 1; y >= 0; --y) {
                     if (m_target_pvs[x]->getName() == m_sources[y]->name)
                         m_target_pvs.removeAt(x);
                 }
@@ -175,26 +177,13 @@ PVMoveDialog::PVMoveDialog(LogVol *const logicalVolume, int const segment, QWidg
         }
         
         removeFullTargets();
-        buildDialog();
 
-        connect(this, SIGNAL(okClicked()),
-                this, SLOT(commitMove()));
-    }
-}
+        if (!m_bailout) {
+            buildDialog();
 
-void PVMoveDialog::removeFullTargets()
-{
-    for (int x = m_target_pvs.size() - 1; x >= 0; x--) {
-        if (m_target_pvs[x]->getRemaining() <= 0 || !m_target_pvs[x]->isAllocatable())
-            m_target_pvs.removeAt(x);
-    }
-
-    /* If there is only one physical volume in the group or they are
-       all full then a pv move will have no place to go */
-
-    if (m_target_pvs.size() < 1) {
-        KMessageBox::error(NULL, i18n("There are no allocatable physical volumes with space to move to"));
-        m_bailout = true;
+            connect(this, SIGNAL(okClicked()),
+                    this, SLOT(commitMove()));
+        }
     }
 }
 
@@ -202,6 +191,22 @@ PVMoveDialog::~PVMoveDialog()
 {
     for (int x = 0; x < m_sources.size(); x++)
         delete m_sources[x];
+}
+
+void PVMoveDialog::removeFullTargets()
+{
+    for (int x = m_target_pvs.size() - 1; x >= 0; --x) {
+        if (m_target_pvs[x]->getRemaining() <= 0 || !m_target_pvs[x]->isAllocatable())
+            m_target_pvs.removeAt(x);
+    }
+
+    /* If there is only one physical volume in the group or they are
+       all full then a pv move will have no place to go */
+
+    if (m_target_pvs.isEmpty()) {
+        KMessageBox::sorry(nullptr, i18n("There are no allocatable physical volumes with space to move to"));
+        m_bailout = true;
+    }
 }
 
 void PVMoveDialog::buildDialog()
@@ -219,8 +224,8 @@ void PVMoveDialog::buildDialog()
     else
         dialect = KLocale::IECBinaryDialect;
 
-    QLabel *label;
-    NoMungeRadioButton *radio_button;
+    QLabel *label = nullptr;
+    NoMungeRadioButton *radio_button = nullptr;
 
     setWindowTitle(i18n("Move Physical Extents"));
     QWidget *const dialog_body = new QWidget(this);
@@ -294,7 +299,6 @@ void PVMoveDialog::buildDialog()
                 radio_button->setChecked(true);
         }
     } else {
-
         source_group->setTitle(i18n("Source Physical Volume"));
 
         if (m_move_segment) {
@@ -336,8 +340,9 @@ void PVMoveDialog::resetOkButton()
             pv_name = m_sources[0]->name;
             needed_space_total = m_lv->getSpaceUsedOnPv(pv_name);
         }
-    } else
+    } else {
         needed_space_total = m_pv_used_space;
+    }
 
     if (free_space_total < needed_space_total)
         enableButtonOk(false);
@@ -347,9 +352,9 @@ void PVMoveDialog::resetOkButton()
 
 void PVMoveDialog::disableSource()  // don't allow source and target to be the same pv
 {
-    PhysVol *source_pv = NULL;
+    PhysVol *source_pv = nullptr;
 
-    for (int x = m_radio_buttons.size() - 1; x >= 0; x--) {
+    for (int x = m_radio_buttons.size() - 1; x >= 0; --x) {
         if (m_radio_buttons[x]->isChecked())
             source_pv = m_vg->getPvByName(m_sources[x]->name);
     }
@@ -392,9 +397,9 @@ void PVMoveDialog::setupSegmentMove(int segment)
     const int stripes = m_lv->getSegmentStripes(segment);                     // source pv stripe count
     const long long extents = m_lv->getSegmentExtents(segment);               // extent count
     const QList<long long> starts = m_lv->getSegmentStartingExtent(segment);  // lv's first extent on pv
-    NameAndRange *nar = NULL;
+    NameAndRange *nar = nullptr;
 
-    for (int x = 0; x < names.size(); x++) {
+    for (int x = 0; x < names.size(); ++x) {
         nar = new NameAndRange;
         nar->name  = names[x];
         nar->start = starts[x];
@@ -407,9 +412,9 @@ void PVMoveDialog::setupSegmentMove(int segment)
 void PVMoveDialog::setupFullMove()
 {
     const QStringList names = m_lv->getPvNamesAllFlat();
-    NameAndRange *nar = NULL;
+    NameAndRange *nar = nullptr;
 
-    for (int x = names.size() - 1; x >= 0; x--) {
+    for (int x = names.size() - 1; x >= 0; --x) {
         nar = new NameAndRange();
         nar->name = names[x];
         nar->name_range = names[x];
@@ -435,7 +440,7 @@ QWidget* PVMoveDialog::extentWidget()
     KConfigSkeleton skeleton;
     skeleton.setCurrentGroup("General");
     skeleton.addItemBool("use_si_units", use_si_units, false);
-    QLabel *label = NULL;
+    QLabel *label = nullptr;
 
     KLocale::BinaryUnitDialect dialect;
     KLocale *const locale = KGlobal::locale();
@@ -463,7 +468,7 @@ QWidget* PVMoveDialog::extentWidget()
     for (int x = 0; x < lv_names.size(); x++) {
         LogVol *const lv = m_vg->getLvByName(lv_names[x]); 
 
-        if (lv != NULL){
+        if (lv){
             label = new QLabel(lv_names[x]);
             layout->addWidget(label, x + 1, 0);
 
@@ -484,17 +489,22 @@ QWidget* PVMoveDialog::extentWidget()
 bool PVMoveDialog::hasMovableExtents()
 {
     bool movable = false;
-    QStringList lv_names = getLvNames();
 
-    for (int x = 0; x < lv_names.size(); x++) {
-        LogVol *const lv = m_vg->getLvByName(lv_names[x]); 
-        if (lv != NULL){
-            if (!lv->isLvmMirror() && !lv->isLvmMirrorLeg() && !lv->isLvmMirrorLog() && !lv->isCowSnap() && !lv->isCowOrigin()){
-                movable = true;
+    if (m_move_lv && m_lv) {
+        if (!m_lv->isThinVolume() && !m_lv->isLvmMirror() && !m_lv->isLvmMirrorLeg() && !m_lv->isLvmMirrorLog() && !m_lv->isCowSnap() && !m_lv->isCowOrigin()) {
+            movable = true;
+        }
+    } else {  // move whole pv
+        for (auto name : getLvNames()) {
+            LogVol *const lv = m_vg->getLvByName(name); 
+            if (lv){
+                if (!lv->isLvmMirror() && !lv->isLvmMirrorLeg() && !lv->isLvmMirrorLog() && !lv->isCowSnap() && !lv->isCowOrigin()) {
+                    movable = true;
+                }
             }
         }
     }
-
+    
     return movable;
 }
 
@@ -505,7 +515,7 @@ QStringList PVMoveDialog::getLvNames()
     segs = m_vg->getPvByName(m_sources[0]->name)->sortByExtent();
     QStringList lv_names;
 
-    for (int x = 0; x < segs.size(); x++) {
+    for (int x = 0; x < segs.size(); ++x) {
         lv_names.append(segs[x]->lv_name);
         delete segs[x];
     }
