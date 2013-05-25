@@ -32,24 +32,20 @@
 PvGroupBox::PvGroupBox(QList<QSharedPointer<PvSpace>> spaceList, 
                        AllocationPolicy policy, AllocationPolicy vgpolicy, 
                        bool target, QWidget *parent)
-    : QGroupBox(parent)
+    : QGroupBox(parent), m_target(target)
 {
     for (auto space : spaceList) {
         m_pvs.append(space->pv);
         m_normal.append(space->normal);
         m_contiguous.append(space->contiguous);
     }
-
-    m_policy_combo = NULL;
-
-    KConfigSkeleton skeleton;
-    skeleton.setCurrentGroup("General");
-    skeleton.addItemBool("use_si_units", m_use_si_units, false);
-
-    if (target)
-      setTitle(i18n("Target Physical Volumes"));
+    
+    m_policy_combo = nullptr;
+    
+    if (m_target)
+        setTitle(i18n("Target Physical Volumes"));
     else
-      setTitle(i18n("Available Physical Volumes"));
+        setTitle(i18n("Available Physical Volumes"));
 
     QGridLayout *const layout = new QGridLayout();
     setLayout(layout);
@@ -59,13 +55,8 @@ PvGroupBox::PvGroupBox(QList<QSharedPointer<PvSpace>> spaceList,
     m_space_label   = new QLabel;
     m_extents_label = new QLabel;
 
-    KLocale::BinaryUnitDialect dialect;
+    m_dialect = getDialect();
     KLocale *const locale = KGlobal::locale();
-
-    if (m_use_si_units)
-        dialect = KLocale::MetricBinaryDialect;
-    else
-        dialect = KLocale::IECBinaryDialect;
 
     if (pv_check_count < 1) {
         m_extent_size = 1;
@@ -73,16 +64,16 @@ PvGroupBox::PvGroupBox(QList<QSharedPointer<PvSpace>> spaceList,
         layout->addWidget(pv_label);
     } else if (pv_check_count < 2) {
         m_extent_size = m_pvs[0]->getVg()->getExtentSize();
-        QLabel *pv_label = new QLabel(m_pvs[0]->getName() + "  " + locale->formatByteSize(m_pvs[0]->getRemaining(), 1, dialect));
+        QLabel *pv_label = new QLabel(m_pvs[0]->getName() + "  " + locale->formatByteSize(m_pvs[0]->getRemaining(), 1, m_dialect));
         layout->addWidget(pv_label, 0, 0, 1, -1);
-
+        
         addLabelsAndButtons(layout, pv_check_count, policy, vgpolicy);
         calculateSpace();
     } else {
         m_extent_size = m_pvs[0]->getVg()->getExtentSize();
         for (int x = 0; x < pv_check_count; x++) {
-
-            check = new NoMungeCheck(m_pvs[x]->getName() + "  " + locale->formatByteSize(m_pvs[x]->getRemaining(), 1, dialect));
+            
+            check = new NoMungeCheck(m_pvs[x]->getName() + "  " + locale->formatByteSize(m_pvs[x]->getRemaining(), 1, m_dialect));
             check->setAlternateText(m_pvs[x]->getName());
             m_pv_checks.append(check);
 
@@ -111,10 +102,6 @@ PvGroupBox::PvGroupBox(QList <StorageDevice *> devices, QList<StoragePartition *
       m_partitions(partitions),
       m_extent_size(extentSize)
 {
-    KConfigSkeleton skeleton;
-    skeleton.setCurrentGroup("General");
-    skeleton.addItemBool("use_si_units", m_use_si_units, false);
-
     if (devices.size() + partitions.size() > 1)
         setTitle(i18n("Available Physical Volumes"));
     else
@@ -131,13 +118,8 @@ PvGroupBox::PvGroupBox(QList <StorageDevice *> devices, QList<StoragePartition *
     m_space_label   = new QLabel;
     m_extents_label = new QLabel;
 
-    KLocale::BinaryUnitDialect dialect;
+    m_dialect = getDialect();
     KLocale *const locale = KGlobal::locale();
-
-    if (m_use_si_units)
-        dialect = KLocale::MetricBinaryDialect;
-    else
-        dialect = KLocale::IECBinaryDialect;
 
     if (pv_check_count < 1) {
         QLabel *pv_label = new QLabel(i18n("none found"));
@@ -150,7 +132,7 @@ PvGroupBox::PvGroupBox(QList <StorageDevice *> devices, QList<StoragePartition *
             name = m_partitions[0]->getName();
             size = m_partitions[0]->getSize();
         }
-        QLabel *pv_label = new QLabel(name + "  " + locale->formatByteSize(size, 1, dialect));
+        QLabel *pv_label = new QLabel(name + "  " + locale->formatByteSize(size, 1, m_dialect));
         layout->addWidget(pv_label, 0, 0, 1, -1);
         addLabelsAndButtons(layout, pv_check_count, NO_POLICY, NO_POLICY);
 
@@ -160,7 +142,7 @@ PvGroupBox::PvGroupBox(QList <StorageDevice *> devices, QList<StoragePartition *
             dev_count++;
             name = m_devices[x]->getName();
             size = m_devices[x]->getSize();
-            check = new NoMungeCheck(name + "  " + locale->formatByteSize(size, 1, dialect));
+            check = new NoMungeCheck(name + "  " + locale->formatByteSize(size, 1, m_dialect));
             check->setAlternateText(name);
             check->setData(QVariant(size));
             m_pv_checks.append(check);
@@ -179,7 +161,7 @@ PvGroupBox::PvGroupBox(QList <StorageDevice *> devices, QList<StoragePartition *
         for (int x = 0; x < m_partitions.size(); x++) {
             name = m_partitions[x]->getName();
             size = m_partitions[x]->getSize();
-            check = new NoMungeCheck(name + "  " + locale->formatByteSize(size, 1, dialect));
+            check = new NoMungeCheck(name + "  " + locale->formatByteSize(size, 1, m_dialect));
             check->setAlternateText(name);
             check->setData(QVariant(size));
             m_pv_checks.append(check);
@@ -207,16 +189,17 @@ QStringList PvGroupBox::getNames()
     QStringList names;
 
     if (m_pv_checks.size()) {
-        for (int x = 0; x < m_pv_checks.size(); x++) {
-            if (m_pv_checks[x]->isChecked())
-                names << m_pv_checks[x]->getAlternateText();
+        for (auto check : m_pv_checks) {
+            if (check->isChecked())
+                names << check->getAlternateText();
         }
-    } else if (m_pvs.size())
+    } else if (m_pvs.size()) {
         names << m_pvs[0]->getName();
-    else if (m_devices.size())
+    } else if (m_devices.size()) {
         names << m_devices[0]->getName();
-    else if (m_partitions.size())
+    } else if (m_partitions.size()) {
         names << m_partitions[0]->getName();
+    }
 
     return names;
 }
@@ -226,15 +209,16 @@ QStringList PvGroupBox::getAllNames()
     QStringList names;
 
     if (m_pv_checks.size()) {
-        for (int x = 0; x < m_pv_checks.size(); x++) {
-            names << m_pv_checks[x]->getAlternateText();
+        for (auto check : m_pv_checks) {
+            names << check->getAlternateText();
         }
-    } else if (m_pvs.size())
+    } else if (m_pvs.size()) {
         names << m_pvs[0]->getName();
-    else if (m_devices.size())
+    } else if (m_devices.size()) {
         names << m_devices[0]->getName();
-    else if (m_partitions.size())
+    } else if (m_partitions.size()) {
         names << m_partitions[0]->getName();
+    }
 
     return names;
 }
@@ -244,20 +228,42 @@ long long PvGroupBox::getRemainingSpace()
     long long space = 0;
 
     if (m_pv_checks.size()) {
-        for (int x = 0; x < m_pv_checks.size(); x++) {
-            if (m_pv_checks[x]->isChecked())
-                space += (m_pv_checks[x]->getData()).toLongLong();
+        for (auto check : m_pv_checks) {
+            if (check->isChecked())
+                space += (check->getData()).toLongLong();
         }
-    } else if (m_pvs.size())
+    } else if (m_pvs.size()) {
         space = m_pvs[0]->getRemaining();
-    else if (m_devices.size())
+    } else if (m_devices.size()) {
         space = m_devices[0]->getSize();
-    else if (m_partitions.size())
+    } else if (m_partitions.size()) {
         space = m_partitions[0]->getSize();
-    else
+    } else {
         space = 0;
+    }
 
     return space;
+}
+
+long long PvGroupBox::getLargestSelectedSpace()
+{
+    long long largest = 0;
+    long long space = 0;
+
+    if (!m_pvs.isEmpty()) {
+        if (m_pv_checks.size()) {
+            for (auto check : m_pv_checks) {
+                space = check->getData().toLongLong();
+                
+                if (check->isChecked() && (space > largest))
+                    largest = space;
+            }
+        } else {
+            largest = m_pvs[0]->getContiguous();
+        }
+    }
+
+    return largest;
 }
 
 QList<long long> PvGroupBox::getRemainingSpaceList()
@@ -265,28 +271,26 @@ QList<long long> PvGroupBox::getRemainingSpaceList()
     QList<long long> space;
 
     if (m_pv_checks.size()) {
-        for (int x = 0; x < m_pv_checks.size(); x++) {
-            if (m_pv_checks[x]->isChecked())
-                space.append((m_pv_checks[x]->getData()).toLongLong());
+        for (auto check : m_pv_checks) {
+            if (check->isChecked())
+                space.append((check->getData()).toLongLong());
         }
-    } else if (m_pvs.size())
+    } else if (m_pvs.size()) {
         space.append(m_pvs[0]->getRemaining());
-    else if (m_devices.size())
+    } else if (m_devices.size()) {
         space.append(m_devices[0]->getSize());
-    else if (m_partitions.size())
+    } else if (m_partitions.size()) {
         space.append(m_partitions[0]->getSize());
+    }
 
     return space;
 }
 
 void PvGroupBox::selectAll()
 {
-
-    if (m_pv_checks.size()) {
-        for (int x = 0; x < m_pv_checks.size(); x++) {
-            if (m_pv_checks[x]->isEnabled())
-                m_pv_checks[x]->setChecked(true);
-        }
+    for (auto check : m_pv_checks) {
+        if (check->isEnabled())
+            check->setChecked(true);
     }
 
     calculateSpace();
@@ -296,10 +300,8 @@ void PvGroupBox::selectAll()
 
 void PvGroupBox::selectNone()
 {
-    if (m_pv_checks.size()) {
-        for (int x = 0; x < m_pv_checks.size(); x++)
-            m_pv_checks[x]->setChecked(false);
-    }
+    for (auto check : m_pv_checks)
+        check->setChecked(false);
 
     calculateSpace();
 
@@ -308,19 +310,13 @@ void PvGroupBox::selectNone()
 
 void PvGroupBox::calculateSpace()
 {
-    KLocale::BinaryUnitDialect dialect;
     KLocale *const locale = KGlobal::locale();
 
-    if (m_use_si_units)
-        dialect = KLocale::MetricBinaryDialect;
-    else
-        dialect = KLocale::IECBinaryDialect;
-
-    if (m_pv_checks.size() > 1) {
-        m_space_label->setText(i18n("Selected space: %1", locale->formatByteSize(getRemainingSpace(), 1, dialect)));
-        m_extents_label->setText(i18n("Selected extents: %1", getRemainingSpace() / m_extent_size));
+    if ((getEffectivePolicy() == CONTIGUOUS) && m_target) {
+        m_space_label->setText(i18n("Contiguous space: %1", locale->formatByteSize(getLargestSelectedSpace(), 1, m_dialect)));
+        m_extents_label->setText(i18n("Contiguous extents: %1", getLargestSelectedSpace() / m_extent_size));
     } else {
-        m_space_label->setText(i18n("Space: %1", locale->formatByteSize(getRemainingSpace(), 1, dialect)));
+        m_space_label->setText(i18n("Space: %1", locale->formatByteSize(getRemainingSpace(), 1, m_dialect)));
         m_extents_label->setText(i18n("Extents: %1", getRemainingSpace() / m_extent_size));
     }
 
@@ -334,7 +330,7 @@ void PvGroupBox::setExtentSize(long long extentSize)
     m_extent_size = (extentSize >= 1024) ? extentSize : 1024;
 
     if (m_pv_checks.size()) {
-        for (int x = 0; x < m_pv_checks.size(); x++) {
+        for (int x = 0; x < m_pv_checks.size(); ++x) {
             if ((m_pv_checks[x]->getData()).toLongLong() > (m_extent_size + 0xfffffLL))    // 1 MiB for MDA, fix this
                 m_pv_checks[x]->setEnabled(true);                                          // when MDA size is put in
             else {                                                                         // liblvm2app
@@ -353,12 +349,13 @@ void PvGroupBox::disableOrigin(PhysVol *originVolume)
 
         const QString name = originVolume->getName();
 
-        for (int x = 0; x < m_pvs.size(); x++) {
+        for (int x = 0; x < m_pvs.size(); ++x) {
             if (m_pvs[x]->getName() == name) {
                 m_pv_checks[x]->setChecked(false);
                 m_pv_checks[x]->setEnabled(false);
-            } else
+            } else {
                 m_pv_checks[x]->setEnabled(true);
+            }
         }
     }
 }
@@ -412,7 +409,7 @@ void PvGroupBox::addLabelsAndButtons(QGridLayout *layout, int pvCount, Allocatio
 
 AllocationPolicy PvGroupBox::getPolicy()
 {
-    if (m_policy_combo == NULL)
+    if (m_policy_combo == nullptr)
         return NORMAL;
     else
         return m_policy_combo->getPolicy();
@@ -420,7 +417,7 @@ AllocationPolicy PvGroupBox::getPolicy()
 
 AllocationPolicy PvGroupBox::getEffectivePolicy()
 {
-    if (m_policy_combo == NULL)
+    if (m_policy_combo == nullptr)
         return NORMAL;
     else
         return m_policy_combo->getEffectivePolicy();
@@ -428,25 +425,18 @@ AllocationPolicy PvGroupBox::getEffectivePolicy()
 
 void PvGroupBox::setChecksToPolicy()
 {
-    KLocale::BinaryUnitDialect dialect;
     KLocale *const locale = KGlobal::locale();
 
-    if (m_use_si_units)
-        dialect = KLocale::MetricBinaryDialect;
-    else
-        dialect = KLocale::IECBinaryDialect;
-
-    if (!m_pvs.isEmpty() && m_policy_combo != NULL) {
-
+    if (!m_pvs.isEmpty() && m_policy_combo != nullptr) {
         const AllocationPolicy policy = getEffectivePolicy();
 
-        for (int x = 0; x < m_pv_checks.size(); x++) {
+        for (int x = 0; x < m_pv_checks.size(); ++x) {
             if (policy == CONTIGUOUS) {
-                m_pv_checks[x]->setText(m_pvs[x]->getName() + "  " + locale->formatByteSize(m_contiguous[x], 1, dialect));
+                m_pv_checks[x]->setText(m_pvs[x]->getName() + "  " + locale->formatByteSize(m_contiguous[x], 1, m_dialect));
                 m_pv_checks[x]->setData(QVariant(m_contiguous[x]));
                 
             } else {
-                m_pv_checks[x]->setText(m_pvs[x]->getName() + "  " + locale->formatByteSize(m_normal[x], 1, dialect));
+                m_pv_checks[x]->setText(m_pvs[x]->getName() + "  " + locale->formatByteSize(m_normal[x], 1, m_dialect));
                 m_pv_checks[x]->setData(QVariant(m_normal[x]));
             }
         }
@@ -455,3 +445,19 @@ void PvGroupBox::setChecksToPolicy()
     calculateSpace();
 }
 
+KLocale::BinaryUnitDialect PvGroupBox::getDialect()
+{
+    bool use_si_units;
+    KConfigSkeleton skeleton;
+    skeleton.setCurrentGroup("General");
+    skeleton.addItemBool("use_si_units", use_si_units, false);
+
+    KLocale::BinaryUnitDialect dialect;
+
+    if (use_si_units)
+        dialect = KLocale::MetricBinaryDialect;
+    else
+        dialect = KLocale::IECBinaryDialect;
+
+    return dialect;
+}

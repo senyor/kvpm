@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -63,8 +63,8 @@ class PVMoveDialog : public KDialog
     QWidget* extentWidget();
 
 public:
-    explicit PVMoveDialog(PhysVol *const physicalVolume, QWidget *parent = 0);
-    explicit PVMoveDialog(LogVol *const logicalVolume, int const segment, QWidget *parent = 0);
+    explicit PVMoveDialog(PhysVol *const physicalVolume, QWidget *parent = nullptr);
+    explicit PVMoveDialog(LogVol *const logicalVolume, int const segment, QWidget *parent = nullptr);
     ~PVMoveDialog();
     bool bailout();
 

@@ -18,6 +18,7 @@
 #include <stdint.h>
 
 #include <KComboBox>
+#include <KLocale>
 
 #include <QCheckBox>
 #include <QGridLayout>
@@ -41,7 +42,8 @@ class PvGroupBox: public QGroupBox
 {
     Q_OBJECT
 
-    bool m_use_si_units;
+    bool m_target = false;  // is this is a target for a pv move.
+    KLocale::BinaryUnitDialect m_dialect;  // power of 10 SI or traditional power of two units
     QList<PhysVol *> m_pvs;
     QList<StorageDevice *> m_devices;
     QList<StoragePartition *> m_partitions;
@@ -54,7 +56,9 @@ class PvGroupBox: public QGroupBox
     QHBoxLayout *getButtons();
     PolicyComboBox *m_policy_combo;
 
+    long long getLargestSelectedSpace();
     void addLabelsAndButtons(QGridLayout *const layout, const int pvCount, AllocationPolicy const policy, AllocationPolicy const vgpolicy);
+    KLocale::BinaryUnitDialect getDialect();
 
 public:    
     // Note: policy needs to be passed "inherited" here for new logical volumes
