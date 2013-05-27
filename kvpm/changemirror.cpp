@@ -43,15 +43,14 @@
 
 
 
-
 ChangeMirrorDialog::ChangeMirrorDialog(LogVol *const mirrorVolume, bool changeLog, QWidget *parent):
     KDialog(parent),
     m_change_log(changeLog),
     m_lv(mirrorVolume)
 {
-    if (m_lv->getParentMirror() != NULL)
+    if (m_lv->getParentMirror() != nullptr)
         m_lv = m_lv->getParentMirror();
-    else if (m_lv->getParentRaid() != NULL)
+    else if (m_lv->getParentRaid() != nullptr)
         m_lv = m_lv->getParentRaid();
 
     QList<LogVol *> children;
@@ -65,15 +64,15 @@ ChangeMirrorDialog::ChangeMirrorDialog(LogVol *const mirrorVolume, bool changeLo
 
     setWindowTitle(i18n("Change Mirror"));
 
-    if ((is_raid && !m_lv->isMirror()) || m_lv->isCowSnap()){
+    if ((is_raid && !m_lv->isMirror()) || m_lv->isCowSnap()) {
         m_bailout = true;
-        KMessageBox::sorry(NULL, i18n("This type of volume can not be mirrored "));
-    } else if (is_raid && !m_lv->isSynced()){
+        KMessageBox::sorry(nullptr, i18n("This type of volume can not be mirrored "));
+    } else if (is_raid && !m_lv->isSynced()) {
         m_bailout = true;
-        KMessageBox::sorry(NULL, i18n("RAID mirrors must be synced before adding new legs"));
-    } else if (is_lvm && m_lv->isCowOrigin()){
+        KMessageBox::sorry(nullptr, i18n("RAID mirrors must be synced before adding new legs"));
+    } else if (is_lvm && m_lv->isCowOrigin()) {
         m_bailout = true;
-        KMessageBox::sorry(NULL, i18n("Non-RAID mirrors which are snapshot origins can not have new legs added"));
+        KMessageBox::sorry(nullptr, i18n("Non-RAID mirrors which are snapshot origins can not have new legs added"));
     } else {
         QWidget *const main_widget = new QWidget();
         QVBoxLayout *const layout = new QVBoxLayout();
@@ -115,7 +114,7 @@ ChangeMirrorDialog::ChangeMirrorDialog(LogVol *const mirrorVolume, bool changeLo
             connect(m_stripe_box, SIGNAL(toggled(bool)),
                     this, SLOT(resetOkButton()));
         } else {
-            m_pv_box = NULL;
+            m_pv_box = nullptr;
         }
         
         setLogRadioButtons();
@@ -188,6 +187,11 @@ QWidget *ChangeMirrorDialog::buildGeneralTab(const bool isRaidMirror, const bool
             add_mirror_box->setTitle(i18n("Convert to mirror"));
             m_type_combo->addItem(i18n("Standard LVM"));
             m_type_combo->addItem(i18n("RAID 1"));
+
+            if (LvmConfig::getMirrorSegtypeDefault() == QString("mirror"))
+                m_type_combo->setCurrentIndex(0);
+            else
+                m_type_combo->setCurrentIndex(1);
             
             connect(m_type_combo, SIGNAL(currentIndexChanged(int)),
                     this, SLOT(enableTypeOptions(int)));
@@ -218,9 +222,9 @@ QWidget *ChangeMirrorDialog::buildGeneralTab(const bool isRaidMirror, const bool
                 m_mirrored_log_button->setChecked(true);
         } else 
             m_disk_log_button->setChecked(true);
-    }
-    else
+    } else {
         m_log_box->hide();
+    }
 
     if (m_change_log && (m_lv->getLogCount() == 2)) {
         m_log_widget = buildLogWidget();
@@ -234,8 +238,9 @@ QWidget *ChangeMirrorDialog::buildGeneralTab(const bool isRaidMirror, const bool
         
         connect(m_mirrored_log_button, SIGNAL(toggled(bool)),
                 this, SLOT(enableLogWidget()));
-    } else
-        m_log_widget = NULL;
+    } else {
+        m_log_widget = nullptr;
+    }
 
     center_layout->addStretch();
     general->setLayout(general_layout);
@@ -521,8 +526,9 @@ QStringList ChangeMirrorDialog::arguments()
             args << "--stripes" <<  QString("%1").arg(m_stripe_spin->value());
             args << "--stripesize" << (m_stripe_size_combo->currentText()).remove("KiB").trimmed();
         }
-    } else
+    } else {
         args << "--mirrors" << QString("+0");
+    }
 
     args << "--background" << m_lv->getFullName();
 
@@ -606,6 +612,7 @@ void ChangeMirrorDialog::resetOkButton()
             enableButtonOk(false);
         else
             enableButtonOk(true);
+
         return;
     }
 
@@ -658,10 +665,19 @@ void ChangeMirrorDialog::resetOkButton()
         }
         qSort(stripe_pv_bytes);
 
-        if (stripe_pv_bytes[0] >= (m_lv->getSize() / new_stripe_count))
-            enableButtonOk(true);
-        else
-            enableButtonOk(false);
+        // reserve one extent for raid metadata
+        if ((m_type_combo && m_type_combo->currentIndex() == 1) || m_lv->isRaid()) {
+            if ((stripe_pv_bytes[0] - 1) >= (m_lv->getSize() / new_stripe_count))
+                enableButtonOk(true);
+            else
+                enableButtonOk(false);
+        } else {
+            if (stripe_pv_bytes[0] >= (m_lv->getSize() / new_stripe_count))
+                enableButtonOk(true);
+            else
+                enableButtonOk(false);
+        }
+
         return;
     } else {
         enableButtonOk(true);
