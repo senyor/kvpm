@@ -130,6 +130,8 @@ ChangeMirrorDialog::ChangeMirrorDialog(LogVol *const mirrorVolume, bool changeLo
         
         connect(this, SIGNAL(okClicked()),
                 this, SLOT(commitChanges()));
+
+        enableTypeOptions(m_type_combo->currentIndex());
     }
 }
 
@@ -192,9 +194,12 @@ QWidget *ChangeMirrorDialog::buildGeneralTab(const bool isRaidMirror, const bool
                 m_type_combo->setCurrentIndex(0);
             else
                 m_type_combo->setCurrentIndex(1);
-            
+
             connect(m_type_combo, SIGNAL(currentIndexChanged(int)),
                     this, SLOT(enableTypeOptions(int)));
+
+            connect(m_type_combo, SIGNAL(currentIndexChanged(int)),
+                    this, SLOT(resetOkButton()));
         }
     }
 
