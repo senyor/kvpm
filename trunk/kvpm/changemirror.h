@@ -43,16 +43,16 @@ class ChangeMirrorDialog : public KDialog
 {
     Q_OBJECT
 
-    KTabWidget  *m_tab_widget;
-    KIntSpinBox *m_add_mirrors_spin;
-    KIntSpinBox *m_stripe_spin;
-    QStackedWidget *m_error_stack;
-    PvGroupBox *m_pv_box;
-    QGroupBox  *m_stripe_box;
-    QGroupBox  *m_log_box;
-    QWidget    *m_log_widget;
-    KComboBox  *m_stripe_size_combo;
-    KComboBox  *m_type_combo;
+    KTabWidget  *m_tab_widget = nullptr;
+    KIntSpinBox *m_add_mirrors_spin = nullptr;
+    KIntSpinBox *m_stripe_spin = nullptr;
+    QStackedWidget *m_error_stack = nullptr;
+    PvGroupBox *m_pv_box = nullptr;
+    QGroupBox  *m_stripe_box = nullptr;
+    QGroupBox  *m_log_box = nullptr;
+    QWidget    *m_log_widget = nullptr;
+    KComboBox  *m_stripe_size_combo = nullptr;
+    KComboBox  *m_type_combo = nullptr;
 
     QStringList m_log_pvs;
     QStringList m_image_pvs;
