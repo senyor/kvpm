@@ -52,6 +52,7 @@ class PVMoveDialog : public KDialog
     QList<PhysVol *> m_target_pvs;               // destination physical volumes
     QList<NoMungeRadioButton *> m_radio_buttons; // user can select only one source pv
     PvGroupBox *m_pv_box;                        // many target pvs may be selected
+    QLabel *m_radio_label = nullptr;   // number of extents selected for the pvmove source
 
     void buildDialog();
     void removeFullTargets();
@@ -60,7 +61,9 @@ class PVMoveDialog : public KDialog
     bool hasMovableExtents();
     QStringList arguments(); 
     QStringList getLvNames(); 
-    QWidget* extentWidget();
+    QWidget* singleSourceWidget();
+    bool isMovable(LogVol *lv);
+    long long movableExtents();
 
 public:
     explicit PVMoveDialog(PhysVol *const physicalVolume, QWidget *parent = nullptr);
@@ -72,7 +75,7 @@ private slots:
     void commitMove();
     void disableSource();
     void resetOkButton();
-
+    void setRadioExtents();
 };
 
 #endif

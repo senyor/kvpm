@@ -46,6 +46,7 @@ struct NameAndRange {
     QString   name_range;  // name + range of extents  ie: /dev/sda1:10-100 and just name if no range specified
     uint64_t  start;       // Starting extent
     uint64_t  end;         // Last extent
+    long long used;        // extents in use
 };
 
 
@@ -91,6 +92,7 @@ PVMoveDialog::PVMoveDialog(PhysVol *const physicalVolume, QWidget *parent) : KDi
     NameAndRange *nar = new NameAndRange;
     nar->name = name;
     nar->name_range = name;
+    nar->used = (physicalVolume->getSize() - physicalVolume->getRemaining()) / m_vg->getExtentSize();
     m_sources.append(nar);
 
     forbidden_targets.append(name);
@@ -267,6 +269,11 @@ void PVMoveDialog::buildDialog()
     const int radio_count = m_sources.size();
 
     if (radio_count > 1) {
+
+        m_radio_label = new QLabel();
+        source_layout->addSpacing(10);
+        source_layout->addWidget(m_radio_label);
+
         for (int x = 0; x < radio_count; x++) {
 
             if (m_move_segment) {
@@ -278,7 +285,7 @@ void PVMoveDialog::buildDialog()
                 radio_button = new NoMungeRadioButton(QString("%1  %2").arg(m_sources[x]->name).arg(locale->formatByteSize(m_pv_used_space, 1, dialect)));
                 radio_button->setAlternateText(m_sources[x]->name);
             } else {
-                m_pv_used_space = m_vg->getPvByName(m_sources[x]->name)->getSize() - m_vg->getPvByName(m_sources[x]->name)->getRemaining();
+                m_pv_used_space = m_sources[x]->used;
                 radio_button = new NoMungeRadioButton(QString("%1  %2").arg(m_sources[x]->name).arg(locale->formatByteSize(m_pv_used_space, 1, dialect)));
                 radio_button->setAlternateText(m_sources[x]->name);
             }
@@ -295,22 +302,26 @@ void PVMoveDialog::buildDialog()
             connect(radio_button, SIGNAL(toggled(bool)),
                     this, SLOT(disableSource()));
 
+            connect(radio_button, SIGNAL(toggled(bool)),
+                    this, SLOT(setRadioExtents()));
+
             if (!x)
                 radio_button->setChecked(true);
         }
     } else {
         source_group->setTitle(i18n("Source Physical Volume"));
-
+        auto src = m_sources[0];
+        
         if (m_move_segment) {
-            m_pv_used_space = (1 + m_sources[0]->end - m_sources[0]->start) * m_vg->getExtentSize();
-            radio_layout->addWidget(new QLabel(QString("%1  %2").arg(m_sources[0]->name_range).arg(locale->formatByteSize(m_pv_used_space, 1, dialect))));
+            m_pv_used_space = (1 + src->end - src->start) * m_vg->getExtentSize();
+            radio_layout->addWidget(new QLabel(QString("%1  %2").arg(src->name_range).arg(locale->formatByteSize(m_pv_used_space, 1, dialect))));
         } else if (m_move_lv) {
-            m_pv_used_space = m_lv->getSpaceUsedOnPv(m_sources[0]->name);
-            radio_layout->addWidget(new QLabel(QString("%1  %2").arg(m_sources[0]->name).arg(locale->formatByteSize(m_pv_used_space, 1, dialect))));
+            m_pv_used_space = m_lv->getSpaceUsedOnPv(src->name);
+            radio_layout->addWidget(new QLabel(QString("%1  %2").arg(src->name).arg(locale->formatByteSize(m_pv_used_space, 1, dialect))));
         } else {
-            m_pv_used_space = m_vg->getPvByName(m_sources[0]->name)->getSize() - m_vg->getPvByName(m_sources[0]->name)->getRemaining();
-            radio_layout->addWidget(new QLabel(QString("%1  %2").arg(m_sources[0]->name).arg(locale->formatByteSize(m_pv_used_space, 1, dialect))));
-            source_layout->addWidget(extentWidget());
+            m_pv_used_space = movableExtents() * m_vg->getExtentSize();
+            radio_layout->addWidget(new QLabel(QString("%1  %2").arg(src->name).arg(locale->formatByteSize(m_pv_used_space, 1, dialect))));
+            source_layout->addWidget(singleSourceWidget());
         }
     }
 
@@ -318,21 +329,30 @@ void PVMoveDialog::buildDialog()
             this, SLOT(resetOkButton()));
 
     disableSource();
-
     resetOkButton();
 }
 
 void PVMoveDialog::resetOkButton()
 {
-    const long long free_space_total = m_pv_box->getRemainingSpace();
+    long long free_space_total = 0;
+
+    if(m_pv_box->getEffectivePolicy() == CONTIGUOUS) {
+        for (auto space : m_pv_box->getRemainingSpaceList()) {
+            if (space > free_space_total)
+                free_space_total = space;
+        }
+    } else {
+        free_space_total = m_pv_box->getRemainingSpace();
+    }
+
     long long needed_space_total = 0;
     QString pv_name;
 
     if (m_move_lv) {
         if (m_radio_buttons.size() > 1) {
-            for (int x = 0; x < m_radio_buttons.size(); x++) {
-                if (m_radio_buttons[x]->isChecked()) {
-                    pv_name = m_radio_buttons[x]->getAlternateText();
+            for (auto radio : m_radio_buttons) {
+                if (radio->isChecked()) {
+                    pv_name = radio->getAlternateText();
                     needed_space_total = m_lv->getSpaceUsedOnPv(pv_name);
                 }
             }
@@ -405,19 +425,22 @@ void PVMoveDialog::setupSegmentMove(int segment)
         nar->start = starts[x];
         nar->end   = starts[x] + (extents / stripes) - 1;
         nar->name_range = QString("%1:%2-%3").arg(nar->name).arg(nar->start).arg(nar->end);
+        nar->used = 1 + (nar->end - nar->start);
         m_sources.append(nar);
     }
 }
 
 void PVMoveDialog::setupFullMove()
 {
-    const QStringList names = m_lv->getPvNamesAllFlat();
     NameAndRange *nar = nullptr;
+    PhysVol *pv = nullptr;
 
-    for (int x = names.size() - 1; x >= 0; --x) {
+    for (auto pvname : m_lv->getPvNamesAllFlat()) {
         nar = new NameAndRange();
-        nar->name = names[x];
-        nar->name_range = names[x];
+        nar->name = pvname;
+        nar->name_range = pvname;
+        pv = m_vg->getPvByName(pvname);
+        nar->used = (pv->getSize() - pv->getRemaining()) / m_vg->getExtentSize();
         m_sources.append(nar);
     }
 }
@@ -434,7 +457,7 @@ void PVMoveDialog::commitMove()
     return;
 }
 
-QWidget* PVMoveDialog::extentWidget()
+QWidget* PVMoveDialog::singleSourceWidget()
 {
     bool use_si_units;
     KConfigSkeleton skeleton;
@@ -451,37 +474,40 @@ QWidget* PVMoveDialog::extentWidget()
         dialect = KLocale::IECBinaryDialect;
 
     QWidget *const widget = new QWidget();
-    QGridLayout *const layout = new QGridLayout();
+    QVBoxLayout *const layout = new QVBoxLayout();
+    QGridLayout *const grid = new QGridLayout();
+    layout->addLayout(grid);
     widget->setLayout(layout);
 
     label = new QLabel(i18n("Logical Volumes"));
     label->setAlignment(Qt::AlignCenter);
-    layout->addWidget(label, 0, 0);
+    grid->addWidget(label, 0, 0);
     label = new QLabel(i18n("Space Used"));
     label->setAlignment(Qt::AlignCenter);
-    layout->addWidget(label, 0, 1);
+    grid->addWidget(label, 0, 1);
 
-    QList<LVSegmentExtent *> segs;
-    segs = m_vg->getPvByName(m_sources[0]->name)->sortByExtent();
-    QStringList lv_names = getLvNames();
+    const QStringList lv_names = getLvNames();
 
-    for (int x = 0; x < lv_names.size(); x++) {
+    for (int x = 0; x < lv_names.size(); ++x) {
         LogVol *const lv = m_vg->getLvByName(lv_names[x]); 
-
-        if (lv){
+        
+        if (lv) {
             label = new QLabel(lv_names[x]);
-            layout->addWidget(label, x + 1, 0);
-
+            grid->addWidget(label, x + 1, 0);
+            
             label = new QLabel(QString("%1").arg(locale->formatByteSize(lv->getSpaceUsedOnPv(m_sources[0]->name), 1, dialect)));
             label->setAlignment(Qt::AlignRight);
-            layout->addWidget(label, x + 1, 1); 
-
-            if (lv->isLvmMirror() || lv->isLvmMirrorLeg() || lv->isLvmMirrorLog() || lv->isCowSnap() || lv->isCowOrigin()){
+            grid->addWidget(label, x + 1, 1); 
+            
+            if (!isMovable(lv)) {
                 label = new QLabel(i18n("<Not movable>"));
-                layout->addWidget(label, x + 1, 2);
+                grid->addWidget(label, x + 1, 2);
             }
         }
     }
+
+    layout->addSpacing(10);
+    layout->addWidget(new QLabel(i18n("Movable extents: %1", movableExtents())));
 
     return widget;
 }
@@ -490,18 +516,13 @@ bool PVMoveDialog::hasMovableExtents()
 {
     bool movable = false;
 
-    if (m_move_lv && m_lv) {
-        if (!m_lv->isThinVolume() && !m_lv->isLvmMirror() && !m_lv->isLvmMirrorLeg() && !m_lv->isLvmMirrorLog() && !m_lv->isCowSnap() && !m_lv->isCowOrigin()) {
-            movable = true;
-        }
-    } else {  // move whole pv
+    if (m_move_lv && m_lv) {              // move only lv
+        movable = isMovable(m_lv);
+    } else {                              // move whole pv
         for (auto name : getLvNames()) {
             LogVol *const lv = m_vg->getLvByName(name); 
-            if (lv){
-                if (!lv->isLvmMirror() && !lv->isLvmMirrorLeg() && !lv->isLvmMirrorLog() && !lv->isCowSnap() && !lv->isCowOrigin()) {
-                    movable = true;
-                }
-            }
+            if (lv && isMovable(lv))
+                movable = true;
         }
     }
     
@@ -524,4 +545,44 @@ QStringList PVMoveDialog::getLvNames()
     lv_names.sort();
 
     return lv_names;
+}
+
+void PVMoveDialog::setRadioExtents()
+{
+    if (m_radio_label) {
+        for (auto radio : m_radio_buttons) {
+            if (radio->isChecked()) {
+                PhysVol *const pv = m_vg->getPvByName(radio->getAlternateText());
+                const long long used = (pv->getSize() - pv->getRemaining()) / m_vg->getExtentSize();
+                m_radio_label->setText(i18n("Extents: %1", used));
+            }
+        }
+    }
+}
+
+bool PVMoveDialog::isMovable(LogVol *lv)
+{
+    if (lv->isThinVolume() || lv->isLvmMirror() || lv->isLvmMirrorLeg() || 
+        lv->isLvmMirrorLog() || lv->isCowSnap() || lv->isCowOrigin()) {
+        return false;
+    } else {
+        return true;
+    }
+}
+
+// Number of movable extents when moving a *whole* pv
+long long PVMoveDialog::movableExtents()
+{
+    long long extents = 0;
+
+    for (auto name : getLvNames()) {
+        LogVol *const lv = m_vg->getLvByName(name);
+        if (lv) {
+            if (lv && isMovable(lv)) {
+                extents += lv->getSpaceUsedOnPv(m_sources[0]->name) / m_vg->getExtentSize();
+            } 
+        }
+    }
+
+    return extents;
 }
