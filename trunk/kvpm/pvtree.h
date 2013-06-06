@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -16,6 +16,7 @@
 #define PVTREE_H
 
 #include <QList>
+#include <QStringList>
 #include <QTreeWidget>
 
 class QMenu;
@@ -35,6 +36,10 @@ class PVTree : public QTreeWidget
     QMenu *m_context_menu;
 
     bool m_use_si_units;
+    bool m_show_total;
+    bool m_show_percent;
+    bool m_show_both;
+    int m_pv_warn_percent;
 
     QAction *pv_move_action,
             *vg_reduce_action,
@@ -42,6 +47,7 @@ class PVTree : public QTreeWidget
 
     QString m_pv_name;
 
+    QStringList getLvNames(PhysVol *const pv);
     void setViewConfig();
     void setupContextMenu();
 
