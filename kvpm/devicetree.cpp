@@ -149,7 +149,7 @@ void DeviceTree::loadData(QList<StorageDevice *> devices)
 
         if (dev->isPhysicalVolume()) {
             if (m_pv_warn_percent && (m_pv_warn_percent >= (100 - dev->getPhysicalVolume()->getPercentUsed()))) {
-                parent->setIcon(3, KIcon("exclamation"));
+                parent->setIcon(3, KIcon("dialog-warning"));
                 parent->setToolTip(3, i18n("Physical volume that is running out of space"));
             }
 
@@ -242,7 +242,7 @@ void DeviceTree::loadData(QList<StorageDevice *> devices)
 
                 if (part->isPhysicalVolume()) {
                     if (m_pv_warn_percent && (m_pv_warn_percent >= (100 - part->getPhysicalVolume()->getPercentUsed()))) {
-                        child->setIcon(3, KIcon("exclamation"));
+                        child->setIcon(3, KIcon("dialog-warning"));
                         child->setToolTip(3, i18n("Physical volume that is running out of space"));
                     }
 
@@ -256,7 +256,7 @@ void DeviceTree::loadData(QList<StorageDevice *> devices)
                 } else if (part->isMountable()) {
                     if (part->isMounted()) {
                         if (m_fs_warn_percent && (m_fs_warn_percent >= (100 - part->getFilesystemPercentUsed()))) {
-                            child->setIcon(3, KIcon("exclamation"));
+                            child->setIcon(3, KIcon("dialog-warning"));
                             child->setToolTip(3, i18n("Filesystem that is running out of space"));
                         }
 
@@ -286,7 +286,7 @@ void DeviceTree::loadData(QList<StorageDevice *> devices)
 
                 if (part->isPhysicalVolume()) {
                     if (m_pv_warn_percent && (m_pv_warn_percent >= (100 - part->getPhysicalVolume()->getPercentUsed()))) {
-                        child->setIcon(3, KIcon("exclamation"));
+                        child->setIcon(3, KIcon("dialog-warning"));
                         child->setToolTip(3, i18n("Physical volume that is running out of space"));
                     }
 
@@ -300,7 +300,7 @@ void DeviceTree::loadData(QList<StorageDevice *> devices)
                 } else if (part->isMountable()) {
                     if (part->isMounted()) {
                         if (m_fs_warn_percent && (m_fs_warn_percent >= (100 - part->getFilesystemPercentUsed()))) {
-                            child->setIcon(3, KIcon("exclamation"));
+                            child->setIcon(3, KIcon("dialog-warning"));
                             child->setToolTip(3, i18n("Filesystem that is running out of space"));
                         }
 
