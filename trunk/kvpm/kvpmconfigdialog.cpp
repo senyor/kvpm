@@ -661,7 +661,7 @@ QGroupBox *KvpmConfigDialog::allGroup()
     QHBoxLayout *const pv_warn_layout = new QHBoxLayout;
     warn_layout->addWidget(new QLabel(i18n("Show warning icon")));
     QLabel *const warn_icon = new QLabel;
-    warn_icon->setPixmap(KIcon("exclamation").pixmap(16, 16));
+    warn_icon->setPixmap(KIcon("dialog-warning").pixmap(16, 16));
     warn_layout->addWidget(warn_icon);
     percent_layout->addLayout(warn_layout);
     percent_layout->addWidget(new QLabel(i18n("when space falls to or below:")));
