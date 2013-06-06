@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2009, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011, 2012,, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  * * This program is free software; you can redistribute it and/or modify
@@ -223,7 +223,7 @@ QTreeWidgetItem *VGTree::loadItem(LogVol *lv, QTreeWidgetItem *item)
                 item->setData(3, Qt::DisplayRole, QString(locale->formatByteSize(fs_remaining, 1, dialect) + " (%%1)").arg(fs_percent));
 
             if (fs_percent <= m_fs_warn_percent) {
-                item->setIcon(3, KIcon("exclamation"));
+                item->setIcon(3, KIcon("dialog-warning"));
                 item->setToolTip(3, i18n("This filesystem is running out of space"));
             } else {
                 item->setIcon(3, KIcon());
