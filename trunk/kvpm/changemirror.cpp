@@ -143,6 +143,8 @@ QWidget *ChangeMirrorDialog::buildGeneralTab(const bool isRaidMirror, const bool
     const bool is_mirror = (isRaidMirror || isLvmMirror);
 
     m_type_combo = new KComboBox();
+    m_type_combo->addItem(i18n("Standard LVM"));
+    m_type_combo->addItem(i18n("RAID 1"));
     m_add_mirrors_spin = new KIntSpinBox(1, 10, 1, 1, this);
 
     general_layout->addStretch();
@@ -177,6 +179,7 @@ QWidget *ChangeMirrorDialog::buildGeneralTab(const bool isRaidMirror, const bool
     add_mirror_box_layout->addStretch();
     
     if (m_change_log) {
+        m_type_combo->setCurrentIndex(0);
         m_type_combo->hide();
         type_label->hide();
         add_mirror_box->hide();
@@ -187,8 +190,6 @@ QWidget *ChangeMirrorDialog::buildGeneralTab(const bool isRaidMirror, const bool
             type_label->hide();
         } else {
             add_mirror_box->setTitle(i18n("Convert to mirror"));
-            m_type_combo->addItem(i18n("Standard LVM"));
-            m_type_combo->addItem(i18n("RAID 1"));
 
             if (LvmConfig::getMirrorSegtypeDefault() == QString("mirror"))
                 m_type_combo->setCurrentIndex(0);
@@ -225,8 +226,9 @@ QWidget *ChangeMirrorDialog::buildGeneralTab(const bool isRaidMirror, const bool
                 m_disk_log_button->setChecked(true);
             else
                 m_mirrored_log_button->setChecked(true);
-        } else 
+        } else {
             m_disk_log_button->setChecked(true);
+        }
     } else {
         m_log_box->hide();
     }
