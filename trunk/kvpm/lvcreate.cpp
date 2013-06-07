@@ -348,7 +348,7 @@ QWidget* LVCreateDialog::createMirrorWidget(int pvcount)
 
     m_log_combo = new KComboBox;
     m_log_combo->addItem(i18n("Mirrored disk based log"));
-    m_log_combo->addItem(i18n("Disk based log"));
+    m_log_combo->addItem(i18n("Single disk based log"));
     m_log_combo->addItem(i18n("Memory based log"));
 
     QHBoxLayout *const log_layout = new QHBoxLayout();

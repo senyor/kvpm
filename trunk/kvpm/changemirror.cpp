@@ -207,7 +207,7 @@ QWidget *ChangeMirrorDialog::buildGeneralTab(const bool isRaidMirror, const bool
     m_log_box = new QGroupBox(i18n("Mirror logging"));
     QVBoxLayout *const log_box_layout = new QVBoxLayout;
     m_core_log_button = new QRadioButton(i18n("Memory based log"));
-    m_disk_log_button = new QRadioButton(i18n("Disk based log"));
+    m_disk_log_button = new QRadioButton(i18n("Single disk based log"));
     m_mirrored_log_button = new QRadioButton(i18n("Mirrored disk based log"));
     
     log_box_layout->addWidget(m_mirrored_log_button);
@@ -236,6 +236,7 @@ QWidget *ChangeMirrorDialog::buildGeneralTab(const bool isRaidMirror, const bool
     if (m_change_log && (m_lv->getLogCount() == 2)) {
         m_log_widget = buildLogWidget();
         center_layout->addWidget(m_log_widget);
+        enableLogWidget();
 
         connect(m_disk_log_button, SIGNAL(toggled(bool)),
                 this, SLOT(enableLogWidget()));
@@ -257,14 +258,24 @@ QWidget *ChangeMirrorDialog::buildGeneralTab(const bool isRaidMirror, const bool
 
 QWidget *ChangeMirrorDialog::buildLogWidget()
 {
-    QGroupBox *const log = new QGroupBox("Log to remove");
-    QVBoxLayout *const layout = new QVBoxLayout();
+    QWidget *const no_change = new QWidget();
+    QVBoxLayout *const no_change_layout = new QVBoxLayout();
+    QLabel *const no_change_label = new QLabel(i18n("No change"));
+    no_change_label->setAlignment(Qt::AlignCenter);
+    no_change_layout->addWidget(no_change_label);
+    no_change->setLayout(no_change_layout);
+
+    QWidget *const no_log = new QWidget();
+    QVBoxLayout *const no_log_layout = new QVBoxLayout();
+    QLabel *const no_log_label = new QLabel(i18n("Remove both disk logs"));
+    no_log_label->setAlignment(Qt::AlignCenter);
+    no_log_layout->addWidget(no_log_label);
+    no_log->setLayout(no_log_layout);
 
     QStringList names;
-    LogVolList const logs = m_lv->getAllChildrenFlat();
-    for (int x = logs.size() - 1; x >= 0; x--) {
-        if (logs[x]->isLvmMirrorLog() && !logs[x]->isMirror())
-            names.append(logs[x]->getPvNamesAll());
+    for (auto log : m_lv->getAllChildrenFlat()) {
+        if (log->isLvmMirrorLog() && !log->isMirror())
+            names << log->getPvNamesAll();
     }
 
     if (names.size() > 0)
@@ -279,12 +290,23 @@ QWidget *ChangeMirrorDialog::buildLogWidget()
 
     m_log_one->setChecked(true);
 
-    layout->addWidget(m_log_one);
-    layout->addWidget(m_log_two);
-    log->setEnabled(false);
-    log->setLayout(layout);
+    QWidget *const one_log = new QWidget();
+    QVBoxLayout *const one_log_layout = new QVBoxLayout();
+    one_log_layout->addWidget(m_log_one);
+    one_log_layout->addWidget(m_log_two);
+    one_log->setLayout(one_log_layout);
 
-    return log;
+    m_log_stack = new QStackedWidget();
+    m_log_stack->addWidget(no_change);
+    m_log_stack->addWidget(one_log);
+    m_log_stack->addWidget(no_log);
+
+    QVBoxLayout *const layout = new QVBoxLayout();
+    QGroupBox *const log_box = new QGroupBox("Mirror log to remove");
+    layout->addWidget(m_log_stack);
+    log_box->setLayout(layout);
+
+    return log_box;
 }
 
 QWidget *ChangeMirrorDialog::buildPhysicalTab(const bool isRaidMirror)
@@ -539,8 +561,8 @@ QStringList ChangeMirrorDialog::arguments()
 
     args << "--background" << m_lv->getFullName();
 
-    if (m_log_widget != NULL) {
-        if (m_log_widget->isEnabled()) {
+    if (m_log_widget) {
+        if (m_disk_log_button->isChecked()) {
             if (m_log_one->isChecked())
                 args << m_log_one->getUnmungedText();
             else
@@ -699,12 +721,15 @@ void ChangeMirrorDialog::enableTypeOptions(int index)
 {
     if (index == 0) {
         m_log_box->setEnabled(true);
-        m_stripe_box->setEnabled(true);
+        if (m_stripe_box)  // The physical tab is not always defined
+            m_stripe_box->setEnabled(true);
     } else {
         m_log_box->setEnabled(false);
         m_disk_log_button->setChecked(true);
-        m_stripe_spin->setValue(1);
-        m_stripe_box->setEnabled(false);
+        if (m_stripe_spin)
+            m_stripe_spin->setValue(1);
+        if (m_stripe_box)
+            m_stripe_box->setEnabled(false);
     }
 }
 
@@ -750,10 +775,12 @@ bool ChangeMirrorDialog::validateStripeSpin()
 
 void ChangeMirrorDialog::enableLogWidget()
 {
-    if (m_disk_log_button->isChecked())
-        m_log_widget->setEnabled(true);
+    if(m_mirrored_log_button->isChecked())
+        m_log_stack->setCurrentIndex(0);
+    else if (m_disk_log_button->isChecked())
+        m_log_stack->setCurrentIndex(1);
     else
-        m_log_widget->setEnabled(false);
+        m_log_stack->setCurrentIndex(2);
 }
 
 bool ChangeMirrorDialog::bailout()

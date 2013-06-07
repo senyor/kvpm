@@ -47,6 +47,7 @@ class ChangeMirrorDialog : public KDialog
     KIntSpinBox *m_add_mirrors_spin = nullptr;
     KIntSpinBox *m_stripe_spin = nullptr;
     QStackedWidget *m_error_stack = nullptr;
+    QStackedWidget *m_log_stack = nullptr;
     PvGroupBox *m_pv_box = nullptr;
     QGroupBox  *m_stripe_box = nullptr;
     QGroupBox  *m_log_box = nullptr;
