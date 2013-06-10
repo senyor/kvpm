@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -19,8 +19,8 @@
 
 #include <QStringList>
 
-class QCheckBox;
 class QGroupBox;
+class QRadioButton;
 class QWidget;
 
 #include "logvol.h"
@@ -33,11 +33,11 @@ class RepairMissingDialog : public KDialog
 {
     Q_OBJECT
 
-    PvGroupBox *m_pv_box;
-    QCheckBox  *m_replace_box;
+    PvGroupBox *m_pv_box = nullptr;
+    QRadioButton  *m_replace_radio = nullptr;
 
-    bool m_bailout;
-    LogVol *m_lv;         // The volume we are repairing
+    bool m_bailout = false;
+    LogVol *m_lv = nullptr;         // The volume we are repairing
 
     QStringList arguments();
     QList<PhysVol *> getUsablePvs();
@@ -47,7 +47,7 @@ class RepairMissingDialog : public KDialog
     int getImageNumber(QString name);
 
 public:
-    explicit RepairMissingDialog(LogVol *const volume, QWidget *parent = NULL);
+    explicit RepairMissingDialog(LogVol *const volume, QWidget *parent = nullptr);
     bool bailout();  // if true, don't bother executing this dialog
 
 private slots:
