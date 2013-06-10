@@ -20,6 +20,7 @@
 #include "volgroup.h"
 
 #include <KApplication>
+#include <KIcon>
 #include <KLocale>
 #include <KMessageBox>
 
@@ -31,28 +32,30 @@
 
 
 
-RepairMissingDialog::RepairMissingDialog(LogVol *const volume, QWidget *parent):
-    KDialog(parent),
-    m_lv(volume)
+RepairMissingDialog::RepairMissingDialog(LogVol *const volume, QWidget *parent)
+    : KDialog(parent),
+      m_lv(volume)
 {
     if (m_lv->getParentMirror() != NULL)
         m_lv = m_lv->getParentMirror();
+
     LogVolList children;
     const QString lv_name = m_lv->getName();
     const bool is_raid = m_lv->isRaid();
     const bool is_lvm = m_lv->isLvmMirror();
-    m_bailout = false;
 
     QList<PhysVol *> const pvs = getUsablePvs();
 
-    if (!m_lv->isPartial()){
+    if (!m_lv->isPartial()) {
         m_bailout = true;
-        KMessageBox::sorry(NULL, i18n("This volume has no missing physical volumes"));
-    } else if (pvs.isEmpty() && is_raid && !m_lv->isMirror()){
+        KMessageBox::sorry(nullptr, i18n("This volume has no missing physical volumes"));
+    } else if (pvs.isEmpty() && is_raid && !m_lv->isMirror()) {
         m_bailout = true;
-        KMessageBox::sorry(NULL, i18n("No suitable physical volumes found"));
+        KMessageBox::sorry(nullptr, i18n("No suitable physical volumes found"));
     } else {
+        QHBoxLayout *const top_layout = new QHBoxLayout();
         QVBoxLayout *const layout = new QVBoxLayout();
+        top_layout->addLayout(layout);
         QWidget *const main_widget = new QWidget();        
         QLabel  *const lv_name_label = new QLabel();
         
@@ -65,18 +68,34 @@ RepairMissingDialog::RepairMissingDialog(LogVol *const volume, QWidget *parent):
         }
 
         lv_name_label->setAlignment(Qt::AlignCenter);
- 
         layout->addWidget(lv_name_label);
         layout->addSpacing(5);
 
-        m_replace_box = new QCheckBox(i18n("Replace missing physical volumes"));
+        m_replace_radio = new QRadioButton(i18n("Replace missing physical volumes"));
+        QRadioButton *const remove_radio = new QRadioButton(i18n("Remove missing physical volumes"));
+        QVBoxLayout *const radio_layout = new QVBoxLayout();
+        QWidget *const radio_widget = new QWidget();
+        radio_layout->addWidget(m_replace_radio);
+        radio_layout->addWidget(remove_radio);
+        radio_widget->setLayout(radio_layout);
+        layout->addWidget(radio_widget);
+
         QWidget *const physical = buildPhysicalWidget(pvs);
-        if (pvs.isEmpty()) {
-            KMessageBox::information(NULL, i18n("Replacement will be disabled: No suitable physical volumes found"));
-            lv_name_label->setText(i18n("<b>Remove missing physcial volumes from mirror: %1?</b>", m_lv->getName()));
-            m_replace_box->setChecked(false);
-            m_replace_box->setEnabled(false);
-            m_replace_box->hide();
+        if (pvs.isEmpty()) { 
+
+            QLabel *const icon_label = new QLabel();
+            icon_label->setPixmap(KIcon("dialog-warning").pixmap(64, 64));
+            top_layout->insertWidget(0, icon_label);
+            lv_name_label->setText(QString("<html><p> %1 <br /> %2 <b> %3 </b>?</p></html>")
+                                   .arg(i18n("No suitable replacement physical volumes found."))
+                                   .arg(i18n("Remove missing physical volumes from:"))
+                                   .arg(m_lv->getName()));
+
+            m_replace_radio->setChecked(false);
+            m_replace_radio->setEnabled(false);
+            remove_radio->setChecked(true);
+            remove_radio->setEnabled(false);
+            radio_widget->hide();
             physical->hide();
 
             setButtons(KDialog::Yes | KDialog::No);
@@ -85,12 +104,14 @@ RepairMissingDialog::RepairMissingDialog(LogVol *const volume, QWidget *parent):
             connect(this, SIGNAL(yesClicked()),
                     this, SLOT(commitChanges()));
         } else {
-            m_replace_box->setChecked(true);
+            m_replace_radio->setChecked(true);
 
-            if (is_raid && !m_lv->isMirror())
-                m_replace_box->setEnabled(false);
+            if (is_raid && !m_lv->isMirror()) {
+                m_replace_radio->setEnabled(false);
+                remove_radio->setEnabled(false);
+            }
 
-            connect(m_replace_box, SIGNAL(toggled(bool)),
+            connect(m_replace_radio, SIGNAL(toggled(bool)),
                     this, SLOT(setReplace(bool)));
 
             connect(this, SIGNAL(okClicked()),
@@ -98,11 +119,10 @@ RepairMissingDialog::RepairMissingDialog(LogVol *const volume, QWidget *parent):
 
             resetOkButton();
         }
-        layout->addWidget(m_replace_box);
 
         layout->addSpacing(5);
         layout->addWidget(physical);
-        main_widget->setLayout(layout);
+        main_widget->setLayout(top_layout);
         setMainWidget(main_widget);
     }
 }
@@ -169,10 +189,10 @@ QStringList RepairMissingDialog::arguments()
 
     args << "lvconvert" << "--repair" << "-y";  // -y: answer all prompts with "yes"
 
-    if (m_pv_box->getPolicy() <= ANYWHERE) // don't pass INHERITED_*
+    if (m_pv_box->getPolicy() <= ANYWHERE)    // don't pass INHERITED_*
         args << "--alloc" << policyToString(m_pv_box->getEffectivePolicy());
 
-    if (!m_replace_box->isChecked())
+    if (!m_replace_radio->isChecked())
         args << "-f" << m_lv->getFullName();  // no replace
     else      
         args << m_lv->getFullName() << m_pv_box->getNames();
@@ -196,7 +216,7 @@ bool RepairMissingDialog::bailout()
 QWidget *RepairMissingDialog::buildPhysicalWidget(QList<PhysVol *> const pvs)
 {
     QWidget *const physical = new QWidget;
-    QVBoxLayout *const physical_layout = new QVBoxLayout();
+    QVBoxLayout *const layout = new QVBoxLayout();
 
     QList<QSharedPointer<PvSpace>> pv_space_list;
 
@@ -205,17 +225,17 @@ QWidget *RepairMissingDialog::buildPhysicalWidget(QList<PhysVol *> const pvs)
     }
 
     m_pv_box = new PvGroupBox(pv_space_list, m_lv->getPolicy(), m_lv->getVg()->getPolicy());
-    physical_layout->addWidget(m_pv_box);
-    physical_layout->addStretch();
+    layout->addWidget(m_pv_box);
+    layout->addStretch();
 
     QHBoxLayout *const h_layout = new QHBoxLayout();
     QVBoxLayout *const lower_layout = new QVBoxLayout();
-    physical_layout->addLayout(h_layout);
+    layout->addLayout(h_layout);
     h_layout->addStretch();
     h_layout->addLayout(lower_layout);
     h_layout->addStretch();
 
-    physical->setLayout(physical_layout);
+    physical->setLayout(layout);
 
     connect(m_pv_box, SIGNAL(stateChanged()),
             this, SLOT(resetOkButton()));
@@ -283,7 +303,7 @@ LogVolList RepairMissingDialog::getPartialLvs()
 
 void RepairMissingDialog::resetOkButton()
 {
-    if (!m_replace_box->isChecked()) {
+    if (!m_replace_radio->isChecked()) {
         enableButtonOk(true);
         return;
     }
