@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2009, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2009, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -33,12 +33,14 @@ bool fs_can_reduce(const QString fs)
 
     if (fs == "ext2" || fs == "ext3" || fs == "ext4") {
         if (ExecutableFinder::getPath(executable).isEmpty()) {
-            KMessageBox::error(NULL, i18n("Executable: '%1' not found, this filesystem cannot be reduced", executable));
+            KMessageBox::error(nullptr, i18n("Executable: '%1' not found, this filesystem cannot be reduced", executable));
             return false;
-        } else
+        } else {
             return true;
-    } else
+        }
+    } else {
         return false;
+    }
 }
 
 
@@ -48,38 +50,32 @@ bool fs_can_reduce(const QString fs)
 
 long long fs_reduce(const QString path, const long long new_size, const QString fs)
 {
-
-    QStringList arguments,
-                output,
-                success_stringlist,
-                nothing_stringlist,
-                nospace_stringlist;
-
-    QString size_string;
-
     if (!fs_can_reduce(fs))
         return -1;
 
-    if (! fsck(path))
+    if (!fsck(path))
         return 0;
 
     const long block_size = get_fs_block_size(path);
 
     if (block_size <= 0) {
-        KMessageBox::error(0, i18n("Shrink failed: could not determine filesystem block size"));
+        KMessageBox::error(nullptr, i18n("Shrink failed: could not determine filesystem block size"));
         return 0 ;
     }
 
-    arguments << "resize2fs"
-              << path
-              << QString("%1K").arg(new_size / 1024);
+    QStringList args = QStringList() << "resize2fs"
+                                     << path
+                                     << QString("%1K").arg(new_size / 1024);
+    ProcessProgress fs_shrink(args);
+    QStringList output = fs_shrink.programOutputAll();
 
-    ProcessProgress fs_shrink(arguments);
-    output = fs_shrink.programOutputAll();
+    QStringList success_stringlist = output.filter("is now");      // it worked
+    QStringList nothing_stringlist = output.filter("is already");  // already a reduced fs, nothing to do!
+    QStringList nospace_stringlist;
+    nospace_stringlist << output.filter("space left");    // fs won't shrink that much -- old message
+    nospace_stringlist << output.filter("than minimum");  // fs won't shrink that much -- new message
 
-    success_stringlist = output.filter("is now");      // it worked
-    nothing_stringlist = output.filter("is already");  // already a reduced fs, nothing to do!
-    nospace_stringlist = output.filter("space left");
+    QString size_string;
 
     if (success_stringlist.size() > 0) { // Try to shrink the desired amount
 
@@ -98,15 +94,16 @@ long long fs_reduce(const QString path, const long long new_size, const QString 
         return size_string.toLongLong() * block_size;
 
     } else if (nospace_stringlist.size() > 0) { // Couldn't shrink that much but try again with -M
+        KMessageBox::information(nullptr, i18n("Now trying to shrink the filesystem to its minimum size"));
 
-        arguments.clear();
+        args.clear();
         success_stringlist.clear();
 
-        arguments << "resize2fs"
+        args << "resize2fs"
                   << "-M"
                   << path;
 
-        ProcessProgress fs_shrink(arguments);
+        ProcessProgress fs_shrink(args);
         output = fs_shrink.programOutput();
         success_stringlist = output.filter("is now");
 
@@ -130,37 +127,27 @@ long long fs_reduce(const QString path, const long long new_size, const QString 
 
 long long get_min_fs_size(const QString path, const QString fs)
 {
-
-    QStringList arguments,
-                output;
-
-    QString size_string;
-
+    long long size = 0;
     if (fs_can_reduce(fs)) {
-        arguments << "resize2fs" << "-P" << path;
 
-        long block_size = get_fs_block_size(path);
+        const long block_size = get_fs_block_size(path);
         if (block_size) {                        // if blocksize failed skip this part
-
-            ProcessProgress fs_scan(arguments);
-            output = fs_scan.programOutput();
-
+            
+            const QStringList args = QStringList() << "resize2fs" << "-P" << path;
+            ProcessProgress fs_scan(args);
+            const QStringList output = fs_scan.programOutput();
+            
             if (output.size() > 0 && fs_scan.exitCode() == 0) {
-
-                size_string = output[0];
-
+                
+                QString size_string = output[0];
                 if (size_string.contains("Estimated", Qt::CaseInsensitive)) {
                     size_string = size_string.remove(0, size_string.indexOf(":") + 1);
                     size_string = size_string.simplified();
-                    return size_string.toLongLong() * block_size;
-                } else
-                    return 0;
+                    size = size_string.toLongLong() * block_size;
+                }
             }
         }
-
-        return 0;
     }
 
-    return 0;
+    return size;
 }
-
