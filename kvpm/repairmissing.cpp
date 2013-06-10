@@ -86,11 +86,13 @@ RepairMissingDialog::RepairMissingDialog(LogVol *const volume, QWidget *parent)
             QLabel *const icon_label = new QLabel();
             icon_label->setPixmap(KIcon("dialog-warning").pixmap(64, 64));
             top_layout->insertWidget(0, icon_label);
-            lv_name_label->setText(QString("<html><p> %1 <br /> %2 <b> %3 </b>?</p></html>")
+            QLabel *const warning_label = new QLabel();
+            warning_label->setText(QString("<html><p> %1 <br /> %2 <b> %3</b>?</p></html>")
                                    .arg(i18n("No suitable replacement physical volumes found."))
                                    .arg(i18n("Remove missing physical volumes from:"))
                                    .arg(m_lv->getName()));
-
+            layout->addSpacing(10);
+            layout->addWidget(warning_label);
             m_replace_radio->setChecked(false);
             m_replace_radio->setEnabled(false);
             remove_radio->setChecked(true);
