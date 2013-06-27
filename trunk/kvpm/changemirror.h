@@ -87,10 +87,10 @@ class ChangeMirrorDialog : public KDialog
     void setLogRadioButtons();
     int getNewLogCount();
     long long getNewLogSize();
-    bool getAvailableByteList(QList<long long> &byte_list, int &unhandledLogs);
+    bool getAvailableByteList(QList<long long> &byte_list, int &unhandledLogs, const int stripes);
 
 public:
-    explicit ChangeMirrorDialog(LogVol *const mirrorVolume, bool changeLog, QWidget *parent = NULL);
+    explicit ChangeMirrorDialog(LogVol *const mirrorVolume, const bool changeLog, QWidget *parent = nullptr);
     QStringList arguments();
     bool bailout();
 

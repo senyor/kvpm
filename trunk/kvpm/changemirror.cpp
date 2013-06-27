@@ -43,7 +43,7 @@
 
 
 
-ChangeMirrorDialog::ChangeMirrorDialog(LogVol *const mirrorVolume, bool changeLog, QWidget *parent):
+ChangeMirrorDialog::ChangeMirrorDialog(LogVol *const mirrorVolume, const bool changeLog, QWidget *parent) :
     KDialog(parent),
     m_change_log(changeLog),
     m_lv(mirrorVolume)
@@ -382,8 +382,8 @@ QWidget *ChangeMirrorDialog::buildPhysicalTab(const bool isRaidMirror)
     }
 
     lower_layout->addStretch();
-
     physical->setLayout(physical_layout);
+
     return physical;
 }
 
@@ -659,8 +659,8 @@ void ChangeMirrorDialog::resetOkButton()
     }
 
     QList <long long> available_pv_bytes;
-    int logs;
-    if (!getAvailableByteList(available_pv_bytes, logs)) {
+    int logs = 0;
+    if (!getAvailableByteList(available_pv_bytes, logs, total_stripes)) {
         enableButtonOk(false);
         return;
     }
@@ -793,54 +793,67 @@ bool ChangeMirrorDialog::bailout()
    usable for a new mirror leg. If a pv is selected by the user 
    that cannot be used for a leg, it tries to put a log there.
    The unhandledLogs parameter returns the number of logs that
-   will need to go with the legs.
+   will need to go with the legs. The stripes parameter is the 
+   stripes per leg multiplied by the number of new legs.
    Returns true on success. */ 
 
-bool ChangeMirrorDialog::getAvailableByteList(QList<long long> &byte_list, int &unhandledLogs)
+bool ChangeMirrorDialog::getAvailableByteList(QList<long long> &byte_list, int &unhandledLogs, const int stripes)
 {
     const AllocationPolicy policy = m_pv_box->getEffectivePolicy();
     const bool separate_logs = LvmConfig::getMirrorLogsRequireSeparatePvs();
-    int total_stripes = 0;   //  stripes per mirror * added mirrors
-    const int new_log_count = getNewLogCount();
+    unhandledLogs = 0;
 
-    if (policy == CONTIGUOUS) {
-        byte_list = m_pv_box->getRemainingSpaceList();
-        qSort(byte_list);
+    int logs_added = getNewLogCount() - m_lv->getLogCount();
+    if (logs_added < 0)
+        logs_added = 0; 
 
-        int logs_added = new_log_count - m_lv->getLogCount();
-        if (logs_added < 0)
-            logs_added = 0; 
+    if ((policy == CONTIGUOUS) || separate_logs) {  // contiguous allocation also implies separate logs
 
-        while (byte_list.size() > total_stripes + logs_added)  
-            byte_list.removeFirst();
-    } else if (separate_logs) {
-        byte_list = m_pv_box->getRemainingSpaceList();
-        qSort(byte_list);
-
-        int logs_added = new_log_count - m_lv->getLogCount();
-        if (logs_added < 0)
-            logs_added = 0; 
-
-        for (int x = 0; x < logs_added && byte_list.size(); ++x)
-            byte_list.removeFirst();
-    } else {
-        int logs_added = new_log_count - m_lv->getLogCount();
-        if (logs_added < 0)
-            logs_added = 0; 
- 
         for (auto pv_name : m_pv_box->getNames()) {
-            if (pvHasImage(pv_name) && !pvHasLog(pv_name)) {
-                --logs_added;
-            } else if (!pvHasImage(pv_name)) { 
-                
+            if (!pvHasImage(pv_name) && !pvHasLog(pv_name)) { 
                 for (auto available_space : m_space_list) {
-                    
                     if (available_space->pv->getName() == pv_name) {
-                        byte_list << available_space->normal;
+                        if (policy == CONTIGUOUS)
+                            byte_list << available_space->contiguous;
+                        else
+                            byte_list << available_space->normal;
                     }
                 }
             }
         }
+        
+        qSort(byte_list);
+        while (!byte_list.isEmpty() && byte_list[0] <= 0)
+            byte_list.removeAt(0);
+
+        while (logs_added > 0 && byte_list.size()) {
+            byte_list.removeFirst();
+            --logs_added;
+        }
+
+        if (logs_added > 0)  // Too many logs for the selected pvs, so just bail out
+            return false;
+
+        if (policy == CONTIGUOUS) {
+            while (byte_list.size() > stripes)  
+                byte_list.removeFirst();
+        }
+    } else {
+        
+        for (auto pv_name : m_pv_box->getNames()) {
+            if (pvHasImage(pv_name) && !pvHasLog(pv_name)) {
+                --logs_added;
+            } else if (!pvHasImage(pv_name)) { 
+                for (auto available_space : m_space_list) {
+                    if (available_space->pv->getName() == pv_name)
+                        byte_list << available_space->normal;
+                }
+            }
+        }
+        
+        qSort(byte_list);
+        while (!byte_list.isEmpty() && byte_list[0] <= 0)
+            byte_list.removeAt(0);
 
         if (logs_added <= 0)
             unhandledLogs = 0;
@@ -849,12 +862,7 @@ bool ChangeMirrorDialog::getAvailableByteList(QList<long long> &byte_list, int &
         
         if (unhandledLogs > byte_list.size())
             return false;
-    
-        qSort(byte_list);
     }
-    
-    while (!byte_list.isEmpty() && byte_list[0] <= 0)
-        byte_list.removeAt(0);
     
     return true;
 }
