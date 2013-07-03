@@ -138,7 +138,9 @@ public:
     LogVolList getChildren() const { return m_lv_children; } // just the children -- not grandchildren etc.
     LogVolList getAllChildrenFlat();  // All children, grandchildren etc. un-nested.
     LogVolList getSnapshots();        // This will work the same for snapcontainers or the real lv
-    LogVolList getThinVolumes();      // Volumes under a thin pool
+    LogVolList getThinVolumes();      // Thin logical volumes under a thin pool
+    LogVolList getThinDataVolumes();      // Data volumes supporting a thin pool
+    LogVolList getThinMetadataVolumes();  // Metadata volumes for a thin pool
     LogVolList takeChildren();        // removes the children from the logical volume
     LogVolPointer getParent() const { return m_lv_parent; }   // NULL if this is a "top level" lv
     LogVolPointer getParentMirror();             // NULL if this is not an lvm type mirror compnent

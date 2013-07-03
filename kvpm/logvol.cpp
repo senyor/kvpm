@@ -845,18 +845,44 @@ LogVolList LogVol::getSnapshots()
 
 LogVolList LogVol::getThinVolumes()  // not including snap containers
 {
-    LogVolList lvs;
+    LogVolList vols;
 
     if (m_thin_pool) {
-        lvs = getAllChildrenFlat();
-
-        for (int x = lvs.size() - 1; x >= 0; x--) {
-            if (!lvs[x]->isThinVolume() || lvs[x]->isSnapContainer())
-                lvs.removeAt(x);
+        for (auto lv : getAllChildrenFlat()) {
+            if (lv->isThinVolume() && !lv->isSnapContainer())
+                vols << lv;
         }
     }
 
-    return lvs;
+    return vols;
+}
+
+LogVolList LogVol::getThinDataVolumes()
+{
+    LogVolList data;
+
+    if (m_thin_pool) {
+        for (auto lv : getAllChildrenFlat()) {
+            if (lv->isThinPoolData())
+                data << lv;
+        }
+    }
+
+    return data;
+}
+
+LogVolList LogVol::getThinMetadataVolumes()
+{
+    LogVolList meta;
+
+    if (m_thin_pool) {
+        for (auto lv : getAllChildrenFlat()) {
+            if (lv->isThinMetadata())
+                meta << lv;
+        }
+    }
+
+    return meta;
 }
 
 // Returns the lvm mirror than owns this mirror leg or mirror log. Returns
