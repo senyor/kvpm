@@ -338,18 +338,22 @@ void PvGroupBox::setExtentSize(long long extentSize)
     calculateSpace();
 }
 
-void PvGroupBox::disableOrigin(PhysVol *originVolume)
+
+// Disable checkboxes that cant be used under the current settings
+// such as the allocation policy that is selected.
+
+void PvGroupBox::disableChecks(QStringList pvs)
 {
-    if (originVolume && m_pv_checks.size()) {
+    for (int x = 0; x < m_pvs.size(); ++x)
+        m_pv_checks[x]->setEnabled(true);
 
-        const QString name = originVolume->getName();
-
-        for (int x = 0; x < m_pvs.size(); ++x) {
-            if (m_pvs[x]->getName() == name) {
-                m_pv_checks[x]->setChecked(false);
-                m_pv_checks[x]->setEnabled(false);
-            } else {
-                m_pv_checks[x]->setEnabled(true);
+    if (!pvs.isEmpty() && !m_pv_checks.isEmpty()) {
+        for (auto disable_name : pvs) {
+            for (int x = 0; x < m_pvs.size(); ++x) {
+                if (m_pvs[x]->getName() == disable_name) {
+                    m_pv_checks[x]->setChecked(false);
+                    m_pv_checks[x]->setEnabled(false);
+                }
             }
         }
     }

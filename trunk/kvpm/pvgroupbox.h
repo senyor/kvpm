@@ -79,7 +79,7 @@ public:
     long long getRemainingSpace();   // total unused space on selected pvs
     QList<long long> getRemainingSpaceList();  // ditto
     void setExtentSize(long long extentSize);
-    void disableOrigin(PhysVol *originVolume); // disable origin to prevent move from and to same pv
+    void disableChecks(QStringList pvs);
     AllocationPolicy getPolicy();
     AllocationPolicy getEffectivePolicy();  // convert inherited policy to the vg default policy
 
