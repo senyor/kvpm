@@ -885,6 +885,34 @@ LogVolList LogVol::getThinMetadataVolumes()
     return meta;
 }
 
+LogVolList LogVol::getRaidImageVolumes()
+{
+    LogVolList images;
+
+    if (m_raid) {
+        for (auto lv : getAllChildrenFlat()) {
+            if (lv->isRaidImage())
+                images << lv;
+        }
+    }
+
+    return images;
+}
+
+LogVolList LogVol::getRaidMetadataVolumes()
+{
+    LogVolList meta;
+
+    if (m_raid) {
+        for (auto lv : getAllChildrenFlat()) {
+            if (lv->isRaidMetadata())
+                meta << lv;
+        }
+    }
+
+    return meta;
+}
+
 // Returns the lvm mirror than owns this mirror leg or mirror log. Returns
 // NULL if this is not part of an lvm mirror volume.
 LogVolPointer LogVol::getParentMirror()
@@ -971,21 +999,29 @@ QStringList LogVol::getPvNamesAllFlat()
     }
 }
 
-long long LogVol::getSpaceUsedOnPv(const QString physicalVolume)
+long long LogVol::getSpaceUsedOnPv(const QString pvname)
 {
     long long space_used = 0;
-    QListIterator<Segment *> seg_itr(m_segments);
 
-    while (seg_itr.hasNext()) {
+    if (m_thin_pool) {
+        for (auto data : getThinDataVolumes())
+            space_used += data->getSpaceUsedOnPv(pvname);
 
-        Segment *const seg = seg_itr.next();
-        QListIterator<QString> path_itr(seg->device_path);
+        for (auto meta : getThinMetadataVolumes())
+            space_used += meta->getSpaceUsedOnPv(pvname);
+    } else if (m_raid) {
+        for (auto image : getRaidImageVolumes())
+            space_used += image->getSpaceUsedOnPv(pvname);
 
-        while (path_itr.hasNext()) {
-            if (physicalVolume == path_itr.next())
-                space_used += (seg->size) / (seg->stripes) ;
+        for (auto meta : getRaidMetadataVolumes())
+            space_used += meta->getSpaceUsedOnPv(pvname);
+    } else {
+        for (auto seg : m_segments) {
+            for (auto path : seg->device_path) {
+                if (path == pvname)
+                    space_used += (seg->size) / (seg->stripes) ;
+            }
         }
-
     }
 
     return space_used;
@@ -994,29 +1030,23 @@ long long LogVol::getSpaceUsedOnPv(const QString physicalVolume)
 long long LogVol::getMissingSpace()
 {
     LogVolList const children = getChildren();
-    long long missing;
+    long long missing = 0;
 
     if (isPartial()) {
         if (children.isEmpty()) {
-
             QStringList const pvs = getPvNamesAllFlat();
             missing = getTotalSize();
             
             for (int x = pvs.size() - 1; x >= 0; x--) {
-                
                 PhysVol *const pv = m_vg->getPvByName(pvs[x]);
                 
-                if (pv != NULL) {
-                    if (!pv->isMissing()) {
-                        missing -= getSpaceUsedOnPv(pvs[x]);
-                    }
-                }
+                if (pv != nullptr && !pv->isMissing())
+                    missing -= getSpaceUsedOnPv(pvs[x]);
             }
         } else {
             missing = 0;
-            for (int x = children.size() - 1; x >= 0; x--) {
-                missing += children[x]->getMissingSpace();
-            }
+            for (auto child : children)
+                missing += child->getMissingSpace();
         }
     } else {
         missing = 0;
@@ -1045,9 +1075,9 @@ int LogVol::getRaidType()
     if (m_raid && reg.indexIn(m_type) >= 0) {
         matches = reg.capturedTexts();
         type = matches[0].toInt();
-    }
-    else
+    } else {
         type = -1;
+    }
 
     return type;
 }
@@ -1067,9 +1097,9 @@ double LogVol::getSnapPercent()
             return m_snap_percent;
         else
             return -1;
-    }
-    else
+    } else {
         return 0.0;
+    }
 }
 
 double LogVol::getCopyPercent()

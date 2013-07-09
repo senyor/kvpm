@@ -141,6 +141,8 @@ public:
     LogVolList getThinVolumes();      // Thin logical volumes under a thin pool
     LogVolList getThinDataVolumes();      // Data volumes supporting a thin pool
     LogVolList getThinMetadataVolumes();  // Metadata volumes for a thin pool
+    LogVolList getRaidImageVolumes();     // Image volumes supporting a RAID volume
+    LogVolList getRaidMetadataVolumes();  // Metadata for a RAID volume
     LogVolList takeChildren();        // removes the children from the logical volume
     LogVolPointer getParent() const { return m_lv_parent; }   // NULL if this is a "top level" lv
     LogVolPointer getParentMirror();             // NULL if this is not an lvm type mirror compnent
@@ -173,7 +175,7 @@ public:
     QString getFstabMountPoint() const { return m_fstab_mount_point; }
     QStringList getTags() const { return m_tags; }
     QString getDiscards(int segment);
-    long long getSpaceUsedOnPv(const QString physicalVolume);
+    long long getSpaceUsedOnPv(const QString pvname);
     long long getMissingSpace();  // space used on pvs that are missing
     long long getChunkSize(int segment);
     long long getExtents() const { return m_extents; }
