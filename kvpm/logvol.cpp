@@ -964,10 +964,11 @@ QStringList LogVol::getPvNamesAll()
 
 QStringList LogVol::getPvNamesAllFlat()
 {
+    QStringList pv_names;
+
     if (m_snap_container || m_lvmmirror || m_raid) {
 
         QListIterator<LogVolPointer> child_itr(getChildren());
-        QStringList pv_names;
 
         while (child_itr.hasNext()) {
             pv_names << child_itr.next()->getPvNamesAllFlat();
@@ -978,14 +979,8 @@ QStringList LogVol::getPvNamesAllFlat()
 
         return pv_names;
     } else if (m_thin_pool) {
-
-        QListIterator<LogVolPointer> child_itr(getChildren());
-        QStringList pv_names;
-
-        LogVol *child;
-        while (child_itr.hasNext()) {
-            child = child_itr.next();
-            if (child->isThinPoolData() || child->isMetadata())
+        for (auto child : getChildren()) {
+            if (child->isThinPoolData() || child->isThinMetadata())
                 pv_names << child->getPvNamesAllFlat();
         }
 
@@ -993,7 +988,6 @@ QStringList LogVol::getPvNamesAllFlat()
         pv_names.removeDuplicates();
 
         return pv_names;
-
     } else {
         return getPvNamesAll();
     }
