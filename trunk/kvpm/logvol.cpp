@@ -1164,3 +1164,22 @@ QStringList LogVol::getPvNames(const int segment)
     return m_segments[segment]->device_path;
 }
 
+// Returns the raid metadata volume associated with a raid image volume
+LogVolPointer LogVol::getRaidImageMetadata()
+{
+    if (isRaidImage()) {
+        return m_vg->getLvByName(getName().replace(QString("_rimage_"), QString("_rmeta_")));
+    } else {
+        return nullptr;
+    }
+}
+
+// Returns the raid image volume associated with a raid metadata volume
+LogVolPointer LogVol::getRaidMetadataImage()
+{
+    if (isRaidMetadata()) {
+        return m_vg->getLvByName(getName().replace(QString("_rmeta_"), QString("_rimage_")));
+    } else {
+        return nullptr;
+    }
+}
