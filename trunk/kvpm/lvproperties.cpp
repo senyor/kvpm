@@ -202,7 +202,6 @@ QFrame *LVProperties::generalFrame(int segment)
     const int segment_count = m_lv->getSegmentCount();
     long long extents, total_size, total_extents;
     int stripes, stripe_size;
-    QStringList pv_list;
 
     QFrame *const frame = new QFrame();
     QVBoxLayout *const layout = new QVBoxLayout();
