@@ -145,8 +145,10 @@ public:
     LogVolList getRaidMetadataVolumes();  // Metadata for a RAID volume
     LogVolList takeChildren();        // removes the children from the logical volume
     LogVolPointer getParent() const { return m_lv_parent; }   // NULL if this is a "top level" lv
-    LogVolPointer getParentMirror();             // NULL if this is not an lvm type mirror compnent
-    LogVolPointer getParentRaid();               // NULL if this is not a RAID type compnent
+    LogVolPointer getParentMirror();             // NULL if this is not an lvm type mirror component
+    LogVolPointer getParentRaid();               // NULL if this is not a RAID type component
+    LogVolPointer getRaidImageMetadata();        // NULL if this is not a RAID image
+    LogVolPointer getRaidMetadataImage();        // NULL if this is not RAID metadata
     VolGroup* getVg() const { return m_vg; }
     QString getName() const { return m_lv_name; }
     QString getPoolName() const { return m_pool; } // Name of this volume's thin pool if it is a thin volume, empty otherwise
