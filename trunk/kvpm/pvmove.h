@@ -41,39 +41,40 @@ class PVMoveDialog : public KDialog
 {
     Q_OBJECT
 
-    VolGroup *m_vg;
-    LogVol   *m_lv;
-    bool      m_move_lv;
+    VolGroup *m_vg = nullptr;
+    LogVol   *m_lv = nullptr;
+    int m_segment;
     bool      m_move_segment;
     bool      m_bailout;       // if TRUE, a move is impossible so don't even call up the dialog
     long long m_pv_used_space;
 
     QList<NameAndRange *> m_sources;
-    QList<PhysVol *> m_target_pvs;               // destination physical volumes
     QList<NoMungeRadioButton *> m_radio_buttons; // user can select only one source pv
-    PvGroupBox *m_pv_box;                        // many target pvs may be selected
+    PvGroupBox *m_pv_box = nullptr;              // many target pvs may be selected
     QLabel *m_radio_label = nullptr;   // number of extents selected for the pvmove source
 
-    void buildDialog();
-    void removeFullTargets();
+    void buildDialog(QList<PhysVol *> targets);
     void setupSegmentMove(int segment);
     void setupFullMove();
     bool hasMovableExtents();
     QStringList arguments(); 
     QStringList getLvNames(); 
+    QList<PhysVol *> removeForbiddenTargets(QList<PhysVol *> targets, const QString source);
+    QList<PhysVol *> removeFullTargets(QList<PhysVol *> targets);
+    QStringList getForbiddenTargets(LogVol *const lv, const QString source); 
     QWidget* singleSourceWidget();
     bool isMovable(LogVol *lv);
     long long movableExtents();
 
 public:
     explicit PVMoveDialog(PhysVol *const physicalVolume, QWidget *parent = nullptr);
-    explicit PVMoveDialog(LogVol *const logicalVolume, int const segment, QWidget *parent = nullptr);
+    explicit PVMoveDialog(LogVol *const logicalVolume, int const segment = -1, QWidget *parent = nullptr);
     ~PVMoveDialog();
     bool bailout();
 
 private slots:
     void commitMove();
-    void disableSource();
+    void disableTargets();
     void resetOkButton();
     void setRadioExtents();
 };

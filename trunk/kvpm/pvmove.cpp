@@ -76,18 +76,18 @@ bool stop_pvmove()
     }
 }
 
-PVMoveDialog::PVMoveDialog(PhysVol *const physicalVolume, QWidget *parent) : KDialog(parent)
+
+// Whole pv move
+
+PVMoveDialog::PVMoveDialog(PhysVol *const physicalVolume, QWidget *parent) : 
+    KDialog(parent)
 {
     m_vg = physicalVolume->getVg();
-    m_target_pvs = m_vg->getPhysicalVolumes();
-    m_move_lv = false;
     m_move_segment = false;
     m_bailout = false;
 
     const QString name = physicalVolume->getName();
     const LogVolList lvs = m_vg->getLogicalVolumes();
-    QStringList forbidden_targets;  // A whole pv can't be moved to a pv it is striped with along any segment
-    QStringList striped_targets;
 
     NameAndRange *nar = new NameAndRange;
     nar->name = name;
@@ -95,31 +95,10 @@ PVMoveDialog::PVMoveDialog(PhysVol *const physicalVolume, QWidget *parent) : KDi
     nar->used = (physicalVolume->getSize() - physicalVolume->getRemaining()) / m_vg->getExtentSize();
     m_sources.append(nar);
 
-    forbidden_targets.append(name);
+    QList<PhysVol *> target_pvs = removeFullTargets(m_vg->getPhysicalVolumes());
 
-    for (int x = lvs.size() - 1; x >= 0; x--) {
-        for (int seg = lvs[x]->getSegmentCount() - 1; seg >= 0; seg--) {
-            if (lvs[x]->getSegmentStripes(seg) > 1) {
-                striped_targets = lvs[x]->getPvNames(seg);
-                if (striped_targets.contains(name))
-                    forbidden_targets.append(striped_targets);
-            }
-        }
-    }
-
-    forbidden_targets.removeDuplicates();
-
-    for (int x = m_target_pvs.size() - 1 ; x >= 0; x--) {
-        for (int y = forbidden_targets.size() - 1; y >= 0; y--) {
-            if (m_target_pvs[x]->getName() == forbidden_targets[y]) {
-                m_target_pvs.removeAt(x);
-                forbidden_targets.removeAt(y);
-                break;
-            }
-        }
-    }
-
-    removeFullTargets();
+    if (m_sources.size() == 1)
+        target_pvs = removeForbiddenTargets(target_pvs, m_sources[0]->name);
 
     if (!hasMovableExtents()){
         m_bailout = true;
@@ -127,61 +106,44 @@ PVMoveDialog::PVMoveDialog(PhysVol *const physicalVolume, QWidget *parent) : KDi
     }
 
     if (!m_bailout) {
-        buildDialog();
+        buildDialog(target_pvs);
 
         connect(this, SIGNAL(okClicked()),
                 this, SLOT(commitMove()));
     }
 }
 
+
+// pv move only on one lv
+
 PVMoveDialog::PVMoveDialog(LogVol *const logicalVolume, int const segment, QWidget *parent) :
     KDialog(parent),
-    m_lv(logicalVolume)
+    m_lv(logicalVolume),
+    m_segment(segment)
 {
     m_vg = m_lv->getVg();
-    m_move_lv = true;
-    m_target_pvs = m_vg->getPhysicalVolumes();
     m_bailout = false;
-
 
     if (!hasMovableExtents()){
         m_bailout = true;
         KMessageBox::sorry(nullptr, i18n("None of the extents on this volume can be moved"));
     } else {
+        QList<PhysVol *> target_pvs = removeFullTargets(m_vg->getPhysicalVolumes());
+        
         if (segment >= 0) {
             setupSegmentMove(segment);
             m_move_segment = true;
+            if (m_sources.size() == 1)
+                target_pvs = removeForbiddenTargets(target_pvs, m_sources[0]->name);
         } else {
             setupFullMove();
             m_move_segment = false;
+            if (m_sources.size() == 1)
+                target_pvs = removeForbiddenTargets(target_pvs, m_sources[0]->name);
         }
-
-        /* if there is only one source physical volumes possible on this logical volume
-           then we eliminate it from the possible target pv list completely. */
-        
-        if (m_sources.size() == 1) {
-            for (int x = m_target_pvs.size() - 1; x >= 0; --x) {
-                if (m_target_pvs[x]->getName() == m_sources[0]->name)
-                    m_target_pvs.removeAt(x);
-            }
-        }
-        
-        /* If this is a segment move then all source pvs need to be
-           removed from the target list */
-        
-        if (m_move_segment) {
-            for (int x = m_target_pvs.size() - 1; x >= 0; --x) {
-                for (int y = m_sources.size() - 1; y >= 0; --y) {
-                    if (m_target_pvs[x]->getName() == m_sources[y]->name)
-                        m_target_pvs.removeAt(x);
-                }
-            }
-        }
-        
-        removeFullTargets();
 
         if (!m_bailout) {
-            buildDialog();
+            buildDialog(target_pvs);
 
             connect(this, SIGNAL(okClicked()),
                     this, SLOT(commitMove()));
@@ -195,23 +157,25 @@ PVMoveDialog::~PVMoveDialog()
         delete m_sources[x];
 }
 
-void PVMoveDialog::removeFullTargets()
+QList<PhysVol *> PVMoveDialog::removeFullTargets(QList<PhysVol *> targets)
 {
-    for (int x = m_target_pvs.size() - 1; x >= 0; --x) {
-        if (m_target_pvs[x]->getRemaining() <= 0 || !m_target_pvs[x]->isAllocatable())
-            m_target_pvs.removeAt(x);
+    for (int x = targets.size() - 1; x >= 0; --x) {
+        if (targets[x]->getRemaining() <= 0 || !targets[x]->isAllocatable())
+            targets.removeAt(x);
     }
 
     /* If there is only one physical volume in the group or they are
        all full then a pv move will have no place to go */
 
-    if (m_target_pvs.isEmpty()) {
+    if (targets.isEmpty()) {
         KMessageBox::sorry(nullptr, i18n("There are no allocatable physical volumes with space to move to"));
         m_bailout = true;
     }
+
+    return targets;
 }
 
-void PVMoveDialog::buildDialog()
+void PVMoveDialog::buildDialog(QList<PhysVol *> targets)
 {
     bool use_si_units;
     KConfigSkeleton skeleton;
@@ -239,7 +203,7 @@ void PVMoveDialog::buildDialog()
     layout->addWidget(label);
     dialog_body->setLayout(layout);
 
-    if (m_move_lv) {
+    if (m_lv) {
         label->setText(i18n("<b>Move only physical extents on:</b>"));
         label->setAlignment(Qt::AlignCenter);
         layout->addWidget(label);
@@ -259,7 +223,7 @@ void PVMoveDialog::buildDialog()
     layout->addLayout(lower_layout);
 
     QList<QSharedPointer<PvSpace>> pv_space_list;
-    for (auto pv : m_target_pvs) {
+    for (auto pv : targets) {
         pv_space_list << QSharedPointer<PvSpace>(new PvSpace(pv, pv->getRemaining(), pv->getContiguous()));
     }
 
@@ -280,7 +244,7 @@ void PVMoveDialog::buildDialog()
                 m_pv_used_space = (1 + m_sources[x]->end - m_sources[x]->start) * m_vg->getExtentSize();
                 radio_button = new NoMungeRadioButton(QString("%1  %2").arg(m_sources[x]->name_range).arg(locale->formatByteSize(m_pv_used_space, 1, dialect)));
                 radio_button->setAlternateText(m_sources[x]->name);
-            } else if (m_move_lv) {
+            } else if (m_lv) {
                 m_pv_used_space = m_lv->getSpaceUsedOnPv(m_sources[x]->name);
                 radio_button = new NoMungeRadioButton(QString("%1  %2").arg(m_sources[x]->name).arg(locale->formatByteSize(m_pv_used_space, 1, dialect)));
                 radio_button->setAlternateText(m_sources[x]->name);
@@ -300,7 +264,7 @@ void PVMoveDialog::buildDialog()
             m_radio_buttons.append(radio_button);
 
             connect(radio_button, SIGNAL(toggled(bool)),
-                    this, SLOT(disableSource()));
+                    this, SLOT(disableTargets()));
 
             connect(radio_button, SIGNAL(toggled(bool)),
                     this, SLOT(setRadioExtents()));
@@ -315,7 +279,7 @@ void PVMoveDialog::buildDialog()
         if (m_move_segment) {
             m_pv_used_space = (1 + src->end - src->start) * m_vg->getExtentSize();
             radio_layout->addWidget(new QLabel(QString("%1  %2").arg(src->name_range).arg(locale->formatByteSize(m_pv_used_space, 1, dialect))));
-        } else if (m_move_lv) {
+        } else if (m_lv) {
             m_pv_used_space = m_lv->getSpaceUsedOnPv(src->name);
             radio_layout->addWidget(new QLabel(QString("%1  %2").arg(src->name).arg(locale->formatByteSize(m_pv_used_space, 1, dialect))));
         } else {
@@ -326,9 +290,9 @@ void PVMoveDialog::buildDialog()
     }
 
     connect(m_pv_box, SIGNAL(stateChanged()),
-            this, SLOT(resetOkButton()));
+            this, SLOT(disableTargets()));
 
-    disableSource();
+    disableTargets();
     resetOkButton();
 }
 
@@ -348,7 +312,7 @@ void PVMoveDialog::resetOkButton()
     long long needed_space_total = 0;
     QString pv_name;
 
-    if (m_move_lv) {
+    if (m_lv) {
         if (m_radio_buttons.size() > 1) {
             for (auto radio : m_radio_buttons) {
                 if (radio->isChecked()) {
@@ -370,25 +334,13 @@ void PVMoveDialog::resetOkButton()
         enableButtonOk(true);
 }
 
-void PVMoveDialog::disableSource()  // don't allow source and target to be the same pv
-{
-    PhysVol *source_pv = nullptr;
-
-    for (int x = m_radio_buttons.size() - 1; x >= 0; --x) {
-        if (m_radio_buttons[x]->isChecked())
-            source_pv = m_vg->getPvByName(m_sources[x]->name);
-    }
-
-    m_pv_box->disableOrigin(source_pv);
-    resetOkButton();
-}
 
 QStringList PVMoveDialog::arguments()
 {
     QStringList args = QStringList() << "pvmove" << "--background";
     QString source;
 
-    if (m_move_lv) {
+    if (m_lv) {
         args << "--name";
         args << m_lv->getFullName();
     }
@@ -516,9 +468,9 @@ bool PVMoveDialog::hasMovableExtents()
 {
     bool movable = false;
 
-    if (m_move_lv && m_lv) {              // move only lv
+    if (m_lv) {                       // move only lv
         movable = isMovable(m_lv);
-    } else {                              // move whole pv
+    } else {                          // move whole pv
         for (auto name : getLvNames()) {
             LogVol *const lv = m_vg->getLvByName(name); 
             if (lv && isMovable(lv))
@@ -577,12 +529,126 @@ long long PVMoveDialog::movableExtents()
 
     for (auto name : getLvNames()) {
         LogVol *const lv = m_vg->getLvByName(name);
-        if (lv) {
-            if (lv && isMovable(lv)) {
-                extents += lv->getSpaceUsedOnPv(m_sources[0]->name) / m_vg->getExtentSize();
-            } 
-        }
+        if (lv && isMovable(lv))
+            extents += lv->getSpaceUsedOnPv(m_sources[0]->name) / m_vg->getExtentSize();
     }
 
     return extents;
 }
+
+void PVMoveDialog::disableTargets()
+{
+    QString source;
+
+    if (!m_radio_buttons.isEmpty()) {
+        for (auto radio : m_radio_buttons) {
+            if (radio->isChecked())
+                source = radio->getAlternateText();
+        }
+    } else {
+        source = m_sources[0]->name;
+    }
+
+    m_pv_box->disableChecks(getForbiddenTargets(m_lv, source));
+    resetOkButton();
+}
+
+/* don't allow source and target to be the same pv
+   or move a pv to another it is striped with */
+
+QStringList PVMoveDialog::getForbiddenTargets(LogVol *const lv, const QString source)
+{
+    /* Once lvm2 2.02.99 or higher is released this will need
+       to be tested again. What happens if parts can be moved to 
+       another pv but some parts cannot? How will allocation
+       policy work with raid legs during pvmove? */
+
+    QStringList forbidden = QStringList() << source;
+
+    if(m_pv_box->getEffectivePolicy() == ANYWHERE)
+        return forbidden;
+
+    if (lv) {
+        if (lv->isRaid()) {
+            if (lv->getPvNamesAllFlat().contains(source)) {
+
+                for (auto image : lv->getRaidImageVolumes()) {
+                    QStringList pvs = QStringList() << image->getPvNamesAllFlat();
+                    LogVolPointer meta = image->getRaidImageMetadata();
+                    
+                    if (meta)
+                        pvs << meta->getPvNamesAllFlat();
+                    
+                if (!pvs.contains(source))
+                    forbidden << pvs;
+                }
+            }
+        } else if  (lv->isThinPool()) {
+            for (auto data : lv->getThinDataVolumes())
+                forbidden << getForbiddenTargets(data, source);
+
+            for (auto meta : lv->getThinMetadataVolumes())
+                forbidden << getForbiddenTargets(meta, source);
+        } else {
+            if (lv->isRaidImage() || lv->isRaidMetadata()) { // don't allow moving pvs from one raid leg to another
+                LogVolPointer image, meta;
+                
+                if (lv->isRaidImage()) {
+                    meta = lv->getRaidImageMetadata();
+                    image = lv;
+                } else {
+                    image = lv->getRaidMetadataImage();
+                    meta = lv;
+                }
+                
+                auto parent = lv->getParentRaid();
+                if (parent) {
+                    for (auto leg : parent->getRaidImageVolumes()) {
+                        if (image != leg)
+                            forbidden << leg->getPvNamesAllFlat();
+                    }
+                    
+                    for (auto leg : parent->getRaidMetadataVolumes()) {
+                        if (meta != leg)
+                            forbidden << leg->getPvNamesAllFlat();
+                    }
+                }
+            }
+
+            if (m_move_segment) {
+                forbidden << lv->getPvNames(m_segment);
+            } else {
+                for (int seg = lv->getSegmentCount() - 1; seg >= 0; --seg) {
+                    if (lv->getSegmentStripes(seg) > 1 && lv->getPvNames(seg).contains(source))
+                        forbidden << lv->getPvNames(seg);
+                }
+            }
+        }
+    } else { // Whole pv move
+        for (auto lv : m_vg->getLogicalVolumes())
+            forbidden << getForbiddenTargets(lv, source);
+    }
+    
+    forbidden.removeDuplicates();
+
+    return forbidden;
+} 
+
+
+/* if there is only one possible source then we remove
+   it from the target list completely */
+
+QList<PhysVol *> PVMoveDialog::removeForbiddenTargets(QList<PhysVol *> targets, const QString source) 
+{
+    QStringList forbidden = QStringList() << source;
+
+    for (int x = targets.size() - 1 ; x >= 0; --x) {
+        for (auto remove : forbidden) {
+            if (targets[x]->getName() == remove)
+                targets.removeAt(x);
+        }
+    }
+
+    return targets;
+}
+
