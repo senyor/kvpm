@@ -175,7 +175,7 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
             pv_move->setEnabled(true);
             snap_create->setEnabled(false);
             fs_menu->setEnabled(false);
-        } else if(m_lv->isMetadata() || m_lv->isThinPoolData()){
+        } else if(m_lv->isThinMetadata() || m_lv->isThinPoolData()){
             snap_merge->setEnabled(false);
             max_fs->setEnabled(false);
             mkfs->setEnabled(false);
@@ -209,7 +209,8 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
             snap_create->setEnabled(false);
             fs_menu->setEnabled(false);
         } else if (m_lv->isWritable()  && !m_lv->isLocked() && !m_lv->isVirtual() && !m_lv->isThinVolume() &&
-                   !m_lv->isMirrorLeg() && !m_lv->isLvmMirrorLog() && !m_lv->isRaidImage() && !m_lv->isTemporary()) {
+                   !m_lv->isMirrorLeg() && !m_lv->isLvmMirrorLog() && !m_lv->isRaidImage() && !m_lv->isTemporary() &&
+                   !m_lv->isRaidMetadata()) {
 
             if (m_lv->isMounted()) {
                 fsck->setEnabled(false);
@@ -282,7 +283,7 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
                     fsck->setEnabled(true);
                     mkfs->setEnabled(true);
                 }
-            } else if (m_lv->isMirror()) {
+            } else if (m_lv->isLvmMirror()) {
                 pv_move->setEnabled(false);
 
                 if (m_lv->isUnderConversion()) {
@@ -366,7 +367,10 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
             pv_move->setEnabled(false);
             snap_create->setEnabled(false);
             fs_menu->setEnabled(false);
-        } else if (m_lv->isRaidImage()) {
+        } else if (m_lv->isRaidImage() || m_lv->isRaidMetadata()) {
+
+            qDebug() << "Got here .... ";
+
             mkfs->setEnabled(false);
             max_fs->setEnabled(false);
             lv_remove->setEnabled(false);
@@ -376,7 +380,7 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
             lv_extend->setEnabled(false);
             lv_reduce->setEnabled(false);
             lv_rename->setEnabled(false);
-            pv_move->setEnabled(true);
+            pv_move->setEnabled(false);
             snap_create->setEnabled(false);
             fs_menu->setEnabled(false);
         } else if (m_lv->isPvmove()) {
