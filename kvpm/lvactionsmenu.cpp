@@ -186,9 +186,14 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
             lv_extend->setEnabled(false);
             lv_reduce->setEnabled(false);
             lv_rename->setEnabled(false);
-            pv_move->setEnabled(true);
+
+            if (m_lv->isRaid() || m_lv->isLvmMirror())
+                pv_move->setEnabled(false);
+            else
+                pv_move->setEnabled(true);
+
             snap_create->setEnabled(false);
-            fs_menu->setEnabled(false);
+            fs_menu->setEnabled(false); 
         } else if(m_lv->isLvmMirrorLog() || m_lv->isTemporary()){
             snap_merge->setEnabled(false);
             max_fs->setEnabled(false);
@@ -368,9 +373,6 @@ LVActionsMenu::LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volum
             snap_create->setEnabled(false);
             fs_menu->setEnabled(false);
         } else if (m_lv->isRaidImage() || m_lv->isRaidMetadata()) {
-
-            qDebug() << "Got here .... ";
-
             mkfs->setEnabled(false);
             max_fs->setEnabled(false);
             lv_remove->setEnabled(false);
