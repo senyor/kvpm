@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -23,7 +23,6 @@ class QHBoxLayout;
 class QBrush;
 class QString;
 
-class VolGroup;
 class LogVol;
 
 
@@ -31,17 +30,18 @@ class LVChartSeg : public QWidget
 {
     Q_OBJECT
 
-    VolGroup *m_vg;
-    LogVol *m_lv;
-    KMenu *m_context_menu;
+    LogVol *m_lv = nullptr;
     QBrush m_brush;
 
 public:
-    LVChartSeg(VolGroup *const group, LogVol *const volume, const QString use, QWidget *parent);
+    LVChartSeg(LogVol *const volume, const QString use, QWidget *parent);
     void paintEvent(QPaintEvent *);
 
 private slots:
     void popupContextMenu(QPoint);
+
+signals:
+    void lvMenuRequested(LogVol *lv);
 
 };
 

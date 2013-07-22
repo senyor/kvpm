@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2009, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -45,25 +45,24 @@ LVSizeChart::LVSizeChart(VolGroup *const group, QTreeWidget *const vgTree, QWidg
     setMaximumHeight(75);
 
     connect(m_vg_tree->header(), SIGNAL(sectionClicked(int)),
-            this , SLOT(vgtreeClicked()));
+            this, SLOT(vgtreeClicked()));
 }
 
 void LVSizeChart::populateChart()
 {
     LogVolList logical_volumes;
-    QTreeWidgetItem *item;
-    LogVol *lv;
+    
     QLayoutItem *child;
     const long item_count = m_vg_tree->topLevelItemCount();
 
     while ((child = m_layout->takeAt(0)) != 0)     // remove old children of layout
         delete child;
 
-    for (int x = 0; x < item_count; x++) {
-        item = m_vg_tree->topLevelItem(x);
-        lv = m_vg->getLvByName(item->data(0, Qt::UserRole).toString());
+    for (int x = 0; x < item_count; ++x) {
+        QTreeWidgetItem *const item = m_vg_tree->topLevelItem(x);
+        LogVol *const lv = m_vg->getLvByName(item->data(0, Qt::UserRole).toString());
 
-        if (lv != NULL) {
+        if (lv) {
             logical_volumes.append(lv);
 
             if (lv->isThinPool()){
@@ -83,39 +82,34 @@ void LVSizeChart::populateChart()
         }
     }
 
-    double seg_ratio;
-    QWidget *widget;
-
     const long long free_extents  = m_vg->getFreeExtents();
     const long long total_extents = m_vg->getExtents();
     const long long extent_size   = m_vg->getExtentSize();
-    const int lv_count = logical_volumes.size();
 
     QString usage;                   // Filesystem: blank, ext2 etc. or freespace in vg
     int max_segment_width;
+    double seg_ratio;
+    QWidget *widget;
 
-    for (int x = 0; x < lv_count; x++) {
-        m_lv = logical_volumes[x];
+    for (auto lv : logical_volumes) {
 
-        if (!m_lv->isLvmMirrorLeg() && !m_lv->isThinVolume() &&
-            !m_lv->isLvmMirrorLog() && !m_lv->isThinPoolData() &&
-            !m_lv->isVirtual()    &&
-            !m_lv->isRaidImage() &&
-            !(m_lv->isLvmMirror() && !(m_lv->getOrigin()).isEmpty())) {
+        if (!lv->isLvmMirrorLeg() && !lv->isThinVolume() &&
+            !lv->isLvmMirrorLog() && !lv->isThinPoolData() &&
+            !lv->isVirtual()      && !lv->isRaidImage() &&
+            !(lv->isLvmMirror()   && !(lv->getOrigin()).isEmpty())) {
  
-            if (m_lv->isThinPool())
+            if (lv->isThinPool())
                 usage = "thin_pool";
             else
-                usage = m_lv->getFilesystem();
+                usage = lv->getFilesystem();
 
-            if (m_lv->isLvmMirror() || m_lv->isRaid() || m_lv->isThinPool()){
-                seg_ratio = (m_lv->getTotalSize() / (double) extent_size) / (double) total_extents;
-            } else {
-                seg_ratio = m_lv->getExtents() / (double) total_extents;
-            }
-
+            if (lv->isLvmMirror() || lv->isRaid() || lv->isThinPool())
+                seg_ratio = (lv->getTotalSize() / (double) extent_size) / (double) total_extents;
+            else 
+                seg_ratio = lv->getExtents() / (double) total_extents;
+            
             m_ratios.append(seg_ratio);
-            widget = buildFrame(new LVChartSeg(m_vg, m_lv, usage, this));
+            widget = frameAndConnect(new LVChartSeg(lv, usage, this));
             m_layout->addWidget(widget);
             m_widgets.append(widget);
         }
@@ -124,7 +118,7 @@ void LVSizeChart::populateChart()
     if (free_extents) { // only create a free space widget if we have some
         seg_ratio = (free_extents / (double) total_extents) + 0.02; // allow a little "stretch" 0.02
         usage = "freespace" ;
-        widget = buildFrame(new LVChartSeg(m_vg, 0, usage, this));
+        widget = frameAndConnect(new LVChartSeg(0, usage, this));
         m_widgets.append(widget);
 
         m_layout->addWidget(widget);
@@ -132,7 +126,7 @@ void LVSizeChart::populateChart()
     } else if (m_widgets.size() == 0) { // if we have no chart segs then put in a blank one
                                         // because lvsizechart won't work with zero segments
         usage = "" ;
-        widget = buildFrame(new LVChartSeg(m_vg, 0, usage, this));
+        widget = frameAndConnect(new LVChartSeg(0, usage, this));
         m_widgets.append(widget);
 
         m_layout->addWidget(widget);
@@ -181,14 +175,17 @@ void LVSizeChart::vgtreeClicked()
     populateChart();
 }
 
-QFrame* LVSizeChart::buildFrame(QWidget *widget) 
+QFrame* LVSizeChart::frameAndConnect(LVChartSeg *seg) 
 {
+    connect(seg,  SIGNAL(lvMenuRequested(LogVol*)),
+            this, SIGNAL(lvMenuRequested(LogVol*)));
+
     QFrame *const frame = new QFrame();
     frame->setFrameStyle(QFrame::Sunken | QFrame::Panel);
     frame->setLineWidth(2);
 
     QVBoxLayout *const layout = new QVBoxLayout();
-    layout->addWidget(widget);
+    layout->addWidget(seg);
     layout->setSpacing(0);
     layout->setMargin(0);
     frame->setLayout(layout);
