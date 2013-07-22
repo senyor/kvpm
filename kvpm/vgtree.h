@@ -52,6 +52,9 @@ private slots:
     void popupContextMenu(QPoint point);
     void adjustColumnWidth(QTreeWidgetItem *);
 
+signals:
+    void lvMenuRequested(QTreeWidgetItem *item);
+
 };
 
 #endif
