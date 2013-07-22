@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -17,51 +17,15 @@
 
 #include <KMenu>
 
-class KAction;
+class LVActions;
 
-class QPoint;
-
-class VolGroup;
-class LogVol;
-class LVChartSeg;
-class VGTree;
 
 class LVActionsMenu : public KMenu
 {
     Q_OBJECT
 
-    VolGroup *m_vg;
-    LogVol *m_lv;
-    int m_segment;
-
-    KMenu *buildMirrorMenu(); 
-
 public:
-    LVActionsMenu(LogVol *logicalVolume, int segment, VolGroup *volumeGroup, QWidget *parent);
-
-private slots:
-    void createLv();
-    void extendLv();
-    void createThinVolume();
-    void createThinPool();
-    void changeLv();
-    void reduceLv();
-    void removeLv();
-    void renameLv();
-    void addLegs();
-    void changeLog();
-    void repairMissing();
-    void removeMirror();
-    void removeLeg();
-    void createSnapshot();
-    void thinSnapshot();
-    void makeFs();
-    void checkFs();
-    void maxFs();
-    void mergeSnapshot();
-    void movePhysicalExtents();
-    void mountFs();
-    void unmountFs();
+    LVActionsMenu(LVActions *const lvactions, QWidget *parent);
 
 };
 
