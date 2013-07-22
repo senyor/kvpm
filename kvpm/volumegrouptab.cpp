@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -22,9 +22,12 @@
 #include <QScrollArea>
 #include <QSplitter>
 #include <QString>
+#include <QTreeWidgetItem>
 #include <QVBoxLayout>
 
+#include <KActionCollection>
 #include <KLocale>
+#include <KToolBar>
 
 #include "lvpropertiesstack.h"
 #include "lvsizechart.h"
@@ -35,25 +38,35 @@
 #include "vgremove.h"
 #include "vgtree.h"
 #include "volgroup.h"
+#include "lvactions.h"
+#include "lvactionsmenu.h"
 
 
-VolumeGroupTab::VolumeGroupTab(VolGroup *volumeGroup, QWidget *parent) : QWidget(parent), m_vg(volumeGroup)
+VolumeGroupTab::VolumeGroupTab(VolGroup *const group, QWidget *parent) : 
+    KMainWindow(parent),
+    m_vg(group)
 {
+    QWidget *const central = new QWidget();
+    setCentralWidget(central);
+    m_layout = new QVBoxLayout;
+    central->setLayout(m_layout);
+
     QSplitter *const tree_splitter = new QSplitter(Qt::Vertical);
     QSplitter *const lv_splitter   = new QSplitter();
     QSplitter *const pv_splitter   = new QSplitter();
-    m_vg_info_labels = NULL;
-    m_lv_size_chart  = NULL;
-    m_lv_properties_stack = NULL;
-    m_pv_properties_stack = NULL;
-    m_partial_warning = NULL;
+    m_lv_actions = new LVActions(group, this);
 
-    m_layout = new QVBoxLayout;
-    setLayout(m_layout);
-    m_group_name = m_vg->getName();
+    addToolBar(buildToolBar());
 
     m_vg_tree = new VGTree(m_vg);
     m_pv_tree = new PVTree(m_vg);
+
+    connect(m_vg_tree, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)),
+            m_lv_actions, SLOT(changeLv(QTreeWidgetItem*)));
+
+    connect(m_vg_tree, SIGNAL(lvMenuRequested(QTreeWidgetItem*)),
+            this, SLOT(lvContextMenu(QTreeWidgetItem*)));
+
     m_vg_tree->setAlternatingRowColors(true);
     m_pv_tree->setAlternatingRowColors(true);
 
@@ -93,7 +106,7 @@ void VolumeGroupTab::rescan()
 
     if (m_vg_info_labels) {
         m_layout->removeWidget(m_vg_info_labels);
-        m_vg_info_labels->setParent(NULL);
+        m_vg_info_labels->setParent(nullptr);
         m_vg_info_labels->deleteLater();
     }
     m_vg_info_labels = new VGInfoLabels(m_vg);
@@ -113,7 +126,7 @@ void VolumeGroupTab::rescan()
 
     if (m_partial_warning) {
         m_layout->removeWidget(m_partial_warning);
-        m_partial_warning->setParent(NULL);
+        m_partial_warning->setParent(nullptr);
         m_partial_warning->deleteLater();
     }
     m_partial_warning  = buildPartialWarning();
@@ -125,11 +138,14 @@ void VolumeGroupTab::rescan()
 
     if (m_lv_size_chart) { // This needs to be after the vgtree is loaded
         m_layout->removeWidget(m_lv_size_chart);
-        m_lv_size_chart->setParent(NULL);
+        m_lv_size_chart->setParent(nullptr);
         m_lv_size_chart->deleteLater();
     }
     m_lv_size_chart  = new LVSizeChart(m_vg, m_vg_tree);
     m_layout->insertWidget(2, m_lv_size_chart);
+
+    connect(m_lv_size_chart, SIGNAL(lvMenuRequested(LogVol*)),
+            this, SLOT(lvContextMenu(LogVol*)));
 
     readConfig();
 
@@ -180,4 +196,57 @@ QFrame* VolumeGroupTab::buildPartialWarning()
     return warning;
 }
 
+KToolBar* VolumeGroupTab::buildToolBar()
+{
+    KToolBar *const toolbar = new KToolBar("lvtoolbar", this);
+    toolbar->setContextMenuEnabled(true);
+    toolbar->setToolButtonStyle(Qt::ToolButtonIconOnly);
+
+    toolbar->addAction(m_lv_actions->action("lvcreate"));
+    toolbar->addAction(m_lv_actions->action("thinpool"));
+    toolbar->addAction(m_lv_actions->action("thincreate"));
+    toolbar->addSeparator();    
+    toolbar->addAction(m_lv_actions->action("lvremove"));
+    toolbar->addSeparator();    
+    toolbar->addAction(m_lv_actions->action("lvrename"));
+    toolbar->addAction(m_lv_actions->action("snapcreate"));
+    toolbar->addAction(m_lv_actions->action("thinsnap"));
+    toolbar->addAction(m_lv_actions->action("snapmerge"));
+    toolbar->addAction(m_lv_actions->action("lvreduce"));
+    toolbar->addAction(m_lv_actions->action("lvextend"));
+    toolbar->addAction(m_lv_actions->action("pvmove"));
+    toolbar->addAction(m_lv_actions->action("lvchange"));
+    toolbar->addSeparator();    
+    toolbar->addAction(m_lv_actions->action("addlegs"));
+    toolbar->addAction(m_lv_actions->action("changelog"));
+    toolbar->addAction(m_lv_actions->action("removemirror"));
+    toolbar->addAction(m_lv_actions->action("removethis"));
+    toolbar->addAction(m_lv_actions->action("repairmissing"));
+    toolbar->addAction(m_lv_actions->action("mount"));
+    toolbar->addAction(m_lv_actions->action("unmount"));
+    toolbar->addSeparator();    
+    toolbar->addAction(m_lv_actions->action("maxfs"));
+    toolbar->addAction(m_lv_actions->action("fsck"));
+    toolbar->addAction(m_lv_actions->action("mkfs"));
+
+    return toolbar;
+}
+
+void VolumeGroupTab::lvContextMenu(LogVol *lv)
+{
+    m_lv_actions->changeLv(lv, -1);
+    
+    KMenu *menu = new LVActionsMenu(m_lv_actions, this);
+    menu->exec(QCursor::pos());
+    menu->deleteLater();
+}
+
+void VolumeGroupTab::lvContextMenu(QTreeWidgetItem *item)
+{
+    m_lv_actions->changeLv(item);
+
+    KMenu *menu = new LVActionsMenu(m_lv_actions, this);
+    menu->exec(QCursor::pos());
+    menu->deleteLater();
+}
 

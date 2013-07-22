@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -15,11 +15,14 @@
 #ifndef VOLUMEGROUPTAB_H
 #define VOLUMEGROUPTAB_H
 
-#include <QWidget>
+#include <KMainWindow>
 
 class QString;
 class QVBoxLayout;
 class QScrollArea;
+class QTreeWidgetItem;                         \
+
+class KToolBar;
 
 class VolGroup;
 class LVPropertiesStack;
@@ -28,30 +31,37 @@ class PVTree;
 class VGTree;
 class VGInfoLabels;
 class LVSizeChart;
+class LVActions;
 class QFrame;
+class LogVol;
 
-class VolumeGroupTab : public QWidget
+class VolumeGroupTab : public KMainWindow
 {
     Q_OBJECT
-
-    LVSizeChart  *m_lv_size_chart;
-    VGInfoLabels *m_vg_info_labels;
-    QVBoxLayout  *m_layout;
-    VolGroup     *m_vg;
-    LVPropertiesStack *m_lv_properties_stack;
-    PVPropertiesStack *m_pv_properties_stack;
-    PVTree *m_pv_tree;
-    VGTree *m_vg_tree;
-    QString m_group_name;
-    QFrame *m_partial_warning;
+ 
+    LVActions    *m_lv_actions = nullptr;
+    LVSizeChart  *m_lv_size_chart = nullptr;
+    VGInfoLabels *m_vg_info_labels = nullptr;
+    QVBoxLayout  *m_layout = nullptr;
+    VolGroup     *m_vg = nullptr;
+    LVPropertiesStack *m_lv_properties_stack = nullptr;
+    PVPropertiesStack *m_pv_properties_stack = nullptr;
+    PVTree *m_pv_tree = nullptr;
+    VGTree *m_vg_tree = nullptr;
+    QFrame *m_partial_warning = nullptr;
 
     QFrame* buildPartialWarning();
     void readConfig();
+    KToolBar* buildToolBar();
 
 public:
-    explicit VolumeGroupTab(VolGroup *volumeGroup, QWidget *parent = 0);
+    explicit VolumeGroupTab(VolGroup *const group, QWidget *parent = nullptr);
     VolGroup* getVg();
     void rescan();
+
+public slots:
+    void lvContextMenu(QTreeWidgetItem *item);
+    void lvContextMenu(LogVol *lv);
 };
 
 #endif
