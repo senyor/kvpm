@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2011, 2012  Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2011, 2012, 2013  Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -30,6 +30,9 @@
 
 bool remove_mirror(LogVol *logicalVolume)
 {
+    while (logicalVolume->isLvmMirrorLog() || logicalVolume->isLvmMirrorLeg())
+        logicalVolume = logicalVolume->getParentMirror();
+
     RemoveMirrorDialog dialog(logicalVolume);
     dialog.exec();
 
