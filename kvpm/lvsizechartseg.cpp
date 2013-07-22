@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2009, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -26,16 +26,14 @@
 
 #include "logvol.h"
 #include "lvactionsmenu.h"
-#include "volgroup.h"
 
 
 
 /* This should be passed *lv = 0 if it is really free space on a volume
    group that is being displayed */
 
-LVChartSeg::LVChartSeg(VolGroup *const group, LogVol *const volume, const QString use, QWidget *parent) :
+LVChartSeg::LVChartSeg(LogVol *const volume, const QString use, QWidget *parent) :
     QWidget(parent),
-    m_vg(group),
     m_lv(volume)
 {
     KConfigSkeleton skeleton;
@@ -83,14 +81,14 @@ LVChartSeg::LVChartSeg(VolGroup *const group, LogVol *const volume, const QStrin
             color = reiser4_color;
         else if (use == "hfs")
             color = hfs_color;
-        else if (use == "vfat")
+        else if (use == "vgat")
             color = msdos_color;
         else if (use == "jfs")
             color = jfs_color;
         else if (use == "xfs")
             color = xfs_color;
         else if (use == "ntfs")
-        color = ntfs_color;
+            color = ntfs_color;
         else if (use == "swap")
             color = swap_color;
         else if (use == "freespace")
@@ -101,25 +99,20 @@ LVChartSeg::LVChartSeg(VolGroup *const group, LogVol *const volume, const QStrin
         m_brush = QBrush(color, Qt::SolidPattern);
     }
 
-    if (!m_vg->isExported()) {
-
-        setContextMenuPolicy(Qt::CustomContextMenu);
-
-        if (m_lv)
-            setToolTip(m_lv->getName());
-        else
-            setToolTip(i18n("free space"));
-
-        connect(this, SIGNAL(customContextMenuRequested(QPoint)),
-                this, SLOT(popupContextMenu(QPoint)));
-    }
+    setContextMenuPolicy(Qt::CustomContextMenu);
+    
+    if (m_lv)
+        setToolTip(m_lv->getName());
+    else
+        setToolTip(i18n("free space"));
+    
+    connect(this, SIGNAL(customContextMenuRequested(QPoint)),
+            this, SLOT(popupContextMenu(QPoint)));
 }
 
 void LVChartSeg::popupContextMenu(QPoint)
 {
-    m_context_menu = new LVActionsMenu(m_lv, -1, m_vg, this);
-    m_context_menu->exec(QCursor::pos());
-    m_context_menu->deleteLater();
+    emit lvMenuRequested(m_lv);
 }
 
 void LVChartSeg::paintEvent(QPaintEvent *)

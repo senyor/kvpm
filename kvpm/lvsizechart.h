@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -23,28 +23,32 @@ class QTreeWidget;
 
 class VolGroup;
 class LogVol;
-
+class LVChartSeg;
 
 class LVSizeChart : public QFrame
 {
     Q_OBJECT
 
-    VolGroup *m_vg;
-    LogVol   *m_lv;
-    QTreeWidget  *m_vg_tree;
-    QHBoxLayout  *m_layout;
+    VolGroup *m_vg = nullptr;
+    QTreeWidget  *m_vg_tree = nullptr;
+    QHBoxLayout  *m_layout = nullptr;
+
     QList<QWidget *> m_widgets;    // These are segments of the bar chart
     QList<double>    m_ratios;     // These are the relative size of each segment
                                    // to the whole chart. The total should be about 1.
-    QFrame *buildFrame(QWidget *widget); 
+
+    QFrame *frameAndConnect(LVChartSeg *seg); 
 
 public:
-    LVSizeChart(VolGroup *const group, QTreeWidget *const vgTree, QWidget *parent = 0);
+    LVSizeChart(VolGroup *const group, QTreeWidget *const vgTree, QWidget *parent = nullptr);
     void populateChart();
     void resizeEvent(QResizeEvent *event);
 
 private slots:
     void vgtreeClicked();
+
+signals:
+    void lvMenuRequested(LogVol *lv);
 
 };
 
