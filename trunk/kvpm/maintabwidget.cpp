@@ -15,6 +15,7 @@
 
 #include "maintabwidget.h"
 
+#include <KLocale>
 #include <KTabWidget>
 
 #include <QDebug>
@@ -27,7 +28,8 @@
 
 
 
-MainTabWidget::MainTabWidget(QWidget *parent) : QWidget(parent)
+MainTabWidget::MainTabWidget(QWidget *parent) : 
+    QWidget(parent)
 {
     QVBoxLayout *const layout = new QVBoxLayout();
     m_tab_widget = new KTabWidget();
@@ -38,7 +40,7 @@ MainTabWidget::MainTabWidget(QWidget *parent) : QWidget(parent)
     setLayout(layout);
 
     connect(m_tab_widget, SIGNAL(currentChanged(int)),
-            this, SLOT(indexChanged(int)));
+            this, SIGNAL(currentIndexChanged()));
 }
 
 QString MainTabWidget::getUnmungedText(const int index)
@@ -48,14 +50,14 @@ QString MainTabWidget::getUnmungedText(const int index)
 
 void MainTabWidget::appendVolumeGroupTab(VolumeGroupTab *const page, const QIcon &icon, const QString &label)
 {
-    m_tab_widget->insertTab(m_tab_widget->count(), (QWidget *)page, icon, label);
+    m_tab_widget->insertTab(m_tab_widget->count(), (QWidget *)page, icon, i18n("Group: %1", label));
     m_unmunged_text.append(label);
     m_vg_tabs.append(page);
 }
 
-void MainTabWidget::appendDeviceTab(DeviceTab *const page, const QString & label)
+void MainTabWidget::appendDeviceTab(DeviceTab *const page, const QString &label)
 {
-    m_tab_widget->insertTab(m_tab_widget->count(), (QWidget *) page, label);
+    m_tab_widget->insertTab(m_tab_widget->count(), (QWidget *)page, label);
     m_unmunged_text.append(label);
 }
 
@@ -90,10 +92,5 @@ VolumeGroupTab *MainTabWidget::getVolumeGroupTab(const int index)
 void MainTabWidget::setIcon(const int index, const QIcon &icon)
 {
     m_tab_widget->setTabIcon(index, icon);
-}
-
-void MainTabWidget::indexChanged(int)
-{
-    emit currentIndexChanged();
 }
 

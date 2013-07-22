@@ -47,9 +47,6 @@ public:
     VolumeGroupTab *getVolumeGroupTab(const int index);
     void setIcon(const int index, const QIcon &icon);
 
-public slots:
-    void indexChanged(int index);
-
 };
 
 #endif
