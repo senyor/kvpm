@@ -31,7 +31,7 @@ VGTree::VGTree(VolGroup *const group) : QTreeWidget(), m_vg(group)
 {
     m_init = true;
 
-    const QStringList headers = QStringList() << i18n("Volume")      << i18n("type")       << i18n("Size")
+    const QStringList headers = QStringList() << i18n("Volume") << i18n("type") << i18n("Size")
                                 << i18n("Remaining")   << i18n("Filesystem") << i18n("Stripes")
                                 << i18n("Stripe size") << i18n("Data/Copy")  << i18n("State")
                                 << i18n("Access")      << i18n("Tags")       << i18n("Mount points");
@@ -344,18 +344,14 @@ void VGTree::setupContextMenu()
 {
     setContextMenuPolicy(Qt::CustomContextMenu);
 
-    // disconnect the last connect, otherwise the following connect get repeated
+    // disconnect the last connect, otherwise the following connect gets repeated
     // and piles up.
 
     disconnect(this, SIGNAL(customContextMenuRequested(QPoint)),
                this, SLOT(popupContextMenu(QPoint)));
-
-    if (!m_vg->isExported()) {
-
-        connect(this, SIGNAL(customContextMenuRequested(QPoint)),
-                this, SLOT(popupContextMenu(QPoint)));
-
-    }
+    
+    connect(this, SIGNAL(customContextMenuRequested(QPoint)),
+            this, SLOT(popupContextMenu(QPoint)));
 
     return;
 }
@@ -403,28 +399,7 @@ void VGTree::insertChildItems(LogVol *parentVolume, QTreeWidgetItem *parentItem)
 
 void VGTree::popupContextMenu(QPoint point)
 {
-    KMenu *context_menu = NULL;
-    const QTreeWidgetItem *const item = itemAt(point);
-
-    if (item) {                               //item = 0 if there is no item a that point
-
-        LogVol *const lv = m_vg->getLvByName(QVariant(item->data(0, Qt::UserRole)).toString());
-        int segment;    // segment = -1 means whole lv
-
-        if (QVariant(item->data(3, Qt::UserRole)).toString() == "segment")
-            segment = QVariant(item->data(1, Qt::UserRole)).toInt();
-        else
-            segment = -1;
-
-        context_menu = new LVActionsMenu(lv, segment, m_vg, this);
-        context_menu->exec(QCursor::pos());
-    } else {
-        context_menu = new LVActionsMenu(NULL, 0, m_vg, this);
-        context_menu->exec(QCursor::pos());
-    }
-
-    if (context_menu != NULL)
-        context_menu->deleteLater();
+    emit lvMenuRequested(itemAt(point));
 }
 
 void VGTree::setViewConfig()
@@ -464,11 +439,11 @@ void VGTree::setViewConfig()
     skeleton.addItemBool("vt_mountpoints", mountpoints, false);
 
     if (!(!volume == isColumnHidden(0)     && !size == isColumnHidden(1) &&
-            !remaining == isColumnHidden(2)  && !filesystem == isColumnHidden(3) &&
-            !type == isColumnHidden(4)       && !stripes == isColumnHidden(5) &&
-            !stripesize == isColumnHidden(6) && !snapmove == isColumnHidden(7) &&
-            !state == isColumnHidden(8)      && !access == isColumnHidden(9) &&
-            !tags == isColumnHidden(10)      && !mountpoints == isColumnHidden(11)))
+          !remaining == isColumnHidden(2)  && !filesystem == isColumnHidden(3) &&
+          !type == isColumnHidden(4)       && !stripes == isColumnHidden(5) &&
+          !stripesize == isColumnHidden(6) && !snapmove == isColumnHidden(7) &&
+          !state == isColumnHidden(8)      && !access == isColumnHidden(9) &&
+          !tags == isColumnHidden(10)      && !mountpoints == isColumnHidden(11)))
         changed = true;
 
     if (changed) {
