@@ -353,11 +353,13 @@ void LVActions::setActions(LogVol *const lv, const int segment)
             if (lv->isCowOrigin()) {
                 snap_create->setEnabled(true);
                 
-                if (lv->isMerging())
+                if (lv->isMerging()) {
                     snap_create->setEnabled(false);
-                else
+                    lv_extend->setEnabled(false);
+                } else {
                     lv_extend->setEnabled(true);
-                
+                }
+
                 lv_reduce->setEnabled(false);
                 pv_move->setEnabled(false);
             } else if (lv->isCowSnap()) {
@@ -458,9 +460,9 @@ void LVActions::setActions(LogVol *const lv, const int segment)
                 lv_reduce->setEnabled(false);
                 lv_extend->setEnabled(false);
                 max_fs->setEnabled(false);
-            } else if (lv->isCowOrigin())
+            } else if (lv->isCowOrigin()) {
                 lv_reduce->setEnabled(false);
-            
+            }
         } else if (lv->isOrphan()) {
             mkfs->setEnabled(false);
             max_fs->setEnabled(false);

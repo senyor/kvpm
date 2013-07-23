@@ -18,6 +18,8 @@
 
 #include <KActionCollection>
 
+class KDialog;
+
 class QTreeWidgetItem;
 
 class LogVol;

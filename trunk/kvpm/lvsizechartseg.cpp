@@ -81,7 +81,7 @@ LVChartSeg::LVChartSeg(LogVol *const volume, const QString use, QWidget *parent)
             color = reiser4_color;
         else if (use == "hfs")
             color = hfs_color;
-        else if (use == "vgat")
+        else if (use == "vfat")
             color = msdos_color;
         else if (use == "jfs")
             color = jfs_color;
