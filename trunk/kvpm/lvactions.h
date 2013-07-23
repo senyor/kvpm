@@ -34,10 +34,11 @@ class LVActions : public KActionCollection
     LogVol *m_lv = nullptr;
     int m_segment = 0;
 
-public:
-    LVActions(VolGroup *const group, QWidget *parent = nullptr);
     void setActions(LogVol *const lv, const int segment);
     void setMirrorActions(LogVol *const lv);
+
+public:
+    LVActions(VolGroup *const group, QWidget *parent = nullptr);
 
 public slots:
     void changeLv(QTreeWidgetItem *item);
