@@ -35,25 +35,28 @@ PVActions::PVActions(VolGroup *const group, QWidget *parent) :
     KActionCollection(parent),
     m_vg(group)
 {
-    KAction *const pv_move = addAction("pvmove", this, SLOT(movePhysicalExtents()));
+    KAction *const pv_move = addAction("pvmove");
     pv_move->setText(i18n("Move all physical extents"));
     pv_move->setIconText(i18n("Move all"));
     pv_move->setToolTip(i18n("Move all extents to another physical volume"));
     pv_move->setIcon(KIcon("lorry_go"));
 
-    KAction *const vg_reduce = addAction("vgreduce", this, SLOT(reduceVolumeGroup()));
+    KAction *const vg_reduce = addAction("pvremove");
     vg_reduce->setText(i18n("Remove from volume group"));
     vg_reduce->setIconText(i18n("Remove"));
     vg_reduce->setToolTip(i18n("Remove physical volume from volume group"));
     vg_reduce->setIcon(KIcon("list-remove"));
 
-    KAction *const pv_change = addAction("pvchange", this, SLOT(changePhysicalVolume()));
+    KAction *const pv_change = addAction("pvchange");
     pv_change->setText(i18n("Change physical volume attributes"));
     pv_change->setIconText(i18n("attributes"));
     pv_change->setToolTip(i18n("Change physical volume attributes"));
     pv_change->setIcon(KIcon("wrench_orange"));
 
     setActions(nullptr, false); 
+
+    connect(this, SIGNAL(actionTriggered(QAction *)),
+            this, SLOT(callDialog(QAction *)));
 }
 
 void PVActions::setActions(PhysVol *const pv, bool const isMoving)
@@ -61,7 +64,7 @@ void PVActions::setActions(PhysVol *const pv, bool const isMoving)
     m_pv = pv;
 
     QAction *const pv_move   = action("pvmove");
-    QAction *const vg_reduce = action("vgreduce");
+    QAction *const vg_reduce = action("pvremove");
     QAction *const pv_change = action("pvchange");
 
     if (!pv || m_vg->isExported()) {
@@ -108,34 +111,30 @@ void PVActions::changePv(QTreeWidgetItem *item)
     setActions(pv, ismoving);
 }
 
-void PVActions::movePhysicalExtents()
+void PVActions::callDialog(QAction *action)
 {
     if (m_pv) {
-        PVMoveDialog dialog(m_pv);
-        if (!dialog.bailout()) {
-            dialog.exec();
-            if (dialog.result() == QDialog::Accepted)
+        if (action->objectName() == "pvmove") {
+            PVMoveDialog dialog(m_pv);
+
+            if (!dialog.bailout()) {
+                dialog.exec();
+                if (dialog.result() == QDialog::Accepted)
+                    MainWindow->reRun();
+            }
+            
+        } else if (action->objectName() == "pvremove") {
+            if (reduce_vg_one(m_vg->getName(), m_pv->getName()))
                 MainWindow->reRun();
+        } else if (action->objectName() == "pvchange") {
+            PVChangeDialog dialog(m_pv);
+
+            dialog.exec();
+            
+            if (dialog.result() == QDialog::Accepted) {
+                ProcessProgress change_pv(dialog.arguments());
+                MainWindow->reRun();
+            }
         }
     }
 }
-
-void PVActions::reduceVolumeGroup()
-{
-    if (reduce_vg_one(m_vg->getName(), m_pv->getName()))
-        MainWindow->reRun();
-}
-
-void PVActions::changePhysicalVolume()
-{
-    if (m_pv) {
-        PVChangeDialog dialog(m_pv);
-        dialog.exec();
-
-        if (dialog.result() == QDialog::Accepted) {
-            ProcessProgress change_pv(dialog.arguments());
-            MainWindow->reRun();
-        }
-    }
-}
-

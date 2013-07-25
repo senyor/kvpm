@@ -160,9 +160,7 @@ void TopWindow::updateTabs()
 
 void TopWindow::callVgDialog(QAction *action)
 {
-
     if (action->objectName() == "changevg") {
-        
         VGChangeDialog dialog(m_vg);
         
         if (!dialog.bailout()) {
@@ -170,9 +168,7 @@ void TopWindow::callVgDialog(QAction *action)
             if (dialog.result() == QDialog::Accepted)
                 reRun();
         }
-        
     } else if (action->objectName() == "createvg") {
-        
         VGCreateDialog dialog;
         
         if (!dialog.bailout()) {
@@ -180,17 +176,12 @@ void TopWindow::callVgDialog(QAction *action)
             if (dialog.result() == QDialog::Accepted)
                 reRun();
         }
-        
     } else if (action->objectName() == "removevg") {
-        
         if (remove_vg(m_vg))
             reRun();
-        
     } else if (action->objectName() == "renamevg") {
-        
         if (rename_vg(m_vg))
             reRun();
-        
     } else if (action->objectName() == "reducevg") {
         VGReduceDialog dialog(m_vg);
         
@@ -199,10 +190,7 @@ void TopWindow::callVgDialog(QAction *action)
             if (dialog.result() == QDialog::Accepted)
                 reRun();
         }
-        
-        
     } else if (action->objectName() == "extendvg") {
-        
         VGExtendDialog dialog(m_vg);
         
         if (!dialog.bailout()) {
@@ -210,9 +198,7 @@ void TopWindow::callVgDialog(QAction *action)
             if (dialog.result() == QDialog::Accepted)
                 reRun();
         }
-        
     } else if (action->objectName() == "splitvg") {
-        
         VGSplitDialog dialog(m_vg);
         
         if (!dialog.bailout()) {
@@ -220,9 +206,7 @@ void TopWindow::callVgDialog(QAction *action)
             if (dialog.result() == QDialog::Accepted)
                 reRun();
         }
-        
     } else if (action->objectName() == "mergevg") {
-        
         VGMergeDialog dialog(m_vg);
         
         if (!dialog.bailout()) {
@@ -230,36 +214,29 @@ void TopWindow::callVgDialog(QAction *action)
             if (dialog.result() == QDialog::Accepted)
                 reRun();
         }
-        
     } else if (action->objectName() == "removemissingvg") {
-        
         if (remove_missing_pv(m_vg))
             reRun();
-        
     } else if (action->objectName() == "importvg") {
-        
         if (import_vg(m_vg))
             reRun();
-        
     } else if (action->objectName() == "exportvg") {
-        
         if (export_vg(m_vg))
             reRun();
-        
     }
-
 }
 
-void TopWindow::restartPhysicalVolumeMove()
+void TopWindow::callToolsDialog(QAction *action)
 {
-    if (restart_pvmove())
+    if (action->objectName() == "restartpvmove") {
+        if (restart_pvmove())
+            reRun();
+    } else if (action->objectName() == "stoppvmove") {
+        if (stop_pvmove())
+            reRun();
+    } else if (action->objectName() == "systemreload") {
         reRun();
-}
-
-void TopWindow::stopPhysicalVolumeMove()
-{
-    if (stop_pvmove())
-        reRun();
+    }
 }
 
 void TopWindow::configKvpm()
@@ -513,19 +490,23 @@ KMenu *TopWindow::buildToolsMenu()
     KAction *const restart_pvmove_action = new KAction(KIcon("system-reboot"), i18n("Restart interrupted pvmove"), this);
     KAction *const stop_pvmove_action    = new KAction(KIcon("process-stop"),  i18n("Abort pvmove"), this);
 
+    rescan_action->setObjectName("systemreload");
+    restart_pvmove_action->setObjectName("restartpvmove");
+    stop_pvmove_action->setObjectName("stoppvmove");
+
     menu->addAction(rescan_action);
     menu->addSeparator();
     menu->addAction(restart_pvmove_action);
     menu->addAction(stop_pvmove_action);
 
-    connect(rescan_action, SIGNAL(triggered()),
-            this, SLOT(reRun()));
+    QActionGroup *const actions = new QActionGroup(this);
 
-    connect(restart_pvmove_action, SIGNAL(triggered()),
-            this, SLOT(restartPhysicalVolumeMove()));
+    actions->addAction(rescan_action);
+    actions->addAction(restart_pvmove_action);
+    actions->addAction(stop_pvmove_action);
 
-    connect(stop_pvmove_action, SIGNAL(triggered()),
-            this, SLOT(stopPhysicalVolumeMove()));
+    connect(actions, SIGNAL(triggered(QAction *)),
+            this, SLOT(callToolsDialog(QAction *)));
 
     return menu;
 }

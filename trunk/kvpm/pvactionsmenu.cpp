@@ -30,6 +30,6 @@ PVActionsMenu::PVActionsMenu(PVActions *const pvactions, QWidget *parent) :
     KMenu(parent)
 {
     addAction(pvactions->action("pvmove"));
-    addAction(pvactions->action("vgreduce"));
+    addAction(pvactions->action("pvremove"));
     addAction(pvactions->action("pvchange"));
 }
