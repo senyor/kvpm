@@ -67,9 +67,9 @@ class TopWindow : public KMainWindow
 public:
     TopWindow(MasterList *const masterList, ExecutableFinder *const executableFinder, QWidget *parent = nullptr);
     static ProgressBox *getProgressBox();
+    void reRun();
 
 public slots:
-    void reRun();
     void updateTabs();
 
 private slots:
@@ -82,8 +82,7 @@ private slots:
     void setToolbarIconSize(QAction *action);
     void setToolbarIconText(QAction *action);
     void callVgDialog(QAction *action);
-    void restartPhysicalVolumeMove();
-    void stopPhysicalVolumeMove();
+    void callToolsDialog(QAction *action);
     void configKvpm();
 
 };

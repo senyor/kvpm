@@ -295,7 +295,7 @@ KToolBar* VolumeGroupTab::buildPvToolBar()
     toolbar->addWidget(separator);
 
     toolbar->addAction(m_pv_actions->action("pvmove"));
-    toolbar->addAction(m_pv_actions->action("vgreduce"));
+    toolbar->addAction(m_pv_actions->action("pvremove"));
     toolbar->addAction(m_pv_actions->action("pvchange"));
 
     return toolbar;

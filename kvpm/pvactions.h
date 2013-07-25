@@ -21,6 +21,7 @@
 class KDialog;
 
 class QTreeWidgetItem;
+class QAction;
 
 class PhysVol;
 class VolGroup;
@@ -42,9 +43,7 @@ public slots:
     void changePv(QTreeWidgetItem *item);
 
 private slots:
-    void movePhysicalExtents();
-    void reduceVolumeGroup();
-    void changePhysicalVolume();
+    void callDialog(QAction *);
 
 };
 
