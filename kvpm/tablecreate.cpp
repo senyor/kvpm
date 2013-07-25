@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2009, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2009, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -36,7 +36,7 @@ bool create_table(const QString devicePath)
                                          "or removing the old one, will cause "
                                          "any existing data on it to be permanently lost");
 
-    if (KMessageBox::warningContinueCancel(NULL,
+    if (KMessageBox::warningContinueCancel(nullptr,
                                            warning_message,
                                            QString(),
                                            KStandardGuiItem::cont(),
@@ -72,14 +72,14 @@ TableCreateDialog::TableCreateDialog(const QString devicePath, QWidget *parent) 
     device_label->setAlignment(Qt::AlignHCenter);
     layout->addWidget(device_label);
 
-    QGroupBox *const radio_box = new QGroupBox("Table Types");
+    QGroupBox *const radio_box = new QGroupBox(i18n("Table Types"));
     QVBoxLayout *const radio_box_layout = new QVBoxLayout();
     radio_box->setLayout(radio_box_layout);
     layout->addWidget(radio_box);
 
-    m_msdos_button   = new QRadioButton("MS-DOS");
-    m_gpt_button     = new QRadioButton("GPT");
-    m_destroy_button = new QRadioButton("Remove table");
+    m_msdos_button   = new QRadioButton(i18n("MS-DOS"));
+    m_gpt_button     = new QRadioButton(i18n("GPT"));
+    m_destroy_button = new QRadioButton(i18n("Remove table"));
     m_msdos_button->setChecked(true);
     radio_box_layout->addWidget(m_msdos_button);
     radio_box_layout->addWidget(m_gpt_button);
@@ -93,9 +93,9 @@ void TableCreateDialog::commitTable()
 {
     QByteArray path = m_device_path.toLocal8Bit();
     PedDevice   *const ped_device = ped_device_get(path.data());
-    PedDiskType *ped_disk_type = NULL;
-    PedDisk     *ped_disk = NULL;
-    char        *buff = NULL;
+    PedDiskType *ped_disk_type = nullptr;
+    PedDisk     *ped_disk = nullptr;
+    char        *buff = nullptr;
 
     if (m_msdos_button->isChecked()) {
         ped_disk_type = ped_disk_type_get("msdos");
@@ -113,7 +113,7 @@ void TableCreateDialog::commitTable()
         for (int x = 0; x < 2 * ped_device->sector_size; x++)
             buff[x] = 0;
 
-        if (! ped_device_write(ped_device, buff, 0, 2))   // clobber first 2 sectors
+        if (!ped_device_write(ped_device, buff, 0, 2))   // clobber first 2 sectors
             KMessageBox::error(0, "Destroying table failed: could not write to device");
 
         ped_device_close(ped_device);
