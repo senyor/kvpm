@@ -38,12 +38,11 @@
 
 /* This is the physical volume tree list on the volume group tab */
 
-PVTree::PVTree(VolGroup *const group, QWidget *parent)
-    : QTreeWidget(parent),
-      m_vg(group)
+PVTree::PVTree(VolGroup *const group, QWidget *parent) : 
+    QTreeWidget(parent),
+    m_vg(group)
 {
     QStringList header_labels;
-    m_context_menu = NULL;
     setColumnCount(6);
     QTreeWidgetItem *item;
 
@@ -204,103 +203,13 @@ void PVTree::setupContextMenu()
 {
     setContextMenuPolicy(Qt::CustomContextMenu);
 
-    pv_move_action   = new QAction(i18n("Move physical extents"), this);
-    vg_reduce_action = new QAction(i18n("Remove from volume group"), this);
-    pv_change_action = new QAction(i18n("Change physical volume attributes"), this);
-    m_context_menu = new QMenu(this);
-    m_context_menu->addAction(pv_move_action);
-    m_context_menu->addAction(vg_reduce_action);
-    m_context_menu->addAction(pv_change_action);
-
     connect(this, SIGNAL(customContextMenuRequested(QPoint)),
             this, SLOT(popupContextMenu(QPoint)));
-
-    connect(pv_move_action, SIGNAL(triggered()),
-            this, SLOT(movePhysicalExtents()));
-
-    connect(vg_reduce_action, SIGNAL(triggered()),
-            this, SLOT(reduceVolumeGroup()));
-
-    connect(pv_change_action, SIGNAL(triggered()),
-            this, SLOT(changePhysicalVolume()));
 }
 
 void PVTree::popupContextMenu(QPoint point)
 {
-    QTreeWidgetItem *const item = itemAt(point);
-
-    if (item && !m_vg->isExported()) {
-
-        if ((QVariant(item->data(3, Qt::UserRole)).toString()) == "0") {  // 0 =  Zero used extents on pv
-            pv_move_action->setEnabled(false);
-
-            if (m_vg->getPvCount() > 1)
-                vg_reduce_action->setEnabled(true);
-            else
-                vg_reduce_action->setEnabled(false);  // can't remove last pv from group
-        } else {
-            vg_reduce_action->setEnabled(false);
-
-            if (m_vg->getPvCount() > 1) {   // can't move extents if there isn't another volume to put them on
-                if (QVariant(item->data(6, 0)).toString().contains("pvmove"))  // can't have more than one pvmove
-                    pv_move_action->setEnabled(false);                      // See physvol.cpp about removing this
-                else
-                    pv_move_action->setEnabled(true);
-            } else {
-                pv_move_action->setEnabled(false);
-            }
-        }
-
-        m_pv_name = QVariant(item->data(0, 0)).toString();
-        if(!m_vg->getPvByName(m_pv_name)) {
-            pv_move_action->setEnabled(false);
-            vg_reduce_action->setEnabled(false);
-            pv_change_action->setEnabled(false);
-        } else {
-            pv_change_action->setEnabled(true);
-        }
-
-        m_context_menu->setEnabled(true);
-        m_context_menu->exec(QCursor::pos());
-
-    } else {
-        m_context_menu->setEnabled(false);  // item = NULL if there is no item a that point
-    }
-}
-
-void PVTree::movePhysicalExtents()
-{
-    PhysVol *const pv = m_vg->getPvByName(m_pv_name);
-
-    if (pv) {
-        PVMoveDialog dialog(pv);
-        if (!dialog.bailout()) {
-            dialog.exec();
-            if (dialog.result() == QDialog::Accepted)
-                MainWindow->reRun();
-        }
-    }
-}
-
-void PVTree::reduceVolumeGroup()
-{
-    if (reduce_vg_one(m_vg->getName(), m_pv_name))
-        MainWindow->reRun();
-}
-
-void PVTree::changePhysicalVolume()
-{
-    PhysVol *const pv = m_vg->getPvByName(m_pv_name);
-
-    if (pv) {
-        PVChangeDialog dialog(pv);
-        dialog.exec();
-
-        if (dialog.result() == QDialog::Accepted) {
-            ProcessProgress change_pv(dialog.arguments());
-            MainWindow->reRun();
-        }
-    }
+    emit pvMenuRequested(itemAt(point));
 }
 
 void PVTree::setViewConfig()

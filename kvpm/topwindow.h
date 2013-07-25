@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2009, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -41,16 +41,16 @@ extern TopWindow *MainWindow;
 class TopWindow : public KMainWindow
 {
     Q_OBJECT
-    MainTabWidget *m_tab_widget;          // The current tab widget we are using
+    MainTabWidget *m_tab_widget = nullptr;          // The current tab widget we are using
 
-    KAction *m_remove_vg_action,      *m_rename_vg_action,
-            *m_reduce_vg_action,      *m_create_vg_action,      *m_extend_vg_action,
-            *m_change_vg_action,      *m_remove_missing_action, *m_merge_vg_action,
-            *m_export_vg_action,      *m_import_vg_action,      *m_split_vg_action;
+    KAction *m_remove_vg_action, *m_rename_vg_action,
+            *m_reduce_vg_action, *m_create_vg_action,      *m_extend_vg_action,
+            *m_change_vg_action, *m_remove_missing_action, *m_merge_vg_action,
+            *m_export_vg_action, *m_import_vg_action,      *m_split_vg_action;
 
-    DeviceTab   *m_device_tab;
-    VolGroup    *m_vg;
-    MasterList  *m_master_list;
+    DeviceTab  *m_device_tab = nullptr;
+    VolGroup   *m_vg = nullptr;
+    MasterList *m_master_list;
     ExecutableFinder *m_executable_finder;
 
     static ProgressBox *m_progress_box;
@@ -60,10 +60,12 @@ class TopWindow : public KMainWindow
     KMenu *buildGroupsMenu();
     KMenu *buildHelpMenu();
     KMenu *buildSettingsMenu();
+    KMenu *buildToolbarSizeMenu();
+    KMenu *buildToolbarTextMenu();
     KMenu *buildToolsMenu();
 
 public:
-    TopWindow(MasterList *const masterList, ExecutableFinder *const executableFinder, QWidget *parent = NULL);
+    TopWindow(MasterList *const masterList, ExecutableFinder *const executableFinder, QWidget *parent = nullptr);
     static ProgressBox *getProgressBox();
 
 public slots:
@@ -75,7 +77,10 @@ private slots:
     void setupMenus();
     void showVolumeGroupInfo(bool show);
     void showVolumeGroupBar(bool show);
+    void showToolbars(bool show);
     void useSiUnits(bool use);
+    void setToolbarIconSize(QAction *action);
+    void setToolbarIconText(QAction *action);
     void changeVolumeGroup();
     void createVolumeGroup();
     void removeVolumeGroup();

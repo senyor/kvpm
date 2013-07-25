@@ -17,6 +17,8 @@
 
 #include <KMainWindow>
 
+#include <QMenu>
+
 class QString;
 class QVBoxLayout;
 class QScrollArea;
@@ -32,6 +34,7 @@ class VGTree;
 class VGInfoLabels;
 class LVSizeChart;
 class LVActions;
+class PVActions;
 class QFrame;
 class LogVol;
 
@@ -40,6 +43,7 @@ class VolumeGroupTab : public KMainWindow
     Q_OBJECT
  
     LVActions    *m_lv_actions = nullptr;
+    PVActions    *m_pv_actions = nullptr;
     LVSizeChart  *m_lv_size_chart = nullptr;
     VGInfoLabels *m_vg_info_labels = nullptr;
     QVBoxLayout  *m_layout = nullptr;
@@ -52,16 +56,19 @@ class VolumeGroupTab : public KMainWindow
 
     QFrame* buildPartialWarning();
     void readConfig();
-    KToolBar* buildToolBar();
+    KToolBar* buildLvToolBar();
+    KToolBar* buildPvToolBar();
 
 public:
     explicit VolumeGroupTab(VolGroup *const group, QWidget *parent = nullptr);
     VolGroup* getVg();
+    QMenu* createPopupMenu() { return nullptr; }
     void rescan();
 
 public slots:
     void lvContextMenu(QTreeWidgetItem *item);
     void lvContextMenu(LogVol *lv);
+    void pvContextMenu(QTreeWidgetItem *item);
 };
 
 #endif
