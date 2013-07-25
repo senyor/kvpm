@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2009, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2009, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -35,7 +35,7 @@ class TableCreateDialog : public KDialog
                  *m_destroy_button;
 
 public:
-    explicit TableCreateDialog(const QString devicePath, QWidget *parent = 0);
+    explicit TableCreateDialog(const QString devicePath, QWidget *parent = nullptr);
 
 private slots:
     void commitTable();
