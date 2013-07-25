@@ -61,10 +61,10 @@
 ProgressBox* TopWindow::m_progress_box = nullptr;   // Static initializing
 
 
-TopWindow::TopWindow(MasterList *const masterList, ExecutableFinder *const executableFinder, QWidget *parent)
-    : KMainWindow(parent),
-      m_master_list(masterList),
-      m_executable_finder(executableFinder)
+TopWindow::TopWindow(MasterList *const masterList, ExecutableFinder *const executableFinder, QWidget *parent) : 
+    KMainWindow(parent),
+    m_master_list(masterList),
+    m_executable_finder(executableFinder)
 {
     m_progress_box = new ProgressBox(); // make sure this stays *before* master_list->rescan() gets called!
 
@@ -158,178 +158,96 @@ void TopWindow::updateTabs()
             this, SLOT(setupMenus()));
 }
 
-void TopWindow::setupMenus()
+void TopWindow::callVgDialog(QAction *action)
 {
-    int index = m_tab_widget->getCurrentIndex();
-    bool has_active = false;
-    LogVolList lvs;
 
-    if (index) {
-        m_vg = MasterList::getVgByName(m_tab_widget->getUnmungedText(index));
-        if (m_vg) {
-            lvs = m_vg->getLogicalVolumes();
-            for (auto lv : lvs) {
-                if (lv->isActive()) {
-                    has_active = true;
-                    break;
-                }
-            }
+    if (action->objectName() == "changevg") {
+        
+        VGChangeDialog dialog(m_vg);
+        
+        if (!dialog.bailout()) {
+            dialog.exec();
+            if (dialog.result() == QDialog::Accepted)
+                reRun();
         }
-    } else {
-        m_vg = nullptr;
-    }
-
-    // only enable group removal if the tab is
-    // a volume group with no logical volumes
-
-    if (m_vg) {
-        if (lvs.size() || m_vg->isPartial() || m_vg->isExported())
-            m_remove_vg_action->setEnabled(false);
-        else
-            m_remove_vg_action->setEnabled(true);
-
-        if (m_vg->isPartial())
-            m_remove_missing_action->setEnabled(true);
-        else
-            m_remove_missing_action->setEnabled(false);
-
-        if (m_vg->isExported()) {
-            m_split_vg_action->setEnabled(false);
-            m_merge_vg_action->setEnabled(false);
-            m_import_vg_action->setEnabled(true);
-            m_export_vg_action->setEnabled(false);
-            m_reduce_vg_action->setEnabled(false);
-            m_extend_vg_action->setEnabled(false);
-        } else if (!m_vg->isPartial()) {
-            m_import_vg_action->setEnabled(false);
-            m_reduce_vg_action->setEnabled(true);
-            m_split_vg_action->setEnabled(true);
-            m_merge_vg_action->setEnabled(true);
-            m_extend_vg_action->setEnabled(true);
-
-            if (has_active)
-                m_export_vg_action->setEnabled(false);
-            else
-                m_export_vg_action->setEnabled(true);
-        } else {
-            m_split_vg_action->setEnabled(false);
-            m_merge_vg_action->setEnabled(false);
-            m_import_vg_action->setEnabled(false);
-            m_export_vg_action->setEnabled(false);
-            m_reduce_vg_action->setEnabled(false);
-            m_extend_vg_action->setEnabled(false);
+        
+    } else if (action->objectName() == "createvg") {
+        
+        VGCreateDialog dialog;
+        
+        if (!dialog.bailout()) {
+            dialog.exec();
+            if (dialog.result() == QDialog::Accepted)
+                reRun();
         }
-
-        m_rename_vg_action->setEnabled(true);
-        m_change_vg_action->setEnabled(true);
-    } else {
-        m_reduce_vg_action->setEnabled(false);
-        m_rename_vg_action->setEnabled(false);
-        m_remove_vg_action->setEnabled(false);
-        m_remove_missing_action->setEnabled(false);
-        m_change_vg_action->setEnabled(false);
-        m_import_vg_action->setEnabled(false);
-        m_split_vg_action->setEnabled(false);
-        m_merge_vg_action->setEnabled(false);
-        m_export_vg_action->setEnabled(false);
-        m_extend_vg_action->setEnabled(false);
-    }
-}
-
-void TopWindow::changeVolumeGroup()
-{
-    VGChangeDialog dialog(m_vg);
-
-    if (!dialog.bailout()) {
-        dialog.exec();
-        if (dialog.result() == QDialog::Accepted)
+        
+    } else if (action->objectName() == "removevg") {
+        
+        if (remove_vg(m_vg))
             reRun();
-    }
-}
-
-void TopWindow::createVolumeGroup()
-{
-    VGCreateDialog dialog;
-
-    if (!dialog.bailout()) {
-        dialog.exec();
-        if (dialog.result() == QDialog::Accepted)
+        
+    } else if (action->objectName() == "renamevg") {
+        
+        if (rename_vg(m_vg))
             reRun();
-    }
-}
-
-void TopWindow::removeVolumeGroup()
-{
-    if (remove_vg(m_vg))
-        reRun();
-}
-
-void TopWindow::renameVolumeGroup()
-{
-    if (rename_vg(m_vg))
-        reRun();
-}
-
-void TopWindow::reduceVolumeGroup()
-{
-    VGReduceDialog dialog(m_vg);
-
-    if (!dialog.bailout()) {
-        dialog.exec();
-        if (dialog.result() == QDialog::Accepted)
+        
+    } else if (action->objectName() == "reducevg") {
+        VGReduceDialog dialog(m_vg);
+        
+        if (!dialog.bailout()) {
+            dialog.exec();
+            if (dialog.result() == QDialog::Accepted)
+                reRun();
+        }
+        
+        
+    } else if (action->objectName() == "extendvg") {
+        
+        VGExtendDialog dialog(m_vg);
+        
+        if (!dialog.bailout()) {
+            dialog.exec();
+            if (dialog.result() == QDialog::Accepted)
+                reRun();
+        }
+        
+    } else if (action->objectName() == "splitvg") {
+        
+        VGSplitDialog dialog(m_vg);
+        
+        if (!dialog.bailout()) {
+            dialog.exec();
+            if (dialog.result() == QDialog::Accepted)
+                reRun();
+        }
+        
+    } else if (action->objectName() == "mergevg") {
+        
+        VGMergeDialog dialog(m_vg);
+        
+        if (!dialog.bailout()) {
+            dialog.exec();
+            if (dialog.result() == QDialog::Accepted)
+                reRun();
+        }
+        
+    } else if (action->objectName() == "removemissingvg") {
+        
+        if (remove_missing_pv(m_vg))
             reRun();
-    }
-}
-
-void TopWindow::exportVolumeGroup()
-{
-    if (export_vg(m_vg))
-        reRun();
-}
-
-void TopWindow::extendVolumeGroup()
-{
-    VGExtendDialog dialog(m_vg);
-
-    if (!dialog.bailout()) {
-        dialog.exec();
-        if (dialog.result() == QDialog::Accepted)
+        
+    } else if (action->objectName() == "importvg") {
+        
+        if (import_vg(m_vg))
             reRun();
-    }
-}
-
-void TopWindow::importVolumeGroup()
-{
-    if (import_vg(m_vg))
-        reRun();
-}
-
-void TopWindow::splitVolumeGroup()
-{
-    VGSplitDialog dialog(m_vg);
-
-    if (!dialog.bailout()) {
-        dialog.exec();
-        if (dialog.result() == QDialog::Accepted)
+        
+    } else if (action->objectName() == "exportvg") {
+        
+        if (export_vg(m_vg))
             reRun();
+        
     }
-}
 
-void TopWindow::mergeVolumeGroup()
-{
-    VGMergeDialog dialog(m_vg);
-
-    if (!dialog.bailout()) {
-        dialog.exec();
-        if (dialog.result() == QDialog::Accepted)
-            reRun();
-    }
-}
-
-void TopWindow::removeMissingVolumes()
-{
-    if (remove_missing_pv(m_vg))
-        reRun();
 }
 
 void TopWindow::restartPhysicalVolumeMove()
@@ -346,7 +264,7 @@ void TopWindow::stopPhysicalVolumeMove()
 
 void TopWindow::configKvpm()
 {
-    KvpmConfigDialog *const dialog  = new KvpmConfigDialog(this, "settings", new KConfigSkeleton(), m_executable_finder);
+    KvpmConfigDialog *const dialog = new KvpmConfigDialog(this, "settings", new KConfigSkeleton(), m_executable_finder);
 
     connect(dialog, SIGNAL(applyClicked()),
             this,   SLOT(updateTabs()));
@@ -650,66 +568,141 @@ KMenu *TopWindow::buildFileMenu()
 
 KMenu *TopWindow::buildGroupsMenu()
 {
-    KMenu *const menu   = new KMenu(i18n("Volume Groups"));
-
-    m_remove_vg_action      = new KAction(KIcon("cross"),        i18n("Delete Volume Group..."), this);
-    m_reduce_vg_action      = new KAction(KIcon("delete"),       i18n("Reduce Volume Group..."), this);
-    m_extend_vg_action      = new KAction(KIcon("add"),          i18n("Extend Volume Group..."), this);
-    m_rename_vg_action      = new KAction(KIcon("edit-rename"),  i18n("Rename Volume Group..."), this);
+    m_remove_action = new KAction(KIcon("cross"),        i18n("Delete Volume Group..."), this);
+    m_reduce_action = new KAction(KIcon("delete"),       i18n("Reduce Volume Group..."), this);
+    m_extend_action = new KAction(KIcon("add"),          i18n("Extend Volume Group..."), this);
+    m_rename_action = new KAction(KIcon("edit-rename"),  i18n("Rename Volume Group..."), this);
+    m_merge_action  = new KAction(KIcon("arrow_join"),   i18n("Merge Volume Group..."), this);
+    m_split_action  = new KAction(KIcon("arrow_divide"), i18n("Split Volume Group..."), this);
+    m_change_action = new KAction(KIcon("wrench"),       i18n("Change Volume Group Attributes..."), this);
+    m_create_action = new KAction(KIcon("document-new"), i18n("Create Volume Group..."), this);
+    m_import_action = new KAction(KIcon("document-import"), i18n("Import Volume Group..."), this);
+    m_export_action = new KAction(KIcon("document-export"), i18n("Export Volume Group..."), this);
     m_remove_missing_action = new KAction(KIcon("error_go"),     i18n("Remove Missing Physcial Volumes..."), this);
-    m_merge_vg_action       = new KAction(KIcon("arrow_join"),   i18n("Merge Volume Group..."), this);
-    m_split_vg_action       = new KAction(KIcon("arrow_divide"), i18n("Split Volume Group..."), this);
-    m_change_vg_action      = new KAction(KIcon("wrench"),       i18n("Change Volume Group Attributes..."), this);
-    m_create_vg_action      = new KAction(KIcon("document-new"), i18n("Create Volume Group..."), this);
-    m_export_vg_action      = new KAction(KIcon("document-export"), i18n("Export Volume Group..."), this);
-    m_import_vg_action      = new KAction(KIcon("document-import"), i18n("Import Volume Group..."), this);
+ 
+    m_remove_action->setObjectName("removevg");
+    m_reduce_action->setObjectName("reducevg");
+    m_extend_action->setObjectName("extendvg");
+    m_rename_action->setObjectName("renamevg");
+    m_merge_action->setObjectName("mergevg");
+    m_split_action->setObjectName("splitvg");
+    m_change_action->setObjectName("changevg");
+    m_create_action->setObjectName("createvg");
+    m_import_action->setObjectName("importvg");
+    m_export_action->setObjectName("exportvg");
+    m_remove_missing_action->setObjectName("removemissingvg");
 
-    menu->addAction(m_create_vg_action);
-    menu->addAction(m_remove_vg_action);
-    menu->addAction(m_rename_vg_action);
+    KMenu *const menu = new KMenu(i18n("Volume Groups"));
+
+    menu->addAction(m_create_action);
+    menu->addAction(m_remove_action);
+    menu->addAction(m_rename_action);
     menu->addSeparator();
     menu->addAction(m_remove_missing_action);
-    menu->addAction(m_extend_vg_action);
-    menu->addAction(m_reduce_vg_action);
-    menu->addAction(m_split_vg_action);
-    menu->addAction(m_merge_vg_action);
+    menu->addAction(m_extend_action);
+    menu->addAction(m_reduce_action);
+    menu->addAction(m_split_action);
+    menu->addAction(m_merge_action);
     menu->addSeparator();
-    menu->addAction(m_export_vg_action);
-    menu->addAction(m_import_vg_action);
-    menu->addAction(m_change_vg_action);
+    menu->addAction(m_import_action);
+    menu->addAction(m_export_action);
+    menu->addAction(m_change_action);
 
-    connect(m_change_vg_action, SIGNAL(triggered()),
-            this, SLOT(changeVolumeGroup()));
+    QActionGroup *const actions = new QActionGroup(this);
 
-    connect(m_create_vg_action, SIGNAL(triggered()),
-            this, SLOT(createVolumeGroup()));
+    actions->addAction(m_create_action);
+    actions->addAction(m_remove_action);
+    actions->addAction(m_rename_action);
+    actions->addAction(m_remove_missing_action);
+    actions->addAction(m_extend_action);
+    actions->addAction(m_reduce_action);
+    actions->addAction(m_split_action);
+    actions->addAction(m_merge_action);
+    actions->addAction(m_import_action);
+    actions->addAction(m_export_action);
+    actions->addAction(m_change_action);
 
-    connect(m_remove_vg_action, SIGNAL(triggered()),
-            this, SLOT(removeVolumeGroup()));
-
-    connect(m_rename_vg_action, SIGNAL(triggered()),
-            this, SLOT(renameVolumeGroup()));
-
-    connect(m_export_vg_action, SIGNAL(triggered()),
-            this, SLOT(exportVolumeGroup()));
-
-    connect(m_extend_vg_action, SIGNAL(triggered()),
-            this, SLOT(extendVolumeGroup()));
-
-    connect(m_import_vg_action, SIGNAL(triggered()),
-            this, SLOT(importVolumeGroup()));
-
-    connect(m_split_vg_action, SIGNAL(triggered()),
-            this, SLOT(splitVolumeGroup()));
-
-    connect(m_merge_vg_action, SIGNAL(triggered()),
-            this, SLOT(mergeVolumeGroup()));
-
-    connect(m_remove_missing_action, SIGNAL(triggered()),
-            this, SLOT(removeMissingVolumes()));
-
-    connect(m_reduce_vg_action, SIGNAL(triggered()),
-            this, SLOT(reduceVolumeGroup()));
+    connect(actions, SIGNAL(triggered(QAction *)),
+            this, SLOT(callVgDialog(QAction *)));
 
     return menu;
 }
+
+void TopWindow::setupMenus()
+{
+    int index = m_tab_widget->getCurrentIndex();
+    bool has_active = false;
+    LogVolList lvs;
+
+    if (index) {
+        m_vg = MasterList::getVgByName(m_tab_widget->getUnmungedText(index));
+        if (m_vg) {
+            lvs = m_vg->getLogicalVolumes();
+            for (auto lv : lvs) {
+                if (lv->isActive()) {
+                    has_active = true;
+                    break;
+                }
+            }
+        }
+    } else {
+        m_vg = nullptr;
+    }
+
+    // only enable group removal if the tab is
+    // a volume group with no logical volumes
+
+    if (m_vg) {
+        if (lvs.size() || m_vg->isPartial() || m_vg->isExported())
+            m_remove_action->setEnabled(false);
+        else
+            m_remove_action->setEnabled(true);
+
+        if (m_vg->isPartial())
+            m_remove_missing_action->setEnabled(true);
+        else
+            m_remove_missing_action->setEnabled(false);
+
+        if (m_vg->isExported()) {
+            m_split_action->setEnabled(false);
+            m_merge_action->setEnabled(false);
+            m_import_action->setEnabled(true);
+            m_export_action->setEnabled(false);
+            m_reduce_action->setEnabled(false);
+            m_extend_action->setEnabled(false);
+        } else if (!m_vg->isPartial()) {
+            m_import_action->setEnabled(false);
+            m_reduce_action->setEnabled(true);
+            m_split_action->setEnabled(true);
+            m_merge_action->setEnabled(true);
+            m_extend_action->setEnabled(true);
+
+            if (has_active)
+                m_export_action->setEnabled(false);
+            else
+                m_export_action->setEnabled(true);
+        } else {
+            m_split_action->setEnabled(false);
+            m_merge_action->setEnabled(false);
+            m_import_action->setEnabled(false);
+            m_export_action->setEnabled(false);
+            m_reduce_action->setEnabled(false);
+            m_extend_action->setEnabled(false);
+        }
+
+        m_rename_action->setEnabled(true);
+        m_change_action->setEnabled(true);
+    } else {
+        m_reduce_action->setEnabled(false);
+        m_rename_action->setEnabled(false);
+        m_remove_action->setEnabled(false);
+        m_remove_missing_action->setEnabled(false);
+        m_change_action->setEnabled(false);
+        m_import_action->setEnabled(false);
+        m_split_action->setEnabled(false);
+        m_merge_action->setEnabled(false);
+        m_export_action->setEnabled(false);
+        m_extend_action->setEnabled(false);
+    }
+}
+
