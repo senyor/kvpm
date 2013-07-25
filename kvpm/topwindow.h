@@ -43,10 +43,10 @@ class TopWindow : public KMainWindow
     Q_OBJECT
     MainTabWidget *m_tab_widget = nullptr;          // The current tab widget we are using
 
-    KAction *m_remove_vg_action, *m_rename_vg_action,
-            *m_reduce_vg_action, *m_create_vg_action,      *m_extend_vg_action,
-            *m_change_vg_action, *m_remove_missing_action, *m_merge_vg_action,
-            *m_export_vg_action, *m_import_vg_action,      *m_split_vg_action;
+    KAction *m_remove_action, *m_rename_action, *m_extend_action,
+            *m_reduce_action, *m_create_action, *m_merge_action,
+            *m_change_action, *m_remove_missing_action,
+            *m_export_action, *m_import_action, *m_split_action;
 
     DeviceTab  *m_device_tab = nullptr;
     VolGroup   *m_vg = nullptr;
@@ -81,17 +81,7 @@ private slots:
     void useSiUnits(bool use);
     void setToolbarIconSize(QAction *action);
     void setToolbarIconText(QAction *action);
-    void changeVolumeGroup();
-    void createVolumeGroup();
-    void removeVolumeGroup();
-    void renameVolumeGroup();
-    void removeMissingVolumes();
-    void reduceVolumeGroup();
-    void exportVolumeGroup();
-    void importVolumeGroup();
-    void splitVolumeGroup();
-    void mergeVolumeGroup();
-    void extendVolumeGroup();
+    void callVgDialog(QAction *action);
     void restartPhysicalVolumeMove();
     void stopPhysicalVolumeMove();
     void configKvpm();
