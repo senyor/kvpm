@@ -1,3 +1,7 @@
+version 0.9.6
+Put toolbars on the volume group tabs for all the menu options
+available in the logical and physical volume context menus.
+
 version 0.9.5
 Added a dialog for setting the flags on a partitions. Ie: boot, swap
 and bios_grub.

@@ -10,6 +10,7 @@ set(kvpm_SRCS allocationpolicy.cpp changemirror.cpp kvpmconfigdialog.cpp devicep
 	      pvextend.cpp pvreduce.cpp partremove.cpp pvgroupbox.cpp partbase.cpp
 	      partitiongraphic.cpp partadd.cpp pvproperties.cpp  pvpropertiesstack.cpp 
 	      physvol.cpp partchange.cpp progressbox.cpp repairmissing.cpp partflag.cpp
+	      pvactions.cpp pvactionsmenu.cpp
 	      misc.cpp pedexceptions.cpp processprogress.cpp pvchange.cpp snapmerge.cpp
 	      pvmove.cpp pvtree.cpp removemissing.cpp removemirror.cpp sizeselectorbox.cpp
 	      removemirrorleg.cpp storagepartition.cpp storagedevice.cpp storagebase.cpp 

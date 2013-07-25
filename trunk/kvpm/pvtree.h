@@ -33,19 +33,11 @@ class PVTree : public QTreeWidget
 
     VolGroup *m_vg;
 
-    QMenu *m_context_menu;
-
     bool m_use_si_units;
     bool m_show_total;
     bool m_show_percent;
     bool m_show_both;
     int m_pv_warn_percent;
-
-    QAction *pv_move_action,
-            *vg_reduce_action,
-            *pv_change_action;
-
-    QString m_pv_name;
 
     QStringList getLvNames(PhysVol *const pv);
     void setViewConfig();
@@ -55,11 +47,11 @@ public:
     explicit PVTree(VolGroup *const group, QWidget *parent = 0);
     void loadData();
 
+signals:
+    void pvMenuRequested(QTreeWidgetItem *item);
+
 private slots:
     void popupContextMenu(QPoint point);
-    void movePhysicalExtents();
-    void reduceVolumeGroup();
-    void changePhysicalVolume();
 
 };
 

@@ -16,8 +16,9 @@
 #include "topwindow.h"
 
 #include <KAboutData>
-#include <KApplication>
+#include <KActionCollection>
 #include <KAction>
+#include <KApplication>
 #include <KConfigSkeleton>
 #include <KHelpMenu>
 #include <KIcon>
@@ -27,6 +28,7 @@
 #include <KStandardAction>
 #include <KToggleAction>
 
+#include <QActionGroup>
 #include <QDebug>
 #include <QElapsedTimer>
 #include <QVBoxLayout>
@@ -56,7 +58,7 @@
 #include "volumegrouptab.h"
 
 
-ProgressBox* TopWindow::m_progress_box = NULL;   // Static initializing
+ProgressBox* TopWindow::m_progress_box = nullptr;   // Static initializing
 
 
 TopWindow::TopWindow(MasterList *const masterList, ExecutableFinder *const executableFinder, QWidget *parent)
@@ -64,7 +66,6 @@ TopWindow::TopWindow(MasterList *const masterList, ExecutableFinder *const execu
       m_master_list(masterList),
       m_executable_finder(executableFinder)
 {
-    m_tab_widget = NULL;
     m_progress_box = new ProgressBox(); // make sure this stays *before* master_list->rescan() gets called!
 
     menuBar()->addMenu(buildFileMenu());
@@ -90,16 +91,8 @@ TopWindow::TopWindow(MasterList *const masterList, ExecutableFinder *const execu
 void TopWindow::reRun()
 {
     qApp->setOverrideCursor(Qt::WaitCursor);
-
     m_master_list->rescan(); // loads the list with new data
-
-    //   QElapsedTimer timer;
-    //   timer.start();
-
     updateTabs();
-
-    //   qDebug() << "Elapsed: " << timer.elapsed();
-
     qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
     qApp->restoreOverrideCursor();
 }
@@ -146,6 +139,7 @@ void TopWindow::updateTabs()
                     m_tab_widget->setIcon(x, KIcon());
             }
         }
+
         if (!vg_exists) {
             tab = new VolumeGroupTab(groups[y]);
             if (groups[y]->isPartial())
@@ -162,7 +156,6 @@ void TopWindow::updateTabs()
 
     connect(m_tab_widget, SIGNAL(currentIndexChanged()),
             this, SLOT(setupMenus()));
-
 }
 
 void TopWindow::setupMenus()
@@ -173,7 +166,7 @@ void TopWindow::setupMenus()
 
     if (index) {
         m_vg = MasterList::getVgByName(m_tab_widget->getUnmungedText(index));
-        if (m_vg != NULL) {
+        if (m_vg) {
             lvs = m_vg->getLogicalVolumes();
             for (auto lv : lvs) {
                 if (lv->isActive()) {
@@ -183,14 +176,13 @@ void TopWindow::setupMenus()
             }
         }
     } else {
-        m_vg = NULL;
+        m_vg = nullptr;
     }
 
     // only enable group removal if the tab is
     // a volume group with no logical volumes
 
     if (m_vg) {
-
         if (lvs.size() || m_vg->isPartial() || m_vg->isExported())
             m_remove_vg_action->setEnabled(false);
         else
@@ -402,6 +394,18 @@ void TopWindow::showVolumeGroupBar(bool show)
     updateTabs();
 }
 
+void TopWindow::showToolbars(bool show)
+{
+    KConfigSkeleton skeleton;
+    bool show_toolbars;
+
+    skeleton.setCurrentGroup("General");
+    skeleton.addItemBool("show_toolbars", show_toolbars, true);
+    show_toolbars = show;
+    skeleton.writeConfig();
+    updateTabs();
+}
+
 void TopWindow::useSiUnits(bool use)
 {
     KConfigSkeleton skeleton;
@@ -414,35 +418,157 @@ void TopWindow::useSiUnits(bool use)
     updateTabs();
 }
 
-KMenu *TopWindow::buildSettingsMenu()
+void TopWindow::setToolbarIconSize(QAction *action)
 {
-    KMenu *const settings_menu = new KMenu(i18n("Settings"));
-    KToggleAction *const show_vg_info_action = new KToggleAction(KIcon("preferences-other"), i18n("Show Volume Group Information"), this);
-    KToggleAction *const show_lv_bar_action  = new KToggleAction(KIcon("preferences-other"), i18n("Show Volume Group Bar Graph"), this);
-    KToggleAction *const use_si_units_action  = new KToggleAction(KIcon("preferences-other"), i18n("Use Metric SI Units"), this);
-    KAction *const config_kvpm_action        = new KAction(KIcon("configure"), i18n("Configure kvpm..."), this);
+    KConfigSkeleton skeleton;
+    QString icon_size;
 
-    settings_menu->addAction(show_vg_info_action);
-    settings_menu->addAction(show_lv_bar_action);
-    settings_menu->addAction(use_si_units_action);
-    settings_menu->addSeparator();
-    settings_menu->addAction(config_kvpm_action);
+    skeleton.setCurrentGroup("General");
+    skeleton.addItemString("toolbar_icon_size", icon_size, "mediumicons");
+    icon_size = action->objectName();
+    skeleton.writeConfig();
+    updateTabs();
+}
+
+void TopWindow::setToolbarIconText(QAction *action)
+{
+    KConfigSkeleton skeleton;
+    QString icon_text;
+
+    skeleton.setCurrentGroup("General");
+    skeleton.addItemString("toolbar_icon_text", icon_text, "iconsonly");
+    icon_text = action->objectName();
+    skeleton.writeConfig();
+    updateTabs();
+}
+
+KMenu *TopWindow::buildToolbarSizeMenu()
+{
+    KMenu *const menu = new KMenu(i18n("Toolbar icon size"));
+
+    KToggleAction *const small_action = new KToggleAction(i18n("Small icons (16x16)"), this);
+    KToggleAction *const medium_action = new KToggleAction(i18n("Medium icons (22x22)"), this);
+    KToggleAction *const large_action = new KToggleAction(i18n("Large icons (32x32)"), this);
+    KToggleAction *const huge_action = new KToggleAction(i18n("Huge icons (48x48)"), this);
+
+    small_action->setObjectName("smallicons");
+    medium_action->setObjectName("mediumicons");
+    large_action->setObjectName("largeicons");
+    huge_action->setObjectName("hugeicons");
+
+    QActionGroup  *const size_group = new QActionGroup(this);
+
+    size_group->addAction(small_action);
+    size_group->addAction(medium_action);
+    size_group->addAction(large_action);
+    size_group->addAction(huge_action);
+
+    connect(size_group, SIGNAL(triggered(QAction *)),
+            this, SLOT(setToolbarIconSize(QAction *)));
+
+    menu->addAction(small_action);
+    menu->addAction(medium_action);
+    menu->addAction(large_action);
+    menu->addAction(huge_action);
 
     KConfigSkeleton skeleton;
-    bool show_vg_info, show_lv_bar, use_si_units;
+    QString icon_size;
+
+    skeleton.setCurrentGroup("General");
+    skeleton.addItemString("toolbar_icon_size", icon_size, "mediumicons");
+    
+    if (icon_size == "smallicons")
+        small_action->setChecked(true);
+    else if (icon_size == "mediumicons")
+        medium_action->setChecked(true);
+    else if (icon_size == "largeicons")
+        large_action->setChecked(true);
+    else if (icon_size == "hugeicons")
+        huge_action->setChecked(true);
+
+    return menu;
+}
+
+KMenu *TopWindow::buildToolbarTextMenu()
+{
+    KMenu *const menu = new KMenu(i18n("Toolbar text placement"));
+
+    KToggleAction *const icons_only_action = new KToggleAction(i18n("Icons only"), this);
+    KToggleAction *const text_only_action = new KToggleAction(i18n("Text only"), this);
+    KToggleAction *const text_beside_action = new KToggleAction(i18n("Text beside icons"), this);
+    KToggleAction *const text_under_action = new KToggleAction(i18n("Text under icons"), this);
+
+    QActionGroup  *const icon_group = new QActionGroup(this);
+    
+    icons_only_action->setObjectName("iconsonly");
+    text_only_action->setObjectName("textonly");
+    text_beside_action->setObjectName("textbesideicons");
+    text_under_action->setObjectName("textundericons");
+
+    icon_group->addAction(icons_only_action);
+    icon_group->addAction(text_only_action);
+    icon_group->addAction(text_beside_action);
+    icon_group->addAction(text_under_action);
+
+    connect(icon_group, SIGNAL(triggered(QAction *)),
+            this, SLOT(setToolbarIconText(QAction *)));
+
+    menu->addAction(icons_only_action);
+    menu->addAction(text_only_action);
+    menu->addAction(text_beside_action);
+    menu->addAction(text_under_action);
+
+    KConfigSkeleton skeleton;
+    QString icon_text;
+
+    skeleton.setCurrentGroup("General");
+    skeleton.addItemString("toolbar_icon_text", icon_text, "iconsonly");
+    
+    if (icon_text == "iconsonly")
+        icons_only_action->setChecked(true);
+    else if (icon_text == "textonly")
+        text_only_action->setChecked(true);
+    else if (icon_text == "textbesideicons")
+        text_beside_action->setChecked(true);
+    else if (icon_text == "textundericons")
+        text_under_action->setChecked(true);
+
+    return menu;
+}
+
+KMenu *TopWindow::buildSettingsMenu()
+{
+    KMenu *const menu = new KMenu(i18n("Settings"));
+    KToggleAction *const show_vg_info_action  = new KToggleAction(i18n("Show Volume Group Information"), this);
+    KToggleAction *const show_lv_bar_action   = new KToggleAction(i18n("Show Volume Group Bar Graph"), this);
+    KToggleAction *const use_si_units_action  = new KToggleAction(i18n("Use Metric SI Units"), this);
+    KToggleAction *const show_toolbars_action = new KToggleAction(i18n("Show Toolbars"), this);
+    KAction *const config_kvpm_action = new KAction(KIcon("configure"), i18n("Configure kvpm..."), this);
+
+    menu->addAction(show_vg_info_action);
+    menu->addAction(show_lv_bar_action);
+    menu->addAction(use_si_units_action);
+    menu->addSeparator();
+    menu->addAction(show_toolbars_action);
+    menu->addMenu(buildToolbarTextMenu());
+    menu->addMenu(buildToolbarSizeMenu());
+    menu->addSeparator();
+    menu->addAction(config_kvpm_action);
+
+    KConfigSkeleton skeleton;
+    bool show_vg_info, show_lv_bar, use_si_units, show_toolbars;
 
     skeleton.setCurrentGroup("General");
     skeleton.addItemBool("show_vg_info", show_vg_info, true);
     skeleton.addItemBool("show_lv_bar",  show_lv_bar,  true);
     skeleton.addItemBool("use_si_units", use_si_units, false);
+    skeleton.addItemBool("show_toolbars", show_toolbars, true);
 
     // This must be *before* the following connect() statements
     show_vg_info_action->setChecked(show_vg_info);
     show_lv_bar_action->setChecked(show_lv_bar);
     use_si_units_action->setChecked(use_si_units);
-
-    connect(config_kvpm_action,  SIGNAL(triggered()),
-            this, SLOT(configKvpm()));
+    show_toolbars_action->setChecked(show_toolbars);
 
     connect(show_vg_info_action, SIGNAL(toggled(bool)),
             this, SLOT(showVolumeGroupInfo(bool)));
@@ -453,31 +579,37 @@ KMenu *TopWindow::buildSettingsMenu()
     connect(use_si_units_action, SIGNAL(toggled(bool)),
             this, SLOT(useSiUnits(bool)));
 
-    return settings_menu;
+    connect(show_toolbars_action, SIGNAL(toggled(bool)),
+            this, SLOT(showToolbars(bool)));
+
+    connect(config_kvpm_action,  SIGNAL(triggered()),
+            this, SLOT(configKvpm()));
+
+    return menu;
 }
 
 KMenu *TopWindow::buildToolsMenu()
 {
-    KMenu   *const tools_menu = new KMenu(i18n("Tools"));
+    KMenu   *const menu = new KMenu(i18n("Tools"));
     KAction *const rescan_action         = new KAction(KIcon("view-refresh"),  i18n("Rescan System"), this);
     KAction *const restart_pvmove_action = new KAction(KIcon("system-reboot"), i18n("Restart interrupted pvmove"), this);
     KAction *const stop_pvmove_action    = new KAction(KIcon("process-stop"),  i18n("Abort pvmove"), this);
 
-    tools_menu->addAction(rescan_action);
-    tools_menu->addSeparator();
-    tools_menu->addAction(restart_pvmove_action);
-    tools_menu->addAction(stop_pvmove_action);
+    menu->addAction(rescan_action);
+    menu->addSeparator();
+    menu->addAction(restart_pvmove_action);
+    menu->addAction(stop_pvmove_action);
 
-    connect(rescan_action,          SIGNAL(triggered()),
+    connect(rescan_action, SIGNAL(triggered()),
             this, SLOT(reRun()));
 
     connect(restart_pvmove_action, SIGNAL(triggered()),
             this, SLOT(restartPhysicalVolumeMove()));
 
-    connect(stop_pvmove_action,    SIGNAL(triggered()),
+    connect(stop_pvmove_action, SIGNAL(triggered()),
             this, SLOT(stopPhysicalVolumeMove()));
 
-    return tools_menu;
+    return menu;
 }
 
 KMenu *TopWindow::buildHelpMenu()
@@ -485,7 +617,7 @@ KMenu *TopWindow::buildHelpMenu()
     KAboutData *const about_data = new KAboutData(QByteArray("kvpm"),
             QByteArray("kvpm"),
             ki18n("kvpm"),
-            QByteArray("0.9.5"),
+            QByteArray("0.9.6"),
             ki18n("Linux volume and partition manager for KDE.  "
                   "This program is still under development, "
                   "bug reports and any comments are welcomed.  "
@@ -509,75 +641,75 @@ KMenu *TopWindow::buildHelpMenu()
 
 KMenu *TopWindow::buildFileMenu()
 {
-    KMenu *const file_menu     = new KMenu(i18n("File"));
-    KAction *const quit_action =  KStandardAction::quit(qApp, SLOT(quit()), file_menu);
-    file_menu->addAction(quit_action);
+    KMenu *const menu = new KMenu(i18n("File"));
+    KAction *const quit_action = KStandardAction::quit(qApp, SLOT(quit()), menu);
+    menu->addAction(quit_action);
 
-    return file_menu;
+    return menu;
 }
 
 KMenu *TopWindow::buildGroupsMenu()
 {
-    KMenu *const groups_menu   = new KMenu(i18n("Volume Groups"));
+    KMenu *const menu   = new KMenu(i18n("Volume Groups"));
 
-    m_remove_vg_action       = new KAction(KIcon("cross"),         i18n("Delete Volume Group..."), this);
-    m_reduce_vg_action       = new KAction(KIcon("delete"),        i18n("Reduce Volume Group..."), this);
-    m_extend_vg_action       = new KAction(KIcon("add"),           i18n("Extend Volume Group..."), this);
-    m_rename_vg_action       = new KAction(KIcon("edit-rename"),   i18n("Rename Volume Group..."), this);
-    m_remove_missing_action  = new KAction(KIcon("error_go"),      i18n("Remove Missing Physcial Volumes..."), this);
-    m_merge_vg_action        = new KAction(KIcon("arrow_join"),   i18n("Merge Volume Group..."), this);
-    m_split_vg_action        = new KAction(KIcon("arrow_divide"), i18n("Split Volume Group..."), this);
-    m_change_vg_action       = new KAction(KIcon("wrench"),       i18n("Change Volume Group Attributes..."), this);
-    m_create_vg_action       = new KAction(KIcon("document-new"), i18n("Create Volume Group..."), this);
-    m_export_vg_action       = new KAction(KIcon("document-export"), i18n("Export Volume Group..."), this);
-    m_import_vg_action       = new KAction(KIcon("document-import"), i18n("Import Volume Group..."), this);
+    m_remove_vg_action      = new KAction(KIcon("cross"),        i18n("Delete Volume Group..."), this);
+    m_reduce_vg_action      = new KAction(KIcon("delete"),       i18n("Reduce Volume Group..."), this);
+    m_extend_vg_action      = new KAction(KIcon("add"),          i18n("Extend Volume Group..."), this);
+    m_rename_vg_action      = new KAction(KIcon("edit-rename"),  i18n("Rename Volume Group..."), this);
+    m_remove_missing_action = new KAction(KIcon("error_go"),     i18n("Remove Missing Physcial Volumes..."), this);
+    m_merge_vg_action       = new KAction(KIcon("arrow_join"),   i18n("Merge Volume Group..."), this);
+    m_split_vg_action       = new KAction(KIcon("arrow_divide"), i18n("Split Volume Group..."), this);
+    m_change_vg_action      = new KAction(KIcon("wrench"),       i18n("Change Volume Group Attributes..."), this);
+    m_create_vg_action      = new KAction(KIcon("document-new"), i18n("Create Volume Group..."), this);
+    m_export_vg_action      = new KAction(KIcon("document-export"), i18n("Export Volume Group..."), this);
+    m_import_vg_action      = new KAction(KIcon("document-import"), i18n("Import Volume Group..."), this);
 
-    groups_menu->addAction(m_create_vg_action);
-    groups_menu->addAction(m_remove_vg_action);
-    groups_menu->addAction(m_rename_vg_action);
-    groups_menu->addSeparator();
-    groups_menu->addAction(m_remove_missing_action);
-    groups_menu->addAction(m_extend_vg_action);
-    groups_menu->addAction(m_reduce_vg_action);
-    groups_menu->addAction(m_split_vg_action);
-    groups_menu->addAction(m_merge_vg_action);
-    groups_menu->addSeparator();
-    groups_menu->addAction(m_export_vg_action);
-    groups_menu->addAction(m_import_vg_action);
-    groups_menu->addAction(m_change_vg_action);
+    menu->addAction(m_create_vg_action);
+    menu->addAction(m_remove_vg_action);
+    menu->addAction(m_rename_vg_action);
+    menu->addSeparator();
+    menu->addAction(m_remove_missing_action);
+    menu->addAction(m_extend_vg_action);
+    menu->addAction(m_reduce_vg_action);
+    menu->addAction(m_split_vg_action);
+    menu->addAction(m_merge_vg_action);
+    menu->addSeparator();
+    menu->addAction(m_export_vg_action);
+    menu->addAction(m_import_vg_action);
+    menu->addAction(m_change_vg_action);
 
-    connect(m_change_vg_action,  SIGNAL(triggered()),
+    connect(m_change_vg_action, SIGNAL(triggered()),
             this, SLOT(changeVolumeGroup()));
 
-    connect(m_create_vg_action,       SIGNAL(triggered()),
+    connect(m_create_vg_action, SIGNAL(triggered()),
             this, SLOT(createVolumeGroup()));
 
-    connect(m_remove_vg_action,       SIGNAL(triggered()),
+    connect(m_remove_vg_action, SIGNAL(triggered()),
             this, SLOT(removeVolumeGroup()));
 
-    connect(m_rename_vg_action,       SIGNAL(triggered()),
+    connect(m_rename_vg_action, SIGNAL(triggered()),
             this, SLOT(renameVolumeGroup()));
 
-    connect(m_export_vg_action,       SIGNAL(triggered()),
+    connect(m_export_vg_action, SIGNAL(triggered()),
             this, SLOT(exportVolumeGroup()));
 
-    connect(m_extend_vg_action,       SIGNAL(triggered()),
+    connect(m_extend_vg_action, SIGNAL(triggered()),
             this, SLOT(extendVolumeGroup()));
 
-    connect(m_import_vg_action,       SIGNAL(triggered()),
+    connect(m_import_vg_action, SIGNAL(triggered()),
             this, SLOT(importVolumeGroup()));
 
-    connect(m_split_vg_action,       SIGNAL(triggered()),
+    connect(m_split_vg_action, SIGNAL(triggered()),
             this, SLOT(splitVolumeGroup()));
 
-    connect(m_merge_vg_action,       SIGNAL(triggered()),
+    connect(m_merge_vg_action, SIGNAL(triggered()),
             this, SLOT(mergeVolumeGroup()));
 
-    connect(m_remove_missing_action,  SIGNAL(triggered()),
+    connect(m_remove_missing_action, SIGNAL(triggered()),
             this, SLOT(removeMissingVolumes()));
 
-    connect(m_reduce_vg_action,       SIGNAL(triggered()),
+    connect(m_reduce_vg_action, SIGNAL(triggered()),
             this, SLOT(reduceVolumeGroup()));
 
-    return groups_menu;
+    return menu;
 }
