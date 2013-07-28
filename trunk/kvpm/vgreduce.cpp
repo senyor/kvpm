@@ -25,14 +25,42 @@
 #include <KLocale>
 #include <KMessageBox>
 
+#include <QDebug>
 #include <QLabel>
 #include <QSharedPointer>
 #include <QVBoxLayout>
 
 
-VGReduceDialog::VGReduceDialog(VolGroup *const volumeGroup, QWidget *parent) : KDialog(parent), m_vg(volumeGroup)
+
+
+// Remove one selected pv from group
+
+VGReduceDialog::VGReduceDialog(PhysVol *const pv, QWidget *parent) : 
+    KvpmDialog(parent), 
+    m_pv(pv),
+    m_vg(pv->getVg())
 {
-    setWindowTitle(i18n("Reduce Volume Group"));
+    setCaption(i18n("Remove Physical Volume"));
+    QWidget *const dialog_body = new QWidget(this);
+    setMainWidget(dialog_body);
+    QVBoxLayout *const layout = new QVBoxLayout;
+    dialog_body->setLayout(layout);
+
+    QLabel *const label = new QLabel(i18n("<b>Remove physical volume: %1?</b>", m_pv->getName()));
+    label->setAlignment(Qt::AlignCenter);
+    layout->addWidget(label);
+    layout->addSpacing(5);
+
+    setButtons(KDialog::Yes | KDialog::No);
+}
+
+// Remove one or more pvs from selected group
+
+VGReduceDialog::VGReduceDialog(VolGroup *const group, QWidget *parent) : 
+    KvpmDialog(parent), 
+    m_vg(group)
+{
+    setCaption(i18n("Reduce Volume Group"));
     QWidget *const dialog_body = new QWidget(this);
     setMainWidget(dialog_body);
     QVBoxLayout *const layout = new QVBoxLayout;
@@ -51,16 +79,15 @@ VGReduceDialog::VGReduceDialog(VolGroup *const volumeGroup, QWidget *parent) : K
     }
 
     if (pv_space_list.isEmpty()){
-        m_bailout = true;
+        preventExec();
         KMessageBox::sorry(0, i18n("There are no physical volumes that can be removed"));
     } else if (pv_space_list.size() == 1 && !m_unremovable_pvs_present) {
-        m_bailout = true;
+        preventExec();
         KMessageBox::sorry(0, i18n("There is only one physical volume in this group"));
     } else {
-        m_bailout = false;
         QLabel *label;
 
-        label = new QLabel(i18n("<b>Reduce volume group: %1</b>", vg_name));
+        label = new QLabel(i18n("<b>Reduce volume group: %1</b>", m_vg->getName()));
         label->setAlignment(Qt::AlignCenter);
         layout->addWidget(label);
         layout->addSpacing(5);
@@ -88,32 +115,39 @@ VGReduceDialog::VGReduceDialog(VolGroup *const volumeGroup, QWidget *parent) : K
         m_pv_checkbox->selectNone();
         
         connect(this, SIGNAL(okClicked()),
-                this, SLOT(commitChanges()));
+                this, SLOT(commit()));
     }
 }
 
-void VGReduceDialog::commitChanges()
+void VGReduceDialog::commit()
 {
     const QByteArray vg_name = m_vg->getName().toLocal8Bit();
-    QByteArray pv_name;
-    vg_t vg_dm = NULL;
+    vg_t vg_dm = nullptr;
     lvm_t lvm = MasterList::getLvm();
 
-    QStringList pv_list; // pvs to remove by name
-    pv_list << m_pv_checkbox->getNames();
-
+    QStringList pv_list;
+    if (m_pv)
+        pv_list << m_pv->getName();
+    else if (m_pv_checkbox)
+        pv_list << m_pv_checkbox->getNames(); // pvs to remove by name
+ 
     if ((vg_dm = lvm_vg_open(lvm, vg_name.data(), "w", 0))) {
-        for (int x = 0; x < pv_list.size(); x++) {
-            pv_name = pv_list[x].toLocal8Bit();
-            if (lvm_vg_reduce(vg_dm, pv_name.data()))
+        
+        for (auto name : pv_list) {
+            const QByteArray name_ba = name.toLocal8Bit();
+            
+            if (lvm_vg_reduce(vg_dm, name_ba.data()))
                 KMessageBox::error(0, QString(lvm_errmsg(lvm)));
         }
+        
         if (lvm_vg_write(vg_dm))
             KMessageBox::error(0, QString(lvm_errmsg(lvm)));
+        
         lvm_vg_close(vg_dm);
-    } else
+    } else {
         KMessageBox::error(0, QString(lvm_errmsg(lvm)));
-
+    }
+    
     return;
 }
 
@@ -127,11 +161,9 @@ void VGReduceDialog::excludeOneVolume()
             enableButtonOk(true);
         else
             enableButtonOk(false);
-    } else
+    } else {
         enableButtonOk(false);
+    }
 }
 
-bool VGReduceDialog::bailout()
-{
-    return m_bailout;
-}
+

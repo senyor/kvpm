@@ -15,13 +15,14 @@
 
 #include "pvactions.h"
 
+#include "kvpmdialog.h"
 #include "physvol.h"
 #include "processprogress.h"
 #include "pvchange.h"
 #include "pvtree.h"
 #include "pvmove.h"
 #include "topwindow.h"
-#include "vgreduceone.h"
+#include "vgreduce.h"
 #include "volgroup.h"
 
 #include <KAction>
@@ -114,27 +115,22 @@ void PVActions::changePv(QTreeWidgetItem *item)
 void PVActions::callDialog(QAction *action)
 {
     if (m_pv) {
-        if (action->objectName() == "pvmove") {
-            PVMoveDialog dialog(m_pv);
+        KvpmDialog *dialog = nullptr;
 
-            if (!dialog.bailout()) {
-                dialog.exec();
-                if (dialog.result() == QDialog::Accepted)
-                    MainWindow->reRun();
-            }
-            
-        } else if (action->objectName() == "pvremove") {
-            if (reduce_vg_one(m_vg->getName(), m_pv->getName()))
-                MainWindow->reRun();
-        } else if (action->objectName() == "pvchange") {
-            PVChangeDialog dialog(m_pv);
+        if (action->objectName() == "pvmove")
+            dialog = new PVMoveDialog(m_pv);
+        else if (action->objectName() == "pvchange")
+            dialog = new PVChangeDialog(m_pv);
+        else if (action->objectName() == "pvremove")
+            dialog = new VGReduceDialog(m_pv);
 
-            dialog.exec();
+        if (dialog) {
+            int result = dialog->run();
             
-            if (dialog.result() == QDialog::Accepted) {
-                ProcessProgress change_pv(dialog.arguments());
+            if (result == QDialog::Accepted || result == KDialog::Yes)
                 MainWindow->reRun();
-            }
+            
+            dialog->deleteLater();
         }
     }
-}
+}         

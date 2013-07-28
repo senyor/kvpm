@@ -184,12 +184,10 @@ void TopWindow::callVgDialog(QAction *action)
             reRun();
     } else if (action->objectName() == "reducevg") {
         VGReduceDialog dialog(m_vg);
-        
-        if (!dialog.bailout()) {
-            dialog.exec();
-            if (dialog.result() == QDialog::Accepted)
+
+        if (dialog.run() == QDialog::Accepted)
                 reRun();
-        }
+        
     } else if (action->objectName() == "extendvg") {
         VGExtendDialog dialog(m_vg);
         

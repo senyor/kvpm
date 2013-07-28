@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -15,9 +15,10 @@
 #ifndef PVCHANGE_H
 #define PVCHANGE_H
 
-#include <KDialog>
 
 #include <QStringList>
+
+#include "kvpmdialog.h"
 
 class KComboBox;
 class KLineEdit;
@@ -28,7 +29,7 @@ class QLabel;
 
 class PhysVol;
 
-class PVChangeDialog : public KDialog
+class PVChangeDialog : public KvpmDialog
 {
     Q_OBJECT
 
@@ -40,11 +41,13 @@ class PVChangeDialog : public KDialog
     QCheckBox *m_mda_box;
     PhysVol   *m_pv;
 
-public:
-    explicit PVChangeDialog(PhysVol *physicalVolume, QWidget *parent = 0);
     QStringList arguments();
 
+public:
+    explicit PVChangeDialog(PhysVol *physicalVolume, QWidget *parent = nullptr);
+
 private slots:
+    void commit();
     void resetOkButton();
 
 };
