@@ -80,11 +80,10 @@ bool stop_pvmove()
 // Whole pv move
 
 PVMoveDialog::PVMoveDialog(PhysVol *const physicalVolume, QWidget *parent) : 
-    KDialog(parent)
+    KvpmDialog(parent)
 {
     m_vg = physicalVolume->getVg();
     m_move_segment = false;
-    m_bailout = false;
 
     const QString name = physicalVolume->getName();
     const LogVolList lvs = m_vg->getLogicalVolumes();
@@ -101,31 +100,26 @@ PVMoveDialog::PVMoveDialog(PhysVol *const physicalVolume, QWidget *parent) :
         target_pvs = removeForbiddenTargets(target_pvs, m_sources[0]->name);
 
     if (!hasMovableExtents()){
-        m_bailout = true;
+        preventExec();
         KMessageBox::sorry(nullptr, i18n("None of the extents on this volume can be moved"));
     }
 
-    if (!m_bailout) {
+    if (willExec())
         buildDialog(target_pvs);
-
-        connect(this, SIGNAL(okClicked()),
-                this, SLOT(commitMove()));
-    }
 }
 
 
 // pv move only on one lv
 
 PVMoveDialog::PVMoveDialog(LogVol *const logicalVolume, int const segment, QWidget *parent) :
-    KDialog(parent),
+    KvpmDialog(parent),
     m_lv(logicalVolume),
     m_segment(segment)
 {
     m_vg = m_lv->getVg();
-    m_bailout = false;
 
     if (!hasMovableExtents()){
-        m_bailout = true;
+        preventExec();
         KMessageBox::sorry(nullptr, i18n("None of the extents on this volume can be moved"));
     } else {
         QList<PhysVol *> target_pvs = removeFullTargets(m_vg->getPhysicalVolumes());
@@ -142,11 +136,11 @@ PVMoveDialog::PVMoveDialog(LogVol *const logicalVolume, int const segment, QWidg
                 target_pvs = removeForbiddenTargets(target_pvs, m_sources[0]->name);
         }
 
-        if (!m_bailout) {
+        if (willExec()) {
             buildDialog(target_pvs);
 
             connect(this, SIGNAL(okClicked()),
-                    this, SLOT(commitMove()));
+                    this, SLOT(commit()));
         }
     }
 }
@@ -169,7 +163,7 @@ QList<PhysVol *> PVMoveDialog::removeFullTargets(QList<PhysVol *> targets)
 
     if (targets.isEmpty()) {
         KMessageBox::sorry(nullptr, i18n("There are no allocatable physical volumes with space to move to"));
-        m_bailout = true;
+        preventExec();
     }
 
     return targets;
@@ -397,12 +391,7 @@ void PVMoveDialog::setupFullMove()
     }
 }
 
-bool PVMoveDialog::bailout()
-{
-    return m_bailout;
-}
-
-void PVMoveDialog::commitMove()
+void PVMoveDialog::commit()
 {
     hide();
     ProcessProgress move(arguments());

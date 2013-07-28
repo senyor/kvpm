@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -25,14 +25,16 @@
 #include <QVBoxLayout>
 
 #include "physvol.h"
+#include "processprogress.h"
 #include "volgroup.h"
 
+
+
 PVChangeDialog::PVChangeDialog(PhysVol *const physicalVolume, QWidget *parent) :
-    KDialog(parent),
+    KvpmDialog(parent),
     m_pv(physicalVolume)
 {
-
-    setWindowTitle(i18n("Change physical volume attributes"));
+    setCaption(i18n("Change Physical Volume Attributes"));
 
     QWidget *const dialog_body = new QWidget(this);
     setMainWidget(dialog_body);
@@ -152,3 +154,13 @@ QStringList PVChangeDialog::arguments()
 
     return args;
 }
+
+void PVChangeDialog::commit()
+{
+    hide();
+    ProcessProgress move(arguments());
+    return;
+}
+
+
+

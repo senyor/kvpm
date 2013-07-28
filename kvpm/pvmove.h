@@ -16,6 +16,8 @@
 #ifndef PVMOVE_H
 #define PVMOVE_H
 
+#include "kvpmdialog.h"
+
 #include <KDialog>
 
 #include <QList>
@@ -37,7 +39,7 @@ bool restart_pvmove();
 bool stop_pvmove();
 
 
-class PVMoveDialog : public KDialog
+class PVMoveDialog : public KvpmDialog
 {
     Q_OBJECT
 
@@ -45,7 +47,6 @@ class PVMoveDialog : public KDialog
     LogVol   *m_lv = nullptr;
     int m_segment;
     bool      m_move_segment;
-    bool      m_bailout;       // if TRUE, a move is impossible so don't even call up the dialog
     long long m_pv_used_space;
 
     QList<NameAndRange *> m_sources;
@@ -70,10 +71,9 @@ public:
     explicit PVMoveDialog(PhysVol *const physicalVolume, QWidget *parent = nullptr);
     explicit PVMoveDialog(LogVol *const logicalVolume, int const segment = -1, QWidget *parent = nullptr);
     ~PVMoveDialog();
-    bool bailout();
 
 private slots:
-    void commitMove();
+    void commit();
     void disableTargets();
     void resetOkButton();
     void setRadioExtents();

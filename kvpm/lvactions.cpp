@@ -1012,11 +1012,8 @@ void LVActions::movePhysicalExtents()
 {
     PVMoveDialog dialog(m_lv, m_segment);
 
-    if (!dialog.bailout()) {
-        dialog.exec();
-        if (dialog.result() == QDialog::Accepted)
+    if (dialog.run() == QDialog::Accepted)
             MainWindow->reRun();
-    }
 }
 
 void LVActions::addLegs()
