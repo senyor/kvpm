@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2009, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -32,7 +32,6 @@
 #include "tablecreate.h"
 #include "topwindow.h"
 #include "vgreduce.h"
-#include "vgreduceone.h"
 #include "vgcreate.h"
 #include "vgextend.h"
 
@@ -344,16 +343,18 @@ void DeviceActionsMenu::tablecreatePartition()
         MainWindow->reRun();
 }
 
-void DeviceActionsMenu::vgreducePartition() // pvs can also be whole devices
+void DeviceActionsMenu::vgreducePartition()   // pvs can also be whole devices
 {
-    QString name;
+    PhysVol *pv = nullptr;
 
     if (m_part)
-        name = m_part->getName();
+        pv = m_part->getPhysicalVolume();
     else
-        name = m_dev->getName();
+        pv = m_dev->getPhysicalVolume();
 
-    if (reduce_vg_one(m_vg_name, name))
+    VGReduceDialog  dialog(pv);
+
+    if (dialog.run() == QDialog::Accepted)
         MainWindow->reRun();
 }
 

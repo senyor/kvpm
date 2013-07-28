@@ -16,7 +16,7 @@ set(kvpm_SRCS allocationpolicy.cpp changemirror.cpp kvpmconfigdialog.cpp devicep
 	      removemirrorleg.cpp storagepartition.cpp storagedevice.cpp storagebase.cpp 
 	      thincreate.cpp topwindow.cpp tablecreate.cpp unmount.cpp vgchange.cpp vgexport.cpp 
 	      vgimport.cpp vgcreate.cpp vgextend.cpp vginfolabels.cpp 
-	      vgreduce.cpp vgremove.cpp vgtree.cpp volgroup.cpp vgreduceone.cpp
+	      vgreduce.cpp vgremove.cpp vgtree.cpp volgroup.cpp
 	      vgrename.cpp volumegrouptab.cpp vgsplit.cpp vgmerge.cpp)
  
 kde4_add_executable(kvpm ${kvpm_SRCS})

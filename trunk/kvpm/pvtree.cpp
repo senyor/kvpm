@@ -32,7 +32,6 @@
 #include "pvchange.h"
 #include "physvol.h"
 #include "topwindow.h"
-#include "vgreduceone.h"
 #include "volgroup.h"
 
 
