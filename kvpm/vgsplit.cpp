@@ -50,9 +50,10 @@ VGSplitDialog::VGSplitDialog(VolGroup *volumeGroup, QWidget *parent) :
     setMainWidget(dialog_body);
     QVBoxLayout *const layout = new QVBoxLayout();
     dialog_body->setLayout(layout);
-    QLabel *const name_label = new QLabel(i18n("<b>Volume group to split: %1</b>", m_vg->getName()));
+    QLabel *const name_label = new QLabel(i18n("Volume group to split: <b>%1</b>", m_vg->getName()));
     name_label->setAlignment(Qt::AlignCenter);
     layout->addWidget(name_label);
+    layout->addSpacing(10);
 
     m_new_vg_name = new KLineEdit();
     QRegExp rx("[0-9a-zA-Z_\\.][-0-9a-zA-Z_\\.]*");

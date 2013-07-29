@@ -48,9 +48,10 @@ VGRemoveMissingDialog::VGRemoveMissingDialog(VolGroup *const group, QWidget *par
     QWidget *dialog_body = new QWidget(this);
     setMainWidget(dialog_body);
     dialog_body->setLayout(warning_layout);
-    QLabel *message = new QLabel(i18n("<b>Removing missing physical volumes may result in data loss! Use with extreme care.</b>"));
+    QLabel *message = new QLabel(i18n("Removing missing physical volumes may result in data loss. <b>Use with extreme care.</b>"));
     message->setWordWrap(true);
     layout->addWidget(message);
+    layout->addSpacing(10);
 
     QGroupBox *radio_box = new QGroupBox();
     QVBoxLayout *radio_box_layout = new QVBoxLayout();

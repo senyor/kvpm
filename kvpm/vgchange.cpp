@@ -35,9 +35,9 @@
 
 
 
-VGChangeDialog::VGChangeDialog(VolGroup *const group, QWidget *parent)
-    : KvpmDialog(parent),
-      m_vg(group)
+VGChangeDialog::VGChangeDialog(VolGroup *const group, QWidget *parent) : 
+    KvpmDialog(parent),
+    m_vg(group)
 {
     setCaption(i18n("Change Volume Group Attributes"));
 
@@ -46,10 +46,10 @@ VGChangeDialog::VGChangeDialog(VolGroup *const group, QWidget *parent)
     QVBoxLayout *const layout = new QVBoxLayout();
     dialog_body->setLayout(layout);
 
-    QLabel *const name_label = new QLabel(i18n("<b>Change volume group: %1</b>", m_vg->getName()));
+    QLabel *const name_label = new QLabel(i18n("Change volume group: <b>%1</b>", m_vg->getName()));
     name_label->setAlignment(Qt::AlignCenter);
     layout->addWidget(name_label);
-    layout->addSpacing(5);
+    layout->addSpacing(10);
 
     QGroupBox *const misc_box = new QGroupBox();
     QVBoxLayout *const misc_layout = new QVBoxLayout();
