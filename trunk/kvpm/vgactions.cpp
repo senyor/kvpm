@@ -25,7 +25,7 @@
 #include "vgcreate.h"
 #include "vgextend.h"
 #include "vgremove.h"
-#include "removemissing.h"
+#include "vgremovemissing.h"
 #include "vgrename.h"
 #include "vgexport.h"
 #include "vgimport.h"
@@ -194,66 +194,44 @@ void VGActions::setVg(VolGroup *vg)
 
 void VGActions::callDialog(QAction *action)
 {
-    if (action->objectName() == "vgchange") {
-        VGChangeDialog dialog(m_vg);
-        
-        if (!dialog.bailout()) {
-            dialog.exec();
-            if (dialog.result() == QDialog::Accepted)
-                MainWindow->reRun();
-        }
-    } else if (action->objectName() == "vgcreate") {
-        VGCreateDialog dialog;
-        
-        if (!dialog.bailout()) {
-            dialog.exec();
-            if (dialog.result() == QDialog::Accepted)
-                MainWindow->reRun();
-        }
-    } else if (action->objectName() == "vgremove") {
-        if (remove_vg(m_vg))
-            MainWindow->reRun();
-    } else if (action->objectName() == "vgrename") {
-        if (rename_vg(m_vg))
-            MainWindow->reRun();
-    } else if (action->objectName() == "vgreduce") {
-        VGReduceDialog dialog(m_vg);
+    const QString name = action->objectName();
 
-        if (dialog.run() == QDialog::Accepted)
+    if (name == "vgremove" || name == "vgimport" || name == "vgexport") {
+        if (name == "vgremove") {
+            if (remove_vg(m_vg))
                 MainWindow->reRun();
-        
-    } else if (action->objectName() == "vgextend") {
-        VGExtendDialog dialog(m_vg);
-        
-        if (!dialog.bailout()) {
-            dialog.exec();
-            if (dialog.result() == QDialog::Accepted)
+        } else if (name == "vgimport") {
+            if (import_vg(m_vg))
                 MainWindow->reRun();
-        }
-    } else if (action->objectName() == "vgsplit") {
-        VGSplitDialog dialog(m_vg);
-        
-        if (!dialog.bailout()) {
-            dialog.exec();
-            if (dialog.result() == QDialog::Accepted)
+        } else if (name == "vgexport") {
+            if (export_vg(m_vg))
                 MainWindow->reRun();
         }
-    } else if (action->objectName() == "vgmerge") {
-        VGMergeDialog dialog(m_vg);
+    } else {
+        KvpmDialog *dialog = nullptr;
+
+        if (name == "vgchange")
+            dialog = new VGChangeDialog(m_vg);
+        else if (name == "vgcreate")
+            dialog = new VGCreateDialog();
+        else if (name == "vgreduce")
+            dialog = new VGReduceDialog(m_vg);
+        else if (name == "vgextend")
+            dialog = new VGExtendDialog(m_vg);
+        else if (name == "vgsplit")
+            dialog = new VGSplitDialog(m_vg);
+        else if (name == "vgmerge")
+            dialog = new VGMergeDialog(m_vg);
+        else if (name == "vgrename")
+            dialog = new VGRenameDialog(m_vg);
+        else if (name == "vgremovemissing")
+            dialog = new VGRemoveMissingDialog(m_vg);
         
-        if (!dialog.bailout()) {
-            dialog.exec();
-            if (dialog.result() == QDialog::Accepted)
+        if (dialog) {
+            int result = dialog->run();
+            
+            if (result == QDialog::Accepted || result == KDialog::Yes)
                 MainWindow->reRun();
         }
-    } else if (action->objectName() == "vgremovemissing") {
-        if (remove_missing_pv(m_vg))
-            MainWindow->reRun();
-    } else if (action->objectName() == "vgimport") {
-        if (import_vg(m_vg))
-            MainWindow->reRun();
-    } else if (action->objectName() == "vgexport") {
-        if (export_vg(m_vg))
-            MainWindow->reRun();
     }
 }

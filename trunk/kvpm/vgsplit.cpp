@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -38,11 +38,13 @@
 #include <QVBoxLayout>
 
 
-VGSplitDialog::VGSplitDialog(VolGroup *volumeGroup, QWidget *parent) : KDialog(parent), m_vg(volumeGroup)
+VGSplitDialog::VGSplitDialog(VolGroup *volumeGroup, QWidget *parent) : 
+    KvpmDialog(parent), 
+    m_vg(volumeGroup)
 {
     QList<PhysVol *> pv_list = m_vg->getPhysicalVolumes();
 
-    setWindowTitle(i18n("Split Volume Group"));
+    setCaption(i18n("Split Volume Group"));
 
     QWidget *const dialog_body = new QWidget(this);
     setMainWidget(dialog_body);
@@ -87,8 +89,10 @@ VGSplitDialog::VGSplitDialog(VolGroup *volumeGroup, QWidget *parent) : KDialog(p
     validateOK();
     setMinimumWidth(400);
 
-    connect(this, SIGNAL(okClicked()),
-            this, SLOT(commitChanges()));
+    if (m_vg->getPhysicalVolumes().size() < 2) {
+        KMessageBox::sorry(nullptr, i18n("A volume group must have at least two physical volumes to split group"));
+        preventExec();
+    }
 }
 
 void VGSplitDialog::validateOK()
@@ -110,11 +114,12 @@ void VGSplitDialog::validateOK()
             enableButtonOk(true);
         else
             enableButtonOk(false);
-    } else
+    } else {
         enableButtonOk(false);
+    }
 }
 
-void VGSplitDialog::commitChanges()
+void VGSplitDialog::commit()
 {
     QStringList args = QStringList() << "vgsplit" << m_vg->getName() << m_new_vg_name->text(); 
 
@@ -136,7 +141,7 @@ void VGSplitDialog::deactivate()
 
     for (int x = m_right_lv_list->count() - 1; x >= 0; x--)
         moving_lvs << m_right_lv_list->item(x)->data(Qt::DisplayRole).toString();
-    qDebug() << "Move --->" << moving_lvs;
+
     if ((vg_dm = lvm_vg_open(lvm, vg_name.data(), "w", 0x0))) {
 
         for (int x = 0; x < moving_lvs.size(); x++) {
@@ -150,13 +155,13 @@ void VGSplitDialog::deactivate()
         for (int x = 0; x < lvs_to_deactivate.size(); x++) {
             if (lvm_lv_is_active(lvs_to_deactivate[x])) {
                 if (lvm_lv_deactivate(lvs_to_deactivate[x]))
-                    KMessageBox::error(0, QString(lvm_errmsg(lvm)));
+                    KMessageBox::error(nullptr, QString(lvm_errmsg(lvm)));
             }
         }
         lvm_vg_close(vg_dm);
         return;
     } else {
-        KMessageBox::error(0, QString(lvm_errmsg(lvm)));
+        KMessageBox::error(nullptr, QString(lvm_errmsg(lvm)));
         return;
     }
 
@@ -550,7 +555,7 @@ void VGSplitDialog::movesWithVolume(const bool isLV, const QString name,
         moving_pv_count = 0;
         temp = m_vg->getLvByName(name);
 
-        if (temp->isCowOrigin() && (temp->getParent() != NULL))
+        if (temp->isCowOrigin() && (temp->getParent() != nullptr))
             movingPvNames = temp->getParent()->getPvNamesAllFlat();
         else if (temp->isThinVolume())
             movingPvNames = m_vg->getLvByName(temp->getPoolName())->getPvNamesAllFlat();
@@ -584,7 +589,7 @@ void VGSplitDialog::movesWithVolume(const bool isLV, const QString name,
         for (int x = movingLvNames.size() - 1; x >= 0; x--) {
             temp = m_vg->getLvByName(movingLvNames[x]);
 
-            if (temp->isCowOrigin() && (temp->getParent() != NULL))
+            if (temp->isCowOrigin() && (temp->getParent() != nullptr))
                 movingPvNames.append(temp->getParent()->getPvNamesAllFlat());
             else
                 movingPvNames.append(temp->getPvNamesAllFlat());
@@ -600,16 +605,6 @@ void VGSplitDialog::movesWithVolume(const bool isLV, const QString name,
 
         moving_lv_count = movingLvNames.size();
         moving_pv_count = movingPvNames.size();
-    }
-}
-
-bool VGSplitDialog::bailout()
-{
-    if (m_vg->getPhysicalVolumes().size() < 2) {
-        KMessageBox::error(0, i18n("A volume group must have at least two physical volumes to split group"));
-        return true;
-    } else {
-        return false;
     }
 }
 
@@ -648,7 +643,7 @@ QStringList VGSplitDialog::getPvs(LogVol *const lv)
         names = lv->getPvNamesAllFlat();
     
     if (lv->isCowOrigin()) {
-        if (lv->getParent() != NULL && !lv->isSnapContainer())
+        if (lv->getParent() != nullptr && !lv->isSnapContainer())
             names.append(lv->getParent()->getPvNamesAllFlat());
         else
             names.append(lv->getPvNamesAllFlat());

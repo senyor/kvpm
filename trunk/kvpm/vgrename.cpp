@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -32,58 +32,32 @@
 #include "volgroup.h"
 
 
-bool rename_vg(VolGroup *volumeGroup)
+
+VGRenameDialog::VGRenameDialog(VolGroup *const group, QWidget *parent) :
+    KvpmDialog(parent),
+    m_vg(group),
+    m_old_name(group->getName())
 {
-    LogVolList lvs;
-    QString new_path, old_path;
-    QString new_name, old_name;
+    setCaption(i18n("Rename Volume Group"));
 
-    VGRenameDialog dialog(volumeGroup);
-    dialog.exec();
-
-    if (dialog.result() == QDialog::Accepted) {
-        ProcessProgress rename(dialog.arguments());
-
-        if (! rename.exitCode()) {
-            lvs = volumeGroup->getLogicalVolumes();
-            old_name = '/' + dialog.getOldName() + '/';
-            new_name = '/' + dialog.getNewName() + '/';
-
-            for (int x = lvs.size() - 1; x >= 0; x--) {
-                if (lvs[x]->isMounted()) {
-                    old_path = lvs[x]->getMapperPath();
-                    new_path = lvs[x]->getMapperPath().replace(old_path.lastIndexOf(old_name), old_name.size(), new_name);
-                    MountTables::renameEntries(old_path, new_path);
-                }
-            }
-        }
-        return true;
-    } else
-        return false;
-}
-
-VGRenameDialog::VGRenameDialog(VolGroup *volumeGroup, QWidget *parent) :
-    KDialog(parent)
-{
-
-    setWindowTitle(i18n("Rename volume group"));
-
-    QWidget *dialog_body = new QWidget(this);
+    QWidget *const dialog_body = new QWidget(this);
     setMainWidget(dialog_body);
-    QVBoxLayout *layout = new QVBoxLayout();
+    QVBoxLayout *const layout = new QVBoxLayout();
     dialog_body->setLayout(layout);
 
-    m_old_name = volumeGroup->getName();
-    QLabel *old_name_label = new QLabel(i18n("Old volume group name: %1", m_old_name));
-    layout->addWidget(old_name_label);
+    QLabel *label = new QLabel(i18n("<b>Rename Volume Group</b>"));
+    label->setAlignment(Qt::AlignCenter);
+    layout->addWidget(label);
+    layout->addSpacing(10);
+    label = new QLabel(i18n("Current volume group name: %1", m_old_name));
+    layout->addWidget(label);
 
-    QLabel *name_label = new QLabel(i18n("New volume group name: "));
+    QLabel *const name_label = new QLabel(i18n("New volume group name: "));
     m_new_name = new KLineEdit();
-
     QRegExp rx("[0-9a-zA-Z_\\.][-0-9a-zA-Z_\\.]*");
     m_name_validator = new QRegExpValidator(rx, m_new_name);
     m_new_name->setValidator(m_name_validator);
-    QHBoxLayout *name_layout = new QHBoxLayout();
+    QHBoxLayout *const name_layout = new QHBoxLayout();
     name_layout->addWidget(name_label);
     name_layout->addWidget(m_new_name);
     layout->addLayout(name_layout);
@@ -91,18 +65,30 @@ VGRenameDialog::VGRenameDialog(VolGroup *volumeGroup, QWidget *parent) :
     enableButtonOk(false);
 
     connect(m_new_name, SIGNAL(textChanged(QString)),
-            this, SLOT(validateName(QString)));
+            this,       SLOT(validateName(QString)));
 }
 
-QStringList VGRenameDialog::arguments()
+void VGRenameDialog::commit()
 {
-    QStringList args;
+    hide();
 
-    args << "vgrename"
-         << m_old_name
-         << m_new_name->text();
+    QStringList args = QStringList() << "vgrename" 
+                                     << m_old_name 
+                                     << m_new_name->text();
 
-    return args;
+    const QString old_name = '/' + m_old_name + '/';
+    const QString new_name = '/' + m_new_name->text().trimmed() + '/';
+
+    ProcessProgress rename(args);
+    if (!rename.exitCode()) {
+        for (auto lv : m_vg->getLogicalVolumes()) {
+            if (lv->isMounted()) {
+                const QString old_path = lv->getMapperPath();
+                const QString new_path = lv->getMapperPath().replace(old_path.lastIndexOf(old_name), old_name.size(), new_name);
+                MountTables::renameEntries(old_path, new_path);
+            }
+        }
+    }
 }
 
 /* The allowed characters in the name are letters, numbers, periods
@@ -117,16 +103,8 @@ void VGRenameDialog::validateName(QString name)
             name != "." &&
             name != "..") {
         enableButtonOk(true);
-    } else
+    } else {
         enableButtonOk(false);
+    }
 }
 
-QString VGRenameDialog::getNewName()
-{
-    return m_new_name->text().trimmed();
-}
-
-QString VGRenameDialog::getOldName()
-{
-    return m_old_name;
-}

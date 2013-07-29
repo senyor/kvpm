@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -12,8 +12,8 @@
  * See the file "COPYING" for the exact licensing terms.
  */
 
-#ifndef REMOVEMISSING_H
-#define REMOVEMISSING_H
+#ifndef VGREMOVEMISSING_H
+#define VGREMOVEMISSING_H
 
 #include <KDialog>
 
@@ -23,20 +23,23 @@ class QRadioButton;
 
 class VolGroup;
 
-bool remove_missing_pv(VolGroup *volumeGroup);
+#include "kvpmdialog.h"
 
-class RemoveMissingDialog : public KDialog
+
+class VGRemoveMissingDialog : public KvpmDialog
 {
     Q_OBJECT
 
-    VolGroup *m_vg;
+    VolGroup *m_vg = nullptr;
 
     QRadioButton *m_empty_button,
                  *m_all_button;
 
 public:
-    explicit RemoveMissingDialog(VolGroup *volumeGroup, QWidget *parent = 0);
-    QStringList arguments();
+    explicit VGRemoveMissingDialog(VolGroup *const group, QWidget *parent = nullptr);
+
+private slots:
+    void commit();
 
 };
 

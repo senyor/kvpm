@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -21,6 +21,9 @@
 
 #include <QList>
 
+
+#include "kvpmdialog.h"
+
 class KComboBox;
 
 class QCheckBox;
@@ -29,7 +32,7 @@ class QStackedWidget;
 class VolGroup;
 
 
-class VGMergeDialog : public KDialog
+class VGMergeDialog : public KvpmDialog
 {
     Q_OBJECT
 
@@ -39,12 +42,13 @@ class VGMergeDialog : public KDialog
     QStackedWidget *m_error_stack;
     QList<uint64_t> m_extent_size;
 
+    void checkSanity();
+
 public:
-    explicit VGMergeDialog(VolGroup *const volumeGroup, QWidget *parent = 0);
-    bool bailout();
+    explicit VGMergeDialog(VolGroup *const volumeGroup, QWidget *parent = nullptr);
 
 private slots:
-    void commitChanges();
+    void commit();
     void compareExtentSize();
 
 };

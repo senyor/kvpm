@@ -319,21 +319,15 @@ void DeviceActionsMenu::changeFlags()
 void DeviceActionsMenu::vgcreatePartition()
 {
     if (m_part) {
-        VGCreateDialog dialog(NULL, m_part);
-        if (!dialog.bailout()) {
-            dialog.exec();
+        VGCreateDialog dialog(nullptr, m_part);
 
-            if (dialog.result() == QDialog::Accepted)
-                MainWindow->reRun();
-        }
+        if (dialog.run() == QDialog::Accepted)
+            MainWindow->reRun();
     } else {                          // whole device, not partition
-        VGCreateDialog dialog(m_dev, NULL);
-        if (!dialog.bailout()) {
-            dialog.exec();
+        VGCreateDialog dialog(m_dev, nullptr);
 
-            if (dialog.result() == QDialog::Accepted)
-                MainWindow->reRun();
-        }
+        if (dialog.run() == QDialog::Accepted)
+            MainWindow->reRun();
     }
 }
 
@@ -354,31 +348,25 @@ void DeviceActionsMenu::vgreducePartition()   // pvs can also be whole devices
 
     VGReduceDialog  dialog(pv);
 
-    if (dialog.run() == QDialog::Accepted)
+    if (dialog.run() == KDialog::Yes)
         MainWindow->reRun();
 }
 
 void DeviceActionsMenu::vgextendPartition(QAction *action)
 {
     QString vg_name = action->text();
-    VolGroup *vg = MasterList::getVgByName(vg_name.remove(QChar('&')));
+    VolGroup *const vg = MasterList::getVgByName(vg_name.remove(QChar('&')));
 
     if (m_part) {
-        VGExtendDialog dialog(vg, NULL, m_part);
-        if (!dialog.bailout()) {
-            dialog.exec();
+        VGExtendDialog dialog(vg, nullptr, m_part);
 
-            if (dialog.result() == QDialog::Accepted)
-                MainWindow->reRun();
-        }
+        if (dialog.run() == QDialog::Accepted)
+            MainWindow->reRun();
     } else {                          // whole device, not partition
-        VGExtendDialog dialog(vg, m_dev, NULL);
-        if (!dialog.bailout()) {
-            dialog.exec();
+        VGExtendDialog dialog(vg, m_dev, nullptr);
 
-            if (dialog.result() == QDialog::Accepted)
-                MainWindow->reRun();
-        }
+        if (dialog.run() == QDialog::Accepted)
+            MainWindow->reRun();
     }
 }
 

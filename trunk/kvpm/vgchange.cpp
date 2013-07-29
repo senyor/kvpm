@@ -35,20 +35,18 @@
 
 
 
-VGChangeDialog::VGChangeDialog(VolGroup *const volumeGroup, QWidget *parent)
-    : KDialog(parent),
-      m_vg(volumeGroup)
+VGChangeDialog::VGChangeDialog(VolGroup *const group, QWidget *parent)
+    : KvpmDialog(parent),
+      m_vg(group)
 {
-    m_vg_name = m_vg->getName();
-
-    setWindowTitle(i18n("Change Volume Group Attributes"));
+    setCaption(i18n("Change Volume Group Attributes"));
 
     QWidget *const dialog_body = new QWidget(this);
     setMainWidget(dialog_body);
     QVBoxLayout *const layout = new QVBoxLayout();
     dialog_body->setLayout(layout);
 
-    QLabel *const name_label = new QLabel(i18n("<b>Change volume group: %1</b>", m_vg_name));
+    QLabel *const name_label = new QLabel(i18n("<b>Change volume group: %1</b>", m_vg->getName()));
     name_label->setAlignment(Qt::AlignCenter);
     layout->addWidget(name_label);
     layout->addSpacing(5);
@@ -77,7 +75,6 @@ VGChangeDialog::VGChangeDialog(VolGroup *const volumeGroup, QWidget *parent)
     policy_layout->addWidget(m_policy_combo);
     policy_layout->addStretch();
     misc_layout->addLayout(policy_layout);
-
 
     m_extent_size_combo = new KComboBox();
     m_extent_size_combo->insertItem(0, "1");
@@ -126,12 +123,6 @@ VGChangeDialog::VGChangeDialog(VolGroup *const volumeGroup, QWidget *parent)
     connect(m_extent_suffix_combo, SIGNAL(activated(int)),
             this, SLOT(limitExtentSize(int)));
 
-
-
-
-
-
-
     QHBoxLayout *const middle_layout = new QHBoxLayout();
     layout->addLayout(middle_layout);
 
@@ -159,7 +150,7 @@ VGChangeDialog::VGChangeDialog(VolGroup *const volumeGroup, QWidget *parent)
     m_polling_box->setChecked(false);
     middle_layout->addWidget(m_polling_box);
 
-    LogVolList lv_list = volumeGroup->getLogicalVolumes();
+    LogVolList lv_list = m_vg->getLogicalVolumes();
 
     for (int x = lv_list.size() - 1; x >= 0 ; x--) { // replace snap containers with first level children
         if (lv_list[x]->isSnapContainer()) {
@@ -270,17 +261,10 @@ VGChangeDialog::VGChangeDialog(VolGroup *const volumeGroup, QWidget *parent)
     connect(m_extent_suffix_combo, SIGNAL(currentIndexChanged(int)), this, SLOT(resetOkButton()));
     connect(m_policy_combo,  SIGNAL(policyChanged(AllocationPolicy)), this, SLOT(resetOkButton()));
 
-    connect(this, SIGNAL(okClicked()), this, SLOT(commitChanges()));
-
     enableButtonOk(false);
 }
 
-bool VGChangeDialog::bailout()
-{
-    return false;
-}
-
-void VGChangeDialog::commitChanges()
+void VGChangeDialog::commit()
 {
     ProcessProgress vgchange(arguments());
 }

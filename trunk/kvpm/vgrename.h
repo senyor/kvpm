@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -18,30 +18,30 @@
 #include <KDialog>
 #include <QStringList>
 
+
+#include "kvpmdialog.h"
+
 class KLineEdit;
 class QRegExpValidator;
 
 class VolGroup;
 
 
-bool rename_vg(VolGroup *volumeGroup);
-
-class VGRenameDialog : public KDialog
+class VGRenameDialog : public KvpmDialog
 {
     Q_OBJECT
 
-    QString m_old_name;
-    KLineEdit *m_new_name;
-    QRegExpValidator *m_name_validator;
+    VolGroup  *m_vg = nullptr;
+    QString    m_old_name;
+    KLineEdit *m_new_name = nullptr;
+    QRegExpValidator *m_name_validator = nullptr;
 
 public:
-    explicit VGRenameDialog(VolGroup *volumeGroup, QWidget *parent = 0);
-    QStringList arguments();
-    QString getNewName();
-    QString getOldName();
+    explicit VGRenameDialog(VolGroup *const group, QWidget *parent = nullptr);
 
 private slots:
     void validateName(QString);
+    void commit();
 
 };
 
