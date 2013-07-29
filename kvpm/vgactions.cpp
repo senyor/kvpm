@@ -199,13 +199,13 @@ void VGActions::callDialog(QAction *action)
     if (name == "vgremove" || name == "vgimport" || name == "vgexport") {
         if (name == "vgremove") {
             if (remove_vg(m_vg))
-                MainWindow->reRun();
+                g_top_window->reRun();
         } else if (name == "vgimport") {
             if (import_vg(m_vg))
-                MainWindow->reRun();
+                g_top_window->reRun();
         } else if (name == "vgexport") {
             if (export_vg(m_vg))
-                MainWindow->reRun();
+                g_top_window->reRun();
         }
     } else {
         KvpmDialog *dialog = nullptr;
@@ -231,7 +231,7 @@ void VGActions::callDialog(QAction *action)
             int result = dialog->run();
             
             if (result == QDialog::Accepted || result == KDialog::Yes)
-                MainWindow->reRun();
+                g_top_window->reRun();
         }
     }
 }
