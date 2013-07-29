@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -19,6 +19,8 @@
 
 #include <QStringList>
 
+#include "kvpmdialog.h"
+
 class KLineEdit;
 class KComboBox;
 
@@ -32,11 +34,9 @@ class StoragePartition;
 class PvGroupBox;
 
 
-class VGCreateDialog : public KDialog
+class VGCreateDialog : public KvpmDialog
 {
     Q_OBJECT
-
-    bool m_bailout;
 
     QLabel *m_pv_label,
            *m_total_available_label,
@@ -63,15 +63,14 @@ class VGCreateDialog : public KDialog
     void limitExtentSize(int);
 
 public:
-    explicit VGCreateDialog(QWidget *parent = NULL);
-    VGCreateDialog(StorageDevice *const device, StoragePartition *const partition, QWidget *parent = NULL);
-    bool bailout();
+    explicit VGCreateDialog(QWidget *parent = nullptr);
+    VGCreateDialog(StorageDevice *const device, StoragePartition *const partition, QWidget *parent = nullptr);
 
 private slots:
     //void limitLogicalVolumes(int boxstate);
     //void limitPhysicalVolumes(int boxstate);
     void validateOK();
-    void commitChanges();
+    void commit();
     void extentSizeChanged();
 
 };

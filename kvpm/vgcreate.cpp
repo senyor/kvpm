@@ -37,10 +37,9 @@
 #include <QVBoxLayout>
 
 
-VGCreateDialog::VGCreateDialog(QWidget *parent) : KDialog(parent)
+VGCreateDialog::VGCreateDialog(QWidget *parent) : 
+    KvpmDialog(parent)
 {
-    m_bailout = false;
-
     QList<StorageDevice *> devices;
     QList<StoragePartition *> partitions;
     const QString warning = i18n("If a device or partition is added to a volume group, "
@@ -49,7 +48,7 @@ VGCreateDialog::VGCreateDialog(QWidget *parent) : KDialog(parent)
     getUsablePvs(devices, partitions);
 
     if (partitions.size() + devices.size() > 0) {
-        if (KMessageBox::warningContinueCancel(NULL,
+        if (KMessageBox::warningContinueCancel(nullptr,
                                                warning,
                                                QString(),
                                                KStandardGuiItem::cont(),
@@ -58,22 +57,21 @@ VGCreateDialog::VGCreateDialog(QWidget *parent) : KDialog(parent)
                                                KMessageBox::Dangerous) == KMessageBox::Continue) {
             buildDialog(devices, partitions);
         } else {
-            m_bailout = true;
+            preventExec();
         }
     } else {
-        m_bailout = true;
-        KMessageBox::error(0, i18n("No unused potential physical volumes found"));
+        preventExec();
+        KMessageBox::error(nullptr, i18n("No unused potential physical volumes found"));
     }
 }
 
-VGCreateDialog::VGCreateDialog(StorageDevice *const device, StoragePartition *const partition, QWidget *parent) : KDialog(parent)
+VGCreateDialog::VGCreateDialog(StorageDevice *const device, StoragePartition *const partition, QWidget *parent) : 
+    KvpmDialog(parent)
 {
-    m_bailout = false;
-
     QList<StorageDevice *> devices;
     QList<StoragePartition *> partitions;
 
-    if (device != NULL)
+    if (device)
         devices.append(device);
     else
         partitions.append(partition);
@@ -81,7 +79,7 @@ VGCreateDialog::VGCreateDialog(StorageDevice *const device, StoragePartition *co
     const QString warning = i18n("If a device or partition is added to a volume group, "
                                  "any data currently on that device or partition will be lost.");
 
-    if (KMessageBox::warningContinueCancel(NULL,
+    if (KMessageBox::warningContinueCancel(nullptr,
                                            warning,
                                            QString(),
                                            KStandardGuiItem::cont(),
@@ -90,7 +88,7 @@ VGCreateDialog::VGCreateDialog(StorageDevice *const device, StoragePartition *co
                                            KMessageBox::Dangerous) == KMessageBox::Continue) {
         buildDialog(devices, partitions);
     } else {
-        m_bailout = true;
+        preventExec();
     }
 }
 
@@ -134,7 +132,7 @@ void VGCreateDialog::limitExtentSize(int index)
     }
 }
 
-void VGCreateDialog::commitChanges()
+void VGCreateDialog::commit()
 {
     lvm_t lvm = MasterList::getLvm();
     vg_t vg_dm;
@@ -331,19 +329,12 @@ void VGCreateDialog::buildDialog(QList<StorageDevice *> devices, QList<StoragePa
     connect(m_max_pvs_check, SIGNAL(stateChanged(int)),
         this, SLOT(limitPhysicalVolumes(int)));
     */
-    connect(this, SIGNAL(okClicked()),
-            this, SLOT(commitChanges()));
 
     connect(m_extent_size, SIGNAL(activated(int)),
             this, SLOT(extentSizeChanged()));
 
     connect(m_extent_suffix, SIGNAL(activated(int)),
             this, SLOT(extentSizeChanged()));
-}
-
-bool VGCreateDialog::bailout()
-{
-    return m_bailout;
 }
 
 void VGCreateDialog::getUsablePvs(QList<StorageDevice *> &devices, QList<StoragePartition *> &partitions)

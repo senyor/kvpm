@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -13,10 +13,11 @@
  */
 
 
-#include "removemissing.h"
+#include "vgremovemissing.h"
 
-#include <KMessageBox>
+#include <KIcon>
 #include <KLocale>
+#include <KMessageBox>
 
 #include <QDebug>
 #include <QGroupBox>
@@ -30,28 +31,23 @@
 
 
 
-bool remove_missing_pv(VolGroup *volumeGroup)
+VGRemoveMissingDialog::VGRemoveMissingDialog(VolGroup *const group, QWidget *parent) :
+    KvpmDialog(parent),
+    m_vg(group)
 {
-    RemoveMissingDialog dialog(volumeGroup);
-    dialog.exec();
+    setCaption(i18n("Remove missing physical volumes"));
 
-    if (dialog.result() == QDialog::Accepted) {
-        ProcessProgress remove_missing(dialog.arguments());
-        return true;
-    }
-    return false;
-}
+    QHBoxLayout *const warning_layout = new QHBoxLayout();
+    QVBoxLayout *const layout = new QVBoxLayout();
 
-RemoveMissingDialog::RemoveMissingDialog(VolGroup *volumeGroup, QWidget *parent) :
-    KDialog(parent),
-    m_vg(volumeGroup)
-{
+    QLabel *const icon_label = new QLabel();
+    icon_label->setPixmap(KIcon("dialog-warning").pixmap(64, 64));
+    warning_layout->addWidget(icon_label);
+    warning_layout->addLayout(layout);
 
-    setWindowTitle(i18n("Remove missing physical volumes"));
     QWidget *dialog_body = new QWidget(this);
     setMainWidget(dialog_body);
-    QVBoxLayout *layout = new QVBoxLayout();
-    dialog_body->setLayout(layout);
+    dialog_body->setLayout(warning_layout);
     QLabel *message = new QLabel(i18n("<b>Removing missing physical volumes may result in data loss! Use with extreme care.</b>"));
     message->setWordWrap(true);
     layout->addWidget(message);
@@ -68,16 +64,17 @@ RemoveMissingDialog::RemoveMissingDialog(VolGroup *volumeGroup, QWidget *parent)
     radio_box_layout->addWidget(m_all_button);
 }
 
-QStringList RemoveMissingDialog::arguments()
+void VGRemoveMissingDialog::commit()
 {
-    QStringList args;
+    hide();
 
-    args << "vgreduce"
-         << "--removemissing";
+    QStringList args = QStringList() << "vgreduce"
+                                     << "--removemissing";
 
     if (m_all_button->isChecked())
         args << "--force";
 
     args << m_vg->getName();
-    return args;
+
+    ProcessProgress remove_missing(args);
 }

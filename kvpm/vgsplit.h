@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -20,6 +20,7 @@
 #include <QList>
 #include <QStringList>
 
+#include "kvpmdialog.h"
 #include "logvol.h"
 
 class KLineEdit;
@@ -33,7 +34,7 @@ class LogVol;
 class VolGroup;
 
 
-class VGSplitDialog : public KDialog
+class VGSplitDialog : public KvpmDialog
 {
     Q_OBJECT
 
@@ -70,13 +71,12 @@ class VGSplitDialog : public KDialog
                    KListWidget *const pvSource, KListWidget *const pvTarget);
 
 public:
-    explicit VGSplitDialog(VolGroup *volumeGroup, QWidget *parent = 0);
-    bool bailout();
+    explicit VGSplitDialog(VolGroup *volumeGroup, QWidget *parent = nullptr);
 
 private slots:
     void addLvList();
     void addPvList();
-    void commitChanges();
+    void commit();
     void deactivate();     // active lvs must be deactivated before moving
     void enableLvArrows();
     void enablePvArrows();

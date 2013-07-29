@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -32,13 +32,13 @@
 #include <QVBoxLayout>
 
 
-VGMergeDialog::VGMergeDialog(VolGroup *const volumeGroup, QWidget *parent)
-    : KDialog(parent),
-      m_vg(volumeGroup)
+VGMergeDialog::VGMergeDialog(VolGroup *const volumeGroup, QWidget *parent) :
+    KvpmDialog(parent),
+    m_vg(volumeGroup)
 {
-    setWindowTitle(i18n("Merge Volume Group"));
+    setCaption(i18n("Merge Volume Group"));
 
-    QWidget *dialog_body = new QWidget(this);
+    QWidget *const dialog_body = new QWidget(this);
     setMainWidget(dialog_body);
     QVBoxLayout *const layout = new QVBoxLayout();
     dialog_body->setLayout(layout);
@@ -86,16 +86,14 @@ VGMergeDialog::VGMergeDialog(VolGroup *const volumeGroup, QWidget *parent)
 
     layout->addWidget(m_autobackup);
 
-    connect(this, SIGNAL(okClicked()),
-            this, SLOT(commitChanges()));
-
     connect(m_target_combo, SIGNAL(currentIndexChanged(int)),
             this, SLOT(compareExtentSize()));
 
+    checkSanity();
     compareExtentSize();
 }
 
-void VGMergeDialog::commitChanges()
+void VGMergeDialog::commit()
 {
     QStringList args = QStringList() << "vgmerge";
 
@@ -109,24 +107,21 @@ void VGMergeDialog::commitChanges()
     ProcessProgress vgmerge(args);
 }
 
-bool  VGMergeDialog::bailout()
+void VGMergeDialog::checkSanity()
 {
-    const QStringList vg_names = MasterList::getVgNames();
-    const QStringList lv_names = m_vg->getLvNames();
-
-    if (vg_names.size() < 2) {
-        KMessageBox::error(0, i18n("There is no other volume group to merge with"));
-        return true;
+    if (MasterList::getVgNames().size() < 2) {
+        KMessageBox::sorry(nullptr, i18n("There is no other volume group to merge with"));
+        preventExec();
+        return;
     }
 
-    for (int x = 0; x < lv_names.size(); x++) {
-        if ((m_vg->getLvByName(lv_names[x]))->isActive()) {
-            KMessageBox::error(0, i18n("The volume group to merge must not have active logical volumes"));
-            return true;
+    for (auto lv : m_vg->getLogicalVolumes()) {
+        if (lv->isActive()) {
+            KMessageBox::sorry(nullptr, i18n("The volume group to merge must not have active logical volumes"));
+            preventExec();
+            return;
         }
     }
-
-    return false;
 }
 
 void VGMergeDialog::compareExtentSize()

@@ -113,9 +113,6 @@ VGReduceDialog::VGReduceDialog(VolGroup *const group, QWidget *parent) :
         
         connect(m_pv_checkbox, SIGNAL(stateChanged()), this, SLOT(excludeOneVolume()));
         m_pv_checkbox->selectNone();
-        
-        connect(this, SIGNAL(okClicked()),
-                this, SLOT(commit()));
     }
 }
 

@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -19,6 +19,8 @@
 
 #include <QStringList>
 
+#include "kvpmdialog.h"
+
 class KComboBox;
 class KIntSpinBox;
 
@@ -29,14 +31,12 @@ class QGroupBox;
 class VolGroup;
 class PolicyComboBox;
 
-class VGChangeDialog : public KDialog
+class VGChangeDialog : public KvpmDialog
 {
     Q_OBJECT
 
     VolGroup *m_vg;
-    QString m_vg_name;
     QRadioButton *m_available_yes, *m_available_no, *m_polling_yes, *m_polling_no;
-
     QCheckBox *m_resize, *m_clustered, *m_refresh, *m_uuid;
     KComboBox *m_extent_size_combo, *m_extent_suffix_combo;
     QGroupBox *m_limit_box, *m_lvlimit_box, *m_pvlimit_box, *m_available_box, *m_polling_box;
@@ -45,13 +45,12 @@ class VGChangeDialog : public KDialog
     QStringList arguments();
 
 public:
-    explicit VGChangeDialog(VolGroup *const volumeGroup, QWidget *parent = NULL);
-    bool bailout();
+    explicit VGChangeDialog(VolGroup *const group, QWidget *parent = nullptr);
 
 private slots:
     void limitExtentSize(const int index);
     void resetOkButton();
-    void commitChanges();
+    void commit();
 
 };
 

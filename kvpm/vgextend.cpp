@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -38,11 +38,10 @@
 #include <QVBoxLayout>
 
 
-VGExtendDialog::VGExtendDialog(VolGroup *const group, QWidget *parent)
-    : KDialog(parent), m_vg(group)
+VGExtendDialog::VGExtendDialog(VolGroup *const group, QWidget *parent) :
+    KvpmDialog(parent),
+    m_vg(group)
 {
-    m_bailout = false;
-
     QList<StorageDevice *> devices;
     QList<StoragePartition *> partitions;
     const QString warning = i18n("If a device or partition is added to a volume group, "
@@ -52,7 +51,7 @@ VGExtendDialog::VGExtendDialog(VolGroup *const group, QWidget *parent)
 
 
     if (partitions.size() + devices.size() > 0) {
-        if (KMessageBox::warningContinueCancel(NULL,
+        if (KMessageBox::warningContinueCancel(nullptr,
                                                warning,
                                                QString(),
                                                KStandardGuiItem::cont(),
@@ -61,24 +60,22 @@ VGExtendDialog::VGExtendDialog(VolGroup *const group, QWidget *parent)
                                                KMessageBox::Dangerous) == KMessageBox::Continue) {
             buildDialog(devices, partitions);
         } else {
-            m_bailout = true;
+            preventExec();
         }
     } else {
-        m_bailout = true;
-        KMessageBox::error(0, i18n("No unused potential physical volumes found"));
+        preventExec();
+        KMessageBox::sorry(nullptr, i18n("No unused potential physical volumes found"));
     }
 }
 
-VGExtendDialog::VGExtendDialog(VolGroup *const group, StorageDevice *const device, StoragePartition *const partition, QWidget *parent)
-    : KDialog(parent), 
-      m_vg(group)
+VGExtendDialog::VGExtendDialog(VolGroup *const group, StorageDevice *const device, StoragePartition *const partition, QWidget *parent) :
+    KvpmDialog(parent), 
+    m_vg(group)
 {
-    m_bailout = false;
-
     QList<StorageDevice *> devices;
     QList<StoragePartition *> partitions;
 
-    if (device != NULL)
+    if (device)
         devices.append(device);
     else
         partitions.append(partition);
@@ -87,7 +84,7 @@ VGExtendDialog::VGExtendDialog(VolGroup *const group, StorageDevice *const devic
                            "any data currently on that device or partition will be lost.");
 
 
-    if (KMessageBox::warningContinueCancel(NULL,
+    if (KMessageBox::warningContinueCancel(nullptr,
                                            warning,
                                            QString(),
                                            KStandardGuiItem::cont(),
@@ -96,11 +93,11 @@ VGExtendDialog::VGExtendDialog(VolGroup *const group, StorageDevice *const devic
                                            KMessageBox::Dangerous) == KMessageBox::Continue) {
         buildDialog(devices, partitions);
     } else {
-        m_bailout = true;
+        preventExec();
     }
 }
 
-void VGExtendDialog::commitChanges()
+void VGExtendDialog::commit()
 {
     const QByteArray vg_name   = m_vg->getName().toLocal8Bit();
     const QStringList pv_names = m_pv_checkbox->getNames();
@@ -117,7 +114,7 @@ void VGExtendDialog::commitChanges()
 
     if ((vg_dm = lvm_vg_open(lvm, vg_name.data(), "w", 0))) {
 
-        for (int x = 0; x < pv_names.size(); x++) {
+        for (int x = 0; x < pv_names.size(); ++x) {
             progress_box->setValue(x);
             qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
             pv_name = pv_names[x].toLocal8Bit();
@@ -133,7 +130,7 @@ void VGExtendDialog::commitChanges()
         return;
     }
 
-    KMessageBox::error(0, QString(lvm_errmsg(lvm)));
+    KMessageBox::error(nullptr, QString(lvm_errmsg(lvm)));
     progress_box->reset();
     qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
     return;
@@ -149,7 +146,7 @@ void VGExtendDialog::validateOK()
 
 void VGExtendDialog::buildDialog(QList<StorageDevice *> devices, QList<StoragePartition *> partitions)
 {
-    setWindowTitle(i18n("Extend Volume Group"));
+    setCaption(i18n("Extend Volume Group"));
 
     QWidget *const dialog_body = new QWidget(this);
     setMainWidget(dialog_body);
@@ -167,9 +164,6 @@ void VGExtendDialog::buildDialog(QList<StorageDevice *> devices, QList<StoragePa
 
     connect(m_pv_checkbox, SIGNAL(stateChanged()),
             this, SLOT(validateOK()));
-
-    connect(this, SIGNAL(okClicked()),
-            this, SLOT(commitChanges()));
 }
 
 void VGExtendDialog::getUsablePvs(QList<StorageDevice *> &devices, QList<StoragePartition *> &partitions)
@@ -194,9 +188,4 @@ void VGExtendDialog::getUsablePvs(QList<StorageDevice *> &devices, QList<Storage
             }
         }
     }
-}
-
-bool VGExtendDialog::bailout()
-{
-    return m_bailout;
 }
