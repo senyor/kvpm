@@ -50,38 +50,32 @@ LVSizeChart::LVSizeChart(VolGroup *const group, QTreeWidget *const vgTree, QWidg
 
 void LVSizeChart::populateChart()
 {
-    LogVolList logical_volumes;
-    
     QLayoutItem *child;
-    const long item_count = m_vg_tree->topLevelItemCount();
-
-    while ((child = m_layout->takeAt(0)) != 0)     // remove old children of layout
+    while ((child = m_layout->takeAt(0)))     // remove old children of layout
         delete child;
+
+    LogVolList volumes;
+    const long item_count = m_vg_tree->topLevelItemCount();
 
     for (int x = 0; x < item_count; ++x) {
         QTreeWidgetItem *const item = m_vg_tree->topLevelItem(x);
         LogVol *const lv = m_vg->getLvByName(item->data(0, Qt::UserRole).toString());
 
         if (lv) {
-            logical_volumes.append(lv);
-
+            volumes.append(lv);
             if (lv->isThinPool()){
-                QListIterator<QPointer<LogVol> > pool_itr(lv->getThinVolumes());
-                while (pool_itr.hasNext()) {
-                    LogVolList cow_snaps(pool_itr.next()->getSnapshots());
-
-                    for (int n = cow_snaps.size() - 1; n >= 0; n--) {
-                        if (cow_snaps[n]->isCowSnap()) {
-                            logical_volumes.append(cow_snaps[n]);
-                        }
+                for (auto thin : lv->getThinVolumes()) {
+                    for (auto snap : thin->getSnapshots()) {
+                        if (snap->isCowSnap())
+                            volumes.append(snap);
                     }
                 }
             } else if (lv->getSnapshotCount()) {
-                logical_volumes.append(lv->getSnapshots());
+                volumes.append(lv->getSnapshots());
             }
         }
     }
-
+    
     const long long free_extents  = m_vg->getFreeExtents();
     const long long total_extents = m_vg->getExtents();
     const long long extent_size   = m_vg->getExtentSize();
@@ -91,8 +85,7 @@ void LVSizeChart::populateChart()
     double seg_ratio;
     QWidget *widget;
 
-    for (auto lv : logical_volumes) {
-
+    for (auto lv : volumes) {
         if (!lv->isLvmMirrorLeg() && !lv->isThinVolume() &&
             !lv->isLvmMirrorLog() && !lv->isThinPoolData() &&
             !lv->isVirtual()      && !lv->isRaidImage() &&
@@ -118,7 +111,7 @@ void LVSizeChart::populateChart()
     if (free_extents) { // only create a free space widget if we have some
         seg_ratio = (free_extents / (double) total_extents) + 0.02; // allow a little "stretch" 0.02
         usage = "freespace" ;
-        widget = frameAndConnect(new LVChartSeg(0, usage, this));
+        widget = frameAndConnect(new LVChartSeg(nullptr, usage, this));
         m_widgets.append(widget);
 
         m_layout->addWidget(widget);
@@ -126,7 +119,7 @@ void LVSizeChart::populateChart()
     } else if (m_widgets.size() == 0) { // if we have no chart segs then put in a blank one
                                         // because lvsizechart won't work with zero segments
         usage = "" ;
-        widget = frameAndConnect(new LVChartSeg(0, usage, this));
+        widget = frameAndConnect(new LVChartSeg(nullptr, usage, this));
         m_widgets.append(widget);
 
         m_layout->addWidget(widget);
@@ -140,7 +133,7 @@ void LVSizeChart::populateChart()
 
     m_widgets[0]->setMaximumWidth(max_segment_width);
 
-    for (int x =  m_widgets.size() - 1; x >= 1 ; x--) {
+    for (int x = m_widgets.size() - 1; x >= 1 ; --x) {
         max_segment_width = qRound(((double)width() * m_ratios[x]));
 
         if (max_segment_width < 1)
@@ -160,7 +153,7 @@ void LVSizeChart::resizeEvent(QResizeEvent *event)
 
     m_widgets[0]->setMaximumWidth(max_segment_width);
 
-    for (int x =  m_widgets.size() - 1; x >= 1 ; x--) {
+    for (int x =  m_widgets.size() - 1; x >= 1 ; --x) {
         max_segment_width = qRound(((double)width() * m_ratios[x]));
 
         if (max_segment_width < 1)
@@ -175,10 +168,10 @@ void LVSizeChart::vgtreeClicked()
     populateChart();
 }
 
-QFrame* LVSizeChart::frameAndConnect(LVChartSeg *seg) 
+QFrame* LVSizeChart::frameAndConnect(LVChartSeg *const seg) 
 {
-    connect(seg,  SIGNAL(lvMenuRequested(LogVol*)),
-            this, SIGNAL(lvMenuRequested(LogVol*)));
+    connect(seg,  SIGNAL(lvMenuRequested(LogVol *)),
+            this, SIGNAL(lvMenuRequested(LogVol *)));
 
     QFrame *const frame = new QFrame();
     frame->setFrameStyle(QFrame::Sunken | QFrame::Panel);

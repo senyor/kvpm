@@ -37,7 +37,7 @@ class LVSizeChart : public QFrame
     QList<double>    m_ratios;     // These are the relative size of each segment
                                    // to the whole chart. The total should be about 1.
 
-    QFrame *frameAndConnect(LVChartSeg *seg); 
+    QFrame *frameAndConnect(LVChartSeg *const seg); 
 
 public:
     LVSizeChart(VolGroup *const group, QTreeWidget *const vgTree, QWidget *parent = nullptr);
