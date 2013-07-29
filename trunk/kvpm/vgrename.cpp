@@ -45,11 +45,11 @@ VGRenameDialog::VGRenameDialog(VolGroup *const group, QWidget *parent) :
     QVBoxLayout *const layout = new QVBoxLayout();
     dialog_body->setLayout(layout);
 
-    QLabel *label = new QLabel(i18n("<b>Rename Volume Group</b>"));
+    QLabel *label = new QLabel(i18n("Rename Volume Group"));
     label->setAlignment(Qt::AlignCenter);
     layout->addWidget(label);
     layout->addSpacing(10);
-    label = new QLabel(i18n("Current volume group name: %1", m_old_name));
+    label = new QLabel(i18n("Current volume group name: <b>%1</b>", m_old_name));
     layout->addWidget(label);
 
     QLabel *const name_label = new QLabel(i18n("New volume group name: "));

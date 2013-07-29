@@ -153,7 +153,7 @@ void VGExtendDialog::buildDialog(QList<StorageDevice *> devices, QList<StoragePa
     QVBoxLayout *const layout = new QVBoxLayout();
     dialog_body->setLayout(layout);
 
-    QLabel *const title = new QLabel(i18n("<b>Extend volume group: %1</b>", m_vg->getName()));
+    QLabel *const title = new QLabel(i18n("Extend volume group: <b>%1</b>", m_vg->getName()));
     title->setAlignment(Qt::AlignCenter);
     layout->addSpacing(5);
     layout->addWidget(title);
