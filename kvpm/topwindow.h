@@ -18,7 +18,7 @@
 
 #include <KMainWindow>
 
-class KAction;
+class KActionCollection;
 class KMenu;
 class KMenuBar;
 class KToggleAction;
@@ -34,6 +34,7 @@ class StorageDevice;
 class TopWindow;
 class VolGroup;
 class VolumeGroupTab;
+class VGActions;
 
 extern TopWindow *MainWindow;
 
@@ -41,15 +42,11 @@ extern TopWindow *MainWindow;
 class TopWindow : public KMainWindow
 {
     Q_OBJECT
+
     MainTabWidget *m_tab_widget = nullptr;          // The current tab widget we are using
+    VGActions *m_vg_actions = nullptr;
+    DeviceTab *m_device_tab = nullptr;
 
-    KAction *m_remove_action, *m_rename_action, *m_extend_action,
-            *m_reduce_action, *m_create_action, *m_merge_action,
-            *m_change_action, *m_remove_missing_action,
-            *m_export_action, *m_import_action, *m_split_action;
-
-    DeviceTab  *m_device_tab = nullptr;
-    VolGroup   *m_vg = nullptr;
     MasterList *m_master_list;
     ExecutableFinder *m_executable_finder;
 
@@ -74,14 +71,13 @@ public slots:
 
 private slots:
     void cleanUp();
-    void setupMenus();
+    void setVgMenu(int index);
     void showVolumeGroupInfo(bool show);
     void showVolumeGroupBar(bool show);
     void showToolbars(bool show);
     void useSiUnits(bool use);
     void setToolbarIconSize(QAction *action);
     void setToolbarIconText(QAction *action);
-    void callVgDialog(QAction *action);
     void callToolsDialog(QAction *action);
     void configKvpm();
 
