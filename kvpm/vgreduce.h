@@ -21,12 +21,14 @@
 #include <KDialog>
 
 #include <QStringList>
+#include <QSharedPointer>
 
 class QCheckBox;
 
 class PhysVol;
 class VolGroup;
 class PvGroupBox;
+class PvSpace;
 
 
 class VGReduceDialog : public KvpmDialog
@@ -36,7 +38,9 @@ class VGReduceDialog : public KvpmDialog
     PhysVol  *m_pv = nullptr;
     VolGroup *m_vg = nullptr;
     PvGroupBox *m_pv_checkbox = nullptr;
-    bool m_unremovable_pvs_present;
+
+    QList<QSharedPointer<PvSpace> > getPvSpaceList(); 
+    bool hasUnremovablePv();
 
 public:
     explicit VGReduceDialog(VolGroup *const group, QWidget *parent = nullptr);

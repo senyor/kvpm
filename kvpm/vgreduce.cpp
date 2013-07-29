@@ -27,7 +27,6 @@
 
 #include <QDebug>
 #include <QLabel>
-#include <QSharedPointer>
 #include <QVBoxLayout>
 
 
@@ -46,10 +45,18 @@ VGReduceDialog::VGReduceDialog(PhysVol *const pv, QWidget *parent) :
     QVBoxLayout *const layout = new QVBoxLayout;
     dialog_body->setLayout(layout);
 
-    QLabel *const label = new QLabel(i18n("<b>Remove physical volume: %1?</b>", m_pv->getName()));
+    QLabel *const label = new QLabel(i18n("Remove physical volume: <b>%1?</b>", m_pv->getName()));
     label->setAlignment(Qt::AlignCenter);
     layout->addWidget(label);
     layout->addSpacing(5);
+
+    if (pv->getSize() != pv->getRemaining()) {
+        preventExec();
+        KMessageBox::sorry(0, i18n("This physical volume is still in use and cannot be removed"));
+    } else if (getPvSpaceList().size() == 1 && !hasUnremovablePv()) {
+        preventExec();
+        KMessageBox::sorry(0, i18n("There is only one physical volume in this group, try deleting the group instead"));
+    }
 
     setButtons(KDialog::Yes | KDialog::No);
 }
@@ -68,31 +75,25 @@ VGReduceDialog::VGReduceDialog(VolGroup *const group, QWidget *parent) :
 
     const QString vg_name = m_vg->getName();
 
-    QList<QSharedPointer<PvSpace>> pv_space_list;
-    m_unremovable_pvs_present = false;
-    for (auto pv : m_vg->getPhysicalVolumes()) {
-        if (pv->getSize() - pv->getRemaining()) { // only unused pvs can be removed
-            m_unremovable_pvs_present = true;
-        } else {
-            pv_space_list << QSharedPointer<PvSpace>(new PvSpace(pv, pv->getSize(), pv->getSize()));
-        }
-    }
+    QList<QSharedPointer<PvSpace> > pv_space_list = getPvSpaceList();
 
     if (pv_space_list.isEmpty()){
         preventExec();
         KMessageBox::sorry(0, i18n("There are no physical volumes that can be removed"));
-    } else if (pv_space_list.size() == 1 && !m_unremovable_pvs_present) {
+    } else if (pv_space_list.size() == 1 && !hasUnremovablePv()) {
         preventExec();
-        KMessageBox::sorry(0, i18n("There is only one physical volume in this group"));
+        KMessageBox::sorry(0, i18n("There is only one physical volume in this group, try deleting the group instead."));
     } else {
         QLabel *label;
 
-        label = new QLabel(i18n("<b>Reduce volume group: %1</b>", m_vg->getName()));
+        label = new QLabel(i18n("Reduce volume group: <b>%1</b>", m_vg->getName()));
         label->setAlignment(Qt::AlignCenter);
         layout->addWidget(label);
-        layout->addSpacing(5);
+        layout->addSpacing(10);
 
-        if (m_unremovable_pvs_present) {
+        if (pv_space_list.size() == 1) {
+            label = new QLabel(i18n("This is the only physical volume that can be removed"));
+        } else if (hasUnremovablePv()) {
             label = new QLabel(i18n("Select physical volumes to remove them from the volume group"));
         } else {
             label = new QLabel(i18n("Select physical volumes, <b>excluding one</b>, to "
@@ -104,13 +105,12 @@ VGReduceDialog::VGReduceDialog(VolGroup *const group, QWidget *parent) :
         QWidget *const label_widget = new QWidget;
         label_layout->addWidget(label);
         label_widget->setLayout(label_layout);
-
         layout->addWidget(label_widget);
-        m_pv_checkbox = new PvGroupBox(pv_space_list, NO_POLICY, NO_POLICY);
 
-        layout->addWidget(m_pv_checkbox);
+        m_pv_checkbox = new PvGroupBox(pv_space_list, NO_POLICY, NO_POLICY);
         m_pv_checkbox->setTitle(i18n("Unused physical volumes"));
-        
+        layout->addWidget(m_pv_checkbox);
+
         connect(m_pv_checkbox, SIGNAL(stateChanged()), this, SLOT(excludeOneVolume()));
         m_pv_checkbox->selectNone();
     }
@@ -154,7 +154,7 @@ void VGReduceDialog::excludeOneVolume()
     const int boxes_count   = m_pv_checkbox->getAllNames().size();
 
     if (boxes_checked > 0) {
-        if (m_unremovable_pvs_present || (boxes_checked < boxes_count))
+        if (hasUnremovablePv() || (boxes_checked < boxes_count))
             enableButtonOk(true);
         else
             enableButtonOk(false);
@@ -163,4 +163,28 @@ void VGReduceDialog::excludeOneVolume()
     }
 }
 
+QList<QSharedPointer<PvSpace> >  VGReduceDialog::getPvSpaceList() 
+{
+    QList<QSharedPointer<PvSpace>> list;
 
+    for (auto pv : m_vg->getPhysicalVolumes()) {
+        if (pv->getSize() == pv->getRemaining())
+            list << QSharedPointer<PvSpace>(new PvSpace(pv, pv->getSize(), pv->getSize()));
+    }
+
+    return list;
+}
+
+bool  VGReduceDialog::hasUnremovablePv()
+{
+    bool unremovable = false;
+
+    for (auto pv : m_vg->getPhysicalVolumes()) {
+        if (pv->getSize() != pv->getRemaining()) {    // only unused pvs can be removed
+            unremovable = true;
+            break;
+        }
+    }
+
+    return unremovable;
+}
