@@ -40,7 +40,7 @@ MainTabWidget::MainTabWidget(QWidget *parent) :
     setLayout(layout);
 
     connect(m_tab_widget, SIGNAL(currentChanged(int)),
-            this, SIGNAL(currentIndexChanged()));
+            this, SIGNAL(currentIndexChanged(int)));
 }
 
 QString MainTabWidget::getUnmungedText(const int index)

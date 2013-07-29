@@ -33,7 +33,7 @@ class MainTabWidget : public QWidget
     QList<VolumeGroupTab *>  m_vg_tabs;
 
 signals:
-    void currentIndexChanged();
+    void currentIndexChanged(int index);
 
 public:
     MainTabWidget(QWidget *parent = 0);
