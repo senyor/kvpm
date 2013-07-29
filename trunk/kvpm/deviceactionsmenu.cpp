@@ -255,31 +255,31 @@ void DeviceActionsMenu::mkfsPartition()
     if (!dialog.bailout()) {
         dialog.exec();
         if (dialog.result() == QDialog::Accepted)
-            MainWindow->reRun();
+            g_top_window->reRun();
     }
 }
 
 void DeviceActionsMenu::fsckPartition()
 {
     if (manual_fsck(m_part))
-        MainWindow->reRun();
+        g_top_window->reRun();
 }
 
 void DeviceActionsMenu::maxfsPartition()
 {
     if (m_part) {        // m_part == NULL if not a partition
         if (max_fs(m_part))
-            MainWindow->reRun();
+            g_top_window->reRun();
     } else {
         if (max_fs(m_dev))
-            MainWindow->reRun();
+            g_top_window->reRun();
     }
 }
 
 void DeviceActionsMenu::removePartition()
 {
     if (remove_partition(m_part))
-        MainWindow->reRun();
+        g_top_window->reRun();
 }
 
 void DeviceActionsMenu::addPartition()
@@ -289,7 +289,7 @@ void DeviceActionsMenu::addPartition()
     if (!dialog.bailout()) {
         dialog.exec();
         if (dialog.result() == QDialog::Accepted)
-            MainWindow->reRun();
+            g_top_window->reRun();
     }
 }
 
@@ -300,7 +300,7 @@ void DeviceActionsMenu::changePartition()
     if (!dialog.bailout()) {
         dialog.exec();
         if (dialog.result() == QDialog::Accepted)
-            MainWindow->reRun();
+            g_top_window->reRun();
     }
 }
 
@@ -312,7 +312,7 @@ void DeviceActionsMenu::changeFlags()
         dialog.exec();
 
         if (dialog.result() == QDialog::Accepted)
-            MainWindow->reRun();
+            g_top_window->reRun();
     }
 }
 
@@ -322,19 +322,19 @@ void DeviceActionsMenu::vgcreatePartition()
         VGCreateDialog dialog(nullptr, m_part);
 
         if (dialog.run() == QDialog::Accepted)
-            MainWindow->reRun();
+            g_top_window->reRun();
     } else {                          // whole device, not partition
         VGCreateDialog dialog(m_dev, nullptr);
 
         if (dialog.run() == QDialog::Accepted)
-            MainWindow->reRun();
+            g_top_window->reRun();
     }
 }
 
 void DeviceActionsMenu::tablecreatePartition()
 {
     if (create_table(m_dev->getName()))
-        MainWindow->reRun();
+        g_top_window->reRun();
 }
 
 void DeviceActionsMenu::vgreducePartition()   // pvs can also be whole devices
@@ -349,7 +349,7 @@ void DeviceActionsMenu::vgreducePartition()   // pvs can also be whole devices
     VGReduceDialog  dialog(pv);
 
     if (dialog.run() == KDialog::Yes)
-        MainWindow->reRun();
+        g_top_window->reRun();
 }
 
 void DeviceActionsMenu::vgextendPartition(QAction *action)
@@ -361,12 +361,12 @@ void DeviceActionsMenu::vgextendPartition(QAction *action)
         VGExtendDialog dialog(vg, nullptr, m_part);
 
         if (dialog.run() == QDialog::Accepted)
-            MainWindow->reRun();
+            g_top_window->reRun();
     } else {                          // whole device, not partition
         VGExtendDialog dialog(vg, m_dev, nullptr);
 
         if (dialog.run() == QDialog::Accepted)
-            MainWindow->reRun();
+            g_top_window->reRun();
     }
 }
 
@@ -376,7 +376,7 @@ void DeviceActionsMenu::mountPartition()
     dialog.exec();
 
     if (dialog.result() == QDialog::Accepted)
-        MainWindow->reRun();
+        g_top_window->reRun();
 }
 
 void DeviceActionsMenu::unmountPartition()
@@ -386,7 +386,7 @@ void DeviceActionsMenu::unmountPartition()
     if (!dialog.bailout()) {
         dialog.exec();
         if (dialog.result() == QDialog::Accepted || dialog.result() == KDialog::Yes)
-            MainWindow->reRun();
+            g_top_window->reRun();
     }
 }
 

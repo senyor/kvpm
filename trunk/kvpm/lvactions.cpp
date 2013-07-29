@@ -844,7 +844,7 @@ void LVActions::mountFs()
     dialog.exec();
 
     if (dialog.result() == QDialog::Accepted)
-        MainWindow->reRun();
+        g_top_window->reRun();
 }
 
 void LVActions::unmountFs()
@@ -854,7 +854,7 @@ void LVActions::unmountFs()
     if (!dialog.bailout()) {
         dialog.exec();
         if (dialog.result() == QDialog::Accepted || dialog.result() == KDialog::Yes)
-            MainWindow->reRun();
+            g_top_window->reRun();
     }
 }
 
@@ -865,20 +865,20 @@ void LVActions::makeFs()
     if (!dialog.bailout()) {
         dialog.exec();
         if (dialog.result() == QDialog::Accepted)
-            MainWindow->reRun();
+            g_top_window->reRun();
     }
 }
 
 void LVActions::checkFs()
 {
     if (manual_fsck(m_lv))
-        MainWindow->reRun();
+        g_top_window->reRun();
 }
 
 void LVActions::maxFs()
 {
     if (max_fs(m_lv))
-        MainWindow->reRun();
+        g_top_window->reRun();
 }
 
 void LVActions::createLv()
@@ -888,7 +888,7 @@ void LVActions::createLv()
     if (!dialog.bailout()) {
         dialog.exec();
         if (dialog.result() == QDialog::Accepted)
-            MainWindow->reRun();
+            g_top_window->reRun();
     }
 }
 
@@ -903,7 +903,7 @@ void LVActions::createThinVolume()
     if (!dialog.bailout()) {
         dialog.exec();
         if (dialog.result() == QDialog::Accepted)
-            MainWindow->reRun();
+            g_top_window->reRun();
     }
 }
 
@@ -914,7 +914,7 @@ void LVActions::createThinPool()
     if (!dialog.bailout()) {
         dialog.exec();
         if (dialog.result() == QDialog::Accepted)
-            MainWindow->reRun();
+            g_top_window->reRun();
     }
 }
 
@@ -925,7 +925,7 @@ void LVActions::reduceLv()
     if (!dialog.bailout()) {
         dialog.exec();
         if (dialog.result() == QDialog::Accepted)
-            MainWindow->reRun();
+            g_top_window->reRun();
     }
 }
 
@@ -937,7 +937,7 @@ void LVActions::extendLv()
         if (!dialog.bailout()) {
             dialog.exec();
             if (dialog.result() == QDialog::Accepted)
-                MainWindow->reRun();
+                g_top_window->reRun();
         }
     } else {
         LVCreateDialog dialog(m_lv, false);
@@ -945,7 +945,7 @@ void LVActions::extendLv()
         if (!dialog.bailout()) {
             dialog.exec();
             if (dialog.result() == QDialog::Accepted)
-                MainWindow->reRun();
+                g_top_window->reRun();
         }
     }
 }
@@ -953,7 +953,7 @@ void LVActions::extendLv()
 void LVActions::mergeSnapshot()
 {
     if (merge_snap(m_lv))
-        MainWindow->reRun();
+        g_top_window->reRun();
 }
 
 void LVActions::removeLv()
@@ -963,7 +963,7 @@ void LVActions::removeLv()
     if (!dialog.bailout()) {
         dialog.exec();
         if (dialog.result() == KDialog::Yes)
-            MainWindow->reRun();
+            g_top_window->reRun();
     }
 }
 
@@ -973,7 +973,7 @@ void LVActions::renameLv()
     dialog.exec();
 
     if (dialog.result() == QDialog::Accepted)
-        MainWindow->reRun();
+        g_top_window->reRun();
 }
 
 void LVActions::createSnapshot()
@@ -983,7 +983,7 @@ void LVActions::createSnapshot()
     if (!dialog.bailout()) {
         dialog.exec();
         if (dialog.result() == QDialog::Accepted)
-            MainWindow->reRun();
+            g_top_window->reRun();
     }
 }
 
@@ -995,7 +995,7 @@ void LVActions::thinSnapshot()
     if (!dialog.bailout()) {
         dialog.exec();
         if (dialog.result() == QDialog::Accepted)
-            MainWindow->reRun();
+            g_top_window->reRun();
     }
 }
 
@@ -1005,7 +1005,7 @@ void LVActions::changeLv()
     dialog.exec();
 
     if (dialog.result() == QDialog::Accepted)
-        MainWindow->reRun();
+        g_top_window->reRun();
 }
 
 void LVActions::movePhysicalExtents()
@@ -1013,7 +1013,7 @@ void LVActions::movePhysicalExtents()
     PVMoveDialog dialog(m_lv, m_segment);
 
     if (dialog.run() == QDialog::Accepted)
-            MainWindow->reRun();
+            g_top_window->reRun();
 }
 
 void LVActions::addLegs()
@@ -1023,7 +1023,7 @@ void LVActions::addLegs()
     if (!dialog.bailout()) {
         dialog.exec();
         if (dialog.result() == QDialog::Accepted)
-            MainWindow->reRun();
+            g_top_window->reRun();
     }
 }
 
@@ -1034,20 +1034,20 @@ void LVActions::changeLog()
     if (!dialog.bailout()) {
         dialog.exec();
         if (dialog.result() == QDialog::Accepted)
-            MainWindow->reRun();
+            g_top_window->reRun();
     }
 }
 
 void LVActions::removeMirror()
 {
     if (remove_mirror(m_lv))
-        MainWindow->reRun();
+        g_top_window->reRun();
 }
 
 void LVActions::removeLeg()
 {
     if (remove_mirror_leg(m_lv))
-        MainWindow->reRun();
+        g_top_window->reRun();
 }
 
 void LVActions::repairMissing()
@@ -1057,7 +1057,7 @@ void LVActions::repairMissing()
     if (!dialog.bailout()) {
         dialog.exec();
         if (dialog.result() == QDialog::Accepted)
-            MainWindow->reRun();
+            g_top_window->reRun();
     }
 }
 

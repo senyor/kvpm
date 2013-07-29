@@ -128,7 +128,7 @@ void PVActions::callDialog(QAction *action)
             int result = dialog->run();
             
             if (result == QDialog::Accepted || result == KDialog::Yes)
-                MainWindow->reRun();
+                g_top_window->reRun();
             
             dialog->deleteLater();
         }

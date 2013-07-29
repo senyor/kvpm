@@ -36,7 +36,7 @@ class VolGroup;
 class VolumeGroupTab;
 class VGActions;
 
-extern TopWindow *MainWindow;
+extern TopWindow *g_top_window;
 
 
 class TopWindow : public KMainWindow

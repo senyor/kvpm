@@ -32,7 +32,7 @@ class PhysVol;
 class LogVol;
 
 
-TopWindow *MainWindow;
+TopWindow *g_top_window;
 
 int main(int argc, char **argv)
 {
@@ -67,13 +67,12 @@ int main(int argc, char **argv)
     LvmConfig config;
     config.initialize();
 
-    MasterList *master_list = new MasterList();
-    TopWindow  *top_window  = new TopWindow(master_list, executable_finder, NULL);
-    MainWindow = top_window;
+    MasterList *const master_list = new MasterList();
+    g_top_window  = new TopWindow(master_list, executable_finder, nullptr);
 
-    top_window->setAutoSaveSettings();
-    top_window->show();
-    splash.finish(top_window);
+    g_top_window->setAutoSaveSettings();
+    g_top_window->show();
+    splash.finish(g_top_window);
 
     return kvpm.exec();
 }
