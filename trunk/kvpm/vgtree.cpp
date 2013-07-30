@@ -27,7 +27,9 @@
 #include "volgroup.h"
 
 
-VGTree::VGTree(VolGroup *const group) : QTreeWidget(), m_vg(group)
+VGTree::VGTree(VolGroup *const group) : 
+    QTreeWidget(), 
+    m_vg(group)
 {
     m_init = true;
 
@@ -56,12 +58,14 @@ VGTree::VGTree(VolGroup *const group) : QTreeWidget(), m_vg(group)
 
     setHeaderItem(item);
     sortByColumn(0, Qt::AscendingOrder);
+
+    setupContextMenu();
 }
 
 void VGTree::loadData()
 {
     LogVolList logical_volumes = m_vg->getLogicalVolumes();
-    LogVol *lv = NULL;
+    LogVol *lv = nullptr;
     QTreeWidgetItem *new_item;
 
     disconnect(this, SIGNAL(itemExpanded(QTreeWidgetItem *)),
@@ -76,14 +80,14 @@ void VGTree::loadData()
     for (int x = 0; x < m_vg->getLvCount(); x++) {
 
         lv = logical_volumes[x];
-        new_item = NULL;
+        new_item = nullptr;
 
         for (int y = topLevelItemCount() - 1; y >= 0; y--) {
             if (topLevelItem(y)->data(0, Qt::DisplayRole).toString() == lv->getName())
                 new_item = loadItem(lv, topLevelItem(y));
         }
 
-        if (new_item == NULL) {
+        if (new_item == nullptr) {
             new_item = new QTreeWidgetItem((QTreeWidgetItem *)0);
             addTopLevelItem(new_item);
             loadItem(lv, new_item);
@@ -111,10 +115,10 @@ void VGTree::loadData()
 
     setSortingEnabled(true);
 
-    if (currentItem() == NULL && topLevelItemCount() > 0) {
+    if (currentItem() == nullptr && topLevelItemCount() > 0) {
         setCurrentItem(topLevelItem(0));
         scrollToItem(currentItem(), QAbstractItemView::EnsureVisible);
-    } else if (currentItem() != NULL) {
+    } else if (currentItem() != nullptr) {
         setCurrentItem(currentItem());
         scrollToItem(currentItem(), QAbstractItemView::EnsureVisible);
     }
@@ -122,7 +126,6 @@ void VGTree::loadData()
     for (int x = 0; x < 10; x++)
         resizeColumnToContents(x);
 
-    setupContextMenu();
     m_init = false;
     emit currentItemChanged(currentItem(), currentItem());
 
@@ -343,17 +346,9 @@ QTreeWidgetItem *VGTree::loadItem(LogVol *lv, QTreeWidgetItem *item)
 void VGTree::setupContextMenu()
 {
     setContextMenuPolicy(Qt::CustomContextMenu);
-
-    // disconnect the last connect, otherwise the following connect gets repeated
-    // and piles up.
-
-    disconnect(this, SIGNAL(customContextMenuRequested(QPoint)),
-               this, SLOT(popupContextMenu(QPoint)));
     
     connect(this, SIGNAL(customContextMenuRequested(QPoint)),
             this, SLOT(popupContextMenu(QPoint)));
-
-    return;
 }
 
 void VGTree::insertChildItems(LogVol *parentVolume, QTreeWidgetItem *parentItem)
@@ -363,7 +358,7 @@ void VGTree::insertChildItems(LogVol *parentVolume, QTreeWidgetItem *parentItem)
 
     for (int x = 0; x < immediate_children.size(); x++) {
 
-        QTreeWidgetItem *child_item = NULL;
+        QTreeWidgetItem *child_item = nullptr;
         child_volume = immediate_children[x];
 
         for (int y = parentItem->childCount() - 1; y >= 0; y--) {
@@ -371,7 +366,7 @@ void VGTree::insertChildItems(LogVol *parentVolume, QTreeWidgetItem *parentItem)
                 child_item = loadItem(child_volume, parentItem->child(y));
         }
 
-        if (child_item == NULL)
+        if (child_item == nullptr)
             child_item = loadItem(child_volume, new QTreeWidgetItem(parentItem));
 
         for (int column = 1; column < child_item->columnCount() ; column++)
@@ -406,8 +401,6 @@ void VGTree::setViewConfig()
 {
     KConfigSkeleton skeleton;
 
-    bool changed = false;
-
     bool volume,      size,      remaining,
          filesystem,  type,
          stripes,     stripesize,
@@ -438,15 +431,12 @@ void VGTree::setViewConfig()
     skeleton.addItemBool("vt_tags",        tags,        true);
     skeleton.addItemBool("vt_mountpoints", mountpoints, false);
 
-    if (!(!volume == isColumnHidden(0)     && !size == isColumnHidden(1) &&
-          !remaining == isColumnHidden(2)  && !filesystem == isColumnHidden(3) &&
-          !type == isColumnHidden(4)       && !stripes == isColumnHidden(5) &&
-          !stripesize == isColumnHidden(6) && !snapmove == isColumnHidden(7) &&
-          !state == isColumnHidden(8)      && !access == isColumnHidden(9) &&
-          !tags == isColumnHidden(10)      && !mountpoints == isColumnHidden(11)))
-        changed = true;
-
-    if (changed) {
+    if (volume == isColumnHidden(0)     || size == isColumnHidden(1) ||
+        remaining == isColumnHidden(2)  || filesystem == isColumnHidden(3) ||
+        type == isColumnHidden(4)       || stripes == isColumnHidden(5) ||
+        stripesize == isColumnHidden(6) || snapmove == isColumnHidden(7) ||
+        state == isColumnHidden(8)      || access == isColumnHidden(9) ||
+        tags == isColumnHidden(10)      || mountpoints == isColumnHidden(11)) {
 
         setColumnHidden(0, !volume);
         setColumnHidden(1, !type);
