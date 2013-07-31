@@ -1040,7 +1040,9 @@ void LVActions::changeLog()
 
 void LVActions::removeMirror()
 {
-    if (remove_mirror(m_lv))
+    RemoveMirrorDialog dialog(m_lv);
+
+    if (dialog.run() == QDialog::Accepted)
         g_top_window->reRun();
 }
 

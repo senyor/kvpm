@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -19,29 +19,30 @@
 
 #include <QStringList>
 
+#include "kvpmdialog.h"
+
 class QLabel;
 
 class LogVol;
 class NoMungeCheck;
 class VolGroup;
 
-bool remove_mirror(LogVol *logicalVolume);
 
-class RemoveMirrorDialog : public KDialog
+
+class RemoveMirrorDialog : public KvpmDialog
 {
     Q_OBJECT
 
-    LogVol *m_lv;
-    VolGroup *m_vg;
-
+    LogVol *m_lv = nullptr;
+    VolGroup *m_vg = nullptr;
     QList<NoMungeCheck *> m_mirror_leg_checks;
 
 public:
-    explicit RemoveMirrorDialog(LogVol *logicalVolume, QWidget *parent = 0);
-    QStringList arguments();
+    explicit RemoveMirrorDialog(LogVol *volume, QWidget *parent = nullptr);
 
 private slots:
-    void validateCheckStates(int);
+    void validateCheckStates();
+    void commit();
 
 };
 
