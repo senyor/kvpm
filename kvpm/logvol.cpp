@@ -119,15 +119,15 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)
 
     QList<lv_t> lvm_child_snapshots;
     lvm_child_snapshots.append(getLvmSnapshots(lvmVG));
-
-    if ((!lvm_child_snapshots.isEmpty()) && m_lv_parent == NULL) {
+    
+    if ((!lvm_child_snapshots.isEmpty()) && m_lv_parent == nullptr) {
         m_snap_container = true;
         m_seg_total = 1;
-    } else if ((!lvm_child_snapshots.isEmpty()) && m_lv_parent != NULL) {
+    } else if ((!lvm_child_snapshots.isEmpty()) && m_lv_parent != nullptr) {
         if (m_lv_parent->isThinPool()) {
             m_snap_container = true;
             m_seg_total = 1;
-
+            
         } else if ( m_lv_parent->getFullName() != getFullName() ) {
             m_snap_container = true;
             m_seg_total = 1;
@@ -141,7 +141,7 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)
         value = lvm_lv_get_property(lvmLV, "seg_count");
         m_seg_total = value.value.integer;
     }
-
+    
     switch (flags[0]) {
     case 'c':
         m_type = "under conversion";
@@ -151,39 +151,43 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)
     case 'e':
         m_type = "metadata";
         m_metadata = true;
+        if (m_lv_name.contains("_rmeta_"))
+            m_raid_metadata = true;
+        else if (m_lv_name.endsWith("_tmeta"))
+            m_thin_metadata = true;
         break;
     case 'I':
         if (flags[6] == 'r'){
-            if (m_lv_parent != NULL) {
+            if (m_lv_parent) {
                 if (m_lv_parent->isRaid() && m_lv_parent->getRaidType() == 1) {
                     m_type = "mirror leg";
                     m_raidmirror_leg = true;
                 } else
                     m_type = "raid image";
-            }
-            else
+            } else {
                 m_type = "raid image";
-
+            }
+            
             m_raid_image = true;
         } else {
             m_type = "mirror leg";
             m_lvmmirror_leg = true;
         }
-
+        
         additional_state = "un-synced";
         m_synced = false;
         break;
     case 'i':
         if (flags[6] == 'r'){
-            if (m_lv_parent != NULL) {
+            if (m_lv_parent) {
                 if (m_lv_parent->isRaid() && m_lv_parent->getRaidType() == 1) {
                     m_type = "mirror leg";
                     m_raidmirror_leg = true;
                 } else
                     m_type = "raid image";
-            }
-            else
+            } else {
                 m_type = "raid image";
+            }
 
             m_raid_image = true;
         } else {
@@ -498,11 +502,6 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)
         else
             m_type = m_segments[0]->type;
     }
-
-    if (m_lv_name.contains("_rmeta_"))
-        m_raid_metadata = true;
-    else if (m_lv_name.endsWith("_tmeta"))
-        m_thin_metadata = true;
     
     insertChildren(lvmLV, lvmVG);
     countLegsAndLogs();
@@ -826,7 +825,7 @@ LogVolList LogVol::getSnapshots()
     LogVolList snapshots;
     LogVol *container = this;
 
-    if (container->getParent() != NULL && !container->isSnapContainer()) {
+    if (container->getParent() != nullptr && !container->isSnapContainer()) {
         if (container->getFullName() == container->getParent()->getFullName())
             container = container->getParent();
     }
@@ -914,7 +913,7 @@ LogVolList LogVol::getRaidMetadataVolumes()
 }
 
 // Returns the lvm mirror than owns this mirror leg or mirror log. Returns
-// NULL if this is not part of an lvm mirror volume.
+// nullptr if this is not part of an lvm mirror volume.
 LogVolPointer LogVol::getParentMirror()
 {
     LogVol *mirror = this;
@@ -932,20 +931,20 @@ LogVolPointer LogVol::getParentMirror()
     } else if (isMirrorLeg()) {
         mirror = getParent();
     } else {
-        mirror = NULL;
+        mirror = nullptr;
     }
 
     return mirror;
 }
 
 // Returns the RAID volume than owns this RAID component
-// NULL if this is not part of a RAID volume.
+// nullptr if this is not part of a RAID volume.
 LogVolPointer LogVol::getParentRaid()
 {
     if (m_raid_metadata || m_raid_image)
         return getParent();
     else
-        return NULL;
+        return nullptr;
 }
 
 QStringList LogVol::getPvNamesAll()
@@ -1034,7 +1033,7 @@ long long LogVol::getMissingSpace()
             for (int x = pvs.size() - 1; x >= 0; x--) {
                 PhysVol *const pv = m_vg->getPvByName(pvs[x]);
                 
-                if (pv != nullptr && !pv->isMissing())
+                if (pv && !pv->isMissing())
                     missing -= getSpaceUsedOnPv(pvs[x]);
             }
         } else {
