@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2009, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2009, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -18,6 +18,7 @@
 #include "executablefinder.h"
 
 #include <KColorButton>
+#include <KComboBox>
 #include <KConfigSkeleton>
 #include <KEditListBox>
 #include <KIcon>
@@ -31,11 +32,13 @@
 #include <KTabWidget>
 
 #include <QCheckBox>
+#include <QDebug>
 #include <QGroupBox>
 #include <QHBoxLayout>
 #include <QHeaderView>
 #include <QLabel>
 #include <QRadioButton>
+#include <QStackedWidget>
 #include <QString>
 #include <QTableWidget>
 #include <QVBoxLayout>
@@ -112,180 +115,6 @@ QWidget *KvpmConfigDialog::propertiesTab()
     return properties;
 }
 
-QWidget *KvpmConfigDialog::colorsPage()
-{
-    static QColor ext2_color;
-    static QColor ext3_color;
-    static QColor ext4_color;
-    static QColor btrfs_color;
-    static QColor reiser_color;
-    static QColor reiser4_color;
-    static QColor msdos_color;
-    static QColor jfs_color;
-    static QColor xfs_color;
-    static QColor hfs_color;
-    static QColor ntfs_color;
-    static QColor none_color;
-    static QColor free_color;
-    static QColor swap_color;
-    static QColor physvol_color;
-
-    m_skeleton->setCurrentGroup("FilesystemColors");
-    m_skeleton->addItemColor("ext2",    ext2_color,    Qt::blue);
-    m_skeleton->addItemColor("ext3",    ext3_color,    Qt::darkBlue);
-    m_skeleton->addItemColor("ext4",    ext4_color,    Qt::cyan);
-    m_skeleton->addItemColor("btrfs",   btrfs_color,   Qt::yellow);
-    m_skeleton->addItemColor("reiser",  reiser_color,  Qt::red);
-    m_skeleton->addItemColor("reiser4", reiser4_color, Qt::darkRed);
-    m_skeleton->addItemColor("msdos",   msdos_color,   Qt::darkYellow);
-    m_skeleton->addItemColor("jfs",     jfs_color,     Qt::magenta);
-    m_skeleton->addItemColor("xfs",     xfs_color,     Qt::darkCyan);
-    m_skeleton->addItemColor("hfs",     hfs_color,     Qt::darkMagenta);
-    m_skeleton->addItemColor("ntfs",    ntfs_color,    Qt::darkGray);
-    m_skeleton->addItemColor("none",    none_color,    Qt::black);
-    m_skeleton->addItemColor("free",    free_color,    Qt::green);
-    m_skeleton->addItemColor("swap",    swap_color,    Qt::lightGray);
-    m_skeleton->addItemColor("physvol", physvol_color, Qt::darkGreen);
-
-    QWidget *const colors = new QWidget;
-    QVBoxLayout *const colors_layout = new QVBoxLayout();
-
-    QGroupBox *const selection_box = new QGroupBox(i18n("Volume and Partition Colors"));
-    QGridLayout *const selection_layout = new QGridLayout();
-
-    QLabel *const message_label = new QLabel(i18n("These are the colors used to show the filesystem type \n"
-            "on a partition or volume in any graphical display. Colors\n"
-            "may also be selected for swap and unpartitioned space."));
-
-    KSeparator *const left_separator  = new KSeparator(Qt::Vertical);
-    KSeparator *const right_separator = new KSeparator(Qt::Vertical);
-
-    selection_layout->addWidget(left_separator,  1, 4, 5, 1);
-    selection_layout->addWidget(right_separator, 1, 9, 5, 1);
-    selection_layout->addWidget(message_label, 0, 0, 1, -1, Qt::AlignHCenter);
-
-    QLabel *const ext2_label = new QLabel("ext2");
-    selection_layout->addWidget(ext2_label, 1, 1, Qt::AlignRight);
-    KColorButton *const ext2_button = new KColorButton();
-    ext2_button->setObjectName("kcfg_ext2");
-    selection_layout->addWidget(ext2_button, 1, 2, Qt::AlignLeft);
-    ext2_label->setBuddy(ext2_button);
-
-    QLabel *const ext3_label = new QLabel("ext3");
-    selection_layout->addWidget(ext3_label, 2, 1, Qt::AlignRight);
-    KColorButton *const ext3_button = new KColorButton();
-    ext3_button->setObjectName("kcfg_ext3");
-    selection_layout->addWidget(ext3_button, 2, 2, Qt::AlignLeft);
-    ext3_label->setBuddy(ext3_button);
-
-    QLabel *const ext4_label = new QLabel("ext4");
-    selection_layout->addWidget(ext4_label, 3, 1, Qt::AlignRight);
-    KColorButton *const ext4_button = new KColorButton();
-    ext4_button->setObjectName("kcfg_ext4");
-    selection_layout->addWidget(ext4_button, 3, 2, Qt::AlignLeft);
-    ext4_label->setBuddy(ext4_button);
-
-    QLabel *const btrfs_label = new QLabel("btrfs");
-    selection_layout->addWidget(btrfs_label, 4, 1, Qt::AlignRight);
-    KColorButton *const btrfs_button = new KColorButton();
-    btrfs_button->setObjectName("kcfg_btrfs");
-    selection_layout->addWidget(btrfs_button, 4, 2, Qt::AlignLeft);
-    btrfs_label->setBuddy(btrfs_button);
-
-    QLabel *const reiser_label = new QLabel("reiser");
-    selection_layout->addWidget(reiser_label, 1, 6, Qt::AlignRight);
-    KColorButton *const reiser_button = new KColorButton();
-    reiser_button->setObjectName("kcfg_reiser");
-    selection_layout->addWidget(reiser_button, 1, 7, Qt::AlignLeft);
-    reiser_label->setBuddy(reiser_button);
-
-    QLabel *const reiser4_label = new QLabel("reiser4");
-    selection_layout->addWidget(reiser4_label, 2, 6, Qt::AlignRight);
-    KColorButton *const reiser4_button = new KColorButton();
-    reiser4_button->setObjectName("kcfg_reiser4");
-    selection_layout->addWidget(reiser4_button, 2, 7, Qt::AlignLeft);
-    reiser4_label->setBuddy(reiser4_button);
-
-    QLabel *const msdos_label = new QLabel("ms-dos");
-    selection_layout->addWidget(msdos_label, 3, 6, Qt::AlignRight);
-    KColorButton *const msdos_button = new KColorButton();
-    msdos_button->setObjectName("kcfg_msdos");
-    selection_layout->addWidget(msdos_button, 3, 7, Qt::AlignLeft);
-    msdos_label->setBuddy(msdos_button);
-
-    QLabel *const jfs_label = new QLabel("jfs");
-    selection_layout->addWidget(jfs_label, 1, 11, Qt::AlignRight);
-    KColorButton *const jfs_button = new KColorButton();
-    jfs_button->setObjectName("kcfg_jfs");
-    selection_layout->addWidget(jfs_button, 1, 12, Qt::AlignLeft);
-    jfs_label->setBuddy(jfs_button);
-
-    QLabel *const xfs_label = new QLabel("xfs");
-    selection_layout->addWidget(xfs_label, 2, 11, Qt::AlignRight);
-    KColorButton *const xfs_button = new KColorButton();
-    xfs_button->setObjectName("kcfg_xfs");
-    selection_layout->addWidget(xfs_button, 2, 12, Qt::AlignLeft);
-    xfs_label->setBuddy(xfs_button);
-
-    QLabel *const swap_label = new QLabel("linux \nswap");
-    selection_layout->addWidget(swap_label, 3, 11, Qt::AlignRight);
-    KColorButton *const swap_button = new KColorButton();
-    swap_button->setObjectName("kcfg_swap");
-    selection_layout->addWidget(swap_button, 3, 12, Qt::AlignLeft);
-    swap_label->setBuddy(swap_button);
-
-    QLabel *const none_label = new QLabel("none");
-    selection_layout->addWidget(none_label, 4, 6,  Qt::AlignRight);
-    KColorButton *const none_button = new KColorButton();
-    none_button->setObjectName("kcfg_none");
-    selection_layout->addWidget(none_button, 4, 7, Qt::AlignLeft);
-    none_label->setBuddy(none_button);
-
-    QLabel *const free_label = new QLabel("free \nspace");
-    selection_layout->addWidget(free_label, 5, 6, Qt::AlignRight);
-    KColorButton *const free_button = new KColorButton();
-    free_button->setObjectName("kcfg_free");
-    selection_layout->addWidget(free_button, 5, 7, Qt::AlignLeft);
-    free_label->setBuddy(free_button);
-
-    QLabel *const hfs_label = new QLabel("hfs");
-    selection_layout->addWidget(hfs_label, 4, 11,  Qt::AlignRight);
-    KColorButton *const hfs_button = new KColorButton();
-    hfs_button->setObjectName("kcfg_hfs");
-    selection_layout->addWidget(hfs_button, 4, 12, Qt::AlignLeft);
-    hfs_label->setBuddy(hfs_button);
-
-    QLabel *const ntfs_label = new QLabel("ntfs");
-    selection_layout->addWidget(ntfs_label, 5, 11,  Qt::AlignRight);
-    KColorButton *const ntfs_button = new KColorButton();
-    ntfs_button->setObjectName("kcfg_ntfs");
-    selection_layout->addWidget(ntfs_button, 5, 12, Qt::AlignLeft);
-    ntfs_label->setBuddy(ntfs_button);
-
-    QLabel *const physical_label = new QLabel("physical \nvolumes");
-    selection_layout->addWidget(physical_label, 5, 1,  Qt::AlignRight);
-    KColorButton *const physical_button = new KColorButton();
-    physical_button->setObjectName("kcfg_physvol");
-    selection_layout->addWidget(physical_button, 5, 2, Qt::AlignLeft);
-    physical_label->setBuddy(physical_button);
-
-    for (int row = 1; row < selection_layout->rowCount(); row++)
-        selection_layout->setRowStretch(row, 1);
-
-    selection_layout->setColumnStretch(0, 30);
-    selection_layout->setColumnStretch(3, 30);
-    selection_layout->setColumnStretch(5, 30);
-    selection_layout->setColumnStretch(8, 30);
-    selection_layout->setColumnStretch(10, 30);
-    selection_layout->setColumnStretch(13, 30);
-
-    selection_box->setLayout(selection_layout);
-    colors_layout->addWidget(selection_box);
-    colors->setLayout(colors_layout);
-
-    return colors;
-}
-
 KTabWidget *KvpmConfigDialog::programsPage()
 {
     m_executables_table = new QTableWidget();
@@ -354,7 +183,7 @@ void KvpmConfigDialog::updateSettings()
 
 void KvpmConfigDialog::fillExecutablesTable()
 {
-    QTableWidgetItem *table_item = NULL;
+    QTableWidgetItem *table_item = nullptr;
 
     const QStringList all_names = m_executable_finder->getAllNames();
     const QStringList all_paths = m_executable_finder->getAllPaths();
@@ -795,4 +624,367 @@ QGroupBox *KvpmConfigDialog::lvPropertiesGroup()
     layout->addStretch();
 
     return properties;
+}
+
+
+QWidget *KvpmConfigDialog::colorsPage()
+{
+    QGroupBox *const page = new QGroupBox(i18n("Volume and Partition Colors"));
+    QVBoxLayout *const layout = new QVBoxLayout();
+
+    QHBoxLayout *const message_layout = new QHBoxLayout();
+    QLabel *const message = new QLabel(i18n("The graphical display of volumes and partitions can use "
+                                            "color to show additional information. They can be displayed " 
+                                            "by type or by the type of filesystem on them"));
+
+    message->setWordWrap(true);
+    message_layout->addSpacing(50);
+    message_layout->addWidget(message);
+    layout->addLayout(message_layout);
+    message_layout->addSpacing(50);
+    layout->addSpacing(10);
+
+    static int type_combo_index;
+    m_skeleton->setCurrentGroup("General");
+    m_skeleton->addItemInt("type_combo", type_combo_index, 0);
+
+
+    QHBoxLayout *const combo_layout = new QHBoxLayout();
+    KComboBox *const combo = new KComboBox();
+    combo->setObjectName("kcfg_type_combo");
+
+    combo->addItem(i18n("Use color graphics by volume or partition type"));
+    combo->addItem(i18n("Use color graphics by filesystem type"));
+    combo_layout->addStretch();
+    combo_layout->addWidget(combo);
+    combo_layout->addStretch();
+    layout->addLayout(combo_layout);
+    layout->addSpacing(10);
+
+
+
+    m_color_stack = new QStackedWidget();
+    m_color_stack->addWidget(typeColors());
+    m_color_stack->addWidget(fsColors());
+
+    connect(combo, SIGNAL(currentIndexChanged(int)), 
+            m_color_stack, SLOT(setCurrentIndex(int)));
+
+    layout->addWidget(m_color_stack);
+    page->setLayout(layout);
+
+    return page;
+}
+
+QWidget *KvpmConfigDialog::fsColors()
+{
+    static QColor ext2_color;
+    static QColor ext3_color;
+    static QColor ext4_color;
+    static QColor btrfs_color;
+    static QColor reiser_color;
+    static QColor reiser4_color;
+    static QColor msdos_color;
+    static QColor jfs_color;
+    static QColor xfs_color;
+    static QColor hfs_color;
+    static QColor ntfs_color;
+    static QColor swap_color;
+    static QColor physvol_color;
+    static QColor none_color;
+    static QColor free_color;
+
+    m_skeleton->setCurrentGroup("FilesystemColors");
+    m_skeleton->addItemColor("ext2",    ext2_color,    Qt::blue);
+    m_skeleton->addItemColor("ext3",    ext3_color,    Qt::darkBlue);
+    m_skeleton->addItemColor("ext4",    ext4_color,    Qt::cyan);
+    m_skeleton->addItemColor("btrfs",   btrfs_color,   Qt::yellow);
+    m_skeleton->addItemColor("reiser",  reiser_color,  Qt::red);
+    m_skeleton->addItemColor("reiser4", reiser4_color, Qt::darkRed);
+    m_skeleton->addItemColor("msdos",   msdos_color,   Qt::darkYellow);
+    m_skeleton->addItemColor("jfs",     jfs_color,     Qt::magenta);
+    m_skeleton->addItemColor("xfs",     xfs_color,     Qt::darkGreen);
+    m_skeleton->addItemColor("hfs",     hfs_color,     Qt::darkMagenta);
+    m_skeleton->addItemColor("ntfs",    ntfs_color,    Qt::darkGray);
+    m_skeleton->addItemColor("none",    none_color,    Qt::black);
+    m_skeleton->addItemColor("swap",    swap_color,    Qt::lightGray);
+    m_skeleton->addItemColor("physvol", physvol_color, Qt::darkCyan);
+
+    m_skeleton->setCurrentGroup("VolumeTypeColors");
+    m_skeleton->addItemColor("free",    free_color,    Qt::green);
+
+    QWidget *const fscolors = new QWidget;
+    QGridLayout *const layout = new QGridLayout();
+
+    fscolors->setLayout(layout);
+
+    KSeparator *const left_separator  = new KSeparator(Qt::Vertical);
+    KSeparator *const right_separator = new KSeparator(Qt::Vertical);
+
+    layout->addWidget(left_separator,  1, 4, 5, 1);
+    layout->addWidget(right_separator, 1, 9, 5, 1);
+
+    QLabel *const ext2_label = new QLabel("ext2");
+    layout->addWidget(ext2_label, 1, 1, Qt::AlignRight);
+    KColorButton *const ext2_button = new KColorButton();
+    ext2_button->setObjectName("kcfg_ext2");
+    layout->addWidget(ext2_button, 1, 2, Qt::AlignLeft);
+    ext2_label->setBuddy(ext2_button);
+
+    QLabel *const ext3_label = new QLabel("ext3");
+    layout->addWidget(ext3_label, 2, 1, Qt::AlignRight);
+    KColorButton *const ext3_button = new KColorButton();
+    ext3_button->setObjectName("kcfg_ext3");
+    layout->addWidget(ext3_button, 2, 2, Qt::AlignLeft);
+    ext3_label->setBuddy(ext3_button);
+
+    QLabel *const ext4_label = new QLabel("ext4");
+    layout->addWidget(ext4_label, 3, 1, Qt::AlignRight);
+    KColorButton *const ext4_button = new KColorButton();
+    ext4_button->setObjectName("kcfg_ext4");
+    layout->addWidget(ext4_button, 3, 2, Qt::AlignLeft);
+    ext4_label->setBuddy(ext4_button);
+
+    QLabel *const btrfs_label = new QLabel("btrfs");
+    layout->addWidget(btrfs_label, 4, 1, Qt::AlignRight);
+    KColorButton *const btrfs_button = new KColorButton();
+    btrfs_button->setObjectName("kcfg_btrfs");
+    layout->addWidget(btrfs_button, 4, 2, Qt::AlignLeft);
+    btrfs_label->setBuddy(btrfs_button);
+
+    QLabel *const reiser_label = new QLabel("reiser");
+    layout->addWidget(reiser_label, 1, 6, Qt::AlignRight);
+    KColorButton *const reiser_button = new KColorButton();
+    reiser_button->setObjectName("kcfg_reiser");
+    layout->addWidget(reiser_button, 1, 7, Qt::AlignLeft);
+    reiser_label->setBuddy(reiser_button);
+
+    QLabel *const reiser4_label = new QLabel("reiser4");
+    layout->addWidget(reiser4_label, 2, 6, Qt::AlignRight);
+    KColorButton *const reiser4_button = new KColorButton();
+    reiser4_button->setObjectName("kcfg_reiser4");
+    layout->addWidget(reiser4_button, 2, 7, Qt::AlignLeft);
+    reiser4_label->setBuddy(reiser4_button);
+
+    QLabel *const msdos_label = new QLabel("ms-dos");
+    layout->addWidget(msdos_label, 3, 6, Qt::AlignRight);
+    KColorButton *const msdos_button = new KColorButton();
+    msdos_button->setObjectName("kcfg_msdos");
+    layout->addWidget(msdos_button, 3, 7, Qt::AlignLeft);
+    msdos_label->setBuddy(msdos_button);
+
+    QLabel *const jfs_label = new QLabel("jfs");
+    layout->addWidget(jfs_label, 1, 11, Qt::AlignRight);
+    KColorButton *const jfs_button = new KColorButton();
+    jfs_button->setObjectName("kcfg_jfs");
+    layout->addWidget(jfs_button, 1, 12, Qt::AlignLeft);
+    jfs_label->setBuddy(jfs_button);
+
+    QLabel *const xfs_label = new QLabel("xfs");
+    layout->addWidget(xfs_label, 2, 11, Qt::AlignRight);
+    KColorButton *const xfs_button = new KColorButton();
+    xfs_button->setObjectName("kcfg_xfs");
+    layout->addWidget(xfs_button, 2, 12, Qt::AlignLeft);
+    xfs_label->setBuddy(xfs_button);
+
+    QLabel *const swap_label = new QLabel("linux \nswap");
+    layout->addWidget(swap_label, 3, 11, Qt::AlignRight);
+    KColorButton *const swap_button = new KColorButton();
+    swap_button->setObjectName("kcfg_swap");
+    layout->addWidget(swap_button, 3, 12, Qt::AlignLeft);
+    swap_label->setBuddy(swap_button);
+
+    QLabel *const none_label = new QLabel("unknown");
+    layout->addWidget(none_label, 4, 6,  Qt::AlignRight);
+    KColorButton *const none_button = new KColorButton();
+    none_button->setObjectName("kcfg_none");
+    layout->addWidget(none_button, 4, 7, Qt::AlignLeft);
+    none_label->setBuddy(none_button);
+
+    QLabel *const free_label = new QLabel("free \nspace");
+    layout->addWidget(free_label, 5, 6, Qt::AlignRight);
+    KColorButton *const free_button = new KColorButton();
+    free_button->setObjectName("kcfg_free");
+    layout->addWidget(free_button, 5, 7, Qt::AlignLeft);
+    free_label->setBuddy(free_button);
+
+    QLabel *const hfs_label = new QLabel("hfs");
+    layout->addWidget(hfs_label, 4, 11,  Qt::AlignRight);
+    KColorButton *const hfs_button = new KColorButton();
+    hfs_button->setObjectName("kcfg_hfs");
+    layout->addWidget(hfs_button, 4, 12, Qt::AlignLeft);
+    hfs_label->setBuddy(hfs_button);
+
+    QLabel *const ntfs_label = new QLabel("ntfs");
+    layout->addWidget(ntfs_label, 5, 11,  Qt::AlignRight);
+    KColorButton *const ntfs_button = new KColorButton();
+    ntfs_button->setObjectName("kcfg_ntfs");
+    layout->addWidget(ntfs_button, 5, 12, Qt::AlignLeft);
+    ntfs_label->setBuddy(ntfs_button);
+
+    QLabel *const physical_label = new QLabel("physical \nvolumes");
+    layout->addWidget(physical_label, 5, 1,  Qt::AlignRight);
+    KColorButton *const physical_button = new KColorButton();
+    physical_button->setObjectName("kcfg_physvol");
+    layout->addWidget(physical_button, 5, 2, Qt::AlignLeft);
+    physical_label->setBuddy(physical_button);
+
+    return fscolors;
+}
+
+QWidget *KvpmConfigDialog::typeColors()
+{
+    QWidget *const type = new QWidget;
+
+    static QColor pvmove_color;
+    static QColor mirror_color;
+    static QColor raid1_color;
+    static QColor raid456_color;
+    static QColor cowsnap_color;
+    static QColor invalid_color;
+    static QColor other_color;
+    static QColor linear_color;
+    static QColor thinsnap_color;
+    static QColor thinvol_color;
+    static QColor inactive_color;
+    static QColor free_color;
+
+    m_skeleton->setCurrentGroup("VolumeTypeColors");
+    m_skeleton->addItemColor("mirror",   mirror_color,   Qt::darkBlue);   // lvm type mirror
+    m_skeleton->addItemColor("raid1",    raid1_color,    Qt::blue);
+    m_skeleton->addItemColor("raid456",  raid456_color,  Qt::cyan);
+    m_skeleton->addItemColor("thinvol",  thinvol_color,  Qt::lightGray);
+    m_skeleton->addItemColor("invalid",  invalid_color,  Qt::red);
+    m_skeleton->addItemColor("thinsnap", thinsnap_color, Qt::darkRed);
+    m_skeleton->addItemColor("cowsnap",  cowsnap_color,  Qt::darkYellow);
+    m_skeleton->addItemColor("linear",   linear_color,   Qt::darkCyan);
+    m_skeleton->addItemColor("pvmove",   pvmove_color,   Qt::magenta);
+    m_skeleton->addItemColor("other",    other_color,    Qt::yellow);
+    m_skeleton->addItemColor("inactive", inactive_color, Qt::black);
+    m_skeleton->addItemColor("free",     free_color,     Qt::green);
+
+    static QColor primary_color;
+    static QColor logical_color;
+    static QColor extended_color;
+
+    m_skeleton->setCurrentGroup("PartitionTypeColors");
+    m_skeleton->addItemColor("primary",   primary_color,  Qt::cyan);
+    m_skeleton->addItemColor("logical",   logical_color,  Qt::blue);
+    m_skeleton->addItemColor("extended",  extended_color, Qt::darkGreen);
+
+    QGridLayout *const layout = new QGridLayout();
+    type->setLayout(layout);
+
+    KSeparator *const left_separator  = new KSeparator(Qt::Vertical);
+    KSeparator *const right_separator = new KSeparator(Qt::Vertical);
+
+    layout->addWidget(left_separator,  1, 4, 4, 1);
+    layout->addWidget(right_separator, 1, 9, 4, 1);
+
+    QLabel *const linear_label = new QLabel("linear");
+    layout->addWidget(linear_label, 1, 1, Qt::AlignRight);
+    KColorButton *const linear_button = new KColorButton();
+    linear_button->setObjectName("kcfg_linear");
+    layout->addWidget(linear_button, 1, 2, Qt::AlignLeft);
+    linear_label->setBuddy(linear_button);
+
+    QLabel *const raid1_label = new QLabel("RAID 1");
+    layout->addWidget(raid1_label, 2, 1, Qt::AlignRight);
+    KColorButton *const raid1_button = new KColorButton();
+    raid1_button->setObjectName("kcfg_raid1");
+    layout->addWidget(raid1_button, 2, 2, Qt::AlignLeft);
+    raid1_label->setBuddy(raid1_button);
+
+    QLabel *const raid456_label = new QLabel("RAID 4/5/6");
+    layout->addWidget(raid456_label, 3, 1, Qt::AlignRight);
+    KColorButton *const raid456_button = new KColorButton();
+    raid456_button->setObjectName("kcfg_raid456");
+    layout->addWidget(raid456_button, 3, 2, Qt::AlignLeft);
+    raid456_label->setBuddy(raid456_button);
+
+    QLabel *const cowsnap_label = new QLabel("snapshot");
+    layout->addWidget(cowsnap_label, 4, 1, Qt::AlignRight);
+    KColorButton *const cowsnap_button = new KColorButton();
+    cowsnap_button->setObjectName("kcfg_cowsnap");
+    layout->addWidget(cowsnap_button, 4, 2, Qt::AlignLeft);
+    cowsnap_label->setBuddy(cowsnap_button);
+
+    QLabel *const invalid_label = new QLabel("invalid snap");
+    layout->addWidget(invalid_label, 5, 1, Qt::AlignRight);
+    KColorButton *const invalid_button = new KColorButton();
+    invalid_button->setObjectName("kcfg_invalid");
+    layout->addWidget(invalid_button, 5, 2, Qt::AlignLeft);
+    invalid_label->setBuddy(invalid_button);
+
+    QLabel *const mirror_label = new QLabel("lvm mirror");
+    layout->addWidget(mirror_label, 6, 1, Qt::AlignRight);
+    KColorButton *const mirror_button = new KColorButton();
+    mirror_button->setObjectName("kcfg_mirror");
+    layout->addWidget(mirror_button, 6, 2, Qt::AlignLeft);
+    mirror_label->setBuddy(mirror_button);
+
+    QLabel *const other_label = new QLabel("other");
+    layout->addWidget(other_label, 1, 6, Qt::AlignRight);
+    KColorButton *const other_button = new KColorButton();
+    other_button->setObjectName("kcfg_other");
+    layout->addWidget(other_button, 1, 7, Qt::AlignLeft);
+    other_label->setBuddy(other_button);
+
+    QLabel *const pvmove_label = new QLabel("pvmove");
+    layout->addWidget(pvmove_label, 2, 6, Qt::AlignRight);
+    KColorButton *const pvmove_button = new KColorButton();
+    pvmove_button->setObjectName("kcfg_pvmove");
+    layout->addWidget(pvmove_button, 2, 7, Qt::AlignLeft);
+    pvmove_label->setBuddy(pvmove_button);
+
+    QLabel *const inactive_label = new QLabel("inactive");
+    layout->addWidget(inactive_label, 3, 6,  Qt::AlignRight);
+    KColorButton *const inactive_button = new KColorButton();
+    inactive_button->setObjectName("kcfg_inactive");
+    layout->addWidget(inactive_button, 3, 7, Qt::AlignLeft);
+    inactive_label->setBuddy(inactive_button);
+
+    QLabel *const thinvol_label = new QLabel("thin volume");
+    layout->addWidget(thinvol_label, 4, 6, Qt::AlignRight);
+    KColorButton *const thinvol_button = new KColorButton();
+    thinvol_button->setObjectName("kcfg_thinvol");
+    layout->addWidget(thinvol_button, 4, 7, Qt::AlignLeft);
+    thinvol_label->setBuddy(thinvol_button);
+
+    QLabel *const thinsnap_label = new QLabel("thin snapshot");
+    layout->addWidget(thinsnap_label, 5, 6, Qt::AlignRight);
+    KColorButton *const thinsnap_button = new KColorButton();
+    thinsnap_button->setObjectName("kcfg_thinsnap");
+    layout->addWidget(thinsnap_button, 5, 7, Qt::AlignLeft);
+    thinsnap_label->setBuddy(thinsnap_button);
+
+    QLabel *const free_label = new QLabel("free \nspace");
+    layout->addWidget(free_label, 6, 6, Qt::AlignRight);
+    KColorButton *const free_button = new KColorButton();
+    free_button->setObjectName("kcfg_free");
+    layout->addWidget(free_button, 6, 7, Qt::AlignLeft);
+    free_label->setBuddy(free_button);
+
+    QLabel *const primary_label = new QLabel("primary partition");
+    layout->addWidget(primary_label, 1, 11, Qt::AlignRight);
+    KColorButton *const primary_button = new KColorButton();
+    primary_button->setObjectName("kcfg_primary");
+    layout->addWidget(primary_button, 1, 12, Qt::AlignLeft);
+    primary_label->setBuddy(primary_button);
+
+    QLabel *const extended_label = new QLabel("extended partition");
+    layout->addWidget(extended_label, 2, 11, Qt::AlignRight);
+    KColorButton *const extended_button = new KColorButton();
+    extended_button->setObjectName("kcfg_extended");
+    layout->addWidget(extended_button, 2, 12, Qt::AlignLeft);
+    extended_label->setBuddy(extended_button);
+
+    QLabel *const logical_label = new QLabel("logical partition");
+    layout->addWidget(logical_label, 3, 11, Qt::AlignRight);
+    KColorButton *const logical_button = new KColorButton();
+    logical_button->setObjectName("kcfg_logical");
+    layout->addWidget(logical_button, 3, 12, Qt::AlignLeft);
+    logical_label->setBuddy(logical_button);
+
+    return type;
 }
