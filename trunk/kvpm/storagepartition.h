@@ -56,6 +56,7 @@ class StoragePartition : public StorageBase
     bool m_is_normal;
     bool m_is_logical;
     bool m_is_freespace;
+    bool m_is_logical_freespace;
 
     PedSector getAlignedStart();
     PedSector getFreespaceEnd();
@@ -91,6 +92,7 @@ public:
     bool isMountable() const { return m_is_mountable; }
     bool isNormal() const { return m_is_normal; }
     bool isLogical() const { return m_is_logical; }
+    bool isLogicalFreespace() const { return m_is_logical_freespace; }
     bool isFreespace() const { return m_is_freespace; }
 };
 
