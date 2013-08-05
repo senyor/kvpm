@@ -27,22 +27,17 @@
 
 
 
-DeviceChartSeg::DeviceChartSeg(QTreeWidgetItem *storageItem, QWidget *parent) :
+DeviceChartSeg::DeviceChartSeg(QTreeWidgetItem *const storageItem, QWidget *parent) :
     QFrame(parent),
     m_item(storageItem)
 {
-    QStringList group_names;
-    QString use;
-    QPalette colorset;
-
-    KConfigSkeleton skeleton;
-
     QColor  ext2_color,     ext3_color,    ext4_color,
             reiser_color,   reiser4_color, msdos_color,
             jfs_color,      xfs_color,     none_color,
-            free_color,     swap_color,    hfs_color,
-            physical_color, ntfs_color ,   btrfs_color;
+            btrfs_color,    swap_color,    hfs_color,
+            physical_color, ntfs_color;
 
+    KConfigSkeleton skeleton;
     skeleton.setCurrentGroup("FilesystemColors");
     skeleton.addItemColor("ext2",    ext2_color,  Qt::blue);
     skeleton.addItemColor("ext3",    ext3_color,  Qt::darkBlue);
@@ -52,17 +47,33 @@ DeviceChartSeg::DeviceChartSeg(QTreeWidgetItem *storageItem, QWidget *parent) :
     skeleton.addItemColor("reiser4", reiser4_color, Qt::darkRed);
     skeleton.addItemColor("msdos",   msdos_color, Qt::darkYellow);
     skeleton.addItemColor("jfs",     jfs_color,   Qt::magenta);
-    skeleton.addItemColor("xfs",     xfs_color,   Qt::darkCyan);
+    skeleton.addItemColor("xfs",     xfs_color,   Qt::darkGreen);
     skeleton.addItemColor("hfs",     hfs_color,   Qt::darkMagenta);
     skeleton.addItemColor("ntfs",    ntfs_color,  Qt::darkGray);
     skeleton.addItemColor("none",    none_color,  Qt::black);
-    skeleton.addItemColor("free",    free_color,  Qt::green);
     skeleton.addItemColor("swap",    swap_color,  Qt::lightGray);
-    skeleton.addItemColor("physvol",  physical_color, Qt::darkGreen);
+    skeleton.addItemColor("physvol", physical_color, Qt::darkCyan);
 
-    use = (m_item->data(4, Qt::DisplayRole)).toString();
+    int type_combo_index;
+    skeleton.setCurrentGroup("General");
+    skeleton.addItemInt("type_combo", type_combo_index, 0);
 
-    m_partition = NULL;
+    QColor free_color;
+    skeleton.setCurrentGroup("VolumeTypeColors");
+    skeleton.addItemColor("free",     free_color,     Qt::green);
+
+    QColor primary_color, 
+           logical_color, 
+           extended_color;
+    skeleton.setCurrentGroup("PartitionTypeColors");
+    skeleton.addItemColor("primary",   primary_color,  Qt::cyan);
+    skeleton.addItemColor("logical",   logical_color,  Qt::blue);
+    skeleton.addItemColor("extended",  extended_color, Qt::darkGreen);
+
+    QPalette colorset;
+    QString use = (m_item->data(4, Qt::DisplayRole)).toString();
+    m_partition = nullptr;
+
     if ((m_item->data(0, Qt::UserRole)).canConvert<void *>()) {
 
         m_partition = (StoragePartition *)((m_item->data(0, Qt::UserRole)).value<void *>());
@@ -70,12 +81,13 @@ DeviceChartSeg::DeviceChartSeg(QTreeWidgetItem *storageItem, QWidget *parent) :
         setFrameStyle(QFrame::Sunken | QFrame::Panel);
         setLineWidth(2);
 
-        if (m_partition->getPedType() & PED_PARTITION_EXTENDED) {
-            colorset.setColor(QPalette::Window, Qt::green);
-        } else if (m_partition->getPedType() &  PED_PARTITION_FREESPACE) {
-            colorset.setColor(QPalette::Window, Qt::green);
-        } else {
-
+        if (m_partition->isExtended()) {
+            colorset.setColor(QPalette::Window, extended_color);
+        } else if (m_partition->isLogicalFreespace()) {
+            colorset.setColor(QPalette::Window, extended_color);
+        } else if (m_partition->isFreespace()) {
+            colorset.setColor(QPalette::Window, free_color);
+        } else if (type_combo_index == 1) {
             if (use == "ext2")
                 colorset.setColor(QPalette::Window, ext2_color);
             else if (use == "ext3")
@@ -106,6 +118,11 @@ DeviceChartSeg::DeviceChartSeg(QTreeWidgetItem *storageItem, QWidget *parent) :
                 colorset.setColor(QPalette::Window, physical_color);
             else
                 colorset.setColor(QPalette::Window, none_color);
+        } else {
+            if (m_partition->isNormal())
+                colorset.setColor(QPalette::Window, primary_color);
+            else if (m_partition->isLogical())
+                colorset.setColor(QPalette::Window, logical_color);
         }
     } else { // whole device, not a partition
         setFrameStyle(QFrame::Sunken | QFrame::Panel);
@@ -141,7 +158,7 @@ void DeviceChartSeg::popupContextMenu(QPoint point)
         context_menu = new DeviceActionsMenu(m_item, this);
         context_menu->exec(QCursor::pos());
     } else {
-        context_menu = new DeviceActionsMenu(NULL, this);
+        context_menu = new DeviceActionsMenu(nullptr, this);
         context_menu->exec(QCursor::pos());
     }
 }

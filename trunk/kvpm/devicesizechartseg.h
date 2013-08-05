@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -31,7 +31,7 @@ class DeviceChartSeg : public QFrame
     StoragePartition *m_partition;
 
 public:
-    explicit DeviceChartSeg(QTreeWidgetItem *storageItem, QWidget *parent = 0);
+    explicit DeviceChartSeg(QTreeWidgetItem *const storageItem, QWidget *parent = nullptr);
 
 public slots:
     void popupContextMenu(QPoint point);
