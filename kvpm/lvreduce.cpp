@@ -31,28 +31,25 @@
 #include "volgroup.h"
 
 
-LVReduceDialog::LVReduceDialog(LogVol *const volume, QWidget *parent)
-    : KDialog(parent),
-      m_lv(volume)
+LVReduceDialog::LVReduceDialog(LogVol *const volume, QWidget *parent) : 
+    KvpmDialog(parent),
+    m_lv(volume)
 {
-    m_vg = m_lv->getVg();
-
     if (volume->isThinPool())
-        setWindowTitle(i18n("Reduce Thin Pool"));
+        setCaption(i18n("Reduce Thin Pool"));
     else
-        setWindowTitle(i18n("Reduce Logical Volume"));
+        setCaption(i18n("Reduce Logical Volume"));
 
-    QWidget *dialog_body = new QWidget(this);
+    QWidget *const dialog_body = new QWidget(this);
     setMainWidget(dialog_body);
-    QVBoxLayout *layout = new QVBoxLayout();
+    QVBoxLayout *const layout = new QVBoxLayout();
     dialog_body->setLayout(layout);
 
-    const long long extent_size = m_vg->getExtentSize();
-    const long long current_lv_extents = m_lv->getExtents();
+    const long long extent_size = m_lv->getVg()->getExtentSize();
+    const long long current_extents = m_lv->getExtents();
     const QString fs = m_lv->getFilesystem();
-    long long min_lv_extents;
+    long long min_extents;
     bool force = false;
-    m_bailout = false;
 
     const QString warning_message1 = i18n("If this <b>Inactive</b> logical volume is reduced "
                                           "any <b>data</b> it contains <b>will be lost!</b>");
@@ -63,7 +60,7 @@ LVReduceDialog::LVReduceDialog(LogVol *const volume, QWidget *parent)
                                           "<b>will be lost!</b>");
 
     if (!m_lv->isActive() && !m_lv->isCowSnap()) {
-        if (KMessageBox::warningContinueCancel(NULL,
+        if (KMessageBox::warningContinueCancel(nullptr,
                                                warning_message1,
                                                QString(),
                                                KStandardGuiItem::cont(),
@@ -72,16 +69,16 @@ LVReduceDialog::LVReduceDialog(LogVol *const volume, QWidget *parent)
                                                KMessageBox::Dangerous) == KMessageBox::Continue) {
             force = true;
         } else {
-            m_bailout = true;
+            preventExec();
         }
     } else if (m_lv->isMounted() && !m_lv->isCowSnap()) {
-        KMessageBox::error(0, i18n("The filesystem must be unmounted first"));
-        m_bailout = true;
+        KMessageBox::error(nullptr, i18n("The filesystem must be unmounted first"));
+        preventExec();
     } else if (m_lv->isThinPool()) {
-        KMessageBox::error(0, i18n("Reducing thin pools isn't supported yet"));
-        m_bailout = true;
+        KMessageBox::error(nullptr, i18n("Reducing thin pools isn't supported yet"));
+        preventExec();
     } else if (!fs_can_reduce(fs) && !m_lv->isCowSnap()) {
-        if (KMessageBox::warningContinueCancel(NULL,
+        if (KMessageBox::warningContinueCancel(nullptr,
                                                warning_message2,
                                                QString(),
                                                KStandardGuiItem::cont(),
@@ -90,28 +87,27 @@ LVReduceDialog::LVReduceDialog(LogVol *const volume, QWidget *parent)
                                                KMessageBox::Dangerous) == KMessageBox::Continue) {
             force = true;
         } else {
-            m_bailout = true;
+            preventExec();
         }
     }
 
-    if (!m_bailout && !force && !m_lv->isCowSnap()) {
+    if (willExec() && !force && !m_lv->isCowSnap()) {
+        const long long min_fs = get_min_fs_size(m_lv->getMapperPath(), m_lv->getFilesystem());
 
-        const long long min_fs_size = get_min_fs_size(m_lv->getMapperPath(), m_lv->getFilesystem());
-
-        if (min_fs_size % extent_size)
-            min_lv_extents = 1 + (min_fs_size / extent_size);
+        if (min_fs % extent_size)
+            min_extents = 1 + (min_fs / extent_size);
         else
-            min_lv_extents = min_fs_size / extent_size;
+            min_extents = min_fs / extent_size;
 
-        if (min_fs_size == 0 || min_lv_extents >= m_lv->getExtents()) {
-            KMessageBox::error(0, i18n("The filesystem is already as small as it can be"));
-            m_bailout = true;
+        if (min_fs == 0 || min_extents >= m_lv->getExtents()) {
+            KMessageBox::error(nullptr, i18n("The filesystem is already as small as it can be"));
+            preventExec();
         }
-    } else
-        min_lv_extents = 1;
+    } else {
+        min_extents = 1;
+    }
 
-    if (!m_bailout) {
-
+    if (willExec()) {
         bool use_si_units;
         KConfigSkeleton skeleton;
         skeleton.setCurrentGroup("General");
@@ -129,42 +125,35 @@ LVReduceDialog::LVReduceDialog(LogVol *const volume, QWidget *parent)
         QWidget *const label_widget = new QWidget();
         label_widget->setLayout(label_layout);
 
-        QLabel *lv_name_label;
+        QLabel *const lv_name_label = new QLabel();
         if (m_lv->isThinPool())
-            lv_name_label = new QLabel(i18n("<b>Reduce thin pool: %1</b>", m_lv->getName()));
+            lv_name_label->setText(i18n("Reduce thin pool: <b>%1</b>", m_lv->getName()));
         else
-            lv_name_label = new QLabel(i18n("<b>Reduce logical volume: %1</b>", m_lv->getName()));
+            lv_name_label->setText(i18n("Reduce logical volume: <b>%1</b>", m_lv->getName()));
 
         lv_name_label->setAlignment(Qt::AlignCenter);
-        QLabel *const lv_min_label  = new QLabel(i18n("Estimated minimum size: %1", locale->formatByteSize(min_lv_extents * extent_size, 1, dialect)));
+        QLabel *const lv_min_label  = new QLabel(i18n("Estimated minimum size: %1", locale->formatByteSize(min_extents * extent_size, 1, dialect)));
 
-        m_size_selector = new SizeSelectorBox(extent_size, min_lv_extents, current_lv_extents, current_lv_extents, true, false, true);
+        m_size_selector = new SizeSelectorBox(extent_size, min_extents, current_extents, current_extents, true, false, true);
 
         label_layout->addWidget(lv_name_label);
-        label_layout->addSpacing(5);
+        label_layout->addSpacing(10);
         label_layout->addWidget(lv_min_label);
         label_layout->addSpacing(5);
         layout->addWidget(label_widget);
         layout->addWidget(m_size_selector);
 
-        connect(this, SIGNAL(okClicked()),
-                this, SLOT(doShrink()));
-
         connect(m_size_selector, SIGNAL(stateChanged()),
                 this , SLOT(resetOkButton()));
     }
+
+    resetOkButton();
 }
 
-bool LVReduceDialog::bailout()
+void LVReduceDialog::commit()
 {
-    return m_bailout;
-}
-
-void LVReduceDialog::doShrink()
-{
-    QStringList lv_arguments;
-    const QString fs =  m_lv->getFilesystem();
-    const long long target_size = m_size_selector->getNewSize() * m_vg->getExtentSize();
+    const QString fs = m_lv->getFilesystem();
+    const long long target_size = m_size_selector->getNewSize() * m_lv->getVg()->getExtentSize();
     long long new_size;
 
     hide();
@@ -177,17 +166,18 @@ void LVReduceDialog::doShrink()
         new_size = target_size;
 
     if (new_size) {
-        lv_arguments << "lvreduce"
-                     << "--force"
-                     << "--size"
-                     << QString("%1K").arg(new_size / 1024)
-                     << m_lv->getMapperPath();
+        QStringList args = QStringList() << "lvreduce"
+                                         << "--force"
+                                         << "--size"
+                                         << QString("%1K").arg(new_size / 1024)
+                                         << m_lv->getMapperPath();
 
-        ProcessProgress reduce_lv(lv_arguments);
+        ProcessProgress reduce_lv(args);
     }
 }
 
 void LVReduceDialog::resetOkButton()
 {
-    enableButtonOk(m_size_selector->isValid());
+    const long long diff = m_size_selector->getMaximumSize() - m_size_selector->getNewSize(); 
+    enableButtonOk(m_size_selector->isValid() && diff);
 }

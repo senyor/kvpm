@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -15,7 +15,8 @@
 #ifndef LVREDUCEDIALOG_H
 #define LVREDUCEDIALOG_H
 
-#include <KDialog>
+
+#include "kvpmdialog.h"
 
 class KLineEdit;
 class KComboBox;
@@ -26,21 +27,18 @@ class SizeSelectorBox;
 class VolGroup;
 
 
-class LVReduceDialog : public KDialog
+class LVReduceDialog : public KvpmDialog
 {
     Q_OBJECT
 
-    LogVol   *m_lv;
-    VolGroup *m_vg;
+    LogVol   *m_lv = nullptr;
     SizeSelectorBox *m_size_selector;
-    bool m_bailout;
 
 public:
-    explicit LVReduceDialog(LogVol *const volume, QWidget *parent = 0);
-    bool bailout();
+    explicit LVReduceDialog(LogVol *const volume, QWidget *parent = nullptr);
 
 private slots:
-    void doShrink();
+    void commit();
     void resetOkButton();
 
 };
