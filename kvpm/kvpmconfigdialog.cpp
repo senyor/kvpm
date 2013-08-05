@@ -626,7 +626,6 @@ QGroupBox *KvpmConfigDialog::lvPropertiesGroup()
     return properties;
 }
 
-
 QWidget *KvpmConfigDialog::colorsPage()
 {
     QGroupBox *const page = new QGroupBox(i18n("Volume and Partition Colors"));
@@ -648,7 +647,6 @@ QWidget *KvpmConfigDialog::colorsPage()
     m_skeleton->setCurrentGroup("General");
     m_skeleton->addItemInt("type_combo", type_combo_index, 0);
 
-
     QHBoxLayout *const combo_layout = new QHBoxLayout();
     KComboBox *const combo = new KComboBox();
     combo->setObjectName("kcfg_type_combo");
@@ -661,17 +659,22 @@ QWidget *KvpmConfigDialog::colorsPage()
     layout->addLayout(combo_layout);
     layout->addSpacing(10);
 
-
-
     m_color_stack = new QStackedWidget();
     m_color_stack->addWidget(typeColors());
     m_color_stack->addWidget(fsColors());
 
+    QHBoxLayout *const mid_layout = new QHBoxLayout();
+    mid_layout->addWidget(m_color_stack);
+    mid_layout->addWidget(otherColors());
+    showOtherButtons(combo->currentIndex());
+    layout->addLayout(mid_layout);
+    page->setLayout(layout);
+
     connect(combo, SIGNAL(currentIndexChanged(int)), 
             m_color_stack, SLOT(setCurrentIndex(int)));
 
-    layout->addWidget(m_color_stack);
-    page->setLayout(layout);
+    connect(combo, SIGNAL(currentIndexChanged(int)), 
+            this, SLOT(showOtherButtons(int)));
 
     return page;
 }
@@ -692,7 +695,6 @@ QWidget *KvpmConfigDialog::fsColors()
     static QColor swap_color;
     static QColor physvol_color;
     static QColor none_color;
-    static QColor free_color;
 
     m_skeleton->setCurrentGroup("FilesystemColors");
     m_skeleton->addItemColor("ext2",    ext2_color,    Qt::blue);
@@ -709,9 +711,6 @@ QWidget *KvpmConfigDialog::fsColors()
     m_skeleton->addItemColor("none",    none_color,    Qt::black);
     m_skeleton->addItemColor("swap",    swap_color,    Qt::lightGray);
     m_skeleton->addItemColor("physvol", physvol_color, Qt::darkCyan);
-
-    m_skeleton->setCurrentGroup("VolumeTypeColors");
-    m_skeleton->addItemColor("free",    free_color,    Qt::green);
 
     QWidget *const fscolors = new QWidget;
     QGridLayout *const layout = new QGridLayout();
@@ -801,13 +800,6 @@ QWidget *KvpmConfigDialog::fsColors()
     layout->addWidget(none_button, 4, 7, Qt::AlignLeft);
     none_label->setBuddy(none_button);
 
-    QLabel *const free_label = new QLabel("free \nspace");
-    layout->addWidget(free_label, 5, 6, Qt::AlignRight);
-    KColorButton *const free_button = new KColorButton();
-    free_button->setObjectName("kcfg_free");
-    layout->addWidget(free_button, 5, 7, Qt::AlignLeft);
-    free_label->setBuddy(free_button);
-
     QLabel *const hfs_label = new QLabel("hfs");
     layout->addWidget(hfs_label, 4, 11,  Qt::AlignRight);
     KColorButton *const hfs_button = new KColorButton();
@@ -847,7 +839,6 @@ QWidget *KvpmConfigDialog::typeColors()
     static QColor thinsnap_color;
     static QColor thinvol_color;
     static QColor inactive_color;
-    static QColor free_color;
 
     m_skeleton->setCurrentGroup("VolumeTypeColors");
     m_skeleton->addItemColor("mirror",   mirror_color,   Qt::darkBlue);   // lvm type mirror
@@ -861,16 +852,6 @@ QWidget *KvpmConfigDialog::typeColors()
     m_skeleton->addItemColor("pvmove",   pvmove_color,   Qt::magenta);
     m_skeleton->addItemColor("other",    other_color,    Qt::yellow);
     m_skeleton->addItemColor("inactive", inactive_color, Qt::black);
-    m_skeleton->addItemColor("free",     free_color,     Qt::green);
-
-    static QColor primary_color;
-    static QColor logical_color;
-    static QColor extended_color;
-
-    m_skeleton->setCurrentGroup("PartitionTypeColors");
-    m_skeleton->addItemColor("primary",   primary_color,  Qt::cyan);
-    m_skeleton->addItemColor("logical",   logical_color,  Qt::blue);
-    m_skeleton->addItemColor("extended",  extended_color, Qt::darkGreen);
 
     QGridLayout *const layout = new QGridLayout();
     type->setLayout(layout);
@@ -958,33 +939,83 @@ QWidget *KvpmConfigDialog::typeColors()
     layout->addWidget(thinsnap_button, 5, 7, Qt::AlignLeft);
     thinsnap_label->setBuddy(thinsnap_button);
 
-    QLabel *const free_label = new QLabel("free \nspace");
-    layout->addWidget(free_label, 6, 6, Qt::AlignRight);
+    return type;
+}
+
+QWidget *KvpmConfigDialog::otherColors()
+{
+    QWidget *const type = new QWidget;
+
+    static QColor free_color;
+
+    m_skeleton->setCurrentGroup("VolumeTypeColors");
+    m_skeleton->addItemColor("free",     free_color,     Qt::green);
+
+    static QColor primary_color;
+    static QColor logical_color;
+    static QColor extended_color;
+
+    m_skeleton->setCurrentGroup("PartitionTypeColors");
+    m_skeleton->addItemColor("primary",   primary_color,  Qt::cyan);
+    m_skeleton->addItemColor("logical",   logical_color,  Qt::blue);
+    m_skeleton->addItemColor("extended",  extended_color, Qt::darkGreen);
+
+    QGridLayout *const layout = new QGridLayout();
+    type->setLayout(layout);
+
+    QLabel *const free_label = new QLabel("unused space");
+    layout->addWidget(free_label, 1, 1, Qt::AlignRight);
     KColorButton *const free_button = new KColorButton();
+    free_button->setToolTip(i18n("Any unused space in a volume group or unpartitioned space on a device"));
     free_button->setObjectName("kcfg_free");
-    layout->addWidget(free_button, 6, 7, Qt::AlignLeft);
+    layout->addWidget(free_button, 1, 2, Qt::AlignLeft);
     free_label->setBuddy(free_button);
 
-    QLabel *const primary_label = new QLabel("primary partition");
-    layout->addWidget(primary_label, 1, 11, Qt::AlignRight);
-    KColorButton *const primary_button = new KColorButton();
-    primary_button->setObjectName("kcfg_primary");
-    layout->addWidget(primary_button, 1, 12, Qt::AlignLeft);
-    primary_label->setBuddy(primary_button);
-
-    QLabel *const extended_label = new QLabel("extended partition");
-    layout->addWidget(extended_label, 2, 11, Qt::AlignRight);
+    QLabel *const extended_label = new QLabel("extended space");
+    layout->addWidget(extended_label, 2, 1, Qt::AlignRight);
     KColorButton *const extended_button = new KColorButton();
     extended_button->setObjectName("kcfg_extended");
-    layout->addWidget(extended_button, 2, 12, Qt::AlignLeft);
+    extended_button->setToolTip(i18n("Any unpartitioned space inside an extended partition"));
+    layout->addWidget(extended_button, 2, 2, Qt::AlignLeft);
     extended_label->setBuddy(extended_button);
 
-    QLabel *const logical_label = new QLabel("logical partition");
-    layout->addWidget(logical_label, 3, 11, Qt::AlignRight);
-    KColorButton *const logical_button = new KColorButton();
-    logical_button->setObjectName("kcfg_logical");
-    layout->addWidget(logical_button, 3, 12, Qt::AlignLeft);
-    logical_label->setBuddy(logical_button);
+    m_primary_label = new QLabel("primary partition");
+    layout->addWidget(m_primary_label, 3, 1, Qt::AlignRight);
+    m_primary_button = new KColorButton();
+    m_primary_button->setObjectName("kcfg_primary");
+    m_primary_button->setToolTip(i18n("An ordinary partition"));
+    layout->addWidget(m_primary_button, 3, 2, Qt::AlignLeft);
+    m_primary_label->setBuddy(m_primary_button);
+    
+    m_logical_label = new QLabel("logical partition");
+    layout->addWidget(m_logical_label, 4, 1, Qt::AlignRight);
+    m_logical_button = new KColorButton();
+    m_logical_button->setObjectName("kcfg_logical");
+    m_logical_button->setToolTip(i18n("A partition inside an extended partition"));
+    layout->addWidget(m_logical_button, 4, 2, Qt::AlignLeft);
+    m_logical_label->setBuddy(m_logical_button);
+    
+    layout->setRowMinimumHeight(1, 40);
+    layout->setRowMinimumHeight(2, 40);
+    layout->setRowMinimumHeight(3, 40);
+    layout->setRowMinimumHeight(4, 40);
+    layout->setRowStretch(5, 1);
 
     return type;
 }
+
+void KvpmConfigDialog::showOtherButtons(int index)
+{
+    if (index == 1) {
+        m_primary_button->hide();
+        m_logical_button->hide();
+        m_primary_label->hide();
+        m_logical_label->hide();
+    } else {
+        m_primary_button->show();
+        m_logical_button->show();
+        m_primary_label->show();
+        m_logical_label->show();
+    }
+}
+

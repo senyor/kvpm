@@ -24,6 +24,7 @@ class KPageWidgetItem;
 class KTabWidget;
 
 class QGroupBox;
+class QLabel;
 class QStackedWidget;
 class QString;
 class QTableWidget;
@@ -42,10 +43,16 @@ class KvpmConfigDialog: public KConfigDialog
     ExecutableFinder *m_executable_finder;
     QStackedWidget   *m_color_stack = nullptr;
 
+    KColorButton *m_primary_button = nullptr;
+    KColorButton *m_logical_button = nullptr;
+    QLabel *m_primary_label = nullptr;
+    QLabel *m_logical_label = nullptr;
+
     KTabWidget *generalPage();
     QWidget    *colorsPage();
     QWidget    *fsColors();
     QWidget    *typeColors();
+    QWidget    *otherColors();
     KTabWidget *programsPage();
     QGroupBox *allGroup();
     QGroupBox *deviceGroup();
@@ -64,6 +71,7 @@ public:
 
 public slots:
     void updateSettings();
+    void showOtherButtons(int index);
 
 };
 
