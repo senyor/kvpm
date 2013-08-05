@@ -29,8 +29,9 @@
 
 
 StoragePartition::StoragePartition(PedPartition *const part, const int freespaceCount, 
-                                   const QList<PhysVol *> pvList, MountTables *const tables)
-    : StorageBase(part, pvList), m_ped_partition(part)
+                                   const QList<PhysVol *> pvList, MountTables *const tables) : 
+    StorageBase(part, pvList), 
+    m_ped_partition(part)
 {
     PedDevice *const ped_device = m_ped_partition->disk->dev;
     PedGeometry const geometry  = m_ped_partition->geom;
@@ -47,6 +48,7 @@ StoragePartition::StoragePartition(PedPartition *const part, const int freespace
     m_is_extended = false;
     m_is_logical  = false;
     m_is_freespace = false;
+    m_is_logical_freespace = false;
 
     if (m_ped_type & PED_PARTITION_FREESPACE) {
         if (m_ped_type & PED_PARTITION_LOGICAL) {
@@ -77,6 +79,7 @@ StoragePartition::StoragePartition(PedPartition *const part, const int freespace
 
     } else if ((m_ped_type & PED_PARTITION_LOGICAL) && (m_ped_type & PED_PARTITION_FREESPACE)) {
         m_partition_type = "freespace (logical)";
+        m_is_logical_freespace = true;
         m_name.chop(1);
         m_name.append(QString("%1").arg(freespaceCount));
     } else {
