@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -29,7 +29,8 @@
    drive or device selected in the tree view. If nothing is selected
    an empty widget is used.  */
 
-DevicePropertiesStack::DevicePropertiesStack(QWidget *parent) : QStackedWidget(parent)
+DevicePropertiesStack::DevicePropertiesStack(QWidget *parent) : 
+    QStackedWidget(parent)
 {
     addWidget(getDefaultWidget());
     setCurrentIndex(0);
@@ -45,7 +46,7 @@ void DevicePropertiesStack::changeDeviceStackIndex(QTreeWidgetItem *item)
     const QString device_path = item->data(0, Qt::DisplayRole).toString();
     const int list_size = m_device_path_list.size();
 
-    for (int x = 0; x < list_size; x++) {
+    for (int x = 0; x < list_size; ++x) {
         if (m_device_path_list[x] == device_path)
             setCurrentIndex(x);
     }
@@ -54,27 +55,23 @@ void DevicePropertiesStack::changeDeviceStackIndex(QTreeWidgetItem *item)
 void DevicePropertiesStack::loadData(QList<StorageDevice *> devices)
 {
     QWidget *stackWidget;
-    QList<StoragePartition *> partitions;
 
     m_device_path_list.clear();
 
-    for (int x = count() - 1; x >= 0; x--) { // delete old member widgets
+    for (int x = count() - 1; x >= 0; --x) { // delete old member widgets
         stackWidget = widget(x);
         removeWidget(stackWidget);
         delete stackWidget;
     }
 
-    for (int x = devices.size() - 1; x >= 0; x--) {
-        m_device_path_list.append(devices[x]->getName());
-        addWidget(new DeviceProperties(devices[x]));
-        partitions << devices[x]->getStoragePartitions() ;
+    for (auto dev : devices) {
+        m_device_path_list.append(dev->getName());
+        addWidget(new DeviceProperties(dev));
 
-        for (int n = 0; n < partitions.size(); n++) {
-            m_device_path_list.append(partitions[n]->getName());
-            addWidget(new DeviceProperties(partitions[n]));
+        for (auto part : dev->getStoragePartitions()) {
+            m_device_path_list << part->getName();
+            addWidget(new DeviceProperties(part));
         }
-
-        partitions.clear();
     }
 
     addWidget(getDefaultWidget());
