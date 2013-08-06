@@ -721,6 +721,12 @@ void LogVol::processSegments(lv_t lvmLV, const QByteArray flags)
                 segment->stripes = 1;
                 segment->stripe_size = 1;
                 segment->size = 1;
+            } else if (pvmove) { 
+                segment->stripes = 1;
+                segment->stripe_size = 1;
+                value = lvm_lvseg_get_property(lvm_lvseg, "seg_size");
+                if (value.is_valid)
+                    segment->size = value.value.integer;
             } else {
                 value = lvm_lvseg_get_property(lvm_lvseg, "stripes");
                 if (value.is_valid)
@@ -743,7 +749,6 @@ void LogVol::processSegments(lv_t lvmLV, const QByteArray flags)
                 }
 
                 value = lvm_lvseg_get_property(lvm_lvseg, "seg_size");
-
                 if (value.is_valid)
                     segment->size = value.value.integer;
             }
