@@ -24,6 +24,7 @@
 #include <QSharedPointer>
 
 class QCheckBox;
+class QStackedWidget;
 
 class PhysVol;
 class VolGroup;
@@ -38,16 +39,19 @@ class VGReduceDialog : public KvpmDialog
     PhysVol  *m_pv = nullptr;
     VolGroup *m_vg = nullptr;
     PvGroupBox *m_pv_checkbox = nullptr;
+    QStackedWidget *m_error_stack = nullptr;
 
     QList<QSharedPointer<PvSpace> > getPvSpaceList(); 
     bool hasUnremovablePv();
+    bool hasMda(const QStringList remove);
+    QStackedWidget *createErrorWidget();
 
 public:
     explicit VGReduceDialog(VolGroup *const group, QWidget *parent = nullptr);
     explicit VGReduceDialog(PhysVol *const pv, QWidget *parent = nullptr);
 
 private slots:
-    void excludeOneVolume();  // one pv must remain in the vg
+    void resetOkButton();  // one pv must remain in the vg
     void commit();
 
 };
