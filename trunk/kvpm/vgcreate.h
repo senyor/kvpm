@@ -61,10 +61,12 @@ class VGCreateDialog : public KvpmDialog
     void buildDialog(QList<StorageDevice *> devices, QList<StoragePartition *> partitions);
     void getUsablePvs(QList<StorageDevice *> &devices, QList<StoragePartition *> &partitions);
     void limitExtentSize(int);
+    bool continueWarning();
 
 public:
     explicit VGCreateDialog(QWidget *parent = nullptr);
-    VGCreateDialog(StorageDevice *const device, StoragePartition *const partition, QWidget *parent = nullptr);
+    VGCreateDialog(StorageDevice *const device, QWidget *parent = nullptr);
+    VGCreateDialog(StoragePartition *const partition, QWidget *parent = nullptr);
 
 private slots:
     //void limitLogicalVolumes(int boxstate);
