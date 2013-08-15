@@ -135,19 +135,19 @@ DeviceActions::DeviceActions(QWidget *parent) :
 
 void DeviceActions::changeDevice(QTreeWidgetItem *item)
 {
-    QAction *const mkfs = action("mkfs");;
-    QAction *const fsck = action("fsck");;
-    QAction *const max_fs = action("max_fs");;
-    QAction *const max_pv = action("max_pv");;
-    QAction *const partflag = action("changeflags");;
-    QAction *const partremove = action("partremove");;
-    QAction *const partadd = action("partadd");;
-    QAction *const partchange = action("partchange");;
-    QAction *const vgcreate = action("vgcreate");;
-    QAction *const tablecreate = action("tablecreate");;
-    QAction *const vgreduce = action("vgreduce");;
-    QAction *const mount = action("mount");;
-    QAction *const unmount = action("unmount");;
+    QAction *const mkfs = action("mkfs");
+    QAction *const fsck = action("fsck");
+    QAction *const max_fs = action("max_fs");
+    QAction *const max_pv = action("max_pv");
+    QAction *const partflag = action("changeflags");
+    QAction *const partremove = action("partremove");
+    QAction *const partadd = action("partadd");
+    QAction *const partchange = action("partchange");
+    QAction *const vgcreate = action("vgcreate");
+    QAction *const tablecreate = action("tablecreate");
+    QAction *const vgreduce = action("vgreduce");
+    QAction *const mount = action("mount");
+    QAction *const unmount = action("unmount");
 
     QList<QAction *> extend_actions = m_act_grp->actions();
     for (auto action : extend_actions) {
