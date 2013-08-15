@@ -42,54 +42,60 @@ VGCreateDialog::VGCreateDialog(QWidget *parent) :
 {
     QList<StorageDevice *> devices;
     QList<StoragePartition *> partitions;
-    const QString warning = i18n("If a device or partition is added to a volume group, "
-                                 "any data currently on that device or partition will be lost.");
 
     getUsablePvs(devices, partitions);
 
     if (partitions.size() + devices.size() > 0) {
-        if (KMessageBox::warningContinueCancel(nullptr,
+        if (continueWarning())
+            buildDialog(devices, partitions);
+        else
+            preventExec();
+    } else {
+        preventExec();
+        KMessageBox::sorry(nullptr, i18n("No unused potential physical volumes found"));
+    }
+}
+
+VGCreateDialog::VGCreateDialog(StorageDevice *const device, QWidget *parent) : 
+    KvpmDialog(parent)
+{
+    QList<StorageDevice *> devices;
+    QList<StoragePartition *> partitions;
+    
+    devices.append(device);
+    
+    if (continueWarning())
+        buildDialog(devices, partitions);
+    else
+        preventExec();
+}
+
+VGCreateDialog::VGCreateDialog(StoragePartition *const partition, QWidget *parent) : 
+    KvpmDialog(parent)
+{
+    QList<StorageDevice *> devices;
+    QList<StoragePartition *> partitions;
+    
+    partitions.append(partition);
+    
+    if (continueWarning())
+        buildDialog(devices, partitions);
+    else
+        preventExec();
+}
+
+bool VGCreateDialog::continueWarning()
+{
+    const QString warning = i18n("If a device or partition is added to a volume group, "
+                                 "any data currently on that device or partition will be lost.");
+
+    return (KMessageBox::warningContinueCancel(nullptr,
                                                warning,
                                                QString(),
                                                KStandardGuiItem::cont(),
                                                KStandardGuiItem::cancel(),
                                                QString(),
-                                               KMessageBox::Dangerous) == KMessageBox::Continue) {
-            buildDialog(devices, partitions);
-        } else {
-            preventExec();
-        }
-    } else {
-        preventExec();
-        KMessageBox::error(nullptr, i18n("No unused potential physical volumes found"));
-    }
-}
-
-VGCreateDialog::VGCreateDialog(StorageDevice *const device, StoragePartition *const partition, QWidget *parent) : 
-    KvpmDialog(parent)
-{
-    QList<StorageDevice *> devices;
-    QList<StoragePartition *> partitions;
-
-    if (device)
-        devices.append(device);
-    else
-        partitions.append(partition);
-
-    const QString warning = i18n("If a device or partition is added to a volume group, "
-                                 "any data currently on that device or partition will be lost.");
-
-    if (KMessageBox::warningContinueCancel(nullptr,
-                                           warning,
-                                           QString(),
-                                           KStandardGuiItem::cont(),
-                                           KStandardGuiItem::cancel(),
-                                           QString(),
-                                           KMessageBox::Dangerous) == KMessageBox::Continue) {
-        buildDialog(devices, partitions);
-    } else {
-        preventExec();
-    }
+                                               KMessageBox::Dangerous) == KMessageBox::Continue);
 }
 
 void VGCreateDialog::extentSizeChanged()
@@ -151,20 +157,20 @@ void VGCreateDialog::commit()
         new_extent_size *= 1024;
 
     progress_box->setRange(0, pv_names.size());
-    progress_box->setText("Creating VG");
+    progress_box->setText(i18n("Creating Group"));
     qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
 
     if ((vg_dm = lvm_vg_create(lvm, vg_name_array.data()))) {
 
         if ((lvm_vg_set_extent_size(vg_dm, new_extent_size)))
-            KMessageBox::error(0, QString(lvm_errmsg(lvm)));
+            KMessageBox::error(nullptr, QString(lvm_errmsg(lvm)));
 
         for (int x = 0; x < pv_names.size(); x++) {
             progress_box->setValue(x);
             qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
             pv_name_qba = pv_names[x].toLocal8Bit();
             if (lvm_vg_extend(vg_dm, pv_name_qba.data()))
-                KMessageBox::error(0, QString(lvm_errmsg(lvm)));
+                KMessageBox::error(nullptr, QString(lvm_errmsg(lvm)));
         }
 
         // ****To Do... None of the following are supported by liblvm2app yet****
@@ -175,7 +181,7 @@ void VGCreateDialog::commit()
 
 
         if (lvm_vg_write(vg_dm))
-            KMessageBox::error(0, QString(lvm_errmsg(lvm)));
+            KMessageBox::error(nullptr, QString(lvm_errmsg(lvm)));
 
         lvm_vg_close(vg_dm);
         progress_box->reset();
@@ -183,7 +189,7 @@ void VGCreateDialog::commit()
         return;
     }
 
-    KMessageBox::error(0, QString(lvm_errmsg(lvm)));
+    KMessageBox::error(nullptr, QString(lvm_errmsg(lvm)));
     progress_box->reset();
     qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
     return;
@@ -210,18 +216,18 @@ void VGCreateDialog::validateOK()
 
 void VGCreateDialog::buildDialog(QList<StorageDevice *> devices, QList<StoragePartition *> partitions)
 {
-    setWindowTitle(i18n("Create Volume Group"));
+    setCaption(i18n("Create New Volume Group"));
 
-    QWidget *dialog_body = new QWidget(this);
+    QWidget *const dialog_body = new QWidget(this);
     setMainWidget(dialog_body);
     QVBoxLayout *const layout = new QVBoxLayout();
     dialog_body->setLayout(layout);
 
-    QLabel *const title = new QLabel(i18n("<b>Create a new volume group</b>"));
+    QLabel *const title = new QLabel(i18n("Create a new volume group"));
     title->setAlignment(Qt::AlignCenter);
     layout->addSpacing(5);
     layout->addWidget(title);
-    layout->addSpacing(5);
+    layout->addSpacing(10);
 
     QLabel *const name_label = new QLabel(i18n("Group name: "));
     m_vg_name = new KLineEdit();

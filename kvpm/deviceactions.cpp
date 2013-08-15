@@ -376,17 +376,17 @@ void DeviceActions::changeFlags()
 
 void DeviceActions::createVg()
 {
-    if (m_part) {
-        VGCreateDialog dialog(nullptr, m_part);
+    VGCreateDialog *dialog;
 
-        if (dialog.run() == QDialog::Accepted)
-            g_top_window->reRun();
-    } else {                          // whole device, not partition
-        VGCreateDialog dialog(m_dev, nullptr);
+    if (m_part)
+        dialog = new VGCreateDialog(m_part);
+    else       
+        dialog = new VGCreateDialog(m_dev);
 
-        if (dialog.run() == QDialog::Accepted)
-            g_top_window->reRun();
-    }
+    if (dialog->run() == QDialog::Accepted)
+        g_top_window->reRun();
+
+    dialog->deleteLater();
 }
 
 void DeviceActions::createTable()
