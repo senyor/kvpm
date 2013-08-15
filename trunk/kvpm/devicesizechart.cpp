@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2009, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -54,10 +54,10 @@ void DeviceSizeChart::setNewDevice(QTreeWidgetItem *deviceItem)
     int max_segment_width;
     unsigned int part_type;
 
-    if (deviceItem == NULL)
+    if (deviceItem == nullptr)
         return;
 
-    while ((deviceItem->parent() != NULL) && ((QTreeWidget *)deviceItem->parent() != m_tree))
+    while ((deviceItem->parent()) && ((QTreeWidget *)deviceItem->parent() != m_tree))
         deviceItem = deviceItem->parent();
 
     for (int x = m_layout->count() - 1; x >= 0; x--) // delete all the children
@@ -80,6 +80,10 @@ void DeviceSizeChart::setNewDevice(QTreeWidgetItem *deviceItem)
         m_segments.append(segment);
         m_ratios.append(1.0);
         m_layout->addWidget(segment);
+
+        connect(segment, SIGNAL(deviceMenuRequested(QTreeWidgetItem *)),
+                this, SIGNAL(deviceMenuRequested(QTreeWidgetItem *)));
+
     }
 
     for (int x = 0; x < deviceItem->childCount(); x++) {
@@ -100,6 +104,10 @@ void DeviceSizeChart::setNewDevice(QTreeWidgetItem *deviceItem)
         segment = new DeviceChartSeg(partition_item);
         m_segments.append(segment);
         m_ratios.append(ratio);
+
+        connect(segment, SIGNAL(deviceMenuRequested(QTreeWidgetItem *)),
+                this, SIGNAL(deviceMenuRequested(QTreeWidgetItem *)));
+
         if (part_type & 0x02) {  // extended partition
             m_extended_layout = new QHBoxLayout();
             m_extended_layout->setSpacing(0);
@@ -123,6 +131,9 @@ void DeviceSizeChart::setNewDevice(QTreeWidgetItem *deviceItem)
                     m_extended_ratios.append(ratio);
 
                     m_extended_layout->addWidget(extended_segment);
+
+                    connect(extended_segment, SIGNAL(deviceMenuRequested(QTreeWidgetItem *)),
+                            this, SIGNAL(deviceMenuRequested(QTreeWidgetItem *)));
                 }
             }
             segment->setLayout(m_extended_layout);

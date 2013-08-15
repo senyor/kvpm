@@ -43,6 +43,10 @@ public:
 
 public slots:
     void setNewDevice(QTreeWidgetItem *deviceItem);
+
+signals:
+    void deviceMenuRequested(QTreeWidgetItem *item);
+
 };
 
 #endif
