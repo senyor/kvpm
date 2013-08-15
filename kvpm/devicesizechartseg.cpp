@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2009, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -15,7 +15,7 @@
 
 #include "devicesizechartseg.h"
 
-#include "deviceactionsmenu.h"
+#include "devicemenu.h"
 #include "storagepartition.h"
 
 #include <KConfigSkeleton>
@@ -141,24 +141,11 @@ DeviceChartSeg::DeviceChartSeg(QTreeWidgetItem *const storageItem, QWidget *pare
     setContextMenuPolicy(Qt::CustomContextMenu);
 
     connect(this, SIGNAL(customContextMenuRequested(QPoint)),
-            this, SLOT(popupContextMenu(QPoint)));
-
+            this, SLOT(popupContextMenu()));
 }
 
-void DeviceChartSeg::popupContextMenu(QPoint point)
+void DeviceChartSeg::popupContextMenu()
 {
-    (void)point;
-
-    KMenu *context_menu;
-
-    if ((m_item->data(0, Qt::UserRole)).canConvert<void *>())
-        m_partition = (StoragePartition *)((m_item->data(0, Qt::UserRole)).value<void *>());
-
-    if (m_item) { // m_item = 0 if there is no item a that point
-        context_menu = new DeviceActionsMenu(m_item, this);
-        context_menu->exec(QCursor::pos());
-    } else {
-        context_menu = new DeviceActionsMenu(nullptr, this);
-        context_menu->exec(QCursor::pos());
-    }
+    emit deviceMenuRequested(m_item);
 }
+

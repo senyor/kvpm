@@ -34,7 +34,10 @@ public:
     explicit DeviceChartSeg(QTreeWidgetItem *const storageItem, QWidget *parent = nullptr);
 
 public slots:
-    void popupContextMenu(QPoint point);
+    void popupContextMenu();
+
+signals:
+    void deviceMenuRequested(QTreeWidgetItem *item);
 
 };
 

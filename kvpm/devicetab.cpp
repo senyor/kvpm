@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2009, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -19,6 +19,8 @@
 #include "devicesizechart.h"
 #include "deviceproperties.h"
 #include "devicepropertiesstack.h"
+#include "deviceactions.h"
+#include "devicemenu.h"
 #include "storagedevice.h"
 
 #include <KLocale>
@@ -30,12 +32,13 @@
 
 
 
-DeviceTab::DeviceTab(QWidget *parent) : QWidget(parent)
+DeviceTab::DeviceTab(QWidget *parent) : 
+    QWidget(parent)
 {
     m_size_chart   = new DeviceSizeChart(this);
     m_device_stack = new DevicePropertiesStack(this);
     m_tree = new DeviceTree(m_size_chart, m_device_stack, this);
-
+    m_device_actions = new DeviceActions(this);
     m_tree_properties_splitter = new QSplitter(Qt::Horizontal);
 
     m_layout = new QVBoxLayout;
@@ -47,13 +50,27 @@ DeviceTab::DeviceTab(QWidget *parent) : QWidget(parent)
     m_tree_properties_splitter->setStretchFactor(0, 9);
     m_tree_properties_splitter->setStretchFactor(1, 2);
 
+    connect(m_tree, SIGNAL(deviceMenuRequested(QTreeWidgetItem*)),
+            this, SLOT(deviceContextMenu(QTreeWidgetItem*)));
+
+    connect(m_size_chart, SIGNAL(deviceMenuRequested(QTreeWidgetItem*)),
+            this, SLOT(deviceContextMenu(QTreeWidgetItem*)));
+
     setLayout(m_layout);
 }
 
 void DeviceTab::rescan(QList<StorageDevice *> devices)
 {
+    disconnect(m_tree, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)),
+            m_device_actions, SLOT(changeDevice(QTreeWidgetItem*)));
+
     m_device_stack->loadData(devices);
     m_tree->loadData(devices);
+
+    connect(m_tree, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)),
+            m_device_actions, SLOT(changeDevice(QTreeWidgetItem*)));
+
+    m_device_actions->changeDevice(m_tree->currentItem());
 }
 
 QScrollArea *DeviceTab::setupPropertyStack()
@@ -66,4 +83,13 @@ QScrollArea *DeviceTab::setupPropertyStack()
     device_scroll->setWidgetResizable(true);
 
     return device_scroll;
+}
+
+void DeviceTab::deviceContextMenu(QTreeWidgetItem *item)
+{
+    m_device_actions->changeDevice(item);
+
+    KMenu *menu = new DeviceMenu(m_device_actions, this);
+    menu->exec(QCursor::pos());
+    menu->deleteLater();
 }

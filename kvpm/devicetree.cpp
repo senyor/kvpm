@@ -20,7 +20,7 @@
 
 #include <QDebug>
 
-#include "deviceactionsmenu.h"
+#include "devicemenu.h"
 #include "devicepropertiesstack.h"
 #include "devicesizechart.h"
 #include "physvol.h"
@@ -404,13 +404,7 @@ void DeviceTree::setupContextMenu()
 
 void DeviceTree::popupContextMenu(QPoint point)
 {
-    QTreeWidgetItem *const item = itemAt(point);
-    KMenu *context_menu;
-
-    if (item) {
-        context_menu = new DeviceActionsMenu(item, this);
-        context_menu->exec(QCursor::pos());
-    }
+    emit deviceMenuRequested(itemAt(point));
 }
 
 void DeviceTree::setViewConfig()
@@ -502,3 +496,4 @@ void DeviceTree::setViewConfig()
         }
     }
 }
+

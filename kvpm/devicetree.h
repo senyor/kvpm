@@ -56,6 +56,9 @@ public:
 private slots:
     void popupContextMenu(QPoint point);
 
+signals:
+    void deviceMenuRequested(QTreeWidgetItem *);
+
 };
 
 #endif
