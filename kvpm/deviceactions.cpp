@@ -50,7 +50,7 @@ DeviceActions::DeviceActions(QWidget *parent) :
     m_act_grp = new QActionGroup(this);
 
     connect(m_act_grp, SIGNAL(triggered(QAction *)), 
-            this, SLOT(vgextend(QAction *)) );
+            this, SLOT(extendVg(QAction *)) );
 
     KAction *const partchange = addAction("partchange", this, SLOT(changePartition()));
     //   mkfs->setIcon(KIcon("lightning_add"));
@@ -82,19 +82,19 @@ DeviceActions::DeviceActions(QWidget *parent) :
     partremove->setIconText(i18n("Remove"));
     partremove->setToolTip(i18n("Remove disk partition"));
     
-    KAction *const vgcreate = addAction("vgcreate", this, SLOT(vgcreatePartition()));
+    KAction *const vgcreate = addAction("vgcreate", this, SLOT(createVg()));
     vgcreate->setIcon(KIcon("document-new"));
     vgcreate->setText(i18n("Create volume group"));
     vgcreate->setIconText(i18n("New vg"));
     vgcreate->setToolTip(i18n("Create volume group"));
     
-    KAction *const tablecreate = addAction("tablecreate", this, SLOT(tablecreatePartition())); 
+    KAction *const tablecreate = addAction("tablecreate", this, SLOT(createTable())); 
     tablecreate->setIcon(KIcon("exclamation"));
     tablecreate->setText(i18n("Create or remove a partition table"));
     tablecreate->setIconText(i18n("Table"));
     tablecreate->setToolTip(i18n("Create or remove a partition table"));
 
-    KAction *const vgreduce = addAction("vgreduce", this, SLOT(vgreducePartition()));
+    KAction *const vgreduce = addAction("vgreduce", this, SLOT(reduceVg()));
     vgreduce->setIcon(KIcon("delete"));
     vgreduce->setText(i18n("Remove from volume group"));
     vgreduce->setIconText(i18n("Remove from volume group"));
@@ -374,7 +374,7 @@ void DeviceActions::changeFlags()
     }
 }
 
-void DeviceActions::vgcreatePartition()
+void DeviceActions::createVg()
 {
     if (m_part) {
         VGCreateDialog dialog(nullptr, m_part);
@@ -389,13 +389,13 @@ void DeviceActions::vgcreatePartition()
     }
 }
 
-void DeviceActions::tablecreatePartition()
+void DeviceActions::createTable()
 {
     if (create_table(m_dev->getName()))
         g_top_window->reRun();
 }
 
-void DeviceActions::vgreducePartition()   // pvs can also be whole devices
+void DeviceActions::reduceVg()   // pvs can also be whole devices
 {
     PhysVol *pv = nullptr;
 
@@ -430,7 +430,7 @@ void DeviceActions::unmountFs()
     }
 }
 
-void DeviceActions::vgextend(QAction *action)
+void DeviceActions::extendVg(QAction *action)
 {
     const QString vg_name = action->objectName();
     VolGroup *const vg = MasterList::getVgByName(vg_name);

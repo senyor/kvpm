@@ -47,7 +47,7 @@ public slots:
     void changeDevice(QTreeWidgetItem *item);
 
 private slots:
-    void vgextend(QAction *action);
+    void extendVg(QAction *action);
     void checkFs();
     void makeFs();
     void maxFs();
@@ -55,9 +55,9 @@ private slots:
     void changePartition();
     void changeFlags();
     void removePartition();
-    void vgcreatePartition();
-    void tablecreatePartition();
-    void vgreducePartition();
+    void createVg();
+    void createTable();
+    void reduceVg();
     void mountFs();
     void unmountFs();
 
