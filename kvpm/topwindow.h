@@ -74,6 +74,7 @@ private slots:
     void setVgMenu(int index);
     void showVolumeGroupInfo(bool show);
     void showVolumeGroupBar(bool show);
+    void showDeviceBar(bool show);
     void showToolbars(bool show);
     void useSiUnits(bool use);
     void setToolbarIconSize(QAction *action);
