@@ -208,6 +208,18 @@ void TopWindow::showVolumeGroupBar(bool show)
     updateTabs();
 }
 
+void TopWindow::showDeviceBar(bool show)
+{
+    KConfigSkeleton skeleton;
+    bool show_device_bar;
+    qDebug() << "Got here ....";
+    skeleton.setCurrentGroup("General");
+    skeleton.addItemBool("show_device_barchart", show_device_bar, true);
+    show_device_bar = show;
+    skeleton.writeConfig();
+    updateTabs();
+}
+
 void TopWindow::showToolbars(bool show)
 {
     KConfigSkeleton skeleton;
@@ -354,13 +366,15 @@ KMenu *TopWindow::buildSettingsMenu()
 {
     KMenu *const menu = new KMenu(i18n("Settings"));
     KToggleAction *const show_vg_info_action  = new KToggleAction(i18n("Show Volume Group Information"), this);
-    KToggleAction *const show_lv_bar_action   = new KToggleAction(i18n("Show Volume Group Bar Graph"), this);
+    KToggleAction *const show_lv_bar_action   = new KToggleAction(i18n("Show Volume Group Bar Chart"), this);
+    KToggleAction *const show_device_bar_action   = new KToggleAction(i18n("Show Device Bar Chart"), this);
     KToggleAction *const use_si_units_action  = new KToggleAction(i18n("Use Metric SI Units"), this);
     KToggleAction *const show_toolbars_action = new KToggleAction(i18n("Show Toolbars"), this);
     KAction *const config_kvpm_action = new KAction(KIcon("configure"), i18n("Configure kvpm..."), this);
 
     menu->addAction(show_vg_info_action);
     menu->addAction(show_lv_bar_action);
+    menu->addAction(show_device_bar_action);
     menu->addAction(use_si_units_action);
     menu->addSeparator();
     menu->addAction(show_toolbars_action);
@@ -370,17 +384,19 @@ KMenu *TopWindow::buildSettingsMenu()
     menu->addAction(config_kvpm_action);
 
     KConfigSkeleton skeleton;
-    bool show_vg_info, show_lv_bar, use_si_units, show_toolbars;
+    bool show_vg_info, show_lv_bar, use_si_units, show_toolbars, show_device_bar;
 
     skeleton.setCurrentGroup("General");
     skeleton.addItemBool("show_vg_info", show_vg_info, true);
     skeleton.addItemBool("show_lv_bar",  show_lv_bar,  true);
+    skeleton.addItemBool("show_device_barchart", show_device_bar,  true);
     skeleton.addItemBool("use_si_units", use_si_units, false);
     skeleton.addItemBool("show_toolbars", show_toolbars, true);
 
     // This must be *before* the following connect() statements
     show_vg_info_action->setChecked(show_vg_info);
     show_lv_bar_action->setChecked(show_lv_bar);
+    show_device_bar_action->setChecked(show_device_bar);
     use_si_units_action->setChecked(use_si_units);
     show_toolbars_action->setChecked(show_toolbars);
 
@@ -389,6 +405,9 @@ KMenu *TopWindow::buildSettingsMenu()
 
     connect(show_lv_bar_action,  SIGNAL(toggled(bool)),
             this, SLOT(showVolumeGroupBar(bool)));
+
+    connect(show_device_bar_action,  SIGNAL(toggled(bool)),
+            this, SLOT(showDeviceBar(bool)));
 
     connect(use_si_units_action, SIGNAL(toggled(bool)),
             this, SLOT(useSiUnits(bool)));

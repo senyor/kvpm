@@ -19,10 +19,14 @@
 #include <QList>
 #include <QWidget>
 
+#include <KMainWindow>
+
 class QSplitter;
 class QScrollArea;
 class QTreeWidgetItem;
 class QVBoxLayout;
+
+class KToolBar;
 
 class DeviceActions;
 class DeviceTree;
@@ -31,19 +35,20 @@ class DeviceSizeChart;
 class StorageDevice;
 
 
-class DeviceTab : public QWidget
+class DeviceTab : public KMainWindow
 {
-
     Q_OBJECT
 
-    QVBoxLayout *m_layout;
-    DeviceTree  *m_tree;
-    QSplitter   *m_tree_properties_splitter;
+    QVBoxLayout *m_layout = nullptr;
+    DeviceTree  *m_tree = nullptr;
+    QSplitter   *m_tree_properties_splitter = nullptr;
     DeviceActions *m_device_actions = nullptr; 
-    DeviceSizeChart *m_size_chart;
-    DevicePropertiesStack *m_device_stack;
+    DeviceSizeChart *m_size_chart = nullptr;
+    DevicePropertiesStack *m_device_stack = nullptr;
 
     QScrollArea *setupPropertyStack();
+    KToolBar *buildDeviceToolBar();
+    void readConfig();
 
 public:
     DeviceTab(QWidget *parent = nullptr);
