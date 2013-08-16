@@ -253,7 +253,7 @@ QFrame* VolumeGroupTab::buildPartialWarning()
 KToolBar* VolumeGroupTab::buildLvToolBar()
 {
     KToolBar *const toolbar = toolBar("lvtoolbar");
-    toolbar->setContextMenuEnabled(false);
+    toolbar->setContextMenuPolicy(Qt::PreventContextMenu);
 
     toolbar->addAction(m_lv_actions->action("lvcreate"));
     toolbar->addAction(m_lv_actions->action("thinpool"));
@@ -288,7 +288,7 @@ KToolBar* VolumeGroupTab::buildLvToolBar()
 KToolBar* VolumeGroupTab::buildPvToolBar()
 {
     KToolBar *const toolbar = toolBar("pvtoolbar");
-    toolbar->setContextMenuEnabled(false);
+    toolbar->setContextMenuPolicy(Qt::PreventContextMenu);
 
     KSeparator *const separator = new KSeparator(Qt::Vertical);
     separator->setMinimumWidth(40);
