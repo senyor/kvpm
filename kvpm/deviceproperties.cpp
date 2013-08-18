@@ -74,8 +74,9 @@ DeviceProperties::DeviceProperties(StoragePartition *const partition, QWidget *p
 
         if (show_fsuuid || show_fslabel)
             layout->addWidget(fsFrame(partition, show_fsuuid, show_fslabel));
-    } else if (partition->isPhysicalVolume())
+    } else if (partition->isPhysicalVolume()) {
         layout->addWidget(pvFrame(partition->getPhysicalVolume()));
+    }
 
     setLayout(layout);
 
@@ -101,7 +102,7 @@ QFrame *DeviceProperties::generalFrame(StoragePartition *const partition)
 
     layout->addWidget(new QLabel(i18n("Last sector: %1", partition->getLastSector())));
 
-    if (partition->isNormal() || partition->isLogical()) {
+    if (partition->isNormal() || partition->isLogical() || partition->isExtended()) {
         layout->addWidget(new QLabel());
         const QStringList flags = partition->getFlags();
         layout->addWidget(new QLabel(i18n("Flags: %1", flags.join(", "))));
