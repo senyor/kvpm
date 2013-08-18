@@ -53,7 +53,7 @@ DeviceActions::DeviceActions(QWidget *parent) :
             this, SLOT(extendVg(QAction *)) );
 
     KAction *const partchange = addAction("partchange", this, SLOT(changePartition()));
-    //   mkfs->setIcon(KIcon("lightning_add"));
+    partchange->setIcon(KIcon("document-swap"));
     partchange->setText(i18n("Move or resize disk partition"));
     partchange->setIconText(i18n("change"));
     partchange->setToolTip(i18n("Move or resize disk partition"));
@@ -71,16 +71,16 @@ DeviceActions::DeviceActions(QWidget *parent) :
     maxpv->setToolTip(i18n("Extend physical volume to fill device"));
     
     KAction *const partadd = addAction("partadd", this, SLOT(addPartition()));
-    //  partadd->setIcon(i18n("Add disk partition"));
+    partadd->setIcon(KIcon("list-add"));
     partadd->setText(i18n("Add disk partition"));
     partadd->setIconText(i18n("Add"));
     partadd->setToolTip(i18n("Add disk partition"));
     
     KAction *const partremove = addAction("partremove", this, SLOT(removePartition())); 
     partremove->setIcon(KIcon("cross"));
-    partremove->setText(i18n("Remove disk partition"));
-    partremove->setIconText(i18n("Remove"));
-    partremove->setToolTip(i18n("Remove disk partition"));
+    partremove->setText(i18n("Delete disk partition"));
+    partremove->setIconText(i18n("Delete"));
+    partremove->setToolTip(i18n("Delete disk partition"));
     
     KAction *const vgcreate = addAction("vgcreate", this, SLOT(createVg()));
     vgcreate->setIcon(KIcon("document-new"));
@@ -184,6 +184,7 @@ void DeviceActions::changeDevice(QTreeWidgetItem *item)
                 vgextendEnable(false);
                 vgreduce->setEnabled(false);
                 partflag->setEnabled(false);
+                fsck->setEnabled(false);
             } else if (m_part->getPedType() & 0x02) { // extended partition
                 max_fs->setEnabled(false);
                 max_pv->setEnabled(false);
@@ -202,9 +203,11 @@ void DeviceActions::changeDevice(QTreeWidgetItem *item)
                 vgextendEnable(false);
                 vgreduce->setEnabled(false);
                 partflag->setEnabled(true);
+                fsck->setEnabled(false);
             } else if (m_part->isPhysicalVolume()) {
                 max_fs->setEnabled(false);
                 mkfs->setEnabled(false);
+                fsck->setEnabled(false);
                 partremove->setEnabled(false);
 
                 if (m_part->getPhysicalVolume()->isActive())
