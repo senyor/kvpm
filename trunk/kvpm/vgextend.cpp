@@ -44,57 +44,62 @@ VGExtendDialog::VGExtendDialog(VolGroup *const group, QWidget *parent) :
 {
     QList<StorageDevice *> devices;
     QList<StoragePartition *> partitions;
-    const QString warning = i18n("If a device or partition is added to a volume group, "
-                                 "any data currently on that device or partition will be lost.");
 
     getUsablePvs(devices, partitions);
 
-
     if (partitions.size() + devices.size() > 0) {
-        if (KMessageBox::warningContinueCancel(nullptr,
-                                               warning,
-                                               QString(),
-                                               KStandardGuiItem::cont(),
-                                               KStandardGuiItem::cancel(),
-                                               QString(),
-                                               KMessageBox::Dangerous) == KMessageBox::Continue) {
+        if (continueWarning())
             buildDialog(devices, partitions);
-        } else {
+        else
             preventExec();
-        }
     } else {
         preventExec();
         KMessageBox::sorry(nullptr, i18n("No unused potential physical volumes found"));
     }
 }
 
-VGExtendDialog::VGExtendDialog(VolGroup *const group, StorageDevice *const device, StoragePartition *const partition, QWidget *parent) :
+VGExtendDialog::VGExtendDialog(VolGroup *const group, StorageDevice *const device, QWidget *parent) :
     KvpmDialog(parent), 
     m_vg(group)
 {
     QList<StorageDevice *> devices;
     QList<StoragePartition *> partitions;
 
-    if (device)
-        devices.append(device);
-    else
-        partitions.append(partition);
+    devices.append(device);
 
-    QString warning = i18n("If a device or partition is added to a volume group, "
-                           "any data currently on that device or partition will be lost.");
-
-
-    if (KMessageBox::warningContinueCancel(nullptr,
-                                           warning,
-                                           QString(),
-                                           KStandardGuiItem::cont(),
-                                           KStandardGuiItem::cancel(),
-                                           QString(),
-                                           KMessageBox::Dangerous) == KMessageBox::Continue) {
+    if (continueWarning())
         buildDialog(devices, partitions);
-    } else {
+    else
         preventExec();
-    }
+}
+
+VGExtendDialog::VGExtendDialog(VolGroup *const group, StoragePartition *const partition, QWidget *parent) :
+    KvpmDialog(parent), 
+    m_vg(group)
+{
+    QList<StorageDevice *> devices;
+    QList<StoragePartition *> partitions;
+
+    partitions.append(partition);
+
+    if (continueWarning())
+        buildDialog(devices, partitions);
+    else
+        preventExec();
+}
+
+bool VGExtendDialog::continueWarning()
+{
+    const QString warning = i18n("If a device or partition is added to a volume group, "
+                                 "any data currently on that device or partition will be lost.");
+
+    return (KMessageBox::warningContinueCancel(nullptr,
+                                               warning,
+                                               QString(),
+                                               KStandardGuiItem::cont(),
+                                               KStandardGuiItem::cancel(),
+                                               QString(),
+                                               KMessageBox::Dangerous) == KMessageBox::Continue);
 }
 
 void VGExtendDialog::commit()
@@ -119,11 +124,11 @@ void VGExtendDialog::commit()
             qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
             pv_name = pv_names[x].toLocal8Bit();
             if (lvm_vg_extend(vg_dm, pv_name.data()))
-                KMessageBox::error(0, QString(lvm_errmsg(lvm)));
+                KMessageBox::error(nullptr, QString(lvm_errmsg(lvm)));
         }
 
         if (lvm_vg_write(vg_dm))
-            KMessageBox::error(0, QString(lvm_errmsg(lvm)));
+            KMessageBox::error(nullptr, QString(lvm_errmsg(lvm)));
 
         lvm_vg_close(vg_dm);
         progress_box->reset();
@@ -157,7 +162,7 @@ void VGExtendDialog::buildDialog(QList<StorageDevice *> devices, QList<StoragePa
     title->setAlignment(Qt::AlignCenter);
     layout->addSpacing(5);
     layout->addWidget(title);
-    layout->addSpacing(5);
+    layout->addSpacing(10);
 
     m_pv_checkbox = new PvGroupBox(devices, partitions, m_vg->getExtentSize());
     layout->addWidget(m_pv_checkbox);
@@ -168,24 +173,16 @@ void VGExtendDialog::buildDialog(QList<StorageDevice *> devices, QList<StoragePa
 
 void VGExtendDialog::getUsablePvs(QList<StorageDevice *> &devices, QList<StoragePartition *> &partitions)
 {
-    QList<StorageDevice *> all_dev = MasterList::getStorageDevices();
-    QList<StoragePartition *> all_part;
-
-    for (int x = 0; x < all_dev.size(); x++) {
-        if ((all_dev[x]->getRealPartitionCount() == 0) &&
-                (!all_dev[x]->isBusy()) &&
-                (!all_dev[x]->isPhysicalVolume())) {
-
-            devices.append(all_dev[x]);
-        } else if (all_dev[x]->getRealPartitionCount() > 0) {
-            all_part = all_dev[x]->getStoragePartitions();
-            for (int y = 0; y < all_part.size(); y++) {
-                if ((!all_part[y]->isBusy()) && (! all_part[y]->isPhysicalVolume()) &&
-                        ((all_part[y]->isNormal()) || (all_part[y]->isLogical())))  {
-
-                    partitions.append(all_part[y]);
-                }
+    for (auto dev : MasterList::getStorageDevices() ) {
+        if ((dev->getRealPartitionCount() == 0) && !dev->isBusy() && !dev->isPhysicalVolume()) {
+            devices.append(dev);
+        } else if (dev->getRealPartitionCount() > 0) {
+            for (auto part : dev->getStoragePartitions()) {
+                if (!part->isBusy() && !part->isPhysicalVolume() && ((part->isNormal()) || (part->isLogical())))
+                    partitions.append(part);
             }
         }
     }
 }
+
+

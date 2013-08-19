@@ -35,9 +35,12 @@ class VGExtendDialog : public KvpmDialog
     PvGroupBox  *m_pv_checkbox;
     VolGroup    *m_vg;
 
+    bool continueWarning();
+
 public:
     VGExtendDialog(VolGroup *const group, QWidget *parent = nullptr);
-    VGExtendDialog(VolGroup *const group, StorageDevice *const device, StoragePartition *const partition, QWidget *parent = nullptr);
+    VGExtendDialog(VolGroup *const group, StoragePartition *const partition, QWidget *parent = nullptr);
+    VGExtendDialog(VolGroup *const group, StorageDevice *const device, QWidget *parent = nullptr);
     void buildDialog(QList<StorageDevice *> devices, QList<StoragePartition *> partitions);
     void getUsablePvs(QList<StorageDevice *> &devices, QList<StoragePartition *> &partitions);
 
