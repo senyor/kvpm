@@ -17,7 +17,7 @@
 
 #include <KDialog>
 
-#include <QStringList>
+#include <QList>
 
 #include "kvpmdialog.h"
 
@@ -29,8 +29,7 @@ class QCheckBox;
 class QRegExpValidator;
 class QVBoxLayout;
 
-class StorageDevice;
-class StoragePartition;
+class StorageBase;
 class PvGroupBox;
 
 
@@ -42,7 +41,7 @@ class VGCreateDialog : public KvpmDialog
            *m_total_available_label,
            *m_total_selected_label;
 
-    PvGroupBox  *m_pv_checkbox;
+    PvGroupBox  *m_pv_checkbox = nullptr;
 
     KLineEdit *m_vg_name,
               *m_max_lvs,
@@ -56,17 +55,16 @@ class VGCreateDialog : public KvpmDialog
     KComboBox *m_extent_size,
               *m_extent_suffix;
 
-    QRegExpValidator *m_validator;
+    QRegExpValidator *m_validator = nullptr;
 
-    void buildDialog(QList<StorageDevice *> devices, QList<StoragePartition *> partitions);
-    void getUsablePvs(QList<StorageDevice *> &devices, QList<StoragePartition *> &partitions);
+    void buildDialog(QList<StorageBase *> devices);
+    QList<StorageBase *> getUsablePvs();
     void limitExtentSize(int);
     bool continueWarning();
 
 public:
     explicit VGCreateDialog(QWidget *parent = nullptr);
-    VGCreateDialog(StorageDevice *const device, QWidget *parent = nullptr);
-    VGCreateDialog(StoragePartition *const partition, QWidget *parent = nullptr);
+    explicit VGCreateDialog(StorageBase *const device, QWidget *parent = nullptr);
 
 private slots:
     //void limitLogicalVolumes(int boxstate);

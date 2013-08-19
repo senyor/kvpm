@@ -41,14 +41,12 @@
 VGCreateDialog::VGCreateDialog(QWidget *parent) : 
     KvpmDialog(parent)
 {
-    QList<StorageDevice *> devices;
-    QList<StoragePartition *> partitions;
+    QList<StorageBase *> devices;
+    devices = getUsablePvs();
 
-    getUsablePvs(devices, partitions);
-
-    if (partitions.size() + devices.size() > 0) {
+    if (devices.size() > 0) {
         if (continueWarning())
-            buildDialog(devices, partitions);
+            buildDialog(devices);
         else
             preventExec();
     } else {
@@ -57,30 +55,14 @@ VGCreateDialog::VGCreateDialog(QWidget *parent) :
     }
 }
 
-VGCreateDialog::VGCreateDialog(StorageDevice *const device, QWidget *parent) : 
+VGCreateDialog::VGCreateDialog(StorageBase *const device, QWidget *parent) : 
     KvpmDialog(parent)
 {
-    QList<StorageDevice *> devices;
-    QList<StoragePartition *> partitions;
-    
+    QList<StorageBase *> devices;
     devices.append(device);
     
     if (continueWarning())
-        buildDialog(devices, partitions);
-    else
-        preventExec();
-}
-
-VGCreateDialog::VGCreateDialog(StoragePartition *const partition, QWidget *parent) : 
-    KvpmDialog(parent)
-{
-    QList<StorageDevice *> devices;
-    QList<StoragePartition *> partitions;
-    
-    partitions.append(partition);
-    
-    if (continueWarning())
-        buildDialog(devices, partitions);
+        buildDialog(devices);
     else
         preventExec();
 }
@@ -215,7 +197,7 @@ void VGCreateDialog::validateOK()
     }
 }
 
-void VGCreateDialog::buildDialog(QList<StorageDevice *> devices, QList<StoragePartition *> partitions)
+void VGCreateDialog::buildDialog(QList<StorageBase *> devices)
 {
     setCaption(i18n("Create New Volume Group"));
 
@@ -263,15 +245,7 @@ void VGCreateDialog::buildDialog(QList<StorageDevice *> devices, QList<StoragePa
     m_extent_suffix->setInsertPolicy(QComboBox::NoInsert);
     m_extent_suffix->setCurrentIndex(1);
 
-    QList<StorageBase *> dev_list;
- 
-    for (auto dev : devices)
-        dev_list.append(dev);
-
-    for (auto part : partitions)
-        dev_list.append(part);
-
-    m_pv_checkbox = new PvGroupBox(dev_list, 0x400000);  // 4 MiB default extent size
+    m_pv_checkbox = new PvGroupBox(devices, 0x400000);  // 4 MiB default extent size
     layout->addWidget(m_pv_checkbox);
 
     connect(m_pv_checkbox, SIGNAL(stateChanged()),
@@ -352,28 +326,22 @@ void VGCreateDialog::buildDialog(QList<StorageDevice *> devices, QList<StoragePa
             this, SLOT(extentSizeChanged()));
 }
 
-void VGCreateDialog::getUsablePvs(QList<StorageDevice *> &devices, QList<StoragePartition *> &partitions)
+QList<StorageBase *> VGCreateDialog::getUsablePvs()
 {
-    QList<StorageDevice *> all_dev = MasterList::getStorageDevices();
-    QList<StoragePartition *> all_part;
+    QList<StorageBase *> devices;
 
-    for (int x = 0; x < all_dev.size(); x++) {
-        if ((all_dev[x]->getRealPartitionCount() == 0) &&
-                (!all_dev[x]->isBusy()) &&
-                (!all_dev[x]->isPhysicalVolume())) {
-
-            devices.append(all_dev[x]);
-        } else if (all_dev[x]->getRealPartitionCount() > 0) {
-            all_part = all_dev[x]->getStoragePartitions();
-            for (int y = 0; y < all_part.size(); y++) {
-                if ((!all_part[y]->isBusy()) && (! all_part[y]->isPhysicalVolume()) &&
-                        ((all_part[y]->isNormal()) || (all_part[y]->isLogical())))  {
-
-                    partitions.append(all_part[y]);
-                }
+    for (auto dev : MasterList::getStorageDevices() ) {
+        if ((dev->getRealPartitionCount() == 0) && !dev->isBusy() && !dev->isPhysicalVolume()) {
+            devices.append(dev);
+        } else if (dev->getRealPartitionCount() > 0) {
+            for (auto part : dev->getStoragePartitions()) {
+                if (!part->isBusy() && !part->isPhysicalVolume() && ((part->isNormal()) || (part->isLogical())))
+                    devices.append(part);
             }
         }
     }
+
+    return devices;
 }
 
 /*
