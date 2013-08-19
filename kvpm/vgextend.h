@@ -17,13 +17,12 @@
 
 #include <KDialog>
 
-#include <QStringList>
+#include <QList>
 
 #include "kvpmdialog.h"
 
 class PvGroupBox;
-class StorageDevice;
-class StoragePartition;
+class StorageBase;
 class VolGroup;
 
 
@@ -32,17 +31,16 @@ class VGExtendDialog : public KvpmDialog
     Q_OBJECT
 
     bool m_bailout;
-    PvGroupBox  *m_pv_checkbox;
-    VolGroup    *m_vg;
+    PvGroupBox *m_pv_checkbox = nullptr;
+    VolGroup   *m_vg = nullptr;
 
     bool continueWarning();
+    void buildDialog(QList<StorageBase *> devices);
+    QList<StorageBase *> getUsablePvs();
 
 public:
     VGExtendDialog(VolGroup *const group, QWidget *parent = nullptr);
-    VGExtendDialog(VolGroup *const group, StoragePartition *const partition, QWidget *parent = nullptr);
-    VGExtendDialog(VolGroup *const group, StorageDevice *const device, QWidget *parent = nullptr);
-    void buildDialog(QList<StorageDevice *> devices, QList<StoragePartition *> partitions);
-    void getUsablePvs(QList<StorageDevice *> &devices, QList<StoragePartition *> &partitions);
+    VGExtendDialog(VolGroup *const group, StorageBase *const device, QWidget *parent = nullptr);
 
 private slots:
     void commit();

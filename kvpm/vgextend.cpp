@@ -18,6 +18,7 @@
 #include "misc.h"
 #include "progressbox.h"
 #include "pvgroupbox.h"
+#include "storagebase.h"
 #include "storagedevice.h"
 #include "storagepartition.h"
 #include "topwindow.h"
@@ -42,14 +43,12 @@ VGExtendDialog::VGExtendDialog(VolGroup *const group, QWidget *parent) :
     KvpmDialog(parent),
     m_vg(group)
 {
-    QList<StorageDevice *> devices;
-    QList<StoragePartition *> partitions;
+    QList<StorageBase *> devices;
+    devices = getUsablePvs();
 
-    getUsablePvs(devices, partitions);
-
-    if (partitions.size() + devices.size() > 0) {
+    if (devices.size() > 0) {
         if (continueWarning())
-            buildDialog(devices, partitions);
+            buildDialog(devices);
         else
             preventExec();
     } else {
@@ -58,32 +57,15 @@ VGExtendDialog::VGExtendDialog(VolGroup *const group, QWidget *parent) :
     }
 }
 
-VGExtendDialog::VGExtendDialog(VolGroup *const group, StorageDevice *const device, QWidget *parent) :
+VGExtendDialog::VGExtendDialog(VolGroup *const group, StorageBase *const device, QWidget *parent) :
     KvpmDialog(parent), 
     m_vg(group)
 {
-    QList<StorageDevice *> devices;
-    QList<StoragePartition *> partitions;
-
+    QList<StorageBase *> devices;
     devices.append(device);
 
     if (continueWarning())
-        buildDialog(devices, partitions);
-    else
-        preventExec();
-}
-
-VGExtendDialog::VGExtendDialog(VolGroup *const group, StoragePartition *const partition, QWidget *parent) :
-    KvpmDialog(parent), 
-    m_vg(group)
-{
-    QList<StorageDevice *> devices;
-    QList<StoragePartition *> partitions;
-
-    partitions.append(partition);
-
-    if (continueWarning())
-        buildDialog(devices, partitions);
+        buildDialog(devices);
     else
         preventExec();
 }
@@ -149,7 +131,7 @@ void VGExtendDialog::validateOK()
         enableButtonOk(false);
 }
 
-void VGExtendDialog::buildDialog(QList<StorageDevice *> devices, QList<StoragePartition *> partitions)
+void VGExtendDialog::buildDialog(QList<StorageBase *> devices)
 {
     setCaption(i18n("Extend Volume Group"));
 
@@ -164,33 +146,29 @@ void VGExtendDialog::buildDialog(QList<StorageDevice *> devices, QList<StoragePa
     layout->addWidget(title);
     layout->addSpacing(10);
 
-    QList<StorageBase *> dev_list;
- 
-    for (auto dev : devices)
-        dev_list.append(dev);
-
-    for (auto part : partitions)
-        dev_list.append(part);
-
-    m_pv_checkbox = new PvGroupBox(dev_list, m_vg->getExtentSize());
+    m_pv_checkbox = new PvGroupBox(devices, m_vg->getExtentSize());
     layout->addWidget(m_pv_checkbox);
 
     connect(m_pv_checkbox, SIGNAL(stateChanged()),
             this, SLOT(validateOK()));
 }
 
-void VGExtendDialog::getUsablePvs(QList<StorageDevice *> &devices, QList<StoragePartition *> &partitions)
+QList<StorageBase *> VGExtendDialog::getUsablePvs()
 {
+    QList<StorageBase *> devices;
+
     for (auto dev : MasterList::getStorageDevices() ) {
         if ((dev->getRealPartitionCount() == 0) && !dev->isBusy() && !dev->isPhysicalVolume()) {
             devices.append(dev);
         } else if (dev->getRealPartitionCount() > 0) {
             for (auto part : dev->getStoragePartitions()) {
                 if (!part->isBusy() && !part->isPhysicalVolume() && ((part->isNormal()) || (part->isLogical())))
-                    partitions.append(part);
+                    devices.append(part);
             }
         }
     }
+
+    return devices;
 }
 
 
