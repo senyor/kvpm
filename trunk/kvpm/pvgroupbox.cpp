@@ -17,8 +17,7 @@
 
 #include "misc.h"
 #include "physvol.h"
-#include "storagedevice.h"
-#include "storagepartition.h"
+#include "storagebase.h"
 #include "volgroup.h"
 
 #include <KConfigSkeleton>
@@ -29,10 +28,22 @@
 #include <QDebug>
 
 
+
+
+namespace {
+    bool isLessThan(StorageBase *const dev1 ,StorageBase *const dev2)
+    {
+        return dev1->getName() < dev2->getName();
+    }
+}
+
+
+
 PvGroupBox::PvGroupBox(QList<QSharedPointer<PvSpace>> spaceList, 
                        AllocationPolicy policy, AllocationPolicy vgpolicy, 
-                       bool target, QWidget *parent)
-    : QGroupBox(parent), m_target(target)
+                       bool target, QWidget *parent) : 
+    QGroupBox(parent), 
+    m_target(target)
 {
     for (auto space : spaceList) {
         m_pvs.append(space->pv);
@@ -92,14 +103,12 @@ PvGroupBox::PvGroupBox(QList<QSharedPointer<PvSpace>> spaceList,
     setChecksToPolicy();
 }
 
-PvGroupBox::PvGroupBox(QList <StorageDevice *> devices, QList<StoragePartition *> partitions,
-                       long long extentSize, QWidget *parent)
-    : QGroupBox(parent),
-      m_devices(devices),
-      m_partitions(partitions),
-      m_extent_size(extentSize)
+PvGroupBox::PvGroupBox(QList <StorageBase *> devices, const long long extentSize, QWidget *parent) : 
+    QGroupBox(parent),
+    m_devices(devices),
+    m_extent_size(extentSize)
 {
-    if (devices.size() + partitions.size() > 1)
+    if (devices.size() > 1)
         setTitle(i18n("Available Physical Volumes"));
     else
         setTitle(i18n("Physical Volume"));
@@ -111,7 +120,8 @@ PvGroupBox::PvGroupBox(QList <StorageDevice *> devices, QList<StoragePartition *
     int dev_count = 0;
 
     NoMungeCheck *check;
-    const int pv_check_count = m_devices.size() + m_partitions.size();
+    qSort(m_devices.begin(), m_devices.end(), isLessThan);
+    const int pv_check_count = m_devices.size();
     m_space_label   = new QLabel;
     m_extents_label = new QLabel;
 
@@ -122,13 +132,9 @@ PvGroupBox::PvGroupBox(QList <StorageDevice *> devices, QList<StoragePartition *
         QLabel *pv_label = new QLabel(i18n("none found"));
         layout->addWidget(pv_label);
     } else if (pv_check_count < 2) {
-        if (m_devices.size()) {
-            name = m_devices[0]->getName();
-            size = m_devices[0]->getSize();
-        } else {
-            name = m_partitions[0]->getName();
-            size = m_partitions[0]->getSize();
-        }
+        name = m_devices[0]->getName();
+        size = m_devices[0]->getSize();
+
         QLabel *pv_label = new QLabel(name + "  " + locale->formatByteSize(size, 1, m_dialect));
         layout->addWidget(pv_label, 0, 0, 1, -1);
         addLabelsAndButtons(layout, pv_check_count, NO_POLICY, NO_POLICY);
@@ -155,25 +161,6 @@ PvGroupBox::PvGroupBox(QList <StorageDevice *> devices, QList<StoragePartition *
                     this, SLOT(calculateSpace()));
         }
 
-        for (int x = 0; x < m_partitions.size(); x++) {
-            name = m_partitions[x]->getName();
-            size = m_partitions[x]->getSize();
-            check = new NoMungeCheck(name + "  " + locale->formatByteSize(size, 1, m_dialect));
-            check->setAlternateText(name);
-            check->setData(QVariant(size));
-            m_pv_checks.append(check);
-
-            if (pv_check_count < 11)
-                layout->addWidget(check, (dev_count + x) % 5, (dev_count + x) / 5);
-            else if (pv_check_count % 3 == 0)
-                layout->addWidget(check, (dev_count + x) % (pv_check_count / 3), (dev_count + x) / (pv_check_count / 3));
-            else
-                layout->addWidget(check, (dev_count + x) % ((pv_check_count + 2) / 3), (dev_count + x) / ((pv_check_count + 2) / 3));
-
-            connect(check, SIGNAL(clicked(bool)),
-                    this, SLOT(calculateSpace()));
-        }
-
         addLabelsAndButtons(layout, pv_check_count, NO_POLICY, NO_POLICY);
         setExtentSize(extentSize);
     }
@@ -192,8 +179,6 @@ QStringList PvGroupBox::getNames()
         names << m_pvs[0]->getName();
     } else if (m_devices.size()) {
         names << m_devices[0]->getName();
-    } else if (m_partitions.size()) {
-        names << m_partitions[0]->getName();
     }
 
     return names;
@@ -211,8 +196,6 @@ QStringList PvGroupBox::getAllNames()
         names << m_pvs[0]->getName();
     } else if (m_devices.size()) {
         names << m_devices[0]->getName();
-    } else if (m_partitions.size()) {
-        names << m_partitions[0]->getName();
     }
 
     return names;
@@ -231,8 +214,6 @@ long long PvGroupBox::getRemainingSpace()
         space = m_pvs[0]->getRemaining();
     } else if (m_devices.size()) {
         space = m_devices[0]->getSize();
-    } else if (m_partitions.size()) {
-        space = m_partitions[0]->getSize();
     } else {
         space = 0;
     }
@@ -274,8 +255,6 @@ QList<long long> PvGroupBox::getRemainingSpaceList()
         space.append(m_pvs[0]->getRemaining());
     } else if (m_devices.size()) {
         space.append(m_devices[0]->getSize());
-    } else if (m_partitions.size()) {
-        space.append(m_partitions[0]->getSize());
     }
 
     return space;

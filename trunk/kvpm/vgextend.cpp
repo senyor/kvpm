@@ -164,7 +164,15 @@ void VGExtendDialog::buildDialog(QList<StorageDevice *> devices, QList<StoragePa
     layout->addWidget(title);
     layout->addSpacing(10);
 
-    m_pv_checkbox = new PvGroupBox(devices, partitions, m_vg->getExtentSize());
+    QList<StorageBase *> dev_list;
+ 
+    for (auto dev : devices)
+        dev_list.append(dev);
+
+    for (auto part : partitions)
+        dev_list.append(part);
+
+    m_pv_checkbox = new PvGroupBox(dev_list, m_vg->getExtentSize());
     layout->addWidget(m_pv_checkbox);
 
     connect(m_pv_checkbox, SIGNAL(stateChanged()),

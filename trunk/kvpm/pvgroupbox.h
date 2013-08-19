@@ -34,8 +34,7 @@
 #include "misc.h"
 
 class PhysVol;
-class StorageDevice;
-class StoragePartition;
+class StorageBase;
 
 
 class PvGroupBox: public QGroupBox
@@ -45,8 +44,7 @@ class PvGroupBox: public QGroupBox
     bool m_target = false;  // is this is a target for a pv move.
     KLocale::BinaryUnitDialect m_dialect;  // power of 10 SI or traditional power of two units
     QList<PhysVol *> m_pvs;
-    QList<StorageDevice *> m_devices;
-    QList<StoragePartition *> m_partitions;
+    QList<StorageBase *> m_devices;
     QList<NoMungeCheck *> m_pv_checks;
     QList<long long> m_normal;
     QList<long long> m_contiguous;
@@ -67,12 +65,11 @@ public:
                AllocationPolicy const policy, 
                AllocationPolicy const vgpolicy,    // For lvs, to pass the policy to inherit, if needed
                bool const target = false, 
-               QWidget *parent = NULL);
+               QWidget *parent = nullptr);
 
-    PvGroupBox(QList<StorageDevice *> devices, 
-               QList<StoragePartition *> partitions,
-               long long extentSize, 
-               QWidget *parent = NULL);
+    PvGroupBox(QList<StorageBase *> devices, 
+               const long long extentSize, 
+               QWidget *parent = nullptr);
 
     QStringList getAllNames();    // names of all pvs displayed in the box
     QStringList getNames();       // names of *selected* pvs
