@@ -438,16 +438,16 @@ void DeviceActions::extendVg(QAction *action)
     const QString vg_name = action->objectName();
     VolGroup *const vg = MasterList::getVgByName(vg_name);
 
-    if (m_part) {
-        VGExtendDialog dialog(vg, nullptr, m_part);
+    KvpmDialog *dialog;
 
-        if (dialog.run() == QDialog::Accepted)
-            g_top_window->reRun();
-    } else {                          // whole device, not partition
-        VGExtendDialog dialog(vg, m_dev, nullptr);
+    if (m_part)
+        dialog = new VGExtendDialog(vg, m_part);
+    else                                         
+        dialog = new VGExtendDialog(vg, m_dev); // whole device, not partition
 
-        if (dialog.run() == QDialog::Accepted)
-            g_top_window->reRun();
-    }
+    if (dialog->run() == QDialog::Accepted)
+        g_top_window->reRun();
+
+    dialog->deleteLater();
 }
 
