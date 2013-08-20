@@ -884,11 +884,8 @@ void LVActions::createLv()
 {
     LVCreateDialog dialog(m_vg, false);
 
-    if (!dialog.bailout()) {
-        dialog.exec();
-        if (dialog.result() == QDialog::Accepted)
-            g_top_window->reRun();
-    }
+    if (dialog.run() == QDialog::Accepted)
+        g_top_window->reRun();
 }
 
 void LVActions::createThinVolume()
@@ -910,11 +907,8 @@ void LVActions::createThinPool()
 {
     LVCreateDialog dialog(m_vg, true);
 
-    if (!dialog.bailout()) {
-        dialog.exec();
-        if (dialog.result() == QDialog::Accepted)
-            g_top_window->reRun();
-    }
+    if (dialog.run() == QDialog::Accepted)
+        g_top_window->reRun();
 }
 
 void LVActions::reduceLv()
@@ -938,11 +932,8 @@ void LVActions::extendLv()
     } else {
         LVCreateDialog dialog(m_lv, false);
         
-        if (!dialog.bailout()) {
-            dialog.exec();
-            if (dialog.result() == QDialog::Accepted)
-                g_top_window->reRun();
-        }
+        if (dialog.run() == QDialog::Accepted)
+            g_top_window->reRun();
     }
 }
 
@@ -976,11 +967,8 @@ void LVActions::createSnapshot()
 {
     LVCreateDialog dialog(m_lv, true);
 
-    if (!dialog.bailout()) {
-        dialog.exec();
-        if (dialog.result() == QDialog::Accepted)
-            g_top_window->reRun();
-    }
+    if (dialog.run() == QDialog::Accepted)
+        g_top_window->reRun();
 }
 
 

@@ -53,12 +53,13 @@ LVCreateDialog::LVCreateDialog(VolGroup *const vg, const bool ispool, QWidget *p
     LvCreateDialogBase(vg, -1, false, false, false, ispool, QString(""), QString(""), parent),
     m_ispool(ispool)
 {
-    m_lv = NULL;
+    m_lv = nullptr;
     m_extend = false;
     m_snapshot = false;
-    m_bailout  = hasInitialErrors();
 
-    if (!m_bailout)
+    if (hasInitialErrors())
+        preventExec();
+    else
         buildDialog();
 }
 
@@ -76,9 +77,9 @@ LVCreateDialog::LVCreateDialog(LogVol *const volume, const bool snapshot, QWidge
     m_extend(!snapshot),
     m_lv(volume)
 {
-    m_bailout = hasInitialErrors();
-
-    if (!m_bailout)
+    if (hasInitialErrors())
+        preventExec();
+    else
         buildDialog();
 }
 
@@ -1069,7 +1070,7 @@ bool LVCreateDialog::hasInitialErrors()
         const long long current = m_lv->getExtents(); 
 
         if (!(m_lv->isThinPool() || fs_can_extend(m_lv->getFilesystem()) || m_lv->isCowSnap())) {
-            if (KMessageBox::warningContinueCancel(NULL,
+            if (KMessageBox::warningContinueCancel(nullptr,
                                                    warning1,
                                                    QString(),
                                                    KStandardGuiItem::cont(),
@@ -1079,7 +1080,7 @@ bool LVCreateDialog::hasInitialErrors()
                 return true;
             }
         } else if (current >= maxfs) {
-            if (KMessageBox::warningContinueCancel(NULL,
+            if (KMessageBox::warningContinueCancel(nullptr,
                                                    warning2,
                                                    QString(),
                                                    KStandardGuiItem::cont(),
@@ -1092,11 +1093,6 @@ bool LVCreateDialog::hasInitialErrors()
     }
     
     return false;
-}
-
-bool LVCreateDialog::bailout()
-{
-    return m_bailout;
 }
 
 void LVCreateDialog::commit()
