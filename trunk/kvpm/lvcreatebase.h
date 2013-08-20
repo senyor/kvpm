@@ -15,11 +15,11 @@
 #ifndef LVCREATEBASE_H
 #define LVCREATEBASE_H
 
-#include <KDialog>
 
 #include <QList>
 #include <QStringList>
 
+#include "kvpmdialog.h"
 #include "misc.h"
 
 class VolGroup;
@@ -39,7 +39,7 @@ class QVBoxLayout;
 class SizeSelectorBox;
 
 
-class LvCreateDialogBase : public KDialog
+class LvCreateDialogBase : public KvpmDialog
 {
     Q_OBJECT
 
@@ -89,7 +89,6 @@ private slots:
     void zeroReadOnlyEnable();
 
 protected slots:
-    virtual void commit() = 0;
     virtual void resetOkButton() = 0;
     void setSizeLabels();
 

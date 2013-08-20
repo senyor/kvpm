@@ -37,7 +37,6 @@ class LVCreateDialog : public LvCreateDialogBase
     bool m_ispool;          // TRUE if a thin pool
     bool m_snapshot;        // TRUE if a snapshot
     bool m_extend;          // TRUE if extending a volume
-    bool m_bailout;         // TRUE if we should not bother to execute this dialog
     bool m_use_si_units;    // TRUE Metric SI sizes = MB and GB, otherise use MiB, GiB etc.
 
     LogVol *m_lv;      // origin for snap or lv to extend
@@ -81,9 +80,8 @@ class LVCreateDialog : public LvCreateDialogBase
     QStringList args();
 
 public:
-    explicit LVCreateDialog(VolGroup *const vg, bool ispool, QWidget *parent = 0);
-    LVCreateDialog(LogVol *const volume, const bool snapshot, QWidget *parent = 0);
-    bool bailout();
+    LVCreateDialog(VolGroup *const vg, bool ispool, QWidget *parent = nullptr);
+    LVCreateDialog(LogVol *const volume, const bool snapshot, QWidget *parent = nullptr);
 
 private slots:
     void setMaxSize();

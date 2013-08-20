@@ -40,7 +40,7 @@
 LvCreateDialogBase::LvCreateDialogBase(VolGroup *vg, long long maxFsSize, 
                                        bool extend, bool snap, bool thin, bool ispool,
                                        QString name, QString pool, QWidget *parent):
-    KDialog(parent),
+    KvpmDialog(parent),
     m_vg(vg), 
     m_extend(extend),
     m_ispool(ispool),
@@ -133,9 +133,6 @@ LvCreateDialogBase::LvCreateDialogBase(VolGroup *vg, long long maxFsSize,
     layout->addWidget(m_tab_widget);
     main_widget->setLayout(layout);
     setMainWidget(main_widget);
-
-    connect(this, SIGNAL(okClicked()),
-            this, SLOT(commit()));
 
     if (!extend) {
         connect(m_persistent_box, SIGNAL(toggled(bool)),
