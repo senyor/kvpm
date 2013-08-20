@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -15,11 +15,12 @@
 #ifndef UNMOUNT_H
 #define UNMOUNT_H
 
-#include <KDialog>
 
 #include <QStringList>
 
 #include "mounttables.h"
+#include "kvpmdialog.h"
+
 
 class LogVol;
 class MountEntry;
@@ -27,11 +28,10 @@ class NoMungeCheck;
 class StoragePartition;
 
 
-class UnmountDialog : public KDialog
+class UnmountDialog : public KvpmDialog
 {
     Q_OBJECT
 
-    bool m_bailout;
     bool m_single;
     QString m_mp;
     QList<NoMungeCheck *> m_check_list; // one check box for each mount point
@@ -44,7 +44,7 @@ public:
 
 private slots:
     void resetOkButton();
-    void commitChanges();
+    void commit();
 
 };
 

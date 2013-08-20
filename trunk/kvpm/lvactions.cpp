@@ -849,12 +849,9 @@ void LVActions::mountFs()
 void LVActions::unmountFs()
 {
     UnmountDialog dialog(m_lv);
-
-    if (!dialog.bailout()) {
-        dialog.exec();
-        if (dialog.result() == QDialog::Accepted || dialog.result() == KDialog::Yes)
-            g_top_window->reRun();
-    }
+    int result = dialog.run();
+    if (result == QDialog::Accepted || result == KDialog::Yes)
+        g_top_window->reRun();
 }
 
 void LVActions::makeFs()
