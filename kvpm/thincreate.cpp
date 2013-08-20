@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -43,10 +43,9 @@ ThinCreateDialog::ThinCreateDialog(LogVol *const pool, QWidget *parent):
     LvCreateDialogBase(pool->getVg(), -1, false, false, true, false, QString(""), pool->getName(), parent),
     m_pool(pool)
 {
-    m_lv = NULL;
+    m_lv = nullptr;
     m_extend = false;
     m_snapshot = false;
-    m_bailout  = hasInitialErrors();
     m_fs_can_extend = false;
     const long long extent_size = getVg()->getExtentSize();
     const long long max_size = getLargestVolume();
@@ -62,6 +61,9 @@ ThinCreateDialog::ThinCreateDialog(LogVol *const pool, QWidget *parent):
 
     setMaxSize();
     resetOkButton();
+
+    if (hasInitialErrors())
+        preventExec();
 }
 
 
@@ -74,7 +76,6 @@ ThinCreateDialog::ThinCreateDialog(LogVol *const volume, const bool snapshot, QW
     m_extend(!snapshot),
     m_lv(volume)
 {
-    m_bailout = hasInitialErrors();
     const long long extent_size = getVg()->getExtentSize();
     const long long max_size = getLargestVolume();
 
@@ -92,6 +93,9 @@ ThinCreateDialog::ThinCreateDialog(LogVol *const volume, const bool snapshot, QW
 
     setMaxSize();
     resetOkButton();
+
+    if (hasInitialErrors())
+        preventExec();
 }
 
 void ThinCreateDialog::setMaxSize()
@@ -179,15 +183,15 @@ QStringList ThinCreateDialog::args()
 }
 
 // This function checks for problems that would make showing this dialog pointless
-// returns true if there are problems and is used to set m_bailout.
+// returns true if there are problems.
 
 bool ThinCreateDialog::hasInitialErrors()
 {
     if (getVg()->isPartial()) {
         if (m_extend)
-            KMessageBox::error(this, i18n("Volumes can not be extended while physical volumes are missing"));
+            KMessageBox::sorry(this, i18n("Volumes can not be extended while physical volumes are missing"));
         else
-            KMessageBox::error(this, i18n("Volumes can not be created while physical volumes are missing"));
+            KMessageBox::sorry(this, i18n("Volumes can not be created while physical volumes are missing"));
 
         return true;
     }
@@ -203,7 +207,7 @@ bool ThinCreateDialog::hasInitialErrors()
 
         if (m_lv->isCowOrigin()) {
             if (m_lv->isOpen()) {
-                KMessageBox::error(this, i18n("Snapshot origins cannot be extended while open or mounted"));
+                KMessageBox::sorry(this, i18n("Snapshot origins cannot be extended while open or mounted"));
                 return true;
             }
 
@@ -211,7 +215,7 @@ bool ThinCreateDialog::hasInitialErrors()
           
             for (int x = 0; x < snap_shots.size(); x++) {
                 if (snap_shots[x]->isOpen() && !snap_shots[x]->isThinVolume()) {
-                    KMessageBox::error(this, i18n("Volumes cannot be extended with open or mounted snapshots"));
+                    KMessageBox::sorry(this, i18n("Volumes cannot be extended with open or mounted snapshots"));
                     return true;
                 }
             }
@@ -222,7 +226,7 @@ bool ThinCreateDialog::hasInitialErrors()
         const long long current = m_lv->getExtents(); 
 
         if (!(m_fs_can_extend || m_lv->isCowSnap())) {
-            if (KMessageBox::warningContinueCancel(NULL,
+            if (KMessageBox::warningContinueCancel(nullptr,
                                                    warning1,
                                                    QString(),
                                                    KStandardGuiItem::cont(),
@@ -232,7 +236,7 @@ bool ThinCreateDialog::hasInitialErrors()
                 return true;
             }
         } else if (current >= maxfs) {
-            if (KMessageBox::warningContinueCancel(NULL,
+            if (KMessageBox::warningContinueCancel(nullptr,
                                                    warning2,
                                                    QString(),
                                                    KStandardGuiItem::cont(),
@@ -247,11 +251,6 @@ bool ThinCreateDialog::hasInitialErrors()
     }
 
     return false;
-}
-
-bool ThinCreateDialog::bailout()
-{
-    return m_bailout;
 }
 
 void ThinCreateDialog::commit()
