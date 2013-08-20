@@ -841,9 +841,8 @@ void LVActions::changeLv(QTreeWidgetItem *item)
 void LVActions::mountFs()
 {
     MountDialog dialog(m_lv);
-    dialog.exec();
 
-    if (dialog.result() == QDialog::Accepted)
+    if (dialog.run() == QDialog::Accepted)
         g_top_window->reRun();
 }
 

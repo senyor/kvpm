@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -33,6 +33,7 @@
 #include <KUrl>
 
 #include <QCheckBox>
+#include <QDebug>
 #include <QGroupBox>
 #include <QLabel>
 #include <QRadioButton>
@@ -43,7 +44,8 @@
 const int BUFF_LEN = 2000;   // Enough?
 
 
-MountDialog::MountDialog(LogVol *const volume, QWidget *parent) : KDialog(parent)
+MountDialog::MountDialog(LogVol *const volume, QWidget *parent) : 
+    KvpmDialog(parent)
 {
     m_device_to_mount = volume->getMapperPath();
     m_filesystem_type = volume->getFilesystem();
@@ -53,7 +55,8 @@ MountDialog::MountDialog(LogVol *const volume, QWidget *parent) : KDialog(parent
     buildDialog();
 }
 
-MountDialog::MountDialog(StoragePartition *const partition, QWidget *parent) : KDialog(parent)
+MountDialog::MountDialog(StoragePartition *const partition, QWidget *parent) : 
+    KvpmDialog(parent)
 {
     m_device_to_mount = partition->getName();
     m_filesystem_type = partition->getFilesystem();
@@ -81,9 +84,6 @@ void MountDialog::buildDialog()
     tab_widget->addTab(mainTab(), i18n("Main"));
     tab_widget->addTab(optionsTab(), i18n("Options"));
     layout->addWidget(tab_widget);
-
-    connect(this, SIGNAL(accepted()),
-            this, SLOT(mountFilesystem()));
 }
 
 QWidget* MountDialog::filesystemBox()
@@ -173,10 +173,10 @@ QWidget* MountDialog::filesystemBox()
     lower_layout->addWidget(m_filesystem_edit);
 
     connect(m_filesystem_edit, SIGNAL(textEdited(const QString)),
-            this, SLOT(toggleOKButton(const QString)));
+            this, SLOT(toggleOKButton()));
 
     connect(specify_button, SIGNAL(toggled(bool)),
-            this, SLOT(toggleOKButton(bool)));
+            this, SLOT(toggleOKButton()));
 
     return filesystem_box;
 }
@@ -195,19 +195,19 @@ QWidget* MountDialog::optionsTab()
     common_options_layout->addLayout(layout_right);
     common_options_box->setLayout(common_options_layout);
 
-    sync_check     = new QCheckBox("sync");
-    dirsync_check  = new QCheckBox("dirsync");
-    rw_check       = new QCheckBox("rw");
-    suid_check     = new QCheckBox("suid");
-    dev_check      = new QCheckBox("dev");
-    exec_check     = new QCheckBox("exec");
-    mand_check     = new QCheckBox("mand");
-    acl_check      = new QCheckBox("acl");
+    sync_check    = new QCheckBox("sync");
+    dirsync_check = new QCheckBox("dirsync");
+    rw_check      = new QCheckBox("rw");
+    suid_check    = new QCheckBox("suid");
+    dev_check     = new QCheckBox("dev");
+    exec_check    = new QCheckBox("exec");
+    mand_check    = new QCheckBox("mand");
+    acl_check     = new QCheckBox("acl");
     user_xattr_check = new QCheckBox("user xattr");
 
-    if (m_is_writable)
+    if (m_is_writable) {
         rw_check->setChecked(true);
-    else {
+    } else {
         rw_check->setChecked(false);
         rw_check->setEnabled(false);
     }
@@ -259,22 +259,23 @@ QWidget* MountDialog::optionsTab()
     journaling_layout->addWidget(data_writeback_button);
     atime_journal_layout->addWidget(m_filesystem_journal_box);
 
-    atime_button      = new QRadioButton("atime");
+    atime_button      = new QRadioButton("strict atime");
     noatime_button    = new QRadioButton("noatime");
-    nodiratime_button = new QRadioButton("nodiratime");
     relatime_button   = new QRadioButton("relatime");
     relatime_button->setChecked(true);
+    nodiratime_check = new QCheckBox("nodiratime");
     atime_layout->addWidget(atime_button);
     atime_layout->addWidget(noatime_button);
-    atime_layout->addWidget(nodiratime_button);
     atime_layout->addWidget(relatime_button);
+    atime_layout->addSpacing(5);
+    atime_layout->addWidget(nodiratime_check);
 
-    atime_button->setToolTip(i18n("Always update atime, this is the default"));
+    atime_button->setToolTip(i18n("Always update atime"));
     noatime_button->setToolTip(i18n("Do not update atime"));
-    nodiratime_button->setToolTip(i18n("Do not update atime for directory access"));
     relatime_button->setToolTip(i18n("Access time is only updated if the previous "
                                      "access time was earlier than the current modify "
                                      "or change time"));
+    nodiratime_check->setToolTip(i18n("Do not update atime for directory access"));
 
     atime_journal_layout->addWidget(atime_box);
 
@@ -364,7 +365,7 @@ QWidget* MountDialog::mountPointBox()
     mount_point_layout->addWidget(browse_button);
 
     connect(m_mount_point_edit, SIGNAL(textChanged(const QString)),
-            this, SLOT(toggleOKButton(const QString)));
+            this, SLOT(toggleOKButton()));
 
     connect(browse_button, SIGNAL(clicked(bool)),
             this, SLOT(selectMountPoint(bool)));
@@ -395,7 +396,7 @@ void MountDialog::selectMountPoint(bool)
     m_mount_point_edit->setText(m_mount_point);
 }
 
-void MountDialog::mountFilesystem()
+void MountDialog::commit()
 {
     unsigned long options = 0;
     QStringList standard_options, additional_options;
@@ -467,12 +468,13 @@ void MountDialog::mountFilesystem()
     } else if (noatime_button->isChecked()) {
         standard_options.append("noatime");
         options |= MS_NOATIME;
-    } else if (nodiratime_button->isChecked()) {
-        standard_options.append("nodiratime");
-        options |= MS_NODIRATIME;
     } else if (relatime_button->isChecked()) {
         standard_options.append("relatime");
         options |= MS_RELATIME;
+    }
+    if (nodiratime_check->isChecked()) {
+        standard_options.append("nodiratime");
+        options |= MS_NODIRATIME;
     }
 
     /* "data=ordered" is the default so we ignore that button */
@@ -513,12 +515,12 @@ void MountDialog::mountFilesystem()
     const QByteArray fs_type     = m_filesystem_type.toLocal8Bit();
     const QByteArray fs_options  = additional_options.join(",").toLocal8Bit();
 
-    int error = mount(device.data(), mount_point.data(), fs_type.data(), options, fs_options.data());
+    const int error = mount(device.data(), mount_point.data(), fs_type.data(), options, fs_options.data());
 
-    if (!error)
-        MountTables::addEntry(m_device_to_mount, m_mount_point, m_filesystem_type, all_options, 0, 0);
+    if (error)
+        KMessageBox::error(nullptr, QString("Error number: %1  %2").arg(errno).arg(strerror(errno)));
     else
-        KMessageBox::error(0, QString("Error number: %1  %2").arg(errno).arg(strerror(errno)));
+        MountTables::addEntry(m_device_to_mount, m_mount_point, m_filesystem_type, all_options, 0, 0);
 }
 
 void MountDialog::toggleOKButton()
@@ -529,16 +531,6 @@ void MountDialog::toggleOKButton()
         (button(KDialog::Ok))->setEnabled(true);
 }
 
-void MountDialog::toggleOKButton(const QString)
-{
-    toggleOKButton();
-}
-
-void MountDialog::toggleOKButton(bool)
-{
-    toggleOKButton();
-}
-
 void MountDialog::toggleAdditionalOptions(bool)
 {
     if (ext3_button->isChecked())
@@ -547,7 +539,7 @@ void MountDialog::toggleAdditionalOptions(bool)
         m_filesystem_journal_box->setEnabled(false);
 
     if (ext2_button->isChecked() || ext3_button->isChecked() || ext4_button->isChecked() ||
-            reiserfs3_button->isChecked() || reiserfs4_button->isChecked()) {
+        reiserfs3_button->isChecked() || reiserfs4_button->isChecked()) {
 
         acl_check->setEnabled(true);
         acl_check->setChecked(true);

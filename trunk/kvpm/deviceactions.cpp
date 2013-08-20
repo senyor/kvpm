@@ -416,9 +416,8 @@ void DeviceActions::reduceVg()   // pvs can also be whole devices
 void DeviceActions::mountFs()
 {
     MountDialog dialog(m_part);
-    dialog.exec();
 
-    if (dialog.result() == QDialog::Accepted)
+    if (dialog.run() == QDialog::Accepted)
         g_top_window->reRun();
 }
 
