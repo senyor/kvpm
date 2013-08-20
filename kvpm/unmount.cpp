@@ -34,7 +34,8 @@
 
 
 
-UnmountDialog::UnmountDialog(LogVol *const volume, QWidget *parent) : KDialog(parent)
+UnmountDialog::UnmountDialog(LogVol *const volume, QWidget *parent) : 
+    KvpmDialog(parent)
 {
     const MountList entries = volume->getMountEntries();
     const QString name = volume->getName();
@@ -42,7 +43,8 @@ UnmountDialog::UnmountDialog(LogVol *const volume, QWidget *parent) : KDialog(pa
     buildDialog(name, entries);
 }
 
-UnmountDialog::UnmountDialog(StoragePartition *const partition, QWidget *parent) : KDialog(parent)
+UnmountDialog::UnmountDialog(StoragePartition *const partition, QWidget *parent) : 
+    KvpmDialog(parent)
 {
     const MountList entries = partition->getMountEntries();
     const QString name = partition->getName();
@@ -50,43 +52,36 @@ UnmountDialog::UnmountDialog(StoragePartition *const partition, QWidget *parent)
     buildDialog(name, entries);
 }
 
-bool UnmountDialog::bailout()
-{
-    return m_bailout;
-}
-
 void UnmountDialog::buildDialog(QString const device, const MountList entries)
 {
-    m_bailout = false;
-
     if (entries.isEmpty()) {
-        m_bailout = true;
+        preventExec();
         hide();
-        KMessageBox::error(0, i18n("Can not unmount: <b>%1</b>, it does not seem to be mounted", device));
+        KMessageBox::sorry(nullptr, i18n("Can not unmount: <b>%1</b>, it does not seem to be mounted", device));
         return;
     } else if (entries.size() == 1) {
         m_single = true;
         if (entries[0]->getMountPosition() > 1) {
-            m_bailout = true;
+            preventExec();
             hide();
-            KMessageBox::error(0, i18n("Can not unmount: <b>%1</b>, another volume or "
-                                       "device is mounted over the same "
-                                       "mount point and must be unmounted first", device));
+            KMessageBox::sorry(nullptr, i18n("Can not unmount: <b>%1</b>, another volume or "
+                                             "device is mounted over the same "
+                                             "mount point and must be unmounted first", device));
             return;
         }
     } else {
         m_single = false;
-        bool unmountable = false;
+        bool can_unmount = false;
         QListIterator<MountPtr> entry(entries);
         while (entry.hasNext()) {
             if (entry.next()->getMountPosition() < 2)
-                unmountable = true;
+                can_unmount = true;
         }
-        if (!unmountable) {
-            m_bailout = true;
-            KMessageBox::error(0, i18n("Can not unmount: <b>%1</b>, another volume or "
-                                       "device is mounted over the same "
-                                       "mount point and must be unmounted first", device));
+        if (!can_unmount) {
+            preventExec();
+            KMessageBox::sorry(nullptr, i18n("Can not unmount: <b>%1</b>, another volume or "
+                                             "device is mounted over the same "
+                                             "mount point and must be unmounted first", device));
             return;
         }
     }
@@ -143,12 +138,6 @@ void UnmountDialog::buildDialog(QString const device, const MountList entries)
             layout->addWidget(label);
         }
     }
-
-    connect(this, SIGNAL(yesClicked()),
-            this, SLOT(commitChanges()));
-
-    connect(this, SIGNAL(okClicked()),
-            this, SLOT(commitChanges()));
 }
 
 void UnmountDialog::resetOkButton()
@@ -164,7 +153,7 @@ void UnmountDialog::resetOkButton()
     enableButtonOk(enable);
 }
 
-void UnmountDialog::commitChanges()
+void UnmountDialog::commit()
 {
     NoMungeCheck *cb;
     QListIterator<NoMungeCheck *> cb_itr(m_check_list);
@@ -177,10 +166,11 @@ void UnmountDialog::commitChanges()
         mp_qba = m_mp.toLocal8Bit();
 
         if (umount2(mp_qba.data(), 0)) {
-            KMessageBox::error(0, i18n("Unmounting <b>%1</b> failed with error number: %2 %3",
-                                       m_mp, errno, QString(strerror(errno))));
-        } else
+            KMessageBox::error(nullptr, i18n("Unmounting <b>%1</b> failed with error number: %2 %3",
+                                             m_mp, errno, QString(strerror(errno))));
+        } else {
             MountTables::removeEntry(m_mp);
+        }
     } else {
         while (cb_itr.hasNext()) {
             cb = cb_itr.next();
@@ -189,10 +179,11 @@ void UnmountDialog::commitChanges()
                 mp_qba = cb->getUnmungedText().toLocal8Bit();
 
                 if (umount2(mp_qba.data(), 0)) {
-                    KMessageBox::error(0, i18n("Unmounting <b>%1</b> failed with error number: %2 %3",
-                                               m_mp, errno, QString(strerror(errno))));
-                } else
+                    KMessageBox::error(nullptr, i18n("Unmounting <b>%1</b> failed with error number: %2 %3",
+                                                     m_mp, errno, QString(strerror(errno))));
+                } else {
                     MountTables::removeEntry(cb->getUnmungedText());
+                }
             }
         }
     }
