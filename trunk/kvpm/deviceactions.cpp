@@ -313,11 +313,8 @@ void DeviceActions::makeFs()
 {
     MkfsDialog dialog(m_part);
 
-    if (!dialog.bailout()) {
-        dialog.exec();
-        if (dialog.result() == QDialog::Accepted)
-            g_top_window->reRun();
-    }
+    if (dialog.run() == QDialog::Accepted)
+        g_top_window->reRun();
 }
 
 void DeviceActions::checkFs()

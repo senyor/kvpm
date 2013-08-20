@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2009, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -32,7 +32,8 @@
 #include "storagepartition.h"
 
 
-MkfsDialog::MkfsDialog(LogVol *const volume, QWidget *parent) : KDialog(parent)
+MkfsDialog::MkfsDialog(LogVol *const volume, QWidget *parent) : 
+    KvpmDialog(parent)
 {
     m_path = volume->getMapperPath();
 
@@ -40,14 +41,13 @@ MkfsDialog::MkfsDialog(LogVol *const volume, QWidget *parent) : KDialog(parent)
     m_stride_count = volume->getSegmentStripes(0);
 
     if (hasInitialErrors(volume->isMounted()))
-        m_bailout = true;
-    else {
-        m_bailout = false;
+        preventExec();
+    else
         buildDialog(volume->getSize());
-    }
 }
 
-MkfsDialog::MkfsDialog(StoragePartition *const partition, QWidget *parent) : KDialog(parent)
+MkfsDialog::MkfsDialog(StoragePartition *const partition, QWidget *parent) : 
+    KvpmDialog(parent)
 {
     m_path = partition->getName();
 
@@ -55,11 +55,9 @@ MkfsDialog::MkfsDialog(StoragePartition *const partition, QWidget *parent) : KDi
     m_stride_count = 1;
 
     if (hasInitialErrors(partition->isMounted()))
-        m_bailout = true;
-    else {
-        m_bailout = false;
+        preventExec();
+    else
         buildDialog(partition->getSize());
-    }
 }
 
 // Determines if there is any point to calling up the dialog at all
@@ -73,11 +71,11 @@ bool MkfsDialog::hasInitialErrors(const bool mounted)
                                        "can be written on it", m_path);
 
     if (mounted) {
-        KMessageBox::error(0, error_message);
+        KMessageBox::sorry(nullptr, error_message);
         return true;
     }
 
-    if (KMessageBox::warningContinueCancel(NULL,
+    if (KMessageBox::warningContinueCancel(nullptr,
                                            warning_message,
                                            QString(),
                                            KStandardGuiItem::cont(),
@@ -112,9 +110,6 @@ void MkfsDialog::buildDialog(const long long size)
     setCaption(i18n("Write Filesystem"));
 
     enableOptions(true);
-
-    connect(this, SIGNAL(okClicked()),
-            this, SLOT(commitFilesystem()));
 
     connect(m_block_combo, SIGNAL(currentIndexChanged(int)),
             this, SLOT(adjustStrideEdit(int)));
@@ -531,7 +526,7 @@ void MkfsDialog::wipeFilesystem()
         ProcessProgress wipefs(args, true);
 }
 
-void MkfsDialog::commitFilesystem()
+void MkfsDialog::commit()
 {
     hide();
     wipeFilesystem();
@@ -702,11 +697,6 @@ void MkfsDialog::commitFilesystem()
     }
 
     ProcessProgress mkfs(arguments, true);
-}
-
-bool MkfsDialog::bailout()
-{
-    return m_bailout;
 }
 
 void MkfsDialog::adjustStrideEdit(int index)
