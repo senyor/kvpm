@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -30,7 +30,6 @@ class ThinCreateDialog : public LvCreateDialogBase
 
     bool m_snapshot;        // TRUE if a snapshot
     bool m_extend;          // TRUE if extending a volume
-    bool m_bailout;         // TRUE if we should not bother to execute this dialog
     bool m_fs_can_extend;
     bool m_use_si_units;    // TRUE Metric SI sizes = MB and GB, otherise use MiB, GiB etc.
 
@@ -44,9 +43,8 @@ class ThinCreateDialog : public LvCreateDialogBase
     QStringList args();
 
 public:
-    explicit ThinCreateDialog(LogVol *const pool, QWidget *parent = 0);
-    ThinCreateDialog(LogVol *const volume, const bool snapshot, QWidget *parent = 0);
-    bool bailout();
+    explicit ThinCreateDialog(LogVol *const pool, QWidget *parent = nullptr);
+    ThinCreateDialog(LogVol *const volume, const bool snapshot, QWidget *parent = nullptr);
 
 private slots:
     void setMaxSize();

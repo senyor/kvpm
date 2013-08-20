@@ -896,11 +896,8 @@ void LVActions::createThinVolume()
 
     ThinCreateDialog dialog(pool);
 
-    if (!dialog.bailout()) {
-        dialog.exec();
-        if (dialog.result() == QDialog::Accepted)
-            g_top_window->reRun();
-    }
+    if (dialog.run() == QDialog::Accepted)
+        g_top_window->reRun();
 }
 
 void LVActions::createThinPool()
@@ -924,11 +921,8 @@ void LVActions::extendLv()
     if (m_lv->isThinVolume()) {
         ThinCreateDialog dialog(m_lv, false);
         
-        if (!dialog.bailout()) {
-            dialog.exec();
-            if (dialog.result() == QDialog::Accepted)
-                g_top_window->reRun();
-        }
+        if (dialog.run() == QDialog::Accepted)
+            g_top_window->reRun();
     } else {
         LVCreateDialog dialog(m_lv, false);
         
@@ -971,16 +965,12 @@ void LVActions::createSnapshot()
         g_top_window->reRun();
 }
 
-
 void LVActions::thinSnapshot()
 {
     ThinCreateDialog dialog(m_lv, true);
 
-    if (!dialog.bailout()) {
-        dialog.exec();
-        if (dialog.result() == QDialog::Accepted)
-            g_top_window->reRun();
-    }
+    if (dialog.run() == QDialog::Accepted)
+        g_top_window->reRun();
 }
 
 void LVActions::changeLv()
