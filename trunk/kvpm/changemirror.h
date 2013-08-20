@@ -15,10 +15,12 @@
 #ifndef CHANGEMIRROR_H
 #define CHANGEMIRROR_H
 
-#include <KDialog>
 
 #include <QSharedPointer>
 #include <QStringList>
+
+#include "kvpmdialog.h"
+
 
 class KComboBox;
 class KIcon;
@@ -39,7 +41,7 @@ class NoMungeRadioButton;
 
 class PvSpace;
 
-class ChangeMirrorDialog : public KDialog
+class ChangeMirrorDialog : public KvpmDialog
 {
     Q_OBJECT
 
@@ -60,7 +62,6 @@ class ChangeMirrorDialog : public KDialog
     QList<QSharedPointer<PvSpace>> m_space_list; 
     QList<NoMungeCheck *> m_mirror_log_checks;
 
-    bool m_bailout;
     bool m_change_log;    // true if we just changing the logging of an existing mirror
     LogVol *m_lv;         // The volume we are adding a mirror leg to.
 
@@ -92,11 +93,10 @@ class ChangeMirrorDialog : public KDialog
 public:
     explicit ChangeMirrorDialog(LogVol *const mirrorVolume, const bool changeLog, QWidget *parent = nullptr);
     QStringList arguments();
-    bool bailout();
 
 private slots:
     void resetOkButton();
-    void commitChanges();
+    void commit();
     void enableTypeOptions(int index);
     void enableLogWidget();
 };
