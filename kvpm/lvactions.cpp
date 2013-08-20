@@ -858,11 +858,8 @@ void LVActions::makeFs()
 {
     MkfsDialog dialog(m_lv);
 
-    if (!dialog.bailout()) {
-        dialog.exec();
-        if (dialog.result() == QDialog::Accepted)
-            g_top_window->reRun();
-    }
+    if (dialog.run() == QDialog::Accepted)
+        g_top_window->reRun();
 }
 
 void LVActions::checkFs()

@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -15,13 +15,14 @@
 #ifndef MKFS_H
 #define MKFS_H
 
-#include <KDialog>
 
 #include <QCheckBox>
 #include <QGroupBox>
 #include <QRadioButton>
 #include <QLabel>
 #include <QStringList>
+
+#include "kvpmdialog.h"
 
 class KIntSpinBox;
 class KTabWidget;
@@ -33,7 +34,7 @@ class LogVol;
 class StoragePartition;
 
 
-class MkfsDialog : public KDialog
+class MkfsDialog : public KvpmDialog
 {
     Q_OBJECT
 
@@ -72,7 +73,6 @@ class MkfsDialog : public KDialog
     QCheckBox *m_lazy_itable_init_check;
 
     QString m_path;
-    bool m_bailout;
 
     QWidget *generalTab(const long long size);
     QWidget *advancedTab();
@@ -87,13 +87,12 @@ class MkfsDialog : public KDialog
 
 private slots:
     void enableOptions(bool);
-    void commitFilesystem();
+    void commit();
     void adjustStrideEdit(int index);
 
 public:
-    explicit MkfsDialog(LogVol *const volume, QWidget *parent = 0);
-    explicit MkfsDialog(StoragePartition *const partition, QWidget *parent = 0);
-    bool bailout();
+    explicit MkfsDialog(LogVol *const volume, QWidget *parent = nullptr);
+    explicit MkfsDialog(StoragePartition *const partition, QWidget *parent = nullptr);
 
 };
 
