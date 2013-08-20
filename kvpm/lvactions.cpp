@@ -988,22 +988,16 @@ void LVActions::addLegs()
 {
     ChangeMirrorDialog dialog(m_lv, false);
 
-    if (!dialog.bailout()) {
-        dialog.exec();
-        if (dialog.result() == QDialog::Accepted)
+    if (dialog.run() == QDialog::Accepted)
             g_top_window->reRun();
-    }
 }
 
 void LVActions::changeLog()
 {
     ChangeMirrorDialog dialog(m_lv, true);
 
-    if (!dialog.bailout()) {
-        dialog.exec();
-        if (dialog.result() == QDialog::Accepted)
+    if (dialog.run() == QDialog::Accepted)
             g_top_window->reRun();
-    }
 }
 
 void LVActions::removeMirror()

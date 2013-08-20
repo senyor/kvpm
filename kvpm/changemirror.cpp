@@ -44,7 +44,7 @@
 
 
 ChangeMirrorDialog::ChangeMirrorDialog(LogVol *const mirrorVolume, const bool changeLog, QWidget *parent) :
-    KDialog(parent),
+    KvpmDialog(parent),
     m_change_log(changeLog),
     m_lv(mirrorVolume)
 {
@@ -57,21 +57,20 @@ ChangeMirrorDialog::ChangeMirrorDialog(LogVol *const mirrorVolume, const bool ch
     const QString lv_name = m_lv->getName();
     const bool is_raid = (m_lv->isMirror() && m_lv->isRaid());
     const bool is_lvm = (m_lv->isMirror() && !m_lv->isRaid());
-    m_bailout = false;
 
     m_log_pvs = getLogPvs();
     m_image_pvs = getImagePvs();
 
-    setWindowTitle(i18n("Change Mirror"));
+    setCaption(i18n("Change Mirror"));
 
     if ((is_raid && !m_lv->isMirror()) || m_lv->isCowSnap()) {
-        m_bailout = true;
+        preventExec();
         KMessageBox::sorry(nullptr, i18n("This type of volume can not be mirrored "));
     } else if (is_raid && !m_lv->isSynced()) {
-        m_bailout = true;
+        preventExec();
         KMessageBox::sorry(nullptr, i18n("RAID mirrors must be synced before adding new legs"));
     } else if (is_lvm && m_lv->isCowOrigin()) {
-        m_bailout = true;
+        preventExec();
         KMessageBox::sorry(nullptr, i18n("Non-RAID mirrors which are snapshot origins can not have new legs added"));
     } else {
         QWidget *const main_widget = new QWidget();
@@ -79,18 +78,18 @@ ChangeMirrorDialog::ChangeMirrorDialog(LogVol *const mirrorVolume, const bool ch
         QLabel  *const lv_name_label = new QLabel();
         
         if(m_change_log)
-            lv_name_label->setText(i18n("<b>Change mirror log: %1</b>", m_lv->getName()));
+            lv_name_label->setText(i18n("Change mirror log: %1", m_lv->getName()));
         else if(is_lvm)
-            lv_name_label->setText(i18n("<b>Change LVM mirror: %1</b>", m_lv->getName()));
+            lv_name_label->setText(i18n("Change LVM mirror: %1", m_lv->getName()));
         else if(is_raid)
-            lv_name_label->setText(i18n("<b>Change RAID 1 mirror: %1</b>", m_lv->getName()));
+            lv_name_label->setText(i18n("Change RAID 1 mirror: %1", m_lv->getName()));
         else
-            lv_name_label->setText(i18n("<b>Convert to a mirror: %1</b>", m_lv->getName()));
+            lv_name_label->setText(i18n("Convert to a mirror: %1", m_lv->getName()));
         
         lv_name_label->setAlignment(Qt::AlignCenter);
         m_tab_widget = new KTabWidget();
         layout->addWidget(lv_name_label);
-        layout->addSpacing(5);
+        layout->addSpacing(10);
         layout->addWidget(m_tab_widget);
         main_widget->setLayout(layout);
         
@@ -127,9 +126,6 @@ ChangeMirrorDialog::ChangeMirrorDialog(LogVol *const mirrorVolume, const bool ch
         
         connect(m_mirrored_log_button, SIGNAL(toggled(bool)),
                 this, SLOT(resetOkButton()));
-        
-        connect(this, SIGNAL(okClicked()),
-                this, SLOT(commitChanges()));
 
         enableTypeOptions(m_type_combo->currentIndex());
     }
@@ -749,7 +745,7 @@ void ChangeMirrorDialog::setLogRadioButtons()
     resetOkButton();
 }
 
-void ChangeMirrorDialog::commitChanges()
+void ChangeMirrorDialog::commit()
 {
     hide();
     qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
@@ -781,11 +777,6 @@ void ChangeMirrorDialog::enableLogWidget()
         m_log_stack->setCurrentIndex(1);
     else
         m_log_stack->setCurrentIndex(2);
-}
-
-bool ChangeMirrorDialog::bailout()
-{
-    return m_bailout;
 }
 
 
