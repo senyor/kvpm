@@ -35,11 +35,11 @@ class QStackedWidget;
 class QVBoxLayout;
 
 class LogVol;
-class PvGroupBox;
 class NoMungeCheck;
 class NoMungeRadioButton;
-
+class PvGroupBox;
 class PvSpace;
+
 
 class ChangeMirrorDialog : public KvpmDialog
 {
@@ -80,7 +80,6 @@ class ChangeMirrorDialog : public KvpmDialog
 
     QStringList getLogPvs();
     QStringList getImagePvs();
-    QStringList getUnusablePvs();
     QList<QSharedPointer<PvSpace>> getPvSpaceList();
     bool pvHasLog(QString const pv);
     bool pvHasImage(QString const pv);
@@ -91,9 +90,9 @@ class ChangeMirrorDialog : public KvpmDialog
     bool getAvailableByteList(QList<long long> &byte_list, int &unhandledLogs, const int stripes);
 
 public:
-    explicit ChangeMirrorDialog(LogVol *const mirrorVolume, const bool changeLog, QWidget *parent = nullptr);
+    ChangeMirrorDialog(LogVol *const mirrorVolume, const bool changeLog, QWidget *parent = nullptr);
     QStringList arguments();
-
+                           
 private slots:
     void resetOkButton();
     void commit();
