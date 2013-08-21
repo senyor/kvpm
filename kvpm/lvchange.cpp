@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -35,19 +35,19 @@
 
 
 LVChangeDialog::LVChangeDialog(LogVol *const volume, QWidget *parent) :
-    KDialog(parent),
+    KvpmDialog(parent),
     m_lv(volume)
 {
-    setWindowTitle(i18n("Change Logical Volume Attributes"));
+    setCaption(i18n("Change Logical Volume Attributes"));
 
     QWidget *const dialog_body = new QWidget();
     setMainWidget(dialog_body);
     QVBoxLayout *const layout = new QVBoxLayout;
 
-    QLabel *const name = new QLabel(i18n("<b>Change volume: %1</b>", m_lv->getName()));
+    QLabel *const name = new QLabel(i18n("Change volume: %1", m_lv->getName()));
     name->setAlignment(Qt::AlignCenter);
     layout->addWidget(name);
-    layout->addSpacing(5);
+    layout->addSpacing(10);
     layout->addStretch();
 
     KTabWidget *const tab_widget = new KTabWidget();
@@ -71,8 +71,6 @@ LVChangeDialog::LVChangeDialog(LogVol *const volume, QWidget *parent) :
     connect(m_devnum_box,        SIGNAL(clicked()), this, SLOT(resetOkButton()));
     connect(m_available_check, SIGNAL(stateChanged(int)), this , SLOT(refreshAndAvailableCheck()));
     connect(m_refresh_check,   SIGNAL(stateChanged(int)), this , SLOT(refreshAndAvailableCheck()));
-
-    connect(this, SIGNAL(okClicked()), this, SLOT(commitChanges()));
 
     resetOkButton();
 }
@@ -135,9 +133,10 @@ QWidget *LVChangeDialog::buildGeneralTab()
     if (!m_lv->isThinVolume()) {
         m_policy_combo = new PolicyComboBox(m_lv->getPolicy(), m_lv->getVg()->getPolicy());
         general_layout->addWidget(m_policy_combo);
-        connect(m_policy_combo,         SIGNAL(policyChanged(AllocationPolicy)), this, SLOT(resetOkButton()));
+        connect(m_policy_combo, SIGNAL(policyChanged(AllocationPolicy)), 
+                this, SLOT(resetOkButton()));
     } else {
-        m_policy_combo = NULL;
+        m_policy_combo = nullptr;
     }
 
     return tab;
@@ -298,7 +297,7 @@ QStringList LVChangeDialog::arguments()
     if (!(m_tag_edit->text()).isEmpty())
         args << "--addtag" << m_tag_edit->text();
 
-    if (m_policy_combo != NULL) {
+    if (m_policy_combo != nullptr) {
         if (m_lv->getPolicy() != m_policy_combo->getPolicy())
             args << "--alloc" << policyToString(m_policy_combo->getPolicy());
     }
@@ -308,7 +307,7 @@ QStringList LVChangeDialog::arguments()
     return args;
 }
 
-void LVChangeDialog::commitChanges()
+void LVChangeDialog::commit()
 {
     hide();
     ProcessProgress change_lv(arguments());

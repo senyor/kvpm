@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -15,9 +15,9 @@
 #ifndef LVCHANGE_H
 #define LVCHANGE_H
 
-#include <KDialog>
-
 #include <QStringList>
+
+#include "kvpmdialog.h"
 
 class KComboBox;
 class KLineEdit;
@@ -31,11 +31,12 @@ class LogVol;
 class PolicyComboBox;
 
 
-class LVChangeDialog : public KDialog
+class LVChangeDialog : public KvpmDialog
 {
     Q_OBJECT
 
     LogVol *m_lv;
+
     PolicyComboBox *m_policy_combo;
 
     QCheckBox *m_available_check,    // Make the volume available
@@ -66,10 +67,10 @@ class LVChangeDialog : public KDialog
     QStringList arguments();
 
 public:
-    explicit LVChangeDialog(LogVol *const volume, QWidget *parent = 0);
+    explicit LVChangeDialog(LogVol *const volume, QWidget *parent = nullptr);
 
 private slots:
-    void commitChanges();
+    void commit();
     void resetOkButton();
     void refreshAndAvailableCheck();
 
