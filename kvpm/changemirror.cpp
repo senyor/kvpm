@@ -48,9 +48,9 @@ ChangeMirrorDialog::ChangeMirrorDialog(LogVol *const mirrorVolume, const bool ch
     m_change_log(changeLog),
     m_lv(mirrorVolume)
 {
-    if (m_lv->getParentMirror() != nullptr)
+    if (m_lv->getParentMirror())
         m_lv = m_lv->getParentMirror();
-    else if (m_lv->getParentRaid() != nullptr)
+    else if (m_lv->getParentRaid())
         m_lv = m_lv->getParentRaid();
 
     QList<LogVol *> children;
@@ -95,7 +95,7 @@ ChangeMirrorDialog::ChangeMirrorDialog(LogVol *const mirrorVolume, const bool ch
         
         setMainWidget(main_widget);
         
-        m_tab_widget->addTab(buildGeneralTab(is_raid, is_lvm),  i18nc("Common user options", "General"));
+        m_tab_widget->addTab(buildGeneralTab(is_raid, is_lvm), i18nc("Common user options", "General"));
         
         if (!(m_change_log && (m_lv->getLogCount() == 2))) {
             
@@ -128,6 +128,11 @@ ChangeMirrorDialog::ChangeMirrorDialog(LogVol *const mirrorVolume, const bool ch
                 this, SLOT(resetOkButton()));
 
         enableTypeOptions(m_type_combo->currentIndex());
+
+        if (!m_change_log && (m_space_list.size() < 1)) {
+            preventExec();
+            KMessageBox::sorry(nullptr, i18n("No physical volumes suitable for a new mirror image found"));
+        }
     }
 }
 
@@ -415,47 +420,6 @@ QStringList ChangeMirrorDialog::getImagePvs()
     return pvs;   
 }
 
-/* The next function returns a list of physical volumes in
-   use by the mirror as legs or logs if they need separate
-   pvs or in use as both if they don't. */
-
-QStringList ChangeMirrorDialog::getUnusablePvs()
-{
-    QStringList unusable;
-
-    if (LvmConfig::getMirrorLogsRequireSeparatePvs()) {
-        if (m_lv->isMirror()) {
-            for (auto leg : m_lv->getAllChildrenFlat()) {
-                if (leg->isMirrorLeg() || leg->isLvmMirrorLog())
-                    unusable << leg->getPvNamesAll();
-            }
-        } else {
-            unusable << m_lv->getPvNamesAll();
-        }
-    } else {
-        if (m_lv->isMirror()) {
-            QStringList leg_names, log_names;
-
-            for (auto leg : m_lv->getAllChildrenFlat()) {
-                if (leg->isMirrorLeg())
-                    leg_names << leg->getPvNamesAll();
-                else if (leg->isLvmMirrorLog())
-                    log_names << leg->getPvNamesAll();
-
-                for (auto leg_pv : leg_names) {      // find the two list's intersection
-                    for (auto log_pv : log_names) {
-                        if (leg_pv == log_pv)
-                            unusable << log_pv;
-                    } 
-                } 
-            }
-        }
-    }
-
-    unusable.removeDuplicates();
-    return unusable;
-}
-
 // If a pv holds all or part of a mirror image return true, else false.
 // Also return true for pvs used by the current lv if that lv is being
 // changed into a mirror.
@@ -484,34 +448,35 @@ QList<QSharedPointer<PvSpace>> ChangeMirrorDialog::getPvSpaceList()
 {
     QList<QSharedPointer<PvSpace>> list;
     const bool separate = LvmConfig::getMirrorLogsRequireSeparatePvs();
-
-    QList<PhysVol *> available_pvs = m_lv->getVg()->getPhysicalVolumes();
-
+    const bool islvm = m_lv->isLvmMirror();
+    const QList<PhysVol *> available_pvs = m_lv->getVg()->getPhysicalVolumes();
+    
     if (m_lv->isMirror() && !m_change_log) {
         for (auto pv : available_pvs) {
-            if (pv->isAllocatable() && pv->getRemaining() > 0) {
-                if ( !(pvHasImage(pv->getName())) )
+            if (pv->isAllocatable() && (pv->getRemaining() > 0) && !pvHasImage(pv->getName())) {
+                if (separate && islvm) {                
+                    if (!pvHasLog(pv->getName()))
+                        list << QSharedPointer<PvSpace>(new PvSpace(pv, pv->getRemaining(), pv->getContiguous()));
+                } else {
                     list << QSharedPointer<PvSpace>(new PvSpace(pv, pv->getRemaining(), pv->getContiguous()));
+                }
             }
         }
     } else if (m_change_log) {
         for (auto pv : available_pvs) {
-            if (pv->isAllocatable() && pv->getRemaining() > 0) {
-                if ( !(pvHasLog(pv->getName())) )
-                    list << QSharedPointer<PvSpace>(new PvSpace(pv, pv->getRemaining(), pv->getContiguous()));
-            }
-        }
-    } else {
-        for (auto pv : available_pvs) {
-            if (pv->isAllocatable() && pv->getRemaining() > 0) {
-                if (separate) {
-                    if ( !(pvHasLog(pv->getName()) || pvHasImage(pv->getName())) )
+            if (pv->isAllocatable() && (pv->getRemaining() > 0) && !pvHasLog(pv->getName())) {
+                if (separate) {                
+                    if (!pvHasImage(pv->getName()))
                         list << QSharedPointer<PvSpace>(new PvSpace(pv, pv->getRemaining(), pv->getContiguous()));
                 } else {
-                    if ( !(pvHasLog(pv->getName()) && pvHasImage(pv->getName())) )
-                        list << QSharedPointer<PvSpace>(new PvSpace(pv, pv->getRemaining(), pv->getContiguous()));
+                    list << QSharedPointer<PvSpace>(new PvSpace(pv, pv->getRemaining(), pv->getContiguous()));
                 }
             }
+        }
+    } else {                              // not a mirror
+        for (auto pv : available_pvs) {
+            if (pv->isAllocatable() && (pv->getRemaining() > 0) && !pvHasImage(pv->getName()))
+                list << QSharedPointer<PvSpace>(new PvSpace(pv, pv->getRemaining(), pv->getContiguous()));
         }
     }
 
