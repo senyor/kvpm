@@ -935,19 +935,15 @@ void LVActions::removeLv()
 {
     LVRemoveDialog dialog(m_lv);
 
-    if (!dialog.bailout()) {
-        dialog.exec();
-        if (dialog.result() == KDialog::Yes)
-            g_top_window->reRun();
-    }
+    if (dialog.run() == KDialog::Yes)
+        g_top_window->reRun();
 }
 
 void LVActions::renameLv()
 {
     LVRenameDialog dialog(m_lv);
-    dialog.exec();
 
-    if (dialog.result() == QDialog::Accepted)
+    if (dialog.run() == QDialog::Accepted)
         g_top_window->reRun();
 }
 

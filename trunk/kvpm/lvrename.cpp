@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -30,11 +30,11 @@
 #include "processprogress.h"
 
 
-LVRenameDialog::LVRenameDialog(LogVol *const volume, QWidget *parent)
-    : KDialog(parent),
-      m_lv(volume)
+LVRenameDialog::LVRenameDialog(LogVol *const volume, QWidget *parent) : 
+    KvpmDialog(parent),
+    m_lv(volume)
 {
-    setWindowTitle(i18n("Rename Logical Volume"));
+    setCaption(i18n("Rename Logical Volume"));
 
     QWidget *const dialog_body = new QWidget(this);
     setMainWidget(dialog_body);
@@ -46,15 +46,15 @@ LVRenameDialog::LVRenameDialog(LogVol *const volume, QWidget *parent)
 
     QLabel *label;
     if (m_lv->isThinPool())
-        label = new QLabel(i18n("<b>Rename Thin Pool</b>"));
+        label = new QLabel(i18n("Rename Thin Pool"));
     else
-        label = new QLabel(i18n("<b>Rename Logical Volume</b>"));
+        label = new QLabel(i18n("Rename Logical Volume"));
 
     label->setAlignment(Qt::AlignCenter);
     layout->addWidget(label);
     layout->addSpacing(10);
 
-    label = new QLabel(i18n("Current volume name: %1", m_old_name));
+    label = new QLabel(i18n("Current name: %1", m_old_name));
     layout->addWidget(label);
 
     QRegExp rx("[0-9a-zA-Z_\\.][-0-9a-zA-Z_\\.]*");
@@ -62,16 +62,13 @@ LVRenameDialog::LVRenameDialog(LogVol *const volume, QWidget *parent)
     m_name_validator = new QRegExpValidator(rx, m_new_name);
     m_new_name->setValidator(m_name_validator);
     QHBoxLayout *const name_layout = new QHBoxLayout();
-    label = new QLabel(i18n("New volume name: "));
+    label = new QLabel(i18n("New name: "));
 
     name_layout->addWidget(label);
     name_layout->addWidget(m_new_name);
     layout->addLayout(name_layout);
 
     enableButtonOk(false);
-
-    connect(this, SIGNAL(okClicked()),
-            this, SLOT(commitChanges()));
 
     connect(m_new_name, SIGNAL(textChanged(QString)),
             this, SLOT(validateName(QString)));
@@ -102,7 +99,7 @@ QString LVRenameDialog::getNewMapperPath()
     return QString(path + m_new_name->text());
 }
 
-void LVRenameDialog::commitChanges()
+void LVRenameDialog::commit()
 {
     QStringList args;
 
