@@ -42,7 +42,7 @@ PVChangeDialog::PVChangeDialog(PhysVol *const physicalVolume, QWidget *parent) :
     dialog_body->setLayout(layout);
 
     QString pv_name = m_pv->getName();
-    QLabel *const label = new QLabel(i18n("<b>Changing volume: %1</b>", pv_name));
+    QLabel *const label = new QLabel(i18n("Changing volume: %1", pv_name));
     label->setAlignment(Qt::AlignCenter);
     layout->addWidget(label);
     layout->addSpacing(5);
@@ -51,7 +51,7 @@ PVChangeDialog::PVChangeDialog(PhysVol *const physicalVolume, QWidget *parent) :
     QVBoxLayout *const attrib_box_layout = new QVBoxLayout;
     attrib_box->setLayout(attrib_box_layout);
     layout->addWidget(attrib_box);
-    m_allocation_box = new QCheckBox(i18n("Enable allocation of extents"));
+    m_allocation_box = new QCheckBox(i18n("Allow allocation of extents"));
     if (m_pv->isAllocatable())
         m_allocation_box->setChecked(true);
     attrib_box_layout->addWidget(m_allocation_box);
