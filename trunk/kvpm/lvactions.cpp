@@ -50,139 +50,142 @@ LVActions::LVActions(VolGroup *const group, QWidget *parent) :
     KActionCollection(parent),
     m_vg(group)
 {
-    KAction *const lv_create = addAction("lvcreate", this, SLOT(createLv()));
+    KAction *const lv_create = addAction("lvcreate");
     lv_create->setText(i18n("Create logical volume..."));
     lv_create->setIconText(i18n("New volume"));
     lv_create->setToolTip(i18n("Create a new logical volume"));
     lv_create->setIcon(KIcon("document-new"));
 
-    KAction *const thin_pool = addAction("thinpool", this, SLOT(createThinPool()));
+    KAction *const thin_pool = addAction("thinpool");
     thin_pool->setText(i18n("Create thin pool..."));
     thin_pool->setToolTip(i18n("Create a new thin pool"));
     thin_pool->setIconText(i18n("New pool"));
     thin_pool->setIcon(KIcon("object-group"));
 
-    KAction *const thin_create = addAction("thincreate", this, SLOT(createThinVolume()));
+    KAction *const thin_create = addAction("thincreate");
     thin_create->setText(i18n("Create thin volume..."));
     thin_create->setToolTip(i18n("Create new thin volume"));
     thin_create->setIconText(i18n("Thin volume"));
     thin_create->setIcon(KIcon("page_white_add"));
 
-    KAction *const lv_rename = addAction("lvrename", this, SLOT(renameLv()));
+    KAction *const lv_rename = addAction("lvrename");
     lv_rename->setText(i18n("Rename logical volume..."));
     lv_rename->setToolTip(i18n("Rename a logical volume or thin pool"));
     lv_rename->setIconText(i18n("Rename"));
     lv_rename->setIcon(KIcon("edit-rename"));
 
-    KAction *const snap_create = addAction("snapcreate", this, SLOT(createSnapshot()));
+    KAction *const snap_create = addAction("snapcreate");
     snap_create->setText(i18n("Create snapshot..."));
     snap_create->setToolTip(i18n("Create a snapshot of a volume"));
     snap_create->setIconText(i18n("Snapshot"));
     snap_create->setIcon(KIcon("camera_add"));
 
-    KAction *const thin_snap = addAction("thinsnap", this, SLOT(thinSnapshot()));
+    KAction *const thin_snap = addAction("thinsnap");
     thin_snap->setText(i18n("Create thin snapshot..."));
     thin_snap->setToolTip(i18n("Create a thin snapshot of a volume"));
     thin_snap->setText(i18n("Thin snapshot"));
     thin_snap->setIcon(KIcon("page_white_camera"));
 
-    KAction *const snap_merge = addAction("snapmerge", this, SLOT(mergeSnapshot()));
+    KAction *const snap_merge = addAction("snapmerge");
     snap_merge->setText(i18n("Merge snapshot..."));
     snap_merge->setToolTip(i18n("Merge a snapshot with its origin"));
     snap_merge->setIconText(i18n("Merge"));
     snap_merge->setIcon(KIcon("arrow_join"));
 
-    KAction *const lv_reduce = addAction("lvreduce", this, SLOT(reduceLv()));
+    KAction *const lv_reduce = addAction("lvreduce");
     lv_reduce->setText(i18n("Reduce logical volume..."));
     lv_reduce->setToolTip(i18n("Reduce the size of a logical volume or thin pool"));
     lv_reduce->setText(i18n("Reduce"));
     lv_reduce->setIcon(KIcon("delete"));
 
-    KAction *const lv_extend = addAction("lvextend", this, SLOT(extendLv()));
+    KAction *const lv_extend = addAction("lvextend");
     lv_extend->setText(i18n("Extend logical volume..."));
     lv_extend->setToolTip(i18n("Increase the size of a logical volume or thin pool"));
     lv_extend->setIconText(i18n("Extend"));
     lv_extend->setIcon(KIcon("add"));
 
-    KAction *const pv_move = addAction("pvmove", this, SLOT(movePhysicalExtents()));
+    KAction *const pv_move = addAction("pvmove");
     pv_move->setText(i18n("Move physical extents..."));
     pv_move->setToolTip(i18n("Move extents to another physical volume"));
     pv_move->setIconText(i18n("Move"));
     pv_move->setIcon(KIcon("lorry"));
 
-    KAction *const lv_change = addAction("lvchange", this, SLOT(changeLv()));
+    KAction *const lv_change = addAction("lvchange");
     lv_change->setText(i18n("Change attributes or tags..."));
     lv_change->setToolTip(i18n("Change attributes or tags of a volume or thin pool"));
     lv_change->setIconText(i18n("Attributes"));
     lv_change->setIcon(KIcon("wrench"));
 
-    KAction *const lv_remove = addAction("lvremove", this, SLOT(removeLv()));
+    KAction *const lv_remove = addAction("lvremove");
     lv_remove->setText(i18n("Delete logical volume..."));
     lv_remove->setToolTip(i18n("Delete logical volume or thin pool"));
     lv_remove->setIconText(i18n("Delete"));
     lv_remove->setIcon(KIcon("cross"));
 
-    KAction *const mkfs =  addAction("mkfs", this, SLOT(makeFs()));
+    KAction *const mkfs =  addAction("mkfs");
     mkfs->setIcon(KIcon("lightning_add"));
     mkfs->setText(i18n("Make or remove filesystem..."));
     mkfs->setIconText(i18n("mkfs"));
     mkfs->setToolTip(i18n("Make or remove a filesystem"));
 
-    KAction *const max_fs = addAction("maxfs", this, SLOT(maxFs()));
+    KAction *const max_fs = addAction("maxfs");
     max_fs->setText(i18n("Extend filesystem to fill volume..."));
     max_fs->setIcon(KIcon("resultset_last")); 
     max_fs->setIconText(i18n("Extend fs"));
     max_fs->setToolTip(i18n("Extend filesystem to fill volume"));
 
-    KAction *const fsck = addAction("fsck", this, SLOT(checkFs()));
+    KAction *const fsck = addAction("fsck");
     fsck->setText(i18n("Run 'fsck -fp' on filesystem..."));
     fsck->setIcon(KIcon("checkmark")); 
     fsck->setIconText(i18n("fsck -fp"));
     fsck->setToolTip(i18n("Run 'fsck -fp' on the filesystem"));
 
-    KAction *const mount = addAction("mount", this, SLOT(mountFs()));
+    KAction *const mount = addAction("mount");
     mount->setText(i18n("Mount filesystem..."));
     mount->setIconText(i18n("mount fs"));
     mount->setToolTip(i18n("Mount filesystem"));
     mount->setIcon(KIcon("emblem-mounted"));
 
-    KAction *const unmount = addAction("unmount", this, SLOT(unmountFs()));
+    KAction *const unmount = addAction("unmount");
     unmount->setText(i18n("Unmount filesystem..."));
     unmount->setIconText(i18n("Unmount fs"));
     unmount->setToolTip(i18n("Unmount filesystem"));
     unmount->setIcon(KIcon("emblem-unmounted"));
 
-    KAction *const add_legs = addAction("addlegs", this , SLOT(addLegs()));
+    KAction *const add_legs = addAction("addlegs");
     add_legs->setText(i18n("Add mirror legs to volume..."));
     add_legs->setIconText(i18n("Add mirrors"));
     add_legs->setToolTip(i18n("Add mirror legs to volume"));
     add_legs->setIcon(KIcon("edit-copy"));
 
-    KAction *const change_log = addAction("changelog", this, SLOT(changeLog())); 
+    KAction *const change_log = addAction("changelog");
     change_log->setText(i18n("Change mirror log..."));
     change_log->setIconText(i18n("Change log"));
     change_log->setToolTip(i18n("Change mirror log"));
     change_log->setIcon(KIcon("preferences-other"));     
 
-    KAction *const remove_mirror = addAction("removemirror", this, SLOT(removeMirror()));
+    KAction *const remove_mirror = addAction("removemirror");
     remove_mirror->setText(i18n("Remove mirror legs..."));
     remove_mirror->setToolTip(i18n("Remove mirror legs"));
     remove_mirror->setIconText(i18n("Remove legs"));
     remove_mirror->setIcon(KIcon("document-close"));    
 
-    KAction *const remove_this = addAction("removethis", this, SLOT(removeLeg()));
+    KAction *const remove_this = addAction("removethis");
     remove_this->setIcon(KIcon("document-close"));
     remove_this->setText(i18n("Remove this mirror leg..."));
     remove_this->setIconText(i18n("Remove leg..."));
     remove_this->setText(i18n("Remove this mirror leg"));
 
-    KAction *const repair_missing = addAction("repairmissing", this, SLOT(repairMissing()));
+    KAction *const repair_missing = addAction("repairmissing");
     repair_missing->setIcon(KIcon("edit-bomb"));
     repair_missing->setText(i18n("Repair volume..."));
     repair_missing->setIconText(i18n("Repair"));
     repair_missing->setToolTip(i18n("Repair raid or mirror volume"));
 
     setActions(nullptr, 0); 
+
+    connect(this, SIGNAL(actionTriggered(QAction *)),
+            this, SLOT(callDialog(QAction *)));
 }
 
 void LVActions::setActions(LogVol *const lv, const int segment)
@@ -838,183 +841,76 @@ void LVActions::changeLv(QTreeWidgetItem *item)
     changeLv(target, segment);
 }
 
-void LVActions::mountFs()
+void LVActions::callDialog(QAction *action)
 {
-    MountDialog dialog(m_lv);
+    const QString name = action->objectName();
 
-    if (dialog.run() == QDialog::Accepted)
-        g_top_window->reRun();
-}
-
-void LVActions::unmountFs()
-{
-    UnmountDialog dialog(m_lv);
-    int result = dialog.run();
-    if (result == QDialog::Accepted || result == KDialog::Yes)
-        g_top_window->reRun();
-}
-
-void LVActions::makeFs()
-{
-    MkfsDialog dialog(m_lv);
-
-    if (dialog.run() == QDialog::Accepted)
-        g_top_window->reRun();
-}
-
-void LVActions::checkFs()
-{
-    if (manual_fsck(m_lv))
-        g_top_window->reRun();
-}
-
-void LVActions::maxFs()
-{
-    if (max_fs(m_lv))
-        g_top_window->reRun();
-}
-
-void LVActions::createLv()
-{
-    LVCreateDialog dialog(m_vg, false);
-
-    if (dialog.run() == QDialog::Accepted)
-        g_top_window->reRun();
-}
-
-void LVActions::createThinVolume()
-{
-    auto pool = m_lv;
-    while (pool->getParent() && !pool->isThinPool())
-        pool = pool->getParent();
-
-    ThinCreateDialog dialog(pool);
-
-    if (dialog.run() == QDialog::Accepted)
-        g_top_window->reRun();
-}
-
-void LVActions::createThinPool()
-{
-    LVCreateDialog dialog(m_vg, true);
-
-    if (dialog.run() == QDialog::Accepted)
-        g_top_window->reRun();
-}
-
-void LVActions::reduceLv()
-{
-    LVReduceDialog dialog(m_lv);
-
-    if (dialog.run() == QDialog::Accepted)
-        g_top_window->reRun();
-}
-
-void LVActions::extendLv()
-{
-    if (m_lv->isThinVolume()) {
-        ThinCreateDialog dialog(m_lv, false);
-        
-        if (dialog.run() == QDialog::Accepted)
+    if (name == "snapmerge") {
+        if (merge_snap(m_lv))
+            g_top_window->reRun();
+    } else if (name == "maxfs") {
+        if (max_fs(m_lv))
+            g_top_window->reRun();
+    } else if (name == "fsck") {
+        if (manual_fsck(m_lv))
+            g_top_window->reRun();
+    } else if (name == "removethis") {
+        if (remove_mirror_leg(m_lv))
             g_top_window->reRun();
     } else {
-        LVCreateDialog dialog(m_lv, false);
+        KvpmDialog *dialog = nullptr;
         
-        if (dialog.run() == QDialog::Accepted)
-            g_top_window->reRun();
+        if (name == "mount")
+            dialog = new MountDialog(m_lv);
+        else if (name == "unmount")
+            dialog = new UnmountDialog(m_lv);
+        else if (name == "mkfs")
+            dialog = new MkfsDialog(m_lv);
+        else if (name == "lvcreate")
+            dialog = new LVCreateDialog(m_vg, false);
+        else if (name == "lvremove")
+            dialog = new LVRemoveDialog(m_lv);       
+        else if (name == "thinpool")
+            dialog = new LVCreateDialog (m_vg, true);       
+        else if (name == "lvrename")
+            dialog = new LVRenameDialog(m_lv);
+        else if (name == "lvreduce")
+            dialog = new LVReduceDialog(m_lv);       
+        else if (name == "snapcreate")
+            dialog = new LVCreateDialog(m_lv, true);
+        else if (name == "thinsnap")
+            dialog = new ThinCreateDialog(m_lv, true);
+        else if (name == "lvchange")
+            dialog = new LVChangeDialog(m_lv);
+        else if (name == "pvmove")
+            dialog = new PVMoveDialog(m_lv, m_segment);
+        else if (name == "addlegs")
+            dialog = new ChangeMirrorDialog(m_lv, false);
+        else if (name == "changelog")
+            dialog = new ChangeMirrorDialog(m_lv, true);
+        else if (name == "removemirror")
+            dialog = new RemoveMirrorDialog(m_lv);
+        else if (name == "repairmissing")
+            dialog = new RepairMissingDialog(m_lv);
+        else if (name == "thincreate") {
+            auto pool = m_lv;
+            while (pool->getParent() && !pool->isThinPool())
+                pool = pool->getParent();
+            
+            dialog = new ThinCreateDialog(pool);
+        } else if (name == "lvextend") {
+            if (m_lv->isThinVolume())
+                dialog = new ThinCreateDialog(m_lv, false);
+            else
+                dialog = new LVCreateDialog(m_lv, false);
+        }       
+        
+        if (dialog) {
+            const int result = dialog->run();
+            
+            if (result == QDialog::Accepted || result == KDialog::Yes)
+                g_top_window->reRun();
+        }
     }
-}
-
-void LVActions::mergeSnapshot()
-{
-    if (merge_snap(m_lv))
-        g_top_window->reRun();
-}
-
-void LVActions::removeLv()
-{
-    LVRemoveDialog dialog(m_lv);
-
-    if (dialog.run() == KDialog::Yes)
-        g_top_window->reRun();
-}
-
-void LVActions::renameLv()
-{
-    LVRenameDialog dialog(m_lv);
-
-    if (dialog.run() == QDialog::Accepted)
-        g_top_window->reRun();
-}
-
-void LVActions::createSnapshot()
-{
-    LVCreateDialog dialog(m_lv, true);
-
-    if (dialog.run() == QDialog::Accepted)
-        g_top_window->reRun();
-}
-
-void LVActions::thinSnapshot()
-{
-    ThinCreateDialog dialog(m_lv, true);
-
-    if (dialog.run() == QDialog::Accepted)
-        g_top_window->reRun();
-}
-
-void LVActions::changeLv()
-{
-    LVChangeDialog dialog(m_lv);
-
-    if (dialog.run() == QDialog::Accepted)
-            g_top_window->reRun();
-}
-
-void LVActions::movePhysicalExtents()
-{
-    PVMoveDialog dialog(m_lv, m_segment);
-
-    if (dialog.run() == QDialog::Accepted)
-            g_top_window->reRun();
-}
-
-void LVActions::addLegs()
-{
-    ChangeMirrorDialog dialog(m_lv, false);
-
-    if (dialog.run() == QDialog::Accepted)
-            g_top_window->reRun();
-}
-
-void LVActions::changeLog()
-{
-    ChangeMirrorDialog dialog(m_lv, true);
-
-    if (dialog.run() == QDialog::Accepted)
-            g_top_window->reRun();
-}
-
-void LVActions::removeMirror()
-{
-    RemoveMirrorDialog dialog(m_lv);
-
-    if (dialog.run() == QDialog::Accepted)
-        g_top_window->reRun();
-}
-
-void LVActions::removeLeg()
-{
-    if (remove_mirror_leg(m_lv))
-        g_top_window->reRun();
-}
-
-void LVActions::repairMissing()
-{
-    RepairMissingDialog dialog(m_lv);
-
-    int result = dialog.run();
-    if (result == QDialog::Accepted || result == KDialog::Yes)
-        g_top_window->reRun();
 }
 

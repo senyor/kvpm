@@ -20,6 +20,7 @@
 
 class KDialog;
 
+class QAction;
 class QTreeWidgetItem;
 
 class LogVol;
@@ -38,35 +39,15 @@ class LVActions : public KActionCollection
     void setMirrorActions(LogVol *const lv);
 
 public:
-    LVActions(VolGroup *const group, QWidget *parent = nullptr);
+    explicit LVActions(VolGroup *const group, QWidget *parent = nullptr);
 
 public slots:
     void changeLv(QTreeWidgetItem *item);
     void changeLv(LogVol *lv, int segment);
 
 private slots:
-    void createLv();
-    void extendLv();
-    void createThinVolume();
-    void createThinPool();
-    void changeLv();
-    void reduceLv();
-    void removeLv();
-    void renameLv();
-    void createSnapshot();
-    void thinSnapshot();
-    void mergeSnapshot();
-    void movePhysicalExtents();
-    void changeLog();
-    void repairMissing();
-    void removeMirror();
-    void removeLeg();
-    void addLegs();
-    void makeFs();
-    void checkFs();
-    void maxFs();
-    void mountFs();
-    void unmountFs();
+    void callDialog(QAction *action);
+
 };
 
 #endif
