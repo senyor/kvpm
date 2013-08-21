@@ -32,11 +32,11 @@
 
 
 
-RepairMissingDialog::RepairMissingDialog(LogVol *const volume, QWidget *parent)
-    : KDialog(parent),
-      m_lv(volume)
+RepairMissingDialog::RepairMissingDialog(LogVol *const volume, QWidget *parent) : 
+    KvpmDialog(parent),
+    m_lv(volume)
 {
-    if (m_lv->getParentMirror() != NULL)
+    if (m_lv->getParentMirror())
         m_lv = m_lv->getParentMirror();
 
     LogVolList children;
@@ -47,10 +47,10 @@ RepairMissingDialog::RepairMissingDialog(LogVol *const volume, QWidget *parent)
     QList<PhysVol *> const pvs = getUsablePvs();
 
     if (!m_lv->isPartial()) {
-        m_bailout = true;
+        preventExec();
         KMessageBox::sorry(nullptr, i18n("This volume has no missing physical volumes"));
     } else if (pvs.isEmpty() && is_raid && !m_lv->isMirror()) {
-        m_bailout = true;
+        preventExec();
         KMessageBox::sorry(nullptr, i18n("No suitable physical volumes found"));
     } else {
         QHBoxLayout *const top_layout = new QHBoxLayout();
@@ -102,9 +102,6 @@ RepairMissingDialog::RepairMissingDialog(LogVol *const volume, QWidget *parent)
 
             setButtons(KDialog::Yes | KDialog::No);
             setDefaultButton(KDialog::No);
-
-            connect(this, SIGNAL(yesClicked()),
-                    this, SLOT(commitChanges()));
         } else {
             m_replace_radio->setChecked(true);
 
@@ -115,9 +112,6 @@ RepairMissingDialog::RepairMissingDialog(LogVol *const volume, QWidget *parent)
 
             connect(m_replace_radio, SIGNAL(toggled(bool)),
                     this, SLOT(setReplace(bool)));
-
-            connect(this, SIGNAL(okClicked()),
-                    this, SLOT(commitChanges()));
 
             resetOkButton();
         }
@@ -202,17 +196,12 @@ QStringList RepairMissingDialog::arguments()
     return args;
 }
 
-void RepairMissingDialog::commitChanges()
+void RepairMissingDialog::commit()
 {
     hide();
     qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
     ProcessProgress repair_missing(arguments());
     qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
-}
-
-bool RepairMissingDialog::bailout()
-{
-    return m_bailout;
 }
 
 QWidget *RepairMissingDialog::buildPhysicalWidget(QList<PhysVol *> const pvs)
@@ -281,7 +270,7 @@ QList<PhysVol *> RepairMissingDialog::getSelectedPvs()
 
     for (int x = pvnames.size() - 1; x >= 0; x--) {
         PhysVol *const pv = vg->getPvByName(pvnames[x]);
-        if (pv != NULL)
+        if (pv != nullptr)
             pvs.append(pv);
     }
 

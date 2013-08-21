@@ -15,28 +15,27 @@
 #ifndef REPAIRMISSING_H
 #define REPAIRMISSING_H
 
-#include <KDialog>
-
 #include <QStringList>
 
 class QGroupBox;
 class QRadioButton;
 class QWidget;
 
+
 #include "logvol.h"
+#include "kvpmdialog.h"
+
 
 class PhysVol;
 class PvGroupBox;
 
 
-class RepairMissingDialog : public KDialog
+class RepairMissingDialog : public KvpmDialog
 {
     Q_OBJECT
 
     PvGroupBox *m_pv_box = nullptr;
     QRadioButton  *m_replace_radio = nullptr;
-
-    bool m_bailout = false;
     LogVol *m_lv = nullptr;         // The volume we are repairing
 
     QStringList arguments();
@@ -48,11 +47,10 @@ class RepairMissingDialog : public KDialog
 
 public:
     explicit RepairMissingDialog(LogVol *const volume, QWidget *parent = nullptr);
-    bool bailout();  // if true, don't bother executing this dialog
 
 private slots:
     void resetOkButton();
-    void commitChanges();
+    void commit();
     void setReplace(const bool replace);
 
 };
