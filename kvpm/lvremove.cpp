@@ -28,7 +28,9 @@
 #include "processprogress.h"
 
 
-LVRemoveDialog::LVRemoveDialog(LogVol *const lv, QWidget *parent) : KDialog(parent), m_lv(lv)
+LVRemoveDialog::LVRemoveDialog(LogVol *const lv, QWidget *parent) : 
+    KvpmDialog(parent), 
+    m_lv(lv)
 {
     setButtons(KDialog::Yes | KDialog::No);
     setDefaultButton(KDialog::No);
@@ -36,7 +38,6 @@ LVRemoveDialog::LVRemoveDialog(LogVol *const lv, QWidget *parent) : KDialog(pare
     setMainWidget(dialog_body);
 
     m_name = m_lv->getName();
-    m_bailout = false;
 
     QHBoxLayout *const layout = new QHBoxLayout();
     QVBoxLayout *const right_layout = new QVBoxLayout();
@@ -105,19 +106,12 @@ LVRemoveDialog::LVRemoveDialog(LogVol *const lv, QWidget *parent) : KDialog(pare
     }
 
     dialog_body->setLayout(layout);
-
-    connect(this, SIGNAL(yesClicked()),
-            this, SLOT(commitChanges()));
-
-    if (m_bailout) {
-        hide();
-        KMessageBox::error(this, i18n("A snapshot of this origin is busy or mounted. It can not be deleted."));
-    }
 }
 
 QStringList LVRemoveDialog::getDependentChildren(LogVol *const lv)
 {
     QStringList children;
+    bool bailout = false;
 
     if (lv->isCowOrigin()) {
         QListIterator<QPointer<LogVol> > snap_itr(lv->getSnapshots());
@@ -126,7 +120,7 @@ QStringList LVRemoveDialog::getDependentChildren(LogVol *const lv)
             snap = snap_itr.next();
 
             if (snap->isMounted())
-                m_bailout = true;
+                bailout = true;
 
             children.append(snap->getName());
         }
@@ -137,7 +131,7 @@ QStringList LVRemoveDialog::getDependentChildren(LogVol *const lv)
             thin = thin_itr.next();
 
             if (thin->isMounted())
-                m_bailout = true;
+                bailout = true;
 
             children.append(thin->getName());
 
@@ -146,15 +140,16 @@ QStringList LVRemoveDialog::getDependentChildren(LogVol *const lv)
         }
     }
 
+    if (bailout) {
+        hide();
+        preventExec();
+        KMessageBox::sorry(this, i18n("A snapshot of this origin is busy or mounted. It can not be deleted."));
+    }
+
     return children;
 }
 
-bool LVRemoveDialog::bailout()
-{
-    return m_bailout;
-}
-
-void LVRemoveDialog::commitChanges()
+void LVRemoveDialog::commit()
 {
     hide();
     const QString full_name = m_lv->getFullName().remove('[').remove(']');

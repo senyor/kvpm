@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -15,16 +15,19 @@
 #ifndef LVRENAME_H
 #define LVRENAME_H
 
-#include <KDialog>
-#include <QStringList>
+
+#include "kvpmdialog.h"
+
 
 class KLineEdit;
+
 class QRegExpValidator;
+class QString;
 
 class LogVol;
 
 
-class LVRenameDialog : public KDialog
+class LVRenameDialog : public KvpmDialog
 {
     Q_OBJECT
 
@@ -37,11 +40,11 @@ class LVRenameDialog : public KDialog
     QString getNewMapperPath();
 
 public:
-    explicit LVRenameDialog(LogVol *const volume, QWidget *parent = 0);
+    explicit LVRenameDialog(LogVol *const volume, QWidget *parent = nullptr);
 
 private slots:
     void validateName(QString name);
-    void commitChanges();
+    void commit();
 
 };
 
