@@ -15,7 +15,6 @@
 #ifndef LVREMOVEMIRROR_H
 #define LVREMOVEMIRROR_H
 
-#include <KDialog>
 
 #include <QStringList>
 
@@ -35,10 +34,10 @@ class RemoveMirrorDialog : public KvpmDialog
 
     LogVol *m_lv = nullptr;
     VolGroup *m_vg = nullptr;
-    QList<NoMungeCheck *> m_mirror_leg_checks;
+    QList<NoMungeCheck *> m_leg_checks;
 
 public:
-    explicit RemoveMirrorDialog(LogVol *volume, QWidget *parent = nullptr);
+    explicit RemoveMirrorDialog(LogVol *mirror, QWidget *parent = nullptr);
 
 private slots:
     void validateCheckStates();

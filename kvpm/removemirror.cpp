@@ -28,13 +28,13 @@
 
 
 
-RemoveMirrorDialog::RemoveMirrorDialog(LogVol *volume, QWidget *parent) :
+RemoveMirrorDialog::RemoveMirrorDialog(LogVol *mirror, QWidget *parent) :
     KvpmDialog(parent)
 {
-    while (volume->isLvmMirrorLog() || volume->isLvmMirrorLeg())
-        volume = volume->getParentMirror();
+    while (mirror->isLvmMirrorLog() || mirror->isLvmMirrorLeg())
+        mirror = mirror->getParentMirror();
 
-    m_lv = volume;
+    m_lv = mirror;
     m_vg = m_lv->getVg();
 
     setCaption(i18n("Remove Mirrors"));
@@ -44,18 +44,19 @@ RemoveMirrorDialog::RemoveMirrorDialog(LogVol *volume, QWidget *parent) :
     dialog_body->setLayout(layout);
     setMainWidget(dialog_body);
 
-    QLabel *const message = new QLabel(i18n("Select the mirror legs to remove:"));
+    QLabel *const message = new QLabel(i18n("Select mirror legs to remove from <b>%1</b>", m_lv->getName()));
+    layout->addSpacing(5);
     layout->addWidget(message);
     layout->addSpacing(10);
 
     for (auto lv : m_lv->getChildren()) {
         if (lv->isMirrorLeg()) {
-            NoMungeCheck *checkbox = new NoMungeCheck(lv->getName());
-            checkbox->setAlternateTextList(lv->getPvNamesAll());
-            m_mirror_leg_checks.append(checkbox);
-            layout->addWidget(checkbox);
+            NoMungeCheck *const check = new NoMungeCheck(lv->getName());
+            check->setAlternateTextList(lv->getPvNamesAll());
+            m_leg_checks.append(check);
+            layout->addWidget(check);
 
-            connect(checkbox, SIGNAL(stateChanged(int)),
+            connect(check, SIGNAL(stateChanged(int)),
                     this, SLOT(validateCheckStates()));
         }
     }
@@ -68,12 +69,12 @@ void RemoveMirrorDialog::commit()
 {
     hide();
 
-    int mirror_count = m_mirror_leg_checks.size();
+    int mirror_count = m_leg_checks.size();
     QStringList legs;       // mirror legs (actually pv names) being deleted
 
-    for (auto checkbox : m_mirror_leg_checks) {
-        if (checkbox->isChecked()) {
-            legs << checkbox->getAlternateTextList();
+    for (auto check : m_leg_checks) {
+        if (check->isChecked()) {
+            legs << check->getAlternateTextList();
             mirror_count--;
         }
     }
@@ -93,24 +94,24 @@ void RemoveMirrorDialog::commit()
 
 void RemoveMirrorDialog::validateCheckStates()
 {
-    const int check_box_count = m_mirror_leg_checks.size();
+    const int check_box_count = m_leg_checks.size();
     int checked_count = 0;
     
-    for (auto checkbox : m_mirror_leg_checks) {
+    for (auto checkbox : m_leg_checks) {
         if (checkbox->isChecked()) {
-            checked_count++;
+            ++checked_count;
         }
     }
 
     enableButtonOk(static_cast<bool>(checked_count));
     
     if (checked_count == (check_box_count - 1)) {
-        for (auto checkbox : m_mirror_leg_checks) {
+        for (auto checkbox : m_leg_checks) {
             if (!checkbox->isChecked())
                 checkbox->setEnabled(false);
         }
     } else {
-        for (auto checkbox : m_mirror_leg_checks)
+        for (auto checkbox : m_leg_checks)
             checkbox->setEnabled(true);
     }
 }
