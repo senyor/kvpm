@@ -917,8 +917,8 @@ LogVolList LogVol::getRaidMetadataVolumes()
     return meta;
 }
 
-// Returns the lvm mirror than owns this mirror leg or mirror log. Returns
-// nullptr if this is not part of an lvm mirror volume.
+// Returns the mirror than owns this mirror leg or mirror log. Returns
+// nullptr if this is not part of a mirror volume.
 LogVolPointer LogVol::getParentMirror()
 {
     LogVol *mirror = this;
@@ -933,7 +933,7 @@ LogVolPointer LogVol::getParentMirror()
         if (mirror && mirror->isTemporary())  // under conversion temp mirror
             mirror = mirror->getParent();
 
-    } else if (isMirrorLeg()) {
+    } else if (isMirrorLeg()) {  // it's raid
         mirror = getParent();
     } else {
         mirror = nullptr;
