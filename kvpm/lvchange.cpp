@@ -78,35 +78,32 @@ LVChangeDialog::LVChangeDialog(LogVol *const volume, QWidget *parent) :
 QWidget *LVChangeDialog::buildGeneralTab()
 {
     QWidget *const tab = new QWidget();
-    QVBoxLayout *layout = new QVBoxLayout();
+    QVBoxLayout *const layout = new QVBoxLayout();
     tab->setLayout(layout);
 
-    QGroupBox *general_group = new QGroupBox();
-    QVBoxLayout *general_layout = new QVBoxLayout();
+    QGroupBox *const general_group = new QGroupBox();
+    QVBoxLayout *const general_layout = new QVBoxLayout();
     general_group->setLayout(general_layout);
     layout->addWidget(general_group);
 
-    m_available_check  = new QCheckBox(i18n("Make volume available for use"));
-    m_ro_check         = new QCheckBox(i18n("Make volume read only"));
-    m_refresh_check    = new QCheckBox(i18n("Refresh volume metadata"));
+    m_available_check = new QCheckBox(i18n("Make volume available for use"));
+    m_ro_check        = new QCheckBox(i18n("Make volume read only"));
+    m_refresh_check   = new QCheckBox(i18n("Refresh volume metadata"));
     general_layout->addWidget(m_available_check);
     general_layout->addWidget(m_ro_check);
     general_layout->addWidget(m_refresh_check);
-
-    if (m_lv->isActive())
-        m_available_check->setChecked(true);
+    
+    m_available_check->setChecked(m_lv->isActive());
+    m_ro_check->setChecked(!m_lv->isWritable());
 
     if (m_lv->isMounted() || m_lv->isCowSnap())
         m_available_check->setEnabled(false);
 
-    if (!m_lv->isWritable())
-        m_ro_check->setChecked(true);
-
     QGroupBox *const tag_group = new QGroupBox(i18n("Volume Tags"));
     layout->addWidget(tag_group);
-    QHBoxLayout *add_tag_layout = new QHBoxLayout();
-    QHBoxLayout *del_tag_layout = new QHBoxLayout();
-    QVBoxLayout *tag_group_layout = new QVBoxLayout();
+    QHBoxLayout *const add_tag_layout = new QHBoxLayout();
+    QHBoxLayout *const del_tag_layout = new QHBoxLayout();
+    QVBoxLayout *const tag_group_layout = new QVBoxLayout();
     tag_group_layout->addLayout(add_tag_layout);
     tag_group_layout->addLayout(del_tag_layout);
     tag_group->setLayout(tag_group_layout);
@@ -133,6 +130,7 @@ QWidget *LVChangeDialog::buildGeneralTab()
     if (!m_lv->isThinVolume()) {
         m_policy_combo = new PolicyComboBox(m_lv->getPolicy(), m_lv->getVg()->getPolicy());
         general_layout->addWidget(m_policy_combo);
+
         connect(m_policy_combo, SIGNAL(policyChanged(AllocationPolicy)), 
                 this, SLOT(resetOkButton()));
     } else {
@@ -155,12 +153,18 @@ QWidget *LVChangeDialog::buildAdvancedTab()
     m_udevsync_check = new QCheckBox(i18n("Synchronize with udev"));
     m_udevsync_check->setChecked(true);
     sync_layout->addWidget(m_udevsync_check);
-    m_resync_check = new QCheckBox(i18n("Re-synchronize mirrors"));
+    m_resync_check = new QCheckBox();
     m_resync_check->setEnabled(!m_lv->isMounted());
     sync_layout->addWidget(m_resync_check);
 
-    if (m_lv->isMirror()) {
-        connect(m_resync_check,     SIGNAL(clicked()), this, SLOT(resetOkButton()));
+    if (m_lv->isMirror() || m_lv->isRaid()) {
+        if (m_lv->isMirror())
+            m_resync_check->setText(i18n("Re-synchronize mirror"));
+        else
+            m_resync_check->setText(i18n("Re-synchronize RAID"));
+
+        connect(m_resync_check, SIGNAL(clicked()), 
+                this, SLOT(resetOkButton()));
     } else {
         m_resync_check->setEnabled(false);
         m_resync_check->hide();
@@ -244,13 +248,13 @@ QStringList LVChangeDialog::arguments()
     if (!m_lv->isCowSnap()) {
         if (m_available_check->isChecked() && (!m_lv->isActive()))
             args << "--available" << "y";
-        else if ((! m_available_check->isChecked()) && (m_lv->isActive()))
+        else if ((!m_available_check->isChecked()) && (m_lv->isActive()))
             args << "--available" << "n";
     }
 
     if (m_ro_check->isChecked() && m_lv->isWritable())
         args << "--permission" << "r";
-    else if ((! m_ro_check->isChecked()) && (! m_lv->isWritable()))
+    else if ((!m_ro_check->isChecked()) && (!m_lv->isWritable()))
         args << "--permission" << "rw";
 
     if (m_refresh_check->isChecked())
@@ -297,7 +301,7 @@ QStringList LVChangeDialog::arguments()
     if (!(m_tag_edit->text()).isEmpty())
         args << "--addtag" << m_tag_edit->text();
 
-    if (m_policy_combo != nullptr) {
+    if (m_policy_combo) {
         if (m_lv->getPolicy() != m_policy_combo->getPolicy())
             args << "--alloc" << policyToString(m_policy_combo->getPolicy());
     }
@@ -316,9 +320,9 @@ void LVChangeDialog::commit()
 void LVChangeDialog::resetOkButton()
 {
 
-    if (m_available_check->isChecked())
+    if (m_available_check->isChecked()) {
         m_polling_box->setEnabled(true);
-    else {
+    } else {
         m_polling_box->setEnabled(false);
         m_polling_box->setChecked(false);
     }
