@@ -28,21 +28,9 @@
 
 bool remove_mirror_leg(LogVol *mirrorLeg)
 {
-    QStringList args;
-    LogVol *parent_mirror = mirrorLeg->getParent();
-
-    while (parent_mirror->getParent() != NULL) {
-        if (parent_mirror->getParent()->isSnapContainer())
-            break;
-        else
-            parent_mirror = parent_mirror->getParent();
-    }
-
-    QStringList pvs_to_remove = mirrorLeg->getPvNamesAll();
-
     const QString warning = i18n("Remove mirror leg: %1 ?", mirrorLeg->getName());
 
-    if (KMessageBox::warningYesNo(NULL,
+    if (KMessageBox::warningYesNo(nullptr,
                                   warning,
                                   QString(),
                                   KStandardGuiItem::yes(),
@@ -50,11 +38,13 @@ bool remove_mirror_leg(LogVol *mirrorLeg)
                                   QString(),
                                   KMessageBox::Dangerous) == KMessageBox::Yes) {
 
+        QStringList args;
+
         args << "lvconvert"
              << "--mirrors"
              << QString("-1")
-             << parent_mirror->getFullName()
-             << pvs_to_remove;
+             << mirrorLeg->getParentMirror()->getFullName()
+             << mirrorLeg->getPvNamesAll();
 
         ProcessProgress remove(args);
         return true;
