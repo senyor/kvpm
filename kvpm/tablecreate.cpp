@@ -60,7 +60,7 @@ TableCreateDialog::TableCreateDialog(const QString devicePath, QWidget *parent) 
     KDialog(parent),
     m_device_path(devicePath)
 {
-    setWindowTitle(i18n("Create Partition Table"));
+    setCaption(i18n("Create Partition Table"));
 
     QWidget *const dialog_body = new QWidget(this);
     setMainWidget(dialog_body);
