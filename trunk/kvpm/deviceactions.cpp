@@ -202,7 +202,7 @@ void DeviceActions::changeDevice(QTreeWidgetItem *item)
                 vgcreate->setEnabled(false);
                 vgextendEnable(false);
                 vgreduce->setEnabled(false);
-                partflag->setEnabled(true);
+                partflag->setEnabled(false);
                 fsck->setEnabled(false);
             } else if (m_part->isPhysicalVolume()) {
                 max_fs->setEnabled(false);
