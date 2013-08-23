@@ -275,9 +275,10 @@ KToolBar* VolumeGroupTab::buildLvToolBar()
     toolbar->addAction(m_lv_actions->action("removemirror"));
     toolbar->addAction(m_lv_actions->action("removethis"));
     toolbar->addAction(m_lv_actions->action("repairmissing"));
+    toolbar->addAction(m_lv_actions->action("resync"));
+    toolbar->addSeparator();    
     toolbar->addAction(m_lv_actions->action("mount"));
     toolbar->addAction(m_lv_actions->action("unmount"));
-    toolbar->addSeparator();    
     toolbar->addAction(m_lv_actions->action("maxfs"));
     toolbar->addAction(m_lv_actions->action("fsck"));
     toolbar->addAction(m_lv_actions->action("mkfs"));

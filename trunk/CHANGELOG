@@ -1,3 +1,7 @@
+version -- next
+Added a dialog for resyncing mirrors and RAID volume in
+the menu and toolbar.
+
 version 0.9.7
 Put toolbars on the device tab for all the menu options
 available in the device context menu, except for extend
