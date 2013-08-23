@@ -40,7 +40,7 @@ PartitionFlagDialog::PartitionFlagDialog(StoragePartition *const partition, QWid
       m_storage_part(partition)
 {
     setButtons(KDialog::Ok | KDialog::Cancel | KDialog::Reset);
-    setWindowTitle((i18n("Set Partition Flags")));
+    setCaption((i18n("Set Partition Flags")));
 
     QWidget *const dialog_body = new QWidget(this);
     setMainWidget(dialog_body);

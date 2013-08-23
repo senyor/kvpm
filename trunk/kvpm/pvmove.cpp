@@ -187,7 +187,7 @@ void PVMoveDialog::buildDialog(QList<PhysVol *> targets)
     QLabel *label = nullptr;
     NoMungeRadioButton *radio_button = nullptr;
 
-    setWindowTitle(i18n("Move Physical Extents"));
+    setCaption(i18n("Move Physical Extents"));
     QWidget *const dialog_body = new QWidget(this);
     setMainWidget(dialog_body);
     QVBoxLayout *const layout = new QVBoxLayout;

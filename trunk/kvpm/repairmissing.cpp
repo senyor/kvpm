@@ -61,10 +61,10 @@ RepairMissingDialog::RepairMissingDialog(LogVol *const volume, QWidget *parent) 
         
         if(is_lvm) {
             lv_name_label->setText(i18n("<b>Repair mirror: %1</b>", m_lv->getName()));
-            setWindowTitle(i18n("Repair Mirror"));
+            setCaption(i18n("Repair Mirror"));
         } else if(is_raid) {
             lv_name_label->setText(i18n("<b>Repair RAID device: %1</b>", m_lv->getName()));
-            setWindowTitle(i18n("Repair RAID device"));
+            setCaption(i18n("Repair RAID device"));
         }
 
         lv_name_label->setAlignment(Qt::AlignCenter);

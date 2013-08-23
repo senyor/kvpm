@@ -131,7 +131,7 @@ void PartitionDialogBase::buildDialog()
     m_display_graphic = new PartitionGraphic(m_sector_size * max_size, m_is_new);
     
     setButtons(KDialog::Ok | KDialog::Cancel | KDialog::Reset);
-    setWindowTitle(i18n("Move or resize a partition"));
+    setCaption(i18n("Move or resize a partition"));
     
     QWidget *const dialog_body = new QWidget(this);
     setMainWidget(dialog_body);
