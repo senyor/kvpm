@@ -489,6 +489,13 @@ void LogVol::rescan(lv_t lvmLV, vg_t lvmVG)
 
     if (m_snap_container) {
         m_type = "origin";
+
+        if(flags.size() > 6){
+            if (flags[6] == 'r')
+                m_raid = true;
+            else if (flags[6] == 't')
+                m_thin = true;
+        }
     } else if (m_type.contains("origin", Qt::CaseInsensitive) && !m_snap_container) {
         if(flags.size() > 6){
             if (flags[6] == 'r')
