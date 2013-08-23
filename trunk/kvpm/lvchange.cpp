@@ -153,22 +153,6 @@ QWidget *LVChangeDialog::buildAdvancedTab()
     m_udevsync_check = new QCheckBox(i18n("Synchronize with udev"));
     m_udevsync_check->setChecked(true);
     sync_layout->addWidget(m_udevsync_check);
-    m_resync_check = new QCheckBox();
-    m_resync_check->setEnabled(!m_lv->isMounted());
-    sync_layout->addWidget(m_resync_check);
-
-    if (m_lv->isMirror() || m_lv->isRaid()) {
-        if (m_lv->isMirror())
-            m_resync_check->setText(i18n("Re-synchronize mirror"));
-        else
-            m_resync_check->setText(i18n("Re-synchronize RAID"));
-
-        connect(m_resync_check, SIGNAL(clicked()), 
-                this, SLOT(resetOkButton()));
-    } else {
-        m_resync_check->setEnabled(false);
-        m_resync_check->hide();
-    }
 
     m_polling_box = new QGroupBox(i18n("Change Volume Polling"));
     m_polling_box->setCheckable(true);
@@ -261,9 +245,6 @@ QStringList LVChangeDialog::arguments()
         args << "--refresh";
 
     if (m_lv->isCowSnap() || m_lv->isMirror() || m_lv->isRaid()) {
-        if (m_resync_check->isChecked())
-            args << "--resync";
-
         if (m_dmeventd_box->isChecked()) {
             if (m_monitor_button->isChecked())
                 args << "--monitor" << "y";

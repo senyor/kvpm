@@ -42,7 +42,6 @@ class LVChangeDialog : public KvpmDialog
     QCheckBox *m_available_check,    // Make the volume available
               *m_ro_check,           // make the volume read only
               *m_refresh_check,      // refresh the metadata
-              *m_resync_check,       // re-sync mirrors
               *m_udevsync_check,     // sync with udev
               *m_persistent_check;   // Set persistent kernel device numbers
 
