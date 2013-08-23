@@ -53,6 +53,7 @@ LVActionsMenu::LVActionsMenu(LVActions *const lvactions, QWidget *parent) :
     raid_menu->addAction(lvactions->action("removethis"));
     raid_menu->addSeparator();
     raid_menu->addAction(lvactions->action("repairmissing"));
+    raid_menu->addAction(lvactions->action("resync"));
     addMenu(raid_menu);
 
     KMenu *const fs_menu = new KMenu(i18n("Filesystem operations"), this);

@@ -34,6 +34,7 @@
 #include "repairmissing.h"
 #include "removemirror.h"
 #include "removemirrorleg.h"
+#include "resync.h"
 #include "snapmerge.h"
 #include "thincreate.h"
 #include "unmount.h"
@@ -178,9 +179,15 @@ LVActions::LVActions(VolGroup *const group, QWidget *parent) :
 
     KAction *const repair_missing = addAction("repairmissing");
     repair_missing->setIcon(KIcon("edit-bomb"));
-    repair_missing->setText(i18n("Repair volume..."));
+    repair_missing->setText(i18n("Repair RAID or mirror..."));
     repair_missing->setIconText(i18n("Repair"));
-    repair_missing->setToolTip(i18n("Repair raid or mirror volume"));
+    repair_missing->setToolTip(i18n("Repair RAID or mirror volume"));
+
+    KAction *const resync = addAction("resync");
+    resync->setIcon(KIcon("arrow_refresh"));
+    resync->setText(i18n("Resync RAID or mirror..."));
+    resync->setIconText(i18n("Resync"));
+    resync->setToolTip(i18n("Resync RAID or mirror volume"));
 
     setActions(nullptr, 0); 
 
@@ -629,12 +636,15 @@ void LVActions::setMirrorActions(LogVol *const lv)
     QAction *const change_log = action("changelog");
     QAction *const remove_this = action("removethis");
     QAction *const repair_missing = action("repairmissing");
+    QAction *const resync = action("resync");
 
     add_legs->setEnabled(true);
     change_log->setEnabled(true);
     remove_mirror->setEnabled(true);
     remove_this->setEnabled(true);
     repair_missing->setEnabled(true);
+
+    resync->setEnabled(false);
 
     if (lv && !m_vg->isExported()) {
 
@@ -644,6 +654,12 @@ void LVActions::setMirrorActions(LogVol *const lv)
             partial = lv->getParentMirror()->isPartial();
         else
             partial = lv->isPartial();
+
+        if (lv->isMirror() || lv->isRaid()) {
+            if (!(lv->isRaidImage() || lv->isRaidMetadata() || lv->isMirrorLeg() || 
+                  lv->isLvmMirrorLog() || lv->isTemporary()))   
+                resync->setEnabled(true);
+        }
 
         if (lv->isThinPool()) {
             add_legs->setEnabled(false);
@@ -856,6 +872,9 @@ void LVActions::callDialog(QAction *action)
             g_top_window->reRun();
     } else if (name == "removethis") {
         if (remove_mirror_leg(m_lv))
+            g_top_window->reRun();
+    } else if (name == "resync") {
+        if (resync(m_lv))
             g_top_window->reRun();
     } else {
         KvpmDialog *dialog = nullptr;
