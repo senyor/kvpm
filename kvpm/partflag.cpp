@@ -44,11 +44,9 @@ PartitionFlagDialog::PartitionFlagDialog(StoragePartition *const partition, QWid
 
     QWidget *const dialog_body = new QWidget(this);
     setMainWidget(dialog_body);
-
-
     QVBoxLayout *const layout = new QVBoxLayout();
 
-    QLabel *const label = new QLabel(i18n("<b>Set Partition Flags</b>"));
+    QLabel *const label = new QLabel(i18n("Set Partition Flags"));
     label->setAlignment(Qt::AlignCenter);
     layout->addWidget(label);
     layout->addSpacing(10);
@@ -95,6 +93,8 @@ PartitionFlagDialog::PartitionFlagDialog(StoragePartition *const partition, QWid
     if (!m_storage_part) {
         m_bailout = true;
     } else if (m_storage_part->isFreespace()) {
+        m_bailout = true;
+    } else if (m_storage_part->isExtended()) {
         m_bailout = true;
     } else {
         m_bailout = false;
