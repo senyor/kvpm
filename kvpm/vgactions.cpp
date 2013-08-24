@@ -127,7 +127,7 @@ void VGActions::setVg(VolGroup *vg)
     // only enable group removal if the tab is
     // a volume group with no logical volumes
 
-    if (vg) {
+    if (vg && !vg->openFailed()) {
 
         bool has_active = false;
         auto lvs = vg->getLogicalVolumes();

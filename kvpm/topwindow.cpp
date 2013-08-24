@@ -115,24 +115,24 @@ void TopWindow::updateTabs()
     }
     // if there is a new vg and no tab then create one
 
-    for (int y = 0; y < groups.size(); ++y) {
+    for (auto vg : groups) {
         vg_exists = false;
         for (int x = 1; x < m_tab_widget->getCount(); ++x) {
-            if (m_tab_widget->getUnmungedText(x) == groups[y]->getName()) {
+            if (m_tab_widget->getUnmungedText(x) == vg->getName()) {
                 vg_exists = true;
-                if (groups[y]->isPartial())
-                    m_tab_widget->setIcon(x, KIcon("exclamation"));
+                if (vg->isPartial() || vg->openFailed())
+                    m_tab_widget->setIcon(x, KIcon("dialog-warning"));
                 else
                     m_tab_widget->setIcon(x, KIcon());
             }
         }
 
         if (!vg_exists) {
-            tab = new VolumeGroupTab(groups[y]);
-            if (groups[y]->isPartial())
-                m_tab_widget->appendVolumeGroupTab(tab, KIcon("exclamation"), groups[y]->getName());
+            tab = new VolumeGroupTab(vg);
+            if (vg->isPartial() || vg->openFailed())
+                m_tab_widget->appendVolumeGroupTab(tab, KIcon("dialog-warning"), vg->getName());
             else
-                m_tab_widget->appendVolumeGroupTab(tab, KIcon(), groups[y]->getName());
+                m_tab_widget->appendVolumeGroupTab(tab, KIcon(), vg->getName());
         }
     }
 

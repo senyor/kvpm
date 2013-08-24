@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -17,6 +17,7 @@
 
 #include <KConfigSkeleton>
 #include <KGlobal>
+#include <KIcon>
 #include <KLocale>
 
 #include <QDebug>
@@ -29,7 +30,8 @@
 
 
 
-VGInfoLabels::VGInfoLabels(VolGroup *const group, QWidget *parent) : QFrame(parent)
+VGInfoLabels::VGInfoLabels(VolGroup *const group, QWidget *parent) : 
+    QFrame(parent)
 {
     QLabel *extent_size_label, *size_label, *used_label,
            *free_label, *lvm_fmt_label, *resizable_label,
