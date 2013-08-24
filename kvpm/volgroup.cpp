@@ -56,6 +56,7 @@ void VolGroup::rescan(lvm_t lvm)
     m_partial      = false;
     m_clustered    = false;
     m_active       = false;
+    m_open_failed  = false;
 
     // clustered volumes can't be opened when clvmd isn't running
 
@@ -106,6 +107,11 @@ void VolGroup::rescan(lvm_t lvm)
 
         lvm_vg_close(lvm_vg);
     } else {
+        if (QString(lvm_errmsg(lvm)).contains("cluster"))
+            m_clustered = true;
+
+        m_open_failed = true;
+
         for (int x = m_member_pvs.size() - 1; x >= 0; x--)
             delete m_member_pvs.takeAt(x);
 
@@ -364,6 +370,11 @@ bool VolGroup::isExported()
 bool VolGroup::isActive()
 {
     return m_active;
+}
+
+bool VolGroup::openFailed()
+{
+    return m_open_failed;
 }
 
 void VolGroup::processPhysicalVolumes(vg_t lvmVG)

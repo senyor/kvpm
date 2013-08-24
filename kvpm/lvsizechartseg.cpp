@@ -127,8 +127,7 @@ LVChartSeg::LVChartSeg(LogVol *const volume, const QString use, QWidget *parent)
             color = none_color;
 
         m_brush = QBrush(color, Qt::SolidPattern);
-    } else {
-
+    } else if (m_lv){
         if (m_lv->isLvmMirror())
             color = mirror_color;
         else if (m_lv->isRaid() && m_lv->isMirror())
