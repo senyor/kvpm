@@ -241,7 +241,7 @@ void LVActions::setActions(LogVol *const lv, const int segment)
     lv_rename->setText(i18n("Rename logical volume..."));
     lv_remove->setText(i18n("Delete logical volume..."));
 
-    if (m_vg->isExported()) {
+    if (m_vg->isExported() || m_vg->openFailed()) {
         lv_create->setEnabled(false);
         thin_pool->setEnabled(false);
         thin_create->setEnabled(false);

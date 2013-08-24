@@ -53,16 +53,18 @@ class VolumeGroupTab : public KMainWindow
     PVTree *m_pv_tree = nullptr;
     VGTree *m_vg_tree = nullptr;
     QFrame *m_partial_warning = nullptr;
+    QFrame *m_open_failed_warning = nullptr;
 
-    QFrame* buildPartialWarning();
+    QFrame *buildPartialWarning();
+    QFrame *buildOpenFailedWarning();
     void readConfig();
-    KToolBar* buildLvToolBar();
-    KToolBar* buildPvToolBar();
+    KToolBar *buildLvToolBar();
+    KToolBar *buildPvToolBar();
 
 public:
     explicit VolumeGroupTab(VolGroup *const group, QWidget *parent = nullptr);
-    VolGroup* getVg();
-    QMenu* createPopupMenu() { return nullptr; }
+    VolGroup *getVg();
+    QMenu *createPopupMenu() { return nullptr; }
     void rescan();
 
 public slots:

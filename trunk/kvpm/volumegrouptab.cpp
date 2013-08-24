@@ -28,6 +28,7 @@
 #include <KComponentData>
 #include <KConfigSkeleton>
 #include <KGlobal>
+#include <KIcon>
 #include <KLocale>
 #include <KSeparator>
 #include <KSharedConfig>
@@ -150,6 +151,18 @@ void VolumeGroupTab::rescan()
     else
         m_partial_warning->hide();
 
+    if (m_open_failed_warning) {
+        m_layout->removeWidget(m_open_failed_warning);
+        m_open_failed_warning->setParent(nullptr);
+        m_open_failed_warning->deleteLater();
+    }
+    m_open_failed_warning  = buildOpenFailedWarning();
+    m_layout->insertWidget(1, m_open_failed_warning);
+    if (m_vg->openFailed())
+        m_open_failed_warning->show();
+    else
+        m_open_failed_warning->hide();
+
     if (m_lv_size_chart) { // This needs to be after the vgtree is loaded
         m_layout->removeWidget(m_lv_size_chart);
         m_lv_size_chart->setParent(nullptr);
@@ -229,6 +242,44 @@ void VolumeGroupTab::readConfig()
         toolBar("lvtoolbar")->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
         toolBar("pvtoolbar")->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     }
+}
+
+
+QFrame* VolumeGroupTab::buildOpenFailedWarning()
+{
+    QFrame *const warning = new QFrame();
+    warning->setFrameStyle(QFrame::Sunken | QFrame::StyledPanel);
+    warning->setLineWidth(2);
+
+    QHBoxLayout *const warning_layout = new QHBoxLayout();
+    warning_layout->setSpacing(0);
+    warning_layout->setMargin(0);
+    QWidget *const background = new QWidget();
+    warning_layout->addWidget(background);
+    warning->setLayout(warning_layout);
+
+    QHBoxLayout *const layout = new QHBoxLayout();
+    background->setLayout(layout);
+
+    layout->addStretch();
+    QLabel *const icon_label = new QLabel();
+    icon_label->setPixmap(KIcon("dialog-warning").pixmap(32, 32));
+    layout->addWidget(icon_label);
+    layout->addSpacing(10);
+    QLabel *warning_label = new QLabel();
+
+    if (m_vg->isClustered())
+        warning_label = new QLabel(i18n("<b>Warning: clustered volume group could not be opened</b>"));
+    else
+        warning_label = new QLabel(i18n("<b>Warning: volume group could not be opened</b>"));
+
+    layout->addWidget(warning_label);
+    layout->addStretch();
+
+    background->setBackgroundRole(QPalette::Base);
+    background->setAutoFillBackground(true);
+
+    return warning;
 }
 
 QFrame* VolumeGroupTab::buildPartialWarning()
