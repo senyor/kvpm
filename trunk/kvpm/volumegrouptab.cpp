@@ -42,6 +42,7 @@
 #include "vginfolabels.h"
 #include "vgremove.h"
 #include "vgtree.h"
+#include "vgwarning.h"
 #include "volgroup.h"
 #include "lvactions.h"
 #include "lvactionsmenu.h"
@@ -57,6 +58,9 @@ VolumeGroupTab::VolumeGroupTab(VolGroup *const group, QWidget *parent) :
     setCentralWidget(central);
     m_layout = new QVBoxLayout;
     central->setLayout(m_layout);
+
+    m_vg_warning = new VGWarning();
+    m_layout->addWidget(m_vg_warning);
 
     QSplitter *const tree_splitter = new QSplitter(Qt::Vertical);
     QSplitter *const lv_splitter   = new QSplitter();
@@ -125,7 +129,7 @@ void VolumeGroupTab::rescan()
         m_vg_info_labels->deleteLater();
     }
     m_vg_info_labels = new VGInfoLabels(m_vg);
-    m_layout->insertWidget(0, m_vg_info_labels);
+    m_layout->insertWidget(1, m_vg_info_labels);
 
     m_lv_properties_stack->loadData();
     m_pv_properties_stack->loadData();
@@ -136,32 +140,9 @@ void VolumeGroupTab::rescan()
     connect(m_pv_tree, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)),
             m_pv_properties_stack, SLOT(changePVStackIndex(QTreeWidgetItem*, QTreeWidgetItem*)));
 
+    m_vg_warning->loadMessage(m_vg);
     m_vg_tree->loadData(); // This needs to be done after the lv property stack is built
     m_pv_tree->loadData(); // This needs to be done after the pv property stack is loaded
-
-    if (m_partial_warning) {
-        m_layout->removeWidget(m_partial_warning);
-        m_partial_warning->setParent(nullptr);
-        m_partial_warning->deleteLater();
-    }
-    m_partial_warning  = buildPartialWarning();
-    m_layout->insertWidget(1, m_partial_warning);
-    if (m_vg->isPartial())
-        m_partial_warning->show();
-    else
-        m_partial_warning->hide();
-
-    if (m_open_failed_warning) {
-        m_layout->removeWidget(m_open_failed_warning);
-        m_open_failed_warning->setParent(nullptr);
-        m_open_failed_warning->deleteLater();
-    }
-    m_open_failed_warning  = buildOpenFailedWarning();
-    m_layout->insertWidget(1, m_open_failed_warning);
-    if (m_vg->openFailed())
-        m_open_failed_warning->show();
-    else
-        m_open_failed_warning->hide();
 
     if (m_lv_size_chart) { // This needs to be after the vgtree is loaded
         m_layout->removeWidget(m_lv_size_chart);
@@ -242,63 +223,6 @@ void VolumeGroupTab::readConfig()
         toolBar("lvtoolbar")->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
         toolBar("pvtoolbar")->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     }
-}
-
-
-QFrame* VolumeGroupTab::buildOpenFailedWarning()
-{
-    QFrame *const warning = new QFrame();
-    warning->setFrameStyle(QFrame::Sunken | QFrame::StyledPanel);
-    warning->setLineWidth(2);
-
-    QHBoxLayout *const warning_layout = new QHBoxLayout();
-    warning_layout->setSpacing(0);
-    warning_layout->setMargin(0);
-    QWidget *const background = new QWidget();
-    warning_layout->addWidget(background);
-    warning->setLayout(warning_layout);
-
-    QHBoxLayout *const layout = new QHBoxLayout();
-    background->setLayout(layout);
-
-    layout->addStretch();
-    QLabel *const icon_label = new QLabel();
-    icon_label->setPixmap(KIcon("dialog-warning").pixmap(32, 32));
-    layout->addWidget(icon_label);
-    layout->addSpacing(10);
-    QLabel *warning_label = new QLabel();
-
-    if (m_vg->isClustered())
-        warning_label = new QLabel(i18n("<b>Warning: clustered volume group could not be opened</b>"));
-    else
-        warning_label = new QLabel(i18n("<b>Warning: volume group could not be opened</b>"));
-
-    layout->addWidget(warning_label);
-    layout->addStretch();
-
-    background->setBackgroundRole(QPalette::Base);
-    background->setAutoFillBackground(true);
-
-    return warning;
-}
-
-QFrame* VolumeGroupTab::buildPartialWarning()
-{
-    QFrame *const warning = new QFrame();
-    warning->setFrameStyle(QFrame::Sunken | QFrame::StyledPanel);
-    warning->setLineWidth(2);
-
-    QHBoxLayout *const layout = new QHBoxLayout();
-    layout->setSpacing(0);
-    layout->setMargin(0);
-    QLabel *const label = new QLabel(i18n("<b>Warning: Partial volume group, some physical volumes are missing</b>"));
-    label->setBackgroundRole(QPalette::Base);
-    label->setAutoFillBackground(true);
-    label->setAlignment(Qt::AlignCenter);
-    layout->addWidget(label);
-    warning->setLayout(layout);
-
-    return warning;
 }
 
 KToolBar* VolumeGroupTab::buildLvToolBar()
