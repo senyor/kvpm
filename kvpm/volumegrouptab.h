@@ -32,6 +32,7 @@ class PVPropertiesStack;
 class PVTree;
 class VGTree;
 class VGInfoLabels;
+class VGWarning;
 class LVSizeChart;
 class LVActions;
 class PVActions;
@@ -41,7 +42,8 @@ class LogVol;
 class VolumeGroupTab : public KMainWindow
 {
     Q_OBJECT
- 
+
+    VGWarning    *m_vg_warning = nullptr; 
     LVActions    *m_lv_actions = nullptr;
     PVActions    *m_pv_actions = nullptr;
     LVSizeChart  *m_lv_size_chart = nullptr;
@@ -52,11 +54,7 @@ class VolumeGroupTab : public KMainWindow
     PVPropertiesStack *m_pv_properties_stack = nullptr;
     PVTree *m_pv_tree = nullptr;
     VGTree *m_vg_tree = nullptr;
-    QFrame *m_partial_warning = nullptr;
-    QFrame *m_open_failed_warning = nullptr;
 
-    QFrame *buildPartialWarning();
-    QFrame *buildOpenFailedWarning();
     void readConfig();
     KToolBar *buildLvToolBar();
     KToolBar *buildPvToolBar();
