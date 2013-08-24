@@ -57,6 +57,7 @@ class VolGroup
     bool m_clustered;
     bool m_exported;
     bool m_partial;        // some physical volumes may be missing
+    bool m_open_failed;    // lvm couldn't open the vg, clustering without a working clvmd can do that
 
     lv_t findOrphan(QList<lv_t> &childList);
     void processLogicalVolumes(vg_t lvmVG);
@@ -99,6 +100,7 @@ public:
     bool isPartial();
     bool isExported();
     bool isActive();
+    bool openFailed();
 
 };
 
