@@ -103,12 +103,6 @@ VGInfoLabels::VGInfoLabels(VolGroup *const group, QWidget *parent) :
     else
         clustered = "No";
 
-    if (group->isExported()) {
-        hlayout2->addStretch();
-        hlayout2->addWidget(new QLabel(i18n("<b>Exported Volume Group</b>")));
-        hlayout2->addStretch();
-    }
-
     KConfigSkeleton skeleton;
     bool use_si_units;
 
