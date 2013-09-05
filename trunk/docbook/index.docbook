@@ -52,14 +52,14 @@ created by lvm2.
 
 <para>The KDE Logical Volume and Partition Manager can manipulate logical
 volumes, physical volumes and volume groups as defined by the Linux Logical
-Volume Manager, LVM2. It can also write a partion table or modify an existing
-one to add, delete or resize partitions. This guide assumes a basic knowlege of
+Volume Manager, LVM2. It can also write a partition table or modify an existing
+one to add, delete or resize partitions. This guide assumes a basic knowledge of
 LVM2 operation and disk partitioning. The following is a good starting point for
 learning the basics of LVM2: <ulink url="http://tldp.org/HOWTO/LVM-HOWTO">http://tldp.org/HOWTO/LVM-HOWTO/</ulink></para>
 
 <para>Currently most LVM functions are implemented by the standard lvm command
 line programs. KDE dialog boxes are used to determine the parameters to pass the
-program. If you are already using lvm on the command line the dialogs will
+program. If you are already using lvm on the command line the dialogues will
 probably seem familiar. For example this is the dialog to change a logical
 volume's attributes:
 
@@ -106,7 +106,7 @@ will look something like this:</para>
 <para>The devices found are listed in the large tree list to the left. Clicking
   the &LMB; to select a device brings up additional information on the
   properties pane to the right. The colored bar across the top of the tab also
-  gives a visual of the partitoning of the highlighted device. Clicking the
+  gives a visual of the partitioning of the highlighted device. Clicking the
   &RMB; over the name of a device calls
   the <link linkend="storage-device-menu">context menu</link> of actions that
   can be taken on that device. Any action that can be called from the context
@@ -151,7 +151,7 @@ group, with the group name on the tab.</para>
 <sect2 id="typical-volume-group-info">
 <title>Volume Group Information Panel</title>
 
-<para>Across the top of the window, below the toobar, is an information panel
+<para>Across the top of the window, below the toolbar, is an information panel
 about the volume group as a whole.  It shows the size of the group, the amount
 of space used up and how much is still left.  There are also entries for the
 uuid, clustering status, default allocation policy, metadata areas, whether
@@ -193,7 +193,7 @@ or collapse the branch if the item has more items under it.</para>
 </sect2>
 
 <sect2 id="typical-volume-group-pvtree">
-<title>Physcial Volume Information</title> <para>The last two panels at the
+<title>Physical Volume Information</title> <para>The last two panels at the
 bottom deal with physical volumes. The left tree list shows the physical volumes
 by name with basic information, while the right panel gives more detailed
 information. Clicking the &RMB; on the name list brings up a context menu of
@@ -210,7 +210,7 @@ actions that can be taken on the physical volume.</para>
 <title>Working With Storage Devices</title>
 <para>Nearly any action that can be taken on a device is done from the device
 context menu, discussed next, or the equivalent tool bar. It has menu entries for
-the creation, deletion, extention and reduction of partitions and a variety of
+the creation, deletion, extension and reduction of partitions and a variety of
 other changes that can be made to a device. There is also a sub-menu for
 working with or writing filesystems on the device.</para>
 </sect1>
@@ -218,13 +218,14 @@ working with or writing filesystems on the device.</para>
 <sect1 id="storage-device-menu">
 <title>The Storage Device Context Menu</title>
 
-<para>This is a popup menu activated with the &RMB;. See <link
+<para>This is a pop-up menu activated with the &RMB;. See <link
 linkend="storage-device-bar">The Storage Device Bar</link> and <link
 linkend="storage-device-tree">The Storage Device Tree</link> for
 information on calling this context menu.</para>
 
-<note><para>The device context menu operates on both whole devices and on
-partitions of devices.</para></note>
+<caution><para>Partitioning is inherently dangerous. It is highly recommended
+    that all data be backed up before making any changes to a device or its
+    partitions.</para></caution>
 
 <variablelist>
 <varlistentry>
@@ -232,14 +233,16 @@ partitions of devices.</para></note>
 <guimenuitem>Create or remove a partition table</guimenuitem>
 </menuchoice></term>
 <listitem><para>Writes a new partition table to the device or erases an existing
-    table.</para></listitem>
+    table. Both GUID (GPT) and traditional MS-DOS type tables are supported. Any
+    partitions or data on the device will be permanently lost.</para></listitem>
 </varlistentry>
 
 <varlistentry>
 <term><menuchoice>
 <guimenuitem>Delete disk partition</guimenuitem>
 </menuchoice></term>
-<listitem><para>Deletes a partition on the device.</para></listitem>
+<listitem><para>Deletes a partition on the device. Any data on it will be
+    lost permanently.</para></listitem>
 </varlistentry>
 
 <varlistentry>
@@ -267,7 +270,7 @@ partitions of devices.</para></note>
 <term><menuchoice>
 <guimenuitem>Extend physical volume to fill device</guimenuitem>
 </menuchoice></term>
-<listitem><para>If the partition or device is larger than the physical volume
+<listitem><para>If the device or partition is larger than the physical volume
     thinks it is, this will extend the volume.</para></listitem>
 </varlistentry>
 
@@ -275,21 +278,24 @@ partitions of devices.</para></note>
 <term><menuchoice>
 <guimenuitem>Create volume group</guimenuitem>
 </menuchoice></term>
-<listitem><para>Create a new volume group using the selected device.</para></listitem>
+<listitem><para>Create a new volume group using the selected device or
+    partition.</para></listitem>
 </varlistentry>
 
 <varlistentry>
 <term><menuchoice>
 <guimenuitem>Remove from volume group</guimenuitem>
 </menuchoice></term>
-<listitem><para>Remove the device from its volume group.</para></listitem>
+<listitem><para>Remove the device or partition from the its volume
+    group.</para></listitem>
 </varlistentry>
 
 <varlistentry>
 <term><menuchoice>
 <guimenuitem>Extend volume group</guimenuitem>
 </menuchoice></term>
-<listitem><para>Add the device to a volume group.</para></listitem>
+<listitem><para>Add the device or partition to an existing volume
+    group.</para></listitem>
 </varlistentry>
 </variablelist>
 
@@ -297,8 +303,8 @@ partitions of devices.</para></note>
 <title>Filesystem Operations On Devices</title>
 
 <para>The Filesystem operations sub-menu provides five common menu selections
-for working with a filesystem.</para>
-<para>Details are provided under <link linkend="filesystems-menu">Filesystem Operations</link>.</para>
+    for working with a filesystem. Details are provided
+    under <link linkend="filesystems-menu">Filesystem Operations</link>.</para>
 
 </sect2>
 </sect1>
@@ -306,8 +312,8 @@ for working with a filesystem.</para>
 <sect1 id="adding-partition">
 <title>Adding a new partition</title>
 
-<para>To add a new partition select <guimenuitem>Add Disk
-    Partition</guimenuitem> from the <link linkend="storage-device-menu">storage
+<para>To add a new partition select <guimenuitem>Add disk
+    partition</guimenuitem> from the <link linkend="storage-device-menu">storage
     device context menu</link> or the tool bar on the devices tab.</para>
 
 <screenshot>
@@ -322,6 +328,10 @@ for working with a filesystem.</para>
 	</mediaobject>
 </screenshot>
 
+<para>At the top is a graphic that represents the size and position of the new
+    partition relative to the free space it is going into. The blue bar is the
+    partition and the green is the left over space around it.</para>
+
 <para>The combo box labeled <quote>Select type</quote> can be set to Primary,
     Logical or Extended if the partition table is MS-DOS. If it is a GUID
     partition table (GPT) only Primary is allowed and the combo box is
@@ -335,10 +345,64 @@ for working with a filesystem.</para>
     partition's starting position. By default the partition will be as large as
     the available free space.</para>
 
-<para>The start of the partition is measured from the beginning of the free
-    space the partition is going into. Starting at zero puts the partition a
-    the beginning of the free space and is also the default. The start can be
-    locked to prevent it from changing if the partition size is increased.</para>
+<para>By default the partition will start at the beginning of available free
+    space on the device. By unchecking <guibutton>Lock partition
+    start</guibutton> the partition can be placed anywhere in the free
+    space. If the partition size is not locked changing the start may make the
+    partition smaller. Conversely, making the partition larger after setting
+    the start may move the start towards zero if the start is not locked. </para>
+
+<para>Clicking <guibutton>Reset</guibutton> will make the partition as large as
+    possible.</para>
+
+</sect1>
+
+
+
+
+
+<sect1 id="changing-partition">
+<title>Changing an existing partition</title>
+
+<para>To change a partition select <guimenuitem>Move or resize disk
+    partition</guimenuitem> from the <link linkend="storage-device-menu">storage
+    device context menu</link> or the tool bar on the devices tab.</para>
+
+<screenshot>
+<screeninfo>This is a screenshot of a dialog for creating a new volume partition.</screeninfo>
+	<mediaobject>
+	  <imageobject>
+	    <imagedata fileref="changepart.png" format="PNG"/>
+	  </imageobject>
+	    <textobject>
+	    <phrase>add a disk partition</phrase>
+	  </textobject>
+	</mediaobject>
+</screenshot>
+
+<para>At the top is a graphic that represents the size and position of the
+    partition relative to any free space around it. The blue bar is the
+    partition and the green is the available free space. The text below
+    indicates the partition is going to be moved 512 megabytes towards the
+    start of the disk and will be 512 megabytes larger.</para>
+
+<para>The size of the partition can be set with the upper slider or can be typed
+    directly into the text box above it. A combo box next to the text box
+    changes the input numerical value between megabytes, gigabytes and
+    terabytes. Once the size is set it can be locked before setting the
+    partition's starting position.</para>
+
+<para>By unchecking <guibutton>Lock partition start</guibutton> the partition
+    can be placed anywhere in the free space. If the partition size is not
+    locked changing the start may make the partition smaller. Conversely, making
+    the partition larger after setting the start may move the start towards zero
+    if the start is not locked. </para>
+
+<para>Clicking <guibutton>Reset</guibutton> will reset the partition to its
+    original size and starting point.</para>
+
+<note><para>Not all filesystem types can grow or shrink so some operations may
+    not be available.</para></note>
 
 </sect1>
 </chapter>
@@ -351,14 +415,14 @@ for working with a filesystem.</para>
 
 <para>Most actions that can be taken on a Volume Group are done from the
 <guimenu>Volume Groups</guimenu> menu discussed next. It has menu entries for
-the creation, deletion, extention and reduction of Volume Groups and a variety
+the creation, deletion, extension and reduction of Volume Groups and a variety
 of other changes that can be made.</para>
 
 <para>The <guimenu>Volume Groups</guimenu> Menu is located at the top of the
 main program window.  Except for <guimenu>Create volume group</guimenu> all of
 the menu choices act on the currently selected volume group tab. If the <guilabel>Storage
 devices</guilabel> tab is selected, or there are no existing volume groups, 
-only the <guimenu>Create volume group</guimenu> choice will be availabe.</para>
+only the <guimenu>Create volume group</guimenu> choice will be available.</para>
 
 </sect1>
 
@@ -393,7 +457,7 @@ only the <guimenu>Create volume group</guimenu> choice will be availabe.</para>
 <varlistentry>
 <term><menuchoice>
 <guimenu>Volume Groups</guimenu>
-<guimenuitem>Remove mising physical volumes</guimenuitem>
+<guimenuitem>Remove missing physical volumes</guimenuitem>
 </menuchoice></term>
 <listitem><para>Remove any missing physical volumes. This may cause data loss, use with caution</para></listitem>
 </varlistentry>
@@ -572,7 +636,7 @@ made to the group.</para>
 
 <para>Nearly any action that can be taken on a logical volume is done from the
 logical volume context menu discussed next or the equivalent tool bar. It
-has menu entries for the creation, deletion, extention and reduction of logical
+has menu entries for the creation, deletion, extension and reduction of logical
 volumes and a variety of other changes that can be made to a volume. There are
 also two sub menus, one for changes in mirroring and another for handling or
 writing filesystems on the volume.</para>
@@ -581,7 +645,7 @@ writing filesystems on the volume.</para>
 <sect1 id="logical-volume-menu">
 <title>The Logical Volume Context Menu</title>
 
-<note><para>This is a popup menu activated with the &RMB;. See <link
+<note><para>This is a pop-up menu activated with the &RMB;. See <link
 linkend="typical-volume-group-colors">The Logical Volume Bar</link> and <link
 linkend="typical-volume-group-vgtree">The Logical Volume Tree</link> for
 information on calling this context menu</para></note>
@@ -741,7 +805,7 @@ for working with a filesystem.</para>
 created in it. Select the tab titled with the name of the volume group you wish
 to work with first. Then a dialog can be called up by right clicking on the long
 green bar or the (still empty) table below it and selecting <guibutton>Create
-logical volume</guibutton>. The toolar also has an equivalent button. I have
+logical volume</guibutton>. The toolbar also has an equivalent button. I have
 called the volume <quote>VolumeOne</quote> and it will take 20 GiB of the available space. </para>
 
 <screenshot>
@@ -810,7 +874,7 @@ context menu.</para>
 <guimenu>Filesystem operations</guimenu>
 <guimenuitem>Unmount</guimenuitem>
 </menuchoice></term>
-<listitem><para>Unmount the filesytem.</para></listitem>
+<listitem><para>Unmount the filesystem.</para></listitem>
 </varlistentry>
 
 <varlistentry>
@@ -847,7 +911,7 @@ context menu.</para>
 <sect2 id="filesystems-mount-type">
 <title>Filesystem Type</title>
 
-<para>The main tab of the filesystem mount dialog provives a list of the most
+<para>The main tab of the filesystem mount dialog provides a list of the most
 common filesystem types that may be selected. The dialog attempts to identify
 the type and check the correct radio button in advance. If needed the user may
 select <guimenuitem>Specify other</guimenuitem> and write the correct type into
@@ -871,7 +935,7 @@ mount a filesystem at multiple locations.</para>
 <sect2 id="filesystems-mount-options">
 <title>Mount Options</title>
 
-<para>The options tab of the filesystem mount dialog provives a list of the most
+<para>The options tab of the filesystem mount dialog provides a list of the most
 common mount options and a place to write in a comma separated list of any
 additional options required. If unsure, it is generally safe to leave these at
 the default.</para>
@@ -894,7 +958,7 @@ the default.</para>
 
 <para>In the following dialog the device <quote>/dev/MyVolumeGroup/MyVolume</quote> has been
 selected to write a new filesystem on. The type <quote>ext4</quote> has been
-chosen and the begining of the volume will be zeroed out to erase the old
+chosen and the beginning of the volume will be zeroed out to erase the old
 filesystem.</para>
 
 <screenshot>
@@ -912,7 +976,7 @@ filesystem.</para>
 <para>If ext2, ext3 or ex4 are selected the <guilabel>Standard Ext
 Options</guilabel> tab will be enabled. Selecting ext4 also enables the tab
 labeled <guilabel>Additional Ext4 Options.</guilabel> This dialog may also be
-used to create linux swap space. Most filesystem types also allow an optional
+used to create Linux swap space. Most filesystem types also allow an optional
 short text label which can be supplied here.</para>
 
 <note><para>It is not necessary to erase the old filesystem but doing so
@@ -975,7 +1039,7 @@ linkend="programs">Programs</link>. </para></note>
   </varlistentry>
   <varlistentry>
     <term><guimenu>Colors</guimenu></term>
-    <listitem><para>Configures the colors used to represent diffent types of
+    <listitem><para>Configures the colors used to represent different types of
     filesystem or types of partitions and volumes.</para></listitem>
   </varlistentry>
   <varlistentry>
@@ -1001,9 +1065,9 @@ configuration may be reverted to the default simply by pressing the
 <title>Tree Views</title>
 
 <para>The columns of each tree my be hidden or shown as desired by clicking on
-the appropriate checkbox. For example, to hide the mount point column in the
+the appropriate check box. For example, to hide the mount point column in the
 device tree, find the section titled <guimenuitem>Device Tree</guimenuitem> and
-uncheck the check box labed <guimenuitem>Mount point</guimenuitem>. Some
+uncheck the check box labeled <guimenuitem>Mount point</guimenuitem>. Some
 information, such as stripe size, is duplicated in the property panel and may be
 hidden by default in the tree view. The amount of space left on a device or
 volume may be set to show as a percentage of the the total space, in
