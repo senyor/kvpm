@@ -7,3 +7,4 @@ X-KDE-SubstituteUID=true
 Type=Application
 Categories=Qt;KDE;System;
 Icon=kvpm
+X-DocPath=kvpm/index.html

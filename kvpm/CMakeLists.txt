@@ -18,7 +18,7 @@ set(kvpm_SRCS allocationpolicy.cpp changemirror.cpp kvpmconfigdialog.cpp devicep
 	      vgimport.cpp vgcreate.cpp vgextend.cpp vginfolabels.cpp vgactions.cpp
 	      vgreduce.cpp vgremove.cpp vgtree.cpp volgroup.cpp vgwarning.cpp
 	      vgrename.cpp volumegrouptab.cpp vgsplit.cpp vgmerge.cpp)
- 
+
 kde4_add_executable(kvpm ${kvpm_SRCS})
 target_link_libraries(kvpm ${KDE4_KDEUI_LIBS} ${KDE4_KFILE_LIBS} ${QT_LIBRARIES} blkid parted lvm2app)
 
