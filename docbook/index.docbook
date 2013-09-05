@@ -99,23 +99,41 @@ will look something like this:</para>
 	</mediaobject>
 </screenshot>
 
-<para>The devices found are listed in the large tree list to the left.
-Clicking the &LMB; to select a device brings up additional information on the
-properties pane to the right. The colored bar across the top of the tab gives a
-visual of the partitoning of the device. The colors indicate the filesystem
-type, ext4 or swap for instance, in use on the partition. In the upper right
-corner is a progress bar.</para>
 
-<para>Most &kvpm; device related functions can be accessed from a context
-menu. Right-clicking on a device in the tree list of devices will call up the
-context menu.</para>
+<sect2 id="storage-device-tree">
+<title>Storage Device Tree</title>
+
+<para>The devices found are listed in the large tree list to the left. Clicking
+  the &LMB; to select a device brings up additional information on the
+  properties pane to the right. The colored bar across the top of the tab also
+  gives a visual of the partitoning of the highlighted device. Clicking the
+  &RMB; over the name of a device calls
+  the <link linkend="storage-device-menu">context menu</link> of actions that
+  can be taken on that device. Any action that can be called from the context
+  menu can also be called from the toolbar by selecting the device desired with
+  the &LMB; and then pressing a button on the toolbar</para>
+</sect2>
+
+<sect2 id="storage-device-bar">
+<title>Storage Device Bar</title>
+<para>The device represented by the colored bar across the top is the one
+  currently selected in the device tree, as described above. Each partition is
+  represented by a segment of the bar. Right-clicking on a segment or free space
+  on the device will call a context menu of partitioning operations. The colors
+  indicate either the filesystem type in use on the partition or the type of
+  partition. By default the partition type determines color but it is a user
+  configuration option. Clicking the &RMB; over a device or partition calls
+  the <link linkend="storage-device-menu">context menu</link> of actions that
+  can be taken on it.
+</para>
+</sect2>
 </sect1>
 
 <sect1 id="getting-started-kvpm-group">
 <title>A Volume Group Tab</title>
 
-<para>Below in an example of a volume group called <quote>MyVolumeGroup.</quote>
-If more than one group exists additional tabs are used, one for each
+<para>Below in an example of a volume group called  <quote>vg1.</quote>
+If more than one group exists, additional tabs are used, one for each
 group, with the group name on the tab.</para>
 
 <screenshot>
@@ -133,21 +151,22 @@ group, with the group name on the tab.</para>
 <sect2 id="typical-volume-group-info">
 <title>Volume Group Information Panel</title>
 
-<para>Across the top of the window is an information panel about the volume
-group as a whole.  It shows the size of the group, the amount of space used up
-and how much is still left.  There are also entries for the uuid, clustering
-status, default allocation policy, metadata areas, whether resizing is allowed
-and the extent size.</para>
+<para>Across the top of the window, below the toobar, is an information panel
+about the volume group as a whole.  It shows the size of the group, the amount
+of space used up and how much is still left.  There are also entries for the
+uuid, clustering status, default allocation policy, metadata areas, whether
+resizing is allowed and the extent size.</para>
 </sect2>
 
 <sect2 id="typical-volume-group-colors">
 <title>The Logical Volume Bar</title>
 
 <para>Below the volume group information panel is a graphical representation of
-the group in the form of a bar divided into segments. There are four logical
+the group in the form of a bar divided into segments. There are three logical
 volumes in this group. Each volume is represented by a bar segment according to
 its relative size and has a color representing the filesystem, if it has
-one. The last segment of the bar is green and depicts the free space
+one, or the type of logical volume, depending on the user's configuration
+preference. The last segment of the bar is green and depicts the free space
 remaining. Clicking the &RMB; on a segment of the bar calls the <link
 linkend="logical-volume-menu">context menu</link> of actions that can be taken
 on the logical volume that was clicked. The menu also has an entry for creating
@@ -157,13 +176,15 @@ new volumes.</para>
 <sect2 id="typical-volume-group-vgtree">
 <title>Logical Volume Tree</title>
 
-<para>The large tree list at center left show the logical volumes by name, along
+<para>The large tree list at center left shows the logical volumes by name, along
 with some information about them. Selecting a name in the list window shows
-additional information about that volume in the pane to its right. Here, the
-volume Vol02 is selected. Clicking the &RMB; over the name of a volume calls the
+additional information about that volume in the pane on the right right. Here, the
+volume lvol1 is selected. Clicking the &RMB; over the name of a volume calls the
 <link linkend="logical-volume-menu">context menu</link> of actions that can be
 taken on that logical volume. There is also an entry in the menu for creating
-new volumes.</para>
+new volumes. Any action that can be called from the context menu can also be
+called from the toolbar by selecting the volume desired with the &LMB; and then
+pressing a button on the toolbar</para>
 
 <para>Because volumes often have an underlying structure, such as segments or
 mirror legs, the logical volumes are listed in tree form. Snapshots are also
@@ -182,6 +203,107 @@ actions that can be taken on the physical volume.</para>
 
 </chapter>
 
+<chapter id="storage-devices">
+<title>Storage Devices</title>
+
+<sect1 id="storage-devices-intro">
+<title>Working With Storage Devices</title>
+<para>Nearly any action that can be taken on a device is done from the device
+context menu, discussed next, or the equivalent tool bar. It has menu entries for
+the creation, deletion, extention and reduction of partitions and a variety of
+other changes that can be made to a device. There is also a sub-menu for
+working with or writing filesystems on the device.</para>
+</sect1>
+
+<sect1 id="storage-device-menu">
+<title>The Storage Device Context Menu</title>
+
+<para>This is a popup menu activated with the &RMB;. See <link
+linkend="storage-device-bar">The Storage Device Bar</link> and <link
+linkend="storage-device-tree">The Storage Device Tree</link> for
+information on calling this context menu.</para>
+
+<note><para>The device context menu operates on both whole devices and on
+partitions of devices.</para></note>
+
+<variablelist>
+<varlistentry>
+<term><menuchoice>
+<guimenuitem>Create or remove a partition table</guimenuitem>
+</menuchoice></term>
+<listitem><para>Writes a new partition table to the device or erases an existing
+    table.</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><menuchoice>
+<guimenuitem>Delete disk partition</guimenuitem>
+</menuchoice></term>
+<listitem><para>Deletes a partition on the device.</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><menuchoice>
+<guimenuitem>Add disk partition</guimenuitem>
+</menuchoice></term>
+<listitem><para>Creates a new partition on the device.</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><menuchoice>
+<guimenuitem>Move or resize disk partition</guimenuitem>
+</menuchoice></term>
+<listitem><para>Move, grow or shrink an existing partition.</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><menuchoice>
+<guimenuitem>Change partition flags</guimenuitem>
+</menuchoice></term>
+<listitem><para>Changes flags, such as the boot flag.</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><menuchoice>
+<guimenuitem>Extend physical volume to fill device</guimenuitem>
+</menuchoice></term>
+<listitem><para>If the partition or device is larger than the physical volume
+    thinks it is, this will extend the volume.</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><menuchoice>
+<guimenuitem>Create volume group</guimenuitem>
+</menuchoice></term>
+<listitem><para>Create a new volume group using the selected device.</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><menuchoice>
+<guimenuitem>Remove from volume group</guimenuitem>
+</menuchoice></term>
+<listitem><para>Remove the device from its volume group.</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><menuchoice>
+<guimenuitem>Extend volume group</guimenuitem>
+</menuchoice></term>
+<listitem><para>Add the device to a volume group.</para></listitem>
+</varlistentry>
+</variablelist>
+
+<sect2 id="storage-device-filesystems-menu">
+<title>Filesystem Operations On Devices</title>
+
+<para>The Filesystem operations sub-menu provides five common menu selections
+for working with a filesystem.</para>
+<para>Details are provided under <link linkend="filesystems-menu">Filesystem Operations</link>.</para>
+
+</sect2>
+</sect1>
+</chapter>
+
 <chapter id="volume-group">
 <title>Volume Groups</title>
 
@@ -195,10 +317,9 @@ of other changes that can be made.</para>
 
 <para>The <guimenu>Volume Groups</guimenu> Menu is located at the top of the
 main program window.  Except for <guimenu>Create volume group</guimenu> all of
-the menu choices act on the current volume group. The current group is the one
-inside the tab selected on the main window. If the <guilabel>Storage
-devices</guilabel> tab is selected, only the <guimenu>Create volume
-group</guimenu> choice will be availabe.</para>
+the menu choices act on the currently selected volume group tab. If the <guilabel>Storage
+devices</guilabel> tab is selected, or there are no existing volume groups, 
+only the <guimenu>Create volume group</guimenu> choice will be availabe.</para>
 
 </sect1>
 
@@ -320,17 +441,64 @@ present on the main window.</para>
 </screenshot>
 
 <note><para>Because &kvpm; uses the lvm2app library to create volume groups, not
-all options of the command "lvcreate" are available here yet. Some, such a
+all options of the command <quote>lvcreate</quote> are available here yet. Some, such a
 clustering, need to be selected from the <menuchoice><guimenu>Volume
 Groups</guimenu><guimenuitem>Change volume group
 attributes</guimenuitem></menuchoice> dialog discussed later.</para></note>
+</sect1>
+
+<sect1 id="volume-group-split">
+<title>Splitting A Volume Group</title> <para> By selecting <menuchoice><guimenu>Volume
+Groups</guimenu><guimenuitem>Split Volume Group</guimenuitem></menuchoice> a
+volume group can be split into two groups.</para>
+
+<screenshot>
+<screeninfo>This is a screenshot of the volume group split dialog.</screeninfo>
+	<mediaobject>
+	  <imageobject>
+	    <imagedata fileref="vgsplit.png" format="PNG"/>
+	  </imageobject>
+	    <textobject>
+	    <phrase>split a volume group</phrase>
+	  </textobject>
+	</mediaobject>
+</screenshot>
+
+<para>The dialog has two views. One view shows which logical volumes will remain
+  in the original group and those being moved to the new group. The other view
+  shows the physical volumes that will be in each group. All volumes will start
+  in the original group. By selecting a volume with the &LMB; and then
+  pressing <guibutton>Add</guibutton> or <guibutton>Remove</guibutton> they may
+  be moved as needed. The new group must be given a name, which can be entered
+  at the top. Any physical volume that has a busy or mounted logical volume on
+  it will be greyed out and moving it will be disabled.</para>
+
+<note><para>Moving a volume between groups may cause other volumes to move as
+  well. When a logical volume is moved it takes all of its physical volumes with
+  it because they cannot be split across groups. That, in turn, may pull other
+  volumes. In the same fashion, one volume that is mounted and can't be moved may
+  cause others to become impossible to move.</para></note>
+</sect1>
+
+<sect1 id="volume-group-remove-missing">
+<title>Remove Missing Physical Volumes</title>
+<para> By selecting <menuchoice><guimenu>Volume
+  Groups</guimenu><guimenuitem>Remove missing volumes</guimenuitem></menuchoice>
+  a volume group with missing physical volumes, a failed disk drive for example,
+  can have them permanently removed. This dialog has only two options, either
+  all missing volumes will be removed or only those that were empty and
+  unused. If removing all missing volumes is chosen and some of the missing
+  volumes had logical volumes or thin pools on them then any unmirrored data
+  they held will be permanently deleted.</para>
+
+<warning><para>Removing missing volumes can result in data loss</para></warning>
 </sect1>
 
 <sect1 id="volume-group-changes">
 <title>Changing a Volume Group</title> <para> By first selecting the tab called
 MyVolumeGroup and then <guibutton>Volume Groups</guibutton> a wide variety of
 changes can be made to the group. It is also possible, and sometimes more
-convenient, to create a new group from this menu</para>
+convenient, to create a new group from this menu.</para>
 
 <screenshot>
 <screeninfo>This is a screenshot of the volume group change dialog.</screeninfo>
@@ -345,9 +513,9 @@ convenient, to create a new group from this menu</para>
 </screenshot>
 
 <note><para>Most Volume group attributes may be changed here with some
-restrictions. For example: changes in the extent size depend on the alignment
-of allocated extents, so some sizes my not be possible. A volume group can not
-be made unavailable if it contains mounted or otherwise busy volumes and the
+restrictions. For example: changes in the extent size depend on the alignment of
+allocated extents, so some sizes my not be possible. A volume group can not be
+made unavailable if it contains mounted or otherwise busy volumes and the
 allocation policy is only a default and can be overridden by most
 commands. </para></note>
 </sect1>
@@ -360,11 +528,11 @@ commands. </para></note>
 <title>Working With Logical Volumes</title>
 
 <para>Nearly any action that can be taken on a logical volume is done from the
-logical volume context menu discussed next. It has menu entries for the creation,
-deletion, extention and reduction of logical volumes and a variety of other
-changes that can be made to a volume. There are also two sub menus, one for
-changes in mirroring and another for handling or writing filesystems on the
-volume.</para>
+logical volume context menu discussed next or the equivalent tool bar. It
+has menu entries for the creation, deletion, extention and reduction of logical
+volumes and a variety of other changes that can be made to a volume. There are
+also two sub menus, one for changes in mirroring and another for handling or
+writing filesystems on the volume.</para>
 </sect1>
 
 <sect1 id="logical-volume-menu">
@@ -385,16 +553,30 @@ information on calling this context menu</para></note>
 
 <varlistentry>
 <term><menuchoice>
-<guimenuitem>Remove logical volume</guimenuitem>
+<guimenuitem>Create thin pool</guimenuitem>
 </menuchoice></term>
-<listitem><para>Deletes the logical volume.</para></listitem>
+<listitem><para>Creates a new pool for thin provisioned logical volumes.</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><menuchoice>
+<guimenuitem>Create thin volume</guimenuitem>
+</menuchoice></term>
+<listitem><para>Creates a new thin provisioned logical volume.</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><menuchoice>
+<guimenuitem>Delete logical volume</guimenuitem>
+</menuchoice></term>
+<listitem><para>Deletes the selected logical volume, thin pool or thin volume.</para></listitem>
 </varlistentry>
 
 <varlistentry>
 <term><menuchoice>
 <guimenuitem>Rename logical volume</guimenuitem>
 </menuchoice></term>
-<listitem><para>Changes the name of the logical volume.</para></listitem>
+<listitem><para>Renames the logical volume, thin pool or thin volume.</para></listitem>
 </varlistentry>
 
 <varlistentry>
@@ -402,6 +584,13 @@ information on calling this context menu</para></note>
 <guimenuitem>Create snapshot</guimenuitem>
 </menuchoice></term>
 <listitem><para>Creates a snapshot volume based on the selected volume.</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><menuchoice>
+<guimenuitem>Create thin snapshot</guimenuitem>
+</menuchoice></term>
+<listitem><para>Creates a thin provisioned snapshot volume based on the selected volume.</para></listitem>
 </varlistentry>
 
 <varlistentry>
@@ -415,7 +604,7 @@ information on calling this context menu</para></note>
 <term><menuchoice>
 <guimenuitem>Reduce logical volume</guimenuitem>
 </menuchoice></term>
-<listitem><para>Reduces the size of a logical volume.</para></listitem>
+<listitem><para>Reduces the size of the logical volume.</para></listitem>
 </varlistentry>
 
 
@@ -423,14 +612,14 @@ information on calling this context menu</para></note>
 <term><menuchoice>
 <guimenuitem>Extends logical volume</guimenuitem>
 </menuchoice></term>
-<listitem><para>Enlarges the size of a logical volume.</para></listitem>
+<listitem><para>Enlarges the size of the logical volume.</para></listitem>
 </varlistentry>
 
 <varlistentry>
 <term><menuchoice>
 <guimenuitem>Move physical extents</guimenuitem>
 </menuchoice></term>
-<listitem><para>Move a logical volume's extents to other physical volumes.</para></listitem>
+<listitem><para>Move the logical volume's extents to other physical volumes.</para></listitem>
 </varlistentry>
 
 <varlistentry>
@@ -444,7 +633,7 @@ information on calling this context menu</para></note>
 <sect2 id="logical-volume-mirror-menu">
 <title>Mirror Operations on Volumes</title>
 
-<para>The following three menu choices allow converting an existing volume into
+<para>The following five menu choices allow converting an existing volume into
 a mirror, changing a mirror or converting a mirror back into a linear
 volume.</para>
 
@@ -452,25 +641,42 @@ volume.</para>
 <varlistentry>
 <term><menuchoice>
 <guimenu>Mirror operations</guimenu>
-<guimenuitem>Add leg or change mirror</guimenuitem>
+<guimenuitem>Add mirror legs to volume</guimenuitem>
 </menuchoice></term>
-<listitem><para>Add one or more mirror legs, change logging options or change allocation policy.</para></listitem>
+<listitem><para>Add one or more mirror legs to the volume, convert it to a
+    mirror if it isn't already.</para></listitem>
 </varlistentry>
 
 <varlistentry>
 <term><menuchoice>
 <guimenu>Mirror operations</guimenu>
-<guimenuitem>Remove mirror leg</guimenuitem>
+<guimenuitem>Change mirror log</guimenuitem>
 </menuchoice></term>
-<listitem><para>Remove any mirror leg from the selected mirror.</para></listitem>
+<listitem><para>Change the log type for a non-RAID mirror.</para></listitem>
 </varlistentry>
 
 <varlistentry>
 <term><menuchoice>
 <guimenu>Mirror operations</guimenu>
-<guimenuitem>Remove this mirror leg</guimenuitem>
+<guimenuitem>Remove mirror legs</guimenuitem>
 </menuchoice></term>
-<listitem><para>Remove selected mirror leg.</para></listitem>
+<listitem><para>Remove one or more mirror legs.</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><menuchoice>
+<guimenu>Mirror operations</guimenu>
+<guimenuitem>Repair RAID or mirror</guimenuitem>
+</menuchoice></term>
+<listitem><para>Remove or replace missing physical volumes under mirror or RAID.</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><menuchoice>
+<guimenu>Mirror operations</guimenu>
+<guimenuitem>Re-sync RAID or mirror</guimenuitem>
+</menuchoice></term>
+<listitem><para>Re-synchronize a RAID or mirror volume's underlying elements.</para></listitem>
 </varlistentry>
 </variablelist>
 </sect2>
@@ -478,60 +684,9 @@ volume.</para>
 <sect2 id="logical-volume-filesystems-menu">
 <title>Filesystem Operations on Volumes</title>
 
-<para>The Filesystem operations sub-menu provides six common menu selections
+<para>The Filesystem operations sub-menu provides five common menu selections
 for working with a filesystem.</para>
 <para>Details are provided under <link linkend="filesystems-menu">Filesystem Operations</link>.</para>
-
-<variablelist>
-<varlistentry>
-<term><menuchoice>
-<guimenu>Filesystem operations</guimenu>
-<guimenuitem>Mount</guimenuitem>
-</menuchoice></term>
-<listitem><para>Mount the filesystem under a directory.</para></listitem>
-</varlistentry>
-
-<varlistentry>
-<term><menuchoice>
-<guimenu>Filesystem operations</guimenu>
-<guimenuitem>Unmount</guimenuitem>
-</menuchoice></term>
-<listitem><para>Unmount the filesytem.</para></listitem>
-</varlistentry>
-
-<varlistentry>
-<term><menuchoice>
-<guimenu>Filesystem operations</guimenu>
-<guimenuitem>Extend filesystem to fill volume</guimenuitem>
-</menuchoice></term>
-<listitem><para>If the filesystem is smaller than the volume that contains it, extend it.</para></listitem>
-</varlistentry>
-
-<varlistentry>
-<term><menuchoice>
-<guimenu>Filesystem operations</guimenu>
-<guimenuitem>Run fsck -fp on filesystem</guimenuitem>
-</menuchoice></term>
-<listitem><para>Force fsck to preen a filesystem, use with caution.</para></listitem>
-</varlistentry>
-
-<varlistentry>
-<term><menuchoice>
-<guimenu>Filesystem operations</guimenu>
-<guimenuitem>Make filesystem</guimenuitem>
-</menuchoice></term>
-<listitem><para>Make a filesystem on the volume.</para></listitem>
-</varlistentry>
-
-<varlistentry>
-<term><menuchoice>
-<guimenu>Filesytem operations</guimenu>
-<guimenuitem>Remove filesystem</guimenuitem>
-</menuchoice></term>
-<listitem><para>Erase a filesystem on the volume</para></listitem>
-</varlistentry>
-
-</variablelist>
 
 </sect2>
 </sect1>
@@ -542,9 +697,9 @@ for working with a filesystem.</para>
 <para>If a volume group exists and has free space, a logical volume can be
 created in it. Select the tab titled with the name of the volume group you wish
 to work with first. Then a dialog can be called up by right clicking on the long
-green bar or the (still empty) table below it. selecting <guibutton>Create
-logical lolume</guibutton>. I have called it VolumeOne and it will take %50 of
-the available space</para>
+green bar or the (still empty) table below it and selecting <guibutton>Create
+logical volume</guibutton>. The toolar also has an equivalent button. I have
+called the volume <quote>VolumeOne</quote> and it will take 20 GiB of the available space. </para>
 
 <screenshot>
 <screeninfo>This is the volume group</screeninfo>
@@ -583,13 +738,20 @@ original data.</para>
 </chapter>
 
 <chapter id="filesystems-kvpm">
-<title>Working With Filesystems</title>
-<sect1 id="filesystems-menu">
 <title>Filesystem Operations</title>
+<sect1 id="filesystems-menu">
+<title>Working With Filesystems</title>
 
 <para>The Filesystem Operations menu is available under the <link
-linkend="logical-volume-menu">Logical Volume</link> context menu and the Device
+linkend="logical-volume-menu">Logical Volume</link> context menu and the <link linkend="storage-device-menu">Storage Device</link>
 context menu.</para>
+
+
+
+
+
+
+
 
 <variablelist>
 <varlistentry>
@@ -627,17 +789,10 @@ context menu.</para>
 <varlistentry>
 <term><menuchoice>
 <guimenu>Filesystem operations</guimenu>
-<guimenuitem>Make filesystem</guimenuitem>
+<guimenuitem>Make or remove filesystem</guimenuitem>
 </menuchoice></term>
-<listitem><para>Make a filesystem on the volume.</para></listitem>
-</varlistentry>
-
-<varlistentry>
-<term><menuchoice>
-<guimenu>Filesytem operations</guimenu>
-<guimenuitem>Remove filesystem</guimenuitem>
-</menuchoice></term>
-<listitem><para>Zero out the beginning of a filesystem so it won't be recognized.</para></listitem>
+<listitem><para>Make a filesystem on the volume or write zeros to the beginning to remove
+    the filesystem.</para></listitem>
 </varlistentry>
 
 </variablelist>
@@ -694,10 +849,10 @@ the default.</para>
 <sect1 id="filesystems-mkfs">
 <title>Writing a Filesystem</title>
 
-<para>In the following dialog the device <quote>/dev/sdc1</quote> has been
+<para>In the following dialog the device <quote>/dev/MyVolumeGroup/MyVolume</quote> has been
 selected to write a new filesystem on. The type <quote>ext4</quote> has been
 chosen and the begining of the volume will be zeroed out to erase the old
-filestem.</para>
+filesystem.</para>
 
 <screenshot>
 <screeninfo>Writing a filesystem</screeninfo>
@@ -777,11 +932,12 @@ linkend="programs">Programs</link>. </para></note>
   </varlistentry>
   <varlistentry>
     <term><guimenu>Colors</guimenu></term>
-    <listitem><para>Configures the colors used to represent diffent types of filesystem</para></listitem>
+    <listitem><para>Configures the colors used to represent diffent types of
+    filesystem or types of partitions and volumes.</para></listitem>
   </varlistentry>
   <varlistentry>
     <term><guimenu>Programs</guimenu></term>
-    <listitem><para>Configures the places to look for support programs</para></listitem>
+    <listitem><para>Configures the places to look for support programs.</para></listitem>
   </varlistentry>
 </variablelist>
 </sect1>
@@ -820,19 +976,18 @@ below a user set level. </para>
 hidden. Checking a box enables showing the section while unchecking it will hide
 the section.</para>
 </sect2>
-
 </sect1>
 
 <sect1 id="colors">
 <title>Colors</title>
 
 <para>The <guimenuitem>Colors</guimenuitem> page is for customizing the colors
-used where <link linkend="typical-volume-group-colors">filesystems are shown
-graphically</link>.  Each filesystem type is associated with a labeled color
-button. By pressing the button a standard color picker dialog is called that
-allows the user to select any desired color for that filesystem. Swap space,
-physical volumes and unused space also have colors associated with them that may
-be changed here.</para>
+  used where devices or volumes are shown graphically. For devices the color can
+  be configured to represent the device, such as one color for logical
+  partitions and another for primary partitions. For volumes the color would be
+  different between RAID and linear for example. The other option is to have the
+  color represent the filesystem type on the device, if there is one. Colors can
+  be changed by clicking on the color picker buttons.</para>
 </sect1>
 
 <sect1 id="programs">
