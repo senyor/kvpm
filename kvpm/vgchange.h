@@ -42,6 +42,7 @@ class VGChangeDialog : public KvpmDialog
     QGroupBox *m_limit_box, *m_lvlimit_box, *m_pvlimit_box, *m_available_box, *m_polling_box;
     KIntSpinBox  *m_max_lvs_spin, *m_max_pvs_spin;
     PolicyComboBox *m_policy_combo;
+
     QStringList arguments();
 
 public:
