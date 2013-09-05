@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2011, 2012, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -58,7 +58,7 @@ VGChangeDialog::VGChangeDialog(VolGroup *const group, QWidget *parent) :
     m_resize = new QCheckBox(i18n("Allow physical volume addition and removal"));
     m_resize->setChecked(m_vg->isResizable());
     misc_layout->addWidget(m_resize);
-    m_clustered = new QCheckBox(i18n("Cluster aware"));
+    m_clustered = new QCheckBox(i18n("Enable cluster support"));
     m_clustered->setChecked(m_vg->isClustered());
     misc_layout->addWidget(m_clustered);
     m_refresh = new QCheckBox(i18n("Refresh metadata"));
