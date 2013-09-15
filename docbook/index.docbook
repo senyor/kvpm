@@ -821,27 +821,29 @@ called the volume <quote>VolumeOne</quote> and it will take 20 GiB of the availa
 </screenshot>
 </sect1>
 
-<sect1 id="mirrors">
-<title>Mirrors</title>
+<sect1 id="converting-mirrors">
+<title>Converting Mirrors</title>
 
-<para>To create a mirror simply bring up the Logical Volume Context Menu on a
-linear volume and select <menuchoice><guimenu>Mirror
-operations</guimenu><guimenuitem>Add leg or change
-mirror</guimenuitem></menuchoice>.  Then select the physical volumes and other
-options from the dialog. A mirror may be created with multiple legs or as few as
-two and the legs can be striped. When the dialog is finished the data on the
-original linear volume will be copied to the new mirror leg or legs and
-synchronized.</para>
+<para>To create a mirror from a linear volume, bring up
+    the <link linkend="logical-volume-menu">logical volume context menu</link>
+    and select <menuchoice><guimenu>Mirror operations</guimenu><guimenuitem>Add
+    mirror legs to volume</guimenuitem></menuchoice>.  Then select the physical
+    volumes and other options from the dialog. Mirrors may be the original LVM2
+    mirrors or RAID. A mirror may be created with multiple legs or as few as two
+    and non-RAID mirror legs can be striped. When the dialog is finished the
+    data on the original linear volume will be copied to the new mirror leg or
+    legs and synchronized.</para>
 
-<note><para>Remember to account for the space the mirror log takes when
-selecting physical volumes.</para></note> <para>A mirror can be returned to a
-linear volume by removing all but one of its mirror legs. This can be a
-convenient way to move data on a mounted volume. Simply create a new mirror leg
-on the destination physical volume and wait for the mirror to sync. When
-finished, remove the source mirror leg and the remaining leg will have all the
-original data.</para>
+<note><para>If creating a non-RAID mirror remember to account for the space the
+    mirror log takes when selecting physical volumes. Depending on configuration
+    LVM may require separate physical volumes for logs.</para></note>
+
+<tip><para>A mirror can be returned to a linear volume by removing all but one of its
+    mirror legs. This can be a convenient way to move data on a mounted
+    volume. Simply create a new mirror leg on the destination physical volume
+    and wait for the mirror to sync. When finished, remove the source mirror leg
+    and the remaining leg will have all the original data.</para></tip>
 </sect1>
-
 </chapter>
 
 <chapter id="filesystems-kvpm">
@@ -852,13 +854,6 @@ original data.</para>
 <para>The Filesystem Operations menu is available under the <link
 linkend="logical-volume-menu">Logical Volume</link> context menu and the <link linkend="storage-device-menu">Storage Device</link>
 context menu.</para>
-
-
-
-
-
-
-
 
 <variablelist>
 <varlistentry>
@@ -898,7 +893,7 @@ context menu.</para>
 <guimenu>Filesystem operations</guimenu>
 <guimenuitem>Make or remove filesystem</guimenuitem>
 </menuchoice></term>
-<listitem><para>Make a filesystem on the volume or write zeros to the beginning to remove
+<listitem><para>Write a filesystem on the volume or write zeros at the beginning to remove
     the filesystem.</para></listitem>
 </varlistentry>
 
@@ -946,7 +941,7 @@ the default.</para>
 	    <imagedata fileref="mount_options.png" format="PNG"/>
 	  </imageobject>
 	    <textobject>
-	    <phrase>Writing a filesystem</phrase>
+	    <phrase>Mounting a filesystem</phrase>
 	  </textobject>
 	</mediaobject>
 </screenshot>
@@ -988,9 +983,8 @@ filesystem type is chosen for which the needed program is missing, &kvpm; will
 generate an error message and otherwise do nothing. See also, <link
 linkend="programs">Programs</link>. </para></note>
 
-</sect1>
 
-<sect1 id="filesystems-mkfs-ext">
+<sect2 id="filesystems-mkfs-ext">
 <title>Standard Options For Ext2, Ext3 and Ext4</title>
 
 <screenshot>
@@ -1004,9 +998,9 @@ linkend="programs">Programs</link>. </para></note>
 	  </textobject>
 	</mediaobject>
 </screenshot>
-</sect1>
+</sect2>
 
-<sect1 id="filesystems-mkfs-ext4">
+<sect2 id="filesystems-mkfs-ext4">
 <title>Ext4 Only Options</title>
 <screenshot>
 <screeninfo>Writing an ext4 filesystem</screeninfo>
@@ -1019,7 +1013,11 @@ linkend="programs">Programs</link>. </para></note>
 	  </textobject>
 	</mediaobject>
 </screenshot>
+</sect2>
+
 </sect1>
+
+
 </chapter>
 
 <chapter id="config-options-kvpm">
