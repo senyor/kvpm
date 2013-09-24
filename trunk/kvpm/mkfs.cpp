@@ -94,7 +94,7 @@ void MkfsDialog::buildDialog(const long long size)
     QVBoxLayout *const layout = new QVBoxLayout;
     dialog_body->setLayout(layout);
 
-    QLabel *const label = new QLabel(i18n("<b>Write or remove filesystem on: %1</b>", m_path));
+    QLabel *const label = new QLabel(i18n("Write or remove filesystem on: <b>%1</b>", m_path));
     label->setAlignment(Qt::AlignCenter);
     layout->addSpacing(5);
     layout->addWidget(label);

@@ -75,7 +75,7 @@ void MountDialog::buildDialog()
     QVBoxLayout *const layout = new QVBoxLayout();
     dialog_body->setLayout(layout);
 
-    QLabel *const device_label = new QLabel(i18n("<b>Device to mount: %1</b>", m_device_to_mount));
+    QLabel *const device_label = new QLabel(i18n("Device to mount: <b>%1</b>", m_device_to_mount));
     device_label->setAlignment(Qt::AlignCenter);
     layout->addWidget(device_label);
     layout->addSpacing(5);
