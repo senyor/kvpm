@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2011, 2012, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2011, 2012, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -58,9 +58,6 @@ VGChangeDialog::VGChangeDialog(VolGroup *const group, QWidget *parent) :
     m_resize = new QCheckBox(i18n("Allow physical volume addition and removal"));
     m_resize->setChecked(m_vg->isResizable());
     misc_layout->addWidget(m_resize);
-    m_clustered = new QCheckBox(i18n("Enable cluster support"));
-    m_clustered->setChecked(m_vg->isClustered());
-    misc_layout->addWidget(m_clustered);
     m_refresh = new QCheckBox(i18n("Refresh metadata"));
     misc_layout->addWidget(m_refresh);
 
@@ -68,6 +65,20 @@ VGChangeDialog::VGChangeDialog(VolGroup *const group, QWidget *parent) :
     if (m_vg->isActive())
         m_uuid->setEnabled(false);
     misc_layout->addWidget(m_uuid);
+
+    misc_layout->addSpacing(5);
+    misc_layout->addWidget(new KSeparator(Qt::Horizontal));
+    misc_layout->addSpacing(5);
+    m_clustered = new QCheckBox(i18n("Enable cluster support"));
+    m_clustered->setChecked(m_vg->isClustered());
+    misc_layout->addWidget(m_clustered);
+    QLabel *const cluster_label = new QLabel();
+    cluster_label->setText(i18n("Caution: do not enable cluster support unless you have a working cluster running"));
+    cluster_label->setWordWrap(true);
+    misc_layout->addWidget(cluster_label);
+    misc_layout->addSpacing(5);
+    misc_layout->addWidget(new KSeparator(Qt::Horizontal));
+    misc_layout->addSpacing(5);
 
     AllocationPolicy const policy = m_vg->getPolicy();
     m_policy_combo = new PolicyComboBox(policy);
@@ -99,11 +110,11 @@ VGChangeDialog::VGChangeDialog(VolGroup *const group, QWidget *parent) :
 
     uint64_t current_extent_size = m_vg->getExtentSize() / 1024;
 
-    if (current_extent_size <= 512)
+    if (current_extent_size <= 512) {
         m_extent_suffix_combo->setCurrentIndex(0);
-    else if (((current_extent_size /= 1024)) <= 512)
+    } else if (((current_extent_size /= 1024)) <= 512) {
         m_extent_suffix_combo->setCurrentIndex(1);
-    else {
+    } else {
         m_extent_suffix_combo->setCurrentIndex(2);
         current_extent_size /= 1024;
     }
@@ -113,12 +124,12 @@ VGChangeDialog::VGChangeDialog(VolGroup *const group, QWidget *parent) :
             m_extent_size_combo->setCurrentIndex(x);
     }
 
-    QHBoxLayout *const combo_layout = new QHBoxLayout();
-    combo_layout->addWidget(new QLabel(i18n("Extent size:")));
-    combo_layout->addWidget(m_extent_size_combo);
-    combo_layout->addWidget(m_extent_suffix_combo);
-    combo_layout->addStretch();
-    misc_layout->addLayout(combo_layout);
+    QHBoxLayout *const extent_layout = new QHBoxLayout();
+    extent_layout->addWidget(new QLabel(i18n("Extent size:")));
+    extent_layout->addWidget(m_extent_size_combo);
+    extent_layout->addWidget(m_extent_suffix_combo);
+    extent_layout->addStretch();
+    misc_layout->addLayout(extent_layout);
 
     connect(m_extent_suffix_combo, SIGNAL(activated(int)),
             this, SLOT(limitExtentSize(int)));
@@ -139,7 +150,7 @@ VGChangeDialog::VGChangeDialog(VolGroup *const group, QWidget *parent) :
     middle_layout->addWidget(m_available_box);
 
     m_polling_box = new QGroupBox("Change group polling");
-    QVBoxLayout *polling_layout = new QVBoxLayout();
+    QVBoxLayout *const polling_layout = new QVBoxLayout();
     m_polling_yes = new QRadioButton(i18n("Start polling"));
     m_polling_no = new QRadioButton(i18n("Stop polling"));
     m_polling_yes->setChecked(true);
