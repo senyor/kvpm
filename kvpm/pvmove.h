@@ -64,6 +64,7 @@ class PVMoveDialog : public KvpmDialog
     QList<PhysVol *> removeFullTargets(QList<PhysVol *> targets);
     QStringList getForbiddenTargets(LogVol *const lv, const QString source); 
     QWidget* singleSourceWidget();
+    QWidget* bannerWidget();
     bool isMovable(LogVol *lv);
     long long movableExtents();
 
