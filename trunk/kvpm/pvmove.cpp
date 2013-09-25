@@ -428,15 +428,14 @@ QWidget* PVMoveDialog::singleSourceWidget()
     QWidget *const widget = new QWidget();
     QVBoxLayout *const layout = new QVBoxLayout();
     QGridLayout *const grid = new QGridLayout();
+    grid->setColumnStretch(1,1);
+    grid->setColumnStretch(2,2);
     layout->addLayout(grid);
     widget->setLayout(layout);
 
-    label = new QLabel(i18n("Logical Volumes"));
+    label = new QLabel(i18n("Logical Volumes To Move"));
     label->setAlignment(Qt::AlignCenter);
-    grid->addWidget(label, 0, 0);
-    label = new QLabel(i18n("Space Used"));
-    label->setAlignment(Qt::AlignCenter);
-    grid->addWidget(label, 0, 1);
+    grid->addWidget(label, 0, 0, 1, -1);
 
     const QStringList lv_names = getLvNames();
 
@@ -453,12 +452,14 @@ QWidget* PVMoveDialog::singleSourceWidget()
             
             if (!isMovable(lv)) {
                 label = new QLabel(i18n("<Not movable>"));
+                label->setAlignment(Qt::AlignCenter);
                 grid->addWidget(label, x + 1, 2);
             }
         }
     }
 
     layout->addSpacing(10);
+    layout->addWidget(new QLabel(i18n("Movable space: %1", locale->formatByteSize(movableExtents() * m_vg->getExtentSize(), 1, dialect))));
     layout->addWidget(new QLabel(i18n("Movable extents: %1", movableExtents())));
 
     return widget;
