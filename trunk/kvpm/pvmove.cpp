@@ -184,27 +184,12 @@ void PVMoveDialog::buildDialog(QList<PhysVol *> targets)
     else
         dialect = KLocale::IECBinaryDialect;
 
-    QLabel *label = nullptr;
-    NoMungeRadioButton *radio_button = nullptr;
-
     setCaption(i18n("Move Physical Extents"));
     QWidget *const dialog_body = new QWidget(this);
     setMainWidget(dialog_body);
     QVBoxLayout *const layout = new QVBoxLayout;
 
-    label = new QLabel(i18n("<b>Move physical extents</b>"));
-    label->setAlignment(Qt::AlignCenter);
-    layout->addWidget(label);
-    dialog_body->setLayout(layout);
-
-    if (m_lv) {
-        label->setText(i18n("<b>Move only physical extents on:</b>"));
-        label->setAlignment(Qt::AlignCenter);
-        layout->addWidget(label);
-        label = new QLabel("<b>" + m_lv->getFullName() + "</b>");
-        label->setAlignment(Qt::AlignCenter);
-        layout->addWidget(label);
-    }
+    layout->addWidget(bannerWidget());
     layout->addSpacing(5);
 
     QGroupBox *const source_group = new QGroupBox(i18n("Source Physical Volumes"));
@@ -225,6 +210,7 @@ void PVMoveDialog::buildDialog(QList<PhysVol *> targets)
     lower_layout->addWidget(m_pv_box);
 
     const int radio_count = m_sources.size();
+    NoMungeRadioButton *radio_button = nullptr;
 
     if (radio_count > 1) {
 
@@ -282,6 +268,8 @@ void PVMoveDialog::buildDialog(QList<PhysVol *> targets)
             source_layout->addWidget(singleSourceWidget());
         }
     }
+
+    dialog_body->setLayout(layout);
 
     connect(m_pv_box, SIGNAL(stateChanged()),
             this, SLOT(disableTargets()));
@@ -396,6 +384,29 @@ void PVMoveDialog::commit()
     hide();
     ProcessProgress move(arguments());
     return;
+}
+
+QWidget* PVMoveDialog::bannerWidget()
+{
+    QWidget *const banner = new QWidget;
+    QVBoxLayout *const layout = new QVBoxLayout;
+
+    QLabel *label = new QLabel;
+    label->setAlignment(Qt::AlignCenter);
+    layout->addWidget(label);
+
+    if (m_lv) {
+        label->setText(i18n("Move only physical extents on:"));
+        label = new QLabel("<b>" + m_lv->getFullName() + "</b>");
+        label->setAlignment(Qt::AlignCenter);
+        layout->addWidget(label);
+    } else {
+        label->setText(i18n("Move physical extents"));
+    }
+
+    banner->setLayout(layout);
+
+    return banner;
 }
 
 QWidget* PVMoveDialog::singleSourceWidget()
