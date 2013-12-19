@@ -38,9 +38,13 @@ class StorageDevice : public StorageBase
     QList<StoragePartition *> m_storage_partitions;
 
 public:
-    StorageDevice(PedDevice *const pedDevice, const QList<PhysVol *> pvList, MountTables *const mountTables);
+    StorageDevice(PedDevice *const pedDevice, 
+                  const QList<PhysVol *> pvList, 
+                  MountTables *const tables, 
+                  const QStringList dmblock, 
+                  const QStringList dmraid);
     ~StorageDevice();
-
+        
     QString getDiskLabel() const { return m_disk_label; }
     QString getHardware() const { return m_hardware; }
     QList<StoragePartition *> getStoragePartitions() const { return m_storage_partitions; }
