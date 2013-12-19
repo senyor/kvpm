@@ -31,11 +31,12 @@ struct LVSegmentExtent {
 
 class PhysVol
 {
-    QString m_device;      // eg: /dev/hde4
-    QString m_format;      // e.g. lvm1 or lvm2
+    QString m_device;         // eg: /dev/hde4
+    QString m_mapper_device;  // eg: /dev/mapper/foo if it is dmraid, equals m_device otherwise
+    QString m_format;         // e.g. lvm1 or lvm2
     QString m_uuid;
     QStringList m_tags;
-    VolGroup *m_vg;        // all pvs now must be in a vg
+    VolGroup *m_vg;           // all pvs now must be in a vg
     bool m_active;
     bool m_allocatable;
     bool m_missing;           // the physical volume can't be found
@@ -47,10 +48,13 @@ class PhysVol
     long long m_unused;       // free space in bytes
     long long m_last_used_extent;
 
+    QString findMapperPath(QString path);
+
 public:
     PhysVol(pv_t lvm_pv, VolGroup *const vg);
     void rescan(pv_t pv);
     QString getName() const { return m_device.trimmed(); }       // eg: /dev/hde4
+    QString getMapperName() const { return m_mapper_device.trimmed(); }    
     QString getUuid() const { return m_uuid.trimmed(); } 
     QStringList getTags() const { return m_tags; }
     VolGroup* getVg() const { return m_vg; }

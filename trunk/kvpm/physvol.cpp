@@ -14,11 +14,16 @@
 
 #include "physvol.h"
 
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
 #include "logvol.h"
 #include "volgroup.h"
 
 #include <QByteArray>
 #include <QDebug>
+#include <QFileInfo>
 #include <QtAlgorithms>
 #include <QListIterator>
 
@@ -69,17 +74,19 @@ void PhysVol::rescan(pv_t lvm_pv)
         m_missing = false;
 
     m_last_used_extent = 0;
-    m_active        = false;     // pv is active if any associated lvs are active
-    m_device        = QString(lvm_pv_get_name(lvm_pv));
-    m_device_size   = lvm_pv_get_dev_size(lvm_pv);
-    m_unused        = lvm_pv_get_free(lvm_pv);
-    m_size          = lvm_pv_get_size(lvm_pv);
-    m_uuid          = QString(lvm_pv_get_uuid(lvm_pv));
-    m_mda_count     = lvm_pv_get_mda_count(lvm_pv);
+    m_active      = false;     // pv is active if any associated lvs are active
+    m_device      = QString(lvm_pv_get_name(lvm_pv));
+    m_device_size = lvm_pv_get_dev_size(lvm_pv);
+    m_unused      = lvm_pv_get_free(lvm_pv);
+    m_size        = lvm_pv_get_size(lvm_pv);
+    m_uuid        = QString(lvm_pv_get_uuid(lvm_pv));
+    m_mda_count   = lvm_pv_get_mda_count(lvm_pv);
 
     value = lvm_pv_get_property(lvm_pv, "pv_mda_size");
     if (value.is_valid)
         m_mda_size = value.value.integer;
+
+    m_mapper_device = findMapperPath(m_device);
 
     /*
     // The following wil be used to to calculate the last used
@@ -274,3 +281,39 @@ long long PhysVol::getContiguous()
 
     return contiguous * extent_size;
 }
+
+
+QString PhysVol::findMapperPath(QString name)
+{
+    QString mapper_name;
+
+    QFileInfo fi(name);
+    if (fi.exists())
+        mapper_name = fi.canonicalFilePath();
+    else
+        return name;
+
+    QByteArray qba = mapper_name.toLocal8Bit();
+    struct stat fs;
+    if (stat(qba.data(), &fs))  // error
+        return name;
+    
+    dm_lib_init();
+    dm_log_with_errno_init(NULL);
+    
+    char buf[1000];
+    if (!dm_device_get_name(major(fs.st_rdev), minor(fs.st_rdev), 0, buf, 1000))
+        return name;
+    
+    dm_lib_release();
+    
+    mapper_name = QString("/dev/mapper/").append(QString(buf));
+    
+    fi.setFile(mapper_name);
+    if(fi.exists())
+        return mapper_name;
+    else
+        return name;
+}
+
+
