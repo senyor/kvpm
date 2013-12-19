@@ -37,17 +37,36 @@ StorageBase::StorageBase(PedPartition *const part, const QList<PhysVol *> &pvLis
         m_is_busy = m_pv->isActive();
     else
         m_is_busy = ped_partition_is_busy(part);
+
+    m_is_dmraid = false;
+    m_is_dmraid_block = false;
 }
 
-StorageBase::StorageBase(PedDevice *const device, const QList<PhysVol *> &pvList)
+StorageBase::StorageBase(PedDevice *const device, const QList<PhysVol *> &pvList, const QStringList dmblock, const QStringList dmraid)
 {
     m_sector_size = device->sector_size;
     m_name = QString(device->path).trimmed();
     m_is_writable = !device->read_only;
     commonConstruction(pvList);
     m_is_busy = ped_device_is_busy(device);
-}
 
+    m_is_dmraid = false;
+    m_is_dmraid_block = false;
+
+    for (auto dev : dmblock) {
+        if (dev == m_name) {
+            m_is_dmraid_block = true;
+            break;
+        }
+    }
+
+    for (auto dev : dmraid) {
+        if (dev == m_name) {
+            m_is_dmraid = true;
+            break;
+        }
+    }
+}
 
 void StorageBase::commonConstruction(const QList<PhysVol *> &pvList)
 {
@@ -55,7 +74,7 @@ void StorageBase::commonConstruction(const QList<PhysVol *> &pvList)
     m_pv = NULL;
 
     for (auto *pv : pvList) {
-        if (m_name == pv->getName()) {
+        if (m_name == pv->getMapperName()) {
             m_pv = pv;
             m_is_pv = true;
         }
