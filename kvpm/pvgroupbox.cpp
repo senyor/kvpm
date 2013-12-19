@@ -73,7 +73,7 @@ PvGroupBox::PvGroupBox(QList<QSharedPointer<PvSpace>> spaceList,
         layout->addWidget(pv_label);
     } else if (pv_check_count < 2) {
         m_extent_size = m_pvs[0]->getVg()->getExtentSize();
-        QLabel *pv_label = new QLabel(m_pvs[0]->getName() + "  " + locale->formatByteSize(m_pvs[0]->getRemaining(), 1, m_dialect));
+        QLabel *pv_label = new QLabel(m_pvs[0]->getMapperName() + "  " + locale->formatByteSize(m_pvs[0]->getRemaining(), 1, m_dialect));
         layout->addWidget(pv_label, 0, 0, 1, -1);
         
         addLabelsAndButtons(layout, pv_check_count, policy, vgpolicy);
@@ -82,8 +82,8 @@ PvGroupBox::PvGroupBox(QList<QSharedPointer<PvSpace>> spaceList,
         m_extent_size = m_pvs[0]->getVg()->getExtentSize();
         for (int x = 0; x < pv_check_count; x++) {
             
-            check = new NoMungeCheck(m_pvs[x]->getName() + "  " + locale->formatByteSize(m_pvs[x]->getRemaining(), 1, m_dialect));
-            check->setAlternateText(m_pvs[x]->getName());
+            check = new NoMungeCheck(m_pvs[x]->getMapperName() + "  " + locale->formatByteSize(m_pvs[x]->getRemaining(), 1, m_dialect));
+            check->setAlternateText(m_pvs[x]->getMapperName());
             m_pv_checks.append(check);
 
             if (pv_check_count < 11)
@@ -176,7 +176,7 @@ QStringList PvGroupBox::getNames()
                 names << check->getAlternateText();
         }
     } else if (m_pvs.size()) {
-        names << m_pvs[0]->getName();
+        names << m_pvs[0]->getMapperName();
     } else if (m_devices.size()) {
         names << m_devices[0]->getName();
     }
@@ -193,7 +193,7 @@ QStringList PvGroupBox::getAllNames()
             names << check->getAlternateText();
         }
     } else if (m_pvs.size()) {
-        names << m_pvs[0]->getName();
+        names << m_pvs[0]->getMapperName();
     } else if (m_devices.size()) {
         names << m_devices[0]->getName();
     }
@@ -329,7 +329,7 @@ void PvGroupBox::disableChecks(QStringList pvs)
     if (!pvs.isEmpty() && !m_pv_checks.isEmpty()) {
         for (auto disable_name : pvs) {
             for (int x = 0; x < m_pvs.size(); ++x) {
-                if (m_pvs[x]->getName() == disable_name) {
+                if (m_pvs[x]->getMapperName() == disable_name) {
                     m_pv_checks[x]->setChecked(false);
                     m_pv_checks[x]->setEnabled(false);
                 }
@@ -412,11 +412,11 @@ void PvGroupBox::setChecksToPolicy()
 
         for (int x = 0; x < m_pv_checks.size(); ++x) {
             if (policy == CONTIGUOUS) {
-                m_pv_checks[x]->setText(m_pvs[x]->getName() + "  " + locale->formatByteSize(m_contiguous[x], 1, m_dialect));
+                m_pv_checks[x]->setText(m_pvs[x]->getMapperName() + "  " + locale->formatByteSize(m_contiguous[x], 1, m_dialect));
                 m_pv_checks[x]->setData(QVariant(m_contiguous[x]));
                 
             } else {
-                m_pv_checks[x]->setText(m_pvs[x]->getName() + "  " + locale->formatByteSize(m_normal[x], 1, m_dialect));
+                m_pv_checks[x]->setText(m_pvs[x]->getMapperName() + "  " + locale->formatByteSize(m_normal[x], 1, m_dialect));
                 m_pv_checks[x]->setData(QVariant(m_normal[x]));
             }
         }

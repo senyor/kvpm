@@ -453,9 +453,9 @@ QList<QSharedPointer<PvSpace>> ChangeMirrorDialog::getPvSpaceList()
     
     if (m_lv->isMirror() && !m_change_log) {
         for (auto pv : available_pvs) {
-            if (pv->isAllocatable() && (pv->getRemaining() > 0) && !pvHasImage(pv->getName())) {
+            if (pv->isAllocatable() && (pv->getRemaining() > 0) && !pvHasImage(pv->getMapperName())) {
                 if (separate && islvm) {                
-                    if (!pvHasLog(pv->getName()))
+                    if (!pvHasLog(pv->getMapperName()))
                         list << QSharedPointer<PvSpace>(new PvSpace(pv, pv->getRemaining(), pv->getContiguous()));
                 } else {
                     list << QSharedPointer<PvSpace>(new PvSpace(pv, pv->getRemaining(), pv->getContiguous()));
@@ -464,9 +464,9 @@ QList<QSharedPointer<PvSpace>> ChangeMirrorDialog::getPvSpaceList()
         }
     } else if (m_change_log) {
         for (auto pv : available_pvs) {
-            if (pv->isAllocatable() && (pv->getRemaining() > 0) && !pvHasLog(pv->getName())) {
+            if (pv->isAllocatable() && (pv->getRemaining() > 0) && !pvHasLog(pv->getMapperName())) {
                 if (separate) {                
-                    if (!pvHasImage(pv->getName()))
+                    if (!pvHasImage(pv->getMapperName()))
                         list << QSharedPointer<PvSpace>(new PvSpace(pv, pv->getRemaining(), pv->getContiguous()));
                 } else {
                     list << QSharedPointer<PvSpace>(new PvSpace(pv, pv->getRemaining(), pv->getContiguous()));
@@ -475,7 +475,7 @@ QList<QSharedPointer<PvSpace>> ChangeMirrorDialog::getPvSpaceList()
         }
     } else {                              // not a mirror
         for (auto pv : available_pvs) {
-            if (pv->isAllocatable() && (pv->getRemaining() > 0) && !pvHasImage(pv->getName()))
+            if (pv->isAllocatable() && (pv->getRemaining() > 0) && !pvHasImage(pv->getMapperName()))
                 list << QSharedPointer<PvSpace>(new PvSpace(pv, pv->getRemaining(), pv->getContiguous()));
         }
     }
@@ -768,7 +768,7 @@ bool ChangeMirrorDialog::getAvailableByteList(QList<long long> &byte_list, int &
         for (auto pv_name : m_pv_box->getNames()) {
             if (!pvHasImage(pv_name) && !pvHasLog(pv_name)) { 
                 for (auto available_space : m_space_list) {
-                    if (available_space->pv->getName() == pv_name) {
+                    if (available_space->pv->getMapperName() == pv_name) {
                         if (policy == CONTIGUOUS)
                             byte_list << available_space->contiguous;
                         else
@@ -801,7 +801,7 @@ bool ChangeMirrorDialog::getAvailableByteList(QList<long long> &byte_list, int &
                 --logs_added;
             } else if (!pvHasImage(pv_name)) { 
                 for (auto available_space : m_space_list) {
-                    if (available_space->pv->getName() == pv_name)
+                    if (available_space->pv->getMapperName() == pv_name)
                         byte_list << available_space->normal;
                 }
             }

@@ -48,12 +48,9 @@ class PhysVol
     long long m_unused;       // free space in bytes
     long long m_last_used_extent;
 
-    QString findMapperPath(QString path);
-
 public:
     PhysVol(pv_t lvm_pv, VolGroup *const vg);
     void rescan(pv_t pv);
-    QString getName() const { return m_device.trimmed(); }       // eg: /dev/hde4
     QString getMapperName() const { return m_mapper_device.trimmed(); }    
     QString getUuid() const { return m_uuid.trimmed(); } 
     QStringList getTags() const { return m_tags; }

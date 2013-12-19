@@ -15,10 +15,11 @@
 #ifndef MISC_H
 #define MISC_H
 
-#include <QStringList>
 #include <QCheckBox>
+#include <QFileInfo>
 #include <QRadioButton>
 #include <QSharedPointer>
+#include <QStringList>
 #include <QVariant>
 
 class PhysVol;
@@ -46,6 +47,8 @@ typedef QList<QSharedPointer<PvSpace>> PvSpaceList;
 
 QStringList splitUuid(QString const uuid);
 bool isBusy(const QString device);
+QString findMapperPath(QString path);
+
 
 
 class NoMungeCheck : public QCheckBox

@@ -239,7 +239,7 @@ PhysVol* VolGroup::getPvByName(QString name)
     if (!name.contains("unknown device")) {
         while (pvs_itr.hasNext()) {
             PhysVol *pv = pvs_itr.next();
-            if (name == pv->getName())
+            if (name == pv->getMapperName())
                 return pv;
         }
     }
@@ -535,7 +535,7 @@ void VolGroup::setLastUsedExtent()
         PhysVol *const pv = pv_itr.next();
         long long last_extent = 0;
         long long last_used_extent = 0;
-        const QString pv_name = pv->getName();
+        const QString pv_name = pv->getMapperName();
 
         QListIterator<LogVolPointer> lv_itr(m_member_lvs);
 

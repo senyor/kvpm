@@ -468,7 +468,7 @@ void VGSplitDialog::volumeMobility(QStringList &mobileLvNames, QStringList &fixe
     }
 
     for (int x = pvs.size() - 1; x >= 0; x--)
-        mobilePvNames.append(pvs[x]->getName());
+        mobilePvNames.append(pvs[x]->getMapperName());
 
     for (int x = mobilePvNames.size() - 1; x >= 0; x--) {
         for (int y = fixedPvNames.size() - 1; y >= 0; y--) {
@@ -524,7 +524,7 @@ void VGSplitDialog::pvState(QStringList &open, QStringList &closed)
     QStringList all_pv_names;
 
     for (int x = pvs.size() - 1; x >= 0; x--)
-        all_pv_names.append(pvs[x]->getName());
+        all_pv_names.append(pvs[x]->getMapperName());
 
     for (int x = all_pv_names.size() - 1; x >= 0; x--) {
         for (int y = open.size() - 1; y >= 0; y--) {

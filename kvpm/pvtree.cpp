@@ -94,7 +94,7 @@ void PVTree::loadData()
     for (auto pv : m_vg->getPhysicalVolumes()) {
 
         QStringList pv_data;
-        const QString device_name = pv->getName();
+        const QString device_name = pv->getMapperName();
 
         if (pv->isMissing()) {
             if (device_name == "unknown device")
@@ -260,7 +260,7 @@ void PVTree::setViewConfig()
 
 QStringList PVTree::getLvNames(PhysVol *const pv)
 {
-    const QString current_name = pv->getName();
+    const QString current_name = pv->getMapperName();
     QStringList lv_names;
     
     for (auto lv : m_vg->getLogicalVolumesFlat()) {
