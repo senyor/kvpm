@@ -88,13 +88,19 @@ QStringList dmraid_get_block(dm_tree_node *parent)
     QStringList block;
     const int buff_size = 1000;
     char dev_name[buff_size];
-    void *handle = NULL;
+    void *handle = nullptr;
 
-    while(dm_tree_node *node = dm_tree_next_child(&handle, parent, 1)) {
-        const dm_info *const dmi = dm_tree_node_get_info(node);
-        dm_device_get_name(dmi->major, dmi->minor, 1, dev_name, buff_size);
-        block << QString("/dev/").append(dev_name);
+    while(dm_tree_node *node = dm_tree_next_child(&handle, parent, 0)) {
+        if (QString(dm_tree_node_get_uuid(node)).startsWith("DMRAID-")) {
+            block << dmraid_get_block(node);
+        } else if (QString(dm_tree_node_get_uuid(node)).startsWith("LVM-")) { 
+            block << dmraid_get_block(node);
+        } else if (QString(dm_tree_node_get_uuid(parent)).startsWith("DMRAID-")) {
+            const dm_info *const dmi = dm_tree_node_get_info(node);
+            dm_device_get_name(dmi->major, dmi->minor, 1, dev_name, buff_size);
+            block << QString("/dev/").append(dev_name);
+        }
     }
-
+    
     return block;
 }
