@@ -24,8 +24,13 @@
 #include "mounttables.h"
 
 
-StorageDevice::StorageDevice(PedDevice *const pedDevice, const QList<PhysVol *> pvList, MountTables *const tables)
-    : StorageBase(pedDevice, pvList)
+
+
+StorageDevice::StorageDevice(PedDevice *const pedDevice, 
+                             const QList<PhysVol *> pvList, 
+                             MountTables *const tables, 
+                             const QStringList dmblock, 
+                             const QStringList dmraid) : StorageBase(pedDevice, pvList, dmblock, dmraid)
 {
     const long long sector_size = getSectorSize();
     const bool is_pv = isPhysicalVolume();

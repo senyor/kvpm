@@ -15,6 +15,7 @@
 
 #include "masterlist.h"
 
+#include "dmraid.h"
 #include "fsprobe.h"
 #include "logvol.h"
 #include "mountentry.h"
@@ -130,7 +131,6 @@ void MasterList::scanVolumeGroups()
         if (!existing_vg)
             m_volume_groups.append(new VolGroup(m_lvm, strl->str, m_mount_tables));
     }
-
     for (int x = m_volume_groups.size() - 1; x >= 0; x--) { // delete VolGroup if the vg is gone
         bool deleted_vg = true;
         dm_list_iterate_items(strl, vgnames) {
@@ -154,10 +154,12 @@ void MasterList::scanStorageDevices()
 
     m_storage_devices.clear();
     PedDevice *dev = NULL;
+    QStringList block, raid;
+    dmraid_get_devices(block, raid);
 
     while ((dev = ped_device_get_next(dev))) {
-        if (!QString("%1").arg(dev->path).contains("/dev/mapper"))
-            m_storage_devices.append(new StorageDevice(dev, physical_volumes, m_mount_tables));
+        if (!QString(dev->path).startsWith("/dev/mapper") || raid.contains(dev->path))
+            m_storage_devices.append(new StorageDevice(dev, physical_volumes, m_mount_tables, block, raid));
     }
 }
 

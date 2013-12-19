@@ -44,7 +44,7 @@ DeviceTree::DeviceTree(DeviceSizeChart *const chart, DevicePropertiesStack *cons
         item->setTextAlignment(column, Qt::AlignCenter);
 
     item->setToolTip(0, i18n("The device name"));
-    item->setToolTip(1, i18n("The type of partition"));
+    item->setToolTip(1, i18n("The type of partition or device"));
     item->setToolTip(2, i18n("The amount of storage space"));
     item->setToolTip(3, i18n("The remaining storage space"));
     item->setToolTip(4, i18n("How the device is being used"));
@@ -125,10 +125,16 @@ void DeviceTree::loadData(QList<StorageDevice *> devices)
         dev = devices[x];
         dev_variant.setValue((void *) dev);
         dev_name = dev->getName();
+        QString dmraid;
+
+        if (dev->isDmRaid())
+            dmraid = "dm volume";
+        else if (dev->isDmRaidBlock())
+            dmraid = "dm device";
 
         if (dev->isPhysicalVolume()) {
             pv = dev->getPhysicalVolume();
-            data << dev_name << "" << locale->formatByteSize(dev->getSize(), 1, dialect);
+            data << dev_name << dmraid << locale->formatByteSize(dev->getSize(), 1, dialect);
 
             if (m_show_total && !m_show_percent)
                 data << locale->formatByteSize(pv->getRemaining(), 1, dialect);
@@ -139,7 +145,7 @@ void DeviceTree::loadData(QList<StorageDevice *> devices)
 
             data << "PV" << pv->getVg()->getName();
         } else {
-            data << dev_name << "" << locale->formatByteSize(dev->getSize(), 1, dialect);
+            data << dev_name << dmraid << locale->formatByteSize(dev->getSize(), 1, dialect);
         }
 
         parent = new QTreeWidgetItem(data);
