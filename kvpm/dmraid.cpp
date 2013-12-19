@@ -62,9 +62,6 @@ void dmraid_get_devices(QStringList &block, QStringList &raid)
     raid.removeDuplicates();
     block.removeDuplicates();
 
-    qDebug() << "RAID --> " << raid;
-    qDebug() << "BLCK --> " << block;
-
     dm_tree_free(tree);
     dm_task_destroy(dmt_list);
     dm_task_destroy(dmt_info);
