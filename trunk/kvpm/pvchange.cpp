@@ -41,7 +41,7 @@ PVChangeDialog::PVChangeDialog(PhysVol *const physicalVolume, QWidget *parent) :
     QVBoxLayout *const layout = new QVBoxLayout;
     dialog_body->setLayout(layout);
 
-    QString pv_name = m_pv->getName();
+    QString pv_name = m_pv->getMapperName();
     QLabel *const label = new QLabel(i18n("Changing volume: %1", pv_name));
     label->setAlignment(Qt::AlignCenter);
     layout->addWidget(label);
@@ -150,7 +150,7 @@ QStringList PVChangeDialog::arguments()
             args << "--addtag" << m_tag_edit->text();
     }
 
-    args << m_pv->getName();
+    args << m_pv->getMapperName();
 
     return args;
 }

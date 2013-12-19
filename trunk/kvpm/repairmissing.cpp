@@ -164,7 +164,7 @@ QList<PhysVol *> RepairMissingDialog::getUsablePvs()
             unused_pvs.removeAt(x);
         } else {
             for (int y = pvs_in_use.size() - 1; y >= 0; y--) {
-                if (unused_pvs[x]->getName() == pvs_in_use[y]) {
+                if (unused_pvs[x]->getMapperName() == pvs_in_use[y]) {
                     unused_pvs.removeAt(x);
                     break;
                 }

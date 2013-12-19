@@ -20,6 +20,8 @@
 #include <errno.h>
 #include <unistd.h>
 
+#include <libdevmapper.h>
+
 #include <KPushButton>
 
 
@@ -136,4 +138,38 @@ bool isBusy(const QString device)
 
     return false;
 }
+
+QString findMapperPath(QString name)
+{
+    QString mapper_name;
+
+    QFileInfo fi(name);
+    if (fi.exists())
+        mapper_name = fi.canonicalFilePath();
+    else
+        return name;
+
+    QByteArray qba = mapper_name.toLocal8Bit();
+    struct stat fs;
+    if (stat(qba.data(), &fs))  // error
+        return name;
+    
+    dm_lib_init();
+    dm_log_with_errno_init(NULL);
+    
+    char buf[1000];
+    if (!dm_device_get_name(major(fs.st_rdev), minor(fs.st_rdev), 0, buf, 1000))
+        return name;
+    
+    dm_lib_release();
+    
+    mapper_name = QString("/dev/mapper/").append(QString(buf));
+    
+    fi.setFile(mapper_name);
+    if(fi.exists())
+        return mapper_name;
+    else
+        return name;
+}
+
 

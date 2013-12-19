@@ -645,7 +645,7 @@ QStringList LogVol::removePvNames()
         PhysVol *const pv = pv_itr.next();
 
         for (int y = names.size() - 1; y >= 0; y--) {
-            if (pv->getName() == names[y])
+            if (pv->getMapperName() == names[y])
                 names.removeAt(y);
         }
     }
@@ -770,7 +770,7 @@ void LogVol::processSegments(lv_t lvmLV, const QByteArray flags)
                 devices_and_starts = raw_paths.split(',');
                 for (int x = 0; x < devices_and_starts.size(); x++) {
                     temp = devices_and_starts[x].split('(');
-                    segment->device_path.append(temp[0]);
+                    segment->device_path.append(findMapperPath(temp[0]));
                     segment->starting_extent.append((temp[1].remove(')')).toLongLong());
                 }
             }

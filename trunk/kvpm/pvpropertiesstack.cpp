@@ -78,7 +78,7 @@ void PVPropertiesStack::changePVStackIndex(QTreeWidgetItem *item, QTreeWidgetIte
         for (int x = devices.size() - 1; x >= 0; --x) {
             if (pv_uuid == devices[x]->getUuid()) {
                 m_stack_widget->setCurrentIndex(x);
-                m_pv_label->setText("<b>" + devices[x]->getName() + "</b>");
+                m_pv_label->setText("<b>" + devices[x]->getMapperName() + "</b>");
             }
         }
     } else {

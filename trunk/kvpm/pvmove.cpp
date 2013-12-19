@@ -85,7 +85,7 @@ PVMoveDialog::PVMoveDialog(PhysVol *const physicalVolume, QWidget *parent) :
     m_vg = physicalVolume->getVg();
     m_move_segment = false;
 
-    const QString name = physicalVolume->getName();
+    const QString name = physicalVolume->getMapperName();
     const LogVolList lvs = m_vg->getLogicalVolumes();
 
     NameAndRange *nar = new NameAndRange;
@@ -645,7 +645,7 @@ QList<PhysVol *> PVMoveDialog::removeForbiddenTargets(QList<PhysVol *> targets, 
 
     for (int x = targets.size() - 1 ; x >= 0; --x) {
         for (auto remove : forbidden) {
-            if (targets[x]->getName() == remove)
+            if (targets[x]->getMapperName() == remove)
                 targets.removeAt(x);
         }
     }

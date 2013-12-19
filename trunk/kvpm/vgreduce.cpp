@@ -47,7 +47,7 @@ VGReduceDialog::VGReduceDialog(PhysVol *const pv, QWidget *parent) :
     QVBoxLayout *const layout = new QVBoxLayout;
     dialog_body->setLayout(layout);
 
-    QLabel *const label = new QLabel(i18n("Remove physical volume: <b>%1?</b>", m_pv->getName()));
+    QLabel *const label = new QLabel(i18n("Remove physical volume: <b>%1?</b>", m_pv->getMapperName()));
     label->setAlignment(Qt::AlignCenter);
     layout->addWidget(label);
     layout->addSpacing(5);
@@ -60,12 +60,12 @@ VGReduceDialog::VGReduceDialog(PhysVol *const pv, QWidget *parent) :
     } else if (pv_space_list.size() == 1 && !hasUnremovablePv()) {
         preventExec();
         KMessageBox::sorry(nullptr, i18n("There is only one physical volume in this group, try deleting the group instead"));
-    } else if (!hasMda(QStringList( m_pv->getName() ))) {
+    } else if (!hasMda(QStringList( m_pv->getMapperName() ))) {
         preventExec();
         KMessageBox::sorry(nullptr, i18n("Physical volume \'%1\' " 
                                          "contains the only usable metadata area for this volume group "
                                          "and cannot be removed.", 
-                                         m_pv->getName()));
+                                         m_pv->getMapperName()));
     }
 
     setButtons(KDialog::Yes | KDialog::No);
@@ -92,12 +92,12 @@ VGReduceDialog::VGReduceDialog(VolGroup *const group, QWidget *parent) :
     } else if (pv_space_list.size() == 1 && !hasUnremovablePv()) {
         preventExec();
         KMessageBox::sorry(nullptr, i18n("There is only one physical volume in this group, try deleting the group instead."));
-    } else if (pv_space_list.size() == 1 && !hasMda(QStringList(pv_space_list[0]->pv->getName()))) {
+    } else if (pv_space_list.size() == 1 && !hasMda(QStringList(pv_space_list[0]->pv->getMapperName()))) {
         preventExec();
         KMessageBox::sorry(nullptr, i18n("The only physical volume with no logical volumes on it is \'%1.\' " 
                                          "It contains the only usable metadata area for this volume group "
                                          "and cannot be removed.", 
-                                         pv_space_list[0]->pv->getName()));
+                                         pv_space_list[0]->pv->getMapperName()));
     } else {
         QLabel *label;
 
@@ -144,7 +144,7 @@ void VGReduceDialog::commit()
 
     QStringList pv_list;
     if (m_pv)
-        pv_list << m_pv->getName();
+        pv_list << m_pv->getMapperName();
     else if (m_pv_checkbox)
         pv_list << m_pv_checkbox->getNames(); // pvs to remove by name
  
@@ -200,7 +200,7 @@ bool VGReduceDialog::hasMda(const QStringList remove)
 
     for (auto pv : m_vg->getPhysicalVolumes()) {
         if (pv->getMdaUsed())
-            mda_names << pv->getName();
+            mda_names << pv->getMapperName();
     }
 
     for (int x = mda_names.size() - 1; x >= 0 ; --x) {
