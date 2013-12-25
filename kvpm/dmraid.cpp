@@ -21,8 +21,8 @@
 #include <QDebug>
 
     
-QStringList dmraid_get_raid(dm_tree_node *parent);
-QStringList dmraid_get_block(dm_tree_node *parent);
+QStringList dmraid_get_raid(dm_tree_node *const parent, dm_tree_node *const root);
+QStringList dmraid_get_block(dm_tree_node *const parent, dm_tree_node *const root);
 
 
 void dmraid_get_devices(QStringList &block, QStringList &raid)
@@ -54,10 +54,10 @@ void dmraid_get_devices(QStringList &block, QStringList &raid)
         } while (next);
     }
 
-    dm_tree_node *const root_node = dm_tree_find_node(tree, 0, 0);
+    dm_tree_node *const root = dm_tree_find_node(tree, 0, 0);
 
-    raid << dmraid_get_raid(root_node);
-    block << dmraid_get_block(root_node);
+    raid << dmraid_get_raid(root, root);
+    block << dmraid_get_block(root, root);
 
     raid.removeDuplicates();
     block.removeDuplicates();
@@ -68,25 +68,28 @@ void dmraid_get_devices(QStringList &block, QStringList &raid)
     dm_lib_release();
 }
 
-QStringList dmraid_get_raid(dm_tree_node *parent)
+QStringList dmraid_get_raid(dm_tree_node *const parent, dm_tree_node *const root)
 {
     QStringList raid;
     void *handle = nullptr;
     void *childhandle = nullptr;
-    
+
     while(dm_tree_node *node = dm_tree_next_child(&handle, parent, 0)) {
+        if(node == root)
+            break;
+
         if (QString(dm_tree_node_get_uuid(node)).startsWith("DMRAID-"))
             raid << QString("/dev/mapper/").append(dm_tree_node_get_name(node));
         else if (QString(dm_tree_node_get_uuid(node)).startsWith("LVM-"))  
-            raid << dmraid_get_raid(node);            
+            raid << dmraid_get_raid(node, root);            
         else if (QString(dm_tree_node_get_uuid(node)).isEmpty()) // might be a partition 
-            raid << dmraid_get_raid(node);   // look for and underlying device
+            raid << dmraid_get_raid(node, root);   // look for and underlying device
     }
     
     return raid;
 }
 
-QStringList dmraid_get_block(dm_tree_node *parent)
+QStringList dmraid_get_block(dm_tree_node *const parent, dm_tree_node *const root)
 {
     QStringList block;
     const int buff_size = 1000;
@@ -94,17 +97,19 @@ QStringList dmraid_get_block(dm_tree_node *parent)
     void *handle = nullptr;
 
     while(dm_tree_node *node = dm_tree_next_child(&handle, parent, 0)) {
+        if(node == root)
+            break;
 
         const QString uuid(dm_tree_node_get_uuid(node));
 
         if (uuid.startsWith("DMRAID-") || uuid.startsWith("LVM-")) {
-            block << dmraid_get_block(node);
+            block << dmraid_get_block(node, root);
         } else if (QString(dm_tree_node_get_uuid(parent)).startsWith("DMRAID-") && uuid.isEmpty()) {
             const dm_info *const dmi = dm_tree_node_get_info(node);
             dm_device_get_name(dmi->major, dmi->minor, 1, dev_name, buff_size);
             block << QString("/dev/").append(dev_name);
         } else {
-            block << dmraid_get_block(node);
+            block << dmraid_get_block(node, root);
         }
     }
     
