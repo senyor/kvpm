@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  * * This program is free software; you can redistribute it and/or modify
@@ -35,8 +35,8 @@ DeviceTree::DeviceTree(DeviceSizeChart *const chart, DevicePropertiesStack *cons
       m_stack(stack)
 {
     const QStringList headers = QStringList() << "Device"    << "Type"  << "Capacity"
-                                << "Remaining" << "Usage" << "Group"
-                                << "Flags"     << "Mount point" ;
+                                              << "Remaining" << "Usage" << "Group"
+                                              << "Flags"     << "Mount point" ;
 
     QTreeWidgetItem *item = new QTreeWidgetItem((QTreeWidgetItem *)0, headers);
 
@@ -152,6 +152,11 @@ void DeviceTree::loadData(QList<StorageDevice *> devices)
         parent->setData(1, Qt::UserRole, dev_variant);
         parent->setTextAlignment(2, Qt::AlignRight);
         parent->setTextAlignment(3, Qt::AlignRight);
+
+        if (dev->isDmRaid())
+            parent->setToolTip(1, i18n("A device mapper RAID volume"));
+        else if (dev->isDmRaidBlock())
+            parent->setToolTip(1, i18n("A block device under a device mapper RAID volume"));
 
         if (dev->isPhysicalVolume()) {
             if (m_pv_warn_percent && (m_pv_warn_percent >= (100 - dev->getPhysicalVolume()->getPercentUsed()))) {
