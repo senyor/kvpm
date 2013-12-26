@@ -323,8 +323,8 @@ void PvGroupBox::setExtentSize(long long extentSize)
 
 void PvGroupBox::disableChecks(QStringList pvs)
 {
-    for (int x = 0; x < m_pvs.size(); ++x)
-        m_pv_checks[x]->setEnabled(true);
+    for(auto check : m_pv_checks)
+        check->setEnabled(true);
 
     if (!pvs.isEmpty() && !m_pv_checks.isEmpty()) {
         for (auto disable_name : pvs) {
