@@ -158,8 +158,10 @@ void MasterList::scanStorageDevices()
     dmraid_get_devices(block, raid);
 
     while ((dev = ped_device_get_next(dev))) {
-        if (!QString(dev->path).startsWith("/dev/mapper") || raid.contains(dev->path))
+        if (!QString(dev->path).startsWith("/dev/mapper"))
             m_storage_devices.append(new StorageDevice(dev, physical_volumes, m_mount_tables, block, raid));
+        else if (raid.contains(dev->path))
+            m_storage_devices.prepend(new StorageDevice(dev, physical_volumes, m_mount_tables, block, raid));
     }
 }
 
