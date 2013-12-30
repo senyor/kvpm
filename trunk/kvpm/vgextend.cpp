@@ -158,7 +158,7 @@ QList<StorageBase *> VGExtendDialog::getUsablePvs()
     QList<StorageBase *> devices;
 
     for (auto dev : MasterList::getStorageDevices() ) {
-        if ((dev->getRealPartitionCount() == 0) && !dev->isBusy() && !dev->isPhysicalVolume()) {
+        if ((dev->getRealPartitionCount() == 0) && !dev->isBusy() && !dev->isPhysicalVolume() && !dev->isDmRaidBlock()) {
             devices.append(dev);
         } else if (dev->getRealPartitionCount() > 0) {
             for (auto part : dev->getStoragePartitions()) {
