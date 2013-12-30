@@ -41,7 +41,7 @@ StorageDevice::StorageDevice(PedDevice *const pedDevice,
     m_device_size = pedDevice->length * sector_size;
     PedDisk *const disk = ped_disk_new(pedDevice);
 
-    if (disk && !is_pv) {
+    if (disk && !is_pv && !isDmRaidBlock()) {
 
         PedDiskFlag cylinder_flag = ped_disk_flag_get_by_name("cylinder_alignment");
         if (ped_disk_is_flag_available(disk, cylinder_flag)) {
@@ -49,19 +49,16 @@ StorageDevice::StorageDevice(PedDevice *const pedDevice,
         }
 
         m_disk_label = QString(disk->type->name);
-
-        long long length;
-        PedPartitionType  part_type;
-        PedPartition *part = NULL;
+        PedPartition *part = nullptr;
     
         while ((part = ped_disk_next_partition(disk, part))) {
 
-            length = part->geom.length * sector_size;
-            part_type = part->type;
+            const long long length = part->geom.length * sector_size;
+            const PedPartitionType  pt = part->type;
 
             // ignore freespace less than 3 megs
-            if (!((part_type & PED_PARTITION_METADATA) || ((part_type & PED_PARTITION_FREESPACE) && (length < (0x300000))))) {
-                if (part_type & PED_PARTITION_FREESPACE)
+            if (!((pt & PED_PARTITION_METADATA) || ((pt & PED_PARTITION_FREESPACE) && (length < (0x300000))))) {
+                if (pt & PED_PARTITION_FREESPACE)
                     m_freespace_count++;
 
                 m_storage_partitions.append(new StoragePartition(part, m_freespace_count, pvList, tables));

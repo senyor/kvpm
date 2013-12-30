@@ -73,17 +73,26 @@ QStringList dmraid_get_raid(dm_tree_node *const parent, dm_tree_node *const root
     QStringList raid;
     void *handle = nullptr;
     void *childhandle = nullptr;
+    const QRegExp rxp("^-[0-9]+$");
+    const QString parent_uuid(dm_tree_node_get_uuid(parent));
 
     while(dm_tree_node *node = dm_tree_next_child(&handle, parent, 0)) {
         if(node == root)
             break;
 
-        if (QString(dm_tree_node_get_uuid(node)).startsWith("DMRAID-"))
-            raid << QString("/dev/mapper/").append(dm_tree_node_get_name(node));
-        else if (QString(dm_tree_node_get_uuid(node)).startsWith("LVM-"))  
+        QString uuid(dm_tree_node_get_uuid(node));
+
+        if (uuid.startsWith("DMRAID-")) {
+            if(!uuid.remove(parent_uuid).contains(rxp)) {
+                raid << QString("/dev/mapper/").append(dm_tree_node_get_name(node));
+                raid << dmraid_get_raid(node, root);          
+            }  
+        } else if (uuid.startsWith("LVM-")) {  
             raid << dmraid_get_raid(node, root);            
-        else if (QString(dm_tree_node_get_uuid(node)).isEmpty()) // might be a partition 
+        } else if (uuid.isEmpty()) {    // might be a partition 
             raid << dmraid_get_raid(node, root);   // look for and underlying device
+        }
+
     }
     
     return raid;
