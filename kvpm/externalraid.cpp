@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2013, 2014 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -13,16 +13,22 @@
  */
 
 
-#include "dmraid.h"
+#include "externalraid.h"
 
 #include <libdevmapper.h>
 
 
 #include <QDebug>
+#include <QFile>
+#include <QRegExp>
+#include <QTextStream>
+
 
     
 QStringList dmraid_get_raid(dm_tree_node *const parent, dm_tree_node *const root);
 QStringList dmraid_get_block(dm_tree_node *const parent, dm_tree_node *const root);
+
+
 
 
 void dmraid_get_devices(QStringList &block, QStringList &raid)
@@ -123,4 +129,32 @@ QStringList dmraid_get_block(dm_tree_node *const parent, dm_tree_node *const roo
     }
     
     return block;
+}
+
+void mdraid_get_devices(QStringList &block, QStringList &raid)
+{
+    QFile mdstat("/proc/mdstat");
+
+    if(mdstat.exists() && mdstat.open(QIODevice::ReadOnly)) {
+        
+        QTextStream stream(&mdstat);
+        QString line;
+        const QRegExp raid_rx("^md[0-9]+ :");
+        const QRegExp bracket_rx("\\[[0-9]+\\]$");
+
+        do {
+            line = stream.readLine();
+            if(line.contains(raid_rx)) {
+                QStringList split = line.split(' ');
+                raid << QString("/dev/").append(split[0]);
+                for(int x = 4; x < split.size(); ++x)
+                    block << QString("/dev/").append(split[x].remove(bracket_rx));
+            }
+        } while (!line.isNull());
+    }
+
+    raid.removeDuplicates();
+    block.removeDuplicates();
+
+    return;
 }

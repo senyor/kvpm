@@ -15,7 +15,7 @@
 
 #include "masterlist.h"
 
-#include "dmraid.h"
+#include "externalraid.h"
 #include "fsprobe.h"
 #include "logvol.h"
 #include "mountentry.h"
@@ -153,15 +153,19 @@ void MasterList::scanStorageDevices()
         delete sd;
 
     m_storage_devices.clear();
-    PedDevice *dev = NULL;
-    QStringList block, raid;
-    dmraid_get_devices(block, raid);
+    PedDevice *dev = nullptr;
+    QStringList dmblock, dmraid;
+    QStringList mdblock, mdraid;
+    dmraid_get_devices(dmblock, dmraid);
+    mdraid_get_devices(mdblock, mdraid);
 
     while ((dev = ped_device_get_next(dev))) {
-        if (!QString(dev->path).startsWith("/dev/mapper"))
-            m_storage_devices.append(new StorageDevice(dev, physical_volumes, m_mount_tables, block, raid));
-        else if (raid.contains(dev->path))
-            m_storage_devices.prepend(new StorageDevice(dev, physical_volumes, m_mount_tables, block, raid));
+        const QString path(dev->path);
+
+        if (!path.startsWith("/dev/mapper") && !(mdblock.contains(path) && mdraid.contains(path)))
+            m_storage_devices.append(new StorageDevice(dev, physical_volumes, m_mount_tables, dmblock, dmraid, mdblock, mdraid));
+        else if (dmraid.contains(path))
+            m_storage_devices.prepend(new StorageDevice(dev, physical_volumes, m_mount_tables, dmblock, dmraid, mdblock, mdraid));
     }
 }
 

@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2013  Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2013, 2014  Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -22,7 +22,9 @@
 #include "physvol.h"
 #include "storagebase.h"
 
-StorageBase::StorageBase(PedPartition *const part, const QList<PhysVol *> &pvList)
+
+
+StorageBase::StorageBase(PedPartition *const part, const QList<PhysVol *> &pvList, const QStringList mdblock)
 {
     m_sector_size = part->disk->dev->sector_size;
 
@@ -40,9 +42,20 @@ StorageBase::StorageBase(PedPartition *const part, const QList<PhysVol *> &pvLis
 
     m_is_dmraid = false;
     m_is_dmraid_block = false;
+    m_is_mdraid = false;
+    m_is_mdraid_block = false;
+
+    for (auto dev : mdblock) {
+        if (dev == m_name) {
+            m_is_mdraid_block = true;
+            break;
+        }
+    }
 }
 
-StorageBase::StorageBase(PedDevice *const device, const QList<PhysVol *> &pvList, const QStringList dmblock, const QStringList dmraid)
+StorageBase::StorageBase(PedDevice *const device, const QList<PhysVol *> &pvList, 
+                         const QStringList dmblock, const QStringList dmraid,
+                         const QStringList mdblock, const QStringList mdraid)
 {
     m_sector_size = device->sector_size;
     m_name = QString(device->path).trimmed();
@@ -52,6 +65,8 @@ StorageBase::StorageBase(PedDevice *const device, const QList<PhysVol *> &pvList
 
     m_is_dmraid = false;
     m_is_dmraid_block = false;
+    m_is_mdraid = false;
+    m_is_mdraid_block = false;
 
     for (auto dev : dmblock) {
         if (dev == m_name) {
@@ -63,6 +78,20 @@ StorageBase::StorageBase(PedDevice *const device, const QList<PhysVol *> &pvList
     for (auto dev : dmraid) {
         if (dev == m_name) {
             m_is_dmraid = true;
+            break;
+        }
+    }
+
+    for (auto dev : mdblock) {
+        if (dev == m_name) {
+            m_is_mdraid_block = true;
+            break;
+        }
+    }
+
+    for (auto dev : mdraid) {
+        if (dev == m_name) {
+            m_is_mdraid = true;
             break;
         }
     }
