@@ -42,7 +42,9 @@ public:
                   const QList<PhysVol *> pvList, 
                   MountTables *const tables, 
                   const QStringList dmblock, 
-                  const QStringList dmraid);
+                  const QStringList dmraid,
+                  const QStringList mdblock, 
+                  const QStringList mdraid);
     ~StorageDevice();
         
     QString getDiskLabel() const { return m_disk_label; }

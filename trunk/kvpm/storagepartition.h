@@ -62,8 +62,11 @@ class StoragePartition : public StorageBase
     PedSector getFreespaceEnd();
 
 public:
-    StoragePartition(PedPartition *const part, const int freespaceCount,
-                     const QList<PhysVol *> pvList, MountTables *const tables);
+    StoragePartition(PedPartition *const part, 
+                     const int freespaceCount,
+                     const QList<PhysVol *> pvList, 
+                     MountTables *const tables, 
+                     const QStringList mdblock);
 
     ~StoragePartition();
 

@@ -30,7 +30,10 @@ StorageDevice::StorageDevice(PedDevice *const pedDevice,
                              const QList<PhysVol *> pvList, 
                              MountTables *const tables, 
                              const QStringList dmblock, 
-                             const QStringList dmraid) : StorageBase(pedDevice, pvList, dmblock, dmraid)
+                             const QStringList dmraid,
+                             const QStringList mdblock, 
+                             const QStringList mdraid) : 
+    StorageBase(pedDevice, pvList, dmblock, dmraid, mdblock, mdraid)
 {
     const long long sector_size = getSectorSize();
     const bool is_pv = isPhysicalVolume();
@@ -41,7 +44,7 @@ StorageDevice::StorageDevice(PedDevice *const pedDevice,
     m_device_size = pedDevice->length * sector_size;
     PedDisk *const disk = ped_disk_new(pedDevice);
 
-    if (disk && !is_pv && !isDmRaidBlock()) {
+    if (disk && !is_pv && !isDmBlock()) {
 
         PedDiskFlag cylinder_flag = ped_disk_flag_get_by_name("cylinder_alignment");
         if (ped_disk_is_flag_available(disk, cylinder_flag)) {
@@ -61,7 +64,7 @@ StorageDevice::StorageDevice(PedDevice *const pedDevice,
                 if (pt & PED_PARTITION_FREESPACE)
                     m_freespace_count++;
 
-                m_storage_partitions.append(new StoragePartition(part, m_freespace_count, pvList, tables));
+                m_storage_partitions.append(new StoragePartition(part, m_freespace_count, pvList, tables, mdblock));
             }
         }
     } else if (is_pv) {

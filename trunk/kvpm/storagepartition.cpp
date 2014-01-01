@@ -28,9 +28,12 @@
 
 
 
-StoragePartition::StoragePartition(PedPartition *const part, const int freespaceCount, 
-                                   const QList<PhysVol *> pvList, MountTables *const tables) : 
-    StorageBase(part, pvList), 
+StoragePartition::StoragePartition(PedPartition *const part,
+                                   const int freespaceCount, 
+                                   const QList<PhysVol *> pvList, 
+                                   MountTables *const tables,
+                                   const QStringList mdblock) : 
+    StorageBase(part, pvList, mdblock), 
     m_ped_partition(part)
 {
     PedDevice *const ped_device = m_ped_partition->disk->dev;
@@ -105,7 +108,7 @@ StoragePartition::StoragePartition(PedPartition *const part, const int freespace
             m_flags << "";
     }
 
-    if (m_partition_type == "extended") {
+    if (m_partition_type == "extended" || isMdBlock()) {
         m_is_mountable = false;
         m_fs_type = "";
     } else {

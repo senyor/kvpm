@@ -1,7 +1,7 @@
 version 0.9.8
 Added a dialog for resyncing mirrors and RAID volume in
-the menu and toolbar. Better support for dmraid "fakeraid"
-devices under volume groups.
+the menu and toolbar. Some limited support for dmraid "fake RAID"
+devices and for md "multiple device" RAID under volume groups.
 
 version 0.9.7
 Put toolbars on the device tab for all the menu options

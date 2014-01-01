@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2011, 2012, 2013, 2014 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  * * This program is free software; you can redistribute it and/or modify
@@ -125,16 +125,16 @@ void DeviceTree::loadData(QList<StorageDevice *> devices)
         dev = devices[x];
         dev_variant.setValue((void *) dev);
         dev_name = dev->getName();
-        QString dmraid;
+        QString external_raid;
 
         if (dev->isDmRaid())
-            dmraid = "dm volume";
-        else if (dev->isDmRaidBlock())
-            dmraid = "dm device";
+            external_raid = "dm volume";
+        else if (dev->isMdRaid())
+            external_raid = "md volume";
 
         if (dev->isPhysicalVolume()) {
             pv = dev->getPhysicalVolume();
-            data << dev_name << dmraid << locale->formatByteSize(dev->getSize(), 1, dialect);
+            data << dev_name << external_raid << locale->formatByteSize(dev->getSize(), 1, dialect);
 
             if (m_show_total && !m_show_percent)
                 data << locale->formatByteSize(pv->getRemaining(), 1, dialect);
@@ -145,7 +145,11 @@ void DeviceTree::loadData(QList<StorageDevice *> devices)
 
             data << "PV" << pv->getVg()->getName();
         } else {
-            data << dev_name << dmraid << locale->formatByteSize(dev->getSize(), 1, dialect);
+            data << dev_name << external_raid << locale->formatByteSize(dev->getSize(), 1, dialect) << "";
+            if(dev->isDmBlock())
+                data << "dm device";
+            else if(dev->isMdBlock())
+                data << "md device";
         }
 
         parent = new QTreeWidgetItem(data);
@@ -155,8 +159,12 @@ void DeviceTree::loadData(QList<StorageDevice *> devices)
 
         if (dev->isDmRaid())
             parent->setToolTip(1, i18n("A device mapper RAID volume"));
-        else if (dev->isDmRaidBlock())
-            parent->setToolTip(1, i18n("A block device under a device mapper RAID volume"));
+        else if (dev->isDmBlock())
+            parent->setToolTip(4, i18n("A block device under a device mapper RAID volume"));
+        else if (dev->isMdRaid())
+            parent->setToolTip(1, i18n("A multiple device RAID volume"));
+        else if (dev->isMdBlock())
+            parent->setToolTip(4, i18n("A block device under a multiple device RAID volume"));
 
         if (dev->isPhysicalVolume()) {
             if (m_pv_warn_percent && (m_pv_warn_percent >= (100 - dev->getPhysicalVolume()->getPercentUsed()))) {
@@ -218,7 +226,12 @@ void DeviceTree::loadData(QList<StorageDevice *> devices)
                 } else
                     data << "";
 
-                data << part->getFilesystem() << "" << (part->getFlags()).join(", ");
+                if(part->isMdBlock())
+                    data << "md device";
+                else
+                    data << part->getFilesystem();
+
+                data << "" << (part->getFlags()).join(", ");
 
                 if (part->isMounted())
                     data << (part->getMountPoints())[0];
@@ -264,6 +277,8 @@ void DeviceTree::loadData(QList<StorageDevice *> devices)
                         child->setIcon(4, KIcon("lightbulb_off"));
                         child->setToolTip(4, i18n("Physical volume without active logical volumes"));
                     }
+                } else if (part->isMdBlock()){
+                    child->setToolTip(4, i18n("A block device under a multiple device RAID volume"));
                 } else if (part->isMountable()) {
                     if (part->isMounted()) {
                         if (m_fs_warn_percent && (m_fs_warn_percent >= (100 - part->getFilesystemPercentUsed()))) {

@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2013, 2014 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -34,6 +34,8 @@ class StorageBase
     bool      m_is_pv;
     bool      m_is_dmraid;
     bool      m_is_dmraid_block;
+    bool      m_is_mdraid;
+    bool      m_is_mdraid_block;
     PhysVol  *m_pv;
     int m_major;            // block dev numbers
     int m_minor;
@@ -41,8 +43,12 @@ class StorageBase
     void commonConstruction(const QList<PhysVol *> &pvList);
 
 public:
-    StorageBase(PedDevice *const device, const QList<PhysVol *> &pvList, const QStringList dmblock, const QStringList dmraid);
-    StorageBase(PedPartition *const part, const QList<PhysVol *> &pvList);
+    StorageBase(PedDevice *const device, const QList<PhysVol *> &pvList, 
+                const QStringList dmblock, const QStringList dmraid,
+                const QStringList mdblock, const QStringList mdraid);
+
+    StorageBase(PedPartition *const part, const QList<PhysVol *> &pvList, const QStringList mdblock);
+
     virtual ~StorageBase() {}
 
     virtual long long getSize() const = 0;
@@ -55,7 +61,9 @@ public:
     bool isBusy() const { return m_is_busy; }
     bool isPhysicalVolume() const { return m_is_pv; }
     bool isDmRaid() const { return m_is_dmraid; }             // dmraid device ie: /dev/mapper/foo
-    bool isDmRaidBlock() const { return m_is_dmraid_block; }  // real block device under dmraid 
+    bool isDmBlock() const { return m_is_dmraid_block; }  // real block device under dmraid 
+    bool isMdRaid() const { return m_is_mdraid; }             // mdraid device ie: /dev/mdfoo
+    bool isMdBlock() const { return m_is_mdraid_block; }  // real block device under mdraid 
 };
 
 #endif

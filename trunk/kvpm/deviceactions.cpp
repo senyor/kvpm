@@ -165,7 +165,7 @@ void DeviceActions::changeDevice(QTreeWidgetItem *item)
 
         m_dev = (StorageDevice *)((item->data(1, Qt::UserRole)).value<void *>());
 
-        if(m_dev->isDmRaidBlock()) {
+        if(m_dev->isDmBlock()) {
             mkfs->setEnabled(false);
             fsck->setEnabled(false);
             max_fs->setEnabled(false);
