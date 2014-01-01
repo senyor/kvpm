@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2013, 2014 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -165,7 +165,7 @@ void DeviceActions::changeDevice(QTreeWidgetItem *item)
 
         m_dev = (StorageDevice *)((item->data(1, Qt::UserRole)).value<void *>());
 
-        if(m_dev->isDmBlock()) {
+        if(m_dev->isDmBlock() || m_dev->isMdBlock()) {
             mkfs->setEnabled(false);
             fsck->setEnabled(false);
             max_fs->setEnabled(false);
@@ -188,7 +188,22 @@ void DeviceActions::changeDevice(QTreeWidgetItem *item)
             unmount->setEnabled(m_part->isMounted());
             fsck->setEnabled(!m_part->isMounted() && !m_part->isBusy());
 
-            if (m_part->getPedType() & 0x04) {    // freespace
+            if (m_part->isMdBlock()) {
+                mkfs->setEnabled(false);
+                fsck->setEnabled(false);
+                max_fs->setEnabled(false);
+                max_pv->setEnabled(false);
+                partflag->setEnabled(false);
+                partremove->setEnabled(false);
+                partadd->setEnabled(false);
+                partchange->setEnabled(false);
+                vgcreate->setEnabled(false);
+                tablecreate->setEnabled(false);
+                vgreduce->setEnabled(false);
+                mount->setEnabled(false);
+                unmount->setEnabled(false);
+                vgextendEnable(false);
+            } else if (m_part->getPedType() & 0x04) {    // freespace
                 max_fs->setEnabled(false);
                 max_pv->setEnabled(false);
                 mkfs->setEnabled(false);
