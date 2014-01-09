@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2011, 2012, 2014 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -22,7 +22,6 @@
 #include <QTreeWidgetItem>
 #include <QHBoxLayout>
 
-class DeviceTree;
 
 
 class DeviceSizeChart : public QFrame
@@ -31,7 +30,6 @@ class DeviceSizeChart : public QFrame
 
     QHBoxLayout *m_layout;
     QHBoxLayout *m_extended_layout;        // The layout for chart segments inside an extended partition
-    QTreeWidget *m_tree;
 
     QList<QWidget *> m_segments, m_extended_segments;    // Segments of the bar chart, not the disk.
     QList<double>    m_ratios,   m_extended_ratios;
