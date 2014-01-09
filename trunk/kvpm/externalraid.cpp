@@ -78,7 +78,6 @@ QStringList dmraid_get_raid(dm_tree_node *const parent, dm_tree_node *const root
 {
     QStringList raid;
     void *handle = nullptr;
-    void *childhandle = nullptr;
     const QRegExp rxp("^-[0-9]+$");
     const QString parent_uuid(dm_tree_node_get_uuid(parent));
 
