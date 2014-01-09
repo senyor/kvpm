@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2009, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2011, 2012, 2013, 2014 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -57,7 +57,10 @@ void DeviceSizeChart::setNewDevice(QTreeWidgetItem *deviceItem)
     if (deviceItem == nullptr)
         return;
 
-    while ((deviceItem->parent()) && ((QTreeWidget *)deviceItem->parent() != m_tree))
+    const QTreeWidget *const root = deviceItem->treeWidget();
+
+    // Find the deviceItem at the top, just under the tree root.
+    while ((deviceItem->parent()) && ((QTreeWidget *)deviceItem->parent() != root))
         deviceItem = deviceItem->parent();
 
     for (int x = m_layout->count() - 1; x >= 0; x--) // delete all the children
