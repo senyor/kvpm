@@ -25,7 +25,7 @@ target_link_libraries(kvpm ${KDE4_KDEUI_LIBS} ${KDE4_KFILE_LIBS} ${QT_LIBRARIES}
 INSTALL( TARGETS kvpm DESTINATION ${SBIN_INSTALL_DIR} )
 
 IF(CMAKE_COMPILER_IS_GNUCXX)
-  set_target_properties(kvpm PROPERTIES COMPILE_FLAGS "-Wno-psabi -Wno-cast-align -O2 -Wstrict-aliasing")
+  set_target_properties(kvpm PROPERTIES COMPILE_FLAGS "-Wall -Wno-psabi -Wno-cast-align -O2 -Wstrict-aliasing")
   set_target_properties(kvpm PROPERTIES LINK_FLAGS "-Wl,--as-needed")
   SET(CMAKE_CXX_FLAGS "-std=gnu++11")
   SET(CMAKE_C_FLAGS "-std=gnu99")
