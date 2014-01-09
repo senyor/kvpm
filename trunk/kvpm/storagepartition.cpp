@@ -151,7 +151,7 @@ StoragePartition::StoragePartition(PedPartition *const part,
         m_is_empty = true;
         if (temp_disk) {
             while ((temp_part = ped_disk_next_partition(temp_disk, temp_part))) {
-                if ((temp_part->type  == PED_PARTITION_LOGICAL)) {
+                if (temp_part->type == PED_PARTITION_LOGICAL) {
                     m_is_empty = false;
                     break;
                 }
