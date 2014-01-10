@@ -212,7 +212,7 @@ void TopWindow::showDeviceBar(bool show)
 {
     KConfigSkeleton skeleton;
     bool show_device_bar;
-    qDebug() << "Got here ....";
+
     skeleton.setCurrentGroup("General");
     skeleton.addItemBool("show_device_barchart", show_device_bar, true);
     show_device_bar = show;
