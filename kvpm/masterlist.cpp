@@ -72,6 +72,14 @@ MasterList::~MasterList()
 {
     if (m_lvm)
         lvm_quit(m_lvm);
+
+    for(auto vg : m_volume_groups)
+        delete vg;
+
+    for(auto dev : m_storage_devices)
+        delete dev;
+
+    delete m_mount_tables;
 }
 
 void MasterList::rescan()
