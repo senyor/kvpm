@@ -451,27 +451,27 @@ KMenu *TopWindow::buildToolsMenu()
 
 KMenu *TopWindow::buildHelpMenu()
 {
-    KAboutData *const about_data = new KAboutData(QByteArray("kvpm"),
-            QByteArray("kvpm"),
-            ki18n("kvpm"),
-            QByteArray("0.9.8"),
-            ki18n("Linux volume and partition manager for KDE.  "
-                  "This program is still under development, "
-                  "bug reports and any comments are welcomed.  "
-                  "Licensed under GNU General Public License v3.0"),
-            KAboutData::License_GPL_V3,
-            ki18n("(c) 2008, 2009, 2010, 2011, 2012, 2013 Benjamin Scott"),
-            KLocalizedString(),
-            QByteArray("http://sourceforge.net/projects/kvpm/"),
-            QByteArray("benscott@nwlink.com"));
+    static KAboutData about_data(QByteArray("kvpm"),
+                                 QByteArray("kvpm"),
+                                 ki18n("kvpm"),
+                                 QByteArray("0.9.8"),
+                                 ki18n("Linux volume and partition manager for KDE.  "
+                                       "This program is still under development, "
+                                       "bug reports and any comments are welcomed.  "
+                                       "Licensed under GNU General Public License v3.0"),
+                                 KAboutData::License_GPL_V3,
+                                 ki18n("(c) 2008, 2009, 2010, 2011, 2012, 2013 Benjamin Scott"),
+                                 KLocalizedString(),
+                                 QByteArray("http://sourceforge.net/projects/kvpm/"),
+                                 QByteArray("benscott@nwlink.com"));
 
-    about_data->addCredit(ki18n("Mark James"),
-                          ki18n("Additional icons taken from the Silk icon set by "
-                                "Mark James under the Creative Commons Attribution 3.0 License."),
-                          QByteArray(),
-                          QByteArray("http://www.famfamfam.com/lab/icons/silk/"));
-
-    KHelpMenu *const help_menu = new KHelpMenu(this, about_data);
+    about_data.addCredit(ki18n("Mark James"),
+                         ki18n("Additional icons taken from the Silk icon set by "
+                               "Mark James under the Creative Commons Attribution 3.0 License."),
+                         QByteArray(),
+                         QByteArray("http://www.famfamfam.com/lab/icons/silk/"));
+    
+    KHelpMenu *const help_menu = new KHelpMenu(this, &about_data);
 
     return help_menu->menu();
 }
