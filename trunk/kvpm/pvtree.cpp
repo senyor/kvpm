@@ -51,7 +51,7 @@ PVTree::PVTree(VolGroup *const group, QWidget *parent) :
                   << i18n("Tags")
                   << i18n("Logical volumes");
 
-    item = new QTreeWidgetItem((QTreeWidgetItem *)0, header_labels);
+    item = new QTreeWidgetItem(static_cast<QTreeWidgetItem *>(nullptr), header_labels);
 
     for (int column = 0; column < 7; column++)
         item->setTextAlignment(column, Qt::AlignCenter);
