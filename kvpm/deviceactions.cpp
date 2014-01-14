@@ -162,8 +162,7 @@ void DeviceActions::changeDevice(QTreeWidgetItem *item)
     }
 
     if (item) {
-
-        m_dev = (StorageDevice *)((item->data(1, Qt::UserRole)).value<void *>());
+        m_dev = static_cast<StorageDevice *>((item->data(1, Qt::UserRole)).value<void *>());
 
         if(m_dev->isDmBlock() || m_dev->isMdBlock()) {
             mkfs->setEnabled(false);
@@ -181,7 +180,7 @@ void DeviceActions::changeDevice(QTreeWidgetItem *item)
             unmount->setEnabled(false);
             vgextendEnable(false);
         } else if ((item->data(0, Qt::UserRole)).canConvert<void *>()) {   // its a partition
-            m_part = (StoragePartition *)((item->data(0, Qt::UserRole)).value<void *>());
+            m_part = static_cast<StoragePartition *>((item->data(0, Qt::UserRole)).value<void *>());
             
             tablecreate->setEnabled(false);
             mount->setEnabled(m_part->isMountable());
