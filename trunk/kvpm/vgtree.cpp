@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2009, 2010, 2011, 2012,, 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013, 2014 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  * * This program is free software; you can redistribute it and/or modify
@@ -38,7 +38,7 @@ VGTree::VGTree(VolGroup *const group) :
                                 << i18n("Stripe size") << i18n("Data/Copy")  << i18n("State")
                                 << i18n("Access")      << i18n("Tags")       << i18n("Mount points");
 
-    QTreeWidgetItem *item = new QTreeWidgetItem((QTreeWidgetItem *)0, headers);
+    QTreeWidgetItem *item = new QTreeWidgetItem(static_cast<QTreeWidgetItem *>(nullptr), headers);
 
     for (int column = 0; column < item->columnCount() ; column++)
         item->setTextAlignment(column, Qt::AlignCenter);
@@ -88,7 +88,7 @@ void VGTree::loadData()
         }
 
         if (new_item == nullptr) {
-            new_item = new QTreeWidgetItem((QTreeWidgetItem *)0);
+            new_item = new QTreeWidgetItem(static_cast<QTreeWidgetItem *>(nullptr));
             addTopLevelItem(new_item);
             loadItem(lv, new_item);
         }
