@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2010, 2011, 2012, 2014 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -24,6 +24,7 @@
 #include <QLabel>
 #include <QVBoxLayout>
 
+#include "devicetab.h"
 #include "volumegrouptab.h"
 
 
@@ -50,14 +51,14 @@ QString MainTabWidget::getUnmungedText(const int index)
 
 void MainTabWidget::appendVolumeGroupTab(VolumeGroupTab *const page, const QIcon &icon, const QString &label)
 {
-    m_tab_widget->insertTab(m_tab_widget->count(), (QWidget *)page, icon, i18n("Group: %1", label));
+    m_tab_widget->insertTab(m_tab_widget->count(), static_cast<QWidget *>(page), icon, i18n("Group: %1", label));
     m_unmunged_text.append(label);
     m_vg_tabs.append(page);
 }
 
 void MainTabWidget::appendDeviceTab(DeviceTab *const page, const QString &label)
 {
-    m_tab_widget->insertTab(m_tab_widget->count(), (QWidget *)page, label);
+    m_tab_widget->insertTab(m_tab_widget->count(), static_cast<QWidget *>(page), label);
     m_unmunged_text.append(label);
 }
 
