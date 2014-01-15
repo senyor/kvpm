@@ -60,7 +60,7 @@ void DeviceSizeChart::setNewDevice(QTreeWidgetItem *deviceItem)
     m_extended_segments.clear();
     m_extended_ratios.clear();
 
-    const StorageDevice *device = static_cast<StorageDevice *>((deviceItem->data(1, Qt::UserRole).value<void *>()));
+    const StorageDevice *const device = static_cast<StorageDevice *>((deviceItem->data(1, Qt::UserRole).value<void *>()));
     QWidget *segment = nullptr;
 
     if (deviceItem->childCount()) {   // device with one or more partitions
@@ -68,11 +68,9 @@ void DeviceSizeChart::setNewDevice(QTreeWidgetItem *deviceItem)
             
             QTreeWidgetItem *const part_item = deviceItem->child(i);
             const StoragePartition *part = static_cast<StoragePartition *>((part_item->data(0, Qt::UserRole)).value<void *>());
-            double ratio = part->getSize() / static_cast<double>(device->getSize());
-            
             segment = new DeviceChartSeg(part_item);
             m_segments.append(segment);
-            m_ratios.append(ratio);
+            m_ratios.append(part->getSize() / static_cast<double>(device->getSize()));
             
             connect(segment, SIGNAL(deviceMenuRequested(QTreeWidgetItem *)),
                     this, SIGNAL(deviceMenuRequested(QTreeWidgetItem *)));
@@ -83,13 +81,12 @@ void DeviceSizeChart::setNewDevice(QTreeWidgetItem *deviceItem)
                 m_extended_layout->setMargin(0);
                 m_extended_layout->setSizeConstraint(QLayout::SetNoConstraint);
                 if (!part->isEmptyExtended()) {
-                    for (int j = 0 ; j < part_item->childCount(); ++j) {
-                        QTreeWidgetItem  *const extended_item = part_item->child(j);
-                        part = static_cast<StoragePartition *>((extended_item->data(0, Qt::UserRole)).value<void *>());
+                    for (int j = 0; j < part_item->childCount(); ++j) {
+                        QTreeWidgetItem *const extended_item = part_item->child(j);
                         QWidget *const extended_segment = new DeviceChartSeg(extended_item);
-                        ratio = part->getSize() / static_cast<double>(device->getSize());
+                        part = static_cast<StoragePartition *>((extended_item->data(0, Qt::UserRole)).value<void *>());
                         m_extended_segments.append(extended_segment);
-                        m_extended_ratios.append(ratio);
+                        m_extended_ratios.append(part->getSize() / static_cast<double>(device->getSize()));
                         m_extended_layout->addWidget(extended_segment);
                         
                         connect(extended_segment, SIGNAL(deviceMenuRequested(QTreeWidgetItem *)),
@@ -119,7 +116,7 @@ void DeviceSizeChart::resizeSegments(const int width)
     
     for (int i = m_segments.size() - 1 ; i >= 0; --i) {
         
-        max_width = ((width * m_ratios[i]) - 2);
+        max_width = (width * m_ratios[i]) - 2;
         if (max_width < 1)
             max_width = 1;
 
@@ -128,7 +125,7 @@ void DeviceSizeChart::resizeSegments(const int width)
 
     for (int i = m_extended_segments.size() - 1; i >= 0; --i) {
 
-        max_width = ((width * m_extended_ratios[i]) - 2);
+        max_width = (width * m_extended_ratios[i]) - 2;
         if (max_width < 1)
             max_width = 1;
 
