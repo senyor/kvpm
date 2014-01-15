@@ -34,10 +34,10 @@ class DeviceSizeChart : public QFrame
     QList<QWidget *> m_segments, m_extended_segments;    // Segments of the bar chart, not the disk.
     QList<double>    m_ratios,   m_extended_ratios;
 
-
 public:
-    DeviceSizeChart(QWidget *parent);
-    void resizeEvent(QResizeEvent *event);
+    DeviceSizeChart(QWidget *const parent);
+    void resizeEvent(QResizeEvent *const event);
+    void resizeSegments(const int width);
 
 public slots:
     void setNewDevice(QTreeWidgetItem *deviceItem);
