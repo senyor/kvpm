@@ -38,7 +38,7 @@ DeviceTree::DeviceTree(DeviceSizeChart *const chart, DevicePropertiesStack *cons
                                               << "Remaining" << "Usage" << "Group"
                                               << "Flags"     << "Mount point" ;
 
-    QTreeWidgetItem *item = new QTreeWidgetItem((QTreeWidgetItem *)0, headers);
+    QTreeWidgetItem *item = new QTreeWidgetItem(static_cast<QTreeWidgetItem *>(nullptr), headers);
 
     for (int column = 0; column < item->columnCount() ; column++)
         item->setTextAlignment(column, Qt::AlignCenter);
@@ -63,10 +63,7 @@ DeviceTree::DeviceTree(DeviceSizeChart *const chart, DevicePropertiesStack *cons
 
 void DeviceTree::loadData(QList<StorageDevice *> devices)
 {
-    QTreeWidgetItem  *parent, *child, *extended = NULL;
-    StoragePartition *part = NULL;
-    StorageDevice *dev = NULL;
-    PhysVol *pv = NULL;
+    QTreeWidgetItem  *parent, *child, *extended = nullptr;
     QStringList data, expanded_items, old_dev_names;
     QString dev_name, part_name, type, current_device, current_parent;
     QVariant part_variant, dev_variant;
@@ -120,10 +117,9 @@ void DeviceTree::loadData(QList<StorageDevice *> devices)
         delete takeTopLevelItem(x);
     }
 
-    for (int x = 0; x < devices.size(); x++) {
+    for (auto dev : devices) {
         data.clear();
-        dev = devices[x];
-        dev_variant.setValue((void *) dev);
+        dev_variant.setValue(static_cast<void *>(dev));
         dev_name = dev->getName();
         QString external_raid;
 
@@ -133,8 +129,8 @@ void DeviceTree::loadData(QList<StorageDevice *> devices)
             external_raid = "md volume";
 
         if (dev->isPhysicalVolume()) {
-            pv = dev->getPhysicalVolume();
             data << dev_name << external_raid << locale->formatByteSize(dev->getSize(), 1, dialect);
+            PhysVol *const pv = dev->getPhysicalVolume();
 
             if (m_show_total && !m_show_percent)
                 data << locale->formatByteSize(pv->getRemaining(), 1, dialect);
@@ -191,17 +187,15 @@ void DeviceTree::loadData(QList<StorageDevice *> devices)
             }
         }
 
-        for (int y = 0; y < dev->getPartitionCount(); y++) {
+        for (auto part : dev->getStoragePartitions()) {
             data.clear();
-
-            part = dev->getStoragePartitions()[y];
-            part_variant.setValue((void *) part);
+            part_variant.setValue(static_cast<void *>(part));
             type = part->getType();
 
             data << part->getName() << type << locale->formatByteSize(part->getSize(), 1, dialect);
 
             if (part->isPhysicalVolume()) {
-                pv = part->getPhysicalVolume();
+                PhysVol *const pv = part->getPhysicalVolume();
 
                 if (m_show_total && !m_show_percent)
                     data << locale->formatByteSize(pv->getRemaining(), 1, dialect);
@@ -412,7 +406,7 @@ void DeviceTree::loadData(QList<StorageDevice *> devices)
     resizeColumnToContents(3);
     resizeColumnToContents(5);
 
-    if (topLevelItemCount() && (currentItem() == NULL))
+    if (topLevelItemCount() && (currentItem() == nullptr))
         setCurrentItem(topLevelItem(0));
 
     return;
