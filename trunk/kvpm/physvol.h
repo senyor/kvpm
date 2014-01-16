@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012, 2013, 2014 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -66,7 +66,7 @@ public:
     long long getRemaining() const { return m_unused; }      // free space in bytes
     long long getLastUsedExtent() const { return m_last_used_extent; }    // needed for minimum shrink size determination
     void setLastUsedExtent(const long long last) { m_last_used_extent = last; }
-    int getPercentUsed();           // 0 - 100
+    int getPercentUsed() const;           // 0 - 100
     long getMdaCount() const { return m_mda_count; }
     long getMdaUsed() const { return m_mda_used; }           // Meta Data areas in use
     long long getMdaSize() const { return m_mda_size; }      // Meta Data Area size in bytes
