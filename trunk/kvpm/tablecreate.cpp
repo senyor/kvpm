@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2009, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2009, 2010, 2011, 2012, 2013, 2014 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -95,7 +95,6 @@ void TableCreateDialog::commitTable()
     PedDevice   *const ped_device = ped_device_get(path.data());
     PedDiskType *ped_disk_type = nullptr;
     PedDisk     *ped_disk = nullptr;
-    char        *buff = nullptr;
 
     if (m_msdos_button->isChecked()) {
         ped_disk_type = ped_disk_type_get("msdos");
@@ -108,7 +107,7 @@ void TableCreateDialog::commitTable()
     } else {
         ped_disk_clobber(ped_device); // This isn't enough for lvm
         ped_device_open(ped_device);
-        buff = static_cast<char *>(malloc(2 * ped_device->sector_size));
+        char *const buff  = static_cast<char *>(malloc(2 * ped_device->sector_size));
 
         for (int x = 0; x < 2 * ped_device->sector_size; x++)
             buff[x] = 0;
@@ -117,6 +116,7 @@ void TableCreateDialog::commitTable()
             KMessageBox::error(0, "Destroying table failed: could not write to device");
 
         ped_device_close(ped_device);
+        free(buff);
     }
 }
 
