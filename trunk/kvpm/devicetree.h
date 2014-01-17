@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2011, 2012, 2014 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -25,7 +25,9 @@
 #include <QTreeWidgetItem>
 
 
+class StorageBase;
 class StorageDevice;
+class StoragePartition;
 class DeviceSizeChart;
 class DevicePropertiesStack;
 
@@ -46,11 +48,20 @@ class DeviceTree : public QTreeWidget
     DeviceSizeChart       *m_chart;
     DevicePropertiesStack *m_stack;
 
+    void currentItemNames(QString &current, QString &currentParent);
+    void expandedItemNames(QStringList &expanded, QStringList &old);
+    void expandItem(QTreeWidgetItem *const item, const QStringList expanded, const QStringList old);
+    QTreeWidgetItem *buildDeviceItem(StorageDevice *const dev);
+    QTreeWidgetItem *buildPartitionItem(StoragePartition *const part, StorageDevice *const dev);
+    void setItemAttributes(QTreeWidgetItem *const item, const StorageBase *const devbase);
+    QStringList getDeviceItemData(const StorageDevice *const dev); 
+    QStringList getPartitionItemData(const StoragePartition *const part); 
+    void restoreCurrentItem(const QString current, const QString currentParent);
     void setupContextMenu();
     void setViewConfig();
 
 public:
-    DeviceTree(DeviceSizeChart *const chart, DevicePropertiesStack *const stack, QWidget *parent = NULL);
+    DeviceTree(DeviceSizeChart *const chart, DevicePropertiesStack *const stack, QWidget *parent = nullptr);
     void loadData(QList<StorageDevice *> devices);
 
 private slots:
