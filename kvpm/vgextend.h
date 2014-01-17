@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012, 2013, 2014 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -36,7 +36,6 @@ class VGExtendDialog : public KvpmDialog
 
     bool continueWarning();
     void buildDialog(QList<StorageBase *> devices);
-    QList<StorageBase *> getUsablePvs();
 
 public:
     VGExtendDialog(VolGroup *const group, QWidget *parent = nullptr);

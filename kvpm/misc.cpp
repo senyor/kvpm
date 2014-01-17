@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2014 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -23,6 +23,11 @@
 #include <libdevmapper.h>
 
 #include <KPushButton>
+
+#include "masterlist.h"
+#include "storagebase.h"
+#include "storagedevice.h"
+#include "storagepartition.h"
 
 
 NoMungeCheck::NoMungeCheck(const QString text, QWidget *parent) : QCheckBox(text, parent)
@@ -172,4 +177,27 @@ QString findMapperPath(QString name)
         return name;
 }
 
+// returns a list of pvs suitable for creating or extending a vg
+
+QList<StorageBase *> getUsablePvs()
+{
+    QList<StorageBase *> devices;
+
+    for (auto dev : MasterList::getStorageDevices() ) {
+        if (!dev->isDmBlock() && !dev->isMdBlock() && !dev->isPhysicalVolume()) {
+            if ((dev->getRealPartitionCount() == 0) && !dev->isBusy()) {
+                devices.append(dev);
+            } else if (dev->getRealPartitionCount() > 0) {
+                for (auto part : dev->getStoragePartitions()) {
+                    if (!part->isBusy() && !part->isPhysicalVolume() && ((part->isNormal()) || (part->isLogical()))) {
+                        if (!part->isDmBlock() && !part->isMdBlock())
+                            devices.append(part);
+                    }
+                }
+            }
+        }
+    }
+    
+    return devices;
+}
 

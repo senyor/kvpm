@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012, 2013, 2014 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -152,23 +152,4 @@ void VGExtendDialog::buildDialog(QList<StorageBase *> devices)
     connect(m_pv_checkbox, SIGNAL(stateChanged()),
             this, SLOT(validateOK()));
 }
-
-QList<StorageBase *> VGExtendDialog::getUsablePvs()
-{
-    QList<StorageBase *> devices;
-
-    for (auto dev : MasterList::getStorageDevices() ) {
-        if ((dev->getRealPartitionCount() == 0) && !dev->isBusy() && !dev->isPhysicalVolume() && !dev->isDmBlock()) {
-            devices.append(dev);
-        } else if (dev->getRealPartitionCount() > 0) {
-            for (auto part : dev->getStoragePartitions()) {
-                if (!part->isBusy() && !part->isPhysicalVolume() && ((part->isNormal()) || (part->isLogical())))
-                    devices.append(part);
-            }
-        }
-    }
-
-    return devices;
-}
-
 
