@@ -23,6 +23,7 @@
 #include <QVariant>
 
 class PhysVol;
+class StorageBase;
 
 typedef enum {
     LINEAR    = 0,
@@ -48,7 +49,7 @@ typedef QList<QSharedPointer<PvSpace>> PvSpaceList;
 QStringList splitUuid(QString const uuid);
 bool isBusy(const QString device);
 QString findMapperPath(QString path);
-
+QList<StorageBase *> getUsablePvs();
 
 
 class NoMungeCheck : public QCheckBox
@@ -59,7 +60,7 @@ class NoMungeCheck : public QCheckBox
     QVariant    m_data;
 
 public:
-    explicit NoMungeCheck(const QString text, QWidget *parent = NULL);
+    explicit NoMungeCheck(const QString text, QWidget *parent = nullptr);
     QString     getAlternateText();
     QStringList getAlternateTextList();
     QString     getUnmungedText();
@@ -76,7 +77,7 @@ class NoMungeRadioButton : public QRadioButton
     QVariant m_data;
 
 public:
-    explicit NoMungeRadioButton(const QString text, QWidget *parent = NULL);
+    explicit NoMungeRadioButton(const QString text, QWidget *parent = nullptr);
     QString getAlternateText();
     QString getUnmungedText();
     void setAlternateText(QString alternateText);

@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2011, 2012, 2013, 2014 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -58,7 +58,6 @@ class VGCreateDialog : public KvpmDialog
     QRegExpValidator *m_validator = nullptr;
 
     void buildDialog(QList<StorageBase *> devices);
-    QList<StorageBase *> getUsablePvs();
     void limitExtentSize(int);
     bool continueWarning();
 
