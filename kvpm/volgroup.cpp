@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012, 2013, 2014 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -141,7 +141,7 @@ lv_t VolGroup::findOrphan(QList<lv_t> &childList)
     lvm_property_value value;
     QString child_name;
     QString lv_attr;
-    lv_t orphan = NULL;
+    lv_t orphan = nullptr;
 
     for (int x = all_lvs.size() - 1; x >= 0; x--) {
         for (int y = childList.size() - 1; y >= 0; y--) {
@@ -158,7 +158,6 @@ lv_t VolGroup::findOrphan(QList<lv_t> &childList)
     }
 
     for (int x = childList.size() - 1; x >= 0; x--) { // sort mirrors first, loners last
-
         value = lvm_lv_get_property(childList[x], "lv_attr");
         lv_attr = QString(value.value.string);
 
@@ -166,7 +165,6 @@ lv_t VolGroup::findOrphan(QList<lv_t> &childList)
             orphan_list.prepend(childList[x]);
         else
             orphan_list.append(childList[x]);
-
     }
 
     if (!orphan_list.isEmpty()) {
@@ -176,15 +174,10 @@ lv_t VolGroup::findOrphan(QList<lv_t> &childList)
     }
 
     childList = orphan_list;
-    return NULL;
+    return nullptr;
 }
 
-LogVolList VolGroup::getLogicalVolumes()
-{
-    return m_member_lvs;
-}
-
-LogVolList VolGroup::getLogicalVolumesFlat()
+LogVolList VolGroup::getLogicalVolumesFlat() const
 {
     QListIterator<LogVolPointer> tree_list(m_member_lvs);
     LogVolList flat_list;
@@ -198,12 +191,7 @@ LogVolList VolGroup::getLogicalVolumesFlat()
     return flat_list;
 }
 
-QList<PhysVol *> VolGroup::getPhysicalVolumes()
-{
-    return m_member_pvs;
-}
-
-LogVolPointer VolGroup::getLvByName(QString shortName)  // Do not return snap container, just the "real" lv
+LogVolPointer VolGroup::getLvByName(QString shortName) const // Do not return snap container, just the "real" lv
 {
     QListIterator<LogVolPointer> lvs_itr(getLogicalVolumesFlat());
     shortName = shortName.trimmed();
@@ -214,10 +202,10 @@ LogVolPointer VolGroup::getLvByName(QString shortName)  // Do not return snap co
             return lv;
     }
 
-    return NULL;
+    return nullptr;
 }
 
-LogVolPointer VolGroup::getLvByUuid(QString uuid)   // Do not return snap container, just the "real" lv
+LogVolPointer VolGroup::getLvByUuid(QString uuid) const  // Do not return snap container, just the "real" lv
 {
     QListIterator<LogVolPointer> lvs_itr(getLogicalVolumesFlat());
     uuid = uuid.trimmed();
@@ -228,10 +216,10 @@ LogVolPointer VolGroup::getLvByUuid(QString uuid)   // Do not return snap contai
             return lv;
     }
 
-    return NULL;
+    return nullptr;
 }
 
-PhysVol* VolGroup::getPvByName(QString name)
+PhysVol* VolGroup::getPvByName(QString name) const
 {
     QListIterator<PhysVol *> pvs_itr(m_member_pvs);
     name = name.trimmed();
@@ -244,137 +232,17 @@ PhysVol* VolGroup::getPvByName(QString name)
         }
     }
 
-    return NULL;
+    return nullptr;
 }
 
-uint64_t VolGroup::getExtentSize()
-{
-    return m_extent_size;
-}
-
-long long VolGroup::getExtents()
-{
-    return m_extents;
-}
-
-long long VolGroup::getFreeExtents()
-{
-    return m_free_extents;
-}
-
-long long VolGroup::getAllocatableExtents()
-{
-    return m_allocatable_extents;
-}
-
-long long VolGroup::getAllocatableSpace()
-{
-    return m_allocatable_extents * (long long)m_extent_size;
-}
-
-long long VolGroup::getSize()
-{
-    return m_extents * m_extent_size;
-}
-
-long long VolGroup::getFreeSpace()
-{
-    return m_free_extents * m_extent_size;
-}
-
-long long VolGroup::getUsedSpace()
-{
-    return (m_extents - m_free_extents) * m_extent_size;
-}
-
-int VolGroup::getLvCount()
-{
-    return m_member_lvs.size();
-}
-
-int VolGroup::getLvMax()
-{
-    return m_lv_max;
-}
-
-int VolGroup::getPvCount()
-{
-    return m_member_pvs.size();
-}
-
-int VolGroup::getPvMax()
-{
-    return m_pv_max;
-}
-
-int VolGroup::getMdaCount()
-{
-    return m_mda_count;
-}
-
-QString VolGroup::getName()
-{
-    return m_vg_name;
-}
-
-QString VolGroup::getUuid()
-{
-    return m_uuid;
-}
-
-AllocationPolicy VolGroup::getPolicy()
-{
-    return m_policy;
-}
-
-QString VolGroup::getFormat()
-{
-    return m_lvm_format;
-}
-
-QStringList VolGroup::getLvNames()
+QStringList VolGroup::getLvNames() const 
 {
     QStringList names;
 
-    for (int x = m_member_lvs.size() - 1; x >= 0; x--)
-        names << m_member_lvs[x]->getName();
+    for (const auto lv : m_member_lvs)
+        names << lv->getName();
 
     return names;
-}
-
-QStringList VolGroup::getLvNamesAll()
-{
-    return m_lv_names_all;
-}
-
-bool VolGroup::isResizable()
-{
-    return m_resizable;
-}
-
-bool VolGroup::isClustered()
-{
-    return m_clustered;
-}
-
-bool VolGroup::isPartial()
-{
-    return m_partial;
-}
-
-bool VolGroup::isExported()
-{
-    return m_exported;
-}
-
-bool VolGroup::isActive()
-{
-    return m_active;
-}
-
-bool VolGroup::openFailed()
-{
-    return m_open_failed;
 }
 
 void VolGroup::processPhysicalVolumes(vg_t lvmVG)
@@ -489,7 +357,7 @@ void VolGroup::processLogicalVolumes(vg_t lvmVG)
             }
 
             if (is_new) {
-                m_member_lvs.append(new LogVol(lvm_lvs_all_top[y], lvmVG, this, NULL, m_tables));
+                m_member_lvs.append(new LogVol(lvm_lvs_all_top[y], lvmVG, this, nullptr, m_tables));
             }
         }
 
@@ -499,7 +367,7 @@ void VolGroup::processLogicalVolumes(vg_t lvmVG)
 
         lv_t lvm_lv_orphan;                // non-top lvm logical volume handle with no home
         while ((lvm_lv_orphan = findOrphan(lvm_lvs_all_children))) 
-            m_member_lvs.append(new LogVol(lvm_lv_orphan, lvmVG, this, NULL, m_tables, true));
+            m_member_lvs.append(new LogVol(lvm_lv_orphan, lvmVG, this, nullptr, m_tables, true));
 
     } else {   // lv_dm_list is empty so clean up member lvs
         for (int x = m_member_lvs.size() - 1; x >= 0; x--)

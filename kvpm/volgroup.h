@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012, 2013, 2014 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -69,38 +69,38 @@ public:
     VolGroup(lvm_t lvm, const char *vgname, MountTables *const tables);
     ~VolGroup();
     void rescan(lvm_t lvm);
-    LogVolList getLogicalVolumes();        // *TOP LEVEL ONLY* snapcontainers returned not snaps and origin
-    LogVolList getLogicalVolumesFlat();    // un-nest the volumes, snapshots and mirror legs
-    QList<PhysVol *> getPhysicalVolumes();
-    QStringList getLvNamesAll();                  // unsorted list of all lvs and sub lvs
-    LogVolPointer getLvByName(QString shortName); // lv name without the vg name and "/" -- skips snap containers
-    LogVolPointer getLvByUuid(QString uuid);      // also skips snap containers
-    PhysVol* getPvByName(QString name);           //   /dev/something
-    long long getExtents();
-    long long getFreeExtents();
-    long long getAllocatableExtents();
-    long long getAllocatableSpace();
-    uint64_t getExtentSize();
-    long long getSize();
-    long long getFreeSpace();
-    long long getUsedSpace();
-    int getLvCount();
-    int getLvMax();
-    int getPvCount();
-    int getPvMax();
-    int getMdaCount();
-    QString getName();
-    QString getUuid();
-    QString getFormat();
-    AllocationPolicy getPolicy();
-    QStringList getLvNames();
-    bool isWritable();
-    bool isResizable();
-    bool isClustered();
-    bool isPartial();
-    bool isExported();
-    bool isActive();
-    bool openFailed();
+    LogVolList getLogicalVolumes() const { return m_member_lvs; } // *TOP LEVEL ONLY* snapcontainers returned not snaps and origin
+    LogVolList getLogicalVolumesFlat() const;    // un-nest the volumes, snapshots and mirror legs
+    QList<PhysVol *> getPhysicalVolumes() const { return m_member_pvs; }
+    QStringList getLvNamesAll() const { return m_lv_names_all; } // unsorted list of all lvs and sub lvs
+    LogVolPointer getLvByName(QString shortName) const; // lv name without the vg name and "/" -- skips snap containers
+    LogVolPointer getLvByUuid(QString uuid) const;      // also skips snap containers
+    PhysVol* getPvByName(QString name) const;           //   /dev/something
+    long long getExtents() const { return m_extents; }
+    long long getFreeExtents() const { return m_free_extents; }
+    long long getAllocatableExtents() const { return m_allocatable_extents; }
+    long long getAllocatableSpace() const { return m_allocatable_extents * (long long)m_extent_size; }
+    uint64_t getExtentSize() const { return m_extent_size; }
+    long long getSize() const { return m_extents * m_extent_size; }
+    long long getFreeSpace() const { return m_free_extents * m_extent_size; }
+    long long getUsedSpace() const { return (m_extents - m_free_extents) * m_extent_size; }
+    int getLvCount() const { return m_member_lvs.size(); }
+    int getLvMax() const { return m_lv_max; } 
+    int getPvCount() const { return m_member_pvs.size(); }
+    int getPvMax() const { return m_pv_max; }
+    int getMdaCount() const { return m_mda_count; }
+    QString getName() const { return m_vg_name; }
+    QString getUuid() const { return m_uuid; } 
+    QString getFormat() const { return m_lvm_format; }
+    AllocationPolicy getPolicy() const { return m_policy; }
+    QStringList getLvNames() const; 
+    bool isWritable() const { return m_writable; }
+    bool isResizable() const { return m_resizable; }
+    bool isClustered() const { return m_clustered; }
+    bool isPartial() const { return m_partial; }
+    bool isExported() const { return m_exported; }
+    bool isActive() const { return m_active; } 
+    bool openFailed() const { return m_open_failed; }
 
 };
 
