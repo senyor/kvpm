@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2010, 2011, 2012, 2013, 2014 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -40,7 +40,7 @@ class VGMergeDialog : public KvpmDialog
     KComboBox *m_target_combo;
     QCheckBox *m_autobackup;
     QStackedWidget *m_error_stack;
-    QList<uint64_t> m_extent_size;
+    QList<long long> m_extent_size;
 
     void checkSanity();
 
