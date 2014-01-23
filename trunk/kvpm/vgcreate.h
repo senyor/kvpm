@@ -57,7 +57,7 @@ class VGCreateDialog : public KvpmDialog
 
     QRegExpValidator *m_validator = nullptr;
 
-    void buildDialog(QList<StorageBase *> devices);
+    void buildDialog(QList<const StorageBase *> devices);
     void limitExtentSize(int);
     bool continueWarning();
 

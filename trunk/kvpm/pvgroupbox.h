@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2010, 2011, 2012, 2013, 2014 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -44,7 +44,7 @@ class PvGroupBox: public QGroupBox
     bool m_target = false;  // is this is a target for a pv move.
     KLocale::BinaryUnitDialect m_dialect;  // power of 10 SI or traditional power of two units
     QList<PhysVol *> m_pvs;
-    QList<StorageBase *> m_devices;
+    QList<const StorageBase *> m_devices;
     QList<NoMungeCheck *> m_pv_checks;
     QList<long long> m_normal;
     QList<long long> m_contiguous;
@@ -67,7 +67,7 @@ public:
                bool const target = false, 
                QWidget *parent = nullptr);
 
-    PvGroupBox(QList<StorageBase *> devices, 
+    PvGroupBox(QList<const StorageBase *> devices, 
                const long long extentSize, 
                QWidget *parent = nullptr);
 
