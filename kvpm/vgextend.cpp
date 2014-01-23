@@ -43,8 +43,7 @@ VGExtendDialog::VGExtendDialog(const VolGroup *const group, QWidget *parent) :
     KvpmDialog(parent),
     m_vg(group)
 {
-    QList<const StorageBase *> devices;
-    devices = getUsablePvs();
+    const QList<const StorageBase *> devices(getUsablePvs());
 
     if (devices.size() > 0) {
         if (continueWarning())
@@ -62,7 +61,7 @@ VGExtendDialog::VGExtendDialog(const VolGroup *const group, const StorageBase *c
     m_vg(group)
 {
     QList<const StorageBase *> devices;
-    devices.append(device);
+    devices << device;
 
     if (continueWarning())
         buildDialog(devices);
@@ -88,7 +87,7 @@ void VGExtendDialog::commit()
 {
     const QByteArray vg_name   = m_vg->getName().toLocal8Bit();
     const QStringList pv_names = m_pv_checkbox->getNames();
-    QByteArray pv_name;
+
     lvm_t lvm = MasterList::getLvm();
     vg_t  vg_dm;
 
@@ -101,11 +100,11 @@ void VGExtendDialog::commit()
 
     if ((vg_dm = lvm_vg_open(lvm, vg_name.data(), "w", 0))) {
 
-        for (int x = 0; x < pv_names.size(); ++x) {
-            progress_box->setValue(x);
+        for (int i = 0; i < pv_names.size(); ++i) {
+            progress_box->setValue(i);
             qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
-            pv_name = pv_names[x].toLocal8Bit();
-            if (lvm_vg_extend(vg_dm, pv_name.data()))
+            QByteArray name = pv_names[i].toLocal8Bit();
+            if (lvm_vg_extend(vg_dm, name.data()))
                 KMessageBox::error(nullptr, QString(lvm_errmsg(lvm)));
         }
 
@@ -131,7 +130,7 @@ void VGExtendDialog::validateOK()
         enableButtonOk(false);
 }
 
-void VGExtendDialog::buildDialog(QList<const StorageBase *> devices)
+void VGExtendDialog::buildDialog(const QList<const StorageBase *> devices)
 {
     setCaption(i18n("Extend Volume Group"));
 

@@ -30,12 +30,11 @@ class VGExtendDialog : public KvpmDialog
 {
     Q_OBJECT
 
-    bool m_bailout;
     PvGroupBox *m_pv_checkbox = nullptr;
     const VolGroup *const m_vg;
 
     bool continueWarning();
-    void buildDialog(QList<const StorageBase *> devices);
+    void buildDialog(const QList<const StorageBase *> devices);
 
 public:
     VGExtendDialog(const VolGroup *const group, QWidget *parent = nullptr);

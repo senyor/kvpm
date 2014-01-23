@@ -67,7 +67,7 @@ public:
                bool const target = false, 
                QWidget *parent = nullptr);
 
-    PvGroupBox(QList<const StorageBase *> devices, 
+    PvGroupBox(const QList<const StorageBase *> devices, 
                const long long extentSize, 
                QWidget *parent = nullptr);
 
