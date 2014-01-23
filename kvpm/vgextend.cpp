@@ -39,7 +39,7 @@
 #include <QVBoxLayout>
 
 
-VGExtendDialog::VGExtendDialog(VolGroup *const group, QWidget *parent) :
+VGExtendDialog::VGExtendDialog(const VolGroup *const group, QWidget *parent) :
     KvpmDialog(parent),
     m_vg(group)
 {
@@ -57,7 +57,7 @@ VGExtendDialog::VGExtendDialog(VolGroup *const group, QWidget *parent) :
     }
 }
 
-VGExtendDialog::VGExtendDialog(VolGroup *const group, StorageBase *const device, QWidget *parent) :
+VGExtendDialog::VGExtendDialog(const VolGroup *const group, StorageBase *const device, QWidget *parent) :
     KvpmDialog(parent), 
     m_vg(group)
 {
