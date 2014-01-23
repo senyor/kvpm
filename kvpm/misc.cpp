@@ -178,10 +178,9 @@ QString findMapperPath(QString name)
 }
 
 // returns a list of pvs suitable for creating or extending a vg
-
-QList<StorageBase *> getUsablePvs()
+QList<const StorageBase *> getUsablePvs()
 {
-    QList<StorageBase *> devices;
+    QList<const StorageBase *> devices;
 
     for (auto dev : MasterList::getStorageDevices() ) {
         if (!dev->isDmBlock() && !dev->isMdBlock() && !dev->isPhysicalVolume()) {

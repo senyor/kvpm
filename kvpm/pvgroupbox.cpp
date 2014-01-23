@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012, 2013, 2014 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -31,7 +31,7 @@
 
 
 namespace {
-    bool isLessThan(StorageBase *const dev1 ,StorageBase *const dev2)
+    bool isLessThan(const StorageBase *const dev1 ,const StorageBase *const dev2)
     {
         return dev1->getName() < dev2->getName();
     }
@@ -103,7 +103,7 @@ PvGroupBox::PvGroupBox(QList<QSharedPointer<PvSpace>> spaceList,
     setChecksToPolicy();
 }
 
-PvGroupBox::PvGroupBox(QList <StorageBase *> devices, const long long extentSize, QWidget *parent) : 
+PvGroupBox::PvGroupBox(QList <const StorageBase *> devices, const long long extentSize, QWidget *parent) : 
     QGroupBox(parent),
     m_devices(devices),
     m_extent_size(extentSize)

@@ -43,7 +43,7 @@ VGExtendDialog::VGExtendDialog(const VolGroup *const group, QWidget *parent) :
     KvpmDialog(parent),
     m_vg(group)
 {
-    QList<StorageBase *> devices;
+    QList<const StorageBase *> devices;
     devices = getUsablePvs();
 
     if (devices.size() > 0) {
@@ -57,11 +57,11 @@ VGExtendDialog::VGExtendDialog(const VolGroup *const group, QWidget *parent) :
     }
 }
 
-VGExtendDialog::VGExtendDialog(const VolGroup *const group, StorageBase *const device, QWidget *parent) :
+VGExtendDialog::VGExtendDialog(const VolGroup *const group, const StorageBase *const device, QWidget *parent) :
     KvpmDialog(parent), 
     m_vg(group)
 {
-    QList<StorageBase *> devices;
+    QList<const StorageBase *> devices;
     devices.append(device);
 
     if (continueWarning())
@@ -131,7 +131,7 @@ void VGExtendDialog::validateOK()
         enableButtonOk(false);
 }
 
-void VGExtendDialog::buildDialog(QList<StorageBase *> devices)
+void VGExtendDialog::buildDialog(QList<const StorageBase *> devices)
 {
     setCaption(i18n("Extend Volume Group"));
 

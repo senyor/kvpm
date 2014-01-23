@@ -49,7 +49,7 @@ typedef QList<QSharedPointer<PvSpace>> PvSpaceList;
 QStringList splitUuid(QString const uuid);
 bool isBusy(const QString device);
 QString findMapperPath(QString path);
-QList<StorageBase *> getUsablePvs();
+QList<const StorageBase *> getUsablePvs();
 
 
 class NoMungeCheck : public QCheckBox

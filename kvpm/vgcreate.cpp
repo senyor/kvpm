@@ -41,7 +41,7 @@
 VGCreateDialog::VGCreateDialog(QWidget *parent) : 
     KvpmDialog(parent)
 {
-    QList<StorageBase *> devices;
+    QList<const StorageBase *> devices;
     devices = getUsablePvs();
 
     if (devices.size() > 0) {
@@ -58,7 +58,7 @@ VGCreateDialog::VGCreateDialog(QWidget *parent) :
 VGCreateDialog::VGCreateDialog(StorageBase *const device, QWidget *parent) : 
     KvpmDialog(parent)
 {
-    QList<StorageBase *> devices;
+    QList<const StorageBase *> devices;
     devices.append(device);
     
     if (continueWarning())
@@ -197,7 +197,7 @@ void VGCreateDialog::validateOK()
     }
 }
 
-void VGCreateDialog::buildDialog(QList<StorageBase *> devices)
+void VGCreateDialog::buildDialog(QList<const StorageBase *> devices)
 {
     setCaption(i18n("Create New Volume Group"));
 

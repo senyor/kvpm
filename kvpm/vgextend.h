@@ -35,11 +35,11 @@ class VGExtendDialog : public KvpmDialog
     const VolGroup *const m_vg;
 
     bool continueWarning();
-    void buildDialog(QList<StorageBase *> devices);
+    void buildDialog(QList<const StorageBase *> devices);
 
 public:
     VGExtendDialog(const VolGroup *const group, QWidget *parent = nullptr);
-    VGExtendDialog(const VolGroup *const group, StorageBase *const device, QWidget *parent = nullptr);
+    VGExtendDialog(const VolGroup *const group, const StorageBase *const device, QWidget *parent = nullptr);
 
 private slots:
     void commit();
