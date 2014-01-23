@@ -103,7 +103,7 @@ PvGroupBox::PvGroupBox(QList<QSharedPointer<PvSpace>> spaceList,
     setChecksToPolicy();
 }
 
-PvGroupBox::PvGroupBox(QList <const StorageBase *> devices, const long long extentSize, QWidget *parent) : 
+PvGroupBox::PvGroupBox(const QList <const StorageBase *> devices, const long long extentSize, QWidget *parent) : 
     QGroupBox(parent),
     m_devices(devices),
     m_extent_size(extentSize)
