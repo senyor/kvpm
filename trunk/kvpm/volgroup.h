@@ -34,7 +34,7 @@ class VolGroup
 {
     MountTables *m_tables;
 
-    uint64_t m_extent_size;
+    long long m_extent_size;
     int m_lv_max;          // maximum number of logical volumes, unlimited == 0
     int m_pv_max;
     long long m_mda_count;
@@ -80,7 +80,7 @@ public:
     long long getFreeExtents() const { return m_free_extents; }
     long long getAllocatableExtents() const { return m_allocatable_extents; }
     long long getAllocatableSpace() const { return m_allocatable_extents * (long long)m_extent_size; }
-    uint64_t getExtentSize() const { return m_extent_size; }
+    long long getExtentSize() const { return m_extent_size; }
     long long getSize() const { return m_extents * m_extent_size; }
     long long getFreeSpace() const { return m_free_extents * m_extent_size; }
     long long getUsedSpace() const { return (m_extents - m_free_extents) * m_extent_size; }

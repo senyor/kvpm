@@ -27,6 +27,7 @@
 #include <KSeparator>
 
 #include <QCheckBox>
+#include <QDebug>
 #include <QHBoxLayout>
 #include <QGroupBox>
 #include <QLabel>
@@ -108,8 +109,7 @@ VGChangeDialog::VGChangeDialog(VolGroup *const group, QWidget *parent) :
     m_extent_suffix_combo->setInsertPolicy(QComboBox::NoInsert);
     m_extent_suffix_combo->setCurrentIndex(1);
 
-    uint64_t current_extent_size = m_vg->getExtentSize() / 1024;
-
+    long long current_extent_size = m_vg->getExtentSize() / 1024;
     if (current_extent_size <= 512) {
         m_extent_suffix_combo->setCurrentIndex(0);
     } else if (((current_extent_size /= 1024)) <= 512) {
@@ -119,9 +119,9 @@ VGChangeDialog::VGChangeDialog(VolGroup *const group, QWidget *parent) :
         current_extent_size /= 1024;
     }
 
-    for (int x = 0; x < 10; x++) {
-        if (current_extent_size == m_extent_size_combo->itemText(x).toULongLong())
-            m_extent_size_combo->setCurrentIndex(x);
+    for (int i = 0; i < 10; i++) {
+        if (current_extent_size == m_extent_size_combo->itemText(i).toLongLong())
+            m_extent_size_combo->setCurrentIndex(i);
     }
 
     QHBoxLayout *const extent_layout = new QHBoxLayout();
@@ -322,7 +322,7 @@ QStringList VGChangeDialog::arguments()
     if (m_uuid->isChecked())
         args << "--uuid";
 
-    uint64_t new_extent_size = m_extent_size_combo->currentText().toULongLong();
+    long long new_extent_size = m_extent_size_combo->currentText().toLongLong();
 
     new_extent_size *= 1024;
     if (m_extent_suffix_combo->currentIndex() > 0)
