@@ -22,6 +22,10 @@
 class VolGroup;
 class LogVol;
 
+
+
+// TODO -- the following struct should be accessed with smart pointers
+
 struct LVSegmentExtent {
     QString lv_name;
     long long first_extent;
@@ -31,12 +35,13 @@ struct LVSegmentExtent {
 
 class PhysVol
 {
+    const VolGroup *const m_vg;  // all pvs now must be in a vg
+
     QString m_device;         // eg: /dev/hde4
     QString m_mapper_device;  // eg: /dev/mapper/foo if it is dmraid, equals m_device otherwise
     QString m_format;         // e.g. lvm1 or lvm2
     QString m_uuid;
     QStringList m_tags;
-    VolGroup *const m_vg;           // all pvs now must be in a vg
     bool m_active;
     bool m_allocatable;
     bool m_missing;           // the physical volume can't be found
@@ -49,7 +54,7 @@ class PhysVol
     long long m_last_used_extent;
 
 public:
-    PhysVol(pv_t lvm_pv, VolGroup *const vg);
+    PhysVol(pv_t lvm_pv, const VolGroup *const vg);
     void rescan(pv_t pv);
     QString getMapperName() const { return m_mapper_device.trimmed(); }    
     QString getUuid() const { return m_uuid.trimmed(); } 
@@ -59,8 +64,8 @@ public:
     void setActive() { m_active = true; }        // If any lv is active on the pv, the pv is active
     bool isActive() const { return m_active; }
     bool isMissing() const { return m_missing; }
-    long long getContiguous(LogVol *lv);   // the number of contiguous bytes available if the lv is on this pv
-    long long getContiguous();             // the max contiguous bytes on the the pv.
+    long long getContiguous(LogVol *lv) const;   // the number of contiguous bytes available if the lv is on this pv
+    long long getContiguous() const;             // the max contiguous bytes on the the pv.
     long long getSize() const { return m_size; }              // size of the physical volume in bytes
     long long getDeviceSize() const { return m_device_size; } // the physical volume might not take up all the device!
     long long getRemaining() const { return m_unused; }      // free space in bytes
@@ -70,7 +75,7 @@ public:
     long getMdaCount() const { return m_mda_count; }
     long getMdaUsed() const { return m_mda_used; }           // Meta Data areas in use
     long long getMdaSize() const { return m_mda_size; }      // Meta Data Area size in bytes
-    QList<LVSegmentExtent *> sortByExtent();
+    QList<LVSegmentExtent *> sortByExtent() const;
 };
 
 #endif
