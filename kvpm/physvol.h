@@ -36,7 +36,7 @@ class PhysVol
     QString m_format;         // e.g. lvm1 or lvm2
     QString m_uuid;
     QStringList m_tags;
-    VolGroup *m_vg;           // all pvs now must be in a vg
+    VolGroup *const m_vg;           // all pvs now must be in a vg
     bool m_active;
     bool m_allocatable;
     bool m_missing;           // the physical volume can't be found
@@ -54,7 +54,7 @@ public:
     QString getMapperName() const { return m_mapper_device.trimmed(); }    
     QString getUuid() const { return m_uuid.trimmed(); } 
     QStringList getTags() const { return m_tags; }
-    VolGroup* getVg() const { return m_vg; }
+    const VolGroup* getVg() const { return m_vg; }
     bool isAllocatable() const { return m_allocatable; }
     void setActive() { m_active = true; }        // If any lv is active on the pv, the pv is active
     bool isActive() const { return m_active; }
