@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012, 2013, 2014 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -43,7 +43,7 @@ typedef QList<LogVolPointer> LogVolList;
 class LogVol : public QObject
 {
     Q_OBJECT
-    VolGroup *m_vg;
+    const VolGroup *const m_vg;
     QList<Segment *> m_segments;
     MountList m_mount_entries;
 
@@ -130,7 +130,7 @@ class LogVol : public QObject
     void calculateTotalSize();
 
 public:
-    LogVol(lv_t lvmLV, vg_t lvmVG, VolGroup *const vg, LogVol *const lvParent, 
+    LogVol(lv_t lvmLV, vg_t lvmVG, const VolGroup *const vg, LogVol *const lvParent, 
            MountTables *const tables, bool orphan = false);
     ~LogVol();
 
@@ -149,7 +149,7 @@ public:
     LogVolPointer getParentRaid();               // NULL if this is not a RAID type component
     LogVolPointer getRaidImageMetadata();        // NULL if this is not a RAID image
     LogVolPointer getRaidMetadataImage();        // NULL if this is not RAID metadata
-    VolGroup* getVg() const { return m_vg; }
+    const VolGroup* getVg() const { return m_vg; }
     QString getName() const { return m_lv_name; }
     QString getPoolName() const { return m_pool; } // Name of this volume's thin pool if it is a thin volume, empty otherwise
     QString getFullName() const { return m_lv_full_name; }

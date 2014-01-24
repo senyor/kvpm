@@ -33,7 +33,7 @@ class RemoveMirrorDialog : public KvpmDialog
     Q_OBJECT
 
     LogVol *m_lv = nullptr;
-    VolGroup *m_vg = nullptr;
+    const VolGroup *m_vg = nullptr;
     QList<NoMungeCheck *> m_leg_checks;
 
 public:

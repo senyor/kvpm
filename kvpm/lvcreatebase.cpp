@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2012, 2014 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -37,7 +37,7 @@
 
 
 
-LvCreateDialogBase::LvCreateDialogBase(VolGroup *vg, long long maxFsSize, 
+LvCreateDialogBase::LvCreateDialogBase(const VolGroup *const vg, long long maxFsSize, 
                                        bool extend, bool snap, bool thin, bool ispool,
                                        QString name, QString pool, QWidget *parent):
     KvpmDialog(parent),
@@ -626,7 +626,7 @@ void LvCreateDialogBase::clearWarningLabel()
     m_warning_widget->hide();
 }
 
-VolGroup* LvCreateDialogBase::getVg()
+const VolGroup* LvCreateDialogBase::getVg()
 {
     return m_vg;
 }

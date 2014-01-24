@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2012, 2013, 2014 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -266,7 +266,7 @@ QList<PhysVol *> RepairMissingDialog::getSelectedPvs()
     QList<PhysVol *> pvs;
 
     QStringList const pvnames = m_pv_box->getNames();
-    VolGroup *const vg = m_lv->getVg();
+    const VolGroup *const vg = m_lv->getVg();
 
     for (int x = pvnames.size() - 1; x >= 0; x--) {
         PhysVol *const pv = vg->getPvByName(pvnames[x]);

@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013, 2014 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -85,7 +85,7 @@ LVCreateDialog::LVCreateDialog(LogVol *const volume, const bool snapshot, QWidge
 
 void LVCreateDialog::buildDialog()
 {
-    VolGroup *const vg = getVg();
+    const VolGroup *const vg = getVg();
 
     if (m_extend)
         initializeSizeSelector(vg->getExtentSize(), m_lv->getExtents(), vg->getAllocatableExtents() + m_lv->getExtents());
@@ -1008,7 +1008,7 @@ long long LVCreateDialog::roundExtentsToStripes(long long extents)
 
 bool LVCreateDialog::hasInitialErrors()
 {
-    VolGroup *const vg = getVg();
+    const VolGroup *const vg = getVg();
 
     if (vg->getAllocatableExtents() == 0 || vg->isPartial()) {
         if (vg->isPartial())
