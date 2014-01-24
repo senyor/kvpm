@@ -33,9 +33,9 @@ namespace {
 }
 
 
-PhysVol::PhysVol(pv_t pv, VolGroup *vg)
+PhysVol::PhysVol(pv_t pv, VolGroup *vg) 
+    : m_vg(vg)
 {
-    m_vg = vg;
     rescan(pv);
 }
 

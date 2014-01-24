@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012, 2013, 2014 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -43,7 +43,7 @@ class PVMoveDialog : public KvpmDialog
 {
     Q_OBJECT
 
-    VolGroup *m_vg = nullptr;
+    const VolGroup *m_vg = nullptr;
     LogVol   *m_lv = nullptr;
     int m_segment;
     bool      m_move_segment;

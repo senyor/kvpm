@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012, 2013, 2014 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -37,7 +37,7 @@ class VGReduceDialog : public KvpmDialog
     Q_OBJECT
 
     PhysVol  *m_pv = nullptr;
-    VolGroup *m_vg = nullptr;
+    const VolGroup *m_vg = nullptr;
     PvGroupBox *m_pv_checkbox = nullptr;
     QStackedWidget *m_error_stack = nullptr;
 
