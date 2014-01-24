@@ -143,7 +143,6 @@ public:
     LogVolList getThinMetadataVolumes();  // Metadata volumes for a thin pool
     LogVolList getRaidImageVolumes();     // Image volumes supporting a RAID volume
     LogVolList getRaidMetadataVolumes();  // Metadata for a RAID volume
-    LogVolList takeChildren();        // removes the children from the logical volume
     LogVolPointer getParent() const { return m_lv_parent; }   // NULL if this is a "top level" lv
     LogVolPointer getParentMirror();             // NULL if this is not a mirror component
     LogVolPointer getParentRaid();               // NULL if this is not a RAID type component

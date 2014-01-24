@@ -814,14 +814,6 @@ void LogVol::processSegments(lv_t lvmLV, const QByteArray flags)
     }
 }
 
-LogVolList LogVol::takeChildren()
-{
-    LogVolList children = m_lv_children;
-    m_lv_children.clear();
-
-    return children;
-}
-
 LogVolList LogVol::getAllChildrenFlat()
 {
     LogVolList flat_list = m_lv_children;
