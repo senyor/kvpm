@@ -46,7 +46,7 @@ struct Segment {
     long long chunk_size;        // Thin pool chunk size
 };
 
-LogVol::LogVol(lv_t lvmLV, vg_t lvmVG, VolGroup *const vg, LogVol *const lvParent, 
+LogVol::LogVol(lv_t lvmLV, vg_t lvmVG, const VolGroup *const vg, LogVol *const lvParent, 
                MountTables *const tables, bool orphan) :
     QObject(lvParent),
     m_vg(vg),
