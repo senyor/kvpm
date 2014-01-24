@@ -136,13 +136,13 @@ public:
 
     void rescan(lv_t lvmLV, vg_t lvmVG);
     LogVolList getChildren() const { return m_lv_children; } // just the children -- not grandchildren etc.
-    LogVolList getAllChildrenFlat();  // All children, grandchildren etc. un-nested.
-    LogVolList getSnapshots();        // This will work the same for snapcontainers or the real lv
-    LogVolList getThinVolumes();      // Thin logical volumes under a thin pool
-    LogVolList getThinDataVolumes();      // Data volumes supporting a thin pool
-    LogVolList getThinMetadataVolumes();  // Metadata volumes for a thin pool
-    LogVolList getRaidImageVolumes();     // Image volumes supporting a RAID volume
-    LogVolList getRaidMetadataVolumes();  // Metadata for a RAID volume
+    LogVolList getAllChildrenFlat() const; // All children, grandchildren etc. un-nested.
+    LogVolList getSnapshots() const;       // This will work the same for snapcontainers or the real lv
+    LogVolList getThinVolumes() const;     // Thin logical volumes under a thin pool
+    LogVolList getThinDataVolumes();       // Data volumes supporting a thin pool
+    LogVolList getThinMetadataVolumes();   // Metadata volumes for a thin pool
+    LogVolList getRaidImageVolumes();      // Image volumes supporting a RAID volume
+    LogVolList getRaidMetadataVolumes();   // Metadata for a RAID volume
     LogVolPointer getParent() const { return m_lv_parent; }   // NULL if this is a "top level" lv
     LogVolPointer getParentMirror();             // NULL if this is not a mirror component
     LogVolPointer getParentRaid();               // NULL if this is not a RAID type component
@@ -213,8 +213,8 @@ public:
     bool isRaid() const { return m_raid; }
     bool isRaidImage() const { return m_raid_image; }
     bool isCowSnap() const { return m_cow_snap; }
-    bool isThinSnap() { return m_thin_snap; }
-    bool isSnapContainer() { return m_snap_container; }
+    bool isThinSnap() const { return m_thin_snap; }
+    bool isSnapContainer() const { return m_snap_container; }
     bool isSynced();
     bool isTemporary() const { return m_temp; }
     bool isThinVolume() const { return m_thin; }

@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012, 2014 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -28,7 +28,7 @@
 #include "processprogress.h"
 
 
-LVRemoveDialog::LVRemoveDialog(LogVol *const lv, QWidget *parent) : 
+LVRemoveDialog::LVRemoveDialog(const LogVol *const lv, QWidget *parent) : 
     KvpmDialog(parent), 
     m_lv(lv)
 {
@@ -108,7 +108,7 @@ LVRemoveDialog::LVRemoveDialog(LogVol *const lv, QWidget *parent) :
     dialog_body->setLayout(layout);
 }
 
-QStringList LVRemoveDialog::getDependentChildren(LogVol *const lv)
+QStringList LVRemoveDialog::getDependentChildren(const LogVol *const lv)
 {
     QStringList children;
     bool bailout = false;

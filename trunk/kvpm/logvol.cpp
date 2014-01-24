@@ -814,7 +814,7 @@ void LogVol::processSegments(lv_t lvmLV, const QByteArray flags)
     }
 }
 
-LogVolList LogVol::getAllChildrenFlat()
+LogVolList LogVol::getAllChildrenFlat() const
 {
     LogVolList flat_list = m_lv_children;
     long child_size = m_lv_children.size();
@@ -825,10 +825,10 @@ LogVolList LogVol::getAllChildrenFlat()
     return flat_list;
 }
 
-LogVolList LogVol::getSnapshots()
+LogVolList LogVol::getSnapshots() const
 {
     LogVolList snapshots;
-    LogVol *container = this;
+    const LogVol *container = this;
 
     if (container->getParent() != nullptr && !container->isSnapContainer()) {
         if (container->getFullName() == container->getParent()->getFullName())
@@ -838,16 +838,16 @@ LogVolList LogVol::getSnapshots()
     if (container->isSnapContainer()) {
         snapshots = container->getChildren();
 
-        for (int x = snapshots.size() - 1; x >= 0; x--) { // delete the 'real' lv leaving the snaps
-            if (m_lv_name == snapshots[x]->getName())
-                snapshots.removeAt(x);
+        for (int i = snapshots.size() - 1; i >= 0; i--) { // delete the 'real' lv leaving the snaps
+            if (m_lv_name == snapshots[i]->getName())
+                snapshots.removeAt(i);
         }
     }
 
     return snapshots;
 }
 
-LogVolList LogVol::getThinVolumes()  // not including snap containers
+LogVolList LogVol::getThinVolumes() const  // not including snap containers
 {
     LogVolList vols;
 
