@@ -63,7 +63,7 @@ class ChangeMirrorDialog : public KvpmDialog
     QList<NoMungeCheck *> m_mirror_log_checks;
 
     bool m_change_log;    // true if we just changing the logging of an existing mirror
-    LogVol *m_lv;         // The volume we are adding a mirror leg to.
+    LogVol *m_lv;   // The volume we are adding a mirror leg to.
 
     QRadioButton *m_core_log_button,
                  *m_mirrored_log_button,
