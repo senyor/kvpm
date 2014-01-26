@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013, 2014 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -69,7 +69,7 @@ ChangeMirrorDialog::ChangeMirrorDialog(LogVol *const mirrorVolume, const bool ch
     } else if (is_raid && !m_lv->isSynced()) {
         preventExec();
         KMessageBox::sorry(nullptr, i18n("RAID mirrors must be synced before adding new legs"));
-    } else if (is_lvm && m_lv->isCowOrigin()) {
+    } else if (is_lvm && m_lv->isCowOrigin() && !m_change_log) {
         preventExec();
         KMessageBox::sorry(nullptr, i18n("Non-RAID mirrors which are snapshot origins can not have new legs added"));
     } else {
