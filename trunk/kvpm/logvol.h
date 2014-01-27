@@ -50,7 +50,7 @@ class LogVol : public QObject
     LogVolList m_lv_children;  // For a mirror the children are the legs and log
                                // Snapshots are also children -- see m_snap_container
                                // RAID Metadata is here too
-    MountTables *m_tables;
+    MountTables *const m_tables;
     LogVol *m_lv_parent;       // NULL if this is the 'top' lv
     QString m_lv_full_name;    // volume_group/logical_volume
     QString m_lv_name;         // name of this logical volume
@@ -106,7 +106,7 @@ class LogVol : public QObject
     bool m_active;
     bool m_mounted;              // has a mounted filesystem
     bool m_open;                 // device is open
-    bool m_orphan;               // virtual device with no pvs
+    const bool m_orphan;         // virtual device with no pvs
     bool m_pvmove;               // is a pvmove temporary volume
     bool m_cow_snap;             // is a traditional snapshot volume
     bool m_thin_snap;            // is a thin snapshot volume
@@ -122,32 +122,35 @@ class LogVol : public QObject
 
     void countLegsAndLogs();
     void processSegments(lv_t lvmLV, const QByteArray flags);
+    void processMounts();
+    void setSnapContainer(vg_t lvmVg, lv_t lvmLV);
+    void setPolicy(const char flag2);
     QStringList removePvNames();     // list 'devices' that are really sub lvs
     QStringList getMetadataNames();  // names of sub lvs that are metadata for this lv
-    QStringList getPoolVolumeNames(vg_t lvmVG);
-    QList<lv_t> getLvmSnapshots(vg_t lvmVG);
-    void insertChildren(lv_t lvmLV, vg_t lvmVG);
+    QStringList getPoolVolumeNames(vg_t lvmVg);
+    QList<lv_t> getLvmSnapshots(vg_t lvmVg);
+    void insertChildren(lv_t lvmLV, vg_t lvmVg);
     void calculateTotalSize();
 
 public:
-    LogVol(lv_t lvmLV, vg_t lvmVG, const VolGroup *const vg, LogVol *const lvParent, 
+    LogVol(lv_t lvmLV, vg_t lvmVg, const VolGroup *const vg, LogVol *const lvParent, 
            MountTables *const tables, bool orphan = false);
     ~LogVol();
 
-    void rescan(lv_t lvmLV, vg_t lvmVG);
+    void rescan(lv_t lvmLv, vg_t lvmVg);
     LogVolList getChildren() const { return m_lv_children; } // just the children -- not grandchildren etc.
-    LogVolList getAllChildrenFlat() const; // All children, grandchildren etc. un-nested.
-    LogVolList getSnapshots() const;       // This will work the same for snapcontainers or the real lv
-    LogVolList getThinVolumes() const;     // Thin logical volumes under a thin pool
-    LogVolList getThinDataVolumes();       // Data volumes supporting a thin pool
-    LogVolList getThinMetadataVolumes();   // Metadata volumes for a thin pool
-    LogVolList getRaidImageVolumes();      // Image volumes supporting a RAID volume
-    LogVolList getRaidMetadataVolumes();   // Metadata for a RAID volume
+    LogVolList getAllChildrenFlat() const;  // All children, grandchildren etc. un-nested.
+    LogVolList getSnapshots() const;        // This will work the same for snapcontainers or the real lv
+    LogVolList getThinVolumes() const;      // Thin logical volumes under a thin pool
+    LogVolList getThinDataVolumes() const;  // Data volumes supporting a thin pool
+    LogVolList getThinMetadataVolumes() const; // Metadata volumes for a thin pool
+    LogVolList getRaidImageVolumes() const;    // Image volumes supporting a RAID volume
+    LogVolList getRaidMetadataVolumes()const;  // Metadata for a RAID volume
     LogVolPointer getParent() const { return m_lv_parent; }   // NULL if this is a "top level" lv
     LogVolPointer getParentMirror();             // NULL if this is not a mirror component
     LogVolPointer getParentRaid();               // NULL if this is not a RAID type component
-    LogVolPointer getRaidImageMetadata();        // NULL if this is not a RAID image
-    LogVolPointer getRaidMetadataImage();        // NULL if this is not RAID metadata
+    LogVolPointer getRaidImageMetadata() const;  // NULL if this is not a RAID image
+    LogVolPointer getRaidMetadataImage() const;  // NULL if this is not RAID metadata
     const VolGroup* getVg() const { return m_vg; }
     QString getName() const { return m_lv_name; }
     QString getPoolName() const { return m_pool; } // Name of this volume's thin pool if it is a thin volume, empty otherwise
@@ -159,7 +162,7 @@ public:
     AllocationPolicy getPolicy() const { return m_policy; }
     QString getState() const { return m_state; }
     QString getType() const { return m_type; }
-    int getRaidType();
+    int getRaidType() const;
     QString getOrigin() const { return  m_origin; }        // The name of the parent volume to a snapshot
     QString getUuid() const { return m_uuid; }
     int getSegmentCount() const { return m_seg_total; }
@@ -168,25 +171,25 @@ public:
     long long getSegmentSize(const int segment);
     long long getSegmentExtents(const int segment);
     QList<long long> getSegmentStartingExtent(const int segment);
-    QStringList getPvNames(const int segment);
-    QStringList getPvNamesAll();         // full path of physical volumes for all segments
-    QStringList getPvNamesAllFlat();     // full path of physical volumes including child lvs, un-nested
+    QStringList getPvNames(const int segment) const;
+    QStringList getPvNamesAll() const;         // full path of physical volumes for all segments
+    QStringList getPvNamesAllFlat() const;     // full path of physical volumes including child lvs, un-nested
     QStringList getMountPoints() const { return m_mount_points; }
     MountList getMountEntries() const { return m_mount_entries; }
     QString getFstabMountPoint() const { return m_fstab_mount_point; }
     QStringList getTags() const { return m_tags; }
-    QString getDiscards(int segment);
-    long long getSpaceUsedOnPv(const QString pvname);
-    long long getMissingSpace();  // space used on pvs that are missing
-    long long getChunkSize(int segment);
+    QString getDiscards(int segment) const;
+    long long getSpaceUsedOnPv(const QString pvname) const;
+    long long getMissingSpace() const;  // space used on pvs that are missing
+    long long getChunkSize(int segment) const;
     long long getExtents() const { return m_extents; }
     long long getSize() const { return m_size; }
     long long getTotalSize() const { return m_total_size; }
     long long getFilesystemSize() const { return m_fs_size; }
     long long getFilesystemUsed() const { return m_fs_used; }
-    double getSnapPercent();
-    double getCopyPercent();
-    double getDataPercent();
+    double getSnapPercent() const;
+    double getCopyPercent() const;
+    double getDataPercent() const;
     unsigned long getMinorDevice() const { return m_minor_device; }
     unsigned long getMajorDevice() const { return m_major_device; }
     int getLogCount() const { return m_log_count; }      // RAID 1 returns 0 since it doesn't have separate logs
@@ -215,7 +218,7 @@ public:
     bool isCowSnap() const { return m_cow_snap; }
     bool isThinSnap() const { return m_thin_snap; }
     bool isSnapContainer() const { return m_snap_container; }
-    bool isSynced();
+    bool isSynced() const;
     bool isTemporary() const { return m_temp; }
     bool isThinVolume() const { return m_thin; }
     bool isThinPool() const { return m_thin_pool; }
