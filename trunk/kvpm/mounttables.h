@@ -18,6 +18,8 @@
 #include <QSharedPointer>
 #include <QStringList>
 
+#include "typedefs.h"
+
 class LogVol;
 class StoragePartition;
 class MountEntry;
@@ -40,7 +42,7 @@ public:
 
     void loadData();
     MountList getMtabEntries(const int major, const int minor);
-    QString getFstabMountPoint(LogVol *const lv);
+    QString getFstabMountPoint(LvPtr lv);
     QString getFstabMountPoint(StoragePartition *const partition);
 
     static bool addEntry(const QString device, const QString mountPoint, const QString type,

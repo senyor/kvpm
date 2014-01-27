@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2013, 2014 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -18,6 +18,9 @@
 
 #include <KActionCollection>
 
+#include "typedefs.h"
+
+
 class KDialog;
 
 class QAction;
@@ -32,11 +35,11 @@ class LVActions : public KActionCollection
     Q_OBJECT
 
     VolGroup *m_vg = nullptr;
-    LogVol *m_lv = nullptr;
+    LvPtr m_lv = nullptr;
     int m_segment = 0;
 
-    void setActions(LogVol *const lv, const int segment);
-    void setMirrorActions(LogVol *const lv);
+    void setActions(LvPtr lv, const int segment);
+    void setMirrorActions(LvPtr lv);
 
 public:
     explicit LVActions(VolGroup *const group, QWidget *parent = nullptr);

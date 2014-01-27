@@ -17,6 +17,7 @@
 
 
 #include "kvpmdialog.h"
+#include "typedefs.h"
 
 class KLineEdit;
 class KComboBox;
@@ -31,11 +32,11 @@ class LVReduceDialog : public KvpmDialog
 {
     Q_OBJECT
 
-    LogVol   *m_lv = nullptr;
+    LvPtr m_lv = nullptr;
     SizeSelectorBox *m_size_selector;
 
 public:
-    explicit LVReduceDialog(LogVol *const volume, QWidget *parent = nullptr);
+    explicit LVReduceDialog(LvPtr volume, QWidget *parent = nullptr);
 
 private slots:
     void commit();

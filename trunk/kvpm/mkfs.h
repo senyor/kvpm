@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012, 2013, 2014 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -23,6 +23,7 @@
 #include <QStringList>
 
 #include "kvpmdialog.h"
+#include "typedefs.h"
 
 class KIntSpinBox;
 class KTabWidget;
@@ -91,7 +92,7 @@ private slots:
     void adjustStrideEdit(int index);
 
 public:
-    explicit MkfsDialog(LogVol *const volume, QWidget *parent = nullptr);
+    explicit MkfsDialog(LvPtr volume, QWidget *parent = nullptr);
     explicit MkfsDialog(StoragePartition *const partition, QWidget *parent = nullptr);
 
 };

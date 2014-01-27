@@ -66,7 +66,7 @@ LVCreateDialog::LVCreateDialog(VolGroup *const vg, const bool ispool, QWidget *p
 
 // Extending an existing volume or creating a snapshot
 
-LVCreateDialog::LVCreateDialog(LogVol *const volume, const bool snapshot, QWidget *parent) :
+LVCreateDialog::LVCreateDialog(LvPtr volume, const bool snapshot, QWidget *parent) :
     LvCreateDialogBase(volume->getVg(), 
                        volume->isCowSnap() ? -1 : fs_max_extend(volume->getMapperPath(), volume->getFilesystem()),
                        !snapshot, snapshot, false, volume->isThinPool(), volume->getName(), 
@@ -757,7 +757,7 @@ long long LVCreateDialog::getLargestVolume()
         else 
             largest = largest * stripe_count;
     } else {
-        LogVol *effective_lv = m_lv;
+        LvPtr effective_lv = m_lv;
 
         if (effective_lv->isThinPool()) {
             for (auto data : effective_lv->getChildren()) {
@@ -1182,7 +1182,7 @@ void LVCreateDialog::extendLastSegment(QList<long long> &committed, QList<long l
 {
     LvList legs;
     QStringList selected_names(m_pv_box->getNames());
-    LogVol *lv = m_lv;
+    LvPtr lv = m_lv;
 
     if (lv->isThinPool()) {
         legs = lv->getChildren();

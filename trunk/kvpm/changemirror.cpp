@@ -43,7 +43,7 @@
 
 
 
-ChangeMirrorDialog::ChangeMirrorDialog(LogVol *const mirrorVolume, const bool changeLog, QWidget *parent) :
+ChangeMirrorDialog::ChangeMirrorDialog(LvPtr mirrorVolume, const bool changeLog, QWidget *parent) :
     KvpmDialog(parent),
     m_change_log(changeLog),
     m_lv(mirrorVolume)
@@ -53,7 +53,7 @@ ChangeMirrorDialog::ChangeMirrorDialog(LogVol *const mirrorVolume, const bool ch
     else if (m_lv->getParentRaid())
         m_lv = m_lv->getParentRaid();
 
-    QList<LogVol *> children;
+    LvList children;
     const QString lv_name = m_lv->getName();
     const bool is_raid = (m_lv->isMirror() && m_lv->isRaid());
     const bool is_lvm = (m_lv->isMirror() && !m_lv->isRaid());

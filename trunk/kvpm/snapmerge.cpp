@@ -25,7 +25,7 @@
 
 
 
-bool merge_snap(LogVol *const snapshot)
+bool merge_snap(LvPtr snapshot)
 {
     QStringList args;
     const QString warning = i18n("Merge snapshot: <b>%1</b> with origin: <b>%2</b>?", snapshot->getName(), snapshot->getOrigin());

@@ -32,7 +32,7 @@
 /* This should be passed *lv = 0 if it is really free space on a volume
    group that is being displayed */
 
-LVChartSeg::LVChartSeg(LogVol *const volume, const QString use, QWidget *parent) :
+LVChartSeg::LVChartSeg(LvPtr volume, const QString use, QWidget *parent) :
     QWidget(parent),
     m_lv(volume)
 {

@@ -408,7 +408,7 @@ void VolGroup::setLastUsedExtent()
         QListIterator<LvPtr> lv_itr(m_member_lvs);
 
         while (lv_itr.hasNext()) {
-            LogVol *const lv = lv_itr.next();
+            LvPtr lv = lv_itr.next();
 
             for (int segment = lv->getSegmentCount() - 1; segment >= 0; segment--) {
 

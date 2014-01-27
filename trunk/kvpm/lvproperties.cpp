@@ -37,7 +37,7 @@
    we are not focused on any one segment. Therefor stripes and
    stripe size have no meaning */
 
-LVProperties::LVProperties(LogVol *const volume, const int segment, QWidget *parent)
+LVProperties::LVProperties(LvPtr volume, const int segment, QWidget *parent)
     : QWidget(parent),
       m_lv(volume)
 {
