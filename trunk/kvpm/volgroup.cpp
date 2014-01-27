@@ -183,7 +183,7 @@ LvList VolGroup::getLogicalVolumesFlat() const
     LvList flat_list;
 
     while (tree_list.hasNext()) {
-        LogVol *lv = tree_list.next();
+        LvPtr lv = tree_list.next();
         flat_list.append(lv);
         flat_list.append(lv->getAllChildrenFlat());
     }
@@ -197,7 +197,7 @@ LvPtr VolGroup::getLvByName(QString shortName) const // Do not return snap conta
     shortName = shortName.trimmed();
 
     while (lvs_itr.hasNext()) {
-        LogVol *lv = lvs_itr.next();
+        LvPtr lv = lvs_itr.next();
         if (shortName == lv->getName() && !lv->isSnapContainer())
             return lv;
     }
@@ -211,7 +211,7 @@ LvPtr VolGroup::getLvByUuid(QString uuid) const  // Do not return snap container
     uuid = uuid.trimmed();
 
     while (lvs_itr.hasNext()) {
-        LogVol *lv = lvs_itr.next();
+        LvPtr lv = lvs_itr.next();
         if (uuid == lv->getUuid() && !lv->isSnapContainer())
             return lv;
     }

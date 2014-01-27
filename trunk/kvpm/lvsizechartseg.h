@@ -43,7 +43,7 @@ private slots:
     void popupContextMenu(QPoint);
 
 signals:
-    void lvMenuRequested(LogVol *lv);
+    void lvMenuRequested(LvPtr lv);
 
 };
 

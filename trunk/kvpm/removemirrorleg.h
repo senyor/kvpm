@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2014 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -16,9 +16,11 @@
 #define REMOVEMIRRORLEG_H
 
 
+#include "typedefs.h"
+
 class LogVol;
 
-bool remove_mirror_leg(LogVol *mirrorLeg);
+bool remove_mirror_leg(LvPtr mirrorLeg);
 
 
 #endif

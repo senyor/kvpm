@@ -178,7 +178,7 @@ QList<LVSegmentExtent *> PhysVol::sortByExtent() const
     for an element that normally isn't extensible such as a 
     log or metadata */
 
-long long PhysVol::getContiguous(LogVol *lv) const
+long long PhysVol::getContiguous(LvPtr lv) const
 {
     long long contiguous = 0;
     const QList<LVSegmentExtent *> lv_extents = sortByExtent();

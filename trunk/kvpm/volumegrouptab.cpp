@@ -277,7 +277,7 @@ KToolBar* VolumeGroupTab::buildPvToolBar()
     return toolbar;
 }
 
-void VolumeGroupTab::lvContextMenu(LogVol *lv)
+void VolumeGroupTab::lvContextMenu(LvPtr lv)
 {
     m_lv_actions->changeLv(lv, -1);
     

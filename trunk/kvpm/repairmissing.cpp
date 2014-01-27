@@ -326,7 +326,7 @@ void RepairMissingDialog::resetOkButton()
     const bool is_lvm  = m_lv->isLvmMirror();
 
     while (partial_lvs.size()) {
-        LogVol *lv = partial_lvs.takeAt(0);
+        LvPtr lv = partial_lvs.takeAt(0);
         long long space = lv->getSize();
 
         if (is_lvm) {                  // We assume logs and mimages can be on the same pvs

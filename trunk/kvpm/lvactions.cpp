@@ -830,7 +830,7 @@ void LVActions::setMirrorActions(LvPtr lv)
     remove_mirror->setVisible(!remove_this->isEnabled());
 }
 
-void LVActions::changeLv(LogVol *lv, int segment)
+void LVActions::changeLv(LvPtr lv, int segment)
 {
     setActions(lv, segment);     // segment = -1 means whole lv
     setMirrorActions(lv);
@@ -838,7 +838,7 @@ void LVActions::changeLv(LogVol *lv, int segment)
 
 void LVActions::changeLv(QTreeWidgetItem *item)
 {
-    LogVol *target = nullptr;
+    LvPtr target = nullptr;
     int segment = -1;
 
     if (item) {
