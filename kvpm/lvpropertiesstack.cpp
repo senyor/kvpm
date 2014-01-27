@@ -79,7 +79,7 @@ LVPropertiesStack::LVPropertiesStack(VolGroup *Group, QWidget *parent)
 void LVPropertiesStack::changeLVStackIndex(QTreeWidgetItem *item, QTreeWidgetItem*)
 {
     QString lv_name;
-    const LogVolList members  = m_vg->getLogicalVolumesFlat();
+    const LvList members  = m_vg->getLogicalVolumesFlat();
 
     if (item && (members.size() == m_lv_stack_list.size())) {   // These *should* be equal
         const QString lv_uuid = QVariant(item->data(2, Qt::UserRole)).toString();
@@ -114,7 +114,7 @@ void LVPropertiesStack::changeLVStackIndex(QTreeWidgetItem *item, QTreeWidgetIte
 
 void LVPropertiesStack::loadData()
 {
-    const LogVolList members = m_vg->getLogicalVolumesFlat();
+    const LvList members = m_vg->getLogicalVolumesFlat();
 
     if (m_stack_widget == NULL)
         m_stack_widget = new QStackedWidget;

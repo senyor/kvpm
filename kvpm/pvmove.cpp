@@ -86,7 +86,7 @@ PVMoveDialog::PVMoveDialog(PhysVol *const physicalVolume, QWidget *parent) :
     m_move_segment = false;
 
     const QString name = physicalVolume->getMapperName();
-    const LogVolList lvs = m_vg->getLogicalVolumes();
+    const LvList lvs = m_vg->getLogicalVolumes();
 
     NameAndRange *nar = new NameAndRange;
     nar->name = name;
@@ -575,7 +575,7 @@ QStringList PVMoveDialog::getForbiddenTargets(LogVol *const lv, const QString so
 
                 for (auto image : lv->getRaidImageVolumes()) {
                     QStringList pvs = QStringList() << image->getPvNamesAllFlat();
-                    LogVolPointer meta = image->getRaidImageMetadata();
+                    LvPtr meta = image->getRaidImageMetadata();
                     
                     if (meta)
                         pvs << meta->getPvNamesAllFlat();
@@ -592,7 +592,7 @@ QStringList PVMoveDialog::getForbiddenTargets(LogVol *const lv, const QString so
                 forbidden << getForbiddenTargets(meta, source);
         } else {
             if (lv->isRaidImage() || lv->isRaidMetadata()) { // don't allow moving pvs from one raid leg to another
-                LogVolPointer image, meta;
+                LvPtr image, meta;
                 
                 if (lv->isRaidImage()) {
                     meta = lv->getRaidImageMetadata();

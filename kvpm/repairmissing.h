@@ -41,7 +41,7 @@ class RepairMissingDialog : public KvpmDialog
     QStringList arguments();
     QList<PhysVol *> getUsablePvs();
     QList<PhysVol *> getSelectedPvs();
-    LogVolList  getPartialLvs();
+    LvList  getPartialLvs();
     QWidget *buildPhysicalWidget(QList<PhysVol *> const pvs);
     int getImageNumber(QString name);
 

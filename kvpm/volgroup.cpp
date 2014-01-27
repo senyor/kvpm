@@ -136,7 +136,7 @@ void VolGroup::rescan(lvm_t lvm)
 
 lv_t VolGroup::findOrphan(QList<lv_t> &childList)
 {
-    LogVolList all_lvs = getLogicalVolumesFlat();
+    LvList all_lvs = getLogicalVolumesFlat();
     QList<lv_t> orphan_list;
     lvm_property_value value;
     QString child_name;
@@ -177,10 +177,10 @@ lv_t VolGroup::findOrphan(QList<lv_t> &childList)
     return nullptr;
 }
 
-LogVolList VolGroup::getLogicalVolumesFlat() const
+LvList VolGroup::getLogicalVolumesFlat() const
 {
-    QListIterator<LogVolPointer> tree_list(m_member_lvs);
-    LogVolList flat_list;
+    QListIterator<LvPtr> tree_list(m_member_lvs);
+    LvList flat_list;
 
     while (tree_list.hasNext()) {
         LogVol *lv = tree_list.next();
@@ -191,9 +191,9 @@ LogVolList VolGroup::getLogicalVolumesFlat() const
     return flat_list;
 }
 
-LogVolPointer VolGroup::getLvByName(QString shortName) const // Do not return snap container, just the "real" lv
+LvPtr VolGroup::getLvByName(QString shortName) const // Do not return snap container, just the "real" lv
 {
-    QListIterator<LogVolPointer> lvs_itr(getLogicalVolumesFlat());
+    QListIterator<LvPtr> lvs_itr(getLogicalVolumesFlat());
     shortName = shortName.trimmed();
 
     while (lvs_itr.hasNext()) {
@@ -205,9 +205,9 @@ LogVolPointer VolGroup::getLvByName(QString shortName) const // Do not return sn
     return nullptr;
 }
 
-LogVolPointer VolGroup::getLvByUuid(QString uuid) const  // Do not return snap container, just the "real" lv
+LvPtr VolGroup::getLvByUuid(QString uuid) const  // Do not return snap container, just the "real" lv
 {
-    QListIterator<LogVolPointer> lvs_itr(getLogicalVolumesFlat());
+    QListIterator<LvPtr> lvs_itr(getLogicalVolumesFlat());
     uuid = uuid.trimmed();
 
     while (lvs_itr.hasNext()) {
@@ -293,7 +293,7 @@ void VolGroup::processLogicalVolumes(vg_t lvmVG)
     QList<lv_t> lvm_lvs_all_children;  // children of top level volumes
     QByteArray flags;
 
-    LogVolList old_member_lvs = m_member_lvs;
+    LvList old_member_lvs = m_member_lvs;
     m_member_lvs.clear();
     m_lv_names_all.clear();
 
@@ -378,7 +378,7 @@ void VolGroup::processLogicalVolumes(vg_t lvmVG)
 void VolGroup::setActivePhysicalVolumes()
 {
     PhysVol *pv;
-    const LogVolList all_lvs = getLogicalVolumesFlat();
+    const LvList all_lvs = getLogicalVolumesFlat();
 
     for (int x = all_lvs.size() - 1; x >= 0; x--) {
         if (all_lvs[x]->isActive()) {
@@ -405,7 +405,7 @@ void VolGroup::setLastUsedExtent()
         long long last_used_extent = 0;
         const QString pv_name = pv->getMapperName();
 
-        QListIterator<LogVolPointer> lv_itr(m_member_lvs);
+        QListIterator<LvPtr> lv_itr(m_member_lvs);
 
         while (lv_itr.hasNext()) {
             LogVol *const lv = lv_itr.next();

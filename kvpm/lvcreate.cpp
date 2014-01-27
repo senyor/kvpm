@@ -297,7 +297,7 @@ QWidget* LVCreateDialog::createStripeWidget()
         int seg_count = 1;
         int stripe_count = 1;
         int stripe_size = 4;
-        LogVolList  logvols;
+        LvList  logvols;
 
         if (m_lv->isLvmMirror()) {                        // Tries to match striping to last segment of first leg
             logvols = m_lv->getAllChildrenFlat();
@@ -770,7 +770,7 @@ long long LVCreateDialog::getLargestVolume()
         
         if (effective_lv->isMirror() && policy == CONTIGUOUS) {
 
-            const LogVolList legs = effective_lv->getChildren(); // not grandchildren because we can't extend while under conversion
+            const LvList legs = effective_lv->getChildren(); // not grandchildren because we can't extend while under conversion
             QList<long long> leg_max;
 
             for (int x = legs.size() - 1; x >= 0; x--) {
@@ -799,7 +799,7 @@ long long LVCreateDialog::getLargestVolume()
             
         } else if (effective_lv->isRaid() && policy == CONTIGUOUS) {
 
-            const LogVolList images = effective_lv->getChildren();
+            const LvList images = effective_lv->getChildren();
             QList<long long> image_max;
             
             for (auto img : images) {
@@ -1056,7 +1056,7 @@ bool LVCreateDialog::hasInitialErrors()
                 return true;
             }
 
-            const LogVolList snap_shots = m_lv->getSnapshots();
+            const LvList snap_shots = m_lv->getSnapshots();
 
             for (int x = 0; x < snap_shots.size(); x++) {
                 if (snap_shots[x]->isOpen()) {
@@ -1153,7 +1153,7 @@ int LVCreateDialog::getMaxStripes()
     if (m_extend && (policy == CONTIGUOUS)){
         if (m_lv->isLvmMirror()){
 
-            LogVolList legs = m_lv->getChildren();
+            LvList legs = m_lv->getChildren();
             int next_stripes = 0;
 
             for (int x = legs.size() - 1; x >= 0; --x){
@@ -1180,7 +1180,7 @@ int LVCreateDialog::getMaxStripes()
 
 void LVCreateDialog::extendLastSegment(QList<long long> &committed, QList<long long> &available)
 {
-    LogVolList legs;
+    LvList legs;
     QStringList selected_names(m_pv_box->getNames());
     LogVol *lv = m_lv;
 

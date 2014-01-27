@@ -54,7 +54,7 @@ void LVSizeChart::populateChart()
     while ((child = m_layout->takeAt(0)))     // remove old children of layout
         delete child;
 
-    LogVolList volumes;
+    LvList volumes;
     const long item_count = m_vg_tree->topLevelItemCount();
 
     for (int x = 0; x < item_count; ++x) {

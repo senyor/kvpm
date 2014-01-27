@@ -64,7 +64,7 @@ VGTree::VGTree(VolGroup *const group) :
 
 void VGTree::loadData()
 {
-    LogVolList logical_volumes = m_vg->getLogicalVolumes();
+    LvList logical_volumes = m_vg->getLogicalVolumes();
     LogVol *lv = nullptr;
     QTreeWidgetItem *new_item;
 
@@ -149,7 +149,7 @@ QTreeWidgetItem *VGTree::loadItem(LogVol *lv, QTreeWidgetItem *item)
     else
         dialect = KLocale::IECBinaryDialect;
 
-    LogVolList temp_kids;
+    LvList temp_kids;
     long long fs_remaining;       // remaining space on fs -- if known
     int fs_percent;               // percentage of space remaining
 
@@ -354,7 +354,7 @@ void VGTree::setupContextMenu()
 void VGTree::insertChildItems(LogVol *parentVolume, QTreeWidgetItem *parentItem)
 {
     LogVol *child_volume;
-    const LogVolList immediate_children = parentVolume->getChildren();
+    const LvList immediate_children = parentVolume->getChildren();
 
     for (int x = 0; x < immediate_children.size(); x++) {
 

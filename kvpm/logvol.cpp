@@ -739,9 +739,9 @@ void LogVol::processSegments(lv_t lvmLv, const QByteArray flags)
     }
 }
 
-LogVolList LogVol::getAllChildrenFlat() const
+LvList LogVol::getAllChildrenFlat() const
 {
-    LogVolList flat_list = m_lv_children;
+    LvList flat_list = m_lv_children;
 
     for (const auto child :  m_lv_children)
         flat_list << child->getAllChildrenFlat();
@@ -749,9 +749,9 @@ LogVolList LogVol::getAllChildrenFlat() const
     return flat_list;
 }
 
-LogVolList LogVol::getSnapshots() const
+LvList LogVol::getSnapshots() const
 {
-    LogVolList snapshots;
+    LvList snapshots;
     const LogVol *container = this;
 
     if (container->getParent() != nullptr && !container->isSnapContainer()) {
@@ -771,9 +771,9 @@ LogVolList LogVol::getSnapshots() const
     return snapshots;
 }
 
-LogVolList LogVol::getThinVolumes() const  // not including snap containers
+LvList LogVol::getThinVolumes() const  // not including snap containers
 {
-    LogVolList vols;
+    LvList vols;
 
     if (m_thin_pool) {
         for (const auto lv : getAllChildrenFlat()) {
@@ -785,9 +785,9 @@ LogVolList LogVol::getThinVolumes() const  // not including snap containers
     return vols;
 }
 
-LogVolList LogVol::getThinDataVolumes() const
+LvList LogVol::getThinDataVolumes() const
 {
-    LogVolList data;
+    LvList data;
 
     if (m_thin_pool) {
         for (const auto lv : getAllChildrenFlat()) {
@@ -799,9 +799,9 @@ LogVolList LogVol::getThinDataVolumes() const
     return data;
 }
 
-LogVolList LogVol::getThinMetadataVolumes() const
+LvList LogVol::getThinMetadataVolumes() const
 {
-    LogVolList meta;
+    LvList meta;
 
     if (m_thin_pool) {
         for (const auto lv : getAllChildrenFlat()) {
@@ -813,9 +813,9 @@ LogVolList LogVol::getThinMetadataVolumes() const
     return meta;
 }
 
-LogVolList LogVol::getRaidImageVolumes() const
+LvList LogVol::getRaidImageVolumes() const
 {
-    LogVolList images;
+    LvList images;
 
     if (m_raid) {
         for (const auto lv : getAllChildrenFlat()) {
@@ -827,9 +827,9 @@ LogVolList LogVol::getRaidImageVolumes() const
     return images;
 }
 
-LogVolList LogVol::getRaidMetadataVolumes() const
+LvList LogVol::getRaidMetadataVolumes() const
 {
-    LogVolList meta;
+    LvList meta;
 
     if (m_raid) {
         for (const auto lv : getAllChildrenFlat()) {
@@ -843,7 +843,7 @@ LogVolList LogVol::getRaidMetadataVolumes() const
 
 // Returns the mirror than owns this mirror leg or mirror log. Returns
 // nullptr if this is not part of a mirror volume.
-LogVolPointer LogVol::getParentMirror()
+LvPtr LogVol::getParentMirror()
 {
     LogVol *mirror = this;
 
@@ -868,7 +868,7 @@ LogVolPointer LogVol::getParentMirror()
 
 // Returns the RAID volume than owns this RAID component
 // nullptr if this is not part of a RAID volume.
-LogVolPointer LogVol::getParentRaid()
+LvPtr LogVol::getParentRaid()
 {
     if (m_raid_metadata || m_raid_image)
         return getParent();
@@ -941,7 +941,7 @@ long long LogVol::getSpaceUsedOnPv(const QString pvname) const
 
 long long LogVol::getMissingSpace() const
 {
-    LogVolList const children = getChildren();
+    LvList const children = getChildren();
     long long missing = 0;
 
     if (isPartial()) {
@@ -1071,7 +1071,7 @@ QStringList LogVol::getPvNames(const int segment) const
 }
 
 // Returns the raid metadata volume associated with a raid image volume
-LogVolPointer LogVol::getRaidImageMetadata() const
+LvPtr LogVol::getRaidImageMetadata() const
 {
     if (isRaidImage()) {
         return m_vg->getLvByName(getName().replace(QString("_rimage_"), QString("_rmeta_")));
@@ -1081,7 +1081,7 @@ LogVolPointer LogVol::getRaidImageMetadata() const
 }
 
 // Returns the raid image volume associated with a raid metadata volume
-LogVolPointer LogVol::getRaidMetadataImage() const
+LvPtr LogVol::getRaidMetadataImage() const
 {
     if (isRaidMetadata()) {
         return m_vg->getLvByName(getName().replace(QString("_rmeta_"), QString("_rimage_")));

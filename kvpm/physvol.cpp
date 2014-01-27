@@ -183,7 +183,7 @@ long long PhysVol::getContiguous(LogVol *lv) const
     long long contiguous = 0;
     const QList<LVSegmentExtent *> lv_extents = sortByExtent();
 
-    LogVolList legs;
+    LvList legs;
     
     if (lv == nullptr)
         return getContiguous();

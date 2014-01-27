@@ -408,7 +408,7 @@ void VGSplitDialog::moveNames(const bool isLvMove,
 void VGSplitDialog::volumeMobility(QStringList &mobileLvNames, QStringList &fixedLvNames,
                                    QStringList &mobilePvNames, QStringList &fixedPvNames)
 {
-    const LogVolList lvs = getFullLvList();
+    const LvList lvs = getFullLvList();
     const QList<PhysVol *> pvs = m_vg->getPhysicalVolumes();
 
     bool growing = true;
@@ -487,14 +487,14 @@ void VGSplitDialog::volumeMobility(QStringList &mobileLvNames, QStringList &fixe
 
 void VGSplitDialog::pvState(QStringList &open, QStringList &closed)
 {
-    const LogVolList  lvs = getFullLvList();
+    const LvList  lvs = getFullLvList();
 
     for (int x = lvs.size() - 1; x >= 0; x--) {
         if (lvs[x]->isOpen()) {
             open.append(lvs[x]->getPvNamesAllFlat());
 
             if (lvs[x]->isSnapContainer()) {
-                const LogVolList snaps(lvs[x]->getSnapshots());
+                const LvList snaps(lvs[x]->getSnapshots());
 
                 for (int y = snaps.size() - 1; y >= 0; y--) {
                     if (snaps[y]->isOpen()) {
@@ -506,7 +506,7 @@ void VGSplitDialog::pvState(QStringList &open, QStringList &closed)
 
             if (lvs[x]->isThinVolume()) {
                 LogVol *const pool = m_vg->getLvByName(lvs[x]->getPoolName());
-                const LogVolList thinvols(pool->getThinVolumes());
+                const LvList thinvols(pool->getThinVolumes());
 
                 for (int y = thinvols.size() - 1; y >= 0; y--) {
                     if (thinvols[y]->isOpen()) {  // if any thin volume is open the whole pool is open
@@ -541,7 +541,7 @@ void VGSplitDialog::pvState(QStringList &open, QStringList &closed)
 void VGSplitDialog::movesWithVolume(const bool isLV, const QString name,
                                     QStringList &movingPvNames, QStringList &movingLvNames)
 {
-    const LogVolList  lvs = getFullLvList();
+    const LvList  lvs = getFullLvList();
     const QList<PhysVol *> pvs = m_vg->getPhysicalVolumes();
     LogVol *temp;
     bool growing = true;
@@ -609,9 +609,9 @@ void VGSplitDialog::movesWithVolume(const bool isLV, const QString name,
     }
 }
 
-LogVolList VGSplitDialog::getFullLvList()
+LvList VGSplitDialog::getFullLvList()
 {
-    LogVolList  lvs = m_vg->getLogicalVolumes();
+    LvList  lvs = m_vg->getLogicalVolumes();
 
     for (int x = lvs.size() - 1; x >= 0; x--) { // find and list any thin volumes 
         if (lvs[x]->isThinPool())
@@ -620,7 +620,7 @@ LogVolList VGSplitDialog::getFullLvList()
 
     for (int x = lvs.size() - 1; x >= 0; x--) { // find and list any snapshots 
         if (lvs[x]->isCowOrigin()) {
-            LogVolList  snaps(lvs[x]->getSnapshots());
+            LvList  snaps(lvs[x]->getSnapshots());
             for (int y = snaps.size() - 1; y >= 0; y--) {
                 if (snaps[y]->isCowSnap())
                     lvs.append(snaps[y]);
