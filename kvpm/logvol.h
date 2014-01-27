@@ -25,6 +25,7 @@
 #include "misc.h"
 #include "mountentry.h"
 #include "mounttables.h"
+#include "typedefs.h"
 
 class QWidget;
 
@@ -37,8 +38,6 @@ class Segment;
 // by liblvm2app and converts the information into
 // a more Qt/KDE friendly form.
 
-typedef QPointer<LogVol> LvPtr;
-typedef QList<LvPtr> LvList;
 
 class LogVol : public QObject
 {
