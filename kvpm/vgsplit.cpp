@@ -543,7 +543,7 @@ void VGSplitDialog::movesWithVolume(const bool isLV, const QString name,
 {
     const LvList  lvs = getFullLvList();
     const QList<PhysVol *> pvs = m_vg->getPhysicalVolumes();
-    LogVol *temp;
+    LvPtr temp;
     bool growing = true;
     bool moving = true;
     int moving_lv_count;

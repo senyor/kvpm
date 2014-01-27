@@ -46,7 +46,7 @@ public:
 
 public slots:
     void changeLv(QTreeWidgetItem *item);
-    void changeLv(LogVol *lv, int segment);
+    void changeLv(LvPtr lv, int segment);
 
 private slots:
     void callDialog(QAction *action);

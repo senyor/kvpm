@@ -749,10 +749,10 @@ LvList LogVol::getAllChildrenFlat() const
     return flat_list;
 }
 
-LvList LogVol::getSnapshots() const
+LvList LogVol::getSnapshots()
 {
     LvList snapshots;
-    const LogVol *container = this;
+    LvPtr container = this;
 
     if (container->getParent() != nullptr && !container->isSnapContainer()) {
         if (container->getFullName() == container->getParent()->getFullName())
@@ -845,7 +845,7 @@ LvList LogVol::getRaidMetadataVolumes() const
 // nullptr if this is not part of a mirror volume.
 LvPtr LogVol::getParentMirror()
 {
-    LogVol *mirror = this;
+    LvPtr mirror = this;
 
     if (isLvmMirrorLog() || isLvmMirrorLeg() || isTemporary()) {
 

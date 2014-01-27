@@ -139,7 +139,7 @@ public:
     void rescan(lv_t lvmLv, vg_t lvmVg);
     LvList getChildren() const { return m_lv_children; } // just the children -- not grandchildren etc.
     LvList getAllChildrenFlat() const;  // All children, grandchildren etc. un-nested.
-    LvList getSnapshots() const;        // This will work the same for snapcontainers or the real lv
+    LvList getSnapshots();        // This will work the same for snapcontainers or the real lv
     LvList getThinVolumes() const;      // Thin logical volumes under a thin pool
     LvList getThinDataVolumes() const;  // Data volumes supporting a thin pool
     LvList getThinMetadataVolumes() const; // Metadata volumes for a thin pool

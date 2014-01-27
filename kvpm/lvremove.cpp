@@ -115,7 +115,7 @@ QStringList LVRemoveDialog::getDependentChildren(const LvPtr lv)
 
     if (lv->isCowOrigin()) {
         QListIterator<LvPtr> snap_itr(lv->getSnapshots());
-        LogVol *snap;
+        LvPtr snap;
         while (snap_itr.hasNext()) {
             snap = snap_itr.next();
 
@@ -126,7 +126,7 @@ QStringList LVRemoveDialog::getDependentChildren(const LvPtr lv)
         }
     } else if (lv->isThinPool()){
         QListIterator<LvPtr> thin_itr(lv->getThinVolumes());
-        LogVol *thin;
+        LvPtr thin;
         while (thin_itr.hasNext()) {
             thin = thin_itr.next();
 

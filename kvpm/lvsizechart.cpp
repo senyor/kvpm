@@ -170,8 +170,8 @@ void LVSizeChart::vgtreeClicked()
 
 QFrame* LVSizeChart::frameAndConnect(LVChartSeg *const seg) 
 {
-    connect(seg,  SIGNAL(lvMenuRequested(LogVol *)),
-            this, SIGNAL(lvMenuRequested(LogVol *)));
+    connect(seg,  SIGNAL(lvMenuRequested(LvPtr )),
+            this, SIGNAL(lvMenuRequested(LvPtr )));
 
     QFrame *const frame = new QFrame();
     frame->setFrameStyle(QFrame::Sunken | QFrame::Panel);
