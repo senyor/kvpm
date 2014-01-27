@@ -161,7 +161,7 @@ VGChangeDialog::VGChangeDialog(VolGroup *const group, QWidget *parent) :
     m_polling_box->setChecked(false);
     middle_layout->addWidget(m_polling_box);
 
-    LogVolList lv_list = m_vg->getLogicalVolumes();
+    LvList lv_list = m_vg->getLogicalVolumes();
 
     for (int x = lv_list.size() - 1; x >= 0 ; x--) { // replace snap containers with first level children
         if (lv_list[x]->isSnapContainer()) {

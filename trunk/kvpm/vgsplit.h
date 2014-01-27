@@ -51,7 +51,7 @@ class VGSplitDialog : public KvpmDialog
     QRegExpValidator *m_validator;
     VolGroup *m_vg;
 
-    LogVolList getFullLvList();
+    LvList getFullLvList();
 
     QWidget *buildLvLists(const QStringList mobileLvNames, const QStringList fixedLvNames);
     QWidget *buildPvLists(const QStringList mobilePvNames, const QStringList fixedPvNames);
