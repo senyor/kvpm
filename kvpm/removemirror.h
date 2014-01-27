@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2011, 2012, 2013, 2014 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -19,6 +19,7 @@
 #include <QStringList>
 
 #include "kvpmdialog.h"
+#include "typedefs.h"
 
 class QLabel;
 
@@ -32,12 +33,12 @@ class RemoveMirrorDialog : public KvpmDialog
 {
     Q_OBJECT
 
-    LogVol *m_lv = nullptr;
+    LvPtr m_lv = nullptr;
     const VolGroup *m_vg = nullptr;
     QList<NoMungeCheck *> m_leg_checks;
 
 public:
-    explicit RemoveMirrorDialog(LogVol *mirror, QWidget *parent = nullptr);
+    explicit RemoveMirrorDialog(LvPtr mirror, QWidget *parent = nullptr);
 
 private slots:
     void validateCheckStates();

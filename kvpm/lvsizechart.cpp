@@ -59,7 +59,7 @@ void LVSizeChart::populateChart()
 
     for (int x = 0; x < item_count; ++x) {
         QTreeWidgetItem *const item = m_vg_tree->topLevelItem(x);
-        LogVol *const lv = m_vg->getLvByName(item->data(0, Qt::UserRole).toString());
+        LvPtr lv = m_vg->getLvByName(item->data(0, Qt::UserRole).toString());
 
         if (lv) {
             volumes.append(lv);

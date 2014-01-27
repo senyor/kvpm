@@ -111,7 +111,7 @@ PVMoveDialog::PVMoveDialog(PhysVol *const physicalVolume, QWidget *parent) :
 
 // pv move only on one lv
 
-PVMoveDialog::PVMoveDialog(LogVol *const logicalVolume, int const segment, QWidget *parent) :
+PVMoveDialog::PVMoveDialog(LvPtr logicalVolume, int const segment, QWidget *parent) :
     KvpmDialog(parent),
     m_lv(logicalVolume),
     m_segment(segment)
@@ -440,7 +440,7 @@ QWidget* PVMoveDialog::singleSourceWidget()
     const QStringList lv_names = getLvNames();
 
     for (int x = 0; x < lv_names.size(); ++x) {
-        LogVol *const lv = m_vg->getLvByName(lv_names[x]); 
+        LvPtr lv = m_vg->getLvByName(lv_names[x]); 
         
         if (lv) {
             label = new QLabel(lv_names[x]);
@@ -473,7 +473,7 @@ bool PVMoveDialog::hasMovableExtents()
         movable = isMovable(m_lv);
     } else {                          // move whole pv
         for (auto name : getLvNames()) {
-            LogVol *const lv = m_vg->getLvByName(name); 
+            LvPtr lv = m_vg->getLvByName(name); 
             if (lv && isMovable(lv))
                 movable = true;
         }
@@ -513,7 +513,7 @@ void PVMoveDialog::setRadioExtents()
     }
 }
 
-bool PVMoveDialog::isMovable(LogVol *lv)
+bool PVMoveDialog::isMovable(LvPtr lv)
 {
     if (lv->isThinVolume() || lv->isLvmMirror() || lv->isLvmMirrorLeg() || 
         lv->isLvmMirrorLog() || lv->isCowSnap() || lv->isCowOrigin()) {
@@ -529,7 +529,7 @@ long long PVMoveDialog::movableExtents()
     long long extents = 0;
 
     for (auto name : getLvNames()) {
-        LogVol *const lv = m_vg->getLvByName(name);
+        LvPtr lv = m_vg->getLvByName(name);
         if (lv && isMovable(lv))
             extents += lv->getSpaceUsedOnPv(m_sources[0]->name) / m_vg->getExtentSize();
     }
@@ -557,7 +557,7 @@ void PVMoveDialog::disableTargets()
 /* don't allow source and target to be the same pv
    or move a pv to another it is striped with */
 
-QStringList PVMoveDialog::getForbiddenTargets(LogVol *const lv, const QString source)
+QStringList PVMoveDialog::getForbiddenTargets(LvPtr lv, const QString source)
 {
     /* Once lvm2 2.02.99 or higher is released this will need
        to be tested again. What happens if parts can be moved to 

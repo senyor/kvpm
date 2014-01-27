@@ -36,7 +36,7 @@ class RepairMissingDialog : public KvpmDialog
 
     PvGroupBox *m_pv_box = nullptr;
     QRadioButton  *m_replace_radio = nullptr;
-    LogVol *m_lv = nullptr;         // The volume we are repairing
+    LvPtr m_lv = nullptr;         // The volume we are repairing
 
     QStringList arguments();
     QList<PhysVol *> getUsablePvs();
@@ -46,7 +46,7 @@ class RepairMissingDialog : public KvpmDialog
     int getImageNumber(QString name);
 
 public:
-    explicit RepairMissingDialog(LogVol *const volume, QWidget *parent = nullptr);
+    explicit RepairMissingDialog(LvPtr volume, QWidget *parent = nullptr);
 
 private slots:
     void resetOkButton();

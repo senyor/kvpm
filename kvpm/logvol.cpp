@@ -48,7 +48,7 @@ struct Segment {
 };
 
 
-LogVol::LogVol(lv_t lvmLv, vg_t lvmVg, const VolGroup *const vg, LogVol *const lvParent, 
+LogVol::LogVol(lv_t lvmLv, vg_t lvmVg, const VolGroup *const vg, LvPtr lvParent, 
                MountTables *const tables, const bool orphan) :
     QObject(lvParent),
     m_vg(vg),

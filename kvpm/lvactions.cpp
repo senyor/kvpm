@@ -195,7 +195,7 @@ LVActions::LVActions(VolGroup *const group, QWidget *parent) :
             this, SLOT(callDialog(QAction *)));
 }
 
-void LVActions::setActions(LogVol *const lv, const int segment)
+void LVActions::setActions(LvPtr lv, const int segment)
 {
     m_lv = lv;
     m_segment = segment;
@@ -627,7 +627,7 @@ void LVActions::setActions(LogVol *const lv, const int segment)
     }
 }
 
-void LVActions::setMirrorActions(LogVol *const lv)
+void LVActions::setMirrorActions(LvPtr lv)
 {
     bool partial = false;
 

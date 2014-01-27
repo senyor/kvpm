@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2012, 2013, 2014 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -16,6 +16,7 @@
 #define THINCREATE_H
 
 #include "lvcreatebase.h"
+#include "typedefs.h"
 
 #include <QStringList>
 
@@ -34,17 +35,17 @@ class ThinCreateDialog : public LvCreateDialogBase
     bool m_use_si_units;    // TRUE Metric SI sizes = MB and GB, otherise use MiB, GiB etc.
 
 
-    LogVol *m_lv;      // origin for snap or lv to extend
+    LvPtr m_lv;      // origin for snap or lv to extend
                        // set to NULL if creating a new logical volume
-    LogVol *m_pool;    // The thin pool we are using if creating a new volume, set to NULL otherwise.
+    LvPtr m_pool;    // The thin pool we are using if creating a new volume, set to NULL otherwise.
 
     long long getLargestVolume();
     bool hasInitialErrors();
     QStringList args();
 
 public:
-    explicit ThinCreateDialog(LogVol *const pool, QWidget *parent = nullptr);
-    ThinCreateDialog(LogVol *const volume, const bool snapshot, QWidget *parent = nullptr);
+    explicit ThinCreateDialog(LvPtr pool, QWidget *parent = nullptr);
+    ThinCreateDialog(LvPtr volume, const bool snapshot, QWidget *parent = nullptr);
 
 private slots:
     void setMaxSize();

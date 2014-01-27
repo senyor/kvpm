@@ -50,7 +50,7 @@ class LogVol : public QObject
                                // Snapshots are also children -- see m_snap_container
                                // RAID Metadata is here too
     MountTables *const m_tables;
-    LogVol *m_lv_parent;       // NULL if this is the 'top' lv
+    LvPtr m_lv_parent;       // NULL if this is the 'top' lv
     QString m_lv_full_name;    // volume_group/logical_volume
     QString m_lv_name;         // name of this logical volume
     QString m_lv_mapper_path;  // full path to volume, ie: /dev/vg1/lvol1
@@ -132,7 +132,7 @@ class LogVol : public QObject
     void calculateTotalSize();
 
 public:
-    LogVol(lv_t lvmLV, vg_t lvmVg, const VolGroup *const vg, LogVol *const lvParent, 
+    LogVol(lv_t lvmLV, vg_t lvmVg, const VolGroup *const vg, LvPtr lvParent, 
            MountTables *const tables, bool orphan = false);
     ~LogVol();
 

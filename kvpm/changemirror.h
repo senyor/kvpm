@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012, 2014 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -20,7 +20,7 @@
 #include <QStringList>
 
 #include "kvpmdialog.h"
-
+#include "typedefs.h"
 
 class KComboBox;
 class KIcon;
@@ -34,7 +34,6 @@ class QRadioButton;
 class QStackedWidget;
 class QVBoxLayout;
 
-class LogVol;
 class NoMungeCheck;
 class NoMungeRadioButton;
 class PvGroupBox;
@@ -63,7 +62,7 @@ class ChangeMirrorDialog : public KvpmDialog
     QList<NoMungeCheck *> m_mirror_log_checks;
 
     bool m_change_log;    // true if we just changing the logging of an existing mirror
-    LogVol *m_lv;   // The volume we are adding a mirror leg to.
+    LvPtr m_lv;   // The volume we are adding a mirror leg to.
 
     QRadioButton *m_core_log_button,
                  *m_mirrored_log_button,
@@ -90,7 +89,7 @@ class ChangeMirrorDialog : public KvpmDialog
     bool getAvailableByteList(QList<long long> &byte_list, int &unhandledLogs, const int stripes);
 
 public:
-    ChangeMirrorDialog(LogVol *const mirrorVolume, const bool changeLog, QWidget *parent = nullptr);
+    ChangeMirrorDialog(LvPtr mirrorVolume, const bool changeLog, QWidget *parent = nullptr);
     QStringList arguments();
                            
 private slots:

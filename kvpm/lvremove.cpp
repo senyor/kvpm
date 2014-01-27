@@ -28,7 +28,7 @@
 #include "processprogress.h"
 
 
-LVRemoveDialog::LVRemoveDialog(const LogVol *const lv, QWidget *parent) : 
+LVRemoveDialog::LVRemoveDialog(const LvPtr lv, QWidget *parent) : 
     KvpmDialog(parent), 
     m_lv(lv)
 {
@@ -108,7 +108,7 @@ LVRemoveDialog::LVRemoveDialog(const LogVol *const lv, QWidget *parent) :
     dialog_body->setLayout(layout);
 }
 
-QStringList LVRemoveDialog::getDependentChildren(const LogVol *const lv)
+QStringList LVRemoveDialog::getDependentChildren(const LvPtr lv)
 {
     QStringList children;
     bool bailout = false;

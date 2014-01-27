@@ -32,7 +32,7 @@
 #include "storagepartition.h"
 
 
-MkfsDialog::MkfsDialog(LogVol *const volume, QWidget *parent) : 
+MkfsDialog::MkfsDialog(LvPtr volume, QWidget *parent) : 
     KvpmDialog(parent)
 {
     m_path = volume->getMapperPath();

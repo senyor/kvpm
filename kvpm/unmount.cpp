@@ -34,7 +34,7 @@
 
 
 
-UnmountDialog::UnmountDialog(LogVol *const volume, QWidget *parent) : 
+UnmountDialog::UnmountDialog(LvPtr volume, QWidget *parent) : 
     KvpmDialog(parent)
 {
     const MountList entries = volume->getMountEntries();

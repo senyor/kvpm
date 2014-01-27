@@ -32,7 +32,7 @@
 
 
 
-RepairMissingDialog::RepairMissingDialog(LogVol *const volume, QWidget *parent) : 
+RepairMissingDialog::RepairMissingDialog(LvPtr volume, QWidget *parent) : 
     KvpmDialog(parent),
     m_lv(volume)
 {

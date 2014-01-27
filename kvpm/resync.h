@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2013, 2014 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -15,11 +15,12 @@
 #ifndef RESYNC_H
 #define RESYNC_H
 
+#include "typedefs.h"
 
 
 class LogVol;
 
 
-bool resync(LogVol *const lv);
+bool resync(LvPtr lv);
 
 #endif

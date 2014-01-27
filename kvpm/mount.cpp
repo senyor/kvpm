@@ -44,7 +44,7 @@
 const int BUFF_LEN = 2000;   // Enough?
 
 
-MountDialog::MountDialog(LogVol *const volume, QWidget *parent) : 
+MountDialog::MountDialog(LvPtr volume, QWidget *parent) : 
     KvpmDialog(parent)
 {
     m_device_to_mount = volume->getMapperPath();

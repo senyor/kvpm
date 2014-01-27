@@ -176,7 +176,7 @@ MountList MountTables::getMtabEntries(const int major, const int minor)
     return device_mounts;
 }
 
-QString MountTables::getFstabMountPoint(LogVol *const lv)
+QString MountTables::getFstabMountPoint(LvPtr lv)
 {
     return getFstabMountPoint(lv->getMapperPath(), lv->getFilesystemLabel(), lv->getFilesystemUuid());
 }
