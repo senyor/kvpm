@@ -18,7 +18,7 @@
 #include <lvm2app.h>
 
 #include <QObject>
-#include <QPointer>
+#include <QSharedPointer>
 #include <QStringList>
 
 #include "allocationpolicy.h"
@@ -37,19 +37,18 @@ class Segment;
 // by liblvm2app and converts the information into
 // a more Qt/KDE friendly form.
 
-typedef QPointer<LogVol> LvPtr;
-typedef QList<LvPtr> LvList;
 
-class LogVol : public QObject
+typedef QList<LogVol *> LvList;
+
+class LogVol
 {
-    Q_OBJECT
     const VolGroup *const m_vg;
     QList<Segment *> m_segments;
     MountList m_mount_entries;
 
-    LvList m_lv_children;  // For a mirror the children are the legs and log
-                               // Snapshots are also children -- see m_snap_container
-                               // RAID Metadata is here too
+    QList<QSharedPointer<LogVol>> m_lv_children;  // For a mirror the children are the legs and log
+                                                  // Snapshots are also children -- see m_snap_container
+                                                  // RAID Metadata is here too
     MountTables *const m_tables;
     LogVol *m_lv_parent;       // NULL if this is the 'top' lv
     QString m_lv_full_name;    // volume_group/logical_volume
@@ -138,7 +137,7 @@ public:
     ~LogVol();
 
     void rescan(lv_t lvmLv, vg_t lvmVg);
-    LvList getChildren() const { return m_lv_children; } // just the children -- not grandchildren etc.
+    LvList getChildren() const;         // just the children -- not grandchildren etc.
     LvList getAllChildrenFlat() const;  // All children, grandchildren etc. un-nested.
     LvList getSnapshots() const;        // This will work the same for snapcontainers or the real lv
     LvList getThinVolumes() const;      // Thin logical volumes under a thin pool
@@ -146,11 +145,11 @@ public:
     LvList getThinMetadataVolumes() const; // Metadata volumes for a thin pool
     LvList getRaidImageVolumes() const;    // Image volumes supporting a RAID volume
     LvList getRaidMetadataVolumes()const;  // Metadata for a RAID volume
-    LvPtr getParent() const { return m_lv_parent; }   // NULL if this is a "top level" lv
-    LvPtr getParentMirror();             // NULL if this is not a mirror component
-    LvPtr getParentRaid();               // NULL if this is not a RAID type component
-    LvPtr getRaidImageMetadata() const;  // NULL if this is not a RAID image
-    LvPtr getRaidMetadataImage() const;  // NULL if this is not RAID metadata
+    LogVol * getParent() const { return m_lv_parent; }   // NULL if this is a "top level" lv
+    LogVol * getParentMirror();             // NULL if this is not a mirror component
+    LogVol * getParentRaid();               // NULL if this is not a RAID type component
+    LogVol * getRaidImageMetadata() const;  // NULL if this is not a RAID image
+    LogVol * getRaidMetadataImage() const;  // NULL if this is not RAID metadata
     const VolGroup* getVg() const { return m_vg; }
     QString getName() const { return m_lv_name; }
     QString getPoolName() const { return m_pool; } // Name of this volume's thin pool if it is a thin volume, empty otherwise

@@ -53,7 +53,7 @@ LVCreateDialog::LVCreateDialog(VolGroup *const vg, const bool ispool, QWidget *p
     LvCreateDialogBase(vg, -1, false, false, false, ispool, QString(""), QString(""), parent),
     m_ispool(ispool)
 {
-    m_lv = LvPtr(nullptr);
+    m_lv = nullptr;
     m_extend = false;
     m_snapshot = false;
 

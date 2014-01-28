@@ -34,7 +34,7 @@
 
 RepairMissingDialog::RepairMissingDialog(LogVol *const volume, QWidget *parent) : 
     KvpmDialog(parent),
-    m_lv(volume.data())
+    m_lv(volume)
 {
     if (m_lv->getParentMirror())
         m_lv = m_lv->getParentMirror();

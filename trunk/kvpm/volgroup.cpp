@@ -174,23 +174,31 @@ lv_t VolGroup::findOrphan(QList<lv_t> &childList)
     return nullptr;
 }
 
+LvList VolGroup::getLogicalVolumes() const  // *TOP LEVEL ONLY* snapcontainers returned not snaps and origin
+{ 
+    LvList members;
+    for (auto lv : m_member_lvs)
+        members << lv.data();
+
+    return members; 
+}
+
+
 LvList VolGroup::getLogicalVolumesFlat() const
 {
-    QListIterator<LvPtr> tree_list(m_member_lvs);
     LvList flat_list;
 
-    while (tree_list.hasNext()) {
-        LogVol *lv = tree_list.next();
-        flat_list.append(lv);
-        flat_list.append(lv->getAllChildrenFlat());
+    for (auto lv : m_member_lvs) {
+        flat_list << lv.data();
+        flat_list << lv->getAllChildrenFlat();
     }
 
     return flat_list;
 }
 
-LvPtr VolGroup::getLvByName(QString shortName) const // Do not return snap container, just the "real" lv
+LogVol * VolGroup::getLvByName(QString shortName) const // Do not return snap container, just the "real" lv
 {
-    QListIterator<LvPtr> lvs_itr(getLogicalVolumesFlat());
+    QListIterator<LogVol *> lvs_itr(getLogicalVolumesFlat());
     shortName = shortName.trimmed();
 
     while (lvs_itr.hasNext()) {
@@ -199,12 +207,12 @@ LvPtr VolGroup::getLvByName(QString shortName) const // Do not return snap conta
             return lv;
     }
 
-    return LvPtr(nullptr);
+    return nullptr;
 }
 
-LvPtr VolGroup::getLvByUuid(QString uuid) const  // Do not return snap container, just the "real" lv
+LogVol * VolGroup::getLvByUuid(QString uuid) const  // Do not return snap container, just the "real" lv
 {
-    QListIterator<LvPtr> lvs_itr(getLogicalVolumesFlat());
+    QListIterator<LogVol *> lvs_itr(getLogicalVolumesFlat());
     uuid = uuid.trimmed();
 
     while (lvs_itr.hasNext()) {
@@ -213,7 +221,7 @@ LvPtr VolGroup::getLvByUuid(QString uuid) const  // Do not return snap container
             return lv;
     }
 
-    return LvPtr(nullptr);
+    return nullptr;
 }
 
 PhysVol* VolGroup::getPvByName(QString name) const
@@ -290,7 +298,7 @@ void VolGroup::processLogicalVolumes(vg_t lvmVG)
     QList<lv_t> lvm_lvs_all_children;  // children of top level volumes
     QByteArray flags;
 
-    LvList old_member_lvs = m_member_lvs;
+    QList<QSharedPointer<LogVol>> old_member_lvs = m_member_lvs;
     m_member_lvs.clear();
     m_lv_names_all.clear();
 
@@ -354,7 +362,7 @@ void VolGroup::processLogicalVolumes(vg_t lvmVG)
             }
 
             if (is_new) {
-                m_member_lvs << LvPtr(new LogVol(lvm_lv, lvmVG, this, nullptr, m_tables));
+                m_member_lvs << QSharedPointer<LogVol>(new LogVol(lvm_lv, lvmVG, this, nullptr, m_tables));
             }
         }
 
@@ -362,7 +370,7 @@ void VolGroup::processLogicalVolumes(vg_t lvmVG)
 
         lv_t lvm_lv_orphan;                // non-top lvm logical volume handle with no home
         while ((lvm_lv_orphan = findOrphan(lvm_lvs_all_children))) 
-            m_member_lvs.append(LvPtr(new LogVol(lvm_lv_orphan, lvmVG, this, nullptr, m_tables, true)));
+            m_member_lvs << QSharedPointer<LogVol>(new LogVol(lvm_lv_orphan, lvmVG, this, nullptr, m_tables, true));
 
     } else {   // lv_dm_list is empty so clean up member lvs
         m_member_lvs.clear();
@@ -391,21 +399,15 @@ void VolGroup::setActivePhysicalVolumes()
 // It should be moved to PhysVol
 void VolGroup::setLastUsedExtent()
 {
-    QListIterator<PhysVol *> pv_itr(m_member_pvs);
-
-    while (pv_itr.hasNext()) {
-        PhysVol *const pv = pv_itr.next();
+    for (auto pv : m_member_pvs) {
         long long last_extent = 0;
         long long last_used_extent = 0;
         const QString pv_name = pv->getMapperName();
 
-        QListIterator<LvPtr> lv_itr(m_member_lvs);
-
-        while (lv_itr.hasNext()) {
-            LogVol *const lv = lv_itr.next();
+        for (auto smart : m_member_lvs) {
+            auto lv = smart.data();
 
             for (int segment = lv->getSegmentCount() - 1; segment >= 0; segment--) {
-
                 QList<long long> starting_extent = lv->getSegmentStartingExtent(segment);
                 const QStringList pv_name_list = lv->getPvNames(segment);
 

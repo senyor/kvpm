@@ -50,7 +50,6 @@ struct Segment {
 
 LogVol::LogVol(lv_t lvmLv, vg_t lvmVg, const VolGroup *const vg, LogVol *const lvParent, 
                MountTables *const tables, const bool orphan) :
-    QObject(lvParent),
     m_vg(vg),
     m_tables(tables),
     m_lv_parent(lvParent),
@@ -62,6 +61,8 @@ LogVol::LogVol(lv_t lvmLv, vg_t lvmVg, const VolGroup *const vg, LogVol *const l
 
 LogVol::~LogVol()
 {
+    qDebug() << "Deleted: " << m_lv_name;
+
     for (auto ptr : m_segments)
         delete ptr;
 }
@@ -471,14 +472,13 @@ void LogVol::insertChildren(lv_t lvmLv, vg_t lvmVg)
     lv_t lvm_child;
     QList<lv_t> lvm_child_snapshots(getLvmSnapshots(lvmVg));
 
-    while (m_lv_children.size())
-        delete m_lv_children.takeAt(0);
+    m_lv_children.clear();
 
     if (m_snap_container) {
         for (const auto snap : lvm_child_snapshots)
-            m_lv_children << new LogVol(snap, lvmVg, m_vg, this, m_tables);
+            m_lv_children << QSharedPointer<LogVol>(new LogVol(snap, lvmVg, m_vg, this, m_tables));
 
-        m_lv_children << new LogVol(lvmLv, lvmVg, m_vg, this, m_tables);
+        m_lv_children << QSharedPointer<LogVol>(new LogVol(lvmLv, lvmVg, m_vg, this, m_tables));
     } else {
         QStringList names;
         names << removePvNames() << getMetadataNames() << getPoolVolumeNames(lvmVg);
@@ -493,7 +493,7 @@ void LogVol::insertChildren(lv_t lvmLv, vg_t lvmVg)
             lvm_child = lvm_lv_from_name(lvmVg, qba.data());
 
             if (lvm_child)
-                m_lv_children << new LogVol(lvm_child, lvmVg, m_vg, this, m_tables);
+                m_lv_children << QSharedPointer<LogVol>(new LogVol(lvm_child, lvmVg, m_vg, this, m_tables));
         }
     }
 }
@@ -741,12 +741,23 @@ void LogVol::processSegments(lv_t lvmLv, const QByteArray flags)
 
 LvList LogVol::getAllChildrenFlat() const
 {
-    LvList flat_list = m_lv_children;
+    LvList flat_list = getChildren();
 
-    for (const auto child :  m_lv_children)
+    for (const auto child : m_lv_children)
         flat_list << child->getAllChildrenFlat();
 
     return flat_list;
+}
+
+LvList LogVol::getChildren() const 
+{ 
+    LvList children;
+
+    for (auto child : m_lv_children) {
+        children << child.data();
+    }
+
+    return children; 
 }
 
 LvList LogVol::getSnapshots() const
@@ -843,7 +854,7 @@ LvList LogVol::getRaidMetadataVolumes() const
 
 // Returns the mirror than owns this mirror leg or mirror log. Returns
 // nullptr if this is not part of a mirror volume.
-LvPtr LogVol::getParentMirror()
+LogVol * LogVol::getParentMirror()
 {
     LogVol *mirror = this;
 
@@ -868,7 +879,7 @@ LvPtr LogVol::getParentMirror()
 
 // Returns the RAID volume than owns this RAID component
 // nullptr if this is not part of a RAID volume.
-LvPtr LogVol::getParentRaid()
+LogVol * LogVol::getParentRaid()
 {
     if (m_raid_metadata || m_raid_image)
         return getParent();
@@ -1071,7 +1082,7 @@ QStringList LogVol::getPvNames(const int segment) const
 }
 
 // Returns the raid metadata volume associated with a raid image volume
-LvPtr LogVol::getRaidImageMetadata() const
+LogVol * LogVol::getRaidImageMetadata() const
 {
     if (isRaidImage()) {
         return m_vg->getLvByName(getName().replace(QString("_rimage_"), QString("_rmeta_")));
@@ -1081,7 +1092,7 @@ LvPtr LogVol::getRaidImageMetadata() const
 }
 
 // Returns the raid image volume associated with a raid metadata volume
-LvPtr LogVol::getRaidMetadataImage() const
+LogVol * LogVol::getRaidMetadataImage() const
 {
     if (isRaidMetadata()) {
         return m_vg->getLvByName(getName().replace(QString("_rmeta_"), QString("_rimage_")));
