@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2012, 2013, 2014 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -39,7 +39,7 @@
 
 /* Create new thin volume*/
 
-ThinCreateDialog::ThinCreateDialog(LvPtr pool, QWidget *parent):
+ThinCreateDialog::ThinCreateDialog(LogVol *const pool, QWidget *parent):
     LvCreateDialogBase(pool->getVg(), -1, false, false, true, false, QString(""), pool->getName(), parent),
     m_pool(pool)
 {
@@ -69,7 +69,7 @@ ThinCreateDialog::ThinCreateDialog(LvPtr pool, QWidget *parent):
 
 /* extend thin volume or take snapshot */
 
-ThinCreateDialog::ThinCreateDialog(LvPtr volume, const bool snapshot, QWidget *parent):
+ThinCreateDialog::ThinCreateDialog(LogVol *const volume, const bool snapshot, QWidget *parent):
     LvCreateDialogBase(volume->getVg(), fs_max_extend(volume->getMapperPath(), volume->getFilesystem()), 
                        !snapshot, snapshot, true, false, volume->getName(), volume->getPoolName(), parent),
     m_snapshot(snapshot),

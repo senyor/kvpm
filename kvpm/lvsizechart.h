@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2011, 2012, 2013, 2014 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -16,9 +16,6 @@
 #define LVSIZECHART_H
 
 #include <QFrame>
-
-#include "typedefs.h"
-
 
 class QHBoxLayout;
 class QResizeEvent;
@@ -51,7 +48,7 @@ private slots:
     void vgtreeClicked();
 
 signals:
-    void lvMenuRequested(LvPtr lv);
+    void lvMenuRequested(LogVol *lv);
 
 };
 

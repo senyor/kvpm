@@ -19,8 +19,6 @@
 
 #include <QMenu>
 
-#include "typedefs.h"
-
 class QString;
 class QVBoxLayout;
 class QScrollArea;
@@ -69,7 +67,7 @@ public:
 
 public slots:
     void lvContextMenu(QTreeWidgetItem *item);
-    void lvContextMenu(LvPtr lv);
+    void lvContextMenu(LogVol *lv);
     void pvContextMenu(QTreeWidgetItem *item);
 };
 

@@ -23,7 +23,7 @@ class LogVol;
 class PvSpace;
 
 
-typedef QPointer<LogVol> LvPtr;
+typedef QSharedPointer<LogVol> LvPtr;
 typedef QList<LvPtr> LvList;
 typedef QList<QSharedPointer<PvSpace>> PvSpaceList;
 

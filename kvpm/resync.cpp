@@ -23,7 +23,7 @@
 #include "processprogress.h"
 
 
-bool resync(LvPtr lv)
+bool resync(LogVol *const lv)
 {
     if (lv->isOpen() || lv->isMounted()) {
 

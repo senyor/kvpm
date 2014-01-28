@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2012, 2013, 2014 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -36,7 +36,7 @@ class RepairMissingDialog : public KvpmDialog
 
     PvGroupBox *m_pv_box = nullptr;
     QRadioButton  *m_replace_radio = nullptr;
-    LvPtr m_lv = nullptr;         // The volume we are repairing
+    LogVol *m_lv = nullptr;         // The volume we are repairing
 
     QStringList arguments();
     QList<PhysVol *> getUsablePvs();
@@ -46,7 +46,7 @@ class RepairMissingDialog : public KvpmDialog
     int getImageNumber(QString name);
 
 public:
-    explicit RepairMissingDialog(LvPtr volume, QWidget *parent = nullptr);
+    explicit RepairMissingDialog(LogVol *const volume, QWidget *parent = nullptr);
 
 private slots:
     void resetOkButton();

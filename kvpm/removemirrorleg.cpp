@@ -26,7 +26,7 @@
 #include "volgroup.h"
 
 
-bool remove_mirror_leg(LvPtr mirrorLeg)
+bool remove_mirror_leg(LogVol *mirrorLeg)
 {
     const QString warning = i18n("Remove mirror leg: %1 ?", mirrorLeg->getName());
 

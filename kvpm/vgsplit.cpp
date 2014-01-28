@@ -505,7 +505,7 @@ void VGSplitDialog::pvState(QStringList &open, QStringList &closed)
             }
 
             if (lvs[x]->isThinVolume()) {
-                LvPtr pool = m_vg->getLvByName(lvs[x]->getPoolName());
+                LogVol *const pool = m_vg->getLvByName(lvs[x]->getPoolName());
                 const LvList thinvols(pool->getThinVolumes());
 
                 for (int y = thinvols.size() - 1; y >= 0; y--) {
@@ -543,7 +543,7 @@ void VGSplitDialog::movesWithVolume(const bool isLV, const QString name,
 {
     const LvList  lvs = getFullLvList();
     const QList<PhysVol *> pvs = m_vg->getPhysicalVolumes();
-    LvPtr temp;
+    LogVol *temp;
     bool growing = true;
     bool moving = true;
     int moving_lv_count;
@@ -634,7 +634,7 @@ LvList VGSplitDialog::getFullLvList()
 // Returns all the pvs associated with this volume including the pvs
 // of any snapshots under it and for the pool if it is a thin volume.
 
-QStringList VGSplitDialog::getPvs(LvPtr lv)
+QStringList VGSplitDialog::getPvs(LogVol *const lv)
 {
     QStringList names;
 

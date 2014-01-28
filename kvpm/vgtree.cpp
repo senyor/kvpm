@@ -65,7 +65,7 @@ VGTree::VGTree(VolGroup *const group) :
 void VGTree::loadData()
 {
     LvList logical_volumes = m_vg->getLogicalVolumes();
-    LvPtr lv = nullptr;
+    LogVol *lv = nullptr;
     QTreeWidgetItem *new_item;
 
     disconnect(this, SIGNAL(itemExpanded(QTreeWidgetItem *)),
@@ -132,7 +132,7 @@ void VGTree::loadData()
     return;
 }
 
-QTreeWidgetItem *VGTree::loadItem(LvPtr lv, QTreeWidgetItem *item)
+QTreeWidgetItem *VGTree::loadItem(LogVol *lv, QTreeWidgetItem *item)
 {
     const QString old_type = item->data(1, Qt::DisplayRole).toString();  // lv type before reload or "" if new item
     const QString lv_name = lv->getName();
@@ -351,9 +351,9 @@ void VGTree::setupContextMenu()
             this, SLOT(popupContextMenu(QPoint)));
 }
 
-void VGTree::insertChildItems(LvPtr parentVolume, QTreeWidgetItem *parentItem)
+void VGTree::insertChildItems(LogVol *parentVolume, QTreeWidgetItem *parentItem)
 {
-    LvPtr child_volume;
+    LogVol *child_volume;
     const LvList immediate_children = parentVolume->getChildren();
 
     for (int x = 0; x < immediate_children.size(); x++) {
@@ -465,7 +465,7 @@ void VGTree::adjustColumnWidth(QTreeWidgetItem *)
     resizeColumnToContents(6);
 }
 
-void VGTree::insertSegmentItems(LvPtr lv, QTreeWidgetItem *item)
+void VGTree::insertSegmentItems(LogVol *lv, QTreeWidgetItem *item)
 {
     const int segment_count = lv->getSegmentCount();
     const int child_count = item->childCount();

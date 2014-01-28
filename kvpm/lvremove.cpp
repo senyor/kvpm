@@ -28,7 +28,7 @@
 #include "processprogress.h"
 
 
-LVRemoveDialog::LVRemoveDialog(const LvPtr lv, QWidget *parent) : 
+LVRemoveDialog::LVRemoveDialog(const LogVol *const lv, QWidget *parent) : 
     KvpmDialog(parent), 
     m_lv(lv)
 {
@@ -108,14 +108,14 @@ LVRemoveDialog::LVRemoveDialog(const LvPtr lv, QWidget *parent) :
     dialog_body->setLayout(layout);
 }
 
-QStringList LVRemoveDialog::getDependentChildren(const LvPtr lv)
+QStringList LVRemoveDialog::getDependentChildren(const LogVol *const lv)
 {
     QStringList children;
     bool bailout = false;
 
     if (lv->isCowOrigin()) {
         QListIterator<LvPtr> snap_itr(lv->getSnapshots());
-        LvPtr snap;
+        LogVol *snap;
         while (snap_itr.hasNext()) {
             snap = snap_itr.next();
 
@@ -126,7 +126,7 @@ QStringList LVRemoveDialog::getDependentChildren(const LvPtr lv)
         }
     } else if (lv->isThinPool()){
         QListIterator<LvPtr> thin_itr(lv->getThinVolumes());
-        LvPtr thin;
+        LogVol *thin;
         while (thin_itr.hasNext()) {
             thin = thin_itr.next();
 

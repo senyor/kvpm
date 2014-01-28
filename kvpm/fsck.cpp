@@ -41,7 +41,7 @@ bool fsck(const QString path)
         return true;
 }
 
-bool manual_fsck(LvPtr logicalVolume)
+bool manual_fsck(LogVol *const logicalVolume)
 {
 
     const QString path = logicalVolume->getMapperPath();

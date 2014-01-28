@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011, 2012, 2013, 2014 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -21,7 +21,6 @@
 #include <QStringList>
 
 #include "lvcreatebase.h"
-#include "typedefs.h"
 
 class KIntSpinBox;
 class KComboBox;
@@ -40,7 +39,7 @@ class LVCreateDialog : public LvCreateDialogBase
     bool m_extend;          // TRUE if extending a volume
     bool m_use_si_units;    // TRUE Metric SI sizes = MB and GB, otherise use MiB, GiB etc.
 
-    LvPtr m_lv;      // origin for snap or lv to extend
+    LogVol *m_lv;      // origin for snap or lv to extend
                        // set to NULL if creating a new logical volume
 
     QWidget *m_physical_tab;  // The physical tab
@@ -82,7 +81,7 @@ class LVCreateDialog : public LvCreateDialogBase
 
 public:
     LVCreateDialog(VolGroup *const vg, bool ispool, QWidget *parent = nullptr);
-    LVCreateDialog(LvPtr volume, const bool snapshot, QWidget *parent = nullptr);
+    LVCreateDialog(LogVol *const volume, const bool snapshot, QWidget *parent = nullptr);
 
 private slots:
     void setMaxSize();

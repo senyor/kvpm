@@ -33,6 +33,8 @@ class PhysVol;
 class VolGroup
 {
     MountTables *m_tables;
+    LvList m_member_lvs;        // lvs that belong to this group
+    QList<PhysVol *> m_member_pvs;  // pvs that belong to this group
 
     long long m_extent_size;
     int m_lv_max;          // maximum number of logical volumes, unlimited == 0
@@ -48,8 +50,6 @@ class VolGroup
     QString m_uuid;
     QString m_lvm_format;             // lvm1 or lvm2
     AllocationPolicy m_policy;
-    LvList m_member_lvs;        // lvs that belong to this group
-    QList<PhysVol *> m_member_pvs;  // pvs that belong to this group
     QStringList m_lv_names_all;     // names of all lvs and sub lvs in group, including metadata
     bool m_active;         // if any lv is active the group is active
     bool m_writable;

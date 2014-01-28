@@ -32,9 +32,9 @@
 
 
 
-RepairMissingDialog::RepairMissingDialog(LvPtr volume, QWidget *parent) : 
+RepairMissingDialog::RepairMissingDialog(LogVol *const volume, QWidget *parent) : 
     KvpmDialog(parent),
-    m_lv(volume)
+    m_lv(volume.data())
 {
     if (m_lv->getParentMirror())
         m_lv = m_lv->getParentMirror();
@@ -326,7 +326,7 @@ void RepairMissingDialog::resetOkButton()
     const bool is_lvm  = m_lv->isLvmMirror();
 
     while (partial_lvs.size()) {
-        LvPtr lv = partial_lvs.takeAt(0);
+        LogVol *lv = partial_lvs.takeAt(0);
         long long space = lv->getSize();
 
         if (is_lvm) {                  // We assume logs and mimages can be on the same pvs

@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2011, 2012, 2014 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -17,14 +17,12 @@
 
 #include <QFrame>
 
-#include "typedefs.h"
-
 class LogVol;
 
 class LVProperties : public QWidget
 {
     bool m_use_si_units;
-    LvPtr m_lv;
+    LogVol *m_lv;
     QFrame *mountPointsFrame();
     QFrame *uuidFrame();
     QFrame *fsFrame(const bool showFsUuid, const bool showFsLabel);
@@ -32,7 +30,7 @@ class LVProperties : public QWidget
     QFrame *physicalVolumesFrame(int segment);
 
 public:
-    LVProperties(LvPtr volume, const int segment, QWidget *parent = 0);
+    LVProperties(LogVol *const volume, const int segment, QWidget *parent = 0);
 
 };
 

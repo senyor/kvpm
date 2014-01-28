@@ -48,7 +48,7 @@ struct Segment {
 };
 
 
-LogVol::LogVol(lv_t lvmLv, vg_t lvmVg, const VolGroup *const vg, LvPtr lvParent, 
+LogVol::LogVol(lv_t lvmLv, vg_t lvmVg, const VolGroup *const vg, LogVol *const lvParent, 
                MountTables *const tables, const bool orphan) :
     QObject(lvParent),
     m_vg(vg),
@@ -749,10 +749,10 @@ LvList LogVol::getAllChildrenFlat() const
     return flat_list;
 }
 
-LvList LogVol::getSnapshots()
+LvList LogVol::getSnapshots() const
 {
     LvList snapshots;
-    LvPtr container = this;
+    const LogVol *container = this;
 
     if (container->getParent() != nullptr && !container->isSnapContainer()) {
         if (container->getFullName() == container->getParent()->getFullName())
@@ -845,7 +845,7 @@ LvList LogVol::getRaidMetadataVolumes() const
 // nullptr if this is not part of a mirror volume.
 LvPtr LogVol::getParentMirror()
 {
-    LvPtr mirror = this;
+    LogVol *mirror = this;
 
     if (isLvmMirrorLog() || isLvmMirrorLeg() || isTemporary()) {
 

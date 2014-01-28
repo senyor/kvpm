@@ -30,7 +30,7 @@
 #include <QString>
 
 
-bool max_fs(LvPtr logicalVolume)
+bool max_fs(LogVol *const logicalVolume)
 {
     const QString path = logicalVolume->getMapperPath();
     const QString fs   = logicalVolume->getFilesystem();

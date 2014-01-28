@@ -17,7 +17,6 @@
 
 
 #include "kvpmdialog.h"
-#include "typedefs.h"
 
 
 class KLineEdit;
@@ -32,7 +31,7 @@ class LVRenameDialog : public KvpmDialog
 {
     Q_OBJECT
 
-    LvPtr m_lv;
+    LogVol  *m_lv;
     QString  m_old_name;
     QString  m_vg_name;
     KLineEdit *m_new_name;
@@ -41,7 +40,7 @@ class LVRenameDialog : public KvpmDialog
     QString getNewMapperPath();
 
 public:
-    explicit LVRenameDialog(LvPtr volume, QWidget *parent = nullptr);
+    explicit LVRenameDialog(LogVol *const volume, QWidget *parent = nullptr);
 
 private slots:
     void validateName(QString name);

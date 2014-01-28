@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2011, 2014 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2011 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -15,11 +15,10 @@
 #ifndef SNAPMERGE_H
 #define SNAPMERGE_H
 
-#include "typedefs.h"
 
 class LogVol;
 
-bool merge_snap(LvPtr snapshot);
+bool merge_snap(LogVol *const snapshot);
 
 
 #endif

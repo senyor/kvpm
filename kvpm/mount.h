@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011, 2012, 2013, 2014 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -16,7 +16,6 @@
 #define MOUNT_H
 
 #include "kvpmdialog.h"
-#include "typedefs.h"
 
 class KLineEdit;
 
@@ -62,7 +61,7 @@ class MountDialog : public KvpmDialog
     void buildDialog();
 
 public:
-    MountDialog(LvPtr volume, QWidget *parent = nullptr);
+    MountDialog(LogVol *const volume, QWidget *parent = nullptr);
     MountDialog(StoragePartition *const partition, QWidget *parent = nullptr);
 
 private slots:
