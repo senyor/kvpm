@@ -33,7 +33,7 @@ class PhysVol;
 class VolGroup
 {
     MountTables *m_tables;
-    QList<QSharedPointer<LogVol>>  m_member_lvs;        // lvs that belong to this group
+    QList<SmrtLvPtr> m_member_lvs;  // lvs that belong to this group
     QList<PhysVol *> m_member_pvs;  // pvs that belong to this group
 
     long long m_extent_size;

@@ -39,6 +39,7 @@ class Segment;
 
 
 typedef QList<LogVol *> LvList;
+typedef QSharedPointer<LogVol> SmrtLvPtr;
 
 class LogVol
 {
@@ -46,9 +47,9 @@ class LogVol
     QList<Segment *> m_segments;
     MountList m_mount_entries;
 
-    QList<QSharedPointer<LogVol>> m_lv_children;  // For a mirror the children are the legs and log
-                                                  // Snapshots are also children -- see m_snap_container
-                                                  // RAID Metadata is here too
+    QList<SmrtLvPtr> m_lv_children;  // For a mirror the children are the legs and log
+                                     // Snapshots are also children -- see m_snap_container
+                                     // RAID Metadata is here too
     MountTables *const m_tables;
     LogVol *m_lv_parent;       // NULL if this is the 'top' lv
     QString m_lv_full_name;    // volume_group/logical_volume
@@ -67,8 +68,6 @@ class LogVol
 
     QString     m_uuid;
     QStringList m_tags;
-    QString     m_fstab_mount_point;
-    QStringList m_mount_points;  // empty if not mounted
 
     double  m_snap_percent;      // the percentage used, if this is a snapshot
     double  m_copy_percent;      // the percentage of extents moved, if pvmove underway
@@ -173,9 +172,9 @@ public:
     QStringList getPvNames(const int segment) const;
     QStringList getPvNamesAll() const;         // full path of physical volumes for all segments
     QStringList getPvNamesAllFlat() const;     // full path of physical volumes including child lvs, un-nested
-    QStringList getMountPoints() const { return m_mount_points; }
     MountList getMountEntries() const { return m_mount_entries; }
-    QString getFstabMountPoint() const { return m_fstab_mount_point; }
+    QStringList getMountPoints() const; 
+    QString getFstabMountPoint() { return m_tables->getFstabMountPoint(this); }
     QStringList getTags() const { return m_tags; }
     QString getDiscards(int segment) const;
     long long getSpaceUsedOnPv(const QString pvname) const;
