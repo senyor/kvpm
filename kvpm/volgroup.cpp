@@ -298,7 +298,7 @@ void VolGroup::processLogicalVolumes(vg_t lvmVG)
     QList<lv_t> lvm_lvs_all_children;  // children of top level volumes
     QByteArray flags;
 
-    QList<QSharedPointer<LogVol>> old_member_lvs = m_member_lvs;
+    QList<SmrtLvPtr> old_member_lvs = m_member_lvs;
     m_member_lvs.clear();
     m_lv_names_all.clear();
 
@@ -362,7 +362,7 @@ void VolGroup::processLogicalVolumes(vg_t lvmVG)
             }
 
             if (is_new) {
-                m_member_lvs << QSharedPointer<LogVol>(new LogVol(lvm_lv, lvmVG, this, nullptr, m_tables));
+                m_member_lvs << SmrtLvPtr(new LogVol(lvm_lv, lvmVG, this, nullptr, m_tables));
             }
         }
 
@@ -370,7 +370,7 @@ void VolGroup::processLogicalVolumes(vg_t lvmVG)
 
         lv_t lvm_lv_orphan;                // non-top lvm logical volume handle with no home
         while ((lvm_lv_orphan = findOrphan(lvm_lvs_all_children))) 
-            m_member_lvs << QSharedPointer<LogVol>(new LogVol(lvm_lv_orphan, lvmVG, this, nullptr, m_tables, true));
+            m_member_lvs << SmrtLvPtr(new LogVol(lvm_lv_orphan, lvmVG, this, nullptr, m_tables, true));
 
     } else {   // lv_dm_list is empty so clean up member lvs
         m_member_lvs.clear();
@@ -411,9 +411,9 @@ void VolGroup::setLastUsedExtent()
                 QList<long long> starting_extent = lv->getSegmentStartingExtent(segment);
                 const QStringList pv_name_list = lv->getPvNames(segment);
 
-                for (int x = 0; x < pv_name_list.size(); x++) {
-                    if (pv_name == pv_name_list[x]) {
-                        last_extent = starting_extent[x] - 1 + (lv->getSegmentExtents(segment) / (lv->getSegmentStripes(segment)));
+                for (int i = 0; i < pv_name_list.size(); i++) {
+                    if (pv_name == pv_name_list[i]) {
+                        last_extent = starting_extent[i] - 1 + (lv->getSegmentExtents(segment) / (lv->getSegmentStripes(segment)));
                         if (last_extent > last_used_extent)
                             last_used_extent = last_extent;
                     }

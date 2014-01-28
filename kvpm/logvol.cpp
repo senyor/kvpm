@@ -61,8 +61,6 @@ LogVol::LogVol(lv_t lvmLv, vg_t lvmVg, const VolGroup *const vg, LogVol *const l
 
 LogVol::~LogVol()
 {
-    qDebug() << "Deleted: " << m_lv_name;
-
     for (auto ptr : m_segments)
         delete ptr;
 }
@@ -152,7 +150,7 @@ void LogVol::rescan(lv_t lvmLv, vg_t lvmVg)
             m_lvmmirror_leg = true;
         }
         
-        if(flags[0] == 'i') {
+        if(flags[0] == 'I') {
             additional_state = "un-synced";
             m_synced = false;
         } else {
@@ -445,15 +443,16 @@ void LogVol::setSnapContainer(vg_t lvmVg, lv_t lvmLv)
 void LogVol::processMounts()
 {
     m_mount_entries = m_tables->getMtabEntries(m_major_device, m_minor_device);
-    m_fstab_mount_point = m_tables->getFstabMountPoint(this);
+
+    QStringList mpts;
 
     for (auto entry : m_mount_entries)
-        m_mount_points << entry->getMountPoint();
+        mpts << entry->getMountPoint();
 
-    m_mounted = !m_mount_points.isEmpty();
+    m_mounted = !mpts.isEmpty();
 
     if (m_mounted) {
-        const FSData fs_data = get_fs_data(m_mount_points[0]);
+        const FSData fs_data = get_fs_data(mpts[0]);
         if (fs_data.size > 0) {
             m_fs_size = fs_data.size * fs_data.block_size;
             m_fs_used = fs_data.used * fs_data.block_size;
@@ -476,9 +475,9 @@ void LogVol::insertChildren(lv_t lvmLv, vg_t lvmVg)
 
     if (m_snap_container) {
         for (const auto snap : lvm_child_snapshots)
-            m_lv_children << QSharedPointer<LogVol>(new LogVol(snap, lvmVg, m_vg, this, m_tables));
+            m_lv_children << SmrtLvPtr(new LogVol(snap, lvmVg, m_vg, this, m_tables));
 
-        m_lv_children << QSharedPointer<LogVol>(new LogVol(lvmLv, lvmVg, m_vg, this, m_tables));
+        m_lv_children << SmrtLvPtr(new LogVol(lvmLv, lvmVg, m_vg, this, m_tables));
     } else {
         QStringList names;
         names << removePvNames() << getMetadataNames() << getPoolVolumeNames(lvmVg);
@@ -493,7 +492,7 @@ void LogVol::insertChildren(lv_t lvmLv, vg_t lvmVg)
             lvm_child = lvm_lv_from_name(lvmVg, qba.data());
 
             if (lvm_child)
-                m_lv_children << QSharedPointer<LogVol>(new LogVol(lvm_child, lvmVg, m_vg, this, m_tables));
+                m_lv_children << SmrtLvPtr(new LogVol(lvm_child, lvmVg, m_vg, this, m_tables));
         }
     }
 }
@@ -759,19 +758,19 @@ LvList LogVol::getChildren() const
 
     return children; 
 }
-
+ 
 LvList LogVol::getSnapshots() const
 {
     LvList snapshots;
-    const LogVol *container = this;
+    const LogVol *cntr = this;
 
-    if (container->getParent() != nullptr && !container->isSnapContainer()) {
-        if (container->getFullName() == container->getParent()->getFullName())
-            container = container->getParent();
+    if (cntr->getParent() != nullptr && !cntr->isSnapContainer()) {
+        if (cntr->getFullName() == cntr->getParent()->getFullName())
+            cntr = cntr->getParent();
     }
 
-    if (container->isSnapContainer()) {
-        snapshots = container->getChildren();
+    if (cntr->isSnapContainer()) {
+        snapshots = cntr->getChildren();
 
         for (int i = snapshots.size() - 1; i >= 0; i--) { // delete the 'real' lv leaving the snaps
             if (m_lv_name == snapshots[i]->getName())
@@ -1099,4 +1098,14 @@ LogVol * LogVol::getRaidMetadataImage() const
     } else {
         return nullptr;
     }
+}
+
+QStringList LogVol::getMountPoints() const 
+{ 
+    QStringList mpts;
+
+    for (auto entry : m_mount_entries)
+        mpts << entry->getMountPoint();
+
+    return mpts; 
 }
