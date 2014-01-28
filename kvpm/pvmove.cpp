@@ -575,7 +575,7 @@ QStringList PVMoveDialog::getForbiddenTargets(LogVol *const lv, const QString so
 
                 for (auto image : lv->getRaidImageVolumes()) {
                     QStringList pvs = QStringList() << image->getPvNamesAllFlat();
-                    LvPtr meta = image->getRaidImageMetadata();
+                    LogVol *meta = image->getRaidImageMetadata();
                     
                     if (meta)
                         pvs << meta->getPvNamesAllFlat();
@@ -592,7 +592,7 @@ QStringList PVMoveDialog::getForbiddenTargets(LogVol *const lv, const QString so
                 forbidden << getForbiddenTargets(meta, source);
         } else {
             if (lv->isRaidImage() || lv->isRaidMetadata()) { // don't allow moving pvs from one raid leg to another
-                LvPtr image, meta;
+                LogVol *image, *meta;
                 
                 if (lv->isRaidImage()) {
                     meta = lv->getRaidImageMetadata();

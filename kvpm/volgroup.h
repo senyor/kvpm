@@ -33,7 +33,7 @@ class PhysVol;
 class VolGroup
 {
     MountTables *m_tables;
-    LvList m_member_lvs;        // lvs that belong to this group
+    QList<QSharedPointer<LogVol>>  m_member_lvs;        // lvs that belong to this group
     QList<PhysVol *> m_member_pvs;  // pvs that belong to this group
 
     long long m_extent_size;
@@ -69,13 +69,13 @@ public:
     VolGroup(lvm_t lvm, const char *vgname, MountTables *const tables);
     ~VolGroup();
     void rescan(lvm_t lvm);
-    LvList getLogicalVolumes() const { return m_member_lvs; } // *TOP LEVEL ONLY* snapcontainers returned not snaps and origin
-    LvList getLogicalVolumesFlat() const;    // un-nest the volumes, snapshots and mirror legs
+    LvList getLogicalVolumes() const;      // *TOP LEVEL ONLY* snapcontainers returned not snaps and origin
+    LvList getLogicalVolumesFlat() const;  // un-nest the volumes, snapshots and mirror legs
     QList<PhysVol *> getPhysicalVolumes() const { return m_member_pvs; }
     QStringList getLvNamesAll() const { return m_lv_names_all; } // unsorted list of all lvs and sub lvs
-    LvPtr getLvByName(QString shortName) const; // lv name without the vg name and "/" -- skips snap containers
-    LvPtr getLvByUuid(QString uuid) const;      // also skips snap containers
-    PhysVol* getPvByName(QString name) const;           //   /dev/something
+    LogVol *getLvByName(QString shortName) const; // lv name without the vg name and "/" -- skips snap containers
+    LogVol *getLvByUuid(QString uuid) const;      // also skips snap containers
+    PhysVol *getPvByName(QString name) const;           //   /dev/something
     long long getExtents() const { return m_extents; }
     long long getFreeExtents() const { return m_free_extents; }
     long long getAllocatableExtents() const { return m_allocatable_extents; }

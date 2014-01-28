@@ -34,7 +34,7 @@ RemoveMirrorDialog::RemoveMirrorDialog(LogVol *mirror, QWidget *parent) :
     while (mirror->isLvmMirrorLog() || mirror->isLvmMirrorLeg())
         mirror = mirror->getParentMirror();
 
-    m_lv = mirror.data();
+    m_lv = mirror;
     m_vg = m_lv->getVg();
 
     setCaption(i18n("Remove Mirrors"));
