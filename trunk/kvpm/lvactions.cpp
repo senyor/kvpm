@@ -195,7 +195,7 @@ LVActions::LVActions(VolGroup *const group, QWidget *parent) :
             this, SLOT(callDialog(QAction *)));
 }
 
-void LVActions::setActions(LvPtr lv, const int segment)
+void LVActions::setActions(LogVol *const lv, const int segment)
 {
     m_lv = lv;
     m_segment = segment;
@@ -627,7 +627,7 @@ void LVActions::setActions(LvPtr lv, const int segment)
     }
 }
 
-void LVActions::setMirrorActions(LvPtr lv)
+void LVActions::setMirrorActions(LogVol *const lv)
 {
     bool partial = false;
 
@@ -830,7 +830,7 @@ void LVActions::setMirrorActions(LvPtr lv)
     remove_mirror->setVisible(!remove_this->isEnabled());
 }
 
-void LVActions::changeLv(LvPtr lv, int segment)
+void LVActions::changeLv(LogVol *lv, int segment)
 {
     setActions(lv, segment);     // segment = -1 means whole lv
     setMirrorActions(lv);
@@ -838,7 +838,7 @@ void LVActions::changeLv(LvPtr lv, int segment)
 
 void LVActions::changeLv(QTreeWidgetItem *item)
 {
-    LvPtr target = nullptr;
+    LogVol *target = nullptr;
     int segment = -1;
 
     if (item) {

@@ -59,7 +59,7 @@ void LVSizeChart::populateChart()
 
     for (int x = 0; x < item_count; ++x) {
         QTreeWidgetItem *const item = m_vg_tree->topLevelItem(x);
-        LvPtr lv = m_vg->getLvByName(item->data(0, Qt::UserRole).toString());
+        LogVol *const lv = m_vg->getLvByName(item->data(0, Qt::UserRole).toString());
 
         if (lv) {
             volumes.append(lv);
@@ -170,8 +170,8 @@ void LVSizeChart::vgtreeClicked()
 
 QFrame* LVSizeChart::frameAndConnect(LVChartSeg *const seg) 
 {
-    connect(seg,  SIGNAL(lvMenuRequested(LvPtr )),
-            this, SIGNAL(lvMenuRequested(LvPtr )));
+    connect(seg,  SIGNAL(lvMenuRequested(LogVol *)),
+            this, SIGNAL(lvMenuRequested(LogVol *)));
 
     QFrame *const frame = new QFrame();
     frame->setFrameStyle(QFrame::Sunken | QFrame::Panel);

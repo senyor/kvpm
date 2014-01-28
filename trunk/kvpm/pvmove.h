@@ -17,7 +17,6 @@
 #define PVMOVE_H
 
 #include "kvpmdialog.h"
-#include "typedefs.h"
 
 #include <KDialog>
 
@@ -45,7 +44,7 @@ class PVMoveDialog : public KvpmDialog
     Q_OBJECT
 
     const VolGroup *m_vg = nullptr;
-    LvPtr m_lv = nullptr;
+    LogVol   *m_lv = nullptr;
     int m_segment;
     bool      m_move_segment;
     long long m_pv_used_space;
@@ -63,15 +62,15 @@ class PVMoveDialog : public KvpmDialog
     QStringList getLvNames(); 
     QList<PhysVol *> removeForbiddenTargets(QList<PhysVol *> targets, const QString source);
     QList<PhysVol *> removeFullTargets(QList<PhysVol *> targets);
-    QStringList getForbiddenTargets(LvPtr lv, const QString source); 
+    QStringList getForbiddenTargets(LogVol *const lv, const QString source); 
     QWidget* singleSourceWidget();
     QWidget* bannerWidget();
-    bool isMovable(LvPtr lv);
+    bool isMovable(LogVol *lv);
     long long movableExtents();
 
 public:
     explicit PVMoveDialog(PhysVol *const physicalVolume, QWidget *parent = nullptr);
-    explicit PVMoveDialog(LvPtr logicalVolume, int const segment = -1, QWidget *parent = nullptr);
+    explicit PVMoveDialog(LogVol *const logicalVolume, int const segment = -1, QWidget *parent = nullptr);
     ~PVMoveDialog();
 
 private slots:

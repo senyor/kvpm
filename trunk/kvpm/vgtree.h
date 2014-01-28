@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2009, 2010, 2011, 2012, 2014 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -21,9 +21,6 @@
 #include <QStringList>
 #include <QTreeWidget>
 
-#include "typedefs.h"
-
-
 class QPoint;
 class QTreeWidgetItem;
 
@@ -42,9 +39,9 @@ class VGTree : public QTreeWidget
     int m_fs_warn_percent;
 
     void setupContextMenu();
-    QTreeWidgetItem *loadItem(LvPtr lv, QTreeWidgetItem *item);
-    void insertChildItems(LvPtr parentVolume, QTreeWidgetItem *parentItem);
-    void insertSegmentItems(LvPtr logicalVolume, QTreeWidgetItem *item);
+    QTreeWidgetItem *loadItem(LogVol *lv, QTreeWidgetItem *item);
+    void insertChildItems(LogVol *parentVolume, QTreeWidgetItem *parentItem);
+    void insertSegmentItems(LogVol *logicalVolume, QTreeWidgetItem *item);
     void setViewConfig();
 
 public:

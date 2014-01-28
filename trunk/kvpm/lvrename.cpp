@@ -30,7 +30,7 @@
 #include "processprogress.h"
 
 
-LVRenameDialog::LVRenameDialog(LvPtr volume, QWidget *parent) : 
+LVRenameDialog::LVRenameDialog(LogVol *const volume, QWidget *parent) : 
     KvpmDialog(parent),
     m_lv(volume)
 {

@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2011, 2012, 2014 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -15,13 +15,11 @@
 #ifndef MAXFS_H
 #define MAXFS_H
 
-#include "typedefs.h"
-
 class LogVol;
 class StoragePartition;
 class StorageDevice;
 
-bool max_fs(LvPtr logicalVolume);
+bool max_fs(LogVol *const logicalVolume);
 bool max_fs(StoragePartition *const partition);
 bool max_fs(StorageDevice *const device);
 

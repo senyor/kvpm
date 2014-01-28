@@ -38,7 +38,7 @@ class UnmountDialog : public KvpmDialog
 
 public:
     UnmountDialog(StoragePartition *const partition, QWidget *parent = NULL);
-    UnmountDialog(LvPtr volume, QWidget *parent = NULL);
+    UnmountDialog(LogVol *const volume, QWidget *parent = NULL);
     void buildDialog(QString const device, const MountList entries);
     bool bailout();
 

@@ -18,10 +18,9 @@
 #include <QCheckBox>
 #include <QFileInfo>
 #include <QRadioButton>
+#include <QSharedPointer>
 #include <QStringList>
 #include <QVariant>
-
-#include "typedefs.h"
 
 class PhysVol;
 class StorageBase;
@@ -44,6 +43,8 @@ struct PvSpace {
     PvSpace(PhysVol *volume, long long norm, long long cont) {pv = volume; normal = norm; contiguous = cont;}
 };
 
+
+typedef QList<QSharedPointer<PvSpace>> PvSpaceList;
 
 QStringList splitUuid(QString const uuid);
 bool isBusy(const QString device);

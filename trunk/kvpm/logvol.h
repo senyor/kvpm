@@ -25,7 +25,6 @@
 #include "misc.h"
 #include "mountentry.h"
 #include "mounttables.h"
-#include "typedefs.h"
 
 class QWidget;
 
@@ -38,6 +37,8 @@ class Segment;
 // by liblvm2app and converts the information into
 // a more Qt/KDE friendly form.
 
+typedef QPointer<LogVol> LvPtr;
+typedef QList<LvPtr> LvList;
 
 class LogVol : public QObject
 {
@@ -50,7 +51,7 @@ class LogVol : public QObject
                                // Snapshots are also children -- see m_snap_container
                                // RAID Metadata is here too
     MountTables *const m_tables;
-    LvPtr m_lv_parent;       // NULL if this is the 'top' lv
+    LogVol *m_lv_parent;       // NULL if this is the 'top' lv
     QString m_lv_full_name;    // volume_group/logical_volume
     QString m_lv_name;         // name of this logical volume
     QString m_lv_mapper_path;  // full path to volume, ie: /dev/vg1/lvol1
@@ -132,14 +133,14 @@ class LogVol : public QObject
     void calculateTotalSize();
 
 public:
-    LogVol(lv_t lvmLV, vg_t lvmVg, const VolGroup *const vg, LvPtr lvParent, 
+    LogVol(lv_t lvmLV, vg_t lvmVg, const VolGroup *const vg, LogVol *const lvParent, 
            MountTables *const tables, bool orphan = false);
     ~LogVol();
 
     void rescan(lv_t lvmLv, vg_t lvmVg);
     LvList getChildren() const { return m_lv_children; } // just the children -- not grandchildren etc.
     LvList getAllChildrenFlat() const;  // All children, grandchildren etc. un-nested.
-    LvList getSnapshots();        // This will work the same for snapcontainers or the real lv
+    LvList getSnapshots() const;        // This will work the same for snapcontainers or the real lv
     LvList getThinVolumes() const;      // Thin logical volumes under a thin pool
     LvList getThinDataVolumes() const;  // Data volumes supporting a thin pool
     LvList getThinMetadataVolumes() const; // Metadata volumes for a thin pool

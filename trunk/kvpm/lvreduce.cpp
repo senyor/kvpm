@@ -31,7 +31,7 @@
 #include "volgroup.h"
 
 
-LVReduceDialog::LVReduceDialog(LvPtr volume, QWidget *parent) : 
+LVReduceDialog::LVReduceDialog(LogVol *const volume, QWidget *parent) : 
     KvpmDialog(parent),
     m_lv(volume)
 {

@@ -19,8 +19,6 @@
 
 #include <QFrame>
 
-#include "typedefs.h"
-
 class QHBoxLayout;
 class QBrush;
 class QString;
@@ -32,18 +30,18 @@ class LVChartSeg : public QWidget
 {
     Q_OBJECT
 
-    LvPtr m_lv = nullptr;
+    LogVol *m_lv = nullptr;
     QBrush m_brush;
 
 public:
-    LVChartSeg(LvPtr volume, const QString use, QWidget *parent);
+    LVChartSeg(LogVol *const volume, const QString use, QWidget *parent);
     void paintEvent(QPaintEvent *);
 
 private slots:
     void popupContextMenu(QPoint);
 
 signals:
-    void lvMenuRequested(LvPtr lv);
+    void lvMenuRequested(LogVol *lv);
 
 };
 

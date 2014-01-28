@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012, 2013, 2014 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -152,8 +152,8 @@ void VolumeGroupTab::rescan()
     m_lv_size_chart  = new LVSizeChart(m_vg, m_vg_tree);
     m_layout->insertWidget(2, m_lv_size_chart);
 
-    connect(m_lv_size_chart, SIGNAL(lvMenuRequested(LogVol*)),
-            this, SLOT(lvContextMenu(LogVol*)));
+    connect(m_lv_size_chart, SIGNAL(lvMenuRequested(LvPtr)),
+            this, SLOT(lvContextMenu(LvPtr)));
 
     readConfig();
 
@@ -277,7 +277,7 @@ KToolBar* VolumeGroupTab::buildPvToolBar()
     return toolbar;
 }
 
-void VolumeGroupTab::lvContextMenu(LvPtr lv)
+void VolumeGroupTab::lvContextMenu(LogVol *lv)
 {
     m_lv_actions->changeLv(lv, -1);
     

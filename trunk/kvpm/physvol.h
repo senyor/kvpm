@@ -19,9 +19,6 @@
 
 #include <QStringList>
 
-#include "typedefs.h"
-
-
 class VolGroup;
 class LogVol;
 
@@ -67,7 +64,7 @@ public:
     void setActive() { m_active = true; }        // If any lv is active on the pv, the pv is active
     bool isActive() const { return m_active; }
     bool isMissing() const { return m_missing; }
-    long long getContiguous(LvPtr lv) const;   // the number of contiguous bytes available if the lv is on this pv
+    long long getContiguous(LogVol *lv) const;   // the number of contiguous bytes available if the lv is on this pv
     long long getContiguous() const;             // the max contiguous bytes on the the pv.
     long long getSize() const { return m_size; }              // size of the physical volume in bytes
     long long getDeviceSize() const { return m_device_size; } // the physical volume might not take up all the device!

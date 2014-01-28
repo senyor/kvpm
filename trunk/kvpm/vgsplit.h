@@ -56,7 +56,7 @@ class VGSplitDialog : public KvpmDialog
     QWidget *buildLvLists(const QStringList mobileLvNames, const QStringList fixedLvNames);
     QWidget *buildPvLists(const QStringList mobilePvNames, const QStringList fixedPvNames);
 
-    QStringList getPvs(LvPtr lv);
+    QStringList getPvs(LogVol *const lv);
 
     void volumeMobility(QStringList &mobileLvNames, QStringList &fixedLvNames,
                         QStringList &mobilePvNames, QStringList &fixedPvNames);

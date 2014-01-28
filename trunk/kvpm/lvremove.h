@@ -19,7 +19,6 @@
 #include <QStringList>
 
 #include "kvpmdialog.h"
-#include "typedefs.h"
 
 class LogVol;
 
@@ -29,12 +28,12 @@ class LVRemoveDialog : public KvpmDialog
     Q_OBJECT
 
     QString m_name;
-    const LvPtr m_lv;
+    const LogVol *const m_lv;
 
-    QStringList getDependentChildren(const LvPtr lv);
+    QStringList getDependentChildren(const LogVol *const lv);
 
 public:
-    explicit LVRemoveDialog(const LvPtr lv, QWidget *parent = nullptr);
+    explicit LVRemoveDialog(const LogVol *const lv, QWidget *parent = nullptr);
 
 private slots:
     void commit();

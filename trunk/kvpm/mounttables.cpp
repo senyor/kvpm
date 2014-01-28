@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2011, 2012, 2013, 2014 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -176,7 +176,7 @@ MountList MountTables::getMtabEntries(const int major, const int minor)
     return device_mounts;
 }
 
-QString MountTables::getFstabMountPoint(LvPtr lv)
+QString MountTables::getFstabMountPoint(LogVol *const lv)
 {
     return getFstabMountPoint(lv->getMapperPath(), lv->getFilesystemLabel(), lv->getFilesystemUuid());
 }

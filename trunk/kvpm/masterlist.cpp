@@ -128,6 +128,7 @@ void MasterList::scanVolumeGroups()
     lvm_str_list *strl;
 
     vgnames = lvm_list_vg_names(m_lvm);
+
     dm_list_iterate_items(strl, vgnames) { // rescan() existing VolGroup, don't create a new one
         bool existing_vg = false;
         for (int x = 0; x < m_volume_groups.size(); x++) {
@@ -136,15 +137,18 @@ void MasterList::scanVolumeGroups()
                 m_volume_groups[x]->rescan(m_lvm);
             }
         }
+
         if (!existing_vg)
             m_volume_groups.append(new VolGroup(m_lvm, strl->str, m_mount_tables));
     }
+
     for (int x = m_volume_groups.size() - 1; x >= 0; x--) { // delete VolGroup if the vg is gone
         bool deleted_vg = true;
         dm_list_iterate_items(strl, vgnames) {
             if (QString(strl->str).trimmed() == m_volume_groups[x]->getName())
                 deleted_vg = false;
         }
+
         if (deleted_vg)
             delete m_volume_groups.takeAt(x);
     }

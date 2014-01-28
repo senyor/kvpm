@@ -31,9 +31,6 @@ VolGroup::VolGroup(lvm_t lvm, const char *vgname, MountTables *const tables)
 
 VolGroup::~VolGroup()
 {
-    for (auto ptr : m_member_lvs)
-        delete ptr;
-
     for (auto ptr : m_member_pvs)
         delete ptr;
 }
@@ -114,10 +111,10 @@ void VolGroup::rescan(lvm_t lvm)
 
         for (int x = m_member_pvs.size() - 1; x >= 0; x--)
             delete m_member_pvs.takeAt(x);
-
+        /*   !!!!!!!!!!!!!
         for (int x = m_member_lvs.size() - 1; x >= 0; x--)
             delete m_member_lvs.takeAt(x);
-
+        */
         m_member_pvs.clear();
         m_member_lvs.clear();
     }
@@ -183,7 +180,7 @@ LvList VolGroup::getLogicalVolumesFlat() const
     LvList flat_list;
 
     while (tree_list.hasNext()) {
-        LvPtr lv = tree_list.next();
+        LogVol *lv = tree_list.next();
         flat_list.append(lv);
         flat_list.append(lv->getAllChildrenFlat());
     }
@@ -197,12 +194,12 @@ LvPtr VolGroup::getLvByName(QString shortName) const // Do not return snap conta
     shortName = shortName.trimmed();
 
     while (lvs_itr.hasNext()) {
-        LvPtr lv = lvs_itr.next();
+        LogVol *lv = lvs_itr.next();
         if (shortName == lv->getName() && !lv->isSnapContainer())
             return lv;
     }
 
-    return nullptr;
+    return LvPtr(nullptr);
 }
 
 LvPtr VolGroup::getLvByUuid(QString uuid) const  // Do not return snap container, just the "real" lv
@@ -211,12 +208,12 @@ LvPtr VolGroup::getLvByUuid(QString uuid) const  // Do not return snap container
     uuid = uuid.trimmed();
 
     while (lvs_itr.hasNext()) {
-        LvPtr lv = lvs_itr.next();
+        LogVol *lv = lvs_itr.next();
         if (uuid == lv->getUuid() && !lv->isSnapContainer())
             return lv;
     }
 
-    return nullptr;
+    return LvPtr(nullptr);
 }
 
 PhysVol* VolGroup::getPvByName(QString name) const
@@ -341,37 +338,34 @@ void VolGroup::processLogicalVolumes(vg_t lvmVG)
             }
         }
 
-        for (int y = 0; y < lvm_lvs_all_top.size(); y++) { // rescan() existing LogVols
+        for (auto lvm_lv : lvm_lvs_all_top) { // rescan() existing LogVols
             bool is_new = true;
 
             for (int x = old_member_lvs.size() - 1; x >= 0; x--) {
 
-                value = lvm_lv_get_property(lvm_lvs_all_top[y], "lv_attr");
+                value = lvm_lv_get_property(lvm_lv, "lv_attr");
                 flags = value.value.string;
 
-                if (QString(lvm_lv_get_name(lvm_lvs_all_top[y])).trimmed() == old_member_lvs[x]->getName()) {
-                    old_member_lvs[x]->rescan(lvm_lvs_all_top[y], lvmVG);
+                if (QString(lvm_lv_get_name(lvm_lv)).trimmed() == old_member_lvs[x]->getName()) {
+                    old_member_lvs[x]->rescan(lvm_lv, lvmVG);
                     m_member_lvs.append(old_member_lvs.takeAt(x));
                     is_new = false;
                 }
             }
 
             if (is_new) {
-                m_member_lvs.append(new LogVol(lvm_lvs_all_top[y], lvmVG, this, nullptr, m_tables));
+                m_member_lvs << LvPtr(new LogVol(lvm_lv, lvmVG, this, nullptr, m_tables));
             }
         }
 
-        for (int x = old_member_lvs.size() - 1; x >= 0; x--) { // delete LogVol if lv is gone or is orphan
-            delete old_member_lvs.takeAt(x);
-        }
+        old_member_lvs.clear();
 
         lv_t lvm_lv_orphan;                // non-top lvm logical volume handle with no home
         while ((lvm_lv_orphan = findOrphan(lvm_lvs_all_children))) 
-            m_member_lvs.append(new LogVol(lvm_lv_orphan, lvmVG, this, nullptr, m_tables, true));
+            m_member_lvs.append(LvPtr(new LogVol(lvm_lv_orphan, lvmVG, this, nullptr, m_tables, true)));
 
     } else {   // lv_dm_list is empty so clean up member lvs
-        for (int x = m_member_lvs.size() - 1; x >= 0; x--)
-            delete m_member_lvs.takeAt(x);
+        m_member_lvs.clear();
     }
 }
 
@@ -408,7 +402,7 @@ void VolGroup::setLastUsedExtent()
         QListIterator<LvPtr> lv_itr(m_member_lvs);
 
         while (lv_itr.hasNext()) {
-            LvPtr lv = lv_itr.next();
+            LogVol *const lv = lv_itr.next();
 
             for (int segment = lv->getSegmentCount() - 1; segment >= 0; segment--) {
 

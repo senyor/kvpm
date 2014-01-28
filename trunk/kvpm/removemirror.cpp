@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2011, 2012, 2013, 2014 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -28,13 +28,13 @@
 
 
 
-RemoveMirrorDialog::RemoveMirrorDialog(LvPtr mirror, QWidget *parent) :
+RemoveMirrorDialog::RemoveMirrorDialog(LogVol *mirror, QWidget *parent) :
     KvpmDialog(parent)
 {
     while (mirror->isLvmMirrorLog() || mirror->isLvmMirrorLeg())
         mirror = mirror->getParentMirror();
 
-    m_lv = mirror;
+    m_lv = mirror.data();
     m_vg = m_lv->getVg();
 
     setCaption(i18n("Remove Mirrors"));
