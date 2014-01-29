@@ -119,7 +119,7 @@ class LogVol
     bool m_temp;                 // A temporary mirror created while converting a mirror
 
     void countLegsAndLogs();
-    void processSegments(lv_t lvmLV, const QByteArray flags);
+    void processSegments(lv_t lvmLV, QByteArray flags);
     void processMounts();
     void setSnapContainer(vg_t lvmVg, lv_t lvmLV);
     void setPolicy(const char flag2);

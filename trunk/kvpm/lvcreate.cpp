@@ -68,8 +68,8 @@ LVCreateDialog::LVCreateDialog(VolGroup *const vg, const bool ispool, QWidget *p
 
 LVCreateDialog::LVCreateDialog(LogVol *const volume, const bool snapshot, QWidget *parent) :
     LvCreateDialogBase(volume->getVg(), 
-                       volume->isCowSnap() ? -1 : fs_max_extend(volume->getMapperPath(), volume->getFilesystem()),
-                       !snapshot, snapshot, false, volume->isThinPool(), volume->getName(), 
+                       (volume->isCowSnap() || volume->isThinPool()) ? -1 : fs_max_extend(volume->getMapperPath(),
+                        volume->getFilesystem()), !snapshot, snapshot, false, volume->isThinPool(), volume->getName(), 
                        QString(""), parent),
 
     m_ispool(volume->isThinPool()),
@@ -1010,7 +1010,7 @@ bool LVCreateDialog::hasInitialErrors()
 {
     const VolGroup *const vg = getVg();
 
-    if (vg->getAllocatableExtents() == 0 || vg->isPartial()) {
+    if (vg->getAllocatableExtents() <= 0 || vg->isPartial()) {
         if (vg->isPartial())
             if (m_extend)
                 KMessageBox::sorry(this, i18n("Volumes can not be extended while physical volumes are missing"));
@@ -1055,39 +1055,39 @@ bool LVCreateDialog::hasInitialErrors()
                 KMessageBox::sorry(this, i18n("Snapshot origins cannot be extended while open or mounted"));
                 return true;
             }
-
-            const LvList snap_shots = m_lv->getSnapshots();
-
-            for (int x = 0; x < snap_shots.size(); x++) {
-                if (snap_shots[x]->isOpen()) {
+            
+            for (const auto snap : m_lv->getSnapshots()) {
+                if (snap->isOpen()) {
                     KMessageBox::sorry(this, i18n("Volumes cannot be extended with open or mounted snapshots"));
                     return true;
                 }
             }
         }
         
-        const long long maxfs = getMaxFsSize() / m_lv->getVg()->getExtentSize();
-        const long long current = m_lv->getExtents(); 
-
-        if (!(m_lv->isThinPool() || fs_can_extend(m_lv->getFilesystem()) || m_lv->isCowSnap())) {
-            if (KMessageBox::warningContinueCancel(nullptr,
-                                                   warning1,
-                                                   QString(),
-                                                   KStandardGuiItem::cont(),
-                                                   KStandardGuiItem::cancel(),
-                                                   QString(),
-                                                   KMessageBox::Dangerous) != KMessageBox::Continue) {
-                return true;
-            }
-        } else if (current >= maxfs) {
-            if (KMessageBox::warningContinueCancel(nullptr,
-                                                   warning2,
-                                                   QString(),
-                                                   KStandardGuiItem::cont(),
-                                                   KStandardGuiItem::cancel(),
-                                                   QString(),
-                                                   KMessageBox::Dangerous) != KMessageBox::Continue) {
-                return true;
+        if (!m_ispool && !m_lv->isCowSnap()) {
+            const long long maxfs = getMaxFsSize() / m_lv->getVg()->getExtentSize();
+            const long long current = m_lv->getExtents(); 
+            
+            if (!fs_can_extend(m_lv->getFilesystem())) {
+                if (KMessageBox::warningContinueCancel(nullptr,
+                                                       warning1,
+                                                       QString(),
+                                                       KStandardGuiItem::cont(),
+                                                       KStandardGuiItem::cancel(),
+                                                       QString(),
+                                                       KMessageBox::Dangerous) != KMessageBox::Continue) {
+                    return true;
+                }
+            } else if (current >= maxfs) {
+                if (KMessageBox::warningContinueCancel(nullptr,
+                                                       warning2,
+                                                       QString(),
+                                                       KStandardGuiItem::cont(),
+                                                       KStandardGuiItem::cancel(),
+                                                       QString(),
+                                                       KMessageBox::Dangerous) != KMessageBox::Continue) {
+                    return true;
+                }
             }
         }
     }
