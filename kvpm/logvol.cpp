@@ -111,7 +111,7 @@ void LogVol::rescan(lv_t lvmLv, vg_t lvmVg)
     QByteArray flags(lvm_lv_get_property(lvmLv, "lv_attr").value.string);
     m_writable = (flags[1] == 'w');
     m_fixed    = (flags[3] == 'm'); 
-    m_open     = (flags[5] == '0');
+    m_open     = (flags[5] == 'o');
     m_zero     = (flags[7] == 'z');
     m_partial  = (flags[8] == 'p');
 
@@ -626,7 +626,7 @@ void LogVol::calculateTotalSize()
     }
 }
 
-void LogVol::processSegments(lv_t lvmLv, const QByteArray flags)
+void LogVol::processSegments(lv_t lvmLv, QByteArray flags)
 {
     lvm_property_value value;
     dm_list* lvseg_dm_list = lvm_lv_list_lvsegs(lvmLv);
