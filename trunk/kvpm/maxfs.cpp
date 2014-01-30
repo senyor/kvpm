@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2011, 2012, 2014 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -41,12 +41,12 @@ bool max_fs(LogVol *const logicalVolume)
     const QString error_message = i18n("Extending is only supported for ext2, ext3, ext4, jfs, xfs, ntfs and Reiserfs. "
                                        "The correct executables for file system extension must also be present");
 
-    if (!fs_can_extend(fs)) {
-        KMessageBox::error(0, error_message);
+    if (!fs_can_extend(fs, logicalVolume->isMounted())) {
+        KMessageBox::sorry(nullptr, error_message);
         return false;
     }
 
-    if (KMessageBox::warningYesNo(NULL,
+    if (KMessageBox::warningYesNo(nullptr,
                                   warning,
                                   QString(),
                                   KStandardGuiItem::yes(),
@@ -72,7 +72,7 @@ bool max_fs(StoragePartition *const partition)
 
     if (partition->isPhysicalVolume()) {
         if (partition->getPhysicalVolume()->isActive()) {
-            KMessageBox::error(0, error_active);
+            KMessageBox::sorry(nullptr, error_active);
             return false;
         } else {
             message = i18n("Extend the physical volume on: %1 to fill the entire partition?", "<b>" + path + "</b>");
@@ -81,12 +81,12 @@ bool max_fs(StoragePartition *const partition)
         message = i18n("Extend the filesystem on: %1 to fill the entire partition?", "<b>" + path + "</b>");
     }
 
-    if (!(fs_can_extend(fs) || partition->isPhysicalVolume())) {
-        KMessageBox::error(0, error_fs);
+    if (!(fs_can_extend(fs, partition->isMounted()) || partition->isPhysicalVolume())) {
+        KMessageBox::sorry(nullptr, error_fs);
         return false;
     }
 
-    if (KMessageBox::warningYesNo(NULL,
+    if (KMessageBox::warningYesNo(nullptr,
                                   message,
                                   QString(),
                                   KStandardGuiItem::yes(),
@@ -112,11 +112,11 @@ bool max_fs(StorageDevice *const device)
     if (!device->isPhysicalVolume()) {
         return false;
     } else if (device->getPhysicalVolume()->isActive()) {
-        KMessageBox::error(0, error_active);
+        KMessageBox::sorry(nullptr, error_active);
         return false;
     }
 
-    if (KMessageBox::warningYesNo(NULL,
+    if (KMessageBox::warningYesNo(nullptr,
                                   warning,
                                   QString(),
                                   KStandardGuiItem::yes(),

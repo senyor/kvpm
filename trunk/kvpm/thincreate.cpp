@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2012, 2013, 2014 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -70,7 +70,7 @@ ThinCreateDialog::ThinCreateDialog(LogVol *const pool, QWidget *parent):
 /* extend thin volume or take snapshot */
 
 ThinCreateDialog::ThinCreateDialog(LogVol *const volume, const bool snapshot, QWidget *parent):
-    LvCreateDialogBase(volume->getVg(), fs_max_extend(volume->getMapperPath(), volume->getFilesystem()), 
+    LvCreateDialogBase(volume->getVg(), fs_max_extend(volume->getMapperPath(), volume->getFilesystem(), volume->isMounted()), 
                        !snapshot, snapshot, true, false, volume->getName(), volume->getPoolName(), parent),
     m_snapshot(snapshot),
     m_extend(!snapshot),
@@ -205,6 +205,9 @@ bool ThinCreateDialog::hasInitialErrors()
 
         const QString warning2 = i18n("This filesystem seems to be as large as it can get, it will not be extended with the volume");
 
+        const QString warning3 = i18n("ntfs cannot be extended while mounted. The filesystem will need to be "
+                                      "extended later or unmounted before the volume is extended.");
+
         if (m_lv->isCowOrigin()) {
             if (m_lv->isOpen()) {
                 KMessageBox::sorry(this, i18n("Snapshot origins cannot be extended while open or mounted"));
@@ -221,11 +224,21 @@ bool ThinCreateDialog::hasInitialErrors()
             }
         }
 
-        m_fs_can_extend = fs_can_extend(m_lv->getFilesystem());
+        m_fs_can_extend = fs_can_extend(m_lv->getFilesystem(), m_lv->isMounted());
         const long long maxfs = getMaxFsSize() / m_lv->getVg()->getExtentSize();
         const long long current = m_lv->getExtents(); 
 
-        if (!(m_fs_can_extend || m_lv->isCowSnap())) {
+        if ((m_lv->getFilesystem() == "ntfs") && m_lv->isMounted()) {
+            if (KMessageBox::warningContinueCancel(nullptr,
+                                                   warning3,
+                                                   QString(),
+                                                   KStandardGuiItem::cont(),
+                                                   KStandardGuiItem::cancel(),
+                                                   QString(),
+                                                   KMessageBox::Dangerous) != KMessageBox::Continue) {
+                return true;
+            }
+        } else if (!(m_fs_can_extend || m_lv->isCowSnap())) {
             if (KMessageBox::warningContinueCancel(nullptr,
                                                    warning1,
                                                    QString(),

@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2009, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2009, 2010, 2011, 2012, 2013, 2014 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -70,7 +70,7 @@ bool PartitionChangeDialog::continueBackup()
                                   " loss. If the partition holds important data, you really should back it"
                                   " up before continuing.");
 
-    if (KMessageBox::warningContinueCancel(NULL,
+    if (KMessageBox::warningContinueCancel(nullptr,
                                            warning2,
                                            QString(),
                                            KStandardGuiItem::cont(),
@@ -102,9 +102,9 @@ bool PartitionChangeDialog::continueResize()
     const QString fs = m_old_storage_part->getFilesystem();
 
     if (!(fs_can_reduce(fs) || m_old_storage_part->isPhysicalVolume())) {
-        if(fs_can_extend(fs)) {
-            KMessageBox::information(0, message);
-        } else if (KMessageBox::warningContinueCancel(NULL,
+        if(fs_can_extend(fs, m_old_storage_part->isMounted())) {
+            KMessageBox::information(nullptr, message);
+        } else if (KMessageBox::warningContinueCancel(nullptr,
                                                       warning,
                                                       QString(),
                                                       KStandardGuiItem::cont(),
@@ -125,7 +125,7 @@ bool PartitionChangeDialog::continueBusy()
                                  "changes to the partition table may not be recognized by the kernel.");
 
     if (ped_device_is_busy(getPedPartition()->disk->dev)) {
-        if (KMessageBox::warningContinueCancel(NULL,
+        if (KMessageBox::warningContinueCancel(nullptr,
                                                warning,
                                                QString(),
                                                KStandardGuiItem::cont(),
@@ -251,12 +251,12 @@ bool PartitionChangeDialog::movefs(PedSector from_start, PedSector to_start, Ped
 
                 if (!ped_device_read(device, buff, from_start + (x * blocksize), blocksize)) {
                     qApp->restoreOverrideCursor();
-                    KMessageBox::error(0, i18n("Move failed: could not read from device"));
+                    KMessageBox::error(nullptr, i18n("Move failed: could not read from device"));
                     success = false;
                     break;
                 } else if (!ped_device_write(device, buff, to_start + (x * blocksize), blocksize)) {
                     qApp->restoreOverrideCursor();
-                    KMessageBox::error(0, i18n("Move failed: could not write to device"));
+                    KMessageBox::error(nullptr, i18n("Move failed: could not write to device"));
                     success = false;
                     break;
                 }
@@ -266,22 +266,22 @@ bool PartitionChangeDialog::movefs(PedSector from_start, PedSector to_start, Ped
             if (success) {
                 if (!ped_device_read(device,  buff, from_start + (blockcount * blocksize), extra)) {
                     qApp->restoreOverrideCursor();
-                    KMessageBox::error(0, i18n("Move failed: could not read from device"));
+                    KMessageBox::error(nullptr, i18n("Move failed: could not read from device"));
                     success = false;
                 } else if (!ped_device_write(device, buff, to_start + (blockcount * blocksize), extra)) {
                     qApp->restoreOverrideCursor();
-                    KMessageBox::error(0, i18n("Move failed: could not write to device"));
+                    KMessageBox::error(nullptr, i18n("Move failed: could not write to device"));
                     success = false;
                 }
             }
         } else {                                           // moving right
             if (!ped_device_read(device,  buff, from_start + (blockcount * blocksize), extra)) {
                 qApp->restoreOverrideCursor();
-                KMessageBox::error(0, i18n("Move failed: could not read from device"));
+                KMessageBox::error(nullptr, i18n("Move failed: could not read from device"));
                 success = false;
             } else if (!ped_device_write(device, buff, to_start   + (blockcount * blocksize), extra)) {
                 qApp->restoreOverrideCursor();
-                KMessageBox::error(0, i18n("Move failed: could not write to device"));
+                KMessageBox::error(nullptr, i18n("Move failed: could not write to device"));
                 success = false;
             }
 
@@ -292,12 +292,12 @@ bool PartitionChangeDialog::movefs(PedSector from_start, PedSector to_start, Ped
 
                     if (!ped_device_read(device, buff, from_start + (x * blocksize), blocksize)) {
                         qApp->restoreOverrideCursor();
-                        KMessageBox::error(0, i18n("Move failed: could not read from device"));
+                        KMessageBox::error(nullptr, i18n("Move failed: could not read from device"));
                         success = false;
                         break;
                     } else if (!ped_device_write(device, buff, to_start   + (x * blocksize), blocksize)) {
                         qApp->restoreOverrideCursor();
-                        KMessageBox::error(0, i18n("Move failed: could not write to device"));
+                        KMessageBox::error(nullptr, i18n("Move failed: could not write to device"));
                         success = false;
                         break;
                     }
@@ -406,7 +406,7 @@ bool PartitionChangeDialog::shrinkPartition()
     ped_geometry_destroy(end_range);
 
     if (!success) {
-        KMessageBox::error(0, i18n("Partition shrink failed"));
+        KMessageBox::error(nullptr, i18n("Partition shrink failed"));
         return false;
     } else {
         pedCommitAndWait(disk);
@@ -466,11 +466,11 @@ bool PartitionChangeDialog::growPartition()
                                 start_range, end_range,
                                 min_new_size, max_new_size);
 
-    /* if constraint solves to NULL then the new part will fail, so just bail out */
-    if (ped_constraint_solve_max(constraint) == NULL) {
+    /* if constraint solves to nullptr then the new part will fail, so just bail out */
+    if (ped_constraint_solve_max(constraint) == nullptr) {
         qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
         qApp->restoreOverrideCursor();
-        KMessageBox::error(0, i18n("Partition extension failed"));
+        KMessageBox::error(nullptr, i18n("Partition extension failed"));
 
         ped_constraint_destroy(constraint);
         ped_geometry_destroy(start_range);
@@ -488,7 +488,7 @@ bool PartitionChangeDialog::growPartition()
     ped_geometry_destroy(end_range);
 
     if (!success) {
-        KMessageBox::error(0, i18n("Partition extension failed"));
+        KMessageBox::error(nullptr, i18n("Partition extension failed"));
         return false;
     } else {
         // Here we wait for linux and udev to re-read the partition table before doing anything else.
@@ -498,7 +498,7 @@ bool PartitionChangeDialog::growPartition()
 
         if (is_pv)
             return pv_extend(getPath());
-        else if (fs_can_extend(fs))
+        else if (fs_can_extend(fs, m_old_storage_part->isMounted()))
             return fs_extend(getPath(), fs, m_old_storage_part->getMountPoints());
         else
             return true;
@@ -574,7 +574,7 @@ bool PartitionChangeDialog::movePartition()
     ped_geometry_destroy(end_range);
 
     if (!success) {
-        KMessageBox::error(0, i18n("Repartitioning failed: data not moved"));
+        KMessageBox::error(nullptr, i18n("Repartitioning failed: data not moved"));
         return false;
     } else {
         pedCommitAndWait(disk);
