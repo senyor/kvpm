@@ -68,8 +68,13 @@ LVCreateDialog::LVCreateDialog(VolGroup *const vg, const bool ispool, QWidget *p
 
 LVCreateDialog::LVCreateDialog(LogVol *const volume, const bool snapshot, QWidget *parent) :
     LvCreateDialogBase(volume->getVg(), 
-                       (volume->isCowSnap() || volume->isThinPool()) ? -1 : fs_max_extend(volume->getMapperPath(),
-                        volume->getFilesystem()), !snapshot, snapshot, false, volume->isThinPool(), volume->getName(), 
+                       (volume->isCowSnap() || volume->isThinPool()) ? -1 : 
+                       fs_max_extend(volume->getMapperPath(), volume->getFilesystem(), volume->isMounted()), 
+                       !snapshot, 
+                       snapshot, 
+                       false, 
+                       volume->isThinPool(), 
+                       volume->getName(), 
                        QString(""), parent),
 
     m_ispool(volume->isThinPool()),
@@ -1035,6 +1040,8 @@ bool LVCreateDialog::hasInitialErrors()
 
         const QString warning2 = i18n("This filesystem seems to be as large as it can get, it will not be extended with the volume");
 
+        const QString warning3 = i18n("ntfs cannot be extended while mounted. The filesystem will need to be "
+                                      "extended later or unmounted before the volume is extended.");
 
         if (m_lv->isRaid() || m_lv->isLvmMirror()){
             QList<PhysVol *> pvs = vg->getPhysicalVolumes();
@@ -1067,8 +1074,18 @@ bool LVCreateDialog::hasInitialErrors()
         if (!m_ispool && !m_lv->isCowSnap()) {
             const long long maxfs = getMaxFsSize() / m_lv->getVg()->getExtentSize();
             const long long current = m_lv->getExtents(); 
-            
-            if (!fs_can_extend(m_lv->getFilesystem())) {
+
+            if ((m_lv->getFilesystem() == "ntfs") && m_lv->isMounted()) {
+                if (KMessageBox::warningContinueCancel(nullptr,
+                                                       warning3,
+                                                       QString(),
+                                                       KStandardGuiItem::cont(),
+                                                       KStandardGuiItem::cancel(),
+                                                       QString(),
+                                                       KMessageBox::Dangerous) != KMessageBox::Continue) {
+                    return true;
+                }
+            } else if (!fs_can_extend(m_lv->getFilesystem(), m_lv->isMounted())) {
                 if (KMessageBox::warningContinueCancel(nullptr,
                                                        warning1,
                                                        QString(),
@@ -1131,15 +1148,19 @@ void LVCreateDialog::commit()
                 else
                     KMessageBox::error(0, i18n("Volume activation failed"));
             } else if (getExtendFs()) {
-                fs_extend(m_lv->getMapperPath(), fs, m_lv->getMountPoints(), true);
+                if (!fs_extend(m_lv->getMapperPath(), fs, m_lv->getMountPoints(), true)) {
+                    KMessageBox::error(nullptr, i18n("Filesystem extention failed"));
+                }
             }
-
+            
             return;
         } else {
             ProcessProgress extend_lv(args());
-            if (!extend_lv.exitCode() && !m_lv->isCowSnap() && getExtendFs())
-                fs_extend(mapper_path, fs, m_lv->getMountPoints(), true);
-
+            if (!extend_lv.exitCode() && !m_lv->isCowSnap() && getExtendFs()) {
+                if(!fs_extend(mapper_path, fs, m_lv->getMountPoints(), true))
+                    KMessageBox::error(nullptr, i18n("Filesystem extention failed"));
+            }
+            
             return;
         }
     }
