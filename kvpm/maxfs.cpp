@@ -38,11 +38,15 @@ bool max_fs(LogVol *const logicalVolume)
     full_name.remove('[').remove(']');
 
     const QString warning = i18n("Extend the filesystem on: %1 to fill the entire volume?", "<b>" + full_name + "</b>");
-    const QString error_message = i18n("Extending is only supported for ext2, ext3, ext4, jfs, xfs, ntfs and Reiserfs. "
-                                       "The correct executables for file system extension must also be present");
+    const QString error_message1 = i18n("'ntfs' filesystem must be unmounted before extending.");
+    const QString error_message2 = i18n("Extending is only supported for ext2, ext3, ext4, jfs, xfs, ntfs and Reiserfs. "
+                                        "The correct executables for file system extension must also be present.");
 
-    if (!fs_can_extend(fs, logicalVolume->isMounted())) {
-        KMessageBox::sorry(nullptr, error_message);
+    if (logicalVolume->isMounted() && ("ntfs" == fs)) {
+        KMessageBox::sorry(nullptr, error_message1);
+        return false;
+    } else if (!fs_can_extend(fs, logicalVolume->isMounted())) {
+        KMessageBox::sorry(nullptr, error_message2);
         return false;
     }
 
