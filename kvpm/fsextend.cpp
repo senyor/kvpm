@@ -125,14 +125,14 @@ bool fs_extend(const QString dev, const QString fs, const QStringList mps, const
     const QByteArray  mp_qba = mp.toLocal8Bit();
     QStringList args;
 
-    if (!isLV && isMounted) {
-        KMessageBox::sorry(nullptr, i18n("Only logical volumes may be mounted during resize, not partitions."));
-        return false;
-    }
-
-    if (fs != "ext2" && fs != "ext3" && fs != "ext4" && fs != "reiserfs" && fs != "jfs" && fs != "xfs") {
-        KMessageBox::sorry(nullptr, i18n("Filesystem '%1' can not be extended while mounted.", fs));
-        return false;
+    if (isMounted) {
+        if (!isLV) {
+            KMessageBox::sorry(nullptr, i18n("Only logical volumes may be mounted during resize, not partitions."));
+            return false;
+        } else if (fs != "ext2" && fs != "ext3" && fs != "ext4" && fs != "reiserfs" && fs != "jfs" && fs != "xfs") {
+            KMessageBox::sorry(nullptr, i18n("Filesystem '%1' can not be extended while mounted.", fs));
+            return false;
+        }
     }
 
     const QString err_msg = i18n("It appears that the filesystem on the device or volume was not extended. "
