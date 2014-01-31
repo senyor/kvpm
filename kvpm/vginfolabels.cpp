@@ -126,7 +126,7 @@ VGInfoLabels::VGInfoLabels(VolGroup *const group, QWidget *parent) :
     clustered_label = new QLabel(i18n("Clustered: %1", clustered));
     allocatable_label = new QLabel(i18n("Allocatable: %1", locale->formatByteSize(group->getAllocatableSpace(), 1, dialect)));
     extent_size_label = new QLabel(i18n("Extent size: %1", locale->formatByteSize(group->getExtentSize(), 1, dialect)));
-    mda_label         = new QLabel(i18n("MDA count: %1", group->getMdaCount()));
+    mda_label         = new QLabel(i18n("MDA: %1 Used: %2", group->getMdaCount(), group->getMdaUsed()));
     uuid_label        = new QLabel(i18n("UUID: %1", group->getUuid()));
     uuid_label->setWordWrap(true);
 
