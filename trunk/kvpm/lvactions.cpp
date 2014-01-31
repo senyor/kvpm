@@ -668,7 +668,7 @@ void LVActions::setMirrorActions(LogVol *const lv)
         else
             partial = lv->isPartial();
 
-        if (lv->isMirror() || lv->isRaid()) {
+        if ((lv->isMirror() || lv->isRaid()) && !lv->isPvmove()) {
             if (!(lv->isRaidImage() || lv->isRaidMetadata() || lv->isMirrorLeg() || 
                   lv->isLvmMirrorLog() || lv->isTemporary()))   
                 resync->setEnabled(true);
