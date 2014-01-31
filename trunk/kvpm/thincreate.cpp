@@ -171,7 +171,7 @@ QStringList ThinCreateDialog::args()
         args << "--thin" << m_pool->getFullName();
     } else if (m_snapshot) {                            // create a thin snapshot
         program_to_run = "lvcreate";
-        args << "--thin" << "--snapshot" << m_lv->getFullName();
+        args << "--snapshot" << m_lv->getFullName();
     } else {                                            // extend the current volume
         program_to_run = "lvextend";
         args << m_lv->getFullName();
