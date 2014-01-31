@@ -909,7 +909,7 @@ QStringList LogVol::getPvNamesAllFlat() const
 {
     QStringList pv_names;
 
-    if ((isThinMetadata() || isThinPoolData()) && isRaidMetadata()) {
+    if (isRaidMetadata()) {
         pv_names << getPvNamesAll();
     } else if (m_snap_container || m_lvmmirror || m_raid) {
         for (auto child : getChildren())
