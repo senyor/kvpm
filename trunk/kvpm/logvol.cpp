@@ -129,6 +129,12 @@ void LogVol::rescan(lv_t lvmLv, vg_t lvmVg)
     case 'e':
         m_type = "metadata";
         m_metadata = true;
+
+        if (flags[6] == 'r'){
+            m_type = m_segments[0]->type;
+            m_raid = true;
+        }
+
         break;
     case 'I':
     case 'i':
@@ -238,7 +244,7 @@ void LogVol::rescan(lv_t lvmLv, vg_t lvmVg)
     if ((flags[6] == 't') && m_is_origin)
         m_thin = true;
 
-    if (m_lv_name.endsWith("_tdata", Qt::CaseSensitive))
+    if (m_lv_name.contains("_tdata_") || m_lv_name.endsWith("_tdata"))
         m_thin_data = true;
 
     lvm_property_value value;
@@ -903,7 +909,9 @@ QStringList LogVol::getPvNamesAllFlat() const
 {
     QStringList pv_names;
 
-    if (m_snap_container || m_lvmmirror || m_raid) {
+    if ((isThinMetadata() || isThinPoolData()) && isRaidMetadata()) {
+        pv_names << getPvNamesAll();
+    } else if (m_snap_container || m_lvmmirror || m_raid) {
         for (auto child : getChildren())
             pv_names << child->getPvNamesAllFlat();
     } else if (m_thin_pool) {

@@ -111,10 +111,7 @@ void VolGroup::rescan(lvm_t lvm)
 
         for (int x = m_member_pvs.size() - 1; x >= 0; x--)
             delete m_member_pvs.takeAt(x);
-        /*   !!!!!!!!!!!!!
-        for (int x = m_member_lvs.size() - 1; x >= 0; x--)
-            delete m_member_lvs.takeAt(x);
-        */
+
         m_member_pvs.clear();
         m_member_lvs.clear();
     }
@@ -313,8 +310,11 @@ void VolGroup::processLogicalVolumes(vg_t lvmVG)
             value = lvm_lv_get_property(lv_list->lv, "lv_name");
             const QString top_name = QString(value.value.string).trimmed();
             m_lv_names_all << top_name;
-
-            if (top_name.endsWith("_mlog") || top_name.contains("_mimagetmp_") || top_name.contains("_mimage_")) {
+            
+            if (top_name.endsWith("_mlog")    || top_name.contains("_mimagetmp_") || 
+                top_name.contains("_mimage_") || top_name.endsWith("_tdata") ||
+                top_name.endsWith("_tmeta")) {
+                
                 lvm_lvs_all_children.append(lv_list->lv);
             } else {
                 value = lvm_lv_get_property(lv_list->lv, "lv_attr");
