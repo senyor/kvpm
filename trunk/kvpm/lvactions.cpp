@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2013, 2014 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -290,6 +290,19 @@ void LVActions::setActions(LogVol *const lv, const int segment)
             lv_reduce->setEnabled(false);
             lv_rename->setEnabled(true);
             pv_move->setEnabled(true);
+            snap_create->setEnabled(false);
+        } else if (lv->isMetadata() && !lv->isThinMetadata() && !lv->isRaidMetadata()) { // thin pool spare metadata
+            mkfs->setEnabled(false);
+            max_fs->setEnabled(false);
+            fsck->setEnabled(false);
+            lv_remove->setEnabled(true);
+            unmount->setEnabled(false);
+            mount->setEnabled(false);
+            lv_change->setEnabled(false);
+            lv_extend->setEnabled(false);
+            lv_reduce->setEnabled(false);
+            lv_rename->setEnabled(false);
+            pv_move->setEnabled(false);
             snap_create->setEnabled(false);
         } else if(lv->isThinMetadata() || lv->isThinPoolData()){
             thin_create->setEnabled(true);
@@ -662,6 +675,12 @@ void LVActions::setMirrorActions(LogVol *const lv)
         }
 
         if (lv->isThinPool()) {
+            add_legs->setEnabled(false);
+            remove_mirror->setEnabled(false);
+            change_log->setEnabled(false);
+            remove_this->setEnabled(false);
+            repair_missing->setEnabled(false);
+        } else if (lv->isMetadata() && !lv->isThinMetadata() && !lv->isRaidMetadata()) {
             add_legs->setEnabled(false);
             remove_mirror->setEnabled(false);
             change_log->setEnabled(false);
