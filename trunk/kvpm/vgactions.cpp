@@ -144,11 +144,9 @@ void VGActions::setVg(VolGroup *vg)
         else
             remove->setEnabled(true);
 
-        if (vg->isPartial())
-            remove_missing->setEnabled(true);
-        else
-            remove_missing->setEnabled(false);
-
+        remove_missing->setEnabled(vg->isPartial());
+        change->setEnabled(!vg->isExported());
+        
         if (vg->isExported()) {
             split->setEnabled(false);
             merge->setEnabled(false);
@@ -177,7 +175,6 @@ void VGActions::setVg(VolGroup *vg)
         }
 
         rename->setEnabled(true);
-        change->setEnabled(true);
     } else {
         reduce->setEnabled(false);
         rename->setEnabled(false);
