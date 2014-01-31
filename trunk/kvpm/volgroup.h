@@ -39,7 +39,8 @@ class VolGroup
     long long m_extent_size;
     int m_lv_max;          // maximum number of logical volumes, unlimited == 0
     int m_pv_max;
-    long long m_mda_count;
+    long long m_mda_count; // number of metadata areas in tge group
+    long long m_mda_used;  // number of usable mda's
     long long m_size;      // total size of volume group in bytes
     long long m_free;      // free space in bytes
     long long m_extents;
@@ -89,6 +90,7 @@ public:
     int getPvCount() const { return m_member_pvs.size(); }
     int getPvMax() const { return m_pv_max; }
     int getMdaCount() const { return m_mda_count; }
+    int getMdaUsed() const { return m_mda_used; }
     QString getName() const { return m_vg_name; }
     QString getUuid() const { return m_uuid; } 
     QString getFormat() const { return m_lvm_format; }

@@ -42,6 +42,7 @@ void VolGroup::rescan(lvm_t lvm)
 
     m_allocatable_extents = 0;
     m_mda_count    = 0;
+    m_mda_used     = 0;
     m_pv_max       = 0;
     m_extent_size  = 0;
     m_extents      = 0;
@@ -280,10 +281,12 @@ void VolGroup::processPhysicalVolumes(vg_t lvmVG)
             if (m_member_pvs[x]->isAllocatable())
                 m_allocatable_extents += m_member_pvs[x]->getRemaining() / m_extent_size;
             m_mda_count += m_member_pvs[x]->getMdaCount();
+            m_mda_used += m_member_pvs[x]->getMdaUsed();
         }
 
-    } else
+    } else {
         qDebug() << " Empty pv_dm_list?";
+    }
 }
 
 void VolGroup::processLogicalVolumes(vg_t lvmVG)
