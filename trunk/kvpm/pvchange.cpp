@@ -55,9 +55,13 @@ PVChangeDialog::PVChangeDialog(PhysVol *const physicalVolume, QWidget *parent) :
     if (m_pv->isAllocatable())
         m_allocation_box->setChecked(true);
     attrib_box_layout->addWidget(m_allocation_box);
+
     m_mda_box = new QCheckBox(i18n("Use metadata areas on this volume"));
     if (m_pv->getMdaUsed())
         m_mda_box->setChecked(true);
+    if (m_pv->getVg()->getMdaUsed() == m_pv->getMdaUsed()) // pv has only usable mda's in vg
+        m_mda_box->setEnabled(false);
+
     attrib_box_layout->addWidget(m_mda_box);
     m_uuid_box = new QCheckBox(i18n("Generate new UUID for this volume"));
     m_uuid_box->setChecked(false);
