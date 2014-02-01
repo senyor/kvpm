@@ -140,10 +140,8 @@ lv_t VolGroup::findOrphan(QList<lv_t> &childList)
 
     for (int x = all_lvs.size() - 1; x >= 0; x--) {
         for (int y = childList.size() - 1; y >= 0; y--) {
-
             value = lvm_lv_get_property(childList[y], "lv_name");
             child_name = QString(value.value.string).trimmed();
-
             if (child_name == all_lvs[x]->getName()) {
                 childList.removeAt(y);
                 all_lvs.removeAt(x);
@@ -152,14 +150,16 @@ lv_t VolGroup::findOrphan(QList<lv_t> &childList)
         }
     }
 
-    for (int x = childList.size() - 1; x >= 0; x--) { // sort mirrors first, loners last
-        value = lvm_lv_get_property(childList[x], "lv_attr");
+    for (const auto &child : childList) { // sort mirrors first, loners last
+
+        value = lvm_lv_get_property(child, "lv_attr");
         lv_attr = QString(value.value.string);
 
         if (lv_attr[0] == 'm' || lv_attr[0] == 'M')
-            orphan_list.prepend(childList[x]);
+            orphan_list.prepend(child);
         else
-            orphan_list.append(childList[x]);
+            orphan_list.append(child);
+
     }
 
     if (!orphan_list.isEmpty()) {
@@ -314,10 +314,10 @@ void VolGroup::processLogicalVolumes(vg_t lvmVG)
             const QString top_name = QString(value.value.string).trimmed();
             m_lv_names_all << top_name;
             
-            if (top_name.endsWith("_mlog")    || top_name.contains("_mimagetmp_") || 
-                top_name.contains("_mimage_") || top_name.endsWith("_tdata") ||
-                top_name.endsWith("_tmeta")) {
-                
+            if (top_name.contains("_mlog")  || top_name.contains("_mimage") || 
+                top_name.contains("_tmeta") || top_name.contains("_rmeta")  || 
+                top_name.contains("_tdata") || top_name.contains("_rimage")) {
+
                 lvm_lvs_all_children.append(lv_list->lv);
             } else {
                 value = lvm_lv_get_property(lv_list->lv, "lv_attr");
