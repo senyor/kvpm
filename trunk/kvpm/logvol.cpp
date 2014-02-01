@@ -496,9 +496,12 @@ void LogVol::insertChildren(lv_t lvmLv, vg_t lvmVg)
         for (const auto name : names) {
             QByteArray qba = name.toLocal8Bit();
             lvm_child = lvm_lv_from_name(lvmVg, qba.data());
-
-            if (lvm_child)
-                m_lv_children << SmrtLvPtr(new LogVol(lvm_child, lvmVg, m_vg, this, m_tables));
+            
+            if (lvm_child) {
+                QByteArray flags(lvm_lv_get_property(lvm_child, "lv_attr").value.string);
+                if (!flags.isEmpty() && flags[0] !='-') // filters out normal volumes which are never children
+                    m_lv_children << SmrtLvPtr(new LogVol(lvm_child, lvmVg, m_vg, this, m_tables));
+            }
         }
     }
 }
@@ -597,7 +600,9 @@ QStringList LogVol::removePvNames()
 }
 
 // Finds metadata child sub volumes of this volume
-
+// TODO -- ophans can be named this way too.
+// Rewrite to filter them rather than doing it in
+// insertChildren()
 QStringList LogVol::getMetadataNames()
 {
     QStringList children;
