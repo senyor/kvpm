@@ -62,9 +62,6 @@ VolumeGroupTab::VolumeGroupTab(VolGroup *const group, QWidget *parent) :
     m_vg_warning = new VGWarning();
     m_layout->addWidget(m_vg_warning);
 
-    QSplitter *const tree_splitter = new QSplitter(Qt::Vertical);
-    QSplitter *const lv_splitter   = new QSplitter();
-    QSplitter *const pv_splitter   = new QSplitter();
     m_lv_actions = new LVActions(group, this);
     m_pv_actions = new PVActions(group, this);
 
@@ -89,7 +86,9 @@ VolumeGroupTab::VolumeGroupTab(VolGroup *const group, QWidget *parent) :
     m_vg_tree->setAlternatingRowColors(true);
     m_pv_tree->setAlternatingRowColors(true);
 
-    m_layout->addWidget(tree_splitter);
+    QSplitter *const tree_splitter = new QSplitter(Qt::Vertical);
+    QSplitter *const lv_splitter   = new QSplitter();
+    QSplitter *const pv_splitter   = new QSplitter();    m_layout->addWidget(tree_splitter);
     tree_splitter->addWidget(lv_splitter);
     tree_splitter->addWidget(pv_splitter);
     lv_splitter->addWidget(m_vg_tree);
