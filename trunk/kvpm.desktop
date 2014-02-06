@@ -1,7 +1,7 @@
 [Desktop Entry]
-GenericName=LVM Frontend
+GenericName=Volume Partition Manager
 Name=KVPM
-Comment=KDE Volume Partition Manager
+Comment=KDE 
 Exec=/usr/sbin/kvpm
 X-KDE-SubstituteUID=true
 Type=Application
