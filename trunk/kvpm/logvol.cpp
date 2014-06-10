@@ -811,7 +811,7 @@ LvList LogVol::getThinDataVolumes() const
     LvList data;
 
     if (m_thin_pool) {
-        for (const auto lv : getAllChildrenFlat()) {
+        for (const auto lv : getChildren()) {
             if (lv->isThinPoolData())
                 data << lv;
         }
@@ -825,7 +825,7 @@ LvList LogVol::getThinMetadataVolumes() const
     LvList meta;
 
     if (m_thin_pool) {
-        for (const auto lv : getAllChildrenFlat()) {
+        for (const auto lv : getChildren()) {
             if (lv->isThinMetadata())
                 meta << lv;
         }
