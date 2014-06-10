@@ -944,7 +944,7 @@ long long LogVol::getSpaceUsedOnPv(const QString pvname) const
 
         for (auto meta : getThinMetadataVolumes())
             space_used += meta->getSpaceUsedOnPv(pvname);
-    } else if (m_raid) {
+    } else if (m_raid && !(m_raid_metadata || m_raid_image)) {
         for (auto image : getRaidImageVolumes())
             space_used += image->getSpaceUsedOnPv(pvname);
 
