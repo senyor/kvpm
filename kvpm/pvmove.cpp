@@ -99,7 +99,7 @@ PVMoveDialog::PVMoveDialog(PhysVol *const physicalVolume, QWidget *parent) :
     if (m_sources.size() == 1)
         target_pvs = removeForbiddenTargets(target_pvs, m_sources[0]->name);
 
-    if (!hasMovableExtents()){
+    if (!hasMovableExtents()) {
         preventExec();
         KMessageBox::sorry(nullptr, i18n("None of the extents on this volume can be moved"));
     }
@@ -370,12 +370,13 @@ void PVMoveDialog::setupFullMove()
     PhysVol *pv = nullptr;
 
     for (auto pvname : m_lv->getPvNamesAllFlat()) {
-        nar = new NameAndRange();
-        nar->name = pvname;
-        nar->name_range = pvname;
-        pv = m_vg->getPvByName(pvname);
-        nar->used = (pv->getSize() - pv->getRemaining()) / m_vg->getExtentSize();
-        m_sources.append(nar);
+        if ( (pv = m_vg->getPvByName(pvname)) ) {
+            nar = new NameAndRange();
+            nar->name = pvname;
+            nar->name_range = pvname;
+            nar->used = (pv->getSize() - pv->getRemaining()) / m_vg->getExtentSize();
+            m_sources.append(nar);
+        }
     }
 }
 
