@@ -318,7 +318,7 @@ void LVActions::setActions(LogVol *const lv, const int segment)
             lv_reduce->setEnabled(false);
             lv_rename->setEnabled(false);
             
-            if (lv->isRaid() || lv->isLvmMirror())
+            if (lv->isLvmMirror())
                 pv_move->setEnabled(false);
             else
                 pv_move->setEnabled(true);
@@ -428,7 +428,7 @@ void LVActions::setActions(LogVol *const lv, const int segment)
                 lv_extend->setEnabled(true);
                 lv_reduce->setEnabled(false);
                 lv_rename->setEnabled(true);
-                pv_move->setEnabled(false);
+                pv_move->setEnabled(true);
                 snap_create->setEnabled(true);
             } else {
                 snap_create->setEnabled(true);
@@ -510,7 +510,7 @@ void LVActions::setActions(LogVol *const lv, const int segment)
             lv_extend->setEnabled(false);
             lv_reduce->setEnabled(false);
             lv_rename->setEnabled(false);
-            pv_move->setEnabled(false);
+            pv_move->setEnabled(true);
             snap_create->setEnabled(false);
         } else if (lv->isPvmove()) {
             mkfs->setEnabled(false);
