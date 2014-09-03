@@ -43,7 +43,6 @@ bool fs_can_reduce(const QString fs)
     }
 }
 
-
 // Returns new fs size in bytes or 0 if no shrinking was done
 // Returns -1 if fs isn't one of ext2, ext3 or ext4 (not shrinkable)
 // Takes new_size in bytes.
@@ -82,6 +81,8 @@ long long fs_reduce(const QString path, const long long new_size, const QString 
         size_string = success_stringlist[0];
         size_string = size_string.remove(0, size_string.indexOf("now") + 3);
         size_string.truncate(size_string.indexOf("blocks"));
+        if (size_string.indexOf("(") > -1)
+            size_string.truncate(size_string.indexOf("("));
         size_string = size_string.simplified();
         return size_string.toLongLong() * block_size;
 
@@ -90,6 +91,8 @@ long long fs_reduce(const QString path, const long long new_size, const QString 
         size_string = nothing_stringlist[0];
         size_string = size_string.remove(0, size_string.indexOf("already") + 7);
         size_string.truncate(size_string.indexOf("blocks"));
+        if (size_string.indexOf("(") > -1)
+            size_string.truncate(size_string.indexOf("("));
         size_string = size_string.simplified();
         return size_string.toLongLong() * block_size;
 
@@ -112,6 +115,8 @@ long long fs_reduce(const QString path, const long long new_size, const QString 
             size_string = success_stringlist[0];
             size_string = size_string.remove(0, size_string.indexOf("now") + 3);
             size_string.truncate(size_string.indexOf("blocks"));
+            if (size_string.indexOf("(") > -1)
+                size_string.truncate(size_string.indexOf("("));
             size_string = size_string.simplified();
             return size_string.toLongLong() * block_size;
         }
