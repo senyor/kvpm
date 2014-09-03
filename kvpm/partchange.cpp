@@ -362,8 +362,10 @@ bool PartitionChangeDialog::shrinkPartition()
     if (reduced_size % getSectorSize())
         new_size++;
 
-    if (new_size == 0)   // The shrink failed
+    if (new_size == 0) {  // The shrink failed
+        KMessageBox::error(nullptr, i18n("Filesystem shrink failed"));
         return false;
+    }
 
     // This constraint assures we have a new partition at least as long as the fs can shrink it
     // We allow up to an extra 1MiB sectors for the end of the partition
