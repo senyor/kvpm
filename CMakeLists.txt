@@ -12,6 +12,10 @@ add_subdirectory( icons/local )
 add_subdirectory( icons/app )
  
 
+IF(CMAKE_BUILD_TYPE EQUAL "Debian")
+  SET(CMAKE_BUILD_TYPE "RelWithDebInfo")
+ENDIF()
+
 IF(NOT CMAKE_BUILD_TYPE)
   SET(CMAKE_BUILD_TYPE "RelWithDebInfo")
 ENDIF(NOT CMAKE_BUILD_TYPE)

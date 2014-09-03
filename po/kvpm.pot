@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-01-23 15:28-0800\n"
+"POT-Creation-Date: 2014-02-05 21:09-0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -150,15 +150,15 @@ msgstr ""
 msgid "Mirror logging"
 msgstr ""
 
-#: changemirror.cpp:210 lvcreate.cpp:353
+#: changemirror.cpp:210 lvcreate.cpp:358
 msgid "Memory based log"
 msgstr ""
 
-#: changemirror.cpp:211 lvcreate.cpp:352
+#: changemirror.cpp:211 lvcreate.cpp:357
 msgid "Single disk based log"
 msgstr ""
 
-#: changemirror.cpp:212 lvcreate.cpp:351
+#: changemirror.cpp:212 lvcreate.cpp:356
 msgid "Mirrored disk based log"
 msgstr ""
 
@@ -174,17 +174,17 @@ msgstr ""
 msgid "Volume striping"
 msgstr ""
 
-#: changemirror.cpp:343 lvcreate.cpp:263
+#: changemirror.cpp:343 lvcreate.cpp:268
 msgid "Stripe Size: "
 msgstr ""
 
-#: changemirror.cpp:346 lvcreate.cpp:269 lvcreate.cpp:571 lvcreate.cpp:579
-#: lvcreate.cpp:602 lvcreate.cpp:625 lvcreate.cpp:633 lvcreate.cpp:656
-#: lvcreate.cpp:678
+#: changemirror.cpp:346 lvcreate.cpp:274 lvcreate.cpp:576 lvcreate.cpp:584
+#: lvcreate.cpp:607 lvcreate.cpp:630 lvcreate.cpp:638 lvcreate.cpp:661
+#: lvcreate.cpp:683
 msgid "none"
 msgstr ""
 
-#: changemirror.cpp:352 lvcreate.cpp:275
+#: changemirror.cpp:352 lvcreate.cpp:280
 msgid "Number of stripes: "
 msgstr ""
 
@@ -499,22 +499,22 @@ msgstr ""
 msgid "Run <b>'fsck -fp'</b> to check the filesystem on partition <b>%1?</b>"
 msgstr ""
 
-#: fsextend.cpp:56
+#: fsextend.cpp:62
 msgid "Executable: '%1' not found, this filesystem cannot be extended"
 msgstr ""
 
-#: fsextend.cpp:124
-msgid "only logical volumes may be mounted during resize, not partitions"
+#: fsextend.cpp:130
+msgid "Only logical volumes may be mounted during resize, not partitions."
 msgstr ""
 
-#: fsextend.cpp:128
+#: fsextend.cpp:133
+msgid "Filesystem '%1' can not be extended while mounted."
+msgstr ""
+
+#: fsextend.cpp:138
 msgid ""
 "It appears that the filesystem on the device or volume was not extended. It "
 "will need to be extended before the additional space can be used."
-msgstr ""
-
-#: fsextend.cpp:183 fsextend.cpp:197
-msgid "Error number: %1 %2"
 msgstr ""
 
 #: fsreduce.cpp:36
@@ -1146,19 +1146,19 @@ msgstr ""
 msgid "Delete thin pool..."
 msgstr ""
 
-#: lvactions.cpp:432
+#: lvactions.cpp:445
 msgid "Extend thin volume..."
 msgstr ""
 
-#: lvactions.cpp:433
+#: lvactions.cpp:446
 msgid "Reduce thin volume..."
 msgstr ""
 
-#: lvactions.cpp:434
+#: lvactions.cpp:447
 msgid "Rename thin volume..."
 msgstr ""
 
-#: lvactions.cpp:435
+#: lvactions.cpp:448
 msgid "Delete thin volume..."
 msgstr ""
 
@@ -1200,11 +1200,11 @@ msgstr ""
 msgid "Volume Tags"
 msgstr ""
 
-#: lvchange.cpp:110 pvchange.cpp:78
+#: lvchange.cpp:110 pvchange.cpp:82
 msgid "Add new tag:"
 msgstr ""
 
-#: lvchange.cpp:118 pvchange.cpp:86
+#: lvchange.cpp:118 pvchange.cpp:90
 msgid "Remove tag:"
 msgstr ""
 
@@ -1429,88 +1429,88 @@ msgstr ""
 msgid "(RAID 6 with %1 stripes + 2 parity)"
 msgstr ""
 
-#: lvcreate.cpp:226
+#: lvcreate.cpp:231
 msgid "Chunk size: "
 msgstr ""
 
-#: lvcreate.cpp:228
+#: lvcreate.cpp:233
 msgid "default"
 msgstr ""
 
-#: lvcreate.cpp:284
+#: lvcreate.cpp:289
 msgid "Extents smaller than 4KiB can not be striped"
 msgstr ""
 
-#: lvcreate.cpp:322 lvcreate.cpp:646 lvcreate.cpp:669
+#: lvcreate.cpp:327 lvcreate.cpp:651 lvcreate.cpp:674
 msgid " + 1 parity"
 msgstr ""
 
-#: lvcreate.cpp:326 lvcreate.cpp:691
+#: lvcreate.cpp:331 lvcreate.cpp:696
 msgid " + 2 parity"
 msgstr ""
 
-#: lvcreate.cpp:356
+#: lvcreate.cpp:361
 msgid "Mirror log: "
 msgstr ""
 
-#: lvcreate.cpp:387
+#: lvcreate.cpp:392
 msgid "Number of mirror legs: "
 msgstr ""
 
-#: lvcreate.cpp:405
+#: lvcreate.cpp:410
 msgid "Linear"
 msgstr ""
 
-#: lvcreate.cpp:413 lvcreate.cpp:438
+#: lvcreate.cpp:418 lvcreate.cpp:443
 msgid "LVM2 Mirror"
 msgstr ""
 
-#: lvcreate.cpp:414 lvcreate.cpp:439
+#: lvcreate.cpp:419 lvcreate.cpp:444
 msgid "RAID 1 Mirror"
 msgstr ""
 
-#: lvcreate.cpp:415 lvcreate.cpp:443
+#: lvcreate.cpp:420 lvcreate.cpp:448
 msgid "RAID 4"
 msgstr ""
 
-#: lvcreate.cpp:416 lvcreate.cpp:444
+#: lvcreate.cpp:421 lvcreate.cpp:449
 msgid "RAID 5"
 msgstr ""
 
-#: lvcreate.cpp:417 lvcreate.cpp:448
+#: lvcreate.cpp:422 lvcreate.cpp:453
 msgid "RAID 6"
 msgstr ""
 
-#: lvcreate.cpp:452
+#: lvcreate.cpp:457
 msgid "Volume type: "
 msgstr ""
 
-#: lvcreate.cpp:535
+#: lvcreate.cpp:540
 msgid "Selected size less than existing size"
 msgstr ""
 
-#: lvcreate.cpp:549 lvcreate.cpp:557
+#: lvcreate.cpp:554 lvcreate.cpp:562
 msgid "Selected size exceeds maximum size"
 msgstr ""
 
-#: lvcreate.cpp:1016 thincreate.cpp:192
+#: lvcreate.cpp:1021 thincreate.cpp:192
 msgid "Volumes can not be extended while physical volumes are missing"
 msgstr ""
 
-#: lvcreate.cpp:1018 thincreate.cpp:194
+#: lvcreate.cpp:1023 thincreate.cpp:194
 msgid "Volumes can not be created while physical volumes are missing"
 msgstr ""
 
-#: lvcreate.cpp:1020
+#: lvcreate.cpp:1025
 msgid ""
 "All free physical volume extents in this group are locked against allocation"
 msgstr ""
 
-#: lvcreate.cpp:1023
+#: lvcreate.cpp:1028
 msgid "There are no free extents in this volume group"
 msgstr ""
 
-#: lvcreate.cpp:1031 thincreate.cpp:201
+#: lvcreate.cpp:1036 thincreate.cpp:201
 msgid ""
 "If this volume has a filesystem or data, it will need to be extended later "
 "by an appropriate tool. \n"
@@ -1519,38 +1519,48 @@ msgid ""
 "systems are supported for extension. "
 msgstr ""
 
-#: lvcreate.cpp:1036 thincreate.cpp:206
+#: lvcreate.cpp:1041 thincreate.cpp:206
 msgid ""
 "This filesystem seems to be as large as it can get, it will not be extended "
 "with the volume"
 msgstr ""
 
-#: lvcreate.cpp:1048
+#: lvcreate.cpp:1043 thincreate.cpp:208
+msgid ""
+"ntfs cannot be extended while mounted. The filesystem will need to be "
+"extended later or unmounted before the volume is extended."
+msgstr ""
+
+#: lvcreate.cpp:1055
 msgid "Insufficient allocatable physical volumes to extend this volume"
 msgstr ""
 
-#: lvcreate.cpp:1055 thincreate.cpp:210
+#: lvcreate.cpp:1062 thincreate.cpp:213
 msgid "Snapshot origins cannot be extended while open or mounted"
 msgstr ""
 
-#: lvcreate.cpp:1063 thincreate.cpp:218
+#: lvcreate.cpp:1068 thincreate.cpp:221
 msgid "Volumes cannot be extended with open or mounted snapshots"
 msgstr ""
 
-#: lvcreate.cpp:1115 thincreate.cpp:273
+#: lvcreate.cpp:1132 thincreate.cpp:286
 msgid "Volume deactivation failed, volume not extended"
 msgstr ""
 
-#: lvcreate.cpp:1121 thincreate.cpp:279
+#: lvcreate.cpp:1138 thincreate.cpp:292
 msgid "Volume extension failed"
 msgstr ""
 
-#: lvcreate.cpp:1130 thincreate.cpp:288
+#: lvcreate.cpp:1147 thincreate.cpp:301
 msgid "Volume activation failed, filesystem not extended"
 msgstr ""
 
-#: lvcreate.cpp:1132 thincreate.cpp:290
+#: lvcreate.cpp:1149 thincreate.cpp:303
 msgid "Volume activation failed"
+msgstr ""
+
+#: lvcreate.cpp:1152 lvcreate.cpp:1161
+msgid "Filesystem extention failed"
 msgstr ""
 
 #: lvmconfig.cpp:122 processprogress.cpp:121
@@ -1805,30 +1815,34 @@ msgid "Extend the filesystem on: %1 to fill the entire volume?"
 msgstr ""
 
 #: maxfs.cpp:41
+msgid "'ntfs' filesystem must be unmounted before extending."
+msgstr ""
+
+#: maxfs.cpp:42
 msgid ""
 "Extending is only supported for ext2, ext3, ext4, jfs, xfs, ntfs and "
 "Reiserfs. The correct executables for file system extension must also be "
-"present"
+"present."
 msgstr ""
 
-#: maxfs.cpp:66
+#: maxfs.cpp:70
 msgid ""
 "Filesystem extending is only supported for ext2, ext3, ext4, jfs, xfs, ntfs "
 "and Reiserfs. Physical volumes can also be extended. The correct executables "
 "for file system extension must be present"
 msgstr ""
 
-#: maxfs.cpp:69 maxfs.cpp:110
+#: maxfs.cpp:73 maxfs.cpp:114
 msgid ""
 "Physical volumes cannot be extended if they contain any active logical "
 "volumes"
 msgstr ""
 
-#: maxfs.cpp:78 maxfs.cpp:109
+#: maxfs.cpp:82 maxfs.cpp:113
 msgid "Extend the physical volume on: %1 to fill the entire partition?"
 msgstr ""
 
-#: maxfs.cpp:81
+#: maxfs.cpp:85
 msgid "Extend the filesystem on: %1 to fill the entire partition?"
 msgstr ""
 
@@ -2289,15 +2303,15 @@ msgstr ""
 msgid "Allow allocation of extents"
 msgstr ""
 
-#: pvchange.cpp:58
+#: pvchange.cpp:59
 msgid "Use metadata areas on this volume"
 msgstr ""
 
-#: pvchange.cpp:62
+#: pvchange.cpp:66
 msgid "Generate new UUID for this volume"
 msgstr ""
 
-#: pvchange.cpp:68
+#: pvchange.cpp:72
 msgid "Change tags"
 msgstr ""
 
@@ -3022,7 +3036,7 @@ msgid "Extent size: %1"
 msgstr ""
 
 #: vginfolabels.cpp:129
-msgid "MDA count: %1"
+msgid "MDA: %1 Used: %2"
 msgstr ""
 
 #: vginfolabels.cpp:130

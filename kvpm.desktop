@@ -1,5 +1,5 @@
 [Desktop Entry]
-GenericName=Volume Partition Manager
+GenericName=LVM Volume And Partition Manager
 Name=KVPM
 Comment=KDE 
 Exec=/usr/sbin/kvpm
