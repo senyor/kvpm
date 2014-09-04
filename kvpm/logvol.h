@@ -129,6 +129,7 @@ class LogVol
     QList<lv_t> getLvmSnapshots(vg_t lvmVg);
     void insertChildren(lv_t lvmLV, vg_t lvmVg);
     void calculateTotalSize();
+    void getDeviceNumbers(unsigned long &major, unsigned long &minor);
 
 public:
     LogVol(lv_t lvmLV, vg_t lvmVg, const VolGroup *const vg, LogVol *const lvParent, 
@@ -227,6 +228,7 @@ public:
     bool isWritable() const { return m_writable; }
     bool isPartial() const { return m_partial; }
     bool willZero() const { return m_zero; }
+
 };
 
 #endif
