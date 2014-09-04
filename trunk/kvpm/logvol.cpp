@@ -15,7 +15,14 @@
 
 #include "logvol.h"
 
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <unistd.h>
+
 #include <QDebug>
+#include <QFileInfo>
 #include <QRegExp>
 #include <QUuid>
 #include <QWidget>
@@ -104,8 +111,13 @@ void LogVol::rescan(lv_t lvmLv, vg_t lvmVg)
     m_size = lvm_lv_get_property(lvmLv, "lv_size").value.integer;
     m_extents = m_size / m_vg->getExtentSize();
 
-    m_major_device = lvm_lv_get_property(lvmLv, "lv_kernel_major").value.integer;
-    m_minor_device = lvm_lv_get_property(lvmLv, "lv_kernel_minor").value.integer;
+    if (lvm_lv_get_property(lvmLv, "lv_kernel_major").is_valid && lvm_lv_get_property(lvmLv, "lv_kernel_minor").is_valid) {
+        m_major_device = lvm_lv_get_property(lvmLv, "lv_kernel_major").value.integer;
+        m_minor_device = lvm_lv_get_property(lvmLv, "lv_kernel_minor").value.integer;
+    } else { // some versions of lvm2app library don't return valid numbers
+        getDeviceNumbers(m_major_device, m_minor_device);
+    }
+
     m_persistent = (-1 != (static_cast<int64_t>(lvm_lv_get_property(lvmLv, "lv_major").value.integer)));
 
     QByteArray flags(lvm_lv_get_property(lvmLv, "lv_attr").value.string);
@@ -1121,4 +1133,22 @@ QStringList LogVol::getMountPoints() const
         mpts << entry->getMountPoint();
 
     return mpts; 
+}
+
+void LogVol::getDeviceNumbers(unsigned long &majornum, unsigned long &minornum)
+{ 
+    majornum = 0;
+    minornum = 0;
+
+    QFileInfo fi(m_lv_mapper_path);
+    if (!fi.exists())
+        return;
+    
+    QByteArray qba = fi.canonicalFilePath().toLocal8Bit();
+    struct stat fs;
+    if (stat(qba.data(), &fs))  // error
+        return;
+
+    majornum = major(fs.st_rdev); 
+    minornum = minor(fs.st_rdev);
 }
