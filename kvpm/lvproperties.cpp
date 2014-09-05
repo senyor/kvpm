@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013, 2014 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -217,9 +217,8 @@ QFrame *LVProperties::generalFrame(int segment)
         dialect = KLocale::IECBinaryDialect;
 
     QString policy = policyToLocalString(m_lv->getPolicy());
-    if (m_lv->isLocked()) {
+    if (m_lv->isLocked()) 
         policy.append(i18n(", locked"));
-    }
 
     if (m_lv->isThinPool()) {
         total_extents = m_lv->getTotalSize() / extent_size;
@@ -253,7 +252,7 @@ QFrame *LVProperties::generalFrame(int segment)
 
         layout->addWidget(new QLabel(i18n("Extents: %1", extents)));
 
-        if (!m_lv->isLvmMirror()) {
+        if (!m_lv->isLvmMirror() && !m_lv->isRaidImage()) {
             if (stripes != 1)
                 layout->addWidget(new QLabel(i18n("Stripes: %1 of %2", stripes, locale->formatByteSize(stripe_size, 1, dialect)))); 
             else
@@ -266,10 +265,10 @@ QFrame *LVProperties::generalFrame(int segment)
         stripes = m_lv->getSegmentStripes(segment);
         stripe_size = m_lv->getSegmentStripeSize(segment);
 
-        if (!(m_lv->isSnapContainer() || m_lv->isRaid() || m_lv->isLvmMirror()))
+        if (!(m_lv->isSnapContainer() || m_lv->isRaid() || m_lv->isLvmMirror()) || m_lv->isRaidMetadata())
             layout->addWidget(new QLabel(i18n("Extents: %1", extents)));
 
-        if ( !(m_lv->isRaidImage() || m_lv->isMetadata()) ) {
+        if ( !(m_lv->isRaidImage() || m_lv->isRaidMetadata()) ) {
             if (m_lv->isRaid() && m_lv->getRaidType() != 1) {
                 layout->addWidget(new QLabel(i18n("Total extents: %1", total_extents)));
                 layout->addWidget(new QLabel(i18n("Total size: %1", locale->formatByteSize(total_size, 1, dialect))));
@@ -284,22 +283,23 @@ QFrame *LVProperties::generalFrame(int segment)
                 layout->addWidget(new QLabel(i18n("Total size: %1", locale->formatByteSize(total_size, 1, dialect))));
             }
  
-            if (!(m_lv->isLvmMirrorLeg() || m_lv->isLvmMirrorLog() || m_lv->isThinPoolData()))
-                layout->addWidget(new QLabel(i18n("Filesystem: %1", m_lv->getFilesystem())));
+            if (!(m_lv->isLvmMirrorLeg() || m_lv->isLvmMirrorLog() || m_lv->isThinMetadata())) {
+                if (!m_lv->isThinPoolData())
+                    layout->addWidget(new QLabel(i18n("Filesystem: %1", m_lv->getFilesystem())));
+                
+                if (m_lv->isWritable())
+                    layout->addWidget(new QLabel(i18n("Access: r/w")));
+                else
+                    layout->addWidget(new QLabel(i18n("Access: r/o")));
+            }
         }
-
-        if (m_lv->isWritable())
-            layout->addWidget(new QLabel(i18n("Access: r/w")));
-        else
-            layout->addWidget(new QLabel(i18n("Access: r/o")));
 
         if (m_lv->isThinVolume()) {
             if (m_lv->willZero())
                 layout->addWidget(new QLabel(i18n("Zero new blocks: Yes")));
             else
                 layout->addWidget(new QLabel(i18n("Zero new blocks: No")));
-            layout->addWidget(new QLabel(i18n("Discards: %1", m_lv->getDiscards(0))));
-        } else {
+        } else if ( !(m_lv->isRaidImage() || m_lv->isMetadata() || m_lv->isLvmMirrorLeg() || m_lv->isLvmMirrorLog()) ) {
             layout->addWidget(new QLabel(i18n("Policy: %1", policy)));
         }
 
@@ -315,7 +315,7 @@ QFrame *LVProperties::generalFrame(int segment)
 
             layout->addWidget(new QLabel(i18n("Policy: %1", policy)));
 
-        } else if (!(m_lv->isLvmMirrorLeg() || m_lv->isLvmMirrorLog())) {
+        } else if (!(m_lv->isLvmMirrorLeg() || m_lv->isLvmMirrorLog() || m_lv->isRaidImage())) {
 
             layout->addWidget(new QLabel(i18n("Filesystem: %1", m_lv->getFilesystem())));
 
