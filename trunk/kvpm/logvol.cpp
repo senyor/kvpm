@@ -104,7 +104,8 @@ void LogVol::rescan(lv_t lvmLv, vg_t lvmVg)
 
     m_lv_name = QString(lvm_lv_get_property(lvmLv, "lv_name").value.string).trimmed();
     m_lv_full_name = m_vg->getName() + '/' + m_lv_name;
-    m_lv_mapper_path = QString(lvm_lv_get_property(lvmLv, "lv_path").value.string).trimmed();
+    //    m_lv_mapper_path = QString(lvm_lv_get_property(lvmLv, "lv_path").value.string).trimmed(); // borked!
+    m_lv_mapper_path = QString("/dev/").append(m_lv_full_name); // workaround
     m_log = QString(lvm_lv_get_property(lvmLv, "mirror_log").value.string).trimmed();
     m_pool = QString(lvm_lv_get_property(lvmLv, "pool_lv").value.string).trimmed();
     m_tags = QString(lvm_lv_get_property(lvmLv, "lv_tags").value.string).split(',', QString::SkipEmptyParts);
