@@ -745,17 +745,17 @@ void LogVol::processSegments(lv_t lvmLv, QByteArray flags)
                 segment->chunk_size = 0;
             }
             
-            /*  Un-comment and test when lvm version after 2.2.98 is installed
+            if (MasterList::getLvmVersionMajor() >= 2 &&   // discards bug fixed by v2.2.109 
+                MasterList::getLvmVersionMinor() >= 2 && 
+                MasterList::getLvmVersionPatchLevel() >= 109 ) {
 
-            if (flags[0] == 't') {
-                value = lvm_lvseg_get_property(lvm_lvseg, "discards");
-                if (value.is_valid) {
-                    segment->discards = value.value.string;
+                if (flags[0] == 't') {
+                    value = lvm_lvseg_get_property(lvm_lvseg, "discards");
+                    if (value.is_valid)
+                        segment->discards = value.value.string;
                 }
-
             }
 
-            */
             m_segments.append(segment);
         }
     }
