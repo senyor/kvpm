@@ -141,9 +141,12 @@ QStringList LVRemoveDialog::getDependentChildren(const LogVol *const lv)
     }
 
     if (bailout) {
-        hide();
-        preventExec();
-        KMessageBox::sorry(this, i18n("A snapshot of this origin is busy or mounted. It can not be deleted."));
+        hide();                                                                                                              
+        preventExec();                                                                                                       
+        if (lv->isThinPool())
+            KMessageBox::sorry(this, i18n("A volume of this thin pool is busy or mounted. It can not be deleted."));         
+        else
+            KMessageBox::sorry(this, i18n("A snapshot of this origin is busy or mounted. It can not be deleted."));          
     }
 
     return children;
