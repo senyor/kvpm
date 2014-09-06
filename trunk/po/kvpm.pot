@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-02-05 21:09-0800\n"
+"POT-Creation-Date: 2014-09-05 21:05-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -521,11 +521,11 @@ msgstr ""
 msgid "Executable: '%1' not found, this filesystem cannot be reduced"
 msgstr ""
 
-#: fsreduce.cpp:62
+#: fsreduce.cpp:61
 msgid "Shrink failed: could not determine filesystem block size"
 msgstr ""
 
-#: fsreduce.cpp:97
+#: fsreduce.cpp:100
 msgid "Now trying to shrink the filesystem to its minimum size"
 msgstr ""
 
@@ -733,7 +733,7 @@ msgid "Stripe size"
 msgstr ""
 
 #: kvpmconfigdialog.cpp:401
-msgid "(\\%)Data/Copy"
+msgid "(%)Data/Copy"
 msgstr ""
 
 #: kvpmconfigdialog.cpp:402
@@ -1587,63 +1587,63 @@ msgstr ""
 msgid ", locked"
 msgstr ""
 
-#: lvproperties.cpp:227 lvproperties.cpp:247
+#: lvproperties.cpp:226 lvproperties.cpp:246
 msgid "Total Extents: %1"
 msgstr ""
 
-#: lvproperties.cpp:228 lvproperties.cpp:248
+#: lvproperties.cpp:227 lvproperties.cpp:247
 msgid "Total Size: %1"
 msgstr ""
 
-#: lvproperties.cpp:231 lvproperties.cpp:292 lvproperties.cpp:312
+#: lvproperties.cpp:230 lvproperties.cpp:291 lvproperties.cpp:312
 #: lvproperties.cpp:323
 msgid "Access: r/w"
 msgstr ""
 
-#: lvproperties.cpp:233 lvproperties.cpp:294 lvproperties.cpp:314
+#: lvproperties.cpp:232 lvproperties.cpp:293 lvproperties.cpp:314
 #: lvproperties.cpp:325
 msgid "Access: r/o"
 msgstr ""
 
-#: lvproperties.cpp:235
+#: lvproperties.cpp:234
 msgid "Chunk Size: %1"
 msgstr ""
 
-#: lvproperties.cpp:238 lvproperties.cpp:298
+#: lvproperties.cpp:237 lvproperties.cpp:299
 msgid "Zero new blocks: Yes"
 msgstr ""
 
-#: lvproperties.cpp:240 lvproperties.cpp:300
+#: lvproperties.cpp:239 lvproperties.cpp:301
 msgid "Zero new blocks: No"
 msgstr ""
 
-#: lvproperties.cpp:242 lvproperties.cpp:301
+#: lvproperties.cpp:241
 msgid "Discards: %1"
 msgstr ""
 
-#: lvproperties.cpp:243 lvproperties.cpp:303 lvproperties.cpp:316
+#: lvproperties.cpp:242 lvproperties.cpp:303 lvproperties.cpp:316
 #: lvproperties.cpp:327 vginfolabels.cpp:124
 msgid "Policy: %1"
 msgstr ""
 
-#: lvproperties.cpp:254 lvproperties.cpp:270 lvproperties.cpp:307
-#: pvgroupbox.cpp:294 pvmove.cpp:510
+#: lvproperties.cpp:253 lvproperties.cpp:269 lvproperties.cpp:307
+#: pvgroupbox.cpp:294 pvmove.cpp:511
 msgid "Extents: %1"
 msgstr ""
 
-#: lvproperties.cpp:258 lvproperties.cpp:276 lvproperties.cpp:279
+#: lvproperties.cpp:257 lvproperties.cpp:275 lvproperties.cpp:278
 msgid "Stripes: %1 of %2"
 msgstr ""
 
-#: lvproperties.cpp:260 lvproperties.cpp:281
+#: lvproperties.cpp:259 lvproperties.cpp:280
 msgid "Stripes: none"
 msgstr ""
 
-#: lvproperties.cpp:274 lvproperties.cpp:283 pvproperties.cpp:187
+#: lvproperties.cpp:273 lvproperties.cpp:282 pvproperties.cpp:187
 msgid "Total extents: %1"
 msgstr ""
 
-#: lvproperties.cpp:275 lvproperties.cpp:284
+#: lvproperties.cpp:274 lvproperties.cpp:283
 msgid "Total size: %1"
 msgstr ""
 
@@ -1756,7 +1756,11 @@ msgstr ""
 msgid "Any data on them will be lost."
 msgstr ""
 
-#: lvremove.cpp:146
+#: lvremove.cpp:147
+msgid "A volume of this thin pool is busy or mounted. It can not be deleted."
+msgstr ""
+
+#: lvremove.cpp:149
 msgid "A snapshot of this origin is busy or mounted. It can not be deleted."
 msgstr ""
 
@@ -2191,15 +2195,19 @@ msgstr ""
 msgid "Syncing device"
 msgstr ""
 
-#: partchange.cpp:409
+#: partchange.cpp:366
+msgid "Filesystem shrink failed"
+msgstr ""
+
+#: partchange.cpp:411
 msgid "Partition shrink failed"
 msgstr ""
 
-#: partchange.cpp:473 partchange.cpp:491
+#: partchange.cpp:475 partchange.cpp:493
 msgid "Partition extension failed"
 msgstr ""
 
-#: partchange.cpp:577
+#: partchange.cpp:579
 msgid "Repartitioning failed: data not moved"
 msgstr ""
 
@@ -2383,27 +2391,27 @@ msgstr ""
 msgid "Source Physical Volume"
 msgstr ""
 
-#: pvmove.cpp:399
+#: pvmove.cpp:400
 msgid "Move only physical extents on:"
 msgstr ""
 
-#: pvmove.cpp:404
+#: pvmove.cpp:405
 msgid "Move physical extents"
 msgstr ""
 
-#: pvmove.cpp:436
+#: pvmove.cpp:437
 msgid "Logical Volumes To Move"
 msgstr ""
 
-#: pvmove.cpp:454
+#: pvmove.cpp:455
 msgid "<Not movable>"
 msgstr ""
 
-#: pvmove.cpp:462
+#: pvmove.cpp:463
 msgid "Movable space: %1"
 msgstr ""
 
-#: pvmove.cpp:463
+#: pvmove.cpp:464
 msgid "Movable extents: %1"
 msgstr ""
 
@@ -2980,6 +2988,39 @@ msgstr ""
 msgid "Physical extent size: "
 msgstr ""
 
+#. i18n("Number of Logical Volumes") );
+#. QVBoxLayout *lv_layout_v = new QVBoxLayout();
+#. QHBoxLayout *lv_layout_h = new QHBoxLayout();
+#. lv_box->setLayout(lv_layout_v);
+#. m_max_lvs_check = new QCheckBox( i18n("No Limit") );
+#. m_max_lvs_check->setCheckState(Qt::Checked);
+#. lv_layout_v->addWidget(m_max_lvs_check);
+#. lv_layout_v->addLayout(lv_layout_h);
+#. QLabel *lv_label = new QLabel( i18n("Maximum: ") );
+#. m_max_lvs = new KLineEdit();
+#. QIntValidator *lv_validator = new QIntValidator(1,255,this);
+#. m_max_lvs->setValidator(lv_validator);
+#. m_max_lvs->setEnabled(false);
+#. lv_layout_h->addWidget(lv_label);
+#. lv_layout_h->addWidget(m_max_lvs);
+#.
+#. QGroupBox *pv_box = new QGroupBox( i18n("Number of Physical Volumes") );
+#. QVBoxLayout *pv_layout_v = new QVBoxLayout();
+#. QHBoxLayout *pv_layout_h = new QHBoxLayout();
+#. pv_box->setLayout(pv_layout_v);
+#. m_max_pvs_check = new QCheckBox( i18n("No Limit") );
+#. m_max_pvs_check->setCheckState(Qt::Checked);
+#. pv_layout_v->addWidget(m_max_pvs_check);
+#. pv_layout_v->addLayout(pv_layout_h);
+#. QLabel *pv_label = new QLabel( i18n("Maximum: ") );
+#. m_max_pvs = new KLineEdit();
+#. QIntValidator *pv_validator = new QIntValidator(1,255,this);
+#. m_max_pvs->setValidator(pv_validator);
+#. m_max_pvs->setEnabled(false);
+#. pv_layout_h->addWidget(pv_label);
+#. pv_layout_h->addWidget(m_max_pvs);
+#.
+#.
 #: vgcreate.cpp:296
 msgid "Cluster Aware"
 msgstr ""
