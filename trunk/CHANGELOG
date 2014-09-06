@@ -1,3 +1,7 @@
+version 0.9.9
+Mostly small bug fixes and work arounds for problems introduced
+by recent versions of the lvm2app library.
+
 version 0.9.8
 Added a dialog for resyncing mirrors and RAID volume in
 the menu and toolbar. Some limited support for dmraid "fake RAID"
