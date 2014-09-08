@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013, 2014 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -54,6 +54,7 @@ public:
     static int getLvmVersionMajor();
     static int getLvmVersionMinor();
     static int getLvmVersionPatchLevel();
+    static bool isLvmVersionEqualOrGreater(QString test_version);
     static int getLvmVersionApi();
     static lvm_t getLvm();
     static QList<VolGroup *> getVolGroups();
