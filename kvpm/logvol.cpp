@@ -694,13 +694,11 @@ void LogVol::processSegments(lv_t lvmLv, QByteArray flags)
                 if (value.is_valid)
                     segment->stripes = value.value.integer;
                 
-                if (MasterList::getLvmVersionMajor() >= 2 &&  // stripesize bug fixed in v2.2.100 
-                    MasterList::getLvmVersionMinor() >= 2 && 
-                    MasterList::getLvmVersionPatchLevel() >= 100 ) {
-
+                if (MasterList::isLvmVersionEqualOrGreater("2.02.100")) { // stripesize bug fixed in v2.2.100 
                     value = lvm_lvseg_get_property(lvm_lvseg, "stripesize");
                     if (value.is_valid)
                         segment->stripe_size = value.value.integer;
+
                 } else {
                     value = lvm_lvseg_get_property(lvm_lvseg, "stripesize");
                     if (value.is_valid)
@@ -731,32 +729,26 @@ void LogVol::processSegments(lv_t lvmLv, QByteArray flags)
                 value = lvm_lvseg_get_property(lvm_lvseg, "chunksize");
                 if (value.is_valid) {
 
-                    if (MasterList::getLvmVersionMajor() >= 2 &&   // chunksize bug fixed in v2.2.100 
-                        MasterList::getLvmVersionMinor() >= 2 && 
-                        MasterList::getLvmVersionPatchLevel() >= 100 ) {
-    
+                    if (MasterList::isLvmVersionEqualOrGreater("2.02.100"))  // chunksize bug fixed in v2.2.100 
                         segment->chunk_size = value.value.integer;
-                    } else {
+                    else 
                         segment->chunk_size = value.value.integer * 512;
-                    }
+                    
                 } else {
                     segment->chunk_size = 0;
                 }
             } else {
                 segment->chunk_size = 0;
             }
-            
-            if (MasterList::getLvmVersionMajor() >= 2 &&   // discards bug fixed by v2.2.109 
-                MasterList::getLvmVersionMinor() >= 2 && 
-                MasterList::getLvmVersionPatchLevel() >= 109 ) {
 
+            if (MasterList::isLvmVersionEqualOrGreater("2.02.109")) {  // discards bug fixed by v2.2.109 
                 if (flags[0] == 't') {
                     value = lvm_lvseg_get_property(lvm_lvseg, "discards");
                     if (value.is_valid)
                         segment->discards = value.value.string;
                 }
             }
-
+            
             m_segments.append(segment);
         }
     }

@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012, 2013, 2014 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -17,6 +17,7 @@
 
 #include "allocationpolicy.h"
 #include "logvol.h"
+#include "masterlist.h"
 #include "processprogress.h"
 #include "volgroup.h"
 
@@ -230,10 +231,15 @@ QStringList LVChangeDialog::arguments()
     args << "lvchange" << "--yes"; // answer yes to any question
 
     if (!m_lv->isCowSnap()) {
-        if (m_available_check->isChecked() && (!m_lv->isActive()))
+        if (m_available_check->isChecked() && (!m_lv->isActive())) {
             args << "--available" << "y";
-        else if ((!m_available_check->isChecked()) && (m_lv->isActive()))
+
+            if ( MasterList::isLvmVersionEqualOrGreater("2.02.109") )
+                args << "-K";
+
+        } else if ((!m_available_check->isChecked()) && (m_lv->isActive())) {
             args << "--available" << "n";
+        }
     }
 
     if (m_ro_check->isChecked() && m_lv->isWritable())
