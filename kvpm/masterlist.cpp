@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012, 2013, 2014 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -241,4 +241,25 @@ int MasterList::getLvmVersionPatchLevel()
 int MasterList::getLvmVersionApi()
 {
     return m_LvmVersionApi;
+}
+
+bool MasterList::isLvmVersionEqualOrGreater(QString test_version)
+{
+    QStringList version = test_version.split('.');
+    
+    if ( m_LvmVersionMajor > version[0].toInt() )
+        return true;
+    else if ( m_LvmVersionMajor < version[0].toInt() )
+        return false;
+    
+    if ( m_LvmVersionMinor > version[1].toInt() )
+        return true;
+    else if ( m_LvmVersionMinor < version[1].toInt())
+        return false;
+    
+    version = version[2].split(QRegExp("[()]"));
+    if ( m_LvmVersionPatchLevel >= version[0].toInt())
+        return true;
+    else
+        return false;
 }
