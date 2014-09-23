@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2010, 2011, 2012, 2013, 2014 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -71,9 +71,6 @@ VGSplitDialog::VGSplitDialog(VolGroup *volumeGroup, QWidget *parent) :
     connect(m_new_vg_name, SIGNAL(textEdited(QString)),
             this, SLOT(validateOK()));
 
-    connect(this, SIGNAL(okClicked()),
-            this, SLOT(deactivate()));
-
     KTabWidget *const tw = new KTabWidget();
     layout->addWidget(tw);
 
@@ -122,6 +119,8 @@ void VGSplitDialog::validateOK()
 
 void VGSplitDialog::commit()
 {
+    deactivate();
+
     QStringList args = QStringList() << "vgsplit" << m_vg->getName() << m_new_vg_name->text(); 
 
     for (int x = m_right_pv_list->count() - 1; x >= 0; x--)
@@ -146,10 +145,11 @@ void VGSplitDialog::deactivate()
     if ((vg_dm = lvm_vg_open(lvm, vg_name.data(), "w", 0x0))) {
 
         for (int x = 0; x < moving_lvs.size(); x++) {
-            lv_dm_list = lvm_vg_list_lvs(vg_dm);
-            dm_list_iterate_items(lv_list, lv_dm_list) {
-                if (QString(lvm_lv_get_name(lv_list->lv)).trimmed() == moving_lvs[x])
-                    lvs_to_deactivate.append(lv_list->lv);
+            if ((lv_dm_list = lvm_vg_list_lvs(vg_dm))) {
+                dm_list_iterate_items(lv_list, lv_dm_list) {
+                    if (QString(lvm_lv_get_name(lv_list->lv)).trimmed() == moving_lvs[x])
+                        lvs_to_deactivate.append(lv_list->lv);
+                }
             }
         }
 

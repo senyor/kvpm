@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2010, 2011, 2012, 2013, 2014 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -52,6 +52,7 @@ class VGSplitDialog : public KvpmDialog
     VolGroup *m_vg;
 
     LvList getFullLvList();
+    void deactivate();     // active lvs must be deactivated before moving
 
     QWidget *buildLvLists(const QStringList mobileLvNames, const QStringList fixedLvNames);
     QWidget *buildPvLists(const QStringList mobilePvNames, const QStringList fixedPvNames);
@@ -77,7 +78,6 @@ private slots:
     void addLvList();
     void addPvList();
     void commit();
-    void deactivate();     // active lvs must be deactivated before moving
     void enableLvArrows();
     void enablePvArrows();
     void removePvList();
