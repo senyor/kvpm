@@ -1,4 +1,5 @@
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 3.1)
+cmake_policy(SET CMP0059 NEW)
 project (kvpm)
  
 SET(CMAKE_INSTALL_PREFIX "/usr")
