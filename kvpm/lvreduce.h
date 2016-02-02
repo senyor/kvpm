@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2011, 2012, 2013, 2016 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -32,7 +32,7 @@ class LVReduceDialog : public KvpmDialog
     Q_OBJECT
 
     LogVol   *m_lv = nullptr;
-    SizeSelectorBox *m_size_selector;
+    SizeSelectorBox *m_size_selector = nullptr;
 
 public:
     explicit LVReduceDialog(LogVol *const volume, QWidget *parent = nullptr);
