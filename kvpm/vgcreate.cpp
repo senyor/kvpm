@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013, 2014 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2016 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -30,6 +30,7 @@
 #include <KLocale>
 #include <KMessageBox>
 #include <KPushButton>
+#include <KTabWidget>
 
 #include <QCheckBox>
 #include <QEventLoop>
@@ -148,20 +149,45 @@ void VGCreateDialog::commit()
         if ((lvm_vg_set_extent_size(vg_dm, new_extent_size)))
             KMessageBox::error(nullptr, QString(lvm_errmsg(lvm)));
 
-        for (int x = 0; x < pv_names.size(); x++) {
-            progress_box->setValue(x);
+        for (int i = 0; i < pv_names.size(); ++i) {
+            progress_box->setValue(i);
             qApp->processEvents(QEventLoop::ExcludeUserInputEvents);
-            pv_name_qba = pv_names[x].toLocal8Bit();
-            if (lvm_vg_extend(vg_dm, pv_name_qba.data()))
+            QByteArray name = pv_names[i].toLocal8Bit();
+
+            pv_create_params_t params = lvm_pv_params_create(lvm, name.data());
+            lvm_property_value_t value;
+            value.is_settable = 1;
+            value.is_string = 0;
+            value.is_integer = 1;
+            value.is_valid = 1;
+            value.is_signed = 0;
+            value.value.integer = m_copies_combo->currentIndex() + 1;
+            lvm_pv_params_set_property(params, "pvmetadatacopies", &value);
+
+            if (m_size_edit->hasAcceptableInput()) {
+                value.value.integer = 2 * m_size_edit->text().toInt();
+                lvm_pv_params_set_property(params, "pvmetadatasize", &value);
+            }
+
+            if (m_align_edit->hasAcceptableInput()) {
+                value.value.integer = 2 * m_align_edit->text().toInt();
+                lvm_pv_params_set_property(params, "data_alignment", &value);
+            }
+
+            if (m_offset_edit->hasAcceptableInput()) {
+                value.value.integer = 2 * m_offset_edit->text().toInt();
+                lvm_pv_params_set_property(params, "data_alignment_offset", &value);
+            }
+
+            lvm_pv_create_adv(params);
+
+            if (lvm_vg_extend(vg_dm, name.data()))
                 KMessageBox::error(nullptr, QString(lvm_errmsg(lvm)));
         }
 
         // ****To Do... None of the following are supported by liblvm2app yet****
         //   if(m_clustered->isChecked())
         //   if(m_auto_backup->isChecked())
-        //   if((m_max_lvs_check->isChecked()) && (m_max_lvs->text() != ""))
-        //   if((m_max_pvs_check->isChecked()) && (m_max_pvs->text() != ""))
-
 
         if (lvm_vg_write(vg_dm))
             KMessageBox::error(nullptr, QString(lvm_errmsg(lvm)));
@@ -197,20 +223,33 @@ void VGCreateDialog::validateOK()
     }
 }
 
-void VGCreateDialog::buildDialog(QList<const StorageBase *> devices)
+void VGCreateDialog::buildDialog(const QList<const StorageBase *> devices)
 {
-    setCaption(i18n("Create New Volume Group"));
+    setCaption(i18n("Create Volume Group"));
 
     QWidget *const dialog_body = new QWidget(this);
     setMainWidget(dialog_body);
     QVBoxLayout *const layout = new QVBoxLayout();
     dialog_body->setLayout(layout);
 
-    QLabel *const title = new QLabel(i18n("Create a new volume group"));
+    QLabel *const title = new QLabel(i18n("Create volume group"));
     title->setAlignment(Qt::AlignCenter);
     layout->addSpacing(5);
     layout->addWidget(title);
     layout->addSpacing(10);
+
+    KTabWidget *const tab_widget = new KTabWidget(this);
+    layout->addWidget(tab_widget);
+
+    tab_widget->addTab(buildGeneralTab(devices), "General");
+    tab_widget->addTab(buildAdvancedTab(), "Advanced");
+}
+
+QWidget *VGCreateDialog::buildGeneralTab(QList<const StorageBase *> devices)
+{
+    QWidget *const tab = new QWidget();
+    QVBoxLayout *const layout = new QVBoxLayout();
+    tab->setLayout(layout);
 
     QLabel *const name_label = new QLabel(i18n("Group name: "));
     m_vg_name = new KLineEdit();
@@ -257,42 +296,6 @@ void VGCreateDialog::buildDialog(QList<const StorageBase *> devices)
     extent_layout->addWidget(m_extent_suffix);
     extent_layout->addStretch();
 
-    /*  liblvm does not support setting limits on lvs and pvs yet (will it ever?)
-
-    QGroupBox *lv_box = new QGroupBox( i18n("Number of Logical Volumes") );
-    QVBoxLayout *lv_layout_v = new QVBoxLayout();
-    QHBoxLayout *lv_layout_h = new QHBoxLayout();
-    lv_box->setLayout(lv_layout_v);
-    m_max_lvs_check = new QCheckBox( i18n("No Limit") );
-    m_max_lvs_check->setCheckState(Qt::Checked);
-    lv_layout_v->addWidget(m_max_lvs_check);
-    lv_layout_v->addLayout(lv_layout_h);
-    QLabel *lv_label = new QLabel( i18n("Maximum: ") );
-    m_max_lvs = new KLineEdit();
-    QIntValidator *lv_validator = new QIntValidator(1,255,this);
-    m_max_lvs->setValidator(lv_validator);
-    m_max_lvs->setEnabled(false);
-    lv_layout_h->addWidget(lv_label);
-    lv_layout_h->addWidget(m_max_lvs);
-
-    QGroupBox *pv_box = new QGroupBox( i18n("Number of Physical Volumes") );
-    QVBoxLayout *pv_layout_v = new QVBoxLayout();
-    QHBoxLayout *pv_layout_h = new QHBoxLayout();
-    pv_box->setLayout(pv_layout_v);
-    m_max_pvs_check = new QCheckBox( i18n("No Limit") );
-    m_max_pvs_check->setCheckState(Qt::Checked);
-    pv_layout_v->addWidget(m_max_pvs_check);
-    pv_layout_v->addLayout(pv_layout_h);
-    QLabel *pv_label = new QLabel( i18n("Maximum: ") );
-    m_max_pvs = new KLineEdit();
-    QIntValidator *pv_validator = new QIntValidator(1,255,this);
-    m_max_pvs->setValidator(pv_validator);
-    m_max_pvs->setEnabled(false);
-    pv_layout_h->addWidget(pv_label);
-    pv_layout_h->addWidget(m_max_pvs);
-
-    */
-
     m_clustered = new QCheckBox(i18n("Cluster Aware"));
     m_clustered->setEnabled(false);
 
@@ -302,8 +305,6 @@ void VGCreateDialog::buildDialog(QList<const StorageBase *> devices)
 
     layout->addLayout(name_layout);
     layout->addLayout(extent_layout);
-    //    layout->addWidget(lv_box);
-    //    layout->addWidget(pv_box);
     layout->addWidget(m_clustered);
     layout->addWidget(m_auto_backup);
 
@@ -311,35 +312,72 @@ void VGCreateDialog::buildDialog(QList<const StorageBase *> devices)
 
     connect(m_vg_name, SIGNAL(textChanged(QString)),
             this, SLOT(validateOK()));
-    /*
-    connect(m_max_lvs_check, SIGNAL(stateChanged(int)),
-        this, SLOT(limitLogicalVolumes(int)));
-
-    connect(m_max_pvs_check, SIGNAL(stateChanged(int)),
-        this, SLOT(limitPhysicalVolumes(int)));
-    */
 
     connect(m_extent_size, SIGNAL(activated(int)),
             this, SLOT(extentSizeChanged()));
 
     connect(m_extent_suffix, SIGNAL(activated(int)),
             this, SLOT(extentSizeChanged()));
+
+    return tab;
 }
 
-/*
-void VGCreateDialog::limitLogicalVolumes(int boxstate)
+QWidget *VGCreateDialog::buildAdvancedTab()
 {
-    if(boxstate == Qt::Unchecked)
-    m_max_lvs->setEnabled(true);
-    else
-    m_max_lvs->setEnabled(false);
+    QWidget *tab = new QWidget();
+    QVBoxLayout *const layout = new QVBoxLayout();
+    tab->setLayout(layout);
+
+    QHBoxLayout *const copies_layout = new QHBoxLayout();
+    QLabel *const copies_label = new QLabel("Metadata copies: ");
+    copies_layout->addWidget(copies_label);
+    m_copies_combo = new KComboBox();
+    m_copies_combo->addItem(i18n("1"));
+    m_copies_combo->addItem(i18n("2"));
+    m_copies_combo->setCurrentIndex(0);
+    copies_layout->addWidget(m_copies_combo);
+    copies_layout->addStretch();
+
+    QLabel *const unit_label = new QLabel(i18n("All values are in KiloBytes"));
+    unit_label->setAlignment(Qt::AlignCenter);
+
+    QHBoxLayout *const size_layout = new QHBoxLayout();
+    QLabel *const size_label = new QLabel(i18n("Metadata size:"));
+    size_layout->addWidget(size_label);
+    m_size_edit = new KLineEdit;
+    QIntValidator *const size_validator = new QIntValidator();
+    size_validator->setBottom(0);
+    m_size_edit->setValidator(size_validator);
+    m_size_edit->setPlaceholderText(i18n("default"));
+    size_layout->addWidget(m_size_edit);
+
+    QHBoxLayout *const align_layout = new QHBoxLayout();
+    QLabel *align_label = new QLabel(i18n("Metadata align:"));
+    align_layout->addWidget(align_label);
+    m_align_edit = new KLineEdit;
+    QIntValidator *const align_validator = new QIntValidator();
+    align_validator->setBottom(0);
+    m_align_edit->setValidator(align_validator);
+    m_align_edit->setPlaceholderText(i18n("default"));
+    align_layout->addWidget(m_align_edit);
+
+    QHBoxLayout *const offset_layout = new QHBoxLayout();
+    QLabel *offset_label = new QLabel(i18n("Metadata offset:"));
+    offset_layout->addWidget(offset_label);
+    m_offset_edit = new KLineEdit;
+    QIntValidator *const offset_validator = new QIntValidator();
+    offset_validator->setBottom(0);
+    m_offset_edit->setValidator(offset_validator);
+    m_offset_edit->setPlaceholderText(i18n("default"));
+    offset_layout->addWidget(m_offset_edit);
+
+    layout->addLayout(copies_layout);
+    layout->addWidget(unit_label);
+    layout->addLayout(size_layout);
+    layout->addLayout(align_layout);
+    layout->addLayout(offset_layout);
+    layout->addStretch();
+    
+    return tab;
 }
 
-void VGCreateDialog::limitPhysicalVolumes(int boxstate)
-{
-    if(boxstate == Qt::Unchecked)
-    m_max_pvs->setEnabled(true);
-    else
-    m_max_pvs->setEnabled(false);
-}
-*/
