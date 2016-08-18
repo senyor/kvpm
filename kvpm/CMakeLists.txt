@@ -19,8 +19,8 @@ set(kvpm_SRCS allocationpolicy.cpp changemirror.cpp kvpmconfigdialog.cpp devicep
 	      vgreduce.cpp vgremove.cpp vgtree.cpp volgroup.cpp vgwarning.cpp
 	      vgrename.cpp volumegrouptab.cpp vgsplit.cpp vgmerge.cpp)
 
-kde4_add_executable(kvpm ${kvpm_SRCS})
-target_link_libraries(kvpm ${KDE4_KDEUI_LIBS} ${KDE4_KFILE_LIBS} ${QT_LIBRARIES} blkid parted lvm2app devmapper)
+add_executable(kvpm ${kvpm_SRCS})
+target_link_libraries(kvpm KF5::CoreAddons KF5::I18n KF5::KDELibs4Support blkid parted lvm2app devmapper)
 
 INSTALL( TARGETS kvpm DESTINATION ${SBIN_INSTALL_DIR} )
 
@@ -37,4 +37,3 @@ ENDIF(CMAKE_COMPILER_IS_GNUCXX)
 
 SET(CMAKE_CXX_FLAGS_DEBUG "-ggdb -O0")
 SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-ggdb -O2")
-
