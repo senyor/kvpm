@@ -14,17 +14,17 @@
 
 #include "mkfs.h"
 
-#include <KComboBox>
-#include <KIntSpinBox>
-#include <KLineEdit>
-#include <KLocale>
+#include <KLocalizedString>
 #include <KMessageBox>
-#include <KTabWidget>
 
+#include <QComboBox>
 #include <QDebug>
-#include <QFile>
 #include <QHBoxLayout>
+#include <QLabel>
+#include <QLineEdit>
+#include <QSpinBox>
 #include <QVBoxLayout>
+#include <QTabWidget>
 
 #include "logvol.h"
 #include "misc.h"
@@ -100,7 +100,7 @@ void MkfsDialog::buildDialog(const long long size)
     layout->addWidget(label);
     layout->addSpacing(5);
 
-    m_tab_widget = new KTabWidget(this);
+    m_tab_widget = new QTabWidget(this);
     m_tab_widget->addTab(generalTab(size), i18n("Filesystem Type"));
     m_tab_widget->addTab(advancedTab(), i18n("Standard Ext Options"));
     m_tab_widget->addTab(ext4Tab(), i18n("Additional Ext4 Options"));
@@ -163,7 +163,7 @@ QWidget* MkfsDialog::generalTab(const long long size)
     QHBoxLayout *const name_layout = new QHBoxLayout;
     QLabel *const name_label = new QLabel(i18n("Optional name or label: "));
     name_layout->addWidget(name_label);
-    m_name_edit = new KLineEdit();
+    m_name_edit = new QLineEdit();
     name_label->setBuddy(m_name_edit);
     name_layout->addWidget(m_name_edit);
     name_layout->addStretch();
@@ -188,7 +188,7 @@ QWidget* MkfsDialog::generalTab(const long long size)
         QHBoxLayout *const info_layout = new QHBoxLayout;
         info_layout->addStretch();
         QLabel *const icon_label = new QLabel();
-        icon_label->setPixmap(KIcon("dialog-information").pixmap(32, 32));
+        icon_label->setPixmap(QIcon::fromTheme(QStringLiteral("dialog-information")).pixmap(32, 32));
         info_layout->addWidget(icon_label);
         QLabel *const info_label = new QLabel(i18n("Some filesystems can not use a space this large and have been disabled."));
         info_label->setWordWrap(true);
@@ -325,7 +325,7 @@ QGroupBox* MkfsDialog::miscOptionsBox()
 
     label = new QLabel(i18n("Reserved space: "));
     reserved_layout->addWidget(label);
-    m_reserved_spin = new KIntSpinBox;
+    m_reserved_spin = new QSpinBox;
     label->setBuddy(m_reserved_spin);
     m_reserved_spin->setRange(0, 100);
     m_reserved_spin->setValue(5);
@@ -336,13 +336,13 @@ QGroupBox* MkfsDialog::miscOptionsBox()
 
     label = new QLabel(i18n("Block size: "));
     block_layout->addWidget(label);
-    m_block_combo = new KComboBox();
+    m_block_combo = new QComboBox();
     label->setBuddy(m_block_combo);
     m_block_combo->insertItem(0, i18nc("Let the program decide", "default"));
     m_block_combo->insertItem(1, "1024 KiB");
     m_block_combo->insertItem(2, "2048 KiB");
     m_block_combo->insertItem(3, "4096 KiB");
-    m_block_combo->setInsertPolicy(KComboBox::NoInsert);
+    m_block_combo->setInsertPolicy(QComboBox::NoInsert);
     m_block_combo->setCurrentIndex(0);
     block_layout->addWidget(m_block_combo);
     block_layout->addStretch();
@@ -350,13 +350,13 @@ QGroupBox* MkfsDialog::miscOptionsBox()
 
     label = new QLabel(i18n("Inode size: "));
     isize_layout->addWidget(label);
-    m_inode_combo = new KComboBox();
+    m_inode_combo = new QComboBox();
     label->setBuddy(m_inode_combo);
     m_inode_combo->insertItem(0, i18nc("Let the program decide", "default"));
     m_inode_combo->insertItem(1, "128 Bytes");
     m_inode_combo->insertItem(2, "256 Bytes");
     m_inode_combo->insertItem(3, "512 Bytes");
-    m_inode_combo->setInsertPolicy(KComboBox::NoInsert);
+    m_inode_combo->setInsertPolicy(QComboBox::NoInsert);
     m_inode_combo->setCurrentIndex(0);
     isize_layout->addWidget(m_inode_combo);
     isize_layout->addStretch();
@@ -364,7 +364,7 @@ QGroupBox* MkfsDialog::miscOptionsBox()
 
     label = new QLabel(i18n("Bytes / inode: "));
     inode_layout->addWidget(label);
-    m_inode_edit = new KLineEdit();
+    m_inode_edit = new QLineEdit();
     m_inode_edit->setPlaceholderText(i18nc("Let the program decide", "default"));
     label->setBuddy(m_inode_edit);
     QIntValidator *inode_validator = new QIntValidator(m_inode_edit);
@@ -375,7 +375,7 @@ QGroupBox* MkfsDialog::miscOptionsBox()
 
     label = new QLabel(i18n("Total inodes: "));
     total_layout->addWidget(label);
-    m_total_edit = new KLineEdit();
+    m_total_edit = new QLineEdit();
     m_total_edit->setPlaceholderText(i18nc("Let the program decide", "default"));
     label->setBuddy(m_total_edit);
     QIntValidator *const total_validator = new QIntValidator(m_total_edit);
@@ -429,7 +429,7 @@ QGroupBox* MkfsDialog::stripeBox()
     QHBoxLayout *const stride_layout = new QHBoxLayout;
     label = new QLabel(i18n("Stride size in blocks: "));
     stride_layout->addWidget(label);
-    m_stride_edit = new KLineEdit(QString("%1").arg(m_stride_size / 4096));
+    m_stride_edit = new QLineEdit(QString("%1").arg(m_stride_size / 4096));
     label->setBuddy(m_stride_edit);
     QIntValidator *const stride_validator = new QIntValidator(m_stride_edit);
     m_stride_edit->setValidator(stride_validator);
@@ -441,7 +441,7 @@ QGroupBox* MkfsDialog::stripeBox()
     QHBoxLayout *const count_layout  = new QHBoxLayout;
     label = new QLabel(i18n("Strides per stripe: "));
     count_layout->addWidget(label);
-    m_count_edit = new KLineEdit(QString("%1").arg(m_stride_count));
+    m_count_edit = new QLineEdit(QString("%1").arg(m_stride_count));
     label->setBuddy(m_count_edit);
     QIntValidator *const count_validator = new QIntValidator(m_count_edit);
     m_count_edit->setValidator(count_validator);

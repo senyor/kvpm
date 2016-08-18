@@ -19,17 +19,14 @@
 #include <QCheckBox>
 #include <QGroupBox>
 #include <QRadioButton>
-#include <QLabel>
-#include <QStringList>
 
 #include "kvpmdialog.h"
 
-class KIntSpinBox;
-class KTabWidget;
-class KLineEdit;
-class KComboBox;
+class QComboBox;
+class QLineEdit;
+class QSpinBox;
+class QTabWidget;
 
-class VolGroup;
 class LogVol;
 class StoragePartition;
 
@@ -41,7 +38,7 @@ class MkfsDialog : public KvpmDialog
     long m_stride_size; // stride size is in bytes here, not fs blocks
     int m_stride_count;
 
-    KTabWidget  *m_tab_widget;
+    QTabWidget  *m_tab_widget;
 
     QGroupBox   *m_stripe_box,       *m_base_options_box,
                 *m_ext4_options_box, *m_misc_options_box;
@@ -49,14 +46,14 @@ class MkfsDialog : public KvpmDialog
     QRadioButton *ext2, *ext3, *ext4, *reiser, *reiser4, *ntfs,
                  *jfs,  *xfs,  *vfat, *swap,   *btrfs,   *wipefs;
 
-    KIntSpinBox *m_reserved_spin;  // space reserved for root processes
-    KComboBox *m_block_combo;      // blocksize
-    KComboBox *m_inode_combo;      // inode size
-    KLineEdit *m_name_edit;        // volume name
-    KLineEdit *m_inode_edit;       // bytes / inode
-    KLineEdit *m_total_edit;       // total inode count
-    KLineEdit *m_stride_edit;      // stride size
-    KLineEdit *m_count_edit;       // strides per stripe
+    QSpinBox *m_reserved_spin;  // space reserved for root processes
+    QComboBox *m_block_combo;      // blocksize
+    QComboBox *m_inode_combo;      // inode size
+    QLineEdit *m_name_edit;        // volume name
+    QLineEdit *m_inode_edit;       // bytes / inode
+    QLineEdit *m_total_edit;       // total inode count
+    QLineEdit *m_stride_edit;      // stride size
+    QLineEdit *m_count_edit;       // strides per stripe
     QCheckBox *m_extent_check;
     QCheckBox *m_ext_attr_check;
     QCheckBox *m_resize_inode_check;
