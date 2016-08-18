@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2013, 2016 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -19,8 +19,6 @@
 #include "physvol.h"
 #include "topwindow.h"
 #include "vgreduce.h"
-#include "volgroup.h"
-
 #include "vgchange.h"
 #include "vgcreate.h"
 #include "vgextend.h"
@@ -31,29 +29,28 @@
 #include "vgimport.h"
 #include "vgsplit.h"
 #include "vgmerge.h"
+#include "volgroup.h"
 
+#include <KLocalizedString>
 
-#include <KAction>
-#include <KLocale>
-
-#include <QDebug>
+#include <QAction>
 
 
 
 VGActions::VGActions(QWidget *parent) :
     KActionCollection(parent)
 {
-    KAction *const remove = addAction("vgremove");
-    KAction *const reduce = addAction("vgreduce");
-    KAction *const extend = addAction("vgextend");
-    KAction *const rename = addAction("vgrename");
-    KAction *const merge  = addAction("vgmerge");
-    KAction *const split  = addAction("vgsplit");
-    KAction *const change = addAction("vgchange");
-    KAction *const create = addAction("vgcreate");
-    KAction *const vgimport = addAction("vgimport");
-    KAction *const vgexport = addAction("vgexport");
-    KAction *const remove_missing = addAction("vgremovemissing");
+    QAction *const remove = addAction("vgremove");
+    QAction *const reduce = addAction("vgreduce");
+    QAction *const extend = addAction("vgextend");
+    QAction *const rename = addAction("vgrename");
+    QAction *const merge  = addAction("vgmerge");
+    QAction *const split  = addAction("vgsplit");
+    QAction *const change = addAction("vgchange");
+    QAction *const create = addAction("vgcreate");
+    QAction *const vgimport = addAction("vgimport");
+    QAction *const vgexport = addAction("vgexport");
+    QAction *const remove_missing = addAction("vgremovemissing");
     
     remove->setText(i18n("Delete Volume Group..."));
     reduce->setText(i18n("Reduce Volume Group..."));
@@ -91,17 +88,17 @@ VGActions::VGActions(QWidget *parent) :
     vgexport->setIconText(i18n("Export"));
     remove_missing->setIconText(i18n("Remove Missing"));
     
-    remove->setIcon(KIcon("cross"));
-    reduce->setIcon(KIcon("delete"));
-    extend->setIcon(KIcon("add"));
-    rename->setIcon(KIcon("edit-rename"));
-    merge->setIcon(KIcon("arrow_join"));
-    split->setIcon(KIcon("arrow_divide"));
-    change->setIcon(KIcon("wrench")     );
-    create->setIcon(KIcon("document-new"));
-    vgimport->setIcon(KIcon("document-import"));
-    vgexport->setIcon(KIcon("document-export"));
-    remove_missing->setIcon(KIcon("error_go"));
+    remove->setIcon(QIcon::fromTheme(QStringLiteral("cross")));
+    reduce->setIcon(QIcon::fromTheme(QStringLiteral("delete")));
+    extend->setIcon(QIcon::fromTheme(QStringLiteral("add")));
+    rename->setIcon(QIcon::fromTheme(QStringLiteral("edit-rename")));
+    merge->setIcon(QIcon::fromTheme(QStringLiteral("arrow_join")));
+    split->setIcon(QIcon::fromTheme(QStringLiteral("arrow_divide")));
+    change->setIcon(QIcon::fromTheme(QStringLiteral("wrench"))     );
+    create->setIcon(QIcon::fromTheme(QStringLiteral("document-new")));
+    vgimport->setIcon(QIcon::fromTheme(QStringLiteral("document-import")));
+    vgexport->setIcon(QIcon::fromTheme(QStringLiteral("document-export")));
+    remove_missing->setIcon(QIcon::fromTheme(QStringLiteral("error_go")));
     
     setVg(nullptr);
 
