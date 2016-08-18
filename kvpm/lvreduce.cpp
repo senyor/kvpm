@@ -14,13 +14,12 @@
 
 #include "lvreduce.h"
 
-#include <KComboBox>
 #include <KConfigSkeleton>
-#include <KDoubleValidator>
-#include <KLineEdit>
-#include <KLocale>
+#include <KFormat>
+#include <KLocalizedString>
 #include <KMessageBox>
 
+#include <QLabel>
 #include <QVBoxLayout>
 
 #include "fsreduce.h"
@@ -113,13 +112,12 @@ LVReduceDialog::LVReduceDialog(LogVol *const volume, QWidget *parent) :
         skeleton.setCurrentGroup("General");
         skeleton.addItemBool("use_si_units", use_si_units, false);
 
-        KLocale::BinaryUnitDialect dialect;
-        KLocale *const locale = KGlobal::locale();
+        KFormat::BinaryUnitDialect dialect;
 
         if (use_si_units)
-            dialect = KLocale::MetricBinaryDialect;
+            dialect = KFormat::MetricBinaryDialect;
         else
-            dialect = KLocale::IECBinaryDialect;
+            dialect = KFormat::IECBinaryDialect;
 
         QVBoxLayout *const label_layout = new QVBoxLayout();
         QWidget *const label_widget = new QWidget();
@@ -132,7 +130,7 @@ LVReduceDialog::LVReduceDialog(LogVol *const volume, QWidget *parent) :
             lv_name_label->setText(i18n("Reduce logical volume: <b>%1</b>", m_lv->getName()));
 
         lv_name_label->setAlignment(Qt::AlignCenter);
-        QLabel *const lv_min_label  = new QLabel(i18n("Estimated minimum size: %1", locale->formatByteSize(min_extents * extent_size, 1, dialect)));
+        QLabel *const lv_min_label  = new QLabel(i18n("Estimated minimum size: %1", KFormat().formatByteSize(min_extents * extent_size, 1, dialect)));
 
         m_size_selector = new SizeSelectorBox(extent_size, min_extents, current_extents, current_extents, true, false, true);
 
