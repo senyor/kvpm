@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012, 2013, 2016 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -19,12 +19,10 @@
 
 #include "kvpmdialog.h"
 
-class KComboBox;
-class KLineEdit;
-class KTabWidget;
-
 class QCheckBox;
+class QComboBox;
 class QGroupBox;
+class QLineEdit;
 class QRadioButton;
 
 class LogVol;
@@ -55,11 +53,11 @@ class LVChangeDialog : public KvpmDialog
               *m_dmeventd_box,
               *m_polling_box;
 
-    KLineEdit *m_minor_edit,  // User entered device minor number
+    QLineEdit *m_minor_edit,  // User entered device minor number
               *m_major_edit,  // User entered device major number
               *m_tag_edit;    // new tag
 
-    KComboBox *m_deltag_combo;
+    QComboBox *m_deltag_combo;
 
     QWidget *buildGeneralTab();
     QWidget *buildAdvancedTab();

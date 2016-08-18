@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011, 2012, 2013, 2014 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012, 2013, 2014, 2016 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -21,16 +21,15 @@
 #include "processprogress.h"
 #include "volgroup.h"
 
-#include <KComboBox>
-#include <KLineEdit>
-#include <KLocale>
-#include <KTabWidget>
+#include <KLocalizedString>
 
 #include <QCheckBox>
-#include <QDebug>
+#include <QComboBox>
 #include <QGroupBox>
 #include <QLabel>
+#include <QLineEdit>
 #include <QRadioButton>
+#include <QTabWidget>
 #include <QVBoxLayout>
 
 
@@ -51,8 +50,7 @@ LVChangeDialog::LVChangeDialog(LogVol *const volume, QWidget *parent) :
     layout->addSpacing(10);
     layout->addStretch();
 
-    KTabWidget *const tab_widget = new KTabWidget();
-    tab_widget->setAutomaticResizeTabs(true);
+    QTabWidget *const tab_widget = new QTabWidget();
     layout->addWidget(tab_widget);
     tab_widget->addTab(buildGeneralTab(),  i18nc("The standard or basic options", "General"));
     tab_widget->addTab(buildAdvancedTab(), i18nc("Less used or complex options", "Advanced"));
@@ -110,7 +108,7 @@ QWidget *LVChangeDialog::buildGeneralTab()
     tag_group->setLayout(tag_group_layout);
     QLabel *const add_tag_label = new QLabel(i18n("Add new tag:"));
     add_tag_layout->addWidget(add_tag_label);
-    m_tag_edit = new KLineEdit();
+    m_tag_edit = new QLineEdit();
     add_tag_label->setBuddy(m_tag_edit);
     QRegExp rx("[0-9a-zA-Z_\\.+-]*");
     QRegExpValidator *tag_validator = new QRegExpValidator(rx, m_tag_edit);
@@ -118,7 +116,7 @@ QWidget *LVChangeDialog::buildGeneralTab()
     add_tag_layout->addWidget(m_tag_edit);
     QLabel *const del_tag_label = new QLabel(i18n("Remove tag:"));
     del_tag_layout->addWidget(del_tag_label);
-    m_deltag_combo = new KComboBox();
+    m_deltag_combo = new QComboBox();
     del_tag_label->setBuddy(m_deltag_combo);
     m_deltag_combo->setEditable(false);
     QStringList tags = m_lv->getTags();
@@ -205,13 +203,13 @@ QWidget *LVChangeDialog::buildAdvancedTab()
     devnum_layout->addLayout(major_layout);
     devnum_layout->addLayout(minor_layout);
 
-    m_major_edit = new KLineEdit(QString("%1").arg(m_lv->getMajorDevice()));
+    m_major_edit = new QLineEdit(QString("%1").arg(m_lv->getMajorDevice()));
     QLabel *const major_label = new QLabel(i18n("Major number: "));
     major_label->setBuddy(m_major_edit);
     major_layout->addWidget(major_label);
     major_layout->addWidget(m_major_edit);
 
-    m_minor_edit = new KLineEdit(QString("%1").arg(m_lv->getMinorDevice()));
+    m_minor_edit = new QLineEdit(QString("%1").arg(m_lv->getMinorDevice()));
     QLabel *const minor_label = new QLabel(i18n("Minor number: "));
     minor_label->setBuddy(m_minor_edit);
     minor_layout->addWidget(minor_label);

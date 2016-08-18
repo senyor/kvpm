@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013, 2016 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -19,15 +19,13 @@
 #include "lvactions.h"
 #include "volgroup.h"
 
-#include <KAction>
-#include <KActionCollection>
-#include <KLocale>
+#include <KLocalizedString>
 
-#include <QDebug>
+#include <QAction>
 
 
 LVActionsMenu::LVActionsMenu(LVActions *const lvactions, QWidget *parent) : 
-    KMenu(parent)
+    QMenu(parent)
 {
     addAction(lvactions->action("lvcreate"));
     addAction(lvactions->action("thinpool"));
@@ -46,7 +44,7 @@ LVActionsMenu::LVActionsMenu(LVActions *const lvactions, QWidget *parent) :
     addAction(lvactions->action("lvchange"));
     addSeparator();
 
-    KMenu *const raid_menu = new KMenu(i18n("Mirrors and RAID"), this);
+    QMenu *const raid_menu = new QMenu(i18n("Mirrors and RAID"), this);
     raid_menu->addAction(lvactions->action("addlegs"));
     raid_menu->addAction(lvactions->action("changelog"));
     raid_menu->addAction(lvactions->action("removemirror"));
@@ -56,7 +54,7 @@ LVActionsMenu::LVActionsMenu(LVActions *const lvactions, QWidget *parent) :
     raid_menu->addAction(lvactions->action("resync"));
     addMenu(raid_menu);
 
-    KMenu *const fs_menu = new KMenu(i18n("Filesystem operations"), this);
+    QMenu *const fs_menu = new QMenu(i18n("Filesystem operations"), this);
     fs_menu->addAction(lvactions->action("mount"));
     fs_menu->addAction(lvactions->action("unmount"));
     fs_menu->addSeparator();
