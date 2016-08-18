@@ -18,13 +18,9 @@
 
 #include "kvpmdialog.h"
 
-class KLineEdit;
-class KComboBox;
-class KDoubleValidator;
 
 class LogVol;
 class SizeSelectorBox;
-class VolGroup;
 
 
 class LVReduceDialog : public KvpmDialog
