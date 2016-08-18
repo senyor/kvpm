@@ -15,15 +15,14 @@
 #ifndef LVCREATE_H
 #define LVCREATE_H
 
-#include <KDialog>
 
 #include <QSharedPointer>
 #include <QStringList>
 
 #include "lvcreatebase.h"
 
-class KIntSpinBox;
-class KComboBox;
+class QSpinBox;
+class QComboBox;
 class QGroupBox;
 
 class LogVol;
@@ -47,12 +46,12 @@ class LVCreateDialog : public LvCreateDialogBase
     QGroupBox *m_volume_box;   
     PvGroupBox *m_pv_box;
 
-    KComboBox *m_stripe_size_combo,
+    QComboBox *m_stripe_size_combo,
               *m_type_combo,
               *m_log_combo,
               *m_chunk_combo;
 
-    KIntSpinBox *m_mirror_count_spin,  // how many mirrors we want
+    QSpinBox *m_mirror_count_spin,  // how many mirrors we want
                 *m_stripe_count_spin;  // how many stripes we want
 
     QWidget *m_stripe_widget,

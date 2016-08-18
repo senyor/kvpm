@@ -27,19 +27,13 @@
 
 #include <math.h>
 
-#include <KComboBox>
-#include <KConfigSkeleton>
-#include <KGlobal>
-#include <KIntSpinBox>
-#include <KLineEdit>
-#include <KLocale>
+#include <KLocalizedString>
 #include <KMessageBox>
 
-#include <QCheckBox>
-#include <QDebug>
+#include <QComboBox>
 #include <QGroupBox>
 #include <QLabel>
-#include <QRadioButton>
+#include <QSpinBox>
 
 
 
@@ -229,7 +223,7 @@ QWidget* LVCreateDialog::createChunkWidget()
     QWidget *const widget = new QWidget;
     QHBoxLayout *const layout = new QHBoxLayout;
     layout->addWidget(new QLabel(i18n("Chunk size: ")));
-    m_chunk_combo = new KComboBox();
+    m_chunk_combo = new QComboBox();
     m_chunk_combo->addItem(i18n("default"));
     layout->addWidget(m_chunk_combo);    
     unsigned int chunk;
@@ -254,7 +248,7 @@ QWidget* LVCreateDialog::createStripeWidget()
     QWidget *const widget = new QWidget;
     QVBoxLayout *const layout = new QVBoxLayout;
 
-    m_stripe_size_combo = new KComboBox();
+    m_stripe_size_combo = new QComboBox();
     m_stripe_size_combo->setEnabled(false);
     for (int n = 2; (round(pow(2, n) * 1024)) <= getVg()->getExtentSize() ; n++) {
         m_stripe_size_combo->addItem(QString("%1").arg(round(pow(2, n))) + " KiB");
@@ -268,7 +262,7 @@ QWidget* LVCreateDialog::createStripeWidget()
     QLabel *const size_label = new QLabel(i18n("Stripe Size: "));
     size_label->setBuddy(m_stripe_size_combo);
     
-    m_stripe_count_spin = new KIntSpinBox();
+    m_stripe_count_spin = new QSpinBox();
     m_stripe_count_spin->setEnabled(m_stripe_size_combo->isEnabled());
     m_stripe_count_spin->setRange(1, getMaxStripes()); 
     m_stripe_count_spin->setSpecialValueText(i18n("none"));
@@ -352,7 +346,7 @@ QWidget* LVCreateDialog::createMirrorWidget(int pvcount)
 {
     QWidget *const widget = new QWidget;
 
-    m_log_combo = new KComboBox;
+    m_log_combo = new QComboBox;
     m_log_combo->addItem(i18n("Mirrored disk based log"));
     m_log_combo->addItem(i18n("Single disk based log"));
     m_log_combo->addItem(i18n("Memory based log"));
@@ -364,7 +358,7 @@ QWidget* LVCreateDialog::createMirrorWidget(int pvcount)
     log_layout->addWidget(m_log_combo);
 
     QHBoxLayout *const spin_layout = new QHBoxLayout();
-    m_mirror_count_spin = new KIntSpinBox();
+    m_mirror_count_spin = new QSpinBox();
     m_mirror_count_spin->setRange(1, pvcount);
 
     if (m_extend) {
@@ -406,7 +400,7 @@ QWidget* LVCreateDialog::createTypeWidget(int pvcount)
 {
     QWidget *const widget = new QWidget;
 
-    m_type_combo = new KComboBox();
+    m_type_combo = new QComboBox();
     m_type_combo->addItem(i18n("Linear"));
 
     if (m_extend) {

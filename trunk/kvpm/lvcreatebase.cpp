@@ -19,20 +19,17 @@
 #include "sizeselectorbox.h"
 #include "volgroup.h"
 
-#include <math.h>
+#include <cmath>
 
 #include <KConfigSkeleton>
-#include <KGlobal>
-#include <KIcon>
-#include <KLineEdit>
-#include <KLocale>
-#include <KMessageBox>
-#include <KTabWidget>
+#include <KFormat>
+#include <KLocalizedString>
 
 #include <QCheckBox>
-#include <QDebug>
 #include <QGroupBox>
+#include <QIcon>
 #include <QLabel>
+#include <QTabWidget>
 #include <QVBoxLayout>
 
 
@@ -81,7 +78,7 @@ LvCreateDialogBase::LvCreateDialogBase(const VolGroup *const vg, long long maxFs
         show_monitor = false;
     }
 
-    m_tab_widget = new KTabWidget(this);
+    m_tab_widget = new QTabWidget(this);
     m_tab_widget->addTab(createGeneralTab(show_name_tag, show_ro, show_zero, show_misc),  i18nc("The standard common options", "General"));
     m_tab_widget->addTab(createAdvancedTab(show_persistent, show_skip_sync, show_monitor), i18nc("Less used, dangerous or complex options", "Advanced options"));
 
@@ -172,7 +169,7 @@ QWidget* LvCreateDialogBase::createGeneralTab(bool showNameTag, bool showRo, boo
 
     if (showNameTag) {
         QHBoxLayout *const name_layout = new QHBoxLayout();
-        m_name_edit = new KLineEdit();
+        m_name_edit = new QLineEdit();
         
         QRegExp rx("[0-9a-zA-Z_\\.][-0-9a-zA-Z_\\.]*");
         m_name_validator = new QRegExpValidator(rx, m_name_edit);
@@ -188,7 +185,7 @@ QWidget* LvCreateDialogBase::createGeneralTab(bool showNameTag, bool showRo, boo
         volume_layout->insertLayout(0, name_layout);
         
         QHBoxLayout *const tag_layout = new QHBoxLayout();
-        m_tag_edit = new KLineEdit();
+        m_tag_edit = new QLineEdit();
         
         QRegExp rx2("[0-9a-zA-Z_\\.+-]*");
         m_tag_validator = new QRegExpValidator(rx2, m_tag_edit);
@@ -310,8 +307,8 @@ QWidget* LvCreateDialogBase::createAdvancedTab(bool showPersistent, bool showSki
         QVBoxLayout *const persistent_layout   = new QVBoxLayout;
         QHBoxLayout *const minor_number_layout = new QHBoxLayout;
         QHBoxLayout *const major_number_layout = new QHBoxLayout;
-        m_minor_edit = new KLineEdit();
-        m_major_edit = new KLineEdit();
+        m_minor_edit = new QLineEdit();
+        m_major_edit = new QLineEdit();
         QLabel *const minor_number = new QLabel(i18n("Device minor number: "));
         QLabel *const major_number = new QLabel(i18n("Device major number: "));
         minor_number->setBuddy(m_minor_edit);
@@ -561,15 +558,14 @@ void LvCreateDialogBase::initializeSizeSelector(long long extentSize, long long 
     connect(m_size_selector, SIGNAL(stateChanged()),
             this, SLOT(setSizeLabels()));
 
-    KLocale::BinaryUnitDialect dialect;
-    KLocale *const locale = KGlobal::locale();
+    KFormat::BinaryUnitDialect dialect;
 
     if (m_use_si_units)
-        dialect = KLocale::MetricBinaryDialect;
+        dialect = KFormat::MetricBinaryDialect;
     else
-        dialect = KLocale::IECBinaryDialect;
+        dialect = KFormat::IECBinaryDialect;
 
-    m_current_label->setText(i18n("Current size: %1", locale->formatByteSize(currentExtents * extentSize, 1, dialect)));
+    m_current_label->setText(i18n("Current size: %1", KFormat().formatByteSize(currentExtents * extentSize, 1, dialect)));
 }
 
 void LvCreateDialogBase::setSelectorMaxExtents(long long max)
@@ -604,7 +600,7 @@ QWidget* LvCreateDialogBase::createWarningWidget()
     QHBoxLayout *const layout = new QHBoxLayout();
 
     QLabel *const exclamation = new QLabel(); 
-    exclamation->setPixmap(KIcon("dialog-warning").pixmap(32, 32));
+    exclamation->setPixmap(QIcon::fromTheme(QStringLiteral("dialog-warning")).pixmap(32, 32));
     m_warning_label = new QLabel();
     layout->addWidget(exclamation);
     layout->addWidget(m_warning_label);
@@ -633,13 +629,12 @@ const VolGroup* LvCreateDialogBase::getVg()
 
 void LvCreateDialogBase::setSizeLabels()
 {
-    KLocale::BinaryUnitDialect dialect;
-    KLocale *const locale = KGlobal::locale();
+    KFormat::BinaryUnitDialect dialect;
 
     if (m_use_si_units)
-        dialect = KLocale::MetricBinaryDialect;
+        dialect = KFormat::MetricBinaryDialect;
     else
-        dialect = KLocale::IECBinaryDialect;
+        dialect = KFormat::IECBinaryDialect;
 
     if (m_size_selector != NULL) {
 
@@ -648,9 +643,9 @@ void LvCreateDialogBase::setSizeLabels()
 
         if (m_size_selector->usingBytes()) {
             if (extend >= 0)
-                m_extend_label->setText(i18n("Increasing size: +%1", locale->formatByteSize(extend * extent_size, 1, dialect)));
+                m_extend_label->setText(i18n("Increasing size: +%1", KFormat().formatByteSize(extend * extent_size, 1, dialect)));
             else
-                m_extend_label->setText(i18n("Increasing size: %1", locale->formatByteSize(extend * extent_size, 1, dialect)));
+                m_extend_label->setText(i18n("Increasing size: %1", KFormat().formatByteSize(extend * extent_size, 1, dialect)));
         } else {
             if (extend >= 0)
                 m_extend_label->setText(i18n("Increasing extents: +%1", extend));
@@ -660,14 +655,14 @@ void LvCreateDialogBase::setSizeLabels()
 
         if (m_maxfs_size < 0) {
             if (m_size_selector->usingBytes()) {
-                m_max_size_label->setText(i18n("Maximum volume size: %1", locale->formatByteSize(m_max_size, 1, dialect)));
+                m_max_size_label->setText(i18n("Maximum volume size: %1", KFormat().formatByteSize(m_max_size, 1, dialect)));
             } else {
                 m_max_size_label->setText(i18n("Maximum volume extents: %1", m_max_size / extent_size));
             }
         } else {
             if (m_size_selector->usingBytes()) {
-                m_max_size_label->setText(i18n("Maximum volume size: %1", locale->formatByteSize(m_max_size, 1, dialect)));
-                m_maxfs_size_label->setText(i18n("Maximum filesystem size: %1", locale->formatByteSize(m_maxfs_size, 1, dialect)));
+                m_max_size_label->setText(i18n("Maximum volume size: %1", KFormat().formatByteSize(m_max_size, 1, dialect)));
+                m_maxfs_size_label->setText(i18n("Maximum filesystem size: %1", KFormat().formatByteSize(m_maxfs_size, 1, dialect)));
             } else {
                 m_max_size_label->setText(i18n("Maximum volume extents: %1", m_max_size / extent_size));
                 m_maxfs_size_label->setText(i18n("Maximum filesystem extents: %1", m_maxfs_size / extent_size));
