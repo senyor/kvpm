@@ -15,16 +15,14 @@
 #ifndef VGMERGE_H
 #define VGMERGE_H
 
-#include <stdint.h>
-
-#include <KDialog>
+#include <cstdint>
 
 #include <QList>
 
 
 #include "kvpmdialog.h"
 
-class KComboBox;
+class QComboBox;
 
 class QCheckBox;
 class QStackedWidget;
@@ -37,7 +35,7 @@ class VGMergeDialog : public KvpmDialog
     Q_OBJECT
 
     VolGroup  *m_vg;
-    KComboBox *m_target_combo;
+    QComboBox *m_target_combo;
     QCheckBox *m_autobackup;
     QStackedWidget *m_error_stack;
     QList<long long> m_extent_size;
