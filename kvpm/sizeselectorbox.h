@@ -15,14 +15,12 @@
 #ifndef SIZESELECTORBOX_H
 #define SIZESELECTORBOX_H
 
-#include <KComboBox>
-#include <KLineEdit>
-
 #include <QCheckBox>
+#include <QComboBox>
 #include <QDoubleValidator>
 #include <QGroupBox>
+#include <QLineEdit>
 #include <QSlider>
-#include <QLabel>
 
 class SizeSelectorBox : public QGroupBox
 {
@@ -36,8 +34,8 @@ class SizeSelectorBox : public QGroupBox
     long long  m_initial_size;    // Starting size in sectors or extents, not bytes etc.
     long long  m_unit_size;       // the size of the extents or sectors in bytes
     QSlider   *m_size_slider;
-    KComboBox *m_suffix_combo;
-    KLineEdit *m_size_edit;
+    QComboBox *m_suffix_combo;
+    QLineEdit *m_size_edit;
     QDoubleValidator *m_size_validator;
     QCheckBox *m_shrink_box;    // Allow partition/volume to shrink.
     QCheckBox *m_size_box;      // Lock size to change
