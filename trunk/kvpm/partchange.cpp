@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2009, 2010, 2011, 2012, 2013, 2014 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2009, 2010, 2011, 2012, 2013, 2014, 2016 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -26,17 +26,13 @@
 #include "storagepartition.h"
 #include "topwindow.h"
 
-#include <math.h>
+#include <cmath>
 
-#include <KApplication>
-#include <KButtonGroup>
-#include <KGlobal>
-#include <KLocale>
+#include <QApplication>
+#include <QPushButton>
+
+#include <KLocalizedString>
 #include <KMessageBox>
-#include <KPushButton>
-
-#include <QDebug>
-
 
 
 PartitionChangeDialog::PartitionChangeDialog(StoragePartition *const partition, QWidget *parent)

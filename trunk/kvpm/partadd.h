@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2009, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2009, 2011, 2012, 2013, 2016 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -17,11 +17,9 @@
 
 #include <parted/parted.h>
 
-#include <KDialog>
-
 #include "partbase.h"
 
-class KComboBox;
+class QComboBox;
 class QGroupBox;
 
 class StoragePartition;
@@ -36,7 +34,7 @@ class PartitionAddDialog : public PartitionDialogBase
 
     bool m_bailout;
 
-    KComboBox *m_type_combo;
+    QComboBox *m_type_combo;
 
     void getMaximumPartition(PedSector &start, PedSector &end, PedSector &sectorSize);
     QGroupBox *buildTypeWidget();
