@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2009, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2009, 2010, 2011, 2012, 2013, 2016 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -18,29 +18,24 @@
 #include "executablefinder.h"
 
 #include <KColorButton>
-#include <KComboBox>
 #include <KConfigSkeleton>
 #include <KEditListBox>
-#include <KIcon>
-#include <KIconLoader>
-#include <KIntSpinBox>
-#include <KListWidget>
-#include <KLocale>
-#include <KMessageBox>
-#include <KPageWidgetItem>
+#include <KLocalizedString>
 #include <KSeparator>
-#include <KTabWidget>
 
 #include <QCheckBox>
-#include <QDebug>
+#include <QComboBox>
 #include <QGroupBox>
 #include <QHBoxLayout>
 #include <QHeaderView>
+#include <QIcon>
 #include <QLabel>
 #include <QRadioButton>
+#include <QSpinBox>
 #include <QStackedWidget>
 #include <QString>
 #include <QTableWidget>
+#include <QTabWidget>
 #include <QVBoxLayout>
 
 
@@ -55,7 +50,7 @@ KvpmConfigDialog::KvpmConfigDialog(QWidget *parent,
       m_executable_finder(executableFinder)
 {
     setFaceType(KPageDialog::Auto);
-    setDefaultButton(KDialog::Cancel);
+    button(QDialogButtonBox::Help)->setDefault(true);
 
     addPage(generalPage(), i18nc("The standard common options", "General"), QString("configure"));
     addPage(colorsPage(), i18n("Colors"), QString("color-picker"));
@@ -67,9 +62,9 @@ KvpmConfigDialog::~KvpmConfigDialog()
     m_skeleton->deleteLater();
 }
 
-KTabWidget *KvpmConfigDialog::generalPage()
+QTabWidget *KvpmConfigDialog::generalPage()
 {
-    KTabWidget *const tabwidget = new KTabWidget;
+    QTabWidget *const tabwidget = new QTabWidget;
     tabwidget->insertTab(1, treesTab(), i18n("Tree Views"));
     tabwidget->insertTab(1, propertiesTab(), i18n("Property Panels"));
 
@@ -115,7 +110,7 @@ QWidget *KvpmConfigDialog::propertiesTab()
     return properties;
 }
 
-KTabWidget *KvpmConfigDialog::programsPage()
+QTabWidget *KvpmConfigDialog::programsPage()
 {
     m_executables_table = new QTableWidget();
     m_executables_table->setColumnCount(2);
@@ -124,7 +119,7 @@ KTabWidget *KvpmConfigDialog::programsPage()
 
     m_executables_table->setHorizontalHeaderLabels(headers);
 
-    KTabWidget  *const programs = new KTabWidget;
+    QTabWidget  *const programs = new QTabWidget;
     QVBoxLayout *const programs1_layout = new QVBoxLayout();
     QVBoxLayout *const programs2_layout = new QVBoxLayout();
     QWidget *const programs1 = new QWidget();
@@ -196,7 +191,7 @@ void KvpmConfigDialog::fillExecutablesTable()
         table_item = new QTableWidgetItem(not_found[x]);
         m_executables_table->setItem(x, 0, table_item);
 
-        table_item = new QTableWidgetItem(KIcon("dialog-error"), "Not Found");
+        table_item = new QTableWidgetItem(QIcon::fromTheme(QStringLiteral("dialog-error")), "Not Found");
         m_executables_table->setItem(x, 1, table_item);
     }
 
@@ -490,12 +485,12 @@ QGroupBox *KvpmConfigDialog::allGroup()
     QHBoxLayout *const pv_warn_layout = new QHBoxLayout;
     warn_layout->addWidget(new QLabel(i18n("Show warning icon")));
     QLabel *const warn_icon = new QLabel;
-    warn_icon->setPixmap(KIcon("dialog-warning").pixmap(16, 16));
+    warn_icon->setPixmap(QIcon::fromTheme(QStringLiteral("dialog-warning")).pixmap(16, 16));
     warn_layout->addWidget(warn_icon);
     percent_layout->addLayout(warn_layout);
     percent_layout->addWidget(new QLabel(i18n("when space falls to or below:")));
 
-    KIntSpinBox *const fs_warn_spin = new KIntSpinBox;
+    QSpinBox *const fs_warn_spin = new QSpinBox;
     fs_warn_spin->setObjectName("kcfg_fs_warn");
     fs_warn_spin->setRange(0, 99);
     fs_warn_spin->setSingleStep(1);
@@ -507,7 +502,7 @@ QGroupBox *KvpmConfigDialog::allGroup()
     fs_warn_layout->addWidget(fs_warn_label);
     fs_warn_layout->addStretch();
 
-    KIntSpinBox *const pv_warn_spin = new KIntSpinBox;
+    QSpinBox *const pv_warn_spin = new QSpinBox;
     pv_warn_spin->setObjectName("kcfg_pv_warn");
     pv_warn_spin->setRange(0, 99);
     pv_warn_spin->setSingleStep(1);
@@ -648,7 +643,7 @@ QWidget *KvpmConfigDialog::colorsPage()
     m_skeleton->addItemInt("type_combo", type_combo_index, 0);
 
     QHBoxLayout *const combo_layout = new QHBoxLayout();
-    KComboBox *const combo = new KComboBox();
+    QComboBox *const combo = new QComboBox();
     combo->setObjectName("kcfg_type_combo");
 
     combo->addItem(i18n("Use color graphics by volume or partition type"));

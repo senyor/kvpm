@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2009, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2009, 2010, 2011, 2012, 2013, 2016 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -20,14 +20,13 @@
 class KConfigSkeleton;
 class KColorButton;
 class KEditListBox;
-class KPageWidgetItem;
-class KTabWidget;
 
 class QGroupBox;
 class QLabel;
 class QStackedWidget;
 class QString;
 class QTableWidget;
+class QTabWidget;
 class QWidget;
 
 class ExecutableFinder;
@@ -48,12 +47,12 @@ class KvpmConfigDialog: public KConfigDialog
     QLabel *m_primary_label = nullptr;
     QLabel *m_logical_label = nullptr;
 
-    KTabWidget *generalPage();
+    QTabWidget *generalPage();
     QWidget    *colorsPage();
     QWidget    *fsColors();
     QWidget    *typeColors();
     QWidget    *otherColors();
-    KTabWidget *programsPage();
+    QTabWidget *programsPage();
     QGroupBox *allGroup();
     QGroupBox *deviceGroup();
     QGroupBox *logicalGroup();
