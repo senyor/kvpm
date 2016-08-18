@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012, 2016 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -21,14 +21,14 @@
 #include <sys/types.h>
 #include <signal.h>
 
-#include <KApplication>
-#include <KLocale>
+#include <KLocalizedString>
 #include <KMessageBox>
-#include <KProcess>
 #include <KProgressDialog>
 
+#include <QApplication>
 #include <QDebug>
 #include <QEventLoop>
+#include <QProcess>
 
 
 ProcessProgress::ProcessProgress(QStringList arguments, const bool allowCancel, QObject *parent) : QObject(parent)
@@ -46,7 +46,7 @@ ProcessProgress::ProcessProgress(QStringList arguments, const bool allowCancel, 
         if (!executable_path.isEmpty()) {
 
             qApp->setOverrideCursor(Qt::WaitCursor);
-            m_process = new KProcess(this);
+            m_process = new QProcess(this);
             QStringList environment = QProcess::systemEnvironment();
             environment << "LVM_SUPPRESS_FD_WARNINGS=1";
             m_process->setEnvironment(environment);
@@ -79,9 +79,10 @@ ProcessProgress::ProcessProgress(QStringList arguments, const bool allowCancel, 
             connect(m_process, SIGNAL(readyReadStandardError()),
                     this,      SLOT(readStandardError()));
 
-            m_process->setOutputChannelMode(KProcess::SeparateChannels);
+            m_process->setProcessChannelMode(QProcess::SeparateChannels);
             m_process->setReadChannel(QProcess::StandardOutput);
-            m_process->setProgram(executable_path, arguments);
+            m_process->setProgram(executable_path);
+            m_process->setArguments(arguments);
 
             m_process->start();
             m_process->closeWriteChannel();
@@ -118,9 +119,9 @@ void ProcessProgress::cleanup(const int code, const QProcess::ExitStatus status)
         const QString errors = m_output_all.join("");
 
         if (status != QProcess::CrashExit || cancelled)
-            KMessageBox::error(NULL, i18n("%1 produced this output: %2", m_process->program().takeFirst(), errors));
+            KMessageBox::error(NULL, i18n("%1 produced this output: %2", m_process->program(), errors));
         else
-            KMessageBox::error(NULL, i18n("%1 <b>crashed</b> with this output: %2", m_process->program().takeFirst(), errors));
+            KMessageBox::error(NULL, i18n("%1 <b>crashed</b> with this output: %2", m_process->program(), errors));
     }
 
     TopWindow::getProgressBox()->reset();
@@ -143,7 +144,7 @@ int ProcessProgress::exitCode()
 
 void ProcessProgress::cancelProcess()
 {
-    const QString warning = i18n("<b>Really kill process %1</b>", m_process->program().takeFirst());
+    const QString warning = i18n("<b>Really kill process %1</b>", m_process->program());
 
     kill(m_process->pid(), SIGSTOP);
 
