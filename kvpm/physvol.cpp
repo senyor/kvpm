@@ -21,7 +21,6 @@
 #include <QByteArray>
 #include <QDebug>
 #include <QtAlgorithms>
-#include <QListIterator>
 
 
 
