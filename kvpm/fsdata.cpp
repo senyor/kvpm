@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2010, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2010, 2011, 2016 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -19,7 +19,6 @@
 #include <sys/statvfs.h>
 
 #include <QByteArray>
-#include <QDebug>
 #include <QString>
 
 #include "misc.h"
