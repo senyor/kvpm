@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013, 2016 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -24,7 +24,6 @@
 #include "storagedevice.h"
 
 #include <KConfigSkeleton>
-#include <KLocale>
 #include <KToolBar>
 
 #include <QSplitter>
@@ -95,7 +94,7 @@ void DeviceTab::deviceContextMenu(QTreeWidgetItem *item)
 {
     m_device_actions->changeDevice(item);
 
-    KMenu *menu = new DeviceMenu(m_device_actions, this);
+    QMenu *menu = new DeviceMenu(m_device_actions, this);
     menu->exec(QCursor::pos());
     menu->deleteLater();
 }

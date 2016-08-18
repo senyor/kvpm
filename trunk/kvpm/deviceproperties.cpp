@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013, 2016 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -22,9 +22,7 @@
 #include "storagepartition.h"
 
 #include <KConfigSkeleton>
-#include <KGlobal>
-#include <KLocale>
-#include <KSeparator>
+#include <KLocalizedString>
 
 #include <QLabel>
 #include <QVBoxLayout>
