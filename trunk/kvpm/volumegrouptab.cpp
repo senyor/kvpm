@@ -15,23 +15,13 @@
 
 #include "volumegrouptab.h"
 
-#include <QDebug>
-#include <QFrame>
-#include <QLabel>
-#include <QScrollArea>
 #include <QSplitter>
 #include <QString>
 #include <QTreeWidgetItem>
 #include <QVBoxLayout>
 
-#include <KActionCollection>
-#include <KComponentData>
 #include <KConfigSkeleton>
-#include <KGlobal>
-#include <KIcon>
-#include <KLocale>
 #include <KSeparator>
-#include <KSharedConfig>
 #include <KToolBar>
 
 #include "lvpropertiesstack.h"
@@ -280,7 +270,7 @@ void VolumeGroupTab::lvContextMenu(LogVol *lv)
 {
     m_lv_actions->changeLv(lv, -1);
     
-    KMenu *menu = new LVActionsMenu(m_lv_actions, this);
+    QMenu *menu = new LVActionsMenu(m_lv_actions, this);
     menu->exec(QCursor::pos());
     menu->deleteLater();
 }
@@ -289,7 +279,7 @@ void VolumeGroupTab::lvContextMenu(QTreeWidgetItem *item)
 {
     m_lv_actions->changeLv(item);
 
-    KMenu *menu = new LVActionsMenu(m_lv_actions, this);
+    QMenu *menu = new LVActionsMenu(m_lv_actions, this);
     menu->exec(QCursor::pos());
     menu->deleteLater();
 }
@@ -298,7 +288,7 @@ void VolumeGroupTab::pvContextMenu(QTreeWidgetItem *item)
 {
     m_pv_actions->changePv(item);
 
-    KMenu *menu = new PVActionsMenu(m_pv_actions, this);
+    QMenu *menu = new PVActionsMenu(m_pv_actions, this);
     menu->exec(QCursor::pos());
     menu->deleteLater();
 }

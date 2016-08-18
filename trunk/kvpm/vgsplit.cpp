@@ -21,20 +21,17 @@
 #include "processprogress.h"
 #include "volgroup.h"
 
-#include <KDialog>
-#include <KLineEdit>
-#include <KListWidget>
-#include <KLocale>
+#include <KLocalizedString>
 #include <KMessageBox>
-#include <KPushButton>
-#include <KTabWidget>
 
 #include <QCheckBox>
-#include <QDebug>
 #include <QHBoxLayout>
 #include <QLabel>
+#include <QLineEdit>
+#include <QListWidget>
+#include <QPushButton>
 #include <QRegExpValidator>
-#include <QTableWidget>
+#include <QTabWidget>
 #include <QVBoxLayout>
 
 
@@ -55,7 +52,7 @@ VGSplitDialog::VGSplitDialog(VolGroup *volumeGroup, QWidget *parent) :
     layout->addWidget(name_label);
     layout->addSpacing(10);
 
-    m_new_vg_name = new KLineEdit();
+    m_new_vg_name = new QLineEdit();
     QRegExp rx("[0-9a-zA-Z_\\.][-0-9a-zA-Z_\\.]*");
     m_validator = new QRegExpValidator(rx, m_new_vg_name);
     m_new_vg_name->setValidator(m_validator);
@@ -71,7 +68,7 @@ VGSplitDialog::VGSplitDialog(VolGroup *volumeGroup, QWidget *parent) :
     connect(m_new_vg_name, SIGNAL(textEdited(QString)),
             this, SLOT(validateOK()));
 
-    KTabWidget *const tw = new KTabWidget();
+    QTabWidget *const tw = new QTabWidget();
     layout->addWidget(tw);
 
     QStringList mobile_lv_names, fixed_lv_names, mobile_pv_names, fixed_pv_names;
@@ -176,11 +173,11 @@ QWidget *VGSplitDialog::buildLvLists(const QStringList mobileLvNames, const QStr
     QVBoxLayout *const left_layout = new QVBoxLayout;
     QVBoxLayout *const center_layout = new QVBoxLayout;
     QVBoxLayout *const right_layout = new QVBoxLayout;
-    m_lv_add = new KPushButton(KIcon("arrow-right"), i18n("Add"));
-    m_lv_remove = new KPushButton(KIcon("arrow-left"), i18n("Remove"));
+    m_lv_add = new QPushButton(QIcon::fromTheme(QStringLiteral("arrow-right")), i18n("Add"));
+    m_lv_remove = new QPushButton(QIcon::fromTheme(QStringLiteral("arrow-left")), i18n("Remove"));
 
-    m_left_lv_list = new KListWidget();
-    m_right_lv_list = new KListWidget();
+    m_left_lv_list = new QListWidget();
+    m_right_lv_list = new QListWidget();
     m_left_lv_list->setSelectionMode(QAbstractItemView::ExtendedSelection);
     m_right_lv_list->setSelectionMode(QAbstractItemView::ExtendedSelection);
     m_left_lv_list->setSortingEnabled(true);
@@ -239,15 +236,15 @@ QWidget *VGSplitDialog::buildPvLists(const QStringList mobilePvNames, const QStr
     QVBoxLayout *const left_layout = new QVBoxLayout;
     QVBoxLayout *const center_layout = new QVBoxLayout;
     QVBoxLayout *const right_layout = new QVBoxLayout;
-    m_pv_add = new KPushButton(KIcon("arrow-right"), "Add");
-    m_pv_remove = new KPushButton(KIcon("arrow-left"), "Remove");
+    m_pv_add = new QPushButton(QIcon::fromTheme(QStringLiteral("arrow-right")), "Add");
+    m_pv_remove = new QPushButton(QIcon::fromTheme(QStringLiteral("arrow-left")), "Remove");
 
     QListWidgetItem *pv_item;
     QStringList open_pv_names;
     QStringList closed_pv_names;
 
-    m_left_pv_list = new KListWidget();
-    m_right_pv_list = new KListWidget();
+    m_left_pv_list = new QListWidget();
+    m_right_pv_list = new QListWidget();
     m_left_pv_list->setSelectionMode(QAbstractItemView::ExtendedSelection);
     m_right_pv_list->setSelectionMode(QAbstractItemView::ExtendedSelection);
     m_left_pv_list->setSortingEnabled(true);
@@ -347,8 +344,8 @@ void VGSplitDialog::removePvList()
 }
 
 void VGSplitDialog::moveNames(const bool isLvMove,
-                              KListWidget *const lvSource, KListWidget *const lvTarget,
-                              KListWidget *const pvSource, KListWidget *const pvTarget)
+                              QListWidget *const lvSource, QListWidget *const lvTarget,
+                              QListWidget *const pvSource, QListWidget *const pvTarget)
 {
     QList<QListWidgetItem *> selected_items;
     QList<QListWidgetItem *> moving_items;
