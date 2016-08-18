@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2009, 2010, 2011, 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011, 2013, 2016 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -19,9 +19,8 @@
 #include "storagepartition.h"
 
 #include <KConfigSkeleton>
-#include <KLocale>
+#include <KLocalizedString>
 
-#include <QStringList>
 #include <QTreeWidget>
 #include <QTreeWidgetItem>
 
