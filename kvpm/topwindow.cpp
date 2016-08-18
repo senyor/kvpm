@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013, 2014 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2014 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -16,21 +16,18 @@
 #include "topwindow.h"
 
 #include <KAboutData>
-#include <KActionCollection>
-#include <KAction>
-#include <KApplication>
 #include <KConfigSkeleton>
 #include <KHelpMenu>
-#include <KIcon>
-#include <KLocale>
-#include <KMenu>
-#include <KMenuBar>
+#include <KLocalizedString>
 #include <KStandardAction>
 #include <KToggleAction>
 
+#include <QAction>
 #include <QActionGroup>
-#include <QDebug>
-#include <QVBoxLayout>
+#include <QApplication>
+#include <QMenu>
+#include <QMenuBar>
+#include <QIcon>
 
 #include "kvpmconfigdialog.h"
 #include "devicetab.h"
@@ -121,18 +118,18 @@ void TopWindow::updateTabs()
             if (m_tab_widget->getUnmungedText(x) == vg->getName()) {
                 vg_exists = true;
                 if (vg->isPartial() || vg->openFailed())
-                    m_tab_widget->setIcon(x, KIcon("dialog-warning"));
+                    m_tab_widget->setIcon(x, QIcon::fromTheme(QStringLiteral("dialog-warning")));
                 else
-                    m_tab_widget->setIcon(x, KIcon());
+                    m_tab_widget->setIcon(x, QIcon());
             }
         }
 
         if (!vg_exists) {
             tab = new VolumeGroupTab(vg);
             if (vg->isPartial() || vg->openFailed())
-                m_tab_widget->appendVolumeGroupTab(tab, KIcon("dialog-warning"), vg->getName());
+                m_tab_widget->appendVolumeGroupTab(tab, QIcon::fromTheme(QStringLiteral("dialog-warning")), vg->getName());
             else
-                m_tab_widget->appendVolumeGroupTab(tab, KIcon(), vg->getName());
+                m_tab_widget->appendVolumeGroupTab(tab, QIcon(), vg->getName());
         }
     }
 
@@ -192,7 +189,7 @@ void TopWindow::showVolumeGroupInfo(bool show)
     skeleton.setCurrentGroup("General");
     skeleton.addItemBool("show_vg_info", show_vg_info, true);
     show_vg_info = show;
-    skeleton.writeConfig();
+    skeleton.save();
     updateTabs();
 }
 
@@ -204,7 +201,7 @@ void TopWindow::showVolumeGroupBar(bool show)
     skeleton.setCurrentGroup("General");
     skeleton.addItemBool("show_lv_bar", show_lv_bar, true);
     show_lv_bar = show;
-    skeleton.writeConfig();
+    skeleton.save();
     updateTabs();
 }
 
@@ -216,7 +213,7 @@ void TopWindow::showDeviceBar(bool show)
     skeleton.setCurrentGroup("General");
     skeleton.addItemBool("show_device_barchart", show_device_bar, true);
     show_device_bar = show;
-    skeleton.writeConfig();
+    skeleton.save();
     updateTabs();
 }
 
@@ -228,7 +225,7 @@ void TopWindow::showToolbars(bool show)
     skeleton.setCurrentGroup("General");
     skeleton.addItemBool("show_toolbars", show_toolbars, true);
     show_toolbars = show;
-    skeleton.writeConfig();
+    skeleton.save();
     updateTabs();
 }
 
@@ -240,7 +237,7 @@ void TopWindow::useSiUnits(bool use)
     skeleton.setCurrentGroup("General");
     skeleton.addItemBool("use_si_units", use_si_units, false);
     use_si_units = use;
-    skeleton.writeConfig();
+    skeleton.save();
     updateTabs();
 }
 
@@ -252,7 +249,7 @@ void TopWindow::setToolbarIconSize(QAction *action)
     skeleton.setCurrentGroup("General");
     skeleton.addItemString("toolbar_icon_size", icon_size, "mediumicons");
     icon_size = action->objectName();
-    skeleton.writeConfig();
+    skeleton.save();
     updateTabs();
 }
 
@@ -264,13 +261,13 @@ void TopWindow::setToolbarIconText(QAction *action)
     skeleton.setCurrentGroup("General");
     skeleton.addItemString("toolbar_icon_text", icon_text, "iconsonly");
     icon_text = action->objectName();
-    skeleton.writeConfig();
+    skeleton.save();
     updateTabs();
 }
 
-KMenu *TopWindow::buildToolbarSizeMenu()
+QMenu *TopWindow::buildToolbarSizeMenu()
 {
-    KMenu *const menu = new KMenu(i18n("Toolbar icon size"));
+    QMenu *const menu = new QMenu(i18n("Toolbar icon size"));
 
     KToggleAction *const small_action = new KToggleAction(i18n("Small icons (16x16)"), this);
     KToggleAction *const medium_action = new KToggleAction(i18n("Medium icons (22x22)"), this);
@@ -315,9 +312,9 @@ KMenu *TopWindow::buildToolbarSizeMenu()
     return menu;
 }
 
-KMenu *TopWindow::buildToolbarTextMenu()
+QMenu *TopWindow::buildToolbarTextMenu()
 {
-    KMenu *const menu = new KMenu(i18n("Toolbar text placement"));
+    QMenu *const menu = new QMenu(i18n("Toolbar text placement"));
 
     KToggleAction *const icons_only_action = new KToggleAction(i18n("Icons only"), this);
     KToggleAction *const text_only_action = new KToggleAction(i18n("Text only"), this);
@@ -362,15 +359,15 @@ KMenu *TopWindow::buildToolbarTextMenu()
     return menu;
 }
 
-KMenu *TopWindow::buildSettingsMenu()
+QMenu *TopWindow::buildSettingsMenu()
 {
-    KMenu *const menu = new KMenu(i18n("Settings"));
+    QMenu *const menu = new QMenu(i18n("Settings"));
     KToggleAction *const show_vg_info_action  = new KToggleAction(i18n("Show Volume Group Information"), this);
     KToggleAction *const show_lv_bar_action   = new KToggleAction(i18n("Show Volume Group Bar Chart"), this);
     KToggleAction *const show_device_bar_action   = new KToggleAction(i18n("Show Device Bar Chart"), this);
     KToggleAction *const use_si_units_action  = new KToggleAction(i18n("Use Metric SI Units"), this);
     KToggleAction *const show_toolbars_action = new KToggleAction(i18n("Show Toolbars"), this);
-    KAction *const config_kvpm_action = new KAction(KIcon("configure"), i18n("Configure kvpm..."), this);
+    QAction *const config_kvpm_action = new QAction(QIcon::fromTheme(QStringLiteral("configure")), i18n("Configure kvpm..."), this);
 
     menu->addAction(show_vg_info_action);
     menu->addAction(show_lv_bar_action);
@@ -421,12 +418,12 @@ KMenu *TopWindow::buildSettingsMenu()
     return menu;
 }
 
-KMenu *TopWindow::buildToolsMenu()
+QMenu *TopWindow::buildToolsMenu()
 {
-    KMenu   *const menu = new KMenu(i18n("Tools"));
-    KAction *const rescan_action         = new KAction(KIcon("view-refresh"),  i18n("Rescan System"), this);
-    KAction *const restart_pvmove_action = new KAction(KIcon("system-reboot"), i18n("Restart interrupted pvmove"), this);
-    KAction *const stop_pvmove_action    = new KAction(KIcon("process-stop"),  i18n("Abort pvmove"), this);
+    QMenu   *const menu = new QMenu(i18n("Tools"));
+    QAction *const rescan_action         = new QAction(QIcon::fromTheme(QStringLiteral("view-refresh")),  i18n("Rescan System"), this);
+    QAction *const restart_pvmove_action = new QAction(QIcon::fromTheme(QStringLiteral("system-reboot")), i18n("Restart interrupted pvmove"), this);
+    QAction *const stop_pvmove_action    = new QAction(QIcon::fromTheme(QStringLiteral("process-stop")),  i18n("Abort pvmove"), this);
 
     rescan_action->setObjectName("systemreload");
     restart_pvmove_action->setObjectName("restartpvmove");
@@ -449,37 +446,38 @@ KMenu *TopWindow::buildToolsMenu()
     return menu;
 }
 
-KMenu *TopWindow::buildHelpMenu()
+QMenu *TopWindow::buildHelpMenu()
 {
-    static KAboutData about_data(QByteArray("kvpm"),
-                                 QByteArray("kvpm"),
-                                 ki18n("kvpm"),
-                                 QByteArray("0.9.9"),
-                                 ki18n("Linux volume and partition manager for KDE.  "
+    static KAboutData about_data(QStringLiteral("kvpm"),
+                                 xi18nc("@title", "<application>kvpm</application>"),
+                                 QStringLiteral("0.9.9"),
+                                 xi18nc("@title", "Linux volume and partition manager for KDE.  "
                                        "This program is still under development, "
                                        "bug reports and any comments are welcomed.  "
                                        "Licensed under GNU General Public License v3.0"),
-                                 KAboutData::License_GPL_V3,
-                                 ki18n("(c) 2008, 2009, 2010, 2011, 2012, 2013, 2014 Benjamin Scott"),
-                                 KLocalizedString(),
-                                 QByteArray("http://sourceforge.net/projects/kvpm/"),
-                                 QByteArray("benscott@nwlink.com"));
+                                 KAboutLicense::GPL_V3,
+                                 xi18nc("@info:credit", "(c) 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2016 Benjamin Scott"),
+                                 QString(),
+                                 QStringLiteral("http://sourceforge.net/projects/kvpm/"),
+                                 QStringLiteral("benscott@nwlink.com"));
 
-    about_data.addCredit(ki18n("Mark James"),
-                         ki18n("Additional icons taken from the Silk icon set by "
+    about_data.setHomepage(QStringLiteral("http://sourceforge.net/projects/kvpm/"));
+
+    about_data.addCredit(xi18nc("@info:credit", "Mark James"),
+                         xi18nc("@info:credit", "Additional icons taken from the Silk icon set by "
                                "Mark James under the Creative Commons Attribution 3.0 License."),
-                         QByteArray(),
-                         QByteArray("http://www.famfamfam.com/lab/icons/silk/"));
-    
-    KHelpMenu *const help_menu = new KHelpMenu(this, &about_data);
+                         QString(),
+                         QStringLiteral("http://www.famfamfam.com/lab/icons/silk/"));
+
+    KHelpMenu *const help_menu = new KHelpMenu(this, about_data);
 
     return help_menu->menu();
 }
 
-KMenu *TopWindow::buildFileMenu()
+QMenu *TopWindow::buildFileMenu()
 {
-    KMenu *const menu = new KMenu(i18n("File"));
-    KAction *const quit_action = KStandardAction::quit(qApp, SLOT(quit()), menu);
+    QMenu *const menu = new QMenu(i18n("File"));
+    QAction *const quit_action = KStandardAction::quit(qApp, SLOT(quit()), menu);
     menu->addAction(quit_action);
 
     return menu;
@@ -490,11 +488,11 @@ void TopWindow::setVgMenu(int index)
     m_vg_actions->setVg(MasterList::getVgByName(m_tab_widget->getUnmungedText(index)));
 }
 
-KMenu *TopWindow::buildGroupsMenu()
+QMenu *TopWindow::buildGroupsMenu()
 {
     m_vg_actions = new VGActions(this);
 
-    KMenu *const menu = new KMenu(i18n("Volume Groups"));
+    QMenu *const menu = new QMenu(i18n("Volume Groups"));
 
     menu->addAction(m_vg_actions->action("vgcreate"));
     menu->addAction(m_vg_actions->action("vgremove"));
