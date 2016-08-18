@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012, 2013, 2016 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -18,14 +18,11 @@
 #include "logvol.h"
 #include "volgroup.h"
 
-#include <KLocale>
+#include <KLocalizedString>
 
-#include <QDebug>
-#include <QElapsedTimer>
 #include <QFrame>
 #include <QHBoxLayout>
 #include <QLabel>
-#include <QList>
 #include <QScrollArea>
 #include <QScrollBar>
 #include <QStackedWidget>
