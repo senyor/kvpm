@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2011, 2012, 2013, 2016 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -16,11 +16,9 @@
 #include "sizeselectorbox.h"
 
 #include <KConfigSkeleton>
-#include <KGlobal>
-#include <KLocale>
+#include <KLocalizedString>
 
 #include <QCheckBox>
-#include <QDebug>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QSlider>
@@ -62,10 +60,10 @@ SizeSelectorBox::SizeSelectorBox(long long unitSize, long long minSize, long lon
 
     m_size_slider = new QSlider(Qt::Horizontal);
     m_size_slider->setRange(0, 100);
-    m_size_edit   = new KLineEdit();
+    m_size_edit   = new QLineEdit();
     m_size_edit->setAlignment(Qt::AlignRight);
 
-    m_suffix_combo = new KComboBox();
+    m_suffix_combo = new QComboBox();
     if (m_use_si_units) {
         m_suffix_combo->insertItem(0, "MB");
         m_suffix_combo->insertItem(1, "GB");
@@ -82,7 +80,7 @@ SizeSelectorBox::SizeSelectorBox(long long unitSize, long long minSize, long lon
     } else {
         m_suffix_combo->setCurrentIndex(1);
     }
-    m_suffix_combo->setInsertPolicy(KComboBox::NoInsert);
+    m_suffix_combo->setInsertPolicy(QComboBox::NoInsert);
 
     if (m_is_new) {
         if (!m_is_offset)
@@ -453,7 +451,7 @@ long long SizeSelectorBox::convertSizeToUnits(int index, double size)
     if (partition_size < 0)
         partition_size = 0;
 
-    return qRound64(partition_size);
+    return qRound64((double)partition_size);
 }
 
 void SizeSelectorBox::updateEdit()
