@@ -16,7 +16,6 @@
 #define LVCREATEBASE_H
 
 
-#include <QList>
 #include <QStringList>
 
 #include "kvpmdialog.h"
@@ -24,16 +23,13 @@
 
 class VolGroup;
 
-class KLineEdit;
-class KTabWidget;
-class KComboBox;
-
 class QCheckBox;
 class QGroupBox;
 class QLabel;
-class QRadioButton;
+class QLineEdit;
 class QRegExpValidator;
 class QStringList;
+class QTabWidget;
 class QVBoxLayout;
 
 class SizeSelectorBox;
@@ -56,7 +52,7 @@ class LvCreateDialogBase : public KvpmDialog
     QRegExpValidator *m_name_validator,
                      *m_tag_validator;
 
-    KLineEdit *m_minor_edit, *m_major_edit,
+    QLineEdit *m_minor_edit, *m_major_edit,
               *m_name_edit,  *m_tag_edit;
 
     QCheckBox *m_readonly_check,
@@ -68,7 +64,7 @@ class LvCreateDialogBase : public KvpmDialog
 
     QGroupBox *m_persistent_box;
    
-    KTabWidget *m_tab_widget;
+    QTabWidget *m_tab_widget;
 
     QLabel *m_max_size_label, *m_stripes_label, *m_maxfs_size_label, 
            *m_warning_label,  *m_current_label, *m_extend_label;
