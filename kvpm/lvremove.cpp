@@ -18,7 +18,6 @@
 #include <KMessageBox>
 #include <KLocale>
 
-#include <QDebug>
 #include <QLabel>
 #include <QHBoxLayout>
 #include <QScrollArea>
@@ -43,7 +42,7 @@ LVRemoveDialog::LVRemoveDialog(const LogVol *const lv, QWidget *parent) :
     QVBoxLayout *const right_layout = new QVBoxLayout();
 
     QLabel *const icon_label = new QLabel();
-    icon_label->setPixmap(KIcon("dialog-warning").pixmap(64, 64));
+    icon_label->setPixmap(QIcon::fromTheme(QStringLiteral("dialog-warning")).pixmap(64, 64));
     layout->addWidget(icon_label);
     layout->addLayout(right_layout);
 
