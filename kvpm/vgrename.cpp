@@ -15,13 +15,11 @@
 
 #include "vgrename.h"
 
-#include <KLocale>
+#include <KLocalizedString>
 
-#include <KLineEdit>
-
-#include <QDebug>
 #include <QHBoxLayout>
 #include <QLabel>
+#include <QLineEdit>
 #include <QRegExpValidator>
 #include <QStringList>
 #include <QVBoxLayout>
@@ -53,7 +51,7 @@ VGRenameDialog::VGRenameDialog(VolGroup *const group, QWidget *parent) :
     layout->addWidget(label);
 
     QLabel *const name_label = new QLabel(i18n("New volume group name: "));
-    m_new_name = new KLineEdit();
+    m_new_name = new QLineEdit();
     QRegExp rx("[0-9a-zA-Z_\\.][-0-9a-zA-Z_\\.]*");
     m_name_validator = new QRegExpValidator(rx, m_new_name);
     m_new_name->setValidator(m_name_validator);

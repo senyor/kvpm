@@ -15,13 +15,11 @@
 #ifndef VGRENAME_H
 #define VGRENAME_H
 
-#include <KDialog>
-#include <QStringList>
 
 
 #include "kvpmdialog.h"
 
-class KLineEdit;
+class QLineEdit;
 class QRegExpValidator;
 
 class VolGroup;
@@ -33,7 +31,7 @@ class VGRenameDialog : public KvpmDialog
 
     VolGroup  *m_vg = nullptr;
     QString    m_old_name;
-    KLineEdit *m_new_name = nullptr;
+    QLineEdit *m_new_name = nullptr;
     QRegExpValidator *m_name_validator = nullptr;
 
 public:

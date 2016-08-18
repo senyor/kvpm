@@ -15,9 +15,6 @@
 #ifndef VGREMOVEMISSING_H
 #define VGREMOVEMISSING_H
 
-#include <KDialog>
-
-#include <QStringList>
 
 class QRadioButton;
 

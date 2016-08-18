@@ -22,11 +22,10 @@
 
 #include <lvm2app.h>
 
-#include <KIcon>
-#include <KLocale>
+#include <KLocalizedString>
 #include <KMessageBox>
 
-#include <QDebug>
+#include <QIcon>
 #include <QLabel>
 #include <QStackedWidget>
 #include <QVBoxLayout>
@@ -227,7 +226,7 @@ QStackedWidget *VGReduceDialog::createErrorWidget()
     stack->addWidget(error_widget1);
     QHBoxLayout *const layout1 = new QHBoxLayout();
     icon_label = new QLabel("");
-    icon_label->setPixmap(KIcon("dialog-warning").pixmap(32, 32));
+    icon_label->setPixmap(QIcon::fromTheme(QStringLiteral("dialog-warning")).pixmap(32, 32));
     error_label = new QLabel(i18n("Cannot remove all the physical volumes with usable metadata areas"));
     error_label->setWordWrap(true);
     layout1->addWidget(icon_label);
@@ -239,7 +238,7 @@ QStackedWidget *VGReduceDialog::createErrorWidget()
     stack->addWidget(error_widget2);
     QHBoxLayout *const layout2 = new QHBoxLayout();
     icon_label = new QLabel("");
-    icon_label->setPixmap(KIcon("dialog-warning").pixmap(32, 32));
+    icon_label->setPixmap(QIcon::fromTheme(QStringLiteral("dialog-warning")).pixmap(32, 32));
     error_label = new QLabel(i18n("A volume group must always have at least " 
                                   "one physical volume in it"));
     error_label->setWordWrap(true);
