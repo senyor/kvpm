@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2011, 2012, 2016 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -19,7 +19,6 @@
 #include <QProcess>
 #include <QStringList>
 
-class KProcess;
 class KProgressDialog;
 
 class QEventLoop;
@@ -31,7 +30,7 @@ class ProcessProgress : public QObject
 
     QEventLoop *m_loop;
     QStringList m_output_all, m_output_no_error;
-    KProcess *m_process;
+    QProcess *m_process;
     KProgressDialog *m_progress_dialog;
     int m_exit_code;
 

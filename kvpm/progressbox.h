@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2011, 2012, 2016 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -17,7 +17,6 @@
 #define PROGRESSBOX_H
 
 #include <QFrame>
-
 #include <QLabel>
 #include <QProgressBar>
 #include <QString>

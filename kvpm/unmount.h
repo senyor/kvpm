@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2011, 2012, 2013, 2016 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -16,14 +16,12 @@
 #define UNMOUNT_H
 
 
-#include <QStringList>
 
 #include "mounttables.h"
 #include "kvpmdialog.h"
 
 
 class LogVol;
-class MountEntry;
 class NoMungeCheck;
 class StoragePartition;
 
