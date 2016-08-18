@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013, 2014 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2016 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -15,12 +15,10 @@
 
 #include "lvproperties.h"
 
-#include <KGlobal>
-#include <KLocale>
+#include <KFormat>
+#include <KLocalizedString>
 #include <KConfigSkeleton>
 
-#include <QDebug>
-#include <QHBoxLayout>
 #include <QLabel>
 #include <QStringList>
 #include <QVBoxLayout>
@@ -208,13 +206,12 @@ QFrame *LVProperties::generalFrame(int segment)
     frame->setFrameStyle(QFrame::Sunken | QFrame::StyledPanel);
     frame->setLineWidth(2);
 
-    KLocale::BinaryUnitDialect dialect;
-    KLocale *const locale = KGlobal::locale();
+    KFormat::BinaryUnitDialect dialect;
 
     if (m_use_si_units)
-        dialect = KLocale::MetricBinaryDialect;
+        dialect = KFormat::MetricBinaryDialect;
     else
-        dialect = KLocale::IECBinaryDialect;
+        dialect = KFormat::IECBinaryDialect;
 
     QString policy = policyToLocalString(m_lv->getPolicy());
     if (m_lv->isLocked()) 
@@ -224,14 +221,14 @@ QFrame *LVProperties::generalFrame(int segment)
         total_extents = m_lv->getTotalSize() / extent_size;
         total_size = m_lv->getTotalSize();
         layout->addWidget(new QLabel(i18n("Total Extents: %1", total_extents)));
-        layout->addWidget(new QLabel(i18n("Total Size: %1", locale->formatByteSize(total_size, 1, dialect))));
+        layout->addWidget(new QLabel(i18n("Total Size: %1", KFormat().formatByteSize(total_size, 1, dialect))));
 
         if (m_lv->isWritable())
             layout->addWidget(new QLabel(i18n("Access: r/w")));
         else
             layout->addWidget(new QLabel(i18n("Access: r/o")));
 
-        layout->addWidget(new QLabel(i18n("Chunk Size: %1", locale->formatByteSize(m_lv->getChunkSize(0), 1, dialect))));
+        layout->addWidget(new QLabel(i18n("Chunk Size: %1", KFormat().formatByteSize(m_lv->getChunkSize(0), 1, dialect))));
 
         if (m_lv->willZero())
             layout->addWidget(new QLabel(i18n("Zero new blocks: Yes")));
@@ -244,7 +241,7 @@ QFrame *LVProperties::generalFrame(int segment)
         total_extents = m_lv->getTotalSize() / extent_size;
         total_size = m_lv->getTotalSize();
         layout->addWidget(new QLabel(i18n("Total Extents: %1", total_extents)));
-        layout->addWidget(new QLabel(i18n("Total Size: %1", locale->formatByteSize(total_size, 1, dialect))));
+        layout->addWidget(new QLabel(i18n("Total Size: %1", KFormat().formatByteSize(total_size, 1, dialect))));
     } else if ((segment >= 0) && (segment_count > 1)) {
         extents = m_lv->getSegmentExtents(segment);
         stripes = m_lv->getSegmentStripes(segment);
@@ -254,7 +251,7 @@ QFrame *LVProperties::generalFrame(int segment)
 
         if (!m_lv->isLvmMirror() && !m_lv->isRaidImage()) {
             if (stripes != 1)
-                layout->addWidget(new QLabel(i18n("Stripes: %1 of %2", stripes, locale->formatByteSize(stripe_size, 1, dialect)))); 
+                layout->addWidget(new QLabel(i18n("Stripes: %1 of %2", stripes, KFormat().formatByteSize(stripe_size, 1, dialect)))); 
             else
                 layout->addWidget(new QLabel(i18n("Stripes: none")));
         }
@@ -271,16 +268,16 @@ QFrame *LVProperties::generalFrame(int segment)
         if ( !(m_lv->isRaidImage() || m_lv->isRaidMetadata()) ) {
             if (m_lv->isRaid() && m_lv->getRaidType() != 1) {
                 layout->addWidget(new QLabel(i18n("Total extents: %1", total_extents)));
-                layout->addWidget(new QLabel(i18n("Total size: %1", locale->formatByteSize(total_size, 1, dialect))));
-                layout->addWidget(new QLabel(i18n("Stripes: %1 of %2", stripes, locale->formatByteSize(stripe_size, 1, dialect)))); 
+                layout->addWidget(new QLabel(i18n("Total size: %1", KFormat().formatByteSize(total_size, 1, dialect))));
+                layout->addWidget(new QLabel(i18n("Stripes: %1 of %2", stripes, KFormat().formatByteSize(stripe_size, 1, dialect)))); 
             } else if (!m_lv->isThinVolume() && !m_lv->isLvmMirror() && !(m_lv->isRaid() && m_lv->getRaidType() == 1)) {
                 if (stripes != 1)
-                    layout->addWidget(new QLabel(i18n("Stripes: %1 of %2", stripes, locale->formatByteSize(stripe_size, 1, dialect)))); 
+                    layout->addWidget(new QLabel(i18n("Stripes: %1 of %2", stripes, KFormat().formatByteSize(stripe_size, 1, dialect)))); 
                 else
                     layout->addWidget(new QLabel(i18n("Stripes: none")));
             } else if (!m_lv->isThinVolume() && (!m_lv->isLvmMirrorLog() || (m_lv->isLvmMirrorLog() && m_lv->isLvmMirror()))) {
                 layout->addWidget(new QLabel(i18n("Total extents: %1", total_extents)));
-                layout->addWidget(new QLabel(i18n("Total size: %1", locale->formatByteSize(total_size, 1, dialect))));
+                layout->addWidget(new QLabel(i18n("Total size: %1", KFormat().formatByteSize(total_size, 1, dialect))));
             }
  
             if (!(m_lv->isLvmMirrorLeg() || m_lv->isLvmMirrorLog() || m_lv->isThinMetadata())) {

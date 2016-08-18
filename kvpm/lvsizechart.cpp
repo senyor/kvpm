@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013, 2016 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -15,10 +15,8 @@
 
 #include "lvsizechart.h"
 
-#include <QDebug>
 #include <QHBoxLayout>
 #include <QHeaderView>
-#include <QListIterator>
 #include <QResizeEvent>
 #include <QTreeWidget>
 #include <QTreeWidgetItem>
