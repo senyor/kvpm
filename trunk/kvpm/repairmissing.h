@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2012, 2013, 2014 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2012, 2013, 2014, 2016 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -17,7 +17,6 @@
 
 #include <QStringList>
 
-class QGroupBox;
 class QRadioButton;
 class QWidget;
 

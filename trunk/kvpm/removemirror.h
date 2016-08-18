@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2011, 2012, 2013, 2016 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -16,11 +16,9 @@
 #define LVREMOVEMIRROR_H
 
 
-#include <QStringList>
 
 #include "kvpmdialog.h"
 
-class QLabel;
 
 class LogVol;
 class NoMungeCheck;
