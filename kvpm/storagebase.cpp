@@ -1,7 +1,7 @@
 /*
  *
  * 
- * Copyright (C) 2013, 2014  Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2013, 2014, 2016  Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -17,7 +17,6 @@
 #include <kde_file.h>
 
 #include <QByteArray>
-#include <QDebug>
 
 #include "physvol.h"
 #include "storagebase.h"
