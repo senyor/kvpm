@@ -35,11 +35,10 @@
 #include "vgcreate.h"
 #include "vgextend.h"
 
-#include <KLocale>
-#include <KIcon>
+#include <KLocalizedString>
 
 #include <QActionGroup>
-#include <QDebug>
+#include <QIcon>
 #include <QTreeWidgetItem>
 
 
@@ -52,83 +51,83 @@ DeviceActions::DeviceActions(QWidget *parent) :
     connect(m_act_grp, SIGNAL(triggered(QAction *)), 
             this, SLOT(extendVg(QAction *)) );
 
-    KAction *const partchange = addAction("partchange", this, SLOT(changePartition()));
-    partchange->setIcon(KIcon("document-swap"));
+    QAction *const partchange = addAction("partchange", this, SLOT(changePartition()));
+    partchange->setIcon(QIcon::fromTheme(QStringLiteral("document-swap")));
     partchange->setText(i18n("Move or resize disk partition"));
     partchange->setIconText(i18n("change"));
     partchange->setToolTip(i18n("Move or resize disk partition"));
     
-    KAction *const partflag = addAction("changeflags", this, SLOT(changeFlags())); 
-    partflag->setIcon(KIcon("flag-blue"));
+    QAction *const partflag = addAction("changeflags", this, SLOT(changeFlags())); 
+    partflag->setIcon(QIcon::fromTheme(QStringLiteral("flag-blue")));
     partflag->setText(i18n("Change partition flags"));
     partflag->setIconText(i18n("flags"));
     partflag->setToolTip(i18n("Change partition flags"));
     
-    KAction *const maxpv = addAction("max_pv", this, SLOT(maxFs()));
-    maxpv->setIcon(KIcon("resultset_last"));
+    QAction *const maxpv = addAction("max_pv", this, SLOT(maxFs()));
+    maxpv->setIcon(QIcon::fromTheme(QStringLiteral("resultset_last")));
     maxpv->setText(i18n("Extend physical volume to fill device"));
     maxpv->setIconText(i18n("Extend physical volume to fill device"));
     maxpv->setToolTip(i18n("Extend physical volume to fill device"));
     
-    KAction *const partadd = addAction("partadd", this, SLOT(addPartition()));
-    partadd->setIcon(KIcon("list-add"));
+    QAction *const partadd = addAction("partadd", this, SLOT(addPartition()));
+    partadd->setIcon(QIcon::fromTheme(QStringLiteral("list-add")));
     partadd->setText(i18n("Add disk partition"));
     partadd->setIconText(i18n("Add"));
     partadd->setToolTip(i18n("Add disk partition"));
     
-    KAction *const partremove = addAction("partremove", this, SLOT(removePartition())); 
-    partremove->setIcon(KIcon("cross"));
+    QAction *const partremove = addAction("partremove", this, SLOT(removePartition())); 
+    partremove->setIcon(QIcon::fromTheme(QStringLiteral("cross")));
     partremove->setText(i18n("Delete disk partition"));
     partremove->setIconText(i18n("Delete"));
     partremove->setToolTip(i18n("Delete disk partition"));
     
-    KAction *const vgcreate = addAction("vgcreate", this, SLOT(createVg()));
-    vgcreate->setIcon(KIcon("document-new"));
+    QAction *const vgcreate = addAction("vgcreate", this, SLOT(createVg()));
+    vgcreate->setIcon(QIcon::fromTheme(QStringLiteral("document-new")));
     vgcreate->setText(i18n("Create volume group"));
     vgcreate->setIconText(i18n("New vg"));
     vgcreate->setToolTip(i18n("Create volume group"));
     
-    KAction *const tablecreate = addAction("tablecreate", this, SLOT(createTable())); 
-    tablecreate->setIcon(KIcon("exclamation"));
+    QAction *const tablecreate = addAction("tablecreate", this, SLOT(createTable())); 
+    tablecreate->setIcon(QIcon::fromTheme(QStringLiteral("exclamation")));
     tablecreate->setText(i18n("Create or remove a partition table"));
     tablecreate->setIconText(i18n("Table"));
     tablecreate->setToolTip(i18n("Create or remove a partition table"));
 
-    KAction *const vgreduce = addAction("vgreduce", this, SLOT(reduceVg()));
-    vgreduce->setIcon(KIcon("delete"));
+    QAction *const vgreduce = addAction("vgreduce", this, SLOT(reduceVg()));
+    vgreduce->setIcon(QIcon::fromTheme(QStringLiteral("delete")));
     vgreduce->setText(i18n("Remove from volume group"));
     vgreduce->setIconText(i18n("Remove from volume group"));
     vgreduce->setToolTip(i18n("Remove from volume group"));
     
-    KAction *const mkfs =  addAction("mkfs", this, SLOT(makeFs()));
-    mkfs->setIcon(KIcon("lightning_add"));
+    QAction *const mkfs =  addAction("mkfs", this, SLOT(makeFs()));
+    mkfs->setIcon(QIcon::fromTheme(QStringLiteral("lightning_add")));
     mkfs->setText(i18n("Make or remove filesystem..."));
     mkfs->setIconText(i18n("mkfs"));
     mkfs->setToolTip(i18n("Make or remove a filesystem"));
     
-    KAction *const max_fs = addAction("max_fs", this, SLOT(maxFs()));
+    QAction *const max_fs = addAction("max_fs", this, SLOT(maxFs()));
     max_fs->setText(i18n("Extend filesystem to fill volume..."));
-    max_fs->setIcon(KIcon("resultset_last")); 
+    max_fs->setIcon(QIcon::fromTheme(QStringLiteral("resultset_last"))); 
     max_fs->setIconText(i18n("Extend fs"));
     max_fs->setToolTip(i18n("Extend filesystem to fill volume"));
     
-    KAction *const fsck = addAction("fsck", this, SLOT(checkFs()));
+    QAction *const fsck = addAction("fsck", this, SLOT(checkFs()));
     fsck->setText(i18n("Run 'fsck -fp' on filesystem..."));
-    fsck->setIcon(KIcon("checkmark")); 
+    fsck->setIcon(QIcon::fromTheme(QStringLiteral("checkmark"))); 
     fsck->setIconText(i18n("fsck -fp"));
     fsck->setToolTip(i18n("Run 'fsck -fp' on the filesystem"));
     
-    KAction *const mount = addAction("mount", this, SLOT(mountFs()));
+    QAction *const mount = addAction("mount", this, SLOT(mountFs()));
     mount->setText(i18n("Mount filesystem..."));
     mount->setIconText(i18n("mount fs"));
     mount->setToolTip(i18n("Mount filesystem"));
-    mount->setIcon(KIcon("emblem-mounted"));
+    mount->setIcon(QIcon::fromTheme(QStringLiteral("emblem-mounted")));
     
-    KAction *const unmount = addAction("unmount", this, SLOT(unmountFs()));
+    QAction *const unmount = addAction("unmount", this, SLOT(unmountFs()));
     unmount->setText(i18n("Unmount filesystem..."));
     unmount->setIconText(i18n("Unmount fs"));
     unmount->setToolTip(i18n("Unmount filesystem"));
-    unmount->setIcon(KIcon("emblem-unmounted"));
+    unmount->setIcon(QIcon::fromTheme(QStringLiteral("emblem-unmounted")));
 
     changeDevice(nullptr);
 }
@@ -156,7 +155,7 @@ void DeviceActions::changeDevice(QTreeWidgetItem *item)
     }
 
     for (auto vg : MasterList::getVgNames()) {
-        KAction *const action = addAction(vg, this);
+        QAction *const action = addAction(vg, this);
         m_act_grp->addAction(action);
         action->setText(vg);
     }

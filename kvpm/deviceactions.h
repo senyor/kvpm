@@ -16,17 +16,15 @@
 #ifndef DEVICEACTIONS_H
 #define DEVICEACTIONS_H
 
-#include <KAction>
 #include <KActionCollection>
 
-#include <QList>
+#include <QAction>
 
 
+class QActionGroup;
 class QTreeWidgetItem;
-class QString;
 class StoragePartition;
 class StorageDevice;
-class QActionGroup;
 
 
 
