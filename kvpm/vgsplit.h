@@ -15,7 +15,6 @@
 #ifndef VGSPLIT_H
 #define VGSPLIT_H
 
-#include <KDialog>
 
 #include <QList>
 #include <QStringList>
@@ -23,12 +22,9 @@
 #include "kvpmdialog.h"
 #include "logvol.h"
 
-class KLineEdit;
-class KListWidget;
-
-class QCheckBox;
+class QLineEdit;
+class QListWidget;
 class QRegExpValidator;
-class QTableWidget;
 
 class LogVol;
 class VolGroup;
@@ -38,16 +34,16 @@ class VGSplitDialog : public KvpmDialog
 {
     Q_OBJECT
 
-    KListWidget *m_left_lv_list;
-    KListWidget *m_right_lv_list;
-    KListWidget *m_left_pv_list;
-    KListWidget *m_right_pv_list;
-    KPushButton *m_lv_add;
-    KPushButton *m_lv_remove;
-    KPushButton *m_pv_add;
-    KPushButton *m_pv_remove;
+    QListWidget *m_left_lv_list;
+    QListWidget *m_right_lv_list;
+    QListWidget *m_left_pv_list;
+    QListWidget *m_right_pv_list;
+    QPushButton *m_lv_add;
+    QPushButton *m_lv_remove;
+    QPushButton *m_pv_add;
+    QPushButton *m_pv_remove;
 
-    KLineEdit   *m_new_vg_name;
+    QLineEdit   *m_new_vg_name;
     QRegExpValidator *m_validator;
     VolGroup *m_vg;
 
@@ -68,8 +64,8 @@ class VGSplitDialog : public KvpmDialog
                          QStringList &movingPvNames, QStringList &movingLvNames);
 
     void moveNames(const bool isLvMove,
-                   KListWidget *const lvSource, KListWidget *const lvTarget,
-                   KListWidget *const pvSource, KListWidget *const pvTarget);
+                   QListWidget *const lvSource, QListWidget *const lvTarget,
+                   QListWidget *const pvSource, QListWidget *const pvTarget);
 
 public:
     explicit VGSplitDialog(VolGroup *volumeGroup, QWidget *parent = nullptr);
