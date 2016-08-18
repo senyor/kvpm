@@ -15,10 +15,8 @@
 #ifndef VGEXTEND_H
 #define VGEXTEND_H
 
-#include <KComboBox>
-#include <KDialog>
-#include <KLineEdit>
-
+#include <QComboBox>
+#include <QLineEdit>
 #include <QList>
 
 #include "kvpmdialog.h"
@@ -33,10 +31,10 @@ class VGExtendDialog : public KvpmDialog
 
     PvGroupBox *m_pv_checkbox = nullptr;
     const VolGroup *const m_vg;
-    KComboBox *m_copies_combo;
-    KLineEdit *m_size_edit;
-    KLineEdit *m_align_edit;
-    KLineEdit *m_offset_edit;
+    QComboBox *m_copies_combo;
+    QLineEdit *m_size_edit;
+    QLineEdit *m_align_edit;
+    QLineEdit *m_offset_edit;
     
     bool continueWarning();
     void buildDialog(const QList<const StorageBase *> devices);

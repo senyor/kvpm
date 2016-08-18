@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2011, 2012, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2011, 2012, 2012, 2013, 2016 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -21,17 +21,16 @@
 #include "processprogress.h"
 #include "volgroup.h"
 
-#include <KComboBox>
-#include <KIntSpinBox>
-#include <KLocale>
+#include <KLocalizedString>
 #include <KSeparator>
 
 #include <QCheckBox>
-#include <QDebug>
-#include <QHBoxLayout>
+#include <QComboBox>
 #include <QGroupBox>
+#include <QHBoxLayout>
 #include <QLabel>
 #include <QRadioButton>
+#include <QSpinBox>
 #include <QVBoxLayout>
 
 
@@ -88,7 +87,7 @@ VGChangeDialog::VGChangeDialog(VolGroup *const group, QWidget *parent) :
     policy_layout->addStretch();
     misc_layout->addLayout(policy_layout);
 
-    m_extent_size_combo = new KComboBox();
+    m_extent_size_combo = new QComboBox();
     m_extent_size_combo->insertItem(0, "1");
     m_extent_size_combo->insertItem(1, "2");
     m_extent_size_combo->insertItem(2, "4");
@@ -102,7 +101,7 @@ VGChangeDialog::VGChangeDialog(VolGroup *const group, QWidget *parent) :
     m_extent_size_combo->setInsertPolicy(QComboBox::NoInsert);
     m_extent_size_combo->setCurrentIndex(2);
 
-    m_extent_suffix_combo = new KComboBox();
+    m_extent_suffix_combo = new QComboBox();
     m_extent_suffix_combo->insertItem(0, "KiB");
     m_extent_suffix_combo->insertItem(1, "MiB");
     m_extent_suffix_combo->insertItem(2, "GiB");
@@ -209,8 +208,8 @@ VGChangeDialog::VGChangeDialog(VolGroup *const group, QWidget *parent) :
     QHBoxLayout *const lv_layout = new QHBoxLayout();
     QHBoxLayout *const pv_layout = new QHBoxLayout();
 
-    m_max_pvs_spin = new KIntSpinBox();
-    m_max_lvs_spin = new KIntSpinBox();
+    m_max_pvs_spin = new QSpinBox();
+    m_max_lvs_spin = new QSpinBox();
     lv_limit_label->setBuddy(m_max_lvs_spin);
     pv_limit_label->setBuddy(m_max_pvs_spin);
 
