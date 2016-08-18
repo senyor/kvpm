@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2013, 2016 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -17,8 +17,6 @@
 
 
 #include <KActionCollection>
-
-class KDialog;
 
 class QTreeWidgetItem;
 class QAction;
