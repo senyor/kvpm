@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013, 2014 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2016 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -22,23 +22,22 @@
 #include "processprogress.h"
 #include "volgroup.h"
 
-#include <math.h>
+#include <cmath>
 
-#include <KApplication>
-#include <KComboBox>
-#include <KLocale>
+#include <KLocalizedString>
 #include <KMessageBox>
-#include <KIcon>
-#include <KIntSpinBox>
-#include <KTabWidget>
 
-#include <QDebug>
+#include <QApplication>
+#include <QComboBox>
 #include <QEventLoop>
 #include <QGroupBox>
 #include <QHBoxLayout>
+#include <QIcon>
 #include <QLabel>
 #include <QRadioButton>
+#include <QSpinBox>
 #include <QStackedWidget>
+#include <QTabWidget>
 #include <QVBoxLayout>
 
 
@@ -87,7 +86,7 @@ ChangeMirrorDialog::ChangeMirrorDialog(LogVol *const mirrorVolume, const bool ch
             lv_name_label->setText(i18n("Convert to a mirror: %1", m_lv->getName()));
         
         lv_name_label->setAlignment(Qt::AlignCenter);
-        m_tab_widget = new KTabWidget();
+        m_tab_widget = new QTabWidget();
         layout->addWidget(lv_name_label);
         layout->addSpacing(10);
         layout->addWidget(m_tab_widget);
@@ -143,10 +142,14 @@ QWidget *ChangeMirrorDialog::buildGeneralTab(const bool isRaidMirror, const bool
     QVBoxLayout *const center_layout = new QVBoxLayout;
     const bool is_mirror = (isRaidMirror || isLvmMirror);
 
-    m_type_combo = new KComboBox();
+    m_type_combo = new QComboBox();
     m_type_combo->addItem(i18n("Standard LVM"));
     m_type_combo->addItem(i18n("RAID 1"));
-    m_add_mirrors_spin = new KIntSpinBox(1, 10, 1, 1, this);
+    m_add_mirrors_spin = new QSpinBox(this);
+    m_add_mirrors_spin->setMaximum(10);
+    m_add_mirrors_spin->setMinimum(1);
+    m_add_mirrors_spin->setSingleStep(1);
+    m_add_mirrors_spin->setValue(1);
 
     general_layout->addStretch();
     general_layout->addLayout(center_layout);
@@ -331,7 +334,7 @@ QWidget *ChangeMirrorDialog::buildPhysicalTab(const bool isRaidMirror)
     QVBoxLayout *const striped_layout = new QVBoxLayout();
     m_stripe_box->setLayout(striped_layout);
     
-    m_stripe_size_combo = new KComboBox();
+    m_stripe_size_combo = new QComboBox();
     for (int n = 2; (pow(2, n) * 1024) <= m_lv->getVg()->getExtentSize() ; n++) {
         m_stripe_size_combo->addItem(QString("%1").arg(pow(2, n)) + " KiB");
         m_stripe_size_combo->setItemData(n - 2, QVariant((int) pow(2, n)), Qt::UserRole);
@@ -341,7 +344,7 @@ QWidget *ChangeMirrorDialog::buildPhysicalTab(const bool isRaidMirror)
     }
     
     QLabel *const stripe_size = new QLabel(i18n("Stripe Size: "));
-    m_stripe_spin = new KIntSpinBox();
+    m_stripe_spin = new QSpinBox();
     m_stripe_spin->setMinimum(1);
     m_stripe_spin->setSpecialValueText(i18n("none"));
     m_stripe_spin->setMaximum(m_lv->getVg()->getPvCount());
@@ -366,7 +369,7 @@ QWidget *ChangeMirrorDialog::buildPhysicalTab(const bool isRaidMirror)
     QVBoxLayout *const error_right_layout = new QVBoxLayout();
     
     QLabel *const stripe_error1 = new QLabel("");
-    stripe_error1->setPixmap(KIcon("dialog-warning").pixmap(32, 32));
+    stripe_error1->setPixmap(QIcon::fromTheme(QStringLiteral("dialog-warning")).pixmap(32, 32));
     QLabel *const stripe_error2 = new QLabel(i18n("The number of extents: %1 must be evenly divisible by the number of stripes", m_lv->getExtents()));
     stripe_error2->setWordWrap(true);
     error_layout->addWidget(stripe_error1);

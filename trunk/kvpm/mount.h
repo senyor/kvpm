@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012, 2013, 2016 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -17,13 +17,11 @@
 
 #include "kvpmdialog.h"
 
-class KLineEdit;
-
 class QCheckBox;
 class QGroupBox;
+class QLineEdit;
 class QRadioButton;
 class QString;
-class QVBoxLayout;
 
 class LogVol;
 class StoragePartition;
@@ -47,7 +45,7 @@ class MountDialog : public KvpmDialog
               *dev_check, *exec_check, *mand_check, *acl_check,
               *user_xattr_check, *nodiratime_check;
 
-    KLineEdit *m_mount_point_edit,
+    QLineEdit *m_mount_point_edit,
               *m_filesystem_edit,    // User chosen filesystem type
               *m_fs_specific_edit;   // Additional options such as acl and data=ordered
 

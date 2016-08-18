@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012, 2013, 2016 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -24,20 +24,18 @@
 #include <errno.h>
 #include <string.h>
 
-#include <KFileDialog>
-#include <KLineEdit>
-#include <KLocale>
+#include <KLocalizedString>
 #include <KMessageBox>
-#include <KPushButton>
-#include <KTabWidget>
-#include <KUrl>
 
 #include <QCheckBox>
-#include <QDebug>
 #include <QGroupBox>
+#include <QFileDialog>
 #include <QLabel>
+#include <QLineEdit>
+#include <QPushButton>
 #include <QRadioButton>
 #include <QString>
+#include <QTabWidget>
 #include <QVBoxLayout>
 
 
@@ -80,7 +78,7 @@ void MountDialog::buildDialog()
     layout->addWidget(device_label);
     layout->addSpacing(5);
 
-    KTabWidget *const tab_widget = new KTabWidget();
+    QTabWidget *const tab_widget = new QTabWidget();
     tab_widget->addTab(mainTab(), i18n("Main"));
     tab_widget->addTab(optionsTab(), i18n("Options"));
     layout->addWidget(tab_widget);
@@ -147,7 +145,7 @@ QWidget* MountDialog::filesystemBox()
     else
         specify_button->setChecked(true);
 
-    m_filesystem_edit = new KLineEdit(m_filesystem_type);
+    m_filesystem_edit = new QLineEdit(m_filesystem_type);
 
     if (specify_button->isChecked() && (m_filesystem_edit->text()).isEmpty())
         (button(KDialog::Ok))->setEnabled(false);
@@ -280,7 +278,7 @@ QWidget* MountDialog::optionsTab()
     atime_journal_layout->addWidget(atime_box);
 
     QGroupBox *filesystem_options_box = new QGroupBox(i18n("Filesystem specific mount options"));
-    m_fs_specific_edit = new KLineEdit();
+    m_fs_specific_edit = new QLineEdit();
     m_fs_specific_edit->setPlaceholderText(i18n("comma separated list of additional mount options"));
 
     options_layout->addWidget(filesystem_options_box);
@@ -354,7 +352,7 @@ QWidget* MountDialog::mountPointBox()
     QHBoxLayout *const mount_point_layout = new QHBoxLayout();
     mount_point_box->setLayout(mount_point_layout);
 
-    m_mount_point_edit = new KLineEdit(m_mount_point);
+    m_mount_point_edit = new QLineEdit(m_mount_point);
 
     if ((m_mount_point_edit->text()).isEmpty())
         (button(KDialog::Ok))->setEnabled(false);
@@ -383,12 +381,7 @@ void MountDialog::selectMountPoint(bool)
     else
         start = QString("file:///");
 
-    const KUrl url(start);
-    KFileDialog dialog(url, filter, 0);
-    dialog.setModal(true);
-    dialog.setMode(KFile::Directory);
-    dialog.exec();
-    m_mount_point = dialog.selectedFile();
+    m_mount_point = QFileDialog::getExistingDirectory(nullptr, QString(), start);
 
     if (m_mount_point.length() > 1 && m_mount_point.endsWith('/'))
         m_mount_point.chop(1);                           // remove trailing "/" character

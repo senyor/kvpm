@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012, 2016 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -15,10 +15,9 @@
 
 #include "allocationpolicy.h"
 
-#include <KComboBox>
-#include <KLocale>
+#include <KLocalizedString>
 
-#include <QDebug>
+#include <QComboBox>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QWidget>
@@ -94,7 +93,7 @@ PolicyComboBox::PolicyComboBox(AllocationPolicy policy, AllocationPolicy vgpolic
 {
     QLabel *const label = new QLabel(i18n("Allocation policy: "));
 
-    m_combo = new KComboBox();
+    m_combo = new QComboBox();
     m_combo->addItem(i18n("Normal"));
     m_combo->addItem(i18n("Contiguous"));
     m_combo->addItem(i18n("Cling"));
