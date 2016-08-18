@@ -14,11 +14,10 @@
 #include "devicetree.h"
 
 #include <KConfigSkeleton>
-#include <KGlobal>
-#include <KIcon>
-#include <KLocale>
+#include <KFormat>
+#include <KLocalizedString>
 
-#include <QDebug>
+#include <QIcon>
 
 #include "devicemenu.h"
 #include "devicepropertiesstack.h"
@@ -260,13 +259,12 @@ QTreeWidgetItem *DeviceTree::buildPartitionItem(StoragePartition *const part, St
 
 QStringList DeviceTree::getDeviceItemData(const StorageDevice *const dev)
 {
-    KLocale::BinaryUnitDialect dialect;
-    KLocale *const locale = KGlobal::locale();
+    KFormat::BinaryUnitDialect dialect;
 
     if (m_use_si_units)
-        dialect = KLocale::MetricBinaryDialect;
+        dialect = KFormat::MetricBinaryDialect;
     else
-        dialect = KLocale::IECBinaryDialect;
+        dialect = KFormat::IECBinaryDialect;
 
     QString external_raid;
     if (dev->isDmRaid())
@@ -277,19 +275,19 @@ QStringList DeviceTree::getDeviceItemData(const StorageDevice *const dev)
     QStringList data = QStringList() << dev->getName() << external_raid;
 
     if (dev->isPhysicalVolume()) {
-        data << locale->formatByteSize(dev->getSize(), 1, dialect);
+        data << KFormat().formatByteSize(dev->getSize(), 1, dialect);
         const PhysVol *const pv = dev->getPhysicalVolume();
         
         if (m_show_total && !m_show_percent)
-            data << locale->formatByteSize(pv->getRemaining(), 1, dialect);
+            data << KFormat().formatByteSize(pv->getRemaining(), 1, dialect);
         else if (!m_show_total && m_show_percent)
             data << QString("%%1").arg(100 - pv->getPercentUsed());
         else if (m_show_both)
-            data << QString("%1 (%%2) ").arg(locale->formatByteSize(pv->getRemaining(), 1, dialect)).arg(100 - pv->getPercentUsed());
+            data << QString("%1 (%%2) ").arg(KFormat().formatByteSize(pv->getRemaining(), 1, dialect)).arg(100 - pv->getPercentUsed());
         
         data << "PV" << pv->getVg()->getName();
     } else {
-        data << locale->formatByteSize(dev->getSize(), 1, dialect) << "";
+        data << KFormat().formatByteSize(dev->getSize(), 1, dialect) << "";
         if(dev->isDmBlock())
             data << "dm device";
         else if(dev->isMdBlock())
@@ -301,25 +299,24 @@ QStringList DeviceTree::getDeviceItemData(const StorageDevice *const dev)
 
 QStringList DeviceTree::getPartitionItemData(const StoragePartition *const part) 
 {
-    KLocale::BinaryUnitDialect dialect;
-    KLocale *const locale = KGlobal::locale();
+    KFormat::BinaryUnitDialect dialect;
 
     if (m_use_si_units)
-        dialect = KLocale::MetricBinaryDialect;
+        dialect = KFormat::MetricBinaryDialect;
     else
-        dialect = KLocale::IECBinaryDialect;
+        dialect = KFormat::IECBinaryDialect;
 
-    QStringList data = QStringList() << part->getName() << part->getType() << locale->formatByteSize(part->getSize(), 1, dialect);
+    QStringList data = QStringList() << part->getName() << part->getType() << KFormat().formatByteSize(part->getSize(), 1, dialect);
     
     if (part->isPhysicalVolume()) {
         PhysVol *const pv = part->getPhysicalVolume();
         
         if (m_show_total && !m_show_percent)
-            data << locale->formatByteSize(pv->getRemaining(), 1, dialect);
+            data << KFormat().formatByteSize(pv->getRemaining(), 1, dialect);
         else if (!m_show_total && m_show_percent)
             data << QString("%%1").arg(100 - pv->getPercentUsed());
         else
-            data << QString("%1 (%%2) ").arg(locale->formatByteSize(pv->getRemaining(), 1, dialect)).arg(100 - pv->getPercentUsed());
+            data << QString("%1 (%%2) ").arg(KFormat().formatByteSize(pv->getRemaining(), 1, dialect)).arg(100 - pv->getPercentUsed());
         
         data << "PV"
              << pv->getVg()->getName()
@@ -329,11 +326,11 @@ QStringList DeviceTree::getPartitionItemData(const StoragePartition *const part)
         if (part->getFilesystemSize() > -1 && part->getFilesystemUsed() > -1) {
             
             if (m_show_total && !m_show_percent)
-                data << locale->formatByteSize(part->getFilesystemRemaining(), 1, dialect);
+                data << KFormat().formatByteSize(part->getFilesystemRemaining(), 1, dialect);
             else if (!m_show_total && m_show_percent)
                 data << QString("%%1").arg(100 - part->getFilesystemPercentUsed());
             else
-                data << QString("%1 (%%2) ").arg(locale->formatByteSize(part->getFilesystemRemaining(), 1, dialect)).arg(100 - part->getFilesystemPercentUsed());
+                data << QString("%1 (%%2) ").arg(KFormat().formatByteSize(part->getFilesystemRemaining(), 1, dialect)).arg(100 - part->getFilesystemPercentUsed());
         } else {
             data << "";
         }
@@ -492,15 +489,15 @@ void DeviceTree::setItemAttributes(QTreeWidgetItem *const item, const StorageBas
         item->setToolTip(4, i18n("A block device under a multiple device RAID volume"));
     } if (devbase->isPhysicalVolume()) {
         if (m_pv_warn_percent && (m_pv_warn_percent >= (100 - devbase->getPhysicalVolume()->getPercentUsed()))) {
-            item->setIcon(3, KIcon("dialog-warning"));
+            item->setIcon(3, QIcon::fromTheme(QStringLiteral("dialog-warning")));
             item->setToolTip(3, i18n("Physical volume that is running out of space"));
         }
         
         if (devbase->getPhysicalVolume()->isActive()) {
-            item->setIcon(4, KIcon("lightbulb"));
+            item->setIcon(4, QIcon::fromTheme(QStringLiteral("lightbulb")));
             item->setToolTip(4, i18n("Physical volume with active logical volumes"));
         } else {
-            item->setIcon(4, KIcon("lightbulb_off"));
+            item->setIcon(4, QIcon::fromTheme(QStringLiteral("lightbulb_off")));
             item->setToolTip(4, i18n("Physical volume without active logical volumes"));
         }
     }
@@ -511,22 +508,22 @@ void DeviceTree::setItemAttributes(QTreeWidgetItem *const item, const StorageBas
         if (part->isMountable()) {
             if (part->isMounted()) {
                 if (m_fs_warn_percent && (m_fs_warn_percent >= (100 - part->getFilesystemPercentUsed()))) {
-                    item->setIcon(3, KIcon("dialog-warning"));
+                    item->setIcon(3, QIcon::fromTheme(QStringLiteral("dialog-warning")));
                     item->setToolTip(3, i18n("Filesystem that is running out of space"));
                 }
                 
-                item->setIcon(4, KIcon("emblem-mounted"));
+                item->setIcon(4, QIcon::fromTheme(QStringLiteral("emblem-mounted")));
                 item->setToolTip(4, i18n("mounted filesystem"));
             } else {
-                item->setIcon(4, KIcon("emblem-unmounted"));
+                item->setIcon(4, QIcon::fromTheme(QStringLiteral("emblem-unmounted")));
                 item->setToolTip(4, i18n("unmounted filesystem"));
             }
         } else if (part->getFilesystem() == "swap") {
             if (part->isBusy()) {
-                item->setIcon(4, KIcon("task-recurring"));
+                item->setIcon(4, QIcon::fromTheme(QStringLiteral("task-recurring")));
                 item->setToolTip(4, i18n("Active swap area"));
             } else {
-                item->setIcon(4, KIcon("emblem-unmounted"));
+                item->setIcon(4, QIcon::fromTheme(QStringLiteral("emblem-unmounted")));
                 item->setToolTip(4, i18n("Inactive swap area"));
             }
         }

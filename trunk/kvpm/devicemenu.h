@@ -16,15 +16,13 @@
 #ifndef DEVICEMENU_H
 #define DEVICEMENU_H
 
-#include <KMenu>
+#include <QMenu>
 
 
 class DeviceActions;
-class StorageDevice;
-class StoragePartition;
 
 
-class DeviceMenu : public KMenu
+class DeviceMenu : public QMenu
 {
     Q_OBJECT
 

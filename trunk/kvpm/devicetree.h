@@ -16,10 +16,8 @@
 #ifndef DEVICETREE_H
 #define DEVICETREE_H
 
-#include <KMenu>
-
-#include <QPoint>
 #include <QList>
+#include <QPoint>
 #include <QStringList>
 #include <QTreeWidget>
 #include <QTreeWidgetItem>
