@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013, 2016 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -18,22 +18,15 @@
 
 #include <KMainWindow>
 
-class KActionCollection;
-class KMenu;
-class KMenuBar;
-class KToggleAction;
 
-class QVBoxLayout;
+class QMenu;
 
 class DeviceTab;
 class ExecutableFinder;
 class MainTabWidget;
 class MasterList;
 class ProgressBox;
-class StorageDevice;
 class TopWindow;
-class VolGroup;
-class VolumeGroupTab;
 class VGActions;
 
 extern TopWindow *g_top_window;
@@ -53,13 +46,13 @@ class TopWindow : public KMainWindow
     static ProgressBox *m_progress_box;
 
     void closeEvent(QCloseEvent *);
-    KMenu *buildFileMenu();
-    KMenu *buildGroupsMenu();
-    KMenu *buildHelpMenu();
-    KMenu *buildSettingsMenu();
-    KMenu *buildToolbarSizeMenu();
-    KMenu *buildToolbarTextMenu();
-    KMenu *buildToolsMenu();
+    QMenu *buildFileMenu();
+    QMenu *buildGroupsMenu();
+    QMenu *buildHelpMenu();
+    QMenu *buildSettingsMenu();
+    QMenu *buildToolbarSizeMenu();
+    QMenu *buildToolbarTextMenu();
+    QMenu *buildToolsMenu();
 
 public:
     TopWindow(MasterList *const masterList, ExecutableFinder *const executableFinder, QWidget *parent = nullptr);
