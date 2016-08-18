@@ -18,9 +18,8 @@
 #include "executablefinder.h"
 #include "processprogress.h"
 
-#include <QDebug>
 
-#include <KLocale>
+#include <KLocalizedString>
 #include <KMessageBox>
 #include <KProcess>
 
