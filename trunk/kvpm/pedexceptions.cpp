@@ -16,10 +16,9 @@
 
 #include <parted/parted.h>
 
-#include <KApplication>
+#include <QApplication>
 #include <KMessageBox>
 
-#include <QDebug>
 #include <QString>
 
 

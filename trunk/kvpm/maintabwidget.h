@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2010, 2011, 2012, 2016 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -19,7 +19,7 @@
 #include <QStringList>
 
 class QIcon;
-class KTabWidget;
+class QTabWidget;
 
 class VolumeGroupTab;
 class DeviceTab;
@@ -29,7 +29,7 @@ class MainTabWidget : public QWidget
     Q_OBJECT
 
     QStringList m_unmunged_text;    // Tab labels without amperands
-    KTabWidget *m_tab_widget;
+    QTabWidget *m_tab_widget;
     QList<VolumeGroupTab *>  m_vg_tabs;
 
 signals:

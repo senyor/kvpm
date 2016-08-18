@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2011, 2012, 2013, 2016 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -16,7 +16,6 @@
 #define MOUNTTABLES_H
 
 #include <QSharedPointer>
-#include <QStringList>
 
 class LogVol;
 class StoragePartition;
