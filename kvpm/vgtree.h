@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2009, 2010, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011, 2012, 2016 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -16,9 +16,7 @@
 #ifndef VGTREE_H
 #define VGTREE_H
 
-#include <KMenu>
 
-#include <QStringList>
 #include <QTreeWidget>
 
 class QPoint;

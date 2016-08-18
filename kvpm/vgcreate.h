@@ -15,19 +15,16 @@
 #ifndef VGCREATE_H
 #define VGCREATE_H
 
-#include <KDialog>
 
 #include <QList>
 
 #include "kvpmdialog.h"
 
-class KLineEdit;
-class KComboBox;
-
+class QComboBox;
 class QLabel;
+class QLineEdit;
 class QCheckBox;
 class QRegExpValidator;
-class QVBoxLayout;
 
 class StorageBase;
 class PvGroupBox;
@@ -43,7 +40,7 @@ class VGCreateDialog : public KvpmDialog
 
     PvGroupBox  *m_pv_checkbox = nullptr;
 
-    KLineEdit *m_vg_name,
+    QLineEdit *m_vg_name,
               *m_max_lvs,
               *m_max_pvs,
               *m_size_edit,
@@ -55,7 +52,7 @@ class VGCreateDialog : public KvpmDialog
               *m_max_lvs_check,
               *m_max_pvs_check;
 
-    KComboBox *m_extent_size,
+    QComboBox *m_extent_size,
               *m_extent_suffix,
               *m_copies_combo;
 

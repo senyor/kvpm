@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013, 2014 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2016 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  * * This program is free software; you can redistribute it and/or modify
@@ -13,12 +13,11 @@
 
 #include "vgtree.h"
 
-#include <KGlobal>
+#include <KFormat>
 #include <KConfigSkeleton>
-#include <KIcon>
-#include <KLocale>
+#include <KLocalizedString>
 
-#include <QDebug>
+#include <QIcon>
 #include <QPoint>
 #include <QTreeWidgetItem>
 
@@ -141,13 +140,12 @@ QTreeWidgetItem *VGTree::loadItem(LogVol *lv, QTreeWidgetItem *item)
     const int old_child_count = item->childCount();
     bool was_expanded = false;
 
-    KLocale::BinaryUnitDialect dialect;
-    KLocale *const locale = KGlobal::locale();
+    KFormat::BinaryUnitDialect dialect;
 
     if (m_use_si_units)
-        dialect = KLocale::MetricBinaryDialect;
+        dialect = KFormat::MetricBinaryDialect;
     else
-        dialect = KLocale::IECBinaryDialect;
+        dialect = KFormat::IECBinaryDialect;
 
     LvList temp_kids;
     long long fs_remaining;       // remaining space on fs -- if known
@@ -187,31 +185,31 @@ QTreeWidgetItem *VGTree::loadItem(LogVol *lv, QTreeWidgetItem *item)
     item->setData(0, Qt::DisplayRole, lv_name);
 
     if (lv->isPartial()) {
-        item->setIcon(0, KIcon("exclamation"));
+        item->setIcon(0, QIcon::fromTheme(QStringLiteral("exclamation")));
         item->setToolTip(0, i18n("one or more physical volumes are missing"));
     } else if (!is_sc && lv->getSnapshotCount() > 0) {
         item->setData(0, Qt::DisplayRole, QString(" %1").arg(lv_name));
-        item->setIcon(0, KIcon("bullet_star"));
+        item->setIcon(0, QIcon::fromTheme(QStringLiteral("bullet_star")));
         item->setToolTip(0, i18n("origin"));
     } else {
-        item->setIcon(0, KIcon());
+        item->setIcon(0, QIcon());
         item->setToolTip(0, QString());
     }
 
     item->setData(1, Qt::DisplayRole, lv->getType());
 
     if (is_sc) {
-        item->setData(2, Qt::DisplayRole, locale->formatByteSize(lv->getTotalSize(), 1, dialect));
+        item->setData(2, Qt::DisplayRole, KFormat().formatByteSize(lv->getTotalSize(), 1, dialect));
 
         for (int x = 3; x < 12; x++)
             item->setData(x, Qt::DisplayRole, QVariant());
 
-        item->setIcon(3, KIcon());
+        item->setIcon(3, QIcon());
         item->setToolTip(3, QString());
-        item->setIcon(8, KIcon());
+        item->setIcon(8, QIcon());
         item->setToolTip(8, QString());
     } else {
-        item->setData(2, Qt::DisplayRole, locale->formatByteSize(lv->getSize(), 1, dialect));
+        item->setData(2, Qt::DisplayRole, KFormat().formatByteSize(lv->getSize(), 1, dialect));
 
         if (lv->getFilesystemSize() > -1 &&  lv->getFilesystemUsed() > -1) {
 
@@ -219,22 +217,22 @@ QTreeWidgetItem *VGTree::loadItem(LogVol *lv, QTreeWidgetItem *item)
             fs_percent = qRound(((double)fs_remaining / (double)lv->getFilesystemSize()) * 100);
 
             if (m_show_total)
-                item->setData(3, Qt::DisplayRole, locale->formatByteSize(fs_remaining, 1, dialect));
+                item->setData(3, Qt::DisplayRole, KFormat().formatByteSize(fs_remaining, 1, dialect));
             else if (m_show_percent)
                 item->setData(3, Qt::DisplayRole, QString("%%1").arg(fs_percent));
             else if (m_show_both)
-                item->setData(3, Qt::DisplayRole, QString(locale->formatByteSize(fs_remaining, 1, dialect) + " (%%1)").arg(fs_percent));
+                item->setData(3, Qt::DisplayRole, QString(KFormat().formatByteSize(fs_remaining, 1, dialect) + " (%%1)").arg(fs_percent));
 
             if (fs_percent <= m_fs_warn_percent) {
-                item->setIcon(3, KIcon("dialog-warning"));
+                item->setIcon(3, QIcon::fromTheme(QStringLiteral("dialog-warning")));
                 item->setToolTip(3, i18n("This filesystem is running out of space"));
             } else {
-                item->setIcon(3, KIcon());
+                item->setIcon(3, QIcon());
                 item->setToolTip(3, QString());
             }
         } else {
             item->setData(3, Qt::DisplayRole, QString(""));
-            item->setIcon(3, KIcon());
+            item->setIcon(3, QIcon());
             item->setToolTip(3, QString());
         }
 
@@ -259,18 +257,18 @@ QTreeWidgetItem *VGTree::loadItem(LogVol *lv, QTreeWidgetItem *item)
             !lv->isVirtual()       && !lv->isRaidImage()    && !lv->isMetadata()) {
 
             if (lv->isMounted()) {
-                item->setIcon(8, KIcon("emblem-mounted"));
+                item->setIcon(8, QIcon::fromTheme(QStringLiteral("emblem-mounted")));
                 item->setToolTip(8, i18n("mounted filesystem"));
             } else if (lv->getFilesystem() == "swap") {
                 if (lv->isOpen()) {
-                    item->setIcon(8, KIcon("task-recurring"));
+                    item->setIcon(8, QIcon::fromTheme(QStringLiteral("task-recurring")));
                     item->setToolTip(8, i18n("Active swap area"));
                 } else {
-                    item->setIcon(8, KIcon("emblem-unmounted"));
+                    item->setIcon(8, QIcon::fromTheme(QStringLiteral("emblem-unmounted")));
                     item->setToolTip(8, i18n("Inactive swap area"));
                 }
             } else {
-                item->setIcon(8, KIcon("emblem-unmounted"));
+                item->setIcon(8, QIcon::fromTheme(QStringLiteral("emblem-unmounted")));
                 item->setToolTip(8, i18n("unmounted filesystem"));
             }
         }
@@ -295,7 +293,7 @@ QTreeWidgetItem *VGTree::loadItem(LogVol *lv, QTreeWidgetItem *item)
             item->setData(6, Qt::DisplayRole, QString(""));
         } else {
             item->setData(5, Qt::DisplayRole, QString("%1").arg(lv->getSegmentStripes(0)));
-            item->setData(6, Qt::DisplayRole, locale->formatByteSize(lv->getSegmentStripeSize(0), 1, dialect));
+            item->setData(6, Qt::DisplayRole, KFormat().formatByteSize(lv->getSegmentStripeSize(0), 1, dialect));
         }
 
         if (!is_sc && old_type.contains("origin", Qt::CaseInsensitive)) {
@@ -470,13 +468,12 @@ void VGTree::insertSegmentItems(LogVol *lv, QTreeWidgetItem *item)
     const int segment_count = lv->getSegmentCount();
     const int child_count = item->childCount();
 
-    KLocale::BinaryUnitDialect dialect;
-    KLocale *const locale = KGlobal::locale();
+    KFormat::BinaryUnitDialect dialect;
 
     if (m_use_si_units)
-        dialect = KLocale::MetricBinaryDialect;
+        dialect = KFormat::MetricBinaryDialect;
     else
-        dialect = KLocale::IECBinaryDialect;
+        dialect = KFormat::IECBinaryDialect;
 
     QTreeWidgetItem *child_item;
     QList<QTreeWidgetItem *> segment_children;
@@ -500,20 +497,20 @@ void VGTree::insertSegmentItems(LogVol *lv, QTreeWidgetItem *item)
         child_item = item->child(segment);
 
         if (lv->getPvNames(segment).contains("unknown device")) {
-            child_item->setIcon(0, KIcon("exclamation"));
+            child_item->setIcon(0, QIcon::fromTheme(QStringLiteral("exclamation")));
             child_item->setToolTip(0, i18n("one or more physical volumes are missing"));
         } else {
-            child_item->setIcon(0, KIcon());
+            child_item->setIcon(0, QIcon());
             child_item->setToolTip(0, QString());
         }
 
         child_item->setData(0, Qt::DisplayRole, QString("Seg# %1").arg(segment));
         child_item->setData(1, Qt::DisplayRole, QString(""));
-        child_item->setData(2, Qt::DisplayRole, locale->formatByteSize(lv->getSegmentSize(segment), 1, dialect));
+        child_item->setData(2, Qt::DisplayRole, KFormat().formatByteSize(lv->getSegmentSize(segment), 1, dialect));
         child_item->setData(3, Qt::DisplayRole, QString(""));
         child_item->setData(4, Qt::DisplayRole, QString(""));
         child_item->setData(5, Qt::DisplayRole, QString("%1").arg(lv->getSegmentStripes(segment)));
-        child_item->setData(6, Qt::DisplayRole, locale->formatByteSize(lv->getSegmentStripeSize(segment), 1, dialect));
+        child_item->setData(6, Qt::DisplayRole, KFormat().formatByteSize(lv->getSegmentStripeSize(segment), 1, dialect));
         child_item->setData(0, Qt::UserRole, lv->getName());
         child_item->setData(1, Qt::UserRole, segment);
         child_item->setData(2, Qt::UserRole, lv->getUuid());

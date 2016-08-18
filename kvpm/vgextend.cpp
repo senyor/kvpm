@@ -27,17 +27,14 @@
 
 #include <lvm2app.h>
 
-#include <KApplication>
-#include <KConfigSkeleton>
-#include <KGlobal>
-#include <KLocale>
+#include <KLocalizedString>
 #include <KMessageBox>
-#include <KPushButton>
-#include <KTabWidget>
 
+#include <QApplication>
 #include <QCheckBox>
-#include <QDebug>
 #include <QEventLoop>
+#include <QPushButton>
+#include <QTabWidget>
 #include <QVBoxLayout>
 
 
@@ -175,7 +172,7 @@ void VGExtendDialog::buildDialog(const QList<const StorageBase *> devices)
     layout->addWidget(title);
     layout->addSpacing(10);
 
-    KTabWidget *const tab_widget = new KTabWidget(this);
+    QTabWidget *const tab_widget = new QTabWidget(this);
     layout->addWidget(tab_widget);
     
     tab_widget->addTab(buildGeneralTab(devices), "General");
@@ -206,7 +203,7 @@ QWidget *VGExtendDialog::buildAdvancedTab()
     QHBoxLayout *const copies_layout = new QHBoxLayout();
     QLabel *const copies_label = new QLabel("Metadata copies: ");
     copies_layout->addWidget(copies_label);
-    m_copies_combo = new KComboBox();
+    m_copies_combo = new QComboBox();
     m_copies_combo->addItem(i18n("0"));
     m_copies_combo->addItem(i18n("1"));
     m_copies_combo->addItem(i18n("2"));
@@ -220,7 +217,7 @@ QWidget *VGExtendDialog::buildAdvancedTab()
     QHBoxLayout *const size_layout = new QHBoxLayout();
     QLabel *const size_label = new QLabel(i18n("Metadata size:"));
     size_layout->addWidget(size_label);
-    m_size_edit = new KLineEdit;
+    m_size_edit = new QLineEdit;
     QIntValidator *const size_validator = new QIntValidator();
     size_validator->setBottom(0);
     m_size_edit->setValidator(size_validator);
@@ -230,7 +227,7 @@ QWidget *VGExtendDialog::buildAdvancedTab()
     QHBoxLayout *const align_layout = new QHBoxLayout();
     QLabel *align_label = new QLabel(i18n("Metadata align:"));
     align_layout->addWidget(align_label);
-    m_align_edit = new KLineEdit;
+    m_align_edit = new QLineEdit;
     QIntValidator *const align_validator = new QIntValidator();
     align_validator->setBottom(0);
     m_align_edit->setValidator(align_validator);
@@ -240,7 +237,7 @@ QWidget *VGExtendDialog::buildAdvancedTab()
     QHBoxLayout *const offset_layout = new QHBoxLayout();
     QLabel *offset_label = new QLabel(i18n("Metadata offset:"));
     offset_layout->addWidget(offset_label);
-    m_offset_edit = new KLineEdit;
+    m_offset_edit = new QLineEdit;
     QIntValidator *const offset_validator = new QIntValidator();
     offset_validator->setBottom(0);
     m_offset_edit->setValidator(offset_validator);

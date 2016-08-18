@@ -24,18 +24,18 @@
 
 #include <lvm2app.h>
 
-#include <KApplication>
-#include <KComboBox>
-#include <KLineEdit>
-#include <KLocale>
+#include <KLocalizedString>
 #include <KMessageBox>
-#include <KPushButton>
-#include <KTabWidget>
 
+#include <QApplication>
 #include <QCheckBox>
+#include <QComboBox>
 #include <QEventLoop>
 #include <QLabel>
+#include <QLineEdit>
+#include <QPushButton>
 #include <QRegExpValidator>
+#include <QTabWidget>
 #include <QVBoxLayout>
 
 
@@ -238,7 +238,7 @@ void VGCreateDialog::buildDialog(const QList<const StorageBase *> devices)
     layout->addWidget(title);
     layout->addSpacing(10);
 
-    KTabWidget *const tab_widget = new KTabWidget(this);
+    QTabWidget *const tab_widget = new QTabWidget(this);
     layout->addWidget(tab_widget);
 
     tab_widget->addTab(buildGeneralTab(devices), "General");
@@ -252,7 +252,7 @@ QWidget *VGCreateDialog::buildGeneralTab(QList<const StorageBase *> devices)
     tab->setLayout(layout);
 
     QLabel *const name_label = new QLabel(i18n("Group name: "));
-    m_vg_name = new KLineEdit();
+    m_vg_name = new QLineEdit();
     name_label->setBuddy(m_vg_name);
 
     QRegExp rx("[0-9a-zA-Z_\\.][-0-9a-zA-Z_\\.]*");
@@ -263,7 +263,7 @@ QWidget *VGCreateDialog::buildGeneralTab(QList<const StorageBase *> devices)
     name_layout->addWidget(m_vg_name);
 
     QLabel *const extent_label = new QLabel(i18n("Physical extent size: "));
-    m_extent_size = new KComboBox();
+    m_extent_size = new QComboBox();
     extent_label->setBuddy(m_extent_size);
     m_extent_size->insertItem(0, "1");
     m_extent_size->insertItem(1, "2");
@@ -277,7 +277,7 @@ QWidget *VGCreateDialog::buildGeneralTab(QList<const StorageBase *> devices)
     m_extent_size->insertItem(9, "512");
     m_extent_size->setInsertPolicy(QComboBox::NoInsert);
     m_extent_size->setCurrentIndex(2);
-    m_extent_suffix = new KComboBox();
+    m_extent_suffix = new QComboBox();
     m_extent_suffix->insertItem(0, "KiB");
     m_extent_suffix->insertItem(1, "MiB");
     m_extent_suffix->insertItem(2, "GiB");
@@ -331,7 +331,7 @@ QWidget *VGCreateDialog::buildAdvancedTab()
     QHBoxLayout *const copies_layout = new QHBoxLayout();
     QLabel *const copies_label = new QLabel("Metadata copies: ");
     copies_layout->addWidget(copies_label);
-    m_copies_combo = new KComboBox();
+    m_copies_combo = new QComboBox();
     m_copies_combo->addItem(i18n("1"));
     m_copies_combo->addItem(i18n("2"));
     m_copies_combo->setCurrentIndex(0);
@@ -344,7 +344,7 @@ QWidget *VGCreateDialog::buildAdvancedTab()
     QHBoxLayout *const size_layout = new QHBoxLayout();
     QLabel *const size_label = new QLabel(i18n("Metadata size:"));
     size_layout->addWidget(size_label);
-    m_size_edit = new KLineEdit;
+    m_size_edit = new QLineEdit;
     QIntValidator *const size_validator = new QIntValidator();
     size_validator->setBottom(0);
     m_size_edit->setValidator(size_validator);
@@ -354,7 +354,7 @@ QWidget *VGCreateDialog::buildAdvancedTab()
     QHBoxLayout *const align_layout = new QHBoxLayout();
     QLabel *align_label = new QLabel(i18n("Metadata align:"));
     align_layout->addWidget(align_label);
-    m_align_edit = new KLineEdit;
+    m_align_edit = new QLineEdit;
     QIntValidator *const align_validator = new QIntValidator();
     align_validator->setBottom(0);
     m_align_edit->setValidator(align_validator);
@@ -364,7 +364,7 @@ QWidget *VGCreateDialog::buildAdvancedTab()
     QHBoxLayout *const offset_layout = new QHBoxLayout();
     QLabel *offset_label = new QLabel(i18n("Metadata offset:"));
     offset_layout->addWidget(offset_label);
-    m_offset_edit = new KLineEdit;
+    m_offset_edit = new QLineEdit;
     QIntValidator *const offset_validator = new QIntValidator();
     offset_validator->setBottom(0);
     m_offset_edit->setValidator(offset_validator);

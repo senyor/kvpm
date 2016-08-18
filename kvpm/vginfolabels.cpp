@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012, 2013, 2016 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -16,11 +16,9 @@
 #include "vginfolabels.h"
 
 #include <KConfigSkeleton>
-#include <KGlobal>
-#include <KIcon>
-#include <KLocale>
+#include <KFormat>
+#include <KLocalizedString>
 
-#include <QDebug>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QVBoxLayout>
@@ -109,23 +107,22 @@ VGInfoLabels::VGInfoLabels(VolGroup *const group, QWidget *parent) :
     skeleton.setCurrentGroup("General");
     skeleton.addItemBool("use_si_units", use_si_units, false);
 
-    KLocale::BinaryUnitDialect dialect;
-    KLocale *const locale = KGlobal::locale();
+    KFormat::BinaryUnitDialect dialect;
 
     if (use_si_units)
-        dialect = KLocale::MetricBinaryDialect;
+        dialect = KFormat::MetricBinaryDialect;
     else
-        dialect = KLocale::IECBinaryDialect;
+        dialect = KFormat::IECBinaryDialect;
 
-    used_label = new QLabel(i18nc("Space used up",  "Used: %1", locale->formatByteSize(group->getUsedSpace(), 1, dialect)));
-    free_label = new QLabel(i18nc("Space not used", "Free: %1", locale->formatByteSize(group->getFreeSpace(), 1, dialect)));
-    size_label = new QLabel(i18nc("Total space on device", "Total: %1", locale->formatByteSize(group->getSize(), 1, dialect)));
+    used_label = new QLabel(i18nc("Space used up",  "Used: %1", KFormat().formatByteSize(group->getUsedSpace(), 1, dialect)));
+    free_label = new QLabel(i18nc("Space not used", "Free: %1", KFormat().formatByteSize(group->getFreeSpace(), 1, dialect)));
+    size_label = new QLabel(i18nc("Total space on device", "Total: %1", KFormat().formatByteSize(group->getSize(), 1, dialect)));
     lvm_fmt_label   = new QLabel(i18n("Format: %1", group->getFormat()));
     policy_label    = new QLabel(i18n("Policy: %1", policyToLocalString(group->getPolicy())));
     resizable_label = new QLabel(i18n("Resizable: %1", resizable));
     clustered_label = new QLabel(i18n("Clustered: %1", clustered));
-    allocatable_label = new QLabel(i18n("Allocatable: %1", locale->formatByteSize(group->getAllocatableSpace(), 1, dialect)));
-    extent_size_label = new QLabel(i18n("Extent size: %1", locale->formatByteSize(group->getExtentSize(), 1, dialect)));
+    allocatable_label = new QLabel(i18n("Allocatable: %1", KFormat().formatByteSize(group->getAllocatableSpace(), 1, dialect)));
+    extent_size_label = new QLabel(i18n("Extent size: %1", KFormat().formatByteSize(group->getExtentSize(), 1, dialect)));
     mda_label         = new QLabel(i18n("MDA: %1 Used: %2", group->getMdaCount(), group->getMdaUsed()));
     uuid_label        = new QLabel(i18n("UUID: %1", group->getUuid()));
     uuid_label->setWordWrap(true);
