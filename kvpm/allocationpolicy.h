@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2012, 2016 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -20,7 +20,7 @@
 
 
 class QString;
-class KComboBox;
+class QComboBox;
 
 
 typedef enum {
@@ -45,7 +45,7 @@ class PolicyComboBox: public QWidget
     Q_OBJECT
 
 private:
-    KComboBox *m_combo;
+    QComboBox *m_combo;
     AllocationPolicy m_vg_policy;
 
 public:

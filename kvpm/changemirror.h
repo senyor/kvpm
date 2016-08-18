@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012, 2013, 2016 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -21,18 +21,12 @@
 
 #include "kvpmdialog.h"
 
-
-class KComboBox;
-class KIcon;
-class KIntSpinBox;
-class KTabWidget;
-
+class QComboBox;
 class QGroupBox;
-class QHBoxLayout;
-class QLabel;
 class QRadioButton;
+class QSpinBox;
 class QStackedWidget;
-class QVBoxLayout;
+class QTabWidget;
 
 class LogVol;
 class NoMungeCheck;
@@ -45,17 +39,17 @@ class ChangeMirrorDialog : public KvpmDialog
 {
     Q_OBJECT
 
-    KTabWidget  *m_tab_widget = nullptr;
-    KIntSpinBox *m_add_mirrors_spin = nullptr;
-    KIntSpinBox *m_stripe_spin = nullptr;
+    QTabWidget  *m_tab_widget = nullptr;
+    QSpinBox *m_add_mirrors_spin = nullptr;
+    QSpinBox *m_stripe_spin = nullptr;
     QStackedWidget *m_error_stack = nullptr;
     QStackedWidget *m_log_stack = nullptr;
     PvGroupBox *m_pv_box = nullptr;
     QGroupBox  *m_stripe_box = nullptr;
     QGroupBox  *m_log_box = nullptr;
     QWidget    *m_log_widget = nullptr;
-    KComboBox  *m_stripe_size_combo = nullptr;
-    KComboBox  *m_type_combo = nullptr;
+    QComboBox  *m_stripe_size_combo = nullptr;
+    QComboBox  *m_type_combo = nullptr;
 
     QStringList m_log_pvs;
     QStringList m_image_pvs;
