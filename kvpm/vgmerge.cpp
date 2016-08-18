@@ -19,12 +19,11 @@
 #include "processprogress.h"
 #include "volgroup.h"
 
-#include <KComboBox>
-#include <KLocale>
+#include <KLocalizedString>
 #include <KMessageBox>
 
 #include <QCheckBox>
-#include <QDebug>
+#include <QComboBox>
 #include <QLabel>
 #include <QGroupBox>
 #include <QHBoxLayout>
@@ -53,7 +52,7 @@ VGMergeDialog::VGMergeDialog(VolGroup *const volumeGroup, QWidget *parent) :
     QHBoxLayout *const combo_layout = new QHBoxLayout();
     QLabel *const target_label = new QLabel(i18n("Merge with:"));
     combo_layout->addWidget(target_label);
-    m_target_combo = new KComboBox();
+    m_target_combo = new QComboBox();
     target_label->setBuddy(m_target_combo);
 
     QList<VolGroup *> groups = MasterList::getVolGroups();
@@ -73,7 +72,7 @@ VGMergeDialog::VGMergeDialog(VolGroup *const volumeGroup, QWidget *parent) :
     QWidget *const error_widget = new QWidget();
     QHBoxLayout *const error_layout = new QHBoxLayout();
     QLabel *const icon_label = new QLabel();
-    icon_label->setPixmap(KIcon("dialog-warning").pixmap(32, 32));
+    icon_label->setPixmap(QIcon::fromTheme(QStringLiteral("dialog-warning")).pixmap(32, 32));
     error_layout->addWidget(icon_label);
     error_layout->addWidget(new QLabel(i18n("Error: Extent size must match")));
     error_widget->setLayout(error_layout);
