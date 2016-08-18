@@ -15,24 +15,22 @@
 
 #include "devicemenu.h"
 
-#include <KLocale>
-#include <KIcon>
-#include <KAction>
+#include <KLocalizedString>
 
+#include <QAction>
 #include <QActionGroup>
-#include <QDebug>
-#include <QTreeWidgetItem>
+#include <QIcon>
 
 #include "deviceactions.h"
 
 
 
 DeviceMenu::DeviceMenu(DeviceActions *const devacts, QWidget *parent) :
-    KMenu(parent)
+    QMenu(parent)
 {
-    KMenu *const filesystem_menu = new KMenu(i18n("Filesystem operations"), this);
-    KMenu *const vgextend_menu = new KMenu(i18n("Extend volume group"), this);
-    vgextend_menu->setIcon(KIcon("add"));
+    QMenu *const filesystem_menu = new QMenu(i18n("Filesystem operations"), this);
+    QMenu *const vgextend_menu = new QMenu(i18n("Extend volume group"), this);
+    vgextend_menu->setIcon(QIcon::fromTheme(QStringLiteral("add")));
 
     addAction(devacts->action("tablecreate"));
     addSeparator();
