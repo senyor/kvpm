@@ -2,7 +2,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011, 2012, 2016 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -19,7 +19,6 @@
 #include <sys/types.h>
 #include <kde_file.h>
 
-#include <QDebug>
 
 #include "fsdata.h"
 #include "fsprobe.h"
