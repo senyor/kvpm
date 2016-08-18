@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012, 2013, 2016 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -19,7 +19,7 @@
 #include "kvpmdialog.h"
 
 
-class KLineEdit;
+class QLineEdit;
 
 class QRegExpValidator;
 class QString;
@@ -34,7 +34,7 @@ class LVRenameDialog : public KvpmDialog
     LogVol  *m_lv;
     QString  m_old_name;
     QString  m_vg_name;
-    KLineEdit *m_new_name;
+    QLineEdit *m_new_name;
     QRegExpValidator *m_name_validator;
 
     QString getNewMapperPath();
