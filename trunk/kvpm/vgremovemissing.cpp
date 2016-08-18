@@ -15,13 +15,11 @@
 
 #include "vgremovemissing.h"
 
-#include <KIcon>
-#include <KLocale>
-#include <KMessageBox>
+#include <KLocalizedString>
 
-#include <QDebug>
 #include <QGroupBox>
 #include <QHBoxLayout>
+#include <QIcon>
 #include <QLabel>
 #include <QRadioButton>
 #include <QVBoxLayout>
@@ -41,7 +39,7 @@ VGRemoveMissingDialog::VGRemoveMissingDialog(VolGroup *const group, QWidget *par
     QVBoxLayout *const layout = new QVBoxLayout();
 
     QLabel *const icon_label = new QLabel();
-    icon_label->setPixmap(KIcon("dialog-warning").pixmap(64, 64));
+    icon_label->setPixmap(QIcon::fromTheme(QStringLiteral("dialog-warning")).pixmap(64, 64));
     warning_layout->addWidget(icon_label);
     warning_layout->addLayout(layout);
 

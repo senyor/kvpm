@@ -18,12 +18,9 @@
 
 #include "kvpmdialog.h"
 
-#include <KDialog>
-
 #include <QStringList>
 #include <QSharedPointer>
 
-class QCheckBox;
 class QStackedWidget;
 
 class PhysVol;
