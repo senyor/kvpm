@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2009, 2011, 2012, 2013, 2014 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2009, 2011, 2012, 2013, 2014, 2016 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -18,12 +18,11 @@
 #include <errno.h>
 #include <string.h>
 
-#include <KApplication>
-#include <KLocale>
+#include <QApplication>
+#include <KLocalizedString>
 #include <KMessageBox>
-#include <KTempDir>
 
-#include <QDebug>
+#include <QTemporaryDir>
 
 #include "executablefinder.h"
 #include "fsck.h"
@@ -166,8 +165,8 @@ bool fs_extend(const QString dev, const QString fs, const QStringList mps, const
                 return true;
             }
         } else {
-            KTempDir temp_mp;
-            const QByteArray temp_mp_qba = temp_mp.name().toLocal8Bit();
+            QTemporaryDir temp_mp;
+            const QByteArray temp_mp_qba = temp_mp.path().toLocal8Bit();
 
             if (do_temp_mount(dev_qba, fs_qba, temp_mp_qba)) {
 
@@ -191,8 +190,8 @@ bool fs_extend(const QString dev, const QString fs, const QStringList mps, const
         if (isMounted) {
             success = resize_jfs_mount(dev_qba, mp_qba);
         } else {
-            KTempDir temp_mp;
-            const QByteArray temp_mp_qba = temp_mp.name().toLocal8Bit();
+            QTemporaryDir temp_mp;
+            const QByteArray temp_mp_qba = temp_mp.path().toLocal8Bit();
 
             if (do_temp_mount(dev_qba, fs_qba, temp_mp_qba)) {
                 success = resize_jfs_mount(dev_qba, temp_mp_qba);
