@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013, 2014 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2016 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -18,15 +18,12 @@
 #include <lvm2app.h>
 
 #include <QList>
+#include <QObject>
 #include <QStringList>
 
-class QTextEdit;
-class QProcess;
 
 class VolGroup;
-class LogVol;
 class MountTables;
-class PhysVol;
 class StorageDevice;
 
 
