@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2012, 2013, 2014 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2012, 2013, 2014, 2016 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -19,14 +19,12 @@
 #include "processprogress.h"
 #include "volgroup.h"
 
-#include <KApplication>
-#include <KIcon>
-#include <KLocale>
+#include <KLocalizedString>
 #include <KMessageBox>
 
-#include <QDebug>
-#include <QGroupBox>
+#include <QApplication>
 #include <QHBoxLayout>
+#include <QIcon>
 #include <QLabel>
 #include <QVBoxLayout>
 
@@ -84,7 +82,7 @@ RepairMissingDialog::RepairMissingDialog(LogVol *const volume, QWidget *parent) 
         if (pvs.isEmpty()) { 
 
             QLabel *const icon_label = new QLabel();
-            icon_label->setPixmap(KIcon("dialog-warning").pixmap(64, 64));
+            icon_label->setPixmap(QIcon::fromTheme(QStringLiteral("dialog-warning")).pixmap(64, 64));
             top_layout->insertWidget(0, icon_label);
             QLabel *const warning_label = new QLabel();
             warning_label->setText(QString("<html><p> %1 <br /> %2 <b> %3</b>?</p></html>")
