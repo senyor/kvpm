@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2013, 2016 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -27,18 +27,13 @@
 
 #include <math.h>
 
-#include <KLineEdit>
-#include <KApplication>
-#include <KButtonGroup>
-#include <KConfigSkeleton>
-#include <KGlobal>
-#include <KLocale>
+#include <KLocalizedString>
 #include <KMessageBox>
-#include <KPushButton>
 
+#include <QApplication>
 #include <QDebug>
 #include <QLabel>
-#include <QGroupBox>
+#include <QPushButton>
 #include <QVBoxLayout>
 
 

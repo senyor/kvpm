@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2009, 2011 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2009, 2011, 2016 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -16,7 +16,6 @@
 #ifndef PARTREMOVE_H
 #define PARTREMOVE_H
 
-#include <QStringList>
 
 class StoragePartition;
 

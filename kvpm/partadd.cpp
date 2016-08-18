@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2009, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2009, 2010, 2011, 2012, 2013, 2016 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -18,13 +18,10 @@
 #include "pedexceptions.h"
 #include "storagepartition.h"
 
-#include <KComboBox>
-#include <KConfigSkeleton>
-#include <KGlobal>
-#include <KLocale>
+#include <KLocalizedString>
 #include <KMessageBox>
 
-#include <QDebug>
+#include <QComboBox>
 #include <QGroupBox>
 #include <QLabel>
 #include <QVBoxLayout>
@@ -77,7 +74,7 @@ QGroupBox* PartitionAddDialog::buildTypeWidget()
 
     QLabel *const type_label = new QLabel(i18n("Select type: "));
     QHBoxLayout *const type_layout = new QHBoxLayout;
-    m_type_combo = new KComboBox;
+    m_type_combo = new QComboBox;
     PedPartition *const free_space = getPedPartition();
 
     bool in_extended;    // true if we are inside an extended partition

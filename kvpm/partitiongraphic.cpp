@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2009, 2011, 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2009, 2011, 2012, 2016 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -15,13 +15,12 @@
 
 #include "partitiongraphic.h"
 
-#include <QDebug>
 #include <QPainter>
 #include <QVBoxLayout>
 
 #include <KConfigSkeleton>
-#include <KGlobal>
-#include <KLocale>
+#include <KFormat>
+#include <KLocalizedString>
 
 
 // Two classes are set defined. Graphic body is privately used by PartitionGraphic
@@ -148,30 +147,29 @@ void PartitionGraphic::update(long long size, long long offset, long long  move,
     m_body->m_size = size;
     m_body->repaint();
 
-    KLocale::BinaryUnitDialect dialect;
-    KLocale *const locale = KGlobal::locale();
+    KFormat::BinaryUnitDialect dialect;
 
     if (m_use_si_units)
-        dialect = KLocale::MetricBinaryDialect;
+        dialect = KFormat::MetricBinaryDialect;
     else
-        dialect = KLocale::IECBinaryDialect;
+        dialect = KFormat::IECBinaryDialect;
 
     if (change < 0)
-        m_change_label->setText(i18n("Reduce size: -%1", locale->formatByteSize(qAbs(change), 1, dialect)));
+        m_change_label->setText(i18n("Reduce size: -%1", KFormat().formatByteSize(qAbs(change), 1, dialect)));
     else if (change == 0)
         m_change_label->setText(i18n("Size: no change"));
     else
-        m_change_label->setText(i18n("Extend size: %1", locale->formatByteSize(change, 1, dialect)));
+        m_change_label->setText(i18n("Extend size: %1", KFormat().formatByteSize(change, 1, dialect)));
     
     if (move < 0)
-        m_move_label->setText(i18n("Move (left): -%1", locale->formatByteSize(qAbs(move), 1, dialect)));
+        m_move_label->setText(i18n("Move (left): -%1", KFormat().formatByteSize(qAbs(move), 1, dialect)));
     else if (move == 0)
         m_move_label->setText(i18n("Move: no change"));
     else
-        m_move_label->setText(i18n("Move (right): %1", locale->formatByteSize(move, 1, dialect)));
+        m_move_label->setText(i18n("Move (right): %1", KFormat().formatByteSize(move, 1, dialect)));
 
-    m_preceding_label->setText(i18n("Preceding free space: %1", locale->formatByteSize(offset, 1, dialect)));
-    m_following_label->setText(i18n("Following free space: %1", locale->formatByteSize(following, 1, dialect)));
+    m_preceding_label->setText(i18n("Preceding free space: %1", KFormat().formatByteSize(offset, 1, dialect)));
+    m_following_label->setText(i18n("Following free space: %1", KFormat().formatByteSize(following, 1, dialect)));
 }
 
 void PartitionGraphic::update(long long size, long long offset)
