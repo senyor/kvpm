@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2013, 2016 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -25,10 +25,9 @@
 #include "vgreduce.h"
 #include "volgroup.h"
 
-#include <KAction>
-#include <KLocale>
+#include <KLocalizedString>
 
-#include <QDebug>
+#include <QAction>
 #include <QTreeWidgetItem>
 
 
@@ -36,23 +35,23 @@ PVActions::PVActions(VolGroup *const group, QWidget *parent) :
     KActionCollection(parent),
     m_vg(group)
 {
-    KAction *const pv_move = addAction("pvmove");
+    QAction *const pv_move = addAction("pvmove");
     pv_move->setText(i18n("Move all physical extents"));
     pv_move->setIconText(i18n("Move all"));
     pv_move->setToolTip(i18n("Move all extents to another physical volume"));
-    pv_move->setIcon(KIcon("lorry_go"));
+    pv_move->setIcon(QIcon::fromTheme(QStringLiteral("lorry_go")));
 
-    KAction *const vg_reduce = addAction("pvremove");
+    QAction *const vg_reduce = addAction("pvremove");
     vg_reduce->setText(i18n("Remove from volume group"));
     vg_reduce->setIconText(i18n("Remove"));
     vg_reduce->setToolTip(i18n("Remove physical volume from volume group"));
-    vg_reduce->setIcon(KIcon("list-remove"));
+    vg_reduce->setIcon(QIcon::fromTheme(QStringLiteral("list-remove")));
 
-    KAction *const pv_change = addAction("pvchange");
+    QAction *const pv_change = addAction("pvchange");
     pv_change->setText(i18n("Change physical volume attributes"));
     pv_change->setIconText(i18n("attributes"));
     pv_change->setToolTip(i18n("Change physical volume attributes"));
-    pv_change->setIcon(KIcon("wrench_orange"));
+    pv_change->setIcon(QIcon::fromTheme(QStringLiteral("wrench_orange")));
 
     setActions(nullptr, false); 
 

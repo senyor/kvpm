@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2013, 2016 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -19,15 +19,12 @@
 #include "pvactions.h"
 #include "volgroup.h"
 
-#include <KAction>
-#include <KActionCollection>
-#include <KLocale>
 
-#include <QDebug>
+#include <QAction>
 
 
 PVActionsMenu::PVActionsMenu(PVActions *const pvactions, QWidget *parent) : 
-    KMenu(parent)
+    QMenu(parent)
 {
     addAction(pvactions->action("pvmove"));
     addAction(pvactions->action("pvremove"));

@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2013, 2016 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -15,12 +15,12 @@
 #ifndef PVACTIONSMENU_H
 #define PVACTIONSMENU_H
 
-#include <KMenu>
+#include <QMenu>
 
 class PVActions;
 
 
-class PVActionsMenu : public KMenu
+class PVActionsMenu : public QMenu
 {
     Q_OBJECT
 
