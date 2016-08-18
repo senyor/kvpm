@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2010, 2011, 2012, 2014 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2010, 2011, 2012, 2014, 2016 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -15,14 +15,11 @@
 
 #include "maintabwidget.h"
 
-#include <KLocale>
-#include <KTabWidget>
+#include <KLocalizedString>
 
-#include <QDebug>
-#include <QHBoxLayout>
 #include <QIcon>
-#include <QLabel>
 #include <QVBoxLayout>
+#include <QTabWidget>
 
 #include "devicetab.h"
 #include "volumegrouptab.h"
@@ -33,7 +30,7 @@ MainTabWidget::MainTabWidget(QWidget *parent) :
     QWidget(parent)
 {
     QVBoxLayout *const layout = new QVBoxLayout();
-    m_tab_widget = new KTabWidget();
+    m_tab_widget = new QTabWidget();
     m_tab_widget->setMovable(false);
     m_tab_widget->setTabsClosable(false);
     layout->addWidget(m_tab_widget);

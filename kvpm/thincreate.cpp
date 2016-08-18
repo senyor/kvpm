@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2012, 2013, 2014 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2012, 2013, 2014, 2016 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -24,12 +24,9 @@
 
 #include <math.h>
 
-#include <KConfigSkeleton>
-#include <KGlobal>
-#include <KLocale>
+#include <KLocalizedString>
 #include <KMessageBox>
 
-#include <QDebug>
 
 
 

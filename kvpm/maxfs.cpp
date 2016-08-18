@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2011, 2012, 2014 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2011, 2012, 2014, 2016 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -23,10 +23,9 @@
 #include "storagedevice.h"
 #include "storagepartition.h"
 
-#include <KLocale>
+#include <KLocalizedString>
 #include <KMessageBox>
 
-#include <QDebug>
 #include <QString>
 
 

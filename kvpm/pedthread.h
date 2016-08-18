@@ -18,7 +18,6 @@
 
 #include <parted/parted.h>
 
-#include <QDebug>
 #include <QList>
 #include <QSemaphore>
 #include <QThread>
