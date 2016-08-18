@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011, 2012, 2013, 2014 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012, 2013, 2014, 2016 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -17,7 +17,6 @@
 
 #include <lvm2app.h>
 
-#include <QObject>
 #include <QSharedPointer>
 #include <QStringList>
 
@@ -26,7 +25,6 @@
 #include "mountentry.h"
 #include "mounttables.h"
 
-class QWidget;
 
 class LogVol;
 class VolGroup;
