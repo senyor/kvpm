@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2010, 2011, 2012, 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2010, 2011, 2012, 2013, 2016 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -16,7 +16,6 @@
 #define MISC_H
 
 #include <QCheckBox>
-#include <QFileInfo>
 #include <QRadioButton>
 #include <QSharedPointer>
 #include <QStringList>
