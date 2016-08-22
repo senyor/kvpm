@@ -15,7 +15,6 @@
 
 #include "pvextend.h"
 
-#include <KLocale>
 #include <KMessageBox>
 
 #include <QStringList>
