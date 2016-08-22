@@ -17,10 +17,10 @@
 
 #include <KGlobal>
 #include <KConfigSkeleton>
-#include <KIcon>
 #include <KFormat>
 
 #include <QDebug>
+#include <QIcon>
 #include <QPoint>
 #include <QMenu>
 
@@ -133,10 +133,10 @@ void PVTree::loadData()
         QTreeWidgetItem *const item = new QTreeWidgetItem(static_cast<QTreeWidgetItem *>(nullptr), pv_data);
 
         if (pv->isMissing()) {
-            item->setIcon(0, KIcon("exclamation"));
+            item->setIcon(0, QIcon::fromTheme(QStringLiteral("exclamation")));
             item->setToolTip(0, i18n("This physical volume can not be found"));
         } else {
-            item->setIcon(0, KIcon());
+            item->setIcon(0, QIcon());
         }
 
         item->setData(0, Qt::UserRole, pv->getUuid());
@@ -145,18 +145,18 @@ void PVTree::loadData()
         item->setData(3, Qt::UserRole, (pv->getSize() - pv->getRemaining()));
 
         if (m_pv_warn_percent && (m_pv_warn_percent >= (100 - pv->getPercentUsed()))) {
-            item->setIcon(2, KIcon("dialog-warning"));
+            item->setIcon(2, QIcon::fromTheme(QStringLiteral("dialog-warning")));
             item->setToolTip(2, i18n("Physical volume that is running out of space"));
-            item->setIcon(3, KIcon("dialog-warning"));
+            item->setIcon(3, QIcon::fromTheme(QStringLiteral("dialog-warning")));
             item->setToolTip(3, i18n("Physical volume that is running out of space"));
         }
 
         if (pv->isActive()) {
             item->setToolTip(4, i18n("Active"));
-            item->setIcon(4, KIcon("lightbulb"));
+            item->setIcon(4, QIcon::fromTheme(QStringLiteral("lightbulb")));
         } else {
             item->setToolTip(4, i18n("Inactive"));
-            item->setIcon(4, KIcon("lightbulb_off"));
+            item->setIcon(4, QIcon::fromTheme(QStringLiteral("lightbulb_off")));
         }
 
         for (int column = 1; column < 6; column++)

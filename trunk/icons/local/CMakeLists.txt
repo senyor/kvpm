@@ -15,6 +15,7 @@ ecm_install_icons(ICONS
     16-actions-page_white_camera.png
     16-actions-resultset_last.png
     16-actions-wrench.png
+    16-status-exclamation.png
     16-status-lightbulb.png
     16-status-lightbulb_off.png
     DESTINATION ${DATA_INSTALL_DIR}/kvpm/icons
