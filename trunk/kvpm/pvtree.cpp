@@ -18,7 +18,7 @@
 #include <KGlobal>
 #include <KConfigSkeleton>
 #include <KIcon>
-#include <KLocale>
+#include <KFormat>
 
 #include <QDebug>
 #include <QPoint>
@@ -83,13 +83,12 @@ void PVTree::loadData()
     setSortingEnabled(false);
     setViewConfig();
 
-    KLocale::BinaryUnitDialect dialect;
-    KLocale *const locale = KGlobal::locale();
+    KFormat::BinaryUnitDialect dialect;
 
     if (m_use_si_units)
-        dialect = KLocale::MetricBinaryDialect;
+        dialect = KFormat::MetricBinaryDialect;
     else
-        dialect = KLocale::IECBinaryDialect;
+        dialect = KFormat::IECBinaryDialect;
 
     for (auto pv : m_vg->getPhysicalVolumes()) {
 
@@ -105,17 +104,17 @@ void PVTree::loadData()
             pv_data << device_name;
         }
 
-        pv_data << locale->formatByteSize(pv->getSize(), 1, dialect);
+        pv_data << KFormat().formatByteSize(pv->getSize(), 1, dialect);
 
         if (m_show_total && !m_show_percent) {
-            pv_data << locale->formatByteSize(pv->getRemaining(), 1, dialect);
-            pv_data << locale->formatByteSize(pv->getSize() - pv->getRemaining(), 1, dialect);
+            pv_data << KFormat().formatByteSize(pv->getRemaining(), 1, dialect);
+            pv_data << KFormat().formatByteSize(pv->getSize() - pv->getRemaining(), 1, dialect);
         } else if (!m_show_total && m_show_percent) {
             pv_data << QString("%%1").arg(100 - pv->getPercentUsed());
             pv_data << QString("%%1").arg(pv->getPercentUsed());
         } else if (m_show_both) {
-            pv_data << QString("%1 (%%2) ").arg(locale->formatByteSize(pv->getRemaining(), 1, dialect)).arg(100 - pv->getPercentUsed());
-            pv_data << QString("%1 (%%2) ").arg(locale->formatByteSize(pv->getSize() - pv->getRemaining(), 1, dialect)).arg(pv->getPercentUsed());
+            pv_data << QString("%1 (%%2) ").arg(KFormat().formatByteSize(pv->getRemaining(), 1, dialect)).arg(100 - pv->getPercentUsed());
+            pv_data << QString("%1 (%%2) ").arg(KFormat().formatByteSize(pv->getSize() - pv->getRemaining(), 1, dialect)).arg(pv->getPercentUsed());
         }
 
         if (pv->isActive())

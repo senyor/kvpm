@@ -22,10 +22,8 @@
 
 #include <KConfigSkeleton>
 #include <KGlobal>
-#include <KLocale>
-#include <KPushButton>
 
-#include <QDebug>
+#include <QPushButton>
 
 
 
@@ -65,7 +63,6 @@ PvGroupBox::PvGroupBox(QList<QSharedPointer<PvSpace>> spaceList,
     m_extents_label = new QLabel;
 
     m_dialect = getDialect();
-    KLocale *const locale = KGlobal::locale();
 
     if (pv_check_count < 1) {
         m_extent_size = 1;
@@ -73,7 +70,7 @@ PvGroupBox::PvGroupBox(QList<QSharedPointer<PvSpace>> spaceList,
         layout->addWidget(pv_label);
     } else if (pv_check_count < 2) {
         m_extent_size = m_pvs[0]->getVg()->getExtentSize();
-        QLabel *pv_label = new QLabel(m_pvs[0]->getMapperName() + "  " + locale->formatByteSize(m_pvs[0]->getRemaining(), 1, m_dialect));
+        QLabel *pv_label = new QLabel(m_pvs[0]->getMapperName() + "  " + KFormat().formatByteSize(m_pvs[0]->getRemaining(), 1, m_dialect));
         layout->addWidget(pv_label, 0, 0, 1, -1);
         
         addLabelsAndButtons(layout, pv_check_count, policy, vgpolicy);
@@ -82,7 +79,7 @@ PvGroupBox::PvGroupBox(QList<QSharedPointer<PvSpace>> spaceList,
         m_extent_size = m_pvs[0]->getVg()->getExtentSize();
         for (int x = 0; x < pv_check_count; x++) {
             
-            check = new NoMungeCheck(m_pvs[x]->getMapperName() + "  " + locale->formatByteSize(m_pvs[x]->getRemaining(), 1, m_dialect));
+            check = new NoMungeCheck(m_pvs[x]->getMapperName() + "  " + KFormat().formatByteSize(m_pvs[x]->getRemaining(), 1, m_dialect));
             check->setAlternateText(m_pvs[x]->getMapperName());
             m_pv_checks.append(check);
 
@@ -126,7 +123,6 @@ PvGroupBox::PvGroupBox(const QList <const StorageBase *> devices, const long lon
     m_extents_label = new QLabel;
 
     m_dialect = getDialect();
-    KLocale *const locale = KGlobal::locale();
 
     if (pv_check_count < 1) {
         QLabel *pv_label = new QLabel(i18n("none found"));
@@ -135,7 +131,7 @@ PvGroupBox::PvGroupBox(const QList <const StorageBase *> devices, const long lon
         name = m_devices[0]->getName();
         size = m_devices[0]->getSize();
 
-        QLabel *pv_label = new QLabel(name + "  " + locale->formatByteSize(size, 1, m_dialect));
+        QLabel *pv_label = new QLabel(name + "  " + KFormat().formatByteSize(size, 1, m_dialect));
         layout->addWidget(pv_label, 0, 0, 1, -1);
         addLabelsAndButtons(layout, pv_check_count, NO_POLICY, NO_POLICY);
 
@@ -145,7 +141,7 @@ PvGroupBox::PvGroupBox(const QList <const StorageBase *> devices, const long lon
             dev_count++;
             name = m_devices[x]->getName();
             size = m_devices[x]->getSize();
-            check = new NoMungeCheck(name + "  " + locale->formatByteSize(size, 1, m_dialect));
+            check = new NoMungeCheck(name + "  " + KFormat().formatByteSize(size, 1, m_dialect));
             check->setAlternateText(name);
             check->setData(QVariant(size));
             m_pv_checks.append(check);
@@ -284,13 +280,11 @@ void PvGroupBox::selectNone()
 
 void PvGroupBox::calculateSpace()
 {
-    KLocale *const locale = KGlobal::locale();
-
     if ((getEffectivePolicy() == CONTIGUOUS) && m_target) {
-        m_space_label->setText(i18n("Contiguous space: %1", locale->formatByteSize(getLargestSelectedSpace(), 1, m_dialect)));
+        m_space_label->setText(i18n("Contiguous space: %1", KFormat().formatByteSize(getLargestSelectedSpace(), 1, m_dialect)));
         m_extents_label->setText(i18n("Contiguous extents: %1", getLargestSelectedSpace() / m_extent_size));
     } else {
-        m_space_label->setText(i18n("Space: %1", locale->formatByteSize(getRemainingSpace(), 1, m_dialect)));
+        m_space_label->setText(i18n("Space: %1", KFormat().formatByteSize(getRemainingSpace(), 1, m_dialect)));
         m_extents_label->setText(i18n("Extents: %1", getRemainingSpace() / m_extent_size));
     }
 
@@ -341,8 +335,8 @@ void PvGroupBox::disableChecks(QStringList pvs)
 QHBoxLayout *PvGroupBox::getButtons()
 {
     QHBoxLayout *const layout = new QHBoxLayout();
-    KPushButton *const all    = new KPushButton(i18n("Select all"));
-    KPushButton *const none   = new KPushButton(i18n("Clear all"));
+    QPushButton *const all    = new QPushButton(i18n("Select all"));
+    QPushButton *const none   = new QPushButton(i18n("Clear all"));
 
     layout->addStretch();
     layout->addWidget(all);
@@ -405,18 +399,16 @@ AllocationPolicy PvGroupBox::getEffectivePolicy()
 
 void PvGroupBox::setChecksToPolicy()
 {
-    KLocale *const locale = KGlobal::locale();
-
     if (!m_pvs.isEmpty() && m_policy_combo != nullptr) {
         const AllocationPolicy policy = getEffectivePolicy();
 
         for (int x = 0; x < m_pv_checks.size(); ++x) {
             if (policy == CONTIGUOUS) {
-                m_pv_checks[x]->setText(m_pvs[x]->getMapperName() + "  " + locale->formatByteSize(m_contiguous[x], 1, m_dialect));
+                m_pv_checks[x]->setText(m_pvs[x]->getMapperName() + "  " + KFormat().formatByteSize(m_contiguous[x], 1, m_dialect));
                 m_pv_checks[x]->setData(QVariant(m_contiguous[x]));
                 
             } else {
-                m_pv_checks[x]->setText(m_pvs[x]->getMapperName() + "  " + locale->formatByteSize(m_normal[x], 1, m_dialect));
+                m_pv_checks[x]->setText(m_pvs[x]->getMapperName() + "  " + KFormat().formatByteSize(m_normal[x], 1, m_dialect));
                 m_pv_checks[x]->setData(QVariant(m_normal[x]));
             }
         }
@@ -425,19 +417,19 @@ void PvGroupBox::setChecksToPolicy()
     calculateSpace();
 }
 
-KLocale::BinaryUnitDialect PvGroupBox::getDialect()
+KFormat::BinaryUnitDialect PvGroupBox::getDialect()
 {
     bool use_si_units;
     KConfigSkeleton skeleton;
     skeleton.setCurrentGroup("General");
     skeleton.addItemBool("use_si_units", use_si_units, false);
 
-    KLocale::BinaryUnitDialect dialect;
+    KFormat::BinaryUnitDialect dialect;
 
     if (use_si_units)
-        dialect = KLocale::MetricBinaryDialect;
+        dialect = KFormat::MetricBinaryDialect;
     else
-        dialect = KLocale::IECBinaryDialect;
+        dialect = KFormat::IECBinaryDialect;
 
     return dialect;
 }
