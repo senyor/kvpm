@@ -19,7 +19,7 @@
 
 class KConfigSkeleton;
 class KColorButton;
-class KEditListBox;
+class KEditListWidget;
 
 class QGroupBox;
 class QLabel;
@@ -37,7 +37,7 @@ class KvpmConfigDialog: public KConfigDialog
     Q_OBJECT
 
     QTableWidget     *m_executables_table;
-    KEditListBox     *m_edit_list;
+    KEditListWidget  *m_edit_list;
     KConfigSkeleton  *m_skeleton;
     ExecutableFinder *m_executable_finder;
     QStackedWidget   *m_color_stack = nullptr;
