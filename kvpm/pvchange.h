@@ -20,9 +20,9 @@
 
 #include "kvpmdialog.h"
 
-class KComboBox;
 
 class QCheckBox;
+class QComboBox;
 class QGroupBox;
 class QLabel;
 class QLineEdit;
@@ -34,7 +34,7 @@ class PVChangeDialog : public KvpmDialog
     Q_OBJECT
 
     QLineEdit *m_tag_edit;      // new tag to add
-    KComboBox *m_deltag_combo;  // old tag to remove
+    QComboBox *m_deltag_combo;  // old tag to remove
     QGroupBox *m_tags_group;
     QCheckBox *m_allocation_box;
     QCheckBox *m_uuid_box;

@@ -14,10 +14,10 @@
 
 #include "pvchange.h"
 
-#include <KComboBox>
 #include <KLocalizedString>
 
 #include <QCheckBox>
+#include <QComboBox>
 #include <QGroupBox>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -89,7 +89,7 @@ PVChangeDialog::PVChangeDialog(PhysVol *const physicalVolume, QWidget *parent) :
     add_tag_layout->addWidget(m_tag_edit);
     QLabel *const del_tag_label = new QLabel(i18n("Remove tag:"));
     del_tag_layout->addWidget(del_tag_label);
-    m_deltag_combo = new KComboBox();
+    m_deltag_combo = new QComboBox();
     del_tag_label->setBuddy(m_deltag_combo);
     m_deltag_combo->setEditable(false);
     const QStringList tags = m_pv->getTags();
