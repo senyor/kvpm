@@ -17,10 +17,10 @@
 
 #include <stdint.h>
 
-#include <KComboBox>
 #include <KFormat>
 
 #include <QCheckBox>
+#include <QComboBox>
 #include <QGridLayout>
 #include <QGroupBox>
 #include <QHBoxLayout>
