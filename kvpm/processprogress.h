@@ -19,7 +19,7 @@
 #include <QProcess>
 #include <QStringList>
 
-class KProgressDialog;
+class QProgressDialog;
 
 class QEventLoop;
 
@@ -31,7 +31,7 @@ class ProcessProgress : public QObject
     QEventLoop *m_loop;
     QStringList m_output_all, m_output_no_error;
     QProcess *m_process;
-    KProgressDialog *m_progress_dialog;
+    QProgressDialog *m_progress_dialog;
     int m_exit_code;
 
 public:

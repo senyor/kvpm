@@ -23,18 +23,18 @@
 
 #include <KLocalizedString>
 #include <KMessageBox>
-#include <KProgressDialog>
 
 #include <QApplication>
 #include <QDebug>
 #include <QEventLoop>
 #include <QProcess>
+#include <QProgressDialog>
 
 
 ProcessProgress::ProcessProgress(QStringList arguments, const bool allowCancel, QObject *parent) : QObject(parent)
 {
     m_exit_code = 127;  // command not found
-    m_progress_dialog = NULL;
+    m_progress_dialog = nullptr;
 
     if (arguments.size() == 0) {
         qDebug() << "ProcessProgress given an empty arguments list";
@@ -54,18 +54,18 @@ ProcessProgress::ProcessProgress(QStringList arguments, const bool allowCancel, 
 
             if (allowCancel) {
                 TopWindow::getProgressBox()->hide();
-                m_progress_dialog = new KProgressDialog(NULL,
-                                                        i18n("progress"),
-                                                        i18n("Running program: %1", executable),
+                m_progress_dialog = new QProgressDialog(nullptr,
                                                         Qt::CustomizeWindowHint |
                                                         Qt::WindowTitleHint);
-                m_progress_dialog->setAllowCancel(true);
+
+                m_progress_dialog->setLabelText(i18n("Running program: %1", executable));
+                m_progress_dialog->setCancelButtonText(i18n("Cancel"));
                 m_progress_dialog->setMinimumDuration(250);
-                m_progress_dialog->progressBar()->setRange(0, 0);
+                m_progress_dialog->setRange(0, 0);
                 m_progress_dialog->setModal(true);
                 connect(m_progress_dialog, SIGNAL(rejected()), this, SLOT(cancelProcess()));
             } else {
-                m_progress_dialog = NULL;
+                m_progress_dialog = nullptr;
                 TopWindow::getProgressBox()->setRange(0, 0);
                 TopWindow::getProgressBox()->setText(executable);
             }
@@ -92,7 +92,7 @@ ProcessProgress::ProcessProgress(QStringList arguments, const bool allowCancel, 
             else
                 m_loop->exec(QEventLoop::ExcludeUserInputEvents);
         } else {
-            KMessageBox::error(NULL, i18n("Executable: '%1' not found", executable));
+            KMessageBox::error(nullptr, i18n("Executable: '%1' not found", executable));
         }
     }
 }
@@ -105,9 +105,9 @@ void ProcessProgress::cleanup(const int code, const QProcess::ExitStatus status)
     bool cancelled = false;
 
     qApp->restoreOverrideCursor();
-    if (m_progress_dialog != NULL) {
+    if (m_progress_dialog != nullptr) {
         m_progress_dialog->close();
-        cancelled = m_progress_dialog->wasCancelled();
+        cancelled = m_progress_dialog->wasCanceled();
         delete m_progress_dialog;
     }
 
@@ -119,9 +119,9 @@ void ProcessProgress::cleanup(const int code, const QProcess::ExitStatus status)
         const QString errors = m_output_all.join("");
 
         if (status != QProcess::CrashExit || cancelled)
-            KMessageBox::error(NULL, i18n("%1 produced this output: %2", m_process->program(), errors));
+            KMessageBox::error(nullptr, i18n("%1 produced this output: %2", m_process->program(), errors));
         else
-            KMessageBox::error(NULL, i18n("%1 <b>crashed</b> with this output: %2", m_process->program(), errors));
+            KMessageBox::error(nullptr, i18n("%1 <b>crashed</b> with this output: %2", m_process->program(), errors));
     }
 
     TopWindow::getProgressBox()->reset();
@@ -148,7 +148,7 @@ void ProcessProgress::cancelProcess()
 
     kill(m_process->pid(), SIGSTOP);
 
-    if (KMessageBox::warningYesNo(NULL,
+    if (KMessageBox::warningYesNo(nullptr,
                                   warning,
                                   QString(),
                                   KStandardGuiItem::yes(),
@@ -158,7 +158,7 @@ void ProcessProgress::cancelProcess()
         m_process->kill();
         m_progress_dialog->show();
         m_progress_dialog->setLabelText(i18n("Waiting for process to finish"));
-        m_progress_dialog->setAllowCancel(false);
+        m_progress_dialog->setCancelButtonText(QString());
     } else if (m_process->state() == QProcess::Running) {
         m_progress_dialog->show();
         kill(m_process->pid(), SIGCONT);
