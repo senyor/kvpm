@@ -15,13 +15,13 @@
 #include "pvchange.h"
 
 #include <KComboBox>
-#include <KLineEdit>
-#include <KLocale>
+#include <KLocalizedString>
 
 #include <QCheckBox>
 #include <QGroupBox>
 #include <QHBoxLayout>
 #include <QLabel>
+#include <QLineEdit>
 #include <QVBoxLayout>
 
 #include "physvol.h"
@@ -81,7 +81,7 @@ PVChangeDialog::PVChangeDialog(PhysVol *const physicalVolume, QWidget *parent) :
     m_tags_group->setLayout(tag_group_layout);
     QLabel *const add_tag_label = new QLabel(i18n("Add new tag:"));
     add_tag_layout->addWidget(add_tag_label);
-    m_tag_edit = new KLineEdit();
+    m_tag_edit = new QLineEdit();
     add_tag_label->setBuddy(m_tag_edit);
     QRegExp rx("[0-9a-zA-Z_\\.+-]*");
     QRegExpValidator *tag_validator = new QRegExpValidator(rx, m_tag_edit);

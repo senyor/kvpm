@@ -21,11 +21,11 @@
 #include "kvpmdialog.h"
 
 class KComboBox;
-class KLineEdit;
 
 class QCheckBox;
 class QGroupBox;
 class QLabel;
+class QLineEdit;
 
 class PhysVol;
 
@@ -33,7 +33,7 @@ class PVChangeDialog : public KvpmDialog
 {
     Q_OBJECT
 
-    KLineEdit *m_tag_edit;      // new tag to add
+    QLineEdit *m_tag_edit;      // new tag to add
     KComboBox *m_deltag_combo;  // old tag to remove
     QGroupBox *m_tags_group;
     QCheckBox *m_allocation_box;
