@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2013 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2013, 2016 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -15,11 +15,11 @@
 
 #include "vgwarning.h"
 
-#include <KIcon>
-#include <KLocale>
+#include <KFormat>
+#include <KLocalizedString>
 
-#include <QDebug>
 #include <QHBoxLayout>
+#include <QIcon>
 #include <QLabel>
 #include <QVBoxLayout>
 
@@ -79,7 +79,7 @@ QWidget *VGWarning::buildOpenFailedWarning(VolGroup *const group)
 
     warning_layout->addStretch();
     QLabel *const icon_label = new QLabel();
-    icon_label->setPixmap(KIcon("dialog-warning").pixmap(32, 32));
+    icon_label->setPixmap(QIcon::fromTheme(QStringLiteral("dialog-warning")).pixmap(32, 32));
     warning_layout->addWidget(icon_label);
     warning_layout->addSpacing(10);
     QLabel *warning_label = new QLabel();
@@ -103,7 +103,7 @@ QWidget *VGWarning::buildPartialWarning()
 
     warning_layout->addStretch();
     QLabel *const icon_label = new QLabel();
-    icon_label->setPixmap(KIcon("dialog-warning").pixmap(32, 32));
+    icon_label->setPixmap(QIcon::fromTheme(QStringLiteral("dialog-warning")).pixmap(32, 32));
     warning_layout->addWidget(icon_label);
     warning_layout->addSpacing(10);
     QLabel *const warning_label = new QLabel(i18n("<b>Warning: Partial volume group, some physical volumes are missing</b>"));
