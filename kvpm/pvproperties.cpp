@@ -17,7 +17,7 @@
 
 #include <KConfigSkeleton>
 #include <KGlobal>
-#include <KLocale>
+#include <KFormat>
 #include <KSeparator>
 
 #include <QLabel>
@@ -68,13 +68,12 @@ QFrame *PVProperties::buildMdaBox()
     skeleton.setCurrentGroup("General");
     skeleton.addItemBool("use_si_units", use_si_units, false);
 
-    KLocale::BinaryUnitDialect dialect;
-    KLocale *const locale = KGlobal::locale();
+    KFormat::BinaryUnitDialect dialect;
 
     if (use_si_units)
-        dialect = KLocale::MetricBinaryDialect;
+        dialect = KFormat::MetricBinaryDialect;
     else
-        dialect = KLocale::IECBinaryDialect;
+        dialect = KFormat::IECBinaryDialect;
 
     QLabel *label;
     QHBoxLayout *const layout = new QHBoxLayout;
@@ -89,7 +88,7 @@ QFrame *PVProperties::buildMdaBox()
     layout->addWidget(label);
     label = new QLabel(QString("In use: %1").arg(m_pv->getMdaUsed()));
     layout->addWidget(label);
-    label = new QLabel(QString("Size: %1").arg(locale->formatByteSize(m_pv->getMdaSize(), 1, dialect)));
+    label = new QLabel(QString("Size: %1").arg(KFormat().formatByteSize(m_pv->getMdaSize(), 1, dialect)));
     layout->addWidget(label);
 
     frame->setLayout(layout);
