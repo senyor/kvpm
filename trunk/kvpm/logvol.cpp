@@ -691,11 +691,16 @@ void LogVol::processSegments(lv_t lvmLv, QByteArray flags)
                 if (value.is_valid)
                     segment->stripes = value.value.integer;
                 
-                if (MasterList::isLvmVersionEqualOrGreater("2.02.100")) { // stripesize bug fixed in v2.2.100 
-                    value = lvm_lvseg_get_property(lvm_lvseg, "stripesize");
-                    if (value.is_valid)
-                        segment->stripe_size = value.value.integer;
-
+                if (MasterList::isLvmVersionEqualOrGreater("2.02.100")) { // stripe_size bug fixed
+                    if (MasterList::isLvmVersionEqualOrGreater("2.02.164")) { 
+                        value = lvm_lvseg_get_property(lvm_lvseg, "stripe_size");
+                        if (value.is_valid)
+                            segment->stripe_size = value.value.integer;
+                    } else {
+                        value = lvm_lvseg_get_property(lvm_lvseg, "stripesize");
+                        if (value.is_valid)
+                            segment->stripe_size = value.value.integer;
+                    }
                 } else {
                     value = lvm_lvseg_get_property(lvm_lvseg, "stripesize");
                     if (value.is_valid)
