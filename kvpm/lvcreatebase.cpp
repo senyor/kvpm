@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2012, 2014 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2012, 2014, 2016 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -51,7 +51,7 @@ LvCreateDialogBase::LvCreateDialogBase(const VolGroup *const vg, long long maxFs
     QWidget *const main_widget = new QWidget();
     QVBoxLayout *const layout = new QVBoxLayout();
     
-    m_size_selector = NULL;
+    m_size_selector = nullptr;
     m_max_size = 0;
 
     bool show_name_tag = true;
@@ -196,8 +196,8 @@ QWidget* LvCreateDialogBase::createGeneralTab(bool showNameTag, bool showRo, boo
         tag_layout->addWidget(m_tag_edit);
         volume_layout->insertLayout(1, tag_layout);
     } else {
-        m_name_edit = NULL;
-        m_tag_edit = NULL;
+        m_name_edit = nullptr;
+        m_tag_edit = nullptr;
         volume_box->hide();
     }
 
@@ -218,10 +218,10 @@ QWidget* LvCreateDialogBase::createGeneralTab(bool showNameTag, bool showRo, boo
 
     if (showZero && showRo) {
         connect(m_readonly_check, SIGNAL(toggled(bool)),
-                this, SLOT(resetOkButton()));
+                this, SLOT(zeroReadOnlyEnable()));
 
         connect(m_zero_check, SIGNAL(toggled(bool)),
-                this, SLOT(resetOkButton()));
+                this, SLOT(zeroReadOnlyEnable()));
     }
 
     m_extend_fs_check = new QCheckBox(i18n("Extend filesystem with volume"));
@@ -332,9 +332,9 @@ QWidget* LvCreateDialogBase::createAdvancedTab(bool showPersistent, bool showSki
         m_persistent_box->setLayout(persistent_layout);
         layout->addWidget(m_persistent_box);
     } else {
-        m_persistent_box = NULL;
-        m_minor_edit = NULL;
-        m_major_edit = NULL;
+        m_persistent_box = nullptr;
+        m_minor_edit = nullptr;
+        m_major_edit = nullptr;
     }
         
     layout->addStretch();
@@ -402,7 +402,7 @@ bool LvCreateDialogBase::getUdev()
 
 bool LvCreateDialogBase::isLow()
 { 
-    if (m_size_selector != NULL) {
+    if (m_size_selector != nullptr) {
         if (m_size_selector->getNewSize() == -1) {  // if the size selector line edit is empty
             return false;
         } else if (!m_size_selector->isValid()) {
@@ -466,7 +466,7 @@ bool LvCreateDialogBase::isValid()
 
     if (!valid_persistent || !valid_name || !valid_tag) {
         valid = false;
-    } else if (m_size_selector == NULL) {
+    } else if (m_size_selector == nullptr) {
         valid = true;
     } else if (m_size_selector->isValid()) {
         if (m_extend) {
@@ -518,7 +518,7 @@ long long LvCreateDialogBase::getSelectorExtents()
 
 QString LvCreateDialogBase::getName()
 {
-    if (m_name_edit != NULL)
+    if (m_name_edit != nullptr)
         return m_name_edit->text();
     else 
         return QString();
@@ -526,7 +526,7 @@ QString LvCreateDialogBase::getName()
 
 QString LvCreateDialogBase::getTag()
 {
-    if (m_tag_edit != NULL)
+    if (m_tag_edit != nullptr)
         return m_tag_edit->text();
     else 
         return QString();
@@ -570,12 +570,18 @@ void LvCreateDialogBase::initializeSizeSelector(long long extentSize, long long 
 
 void LvCreateDialogBase::setSelectorMaxExtents(long long max)
 {
-    if (m_size_selector != NULL)
+    if (m_size_selector != nullptr)
         m_size_selector->setConstrainedMax(max);
 }
 
 void LvCreateDialogBase::zeroReadOnlyEnable()
 {
+    disconnect(m_readonly_check, SIGNAL(toggled(bool)),
+               this, SLOT(zeroReadOnlyEnable()));
+    
+    disconnect(m_zero_check, SIGNAL(toggled(bool)),
+               this, SLOT(zeroReadOnlyEnable()));
+    
     if (m_zero_check->isChecked()) {
         m_readonly_check->setChecked(false);
         m_readonly_check->setEnabled(false);
@@ -587,6 +593,14 @@ void LvCreateDialogBase::zeroReadOnlyEnable()
         m_zero_check->setEnabled(false);
     } else
         m_zero_check->setEnabled(true);
+
+    resetOkButton();
+    
+    connect(m_readonly_check, SIGNAL(toggled(bool)),
+            this, SLOT(zeroReadOnlyEnable()));
+    
+    connect(m_zero_check, SIGNAL(toggled(bool)),
+            this, SLOT(zeroReadOnlyEnable()));
 }
 
 void LvCreateDialogBase::setPhysicalTab(QWidget *const tab)
@@ -636,7 +650,7 @@ void LvCreateDialogBase::setSizeLabels()
     else
         dialect = KFormat::IECBinaryDialect;
 
-    if (m_size_selector != NULL) {
+    if (m_size_selector != nullptr) {
 
         const long long extend = m_size_selector->getNewSize() - m_size_selector->getMinimumSize(); 
         const long long extent_size = m_vg->getExtentSize();
@@ -680,7 +694,7 @@ void LvCreateDialogBase::setInfoLabels(VolumeType type, int stripes, int mirrors
     m_max_size = maxSize;
     setSizeLabels();
 
-    if (m_size_selector != NULL) {
+    if (m_size_selector != nullptr) {
         m_stripes_label->show();
 
         if (type == LINEAR) {
