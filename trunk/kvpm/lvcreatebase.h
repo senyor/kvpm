@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2012 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2012, 2016 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the Kvpm project.
  *
@@ -129,7 +129,7 @@ public:
     LvCreateDialogBase(const VolGroup *const vg, const long long maxFsSize, 
                        const bool extend, const bool snap, const bool thin, const bool thinpool,
                        QString name = QString(""), QString pool = QString(""),  // name = origin for snap or lvname for extend 
-                       QWidget *parent = NULL);
+                       QWidget *parent = nullptr);
 
     virtual ~LvCreateDialogBase() {}     
 };
