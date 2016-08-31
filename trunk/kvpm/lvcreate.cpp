@@ -1053,7 +1053,7 @@ bool LVCreateDialog::hasInitialErrors()
 
         if (m_lv->isCowOrigin()) {
             if (m_lv->isOpen()) {
-                KMessageBox::sorry(this, i18n("Snapshot origins cannot be extended while open or mounted"));
+                KMessageBox::sorry(this, i18n("Snapshot origins cannot be extended while active"));
                 return true;
             }
             
