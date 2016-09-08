@@ -138,8 +138,8 @@ VGChangeDialog::VGChangeDialog(VolGroup *const group, QWidget *parent) :
 
     m_available_box = new QGroupBox("Change group availability");
     QVBoxLayout *const available_layout = new QVBoxLayout();
-    m_available_yes = new QRadioButton(i18n("Make all logical volumes available"));
-    m_available_no = new QRadioButton(i18n("Make all logical volumes unavailable"));
+    m_available_yes = new QRadioButton(i18n("Make all logical volumes available (active)"));
+    m_available_no = new QRadioButton(i18n("Make all logical volumes unavailable (inactive)"));
     m_available_yes->setChecked(true);
     available_layout->addWidget(m_available_yes);
     available_layout->addWidget(m_available_no);

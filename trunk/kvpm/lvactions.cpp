@@ -263,7 +263,7 @@ void LVActions::setActions(LogVol *const lv, const int segment)
         thin_create->setEnabled(false);
         thin_snap->setEnabled(false);
         
-        if (!lv->isThinVolume() && lv->isCowSnap() && lv->isValid() && !lv->isMerging())
+        if ((lv->isThinSnap() || lv->isCowSnap()) && lv->isValid() && !lv->isMerging())
             snap_merge->setEnabled(true);
         else
             snap_merge->setEnabled(false);

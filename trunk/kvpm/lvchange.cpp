@@ -85,7 +85,7 @@ QWidget *LVChangeDialog::buildGeneralTab()
     general_group->setLayout(general_layout);
     layout->addWidget(general_group);
 
-    m_available_check = new QCheckBox(i18n("Make volume available for use"));
+    m_available_check = new QCheckBox(i18n("Make volume available (active)"));
     m_ro_check        = new QCheckBox(i18n("Make volume read only"));
     m_refresh_check   = new QCheckBox(i18n("Refresh volume metadata"));
     general_layout->addWidget(m_available_check);
