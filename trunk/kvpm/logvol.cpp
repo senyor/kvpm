@@ -25,7 +25,6 @@
 #include <QRegExp>
 #include <QUuid>
 
-
 #include "fsdata.h"
 #include "fsprobe.h"
 #include "masterlist.h"
@@ -87,6 +86,7 @@ void LogVol::rescan(lv_t lvmLv, vg_t lvmVg)
     m_raid        = false;
     m_raid_image  = false;
     m_cow_snap    = false;
+    m_thin_snap   = false;
     m_temp        = false;
     m_thin        = false;
     m_thin_data   = false;
@@ -383,7 +383,7 @@ void LogVol::rescan(lv_t lvmLv, vg_t lvmVg)
         else
             m_type = m_segments[0]->type;
     }
-    
+
     insertChildren(lvmLv, lvmVg);
     countLegsAndLogs();
     calculateTotalSize();
