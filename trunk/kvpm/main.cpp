@@ -1,7 +1,7 @@
 /*
  *
  *
- * Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013, 2014 Benjamin Scott   <benscott@nwlink.com>
+ * Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2016 Benjamin Scott   <benscott@nwlink.com>
  *
  * This file is part of the kvpm project.
  *
@@ -43,7 +43,7 @@ int main(int argc, char **argv)
     KLocalizedString::setApplicationDomain("kvpm");
 
     KAboutData about_data(QStringLiteral("kvpm"),
-                          xi18nc("@title", "<application>kvpm</application>"), QStringLiteral("0.9.9"),
+                          xi18nc("@title", "<application>kvpm</application>"), QStringLiteral("0.9.10"),
                           xi18nc("@title", "The Linux volume and partition manager for KDE.\n"
                                 "Licensed under the GPL v3.0\n \n"
                                 "Additional icons taken from the Silk icon set by Mark James.\n"
