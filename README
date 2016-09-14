@@ -9,13 +9,12 @@ This program is currently being developed on lvm version (with library lvm2app):
 
 
 ~# lvs --version
-  LVM version:     2.02.98(2) (2012-10-15)
-  Library version: 1.02.77 (2012-10-15)
-  Driver version:  4.22.0
-
+  LVM version:     2.02.164(2) (2016-08-15)
+  Library version: 1.02.133 (2016-08-15)
+  Driver version:  4.34.0
 
 Because kvpm relies on the exact format of the lvm program output and 
-the presence of the new library "lvm2app" it won't work correctly with 
+the presence of the library "lvm2app" it may not work correctly with 
 earlier versions.
 
 udev and udevadm must be installed too.
@@ -25,9 +24,9 @@ installed for compilation:
 
 lvm2app.h
 libdevmapper.h
-libparted version 2.3 or higher
+libparted version 3.2 or higher
 libblkid
-kdelibs version 4
+kdelibs version 5 with version 4 support
 <sys/mount.h>
 <linux/fs.h>
 
