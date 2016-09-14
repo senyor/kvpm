@@ -450,7 +450,7 @@ QMenu *TopWindow::buildHelpMenu()
 {
     static KAboutData about_data(QStringLiteral("kvpm"),
                                  xi18nc("@title", "<application>kvpm</application>"),
-                                 QStringLiteral("0.9.9"),
+                                 QStringLiteral("0.9.10"),
                                  xi18nc("@title", "Linux volume and partition manager for KDE.  "
                                        "This program is still under development, "
                                        "bug reports and any comments are welcomed.  "
