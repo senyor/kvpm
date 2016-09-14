@@ -54,7 +54,7 @@ MountEntry::MountEntry(mntent *const entry, QObject *parent) : QObject(parent)
 
 MountEntry::MountEntry(const QString mountinfo, const int major, const int minor, QObject *parent) : QObject(parent)
 {
-    m_mount_point     = mountinfo.section(' ', 4, 4);
+    m_mount_point     = mountinfo.section(' ', 4, 4).replace("\\040", " ");
     m_mount_options   = mountinfo.section(' ', 5, 5);
     m_filesystem_type = mountinfo.section(' ', 6, 6);
     m_device_name     = mountinfo.section(' ', 8, 8);
@@ -62,7 +62,6 @@ MountEntry::MountEntry(const QString mountinfo, const int major, const int minor
 
     m_major = major;
     m_minor = minor;
-
     m_mount_position = 0;
 }
 
