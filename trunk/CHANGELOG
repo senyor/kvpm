@@ -1,3 +1,8 @@
+version 0.9.10
+Better support for adding physical volumes with non standard
+metadata size or alignment. Started porting to KDE Frameworks 5.
+Thank you: <andrius@stikonas.eu>.
+
 version 0.9.9
 Mostly small bug fixes and work arounds for problems introduced
 by recent versions of the lvm2app library.
