@@ -519,8 +519,6 @@ QStringList ChangeMirrorDialog::arguments()
             args << "--stripes" <<  QString("%1").arg(m_stripe_spin->value());
             args << "--stripesize" << (m_stripe_size_combo->currentText()).remove("KiB").trimmed();
         }
-    } else {
-        args << "--mirrors" << QString("+0");
     }
 
     args << "--background" << m_lv->getFullName();
