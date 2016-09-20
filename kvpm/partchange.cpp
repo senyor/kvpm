@@ -40,7 +40,12 @@ PartitionChangeDialog::PartitionChangeDialog(StoragePartition *const partition, 
       m_old_storage_part(partition)
 {
     m_bailout = true;
-
+    
+    if (partition->isPhysicalVolume()) {
+        KMessageBox::information(nullptr, i18n("Resizing physical volumes has been so buggy that I have disabled that functionality"));
+        return;
+    }
+    
     if (!hasInitialErrors()) {
         if (continueBackup()) {
             if (continueResize()) {

@@ -110,7 +110,7 @@ PVChangeDialog::PVChangeDialog(PhysVol *const physicalVolume, QWidget *parent) :
     connect(m_uuid_box,       SIGNAL(clicked()), this, SLOT(resetOkButton()));
     connect(m_tags_group,     SIGNAL(clicked()), this, SLOT(resetOkButton()));
     connect(m_deltag_combo,   SIGNAL(currentIndexChanged(int)), this, SLOT(resetOkButton()));
-    connect(m_tag_edit,       SIGNAL(userTextChanged(QString)), this, SLOT(resetOkButton()));
+    connect(m_tag_edit,       SIGNAL(textChanged(QString)), this, SLOT(resetOkButton()));
 }
 
 void PVChangeDialog::resetOkButton()
