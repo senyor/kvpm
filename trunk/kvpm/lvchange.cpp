@@ -63,7 +63,7 @@ LVChangeDialog::LVChangeDialog(LogVol *const volume, QWidget *parent) :
     connect(m_udevsync_check,    SIGNAL(clicked()), this, SLOT(resetOkButton()));
     connect(m_persistent_check,  SIGNAL(clicked()), this, SLOT(resetOkButton()));
     connect(m_deltag_combo, SIGNAL(currentIndexChanged(int)), this, SLOT(resetOkButton()));
-    connect(m_tag_edit,     SIGNAL(userTextChanged(QString)), this, SLOT(resetOkButton()));
+    connect(m_tag_edit,     SIGNAL(textChanged(QString)), this, SLOT(resetOkButton()));
     connect(m_polling_box,       SIGNAL(clicked()), this, SLOT(resetOkButton()));
     connect(m_poll_button,       SIGNAL(clicked()), this, SLOT(resetOkButton()));
     connect(m_nopoll_button,     SIGNAL(clicked()), this, SLOT(resetOkButton()));
